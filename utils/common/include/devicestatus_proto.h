@@ -25,7 +25,7 @@ inline constexpr int32_t MAX_VECTOR_SIZE { 10 };
 inline constexpr int32_t MEM_OUT_OF_BOUNDS { 3 };
 inline constexpr int32_t MEMCPY_SEC_FUN_FAIL { 4 };
 inline constexpr int32_t PARAM_INPUT_INVALID { 5 };
-inline constexpr int32_t MAX_STREAM_BUF_SIZE { 1024 };
+inline constexpr int32_t MAX_STREAM_BUF_SIZE { 2048 };
 inline constexpr size_t MAX_PACKET_BUF_SIZE { MAX_STREAM_BUF_SIZE };
 inline constexpr int32_t ONCE_PROCESS_NETPACKET_LIMIT { 100 };
 inline constexpr int32_t INVALID_FD { 6 };
