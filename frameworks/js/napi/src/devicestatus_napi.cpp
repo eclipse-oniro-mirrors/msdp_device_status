@@ -62,6 +62,7 @@ void DeviceStatusCallback::OnDeviceStatusChanged(const Data& devicestatusData)
     work->data = static_cast<void *>(&data_);
     int32_t ret = uv_queue_work_with_qos(loop, work, [] (uv_work_t *work) {}, EmitOnEvent, uv_qos_default);
     if (ret != 0) {
+        delete work;
         FI_HILOGE("Failed to uv_queue_work_with_qos");
     }
 }

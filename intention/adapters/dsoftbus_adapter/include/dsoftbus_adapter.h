@@ -38,6 +38,8 @@ public:
     int32_t OpenSession(const std::string &networkId) override;
     void CloseSession(const std::string &networkId) override;
     void CloseAllSessions() override;
+    void StartHeartBeat(const std::string &networkId) override;
+    void StopHeartBeat(const std::string &networkId) override;
 
     int32_t SendPacket(const std::string &networkId, NetPacket &packet) override;
     int32_t SendParcel(const std::string &networkId, Parcel &parcel) override;

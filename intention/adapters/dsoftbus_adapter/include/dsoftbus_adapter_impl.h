@@ -16,9 +16,11 @@
 #ifndef DSOFTBUS_ADAPTER_IMPL_H
 #define DSOFTBUS_ADAPTER_IMPL_H
 
+#include <atomic>
 #include <map>
 #include <set>
 
+#include "event_handler.h"
 #include "nocopyable.h"
 #include "socket.h"
 
@@ -83,6 +85,9 @@ public:
     int32_t SendPacket(const std::string &networkId, NetPacket &packet) override;
     int32_t SendParcel(const std::string &networkId, Parcel &parcel) override;
     int32_t BroadcastPacket(NetPacket &packet) override;
+    void StartHeartBeat(const std::string &networkId) override;
+    void StopHeartBeat(const std::string &networkId) override;
+
     bool HasSessionExisted(const std::string &networkId) override;
 
     void OnBind(int32_t socket, PeerSocketInfo info);
@@ -105,6 +110,10 @@ private:
     void HandlePacket(const std::string &networkId, NetPacket &packet);
     void HandleRawData(const std::string &networkId, const void *data, uint32_t dataLen);
     bool CheckDeviceOnline(const std::string &networkId);
+    void InitHeartBeat();
+    int32_t KeepHeartBeating(const std::string &networkId);
+    void UpdateHeartBeatState(const std::string &networkId, bool state);
+    bool GetHeartBeatState(const std::string &networkId);
 
     /*
     These four interfaces followed only read members, use shared_lock to avoid dead lock.
@@ -118,6 +127,10 @@ private:
     std::string localSessionName_;
     std::set<Observer> observers_;
     std::map<std::string, Session> sessions_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
+    NetPacket heartBeatPacket_ { MessageId::DSOFTBUS_HEART_BEAT_PACKET };
+    std::unordered_map<std::string, bool> heartBeatStates_;
+    std::shared_mutex heartBeatLock_;
 
     static std::mutex mutex_;
     static std::shared_ptr<DSoftbusAdapterImpl> instance_;

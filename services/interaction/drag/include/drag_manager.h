@@ -181,7 +181,7 @@ private:
     std::string GetDragState(DragState value) const;
     std::string GetDragResult(DragResult value) const;
     std::string GetDragCursorStyle(DragCursorStyle value) const;
-    static MMI::ExtraData CreateExtraData(bool appended);
+    static MMI::ExtraData CreateExtraData(bool appended, bool drawCursor = false);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void StateChangedNotify(DragState state);
     int32_t AddDragEvent(const DragData &dragData, const std::string &packageName);

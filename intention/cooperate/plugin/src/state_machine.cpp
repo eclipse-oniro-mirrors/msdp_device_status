@@ -437,6 +437,7 @@ void StateMachine::OnSoftbusSessionOpened(Context &context, const CooperateEvent
     CALL_INFO_TRACE;
     DSoftbusSessionOpened notice = std::get<DSoftbusSessionOpened>(event.event);
     context.inputDevMgr_.OnSoftbusSessionOpened(notice);
+    env_->GetDSoftbus().StartHeartBeat(notice.networkId);
     Transfer(context, event);
 }
 

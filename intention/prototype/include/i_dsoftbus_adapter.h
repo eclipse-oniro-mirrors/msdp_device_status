@@ -51,6 +51,8 @@ public:
     virtual int32_t OpenSession(const std::string &networkId) = 0;
     virtual void CloseSession(const std::string &networkId) = 0;
     virtual void CloseAllSessions() = 0;
+    virtual void StartHeartBeat(const std::string &networkId) = 0;
+    virtual void StopHeartBeat(const std::string &networkId) = 0;
 
     virtual int32_t SendPacket(const std::string &networkId, NetPacket &packet) = 0;
     virtual int32_t SendParcel(const std::string &networkId, Parcel &parcel) = 0;

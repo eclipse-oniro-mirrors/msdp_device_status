@@ -76,7 +76,7 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
     }
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}" PRIu64"", displayId);
+        FI_HILOGW("Get display info failed, display:%{public}" PRIu64"", displayId);
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
         if (display == nullptr) {
             FI_HILOGE("Get display info failed, display is nullptr");
@@ -91,6 +91,8 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
     bool isScreenRotation = false;
     std::vector<std::string> foldRotatePolicys;
     GetRotatePolicy(isScreenRotation, foldRotatePolicys);
+    FI_HILOGI("Current rotation:%{public}d, lastRotation:%{public}d",
+        static_cast<int32_t>(currentRotation), static_cast<int32_t>(lastRotation_));
     if (isScreenRotation) {
         ScreenRotate(currentRotation, lastRotation_);
         lastRotation_ = currentRotation;
@@ -102,6 +104,7 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
 
 void DisplayChangeEventListener::RotateDragWindow(Rosen::Rotation rotation)
 {
+    FI_HILOGI("Rotation:%{public}d", static_cast<int32_t>(rotation));
     CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, rotation] {
         CHKPR(this->context_, RET_ERR);
@@ -114,6 +117,8 @@ void DisplayChangeEventListener::RotateDragWindow(Rosen::Rotation rotation)
 
 void DisplayChangeEventListener::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation)
 {
+    FI_HILOGI("Rotation:%{public}d, lastRotation:%{public}d",
+        static_cast<int32_t>(rotation), static_cast<int32_t>(lastRotation));
     CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, rotation, lastRotation] {
         CHKPR(this->context_, RET_ERR);

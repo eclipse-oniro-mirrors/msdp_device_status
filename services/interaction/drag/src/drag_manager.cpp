@@ -940,7 +940,7 @@ std::string DragManager::GetDragCursorStyle(DragCursorStyle value) const
     return style;
 }
 
-MMI::ExtraData DragManager::CreateExtraData(bool appended)
+MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor)
 {
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     MMI::ExtraData extraData;
@@ -950,7 +950,10 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended)
     extraData.pointerId = dragData.pointerId;
     extraData.appended = appended;
     extraData.pullId = pullId_;
-    FI_HILOGD("sourceType:%{public}d, pointerId:%{public}d", extraData.sourceType, extraData.pointerId);
+    extraData.drawCursor = drawCursor;
+    extraData.eventId = DRAG_DATA_MGR.GetEventId();
+    FI_HILOGD("sourceType:%{public}d, pointerId:%{public}d, eventId:%{public}d",
+        extraData.sourceType, extraData.pointerId, extraData.eventId);
     return extraData;
 }
 
@@ -1103,8 +1106,14 @@ int32_t DragManager::OnStartDrag(const std::string &packageName, int32_t pid)
     if (GetControlCollaborationVisible()) {
         SetControlCollaborationVisible(false);
     }
-    auto extraData = CreateExtraData(true);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
+    bool drawCursor = false;
+#ifdef OHOS_BUILD_PC_PRODUCT
+    if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        drawCursor = true;
+    }
+#endif // OHOS_BUILD_PC_PRODUCT
+    auto extraData = CreateExtraData(true, drawCursor);
     bool isHicarOrSuperLauncher = false;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(dragData.displayId);
@@ -1718,7 +1727,7 @@ int32_t DragManager::EraseMouseIcon()
 
 int32_t DragManager::RotateDragWindow(Rosen::Rotation rotation)
 {
-    FI_HILOGD("enter, rotation:%{public}d", static_cast<int32_t>(rotation));
+    FI_HILOGI("Rotation:%{public}d", static_cast<int32_t>(rotation));
     auto SetDragWindowRotate = [rotation, this]() {
         dragDrawing_.SetRotation(rotation);
         if ((dragState_ == DragState::START) || (dragState_ == DragState::MOTION_DRAGGING)) {
@@ -1742,7 +1751,8 @@ int32_t DragManager::RotateDragWindow(Rosen::Rotation rotation)
 
 int32_t DragManager::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation)
 {
-    FI_HILOGD("enter");
+    FI_HILOGI("Rotation:%{public}d, lastRotation:%{public}d",
+        static_cast<int32_t>(rotation), static_cast<int32_t>(lastRotation));
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     if (dragData.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         FI_HILOGD("Not need screen rotate");
@@ -1832,8 +1842,21 @@ void DragManager::SetSVGFilePath(const std::string &filePath)
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 int32_t DragManager::AddDragEvent(const DragData &dragData, const std::string &packageName)
 {
-    auto extraData = CreateExtraData(true);
-    MMI::InputManager::GetInstance()->AppendExtraData(extraData);
+    bool drawCursor = false;
+#ifdef OHOS_BUILD_PC_PRODUCT
+    if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        drawCursor = true;
+    }
+#endif // OHOS_BUILD_PC_PRODUCT
+    auto extraData = CreateExtraData(true, drawCursor);
+    if (MMI::InputManager::GetInstance()->AppendExtraData(extraData) != RET_OK) {
+        FI_HILOGE("Failed to append extra data to MMI");
+        dragDrawing_.DestroyDragWindow();
+        dragDrawing_.UpdateDrawingState();
+        ReportStartDragFailedRadarInfo(StageRes::RES_FAIL, DragRadarErrCode::FAILED_APPEND_EXTRA_DATA, __func__,
+            packageName);
+        return RET_ERR;
+    }
     if (pointerEventMonitorId_ <= 0) {
         if (AddDragEventHandler(dragData.sourceType) != RET_OK) {
             FI_HILOGE("Failed to add drag event handler");

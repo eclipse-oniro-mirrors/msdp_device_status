@@ -105,7 +105,11 @@ int32_t DSoftbusHandler::OpenSession(const std::string &networkId)
     if (ret != RET_OK) {
         FI_HILOGW("Failed to SetFirstCallerTokenID, ret:%{public}d", ret);
     }
-    return env_->GetDSoftbus().OpenSession(networkId);
+    ret = env_->GetDSoftbus().OpenSession(networkId);
+    if (ret == RET_OK) {
+        env_->GetDSoftbus().StartHeartBeat(networkId);
+    }
+    return ret;
 }
 
 void DSoftbusHandler::CloseSession(const std::string &networkId)

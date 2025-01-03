@@ -50,6 +50,16 @@ void DSoftbusAdapter::CloseSession(const std::string &networkId)
     DSoftbusAdapterImpl::GetInstance()->CloseSession(networkId);
 }
 
+void DSoftbusAdapter::StartHeartBeat(const std::string &networkId)
+{
+    DSoftbusAdapterImpl::GetInstance()->StartHeartBeat(networkId);
+}
+
+void DSoftbusAdapter::StopHeartBeat(const std::string &networkId)
+{
+    DSoftbusAdapterImpl::GetInstance()->StopHeartBeat(networkId);
+}
+
 void DSoftbusAdapter::CloseAllSessions()
 {
     DSoftbusAdapterImpl::GetInstance()->CloseAllSessions();

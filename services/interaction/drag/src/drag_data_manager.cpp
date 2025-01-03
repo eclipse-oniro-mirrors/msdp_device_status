@@ -101,6 +101,16 @@ int32_t DragDataManager::GetTargetPid() const
     return targetPid_;
 }
 
+void DragDataManager::SetEventId(int32_t eventId)
+{
+    eventId_ = eventId;
+}
+
+int32_t DragDataManager::GetEventId() const
+{
+    return eventId_;
+}
+
 int32_t DragDataManager::GetShadowOffset(ShadowOffset &shadowOffset) const
 {
     if (dragData_.shadowInfos.empty()) {
@@ -129,6 +139,7 @@ void DragDataManager::ResetDragData()
     visible_ = false;
     targetTid_ = -1;
     targetPid_ = -1;
+    eventId_ = -1;
     textEditorAreaFlag_ = false;
     dragOriginDpi_ = 0.0f;
 }

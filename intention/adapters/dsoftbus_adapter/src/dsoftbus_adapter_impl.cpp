@@ -49,6 +49,9 @@ constexpr int32_t LATENCY { 3000 };
 constexpr int32_t SOCKET_SERVER { 0 };
 constexpr int32_t SOCKET_CLIENT { 1 };
 constexpr int32_t INVALID_SOCKET { -1 };
+constexpr int32_t HEART_BEAT_INTERVAL_MS { 64 };
+constexpr int32_t HEART_BEAT_SIZE_BYTE { 28 }; // Ensure size of heartBeat packet is 64Bytes.
+const std::string HEART_BEAT_THREAD_NAME { "OS_Cooperate_Heart_Beat" };
 }
 
 std::mutex DSoftbusAdapterImpl::mutex_;
@@ -79,6 +82,7 @@ DSoftbusAdapterImpl::~DSoftbusAdapterImpl()
 int32_t DSoftbusAdapterImpl::Enable()
 {
     CALL_DEBUG_ENTER;
+    InitHeartBeat();
     std::unique_lock<std::shared_mutex> lock(lock_);
     return SetupServer();
 }
@@ -583,6 +587,77 @@ void DSoftbusAdapterImpl::HandleRawData(const std::string &networkId, const void
             return;
         }
     }
+}
+
+void DSoftbusAdapterImpl::InitHeartBeat()
+{
+    auto runner = AppExecFwk::EventRunner::Create(HEART_BEAT_THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
+    CHKPV(runner);
+    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    char heartBeatContent[HEART_BEAT_SIZE_BYTE] { 'a' };
+    heartBeatPacket_.Write(heartBeatContent, HEART_BEAT_SIZE_BYTE);
+}
+
+void DSoftbusAdapterImpl::StartHeartBeat(const std::string &networkId)
+{
+    CALL_INFO_TRACE;
+    if (GetHeartBeatState(networkId)) {
+        FI_HILOGI("HeartBeat to %{public}s running ready", Utility::Anonymize(networkId).c_str());
+        return;
+    }
+    if (KeepHeartBeating(networkId) != RET_OK) {
+        UpdateHeartBeatState(networkId, false);
+        FI_HILOGE("StartHeartBeat to %{public}s failed", Utility::Anonymize(networkId).c_str());
+        return;
+    }
+    UpdateHeartBeatState(networkId, true);
+    FI_HILOGI("StartHeartBeat to %{public}s successfully", Utility::Anonymize(networkId).c_str());
+}
+
+void DSoftbusAdapterImpl::StopHeartBeat(const std::string &networkId)
+{
+    UpdateHeartBeatState(networkId, false);
+    FI_HILOGI("StopHeartBeat to %{public}s successfully", Utility::Anonymize(networkId).c_str());
+}
+
+int32_t DSoftbusAdapterImpl::KeepHeartBeating(const std::string &networkId)
+{
+    if (SendPacket(networkId, heartBeatPacket_) != RET_OK) {
+        FI_HILOGE("HeartBeat to %{public}s failed, stop it", Utility::Anonymize(networkId).c_str());
+        UpdateHeartBeatState(networkId, false);
+        return RET_ERR;
+    }
+    CHKPR(eventHandler_, RET_ERR);
+    if (!eventHandler_->PostTask(
+        [this, networkId]() {
+            if (GetHeartBeatState(networkId)) {
+                this->KeepHeartBeating(networkId);
+            } else {
+                UpdateHeartBeatState(networkId, false);
+                FI_HILOGE("Switch off, Stop heartBeat to %{public}s", Utility::Anonymize(networkId).c_str());
+            }
+        }, HEART_BEAT_INTERVAL_MS)) {
+        FI_HILOGE("PostTask heartBeat to %{public}s failed", Utility::Anonymize(networkId).c_str());
+        UpdateHeartBeatState(networkId, false);
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
+void DSoftbusAdapterImpl::UpdateHeartBeatState(const std::string &networkId, bool state)
+{
+    std::unique_lock<std::shared_mutex> lock(heartBeatLock_);
+    heartBeatStates_[networkId] = state;
+    FI_HILOGI("Update %{public}s state:%{public}s", Utility::Anonymize(networkId).c_str(), state ? "true" : "false");
+}
+
+bool DSoftbusAdapterImpl::GetHeartBeatState(const std::string &networkId)
+{
+    std::shared_lock<std::shared_mutex> lock(heartBeatLock_);
+    if (heartBeatStates_.find(networkId) != heartBeatStates_.end()) {
+        return heartBeatStates_[networkId];
+    }
+    return false;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

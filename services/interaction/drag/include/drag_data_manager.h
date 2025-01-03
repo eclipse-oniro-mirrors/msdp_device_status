@@ -45,6 +45,8 @@ public:
     int32_t GetTargetTid() const;
     void SetTargetPid(int32_t pid);
     int32_t GetTargetPid() const;
+    void SetEventId(int32_t eventId);
+    int32_t GetEventId() const;
     void SetPreviewStyle(const PreviewStyle &previewStyle);
     PreviewStyle GetPreviewStyle();
     void ResetDragData();
@@ -63,6 +65,7 @@ private:
     int32_t targetPid_ { -1 };
     PreviewStyle previewStyle_;
     int32_t targetTid_ { -1 };
+    int32_t eventId_ { -1 };
     std::u16string dragMessage_;
     DragCursorStyle dragStyle_ { DragCursorStyle::DEFAULT };
     DragData dragData_;

@@ -163,6 +163,7 @@ struct FilterInfo {
     uint32_t blurColor { 0 };
     int32_t blurStyle { -1 };
     float dragNodeGrayscale { 0.0f };
+    int32_t eventId { -1 };
 };
 
 struct ExtraInfo {

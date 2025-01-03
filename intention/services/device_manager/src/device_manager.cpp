@@ -175,16 +175,17 @@ int32_t DeviceManager::ParseDeviceId(const std::string &devNode)
 
 std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
 {
+    CALL_INFO_TRACE;
     const std::string SYS_INPUT_PATH { "/sys/class/input/" };
     const std::string devPath { DEV_INPUT_PATH + devNode };
     struct stat statbuf;
 
     if (stat(devPath.c_str(), &statbuf) != 0) {
-        FI_HILOGD("Invalid device path:%{private}s", devPath.c_str());
+        FI_HILOGE("Invalid device path:%{private}s", devPath.c_str());
         return nullptr;
     }
     if (!S_ISCHR(statbuf.st_mode)) {
-        FI_HILOGD("Not character device:%{public}s", devPath.c_str());
+        FI_HILOGE("Not character device:%{public}s", devPath.c_str());
         return nullptr;
     }
 
@@ -203,7 +204,7 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
     const std::string lSysPath { SYS_INPUT_PATH + devNode };
     char rpath[PATH_MAX];
     if (realpath(lSysPath.c_str(), rpath) == nullptr) {
-        FI_HILOGD("Invalid sysPath:%{private}s", lSysPath.c_str());
+        FI_HILOGE("Invalid sysPath:%{private}s", lSysPath.c_str());
         return nullptr;
     }
 
@@ -216,7 +217,7 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
     }
     auto ret = devices_.insert_or_assign(dev->GetId(), dev);
     if (ret.second) {
-        FI_HILOGD("\'%{public}s\' added", dev->GetName().c_str());
+        FI_HILOGI("\'%{public}s\' added", dev->GetName().c_str());
         OnDeviceAdded(dev);
     }
     return dev;
@@ -232,13 +233,13 @@ std::shared_ptr<IDevice> DeviceManager::RemoveDevice(const std::string &devNode)
         CHKPC(dev);
         if (dev->GetDevPath() == devPath) {
             devices_.erase(devIter);
-            FI_HILOGD("\'%{public}s\' removed", dev->GetName().c_str());
+            FI_HILOGI("\'%{public}s\' removed", dev->GetName().c_str());
             dev->Close();
             OnDeviceRemoved(dev);
             return dev;
         }
     }
-    FI_HILOGD("\'%{public}s\' was not found", devNode.c_str());
+    FI_HILOGE("\'%{public}s\' was not found", devNode.c_str());
     return nullptr;
 }
 

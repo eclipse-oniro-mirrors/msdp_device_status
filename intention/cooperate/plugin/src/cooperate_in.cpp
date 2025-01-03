@@ -186,7 +186,6 @@ void CooperateIn::Initial::OnComeBack(Context &context, const CooperateEvent &ev
         notice.errCode = static_cast<int32_t>(CoordinationErrCode::SEND_PACKET_FAILED);
     }
     context.eventMgr_.StartCooperateFinish(notice);
-    context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnBack();
 }
@@ -676,7 +675,6 @@ void CooperateIn::RelayConfirmation::OnNormal(Context &context, const CooperateE
     context.dsoftbus_.StartCooperate(parent_.process_.Peer(), notice);
 
     context.eventMgr_.StartCooperateFinish(notice);
-    context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnRelayCooperation(parent_.process_.Peer(), context.NormalizedCursorPosition());
 }
