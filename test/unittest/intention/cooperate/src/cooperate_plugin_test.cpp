@@ -3552,9 +3552,9 @@ HWTEST_F(CooperatePluginTest, stateMachine_test099, TestSize.Level0)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
-    cooperateContext.remoteNetworkId_ = DSOFTBUS_COOPERATE_WITH_OPTIONS;
+    cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
     CooperateEvent startEvent (
-        CooperateEventType::DSOFTBUS_START_COOPERATE,
+        CooperateEventType::DSOFTBUS_COOPERATE_WITH_OPTIONS,
         DSoftbusStartCooperate {
             .networkId = LOCAL_NETWORKID
     });
