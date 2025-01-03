@@ -3532,12 +3532,12 @@ HWTEST_F(CooperatePluginTest, stateMachine_test098, TestSize.Level0)
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
-    CooperateEvent startEvent (
+    CooperateEvent event (
         CooperateEventType::DSOFTBUS_COOPERATE_WITH_OPTIONS,
-        DSoftbusStartCooperate {
+        DSoftbusCooperateOptions {
             .networkId = LOCAL_NETWORKID
     });
-    ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnRemoteStartWithOptions(cooperateContext, startEvent));
+    ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnRemoteStartWithOptions(cooperateContext, event));
 }
 
 /**
@@ -3553,13 +3553,13 @@ HWTEST_F(CooperatePluginTest, stateMachine_test099, TestSize.Level0)
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
-    CooperateEvent startEvent (
+    CooperateEvent event (
         CooperateEventType::DSOFTBUS_COOPERATE_WITH_OPTIONS,
-        DSoftbusStartCooperate {
+        DSoftbusCooperateOptions {
             .networkId = LOCAL_NETWORKID
     });
     g_stateMachine->isCooperateEnable_ = true;
-    ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnRemoteStartWithOptions(cooperateContext, startEvent));
+    ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnRemoteStartWithOptions(cooperateContext, event));
 }
 } // namespace DeviceStatus
 } // namespace Msdp
