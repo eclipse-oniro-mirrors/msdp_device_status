@@ -84,6 +84,18 @@ void InputEventInterceptor::Enable(Context &context)
         [this](std::shared_ptr<MMI::KeyEvent> keyEvent) { this->OnKeyEvent(keyEvent); });
     if (interceptorId_ < 0) {
         FI_HILOGE("Input::AddInterceptor fail");
+        CooperateRadarInfo startRadarInfo {
+            .funcName = __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_ADD_MMI_EVENT_INTERCEPOR),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::ADD_MMI_EVENT_INTERCEPOR_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId_.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(startRadarInfo);
     }
     TurnOffChannelScan();
     HeartBeatSend();

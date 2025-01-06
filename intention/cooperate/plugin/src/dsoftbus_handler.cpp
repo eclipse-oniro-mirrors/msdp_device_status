@@ -14,6 +14,7 @@
  */
 
 #include "dsoftbus_handler.h"
+#include "cooperate_hisysevent.h"
 
 #include "ipc_skeleton.h"
 #include "token_setproc.h"
@@ -127,11 +128,35 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
         << event.touchPadSpeed;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
+        CooperateRadarInfo startRadarInfo {
+            .funcName = __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_SERIALIZE_INSTRUCTION),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::SERIALIZE_INSTRUCTION_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(startRadarInfo);
         return RET_ERR;
     }
     int32_t ret = env_->GetDSoftbus().SendPacket(networkId, packet);
     if (ret != RET_OK) {
         OnCommunicationFailure(networkId);
+        CooperateRadarInfo startRadarInfo {
+            .funcName = __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_SEND_INSTRUCTION_TO_REMOTE),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::SEND_INSTRUCTION_TO_REMOTE_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(startRadarInfo);
     }
     return ret;
 }

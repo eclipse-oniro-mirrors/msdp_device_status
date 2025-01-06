@@ -59,7 +59,7 @@ public:
 
     static std::string Anonymize(const std::string &id);
     static std::string Anonymize(const char *id);
-    static std::string DragRadarAnonymize(const char* id);
+    static std::string DFXRadarAnonymize(const char* id);
 
     static bool DoesFileExist(const char *path);
     static ssize_t GetFileSize(const char *path);

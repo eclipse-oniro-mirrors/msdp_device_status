@@ -14,6 +14,7 @@
  */
 
 #include "cooperate_out.h"
+#include "cooperate_hisysevent.h"
 
 #include "devicestatus_define.h"
 #include "utility.h"
@@ -47,7 +48,21 @@ void CooperateOut::OnEvent(Context &context, const CooperateEvent &event)
 void CooperateOut::OnEnterState(Context &context)
 {
     CALL_INFO_TRACE;
-    env_->GetInput().SetPointerVisibility(false);
+    int32_t ret = env_->GetInput().SetPointerVisibility(false);
+    if (ret != RET_OK) {
+        CooperateRadarInfo radarInfo {
+            .funcName = __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_IDLE),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_SET_CURSOR_VISIBILITY),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::SET_CURSOR_VISIBILITY_FAILED),
+            .hostName = "",
+            .localNetId = "",
+            .peerNetId = ""
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
 }
 
 void CooperateOut::OnLeaveState(Context &context)

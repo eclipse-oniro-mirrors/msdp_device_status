@@ -44,7 +44,7 @@ namespace DeviceStatus {
 namespace {
 constexpr size_t SUBSTR_ID_LENGTH { 5 };
 constexpr int32_t MULTIPLES { 2 };
-constexpr size_t DRAG_RADAR_MASK_SIZE { 2 };
+constexpr size_t DFX_RADAR_MASK_SIZE { 2 };
 } // namespace
 
 size_t Utility::CopyNulstr(char *dest, size_t size, const char *src)
@@ -126,7 +126,7 @@ std::string Utility::Anonymize(const char* id)
         idStr.substr(idStr.length() - SUBSTR_ID_LENGTH);
 }
 
-std::string Utility::DragRadarAnonymize(const char* id)
+std::string Utility::DFXRadarAnonymize(const char* id)
 {
     if (id == nullptr) {
         return std::string(MULTIPLES * SUBSTR_ID_LENGTH, '*');
@@ -135,7 +135,7 @@ std::string Utility::DragRadarAnonymize(const char* id)
     if (idStr.empty() || idStr.length() < SUBSTR_ID_LENGTH) {
         return std::string(MULTIPLES * SUBSTR_ID_LENGTH, '*');
     }
-    return idStr.substr(0, SUBSTR_ID_LENGTH) + std::string(DRAG_RADAR_MASK_SIZE, '*') +
+    return idStr.substr(0, SUBSTR_ID_LENGTH) + std::string(DFX_RADAR_MASK_SIZE, '*') +
         idStr.substr(idStr.length() - SUBSTR_ID_LENGTH);
 }
 

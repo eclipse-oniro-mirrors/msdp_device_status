@@ -14,6 +14,7 @@
  */
 
 #include "cooperate.h"
+#include "cooperate_hisysevent.h"
 
 #ifdef ENABLE_PERFORMANCE_CHECK
 #include <sstream>
@@ -163,7 +164,18 @@ int32_t Cooperate::Disable(int32_t pid, int32_t userData)
 int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_DEBUG_ENTER;
-
+    CooperateRadarInfo radarInfo {
+            .funcName = __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_LOCAL_SWITCH),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_LOCAL_SWITCH_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context_.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId.c_str())
+        };
+    CooperateRadar::ReportCooperateRadarInfo(radarInfo);
 #ifdef ENABLE_PERFORMANCE_CHECK
     std::ostringstream ss;
     ss << "start_cooperation_with_" << Utility::Anonymize(remoteNetworkId).c_str();

@@ -2002,7 +2002,7 @@ void DragManager::ReportStartDragUEInfo(const std::string &packageName)
     dragRadarInfo.packageName = DRAG_FRAMEWORK;
     dragRadarInfo.appVersionId = APP_VERSION_ID;
     dragRadarInfo.hostName = packageName;
-    dragRadarInfo.localNetId = Utility::DragRadarAnonymize(IDSoftbusAdapter::GetLocalNetworkId().c_str());
+    dragRadarInfo.localNetId = Utility::DFXRadarAnonymize(IDSoftbusAdapter::GetLocalNetworkId().c_str());
     dragRadarInfo.peerNetId = peerNetId_;
     ReportDragUEInfo(dragRadarInfo, START_CROSSING_DRAG);
 }
@@ -2013,7 +2013,7 @@ void DragManager::ReportStopDragUEInfo(const std::string &packageName)
     dragRadarInfo.packageName = DRAG_FRAMEWORK;
     dragRadarInfo.appVersionId = APP_VERSION_ID;
     dragRadarInfo.hostName = packageName;
-    dragRadarInfo.localNetId = Utility::DragRadarAnonymize(IDSoftbusAdapter::GetLocalNetworkId().c_str());
+    dragRadarInfo.localNetId = Utility::DFXRadarAnonymize(IDSoftbusAdapter::GetLocalNetworkId().c_str());
     dragRadarInfo.peerNetId = peerNetId_;
     ReportDragUEInfo(dragRadarInfo, END_CROSSING_DRAG);
 }
