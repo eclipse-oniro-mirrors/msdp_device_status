@@ -16,6 +16,7 @@
 #include "input_event_transmission/input_event_interceptor.h"
 
 #include "cooperate_context.h"
+#include "cooperate_hisysevent.h"
 #include "devicestatus_define.h"
 #include "display_manager.h"
 #include "power_mgr_client.h"

@@ -396,7 +396,7 @@ int32_t CooperateClient::OnCoordinationMessage(const StreamClient &client, NetPa
         .msg = static_cast<CoordinationMessage> (nType),
         .errCode = errCode
     };
-     CoordinationMsgInfo msgInfo {
+    CoordinationMsgInfo msgInfo {
         .msg = static_cast<CoordinationMessage> (nType),
         .errCode = errCode
     };
