@@ -396,10 +396,6 @@ int32_t CooperateClient::OnCoordinationMessage(const StreamClient &client, NetPa
         .msg = static_cast<CoordinationMessage> (nType),
         .errCode = errCode
     };
-    CoordinationMsgInfo msgInfo {
-        .msg = static_cast<CoordinationMessage> (nType),
-        .errCode = errCode
-    };
     OnCooperateMessageEvent(userData, networkId, msgInfo);
     auto stageRes = BizCooperateStageRes::RES_IDLE;
     if (CoordinationMessage(nType) == CoordinationMessage::ACTIVATE_SUCCESS) {
