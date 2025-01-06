@@ -193,7 +193,7 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
         CooperateRadarInfo radarInfo {
-            .funcName = __FUNCTION__ ,
+            .funcName = __FUNCTION__,
             .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
             .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CALLING_COOPERATE),
