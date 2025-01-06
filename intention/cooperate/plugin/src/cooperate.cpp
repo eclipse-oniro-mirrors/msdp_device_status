@@ -192,7 +192,23 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
     auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::START, event));
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+        CooperateRadarInfo radarInfo {
+            .funcName =  __FUNCTION__ ,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CALLING_COOPERATE),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context_.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId.c_str())
+        };
     }
+    if (ret != RET_OK) {
+            radarInfo.bizState = static_cast<int32_t> (BizState::STATE_END),
+            radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CALLING_COOPERATE),
+            CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+        };
     return errCode.get();
 }
 
