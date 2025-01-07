@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,6 +43,7 @@ ohos_shared_library("devicestatus_util") {
   version_script = "libdevicestatus_util_map"
   sources = [
     "src/animation_curve.cpp",
+    "src/cooperate_hisysevent.cpp",
     "src/drag_data_packer.cpp",
     "src/preview_style_packer.cpp",
     "src/util.cpp",
@@ -60,6 +61,7 @@ ohos_shared_library("devicestatus_util") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "image_framework:image_native",
     "init:libbegetutil",
     "napi:ace_napi",

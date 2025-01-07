@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "cooperate_client.h"
+#include "cooperate_hisysevent.h"
 
 #ifdef ENABLE_PERFORMANCE_CHECK
 #include <algorithm>
@@ -396,6 +397,24 @@ int32_t CooperateClient::OnCoordinationMessage(const StreamClient &client, NetPa
         .errCode = errCode
     };
     OnCooperateMessageEvent(userData, networkId, msgInfo);
+    auto stageRes = BizCooperateStageRes::RES_IDLE;
+    if (CoordinationMessage(nType) == CoordinationMessage::ACTIVATE_SUCCESS) {
+        stageRes = BizCooperateStageRes::RES_SUCCESS;
+    } else if (CoordinationMessage(nType) == CoordinationMessage::ACTIVATE_FAIL) {
+        stageRes = BizCooperateStageRes::RES_FAIL;
+    }
+    CooperateRadarInfo radarInfo {
+        .funcName = __FUNCTION__,
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+        .bizState = static_cast<int32_t> (BizState::STATE_END),
+        .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CLIENT_ON_MESSAGE_RCVD),
+        .stageRes = static_cast<int32_t> (stageRes),
+        .errCode = static_cast<int32_t> (msgInfo.errCode),
+        .hostName = "",
+        .localNetId = "",
+        .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
+    };
+    CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     return RET_OK;
 }
 

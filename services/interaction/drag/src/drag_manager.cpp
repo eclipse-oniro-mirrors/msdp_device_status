@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2002,7 +2002,7 @@ void DragManager::ReportStartDragUEInfo(const std::string &packageName)
     dragRadarInfo.packageName = DRAG_FRAMEWORK;
     dragRadarInfo.appVersionId = APP_VERSION_ID;
     dragRadarInfo.hostName = packageName;
-    dragRadarInfo.localNetId = Utility::DragRadarAnonymize(IDSoftbusAdapter::GetLocalNetworkId().c_str());
+    dragRadarInfo.localNetId = Utility::DFXRadarAnonymize(IDSoftbusAdapter::GetLocalNetworkId().c_str());
     dragRadarInfo.peerNetId = peerNetId_;
     ReportDragUEInfo(dragRadarInfo, START_CROSSING_DRAG);
 }
@@ -2013,7 +2013,7 @@ void DragManager::ReportStopDragUEInfo(const std::string &packageName)
     dragRadarInfo.packageName = DRAG_FRAMEWORK;
     dragRadarInfo.appVersionId = APP_VERSION_ID;
     dragRadarInfo.hostName = packageName;
-    dragRadarInfo.localNetId = Utility::DragRadarAnonymize(IDSoftbusAdapter::GetLocalNetworkId().c_str());
+    dragRadarInfo.localNetId = Utility::DFXRadarAnonymize(IDSoftbusAdapter::GetLocalNetworkId().c_str());
     dragRadarInfo.peerNetId = peerNetId_;
     ReportDragUEInfo(dragRadarInfo, END_CROSSING_DRAG);
 }

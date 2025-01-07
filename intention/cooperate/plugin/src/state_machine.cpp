@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "state_machine.h"
+#include "cooperate_hisysevent.h"
 
 #include "application_state_observer_stub.h"
 #include "iservice_registry.h"
@@ -296,12 +297,36 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
     if (!env_->GetDDM().CheckSameAccountToLocal(startEvent.remoteNetworkId)) {
         FI_HILOGE("CheckSameAccountToLocal failed");
         startEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
+        CooperateRadarInfo radarInfo {
+            .funcName =  __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_SAME_ACCOUNT),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_SAME_ACCOUNT_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         return;
     }
     UpdateApplicationStateObserver(startEvent.pid);
     if (!context.IsAllowCooperate()) {
         FI_HILOGI("Not allow cooperate");
         startEvent.errCode->set_value(COMMON_NOT_ALLOWED_DISTRIBUTED);
+        CooperateRadarInfo radarInfo {
+            .funcName = __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_ALLOW_COOPERATE),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_ALLOW_COOPERATE_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         return;
     }
     startEvent.errCode->set_value(RET_OK);

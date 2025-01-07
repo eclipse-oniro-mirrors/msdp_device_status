@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "cooperate.h"
+#include "cooperate_hisysevent.h"
 
 #ifdef ENABLE_PERFORMANCE_CHECK
 #include <sstream>
@@ -163,7 +164,20 @@ int32_t Cooperate::Disable(int32_t pid, int32_t userData)
 int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId)
 {
     CALL_DEBUG_ENTER;
-
+    CooperateRadarInfo radarInfo {
+            .funcName =  __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CALLING_COOPERATE),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context_.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId.c_str())
+    };
+    if (!sm_.IsCooperateEnable()) {
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
 #ifdef ENABLE_PERFORMANCE_CHECK
     std::ostringstream ss;
     ss << "start_cooperation_with_" << Utility::Anonymize(remoteNetworkId).c_str();
@@ -181,6 +195,13 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
     }
+    if (ret != RET_OK) {
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    };
+    radarInfo.bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
+    radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS),
+    radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS),
+    CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     return errCode.get();
 }
 
