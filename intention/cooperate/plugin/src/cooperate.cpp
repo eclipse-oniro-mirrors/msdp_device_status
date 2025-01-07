@@ -203,6 +203,7 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
             .localNetId = Utility::DFXRadarAnonymize(context_.Local().c_str()),
             .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId.c_str())
         };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     }
     if (ret != RET_OK) {
             radarInfo.bizState = static_cast<int32_t> (BizState::STATE_END),
