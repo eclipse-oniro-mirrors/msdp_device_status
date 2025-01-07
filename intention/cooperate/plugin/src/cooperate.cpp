@@ -193,7 +193,7 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
     auto errCode = event.errCode->get_future();
     auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::START, event));
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
-            FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+        FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
     }
     if (ret != RET_OK) {
         CooperateRadar::ReportCooperateRadarInfo(radarInfo);
