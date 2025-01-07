@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2023 Huawei Device Co., Ltd.
+* Copyright (C) 2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ void CooperateRadar::ReportCooperateRadarInfo(struct CooperateRadarInfo &coopera
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "ORG_PKG", ORG_PKG_NAME,
         "FUNC", cooperateRadarInfo.funcName,
-        "BIZ_SCENE", 1,
+        "BIZ_SCENE", cooperateRadarInfo.bizScene,
         "BIZ_STATE", cooperateRadarInfo.bizState,
         "BIZ_STAGE", cooperateRadarInfo.bizStage,
         "STAGE_RES", cooperateRadarInfo.stageRes,

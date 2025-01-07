@@ -55,7 +55,7 @@ void CooperateOut::OnEnterState(Context &context)
             .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .bizState = static_cast<int32_t> (BizState::STATE_IDLE),
             .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_SET_CURSOR_VISIBILITY),
-            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
             .errCode = static_cast<int32_t> (CooperateRadarErrCode::SET_CURSOR_VISIBILITY_FAILED),
             .hostName = "",
             .localNetId = "",

@@ -128,7 +128,7 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
         << event.touchPadSpeed;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
-        CooperateRadarInfo startRadarInfo {
+        CooperateRadarInfo radarInfo {
             .funcName = __FUNCTION__,
             .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .bizState = static_cast<int32_t> (BizState::STATE_END),
@@ -139,13 +139,13 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
             .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
             .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
         };
-        CooperateRadar::ReportCooperateRadarInfo(startRadarInfo);
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         return RET_ERR;
     }
     int32_t ret = env_->GetDSoftbus().SendPacket(networkId, packet);
     if (ret != RET_OK) {
         OnCommunicationFailure(networkId);
-        CooperateRadarInfo startRadarInfo {
+        CooperateRadarInfo radarInfo {
             .funcName = __FUNCTION__,
             .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .bizState = static_cast<int32_t> (BizState::STATE_END),
@@ -156,7 +156,7 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
             .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
             .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
         };
-        CooperateRadar::ReportCooperateRadarInfo(startRadarInfo);
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     }
     return ret;
 }

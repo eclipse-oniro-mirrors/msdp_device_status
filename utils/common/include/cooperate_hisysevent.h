@@ -28,7 +28,6 @@ enum class BizCooperateScene {
     SCENE_PASSIVE
 };
     
-    
 enum class BizCooperateStageRes {
     RES_IDLE = 0,
     RES_SUCCESS,
@@ -53,7 +52,8 @@ enum class BizCooperateStage {
     
 enum class CooperateRadarErrCode {
     CALLING_COOPERATE_SUCCESS = 0,
-    CHECK_SAME_ACCOUNT_FAILED = 20900006,
+    CALLING_COOPERATE_FAILED = 20900006,
+    CHECK_SAME_ACCOUNT_FAILED,
     CHECK_LOCAL_SWITCH_FAILED,
     CHECK_ALLOW_COOPERATE_FAILED,
     OPEN_DSOFTBUS_SESSION_FAILED,
