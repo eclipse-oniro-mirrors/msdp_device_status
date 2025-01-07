@@ -415,7 +415,6 @@ int32_t CooperateClient::OnCoordinationMessage(const StreamClient &client, NetPa
         .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
     };
     CooperateRadar::ReportCooperateRadarInfo(radarInfo);
-    OnCooperateMessageEvent(userData, networkId, msgInfo);
     return RET_OK;
 }
 
