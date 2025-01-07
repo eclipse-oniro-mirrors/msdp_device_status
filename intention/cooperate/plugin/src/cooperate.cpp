@@ -196,8 +196,8 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
             FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
     }
     if (ret != RET_OK) {
-            CooperateRadar::ReportCooperateRadarInfo(radarInfo);
-        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    };
     radarInfo.bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
     radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS),
     radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS),
