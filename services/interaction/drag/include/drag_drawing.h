@@ -257,7 +257,7 @@ public:
     int32_t StartVsync();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void OnDragSuccess(IContext* context);
-    void OnDragFail(IContext* context, bool isLongPressDrag = false);
+    void OnDragFail(IContext* context, bool isLongPressDrag);
     void StopVSyncStation();
 #else
     void OnDragSuccess();
@@ -294,6 +294,7 @@ public:
     void UpdateDragState(DragState dragState);
     static std::shared_ptr<Media::PixelMap> AccessGlobalPixelMapLocked();
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
+    void ZoomOutAnimation();
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -368,7 +369,6 @@ private:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool isAnimated = false);
     void ZoomInOutAndAlphaChangedAnimation();
     void ZoomInAnimation();
-    void ZoomOutAnimation();
     void AlphaChangedAnimation();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<AppExecFwk::EventHandler> GetSuperHubHandler();
