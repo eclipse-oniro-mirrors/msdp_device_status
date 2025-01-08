@@ -257,7 +257,7 @@ public:
     int32_t StartVsync();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void OnDragSuccess(IContext* context);
-    void OnDragFail(IContext* context, bool isLongPressDrag);
+    void OnDragFail(IContext* context, bool isLongPressDrag = false);
     void StopVSyncStation();
 #else
     void OnDragSuccess();
@@ -368,6 +368,7 @@ private:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool isAnimated = false);
     void ZoomInOutAndAlphaChangedAnimation();
     void ZoomInAnimation();
+    void ZoomOutAnimation();
     void AlphaChangedAnimation();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<AppExecFwk::EventHandler> GetSuperHubHandler();
