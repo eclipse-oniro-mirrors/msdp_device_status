@@ -346,6 +346,10 @@ int32_t DragDrawing::CheckDragData(const DragData &dragData)
 void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY, bool isNeedAdjustDisplayXY,
     bool isMultiSelectedAnimation)
 {
+    if (screenRotateState_) {
+        FI_HILOGD("Doing screen rotation, ignore draw drag window");
+        return;
+    }
     if (isRunningRotateAnimation_) {
         FI_HILOGD("Doing rotate drag window animate, ignore draw drag window");
         return;
@@ -396,6 +400,10 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY, bo
 
 void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float displayY)
 {
+    if (screenRotateState_) {
+        FI_HILOGD("Doing screen rotation, ignore update drag position");
+        return;
+    }
     if (displayId < 0) {
         FI_HILOGE("Invalid displayId:%{public}d", displayId);
         return;
@@ -406,6 +414,10 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
     g_drawingInfo.displayId = displayId;
     g_drawingInfo.displayX = static_cast<int32_t>(displayX);
     g_drawingInfo.displayY = static_cast<int32_t>(displayY);
+#ifndef OHOS_BUILD_PC_PRODUCT
+    float mousePositionX = displayX;
+    float mousePositionY = displayY;
+#endif // OHOS_BUILD_PC_PRODUCT
     AdjustRotateDisplayXY(displayX, displayY);
     g_drawingInfo.x = displayX;
     g_drawingInfo.y = displayY;
@@ -427,8 +439,6 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
     parentNode->SetFrame(positionX, positionY, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight() + adjustSize);
 #ifndef OHOS_BUILD_PC_PRODUCT
-    float mousePositionX = displayX;
-    float mousePositionY = displayY;
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         UpdateMousePosition(mousePositionX, mousePositionY);
     }
@@ -1333,11 +1343,15 @@ void DragDrawing::FlushDragPosition(uint64_t nanoTimestamp)
         "OnDragMove,displayX:" + std::to_string(event.displayX) + ",displayY:" + std::to_string(event.displayY));
     UpdateDragPosition(event.displayId, event.displayX, event.displayY);
     FinishTrace(HITRACE_TAG_MSDP);
+    vSyncStation_.RequestFrame(TYPE_FLUSH_DRAG_POSITION, frameCallback_);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
 void DragDrawing::OnDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime)
 {
+    if (screenRotateState_) {
+        screenRotateState_ = false;
+    }
     if (isRunningRotateAnimation_) {
         FI_HILOGD("Doing rotate drag window animate, ignore draw drag window");
         return;
@@ -3044,6 +3058,8 @@ void DragDrawing::ResetParameter()
     StopVSyncStation();
     frameCallback_ = nullptr;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+    isRunningRotateAnimation_ = false;
+    screenRotateState_ = false;
     FI_HILOGI("leave");
 }
 
@@ -3224,6 +3240,7 @@ void DragDrawing::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRot
     }
 #endif // OHOS_BUILD_PC_PRODUCT
     Rosen::RSTransaction::FlushImplicitTransaction();
+    screenRotateState_ = true;
     FI_HILOGI("leave");
 }
 
