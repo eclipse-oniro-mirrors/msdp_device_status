@@ -679,13 +679,24 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t displayX = pointerItem.GetDisplayX();
     int32_t displayY = pointerItem.GetDisplayY();
-    if (needLongPressDragAnimation_ && isLongPressDrag_) {
-        DragData dragData = DRAG_DATA_MGR.GetDragData();
-        int32_t deltaX = fabs(displayX - dragData.displayX);
-        int32_t deltaY = fabs(displayY - dragData.displayY);
-        if ((pow(deltaX, POWER_SQUARED) + pow(deltaY, POWER_SQUARED)) > TEN_POWER) {
-            dragDrawing_.ZoomOutAnimation();
-            needLongPressDragAnimation_ = false;
+    auto LongPressDragZoomOutAnimation = [displayX, displayY, this]() {
+        if (needLongPressDragAnimation_) {
+            DragData dragData = DRAG_DATA_MGR.GetDragData();
+            int32_t deltaX = fabs(displayX - dragData.displayX);
+            int32_t deltaY = fabs(displayY - dragData.displayY);
+            if ((pow(deltaX, POWER_SQUARED) + pow(deltaY, POWER_SQUARED)) > TEN_POWER) {
+                dragDrawing_.ZoomOutAnimation();
+                needLongPressDragAnimation_ = false;
+            }
+        }
+        return RET_OK;
+    };
+    if (isLongPressDrag_) {
+        CHKPV(context_);
+        int32_t ret = context_->GetDelegateTasks().PostAsyncTask(LongPressDragZoomOutAnimation);
+        if (ret != RET_OK) {
+            FI_HILOGE("Post async task failed, ret:%{public}d", ret);
+            return;
         }
     }
     int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
