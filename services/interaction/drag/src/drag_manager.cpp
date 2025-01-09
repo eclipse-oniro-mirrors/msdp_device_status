@@ -682,8 +682,8 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     auto LongPressDragZoomOutAnimation = [displayX, displayY, this]() {
         if (needLongPressDragAnimation_) {
             DragData dragData = DRAG_DATA_MGR.GetDragData();
-            int32_t deltaX = fabs(displayX - dragData.displayX);
-            int32_t deltaY = fabs(displayY - dragData.displayY);
+            int32_t deltaX = abs(displayX - dragData.displayX);
+            int32_t deltaY = abs(displayY - dragData.displayY);
             if ((pow(deltaX, POWER_SQUARED) + pow(deltaY, POWER_SQUARED)) > TEN_POWER) {
                 dragDrawing_.ZoomOutAnimation();
                 needLongPressDragAnimation_ = false;
