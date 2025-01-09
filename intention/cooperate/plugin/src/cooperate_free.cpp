@@ -213,7 +213,7 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
     CALL_INFO_TRACE;
     DSoftbusStartCooperate notice = std::get<DSoftbusStartCooperate>(event.event);
     context.StorePeerPointerSpeed(notice.pointerSpeed);
-    context.StorePeerTouchPadSpeed(notice.pointerSpeed);
+    context.StorePeerTouchPadSpeed(notice.touchPadSpeed);
     context.OnRemoteStartCooperate(notice.extra);
     context.eventMgr_.RemoteStart(notice);
     context.RemoteStartSuccess(notice);

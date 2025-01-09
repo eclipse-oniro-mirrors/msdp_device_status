@@ -288,7 +288,7 @@ struct CooperateEvent {
     > event;
 };
 
-inline constexpr int32_t DEFAULT_TIMEOUT { 3000 };
+inline constexpr int32_t DEFAULT_TIMEOUT { 5000 };
 inline constexpr int32_t REPEAT_ONCE { 1 };
 inline constexpr int32_t DEFAULT_COOLING_TIME { 10 };
 inline constexpr int32_t POINTER_EVENT_TIMEOUT { 10000 };

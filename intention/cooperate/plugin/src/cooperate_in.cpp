@@ -533,6 +533,7 @@ void CooperateIn::RelayConfirmation::OnResponse(Context &context, const Cooperat
         Proceed(context, event);
     } else {
         OnResetWithNotifyMessage(context, event);
+        parent_.StopCooperate(context, event);
     }
 }
 
