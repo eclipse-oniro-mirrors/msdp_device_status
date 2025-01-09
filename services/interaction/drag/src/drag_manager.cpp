@@ -49,6 +49,8 @@ namespace DeviceStatus {
 namespace {
 constexpr int32_t TIMEOUT_MS { 3000 };
 constexpr int32_t INTERVAL_MS { 500 };
+constexpr int32_t POWER_SQUARED { 2 };
+constexpr int32_t TEN_POWER { 10 * 10 };
 std::atomic<int64_t> g_startFilterTime { -1 };
 const std::string DRAG_STYLE_DEFAULT {"DEFAULT"};
 const std::string DRAG_STYLE_FORBIDDEN {"FORBIDDEN"};
@@ -677,6 +679,26 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t displayX = pointerItem.GetDisplayX();
     int32_t displayY = pointerItem.GetDisplayY();
+    auto LongPressDragZoomOutAnimation = [displayX, displayY, this]() {
+        if (needLongPressDragAnimation_) {
+            DragData dragData = DRAG_DATA_MGR.GetDragData();
+            int32_t deltaX = abs(displayX - dragData.displayX);
+            int32_t deltaY = abs(displayY - dragData.displayY);
+            if ((pow(deltaX, POWER_SQUARED) + pow(deltaY, POWER_SQUARED)) > TEN_POWER) {
+                dragDrawing_.ZoomOutAnimation();
+                needLongPressDragAnimation_ = false;
+            }
+        }
+        return RET_OK;
+    };
+    if (isLongPressDrag_) {
+        CHKPV(context_);
+        int32_t ret = context_->GetDelegateTasks().PostAsyncTask(LongPressDragZoomOutAnimation);
+        if (ret != RET_OK) {
+            FI_HILOGE("Post async task failed, ret:%{public}d", ret);
+            return;
+        }
+    }
     int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
     FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{private}d, displayY:%{private}d, "
         "targetDisplayId:%{public}d, pullId:%{public}d", pointerEvent->GetSourceType(), pointerId, displayX, displayY,
@@ -1414,7 +1436,7 @@ int32_t DragManager::HandleDragResult(DragResult result, bool hasCustomAnimation
         case DragResult::DRAG_CANCEL: {
             if (!hasCustomAnimation) {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-                dragDrawing_.OnDragFail(context_);
+                dragDrawing_.OnDragFail(context_, isLongPressDrag_);
 #else
                 dragDrawing_.OnDragFail();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X

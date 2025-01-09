@@ -127,6 +127,9 @@ constexpr float ROTATION_0 { 0.0f };
 constexpr float ROTATION_90 { 90.0f };
 constexpr float ROTATION_360 { 360.0f };
 constexpr float ROTATION_270 { 270.0f };
+constexpr float ZOOM_IN_SCALE { 1.03f };
+constexpr float ZOOM_OUT_SCALE { 0.9f };
+constexpr float ZOOM_END_SCALE { 1.0f };
 constexpr uint32_t TRANSPARENT_COLOR_ARGB { 0x00000000 };
 constexpr int32_t DEFAULT_MOUSE_SIZE { 1 };
 constexpr int32_t DEFAULT_COLOR_VALUE { 0 };
@@ -138,12 +141,13 @@ constexpr int32_t TWICE_SIZE { 2 };
 constexpr int32_t NUM_ONE { 1 };
 constexpr int32_t NUM_TWO { 2 };
 constexpr int32_t NUM_FOUR { 4 };
-constexpr int32_t ALPHA_DURATION { 150 };
+constexpr int32_t ALPHA_DURATION { 350 };
+constexpr int32_t DRAG_END_DURATION { 200 };
 constexpr int32_t ZOOM_DURATION { 300 };
-const Rosen::RSAnimationTimingCurve ZOOM_CURVE =
+constexpr int32_t ZOOM_IN_DURATION { 350 };
+constexpr int32_t ZOOM_OUT_DURATION { 250 };
+const Rosen::RSAnimationTimingCurve CURVE =
     Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f);
-const Rosen::RSAnimationTimingCurve ALPHA_CURVE =
-    Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.33f, 0.0f, 0.67f, 1.0f);
 const Rosen::RSAnimationTimingCurve SPRING = Rosen::RSAnimationTimingCurve::CreateSpring(0.347f, 0.99f, 0.0f);
 constexpr int32_t HEX_FF { 0xFF };
 const std::string RENDER_THREAD_NAME { "os_dargRenderRunner" };
@@ -170,9 +174,9 @@ constexpr float MAX_SCREEN_WIDTH_SM { 320.0f };
 constexpr float MAX_SCREEN_WIDTH_MD { 600.0f };
 constexpr float MAX_SCREEN_WIDTH_LG { 840.0f };
 constexpr float MAX_SCREEN_WIDTH_XL { 1024.0f };
-constexpr float SCALE_SM { 3.0f / 4 };
-constexpr float SCALE_MD { 4.0f / 8 };
-constexpr float SCALE_LG { 5.0f / 12 };
+constexpr float SCALE_SM { 2.0f / 4 };
+constexpr float SCALE_MD { 3.0f / 8 };
+constexpr float SCALE_LG { 4.0f / 12 };
 const std::string THREAD_NAME { "os_AnimationEventRunner" };
 const std::string SUPER_HUB_THREAD_NAME { "os_SuperHubEventRunner" };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -673,13 +677,69 @@ void DragDrawing::OnDragSuccess()
     FI_HILOGI("leave");
 }
 
+void DragDrawing::LongPressDragFail()
+{
+    FI_HILOGD("enter");
+    if (!CheckNodesValid()) {
+        FI_HILOGE("Check nodes valid failed");
+        return;
+    }
+    ResetAnimationParameter();
+    Rosen::RSAnimationTimingProtocol protocolAlphaChanged;
+    protocolAlphaChanged.SetDuration(DRAG_END_DURATION);
+    Rosen::RSNode::Animate(protocolAlphaChanged, CURVE, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetAlpha(END_ALPHA);
+        if (!g_drawingInfo.multiSelectedNodes.empty()) {
+            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+                CHKPV(multiSelectedNode);
+                multiSelectedNode->SetAlpha(END_ALPHA);
+            }
+        }
+        std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+        CHKPV(dragStyleNode);
+        dragStyleNode->SetAlpha(END_ALPHA);
+    },  []() { FI_HILOGD("AlphaChanged end"); });
+
+    Rosen::RSAnimationTimingProtocol protocolZoomIn;
+    protocolZoomIn.SetDuration(DRAG_END_DURATION);
+    Rosen::RSNode::Animate(protocolZoomIn, CURVE, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetScale(ZOOM_END_SCALE);
+        if (!g_drawingInfo.multiSelectedNodes.empty()) {
+            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+                CHKPV(multiSelectedNode);
+                multiSelectedNode->SetScale(ZOOM_END_SCALE);
+            }
+        }
+        std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+        CHKPV(dragStyleNode);
+        dragStyleNode->SetScale(ZOOM_END_SCALE);
+    },  [&]() {
+        FI_HILOGD("ZoomIn end");
+        ResetAnimationFlag();
+    });
+    g_drawingInfo.startNum = START_TIME;
+    g_drawingInfo.needDestroyDragWindow = false;
+    StartVsync();
+    FI_HILOGD("leave");
+}
+
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-void DragDrawing::OnDragFail(IContext* context)
+void DragDrawing::OnDragFail(IContext* context, bool isLongPressDrag)
 #else
 void DragDrawing::OnDragFail()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 {
     FI_HILOGI("enter");
+    if (isLongPressDrag) {
+        LongPressDragFail();
+        return;
+    }
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode = g_drawingInfo.surfaceNode;
     CHKPV(surfaceNode);
     std::shared_ptr<Rosen::RSNode> rootNode = g_drawingInfo.rootNode;
@@ -784,7 +844,7 @@ void DragDrawing::UpdateDragWindowState(bool visible, bool isZoomInAndAlphaChang
         CHKPV(dragStyleNode);
         dragStyleNode->SetAlpha(0.0f);
         g_drawingInfo.surfaceNode->SetVisible(true);
-        ZoomOutAndAlphaChangedAnimation();
+        ZoomInOutAndAlphaChangedAnimation();
     } else {
         g_drawingInfo.surfaceNode->SetVisible(visible);
     }
@@ -801,7 +861,7 @@ void DragDrawing::AlphaChangedAnimation()
     }
     Rosen::RSAnimationTimingProtocol protocolAlphaChanged;
     protocolAlphaChanged.SetDuration(ALPHA_DURATION);
-    Rosen::RSNode::Animate(protocolAlphaChanged, ALPHA_CURVE, [&]() {
+    Rosen::RSNode::Animate(protocolAlphaChanged, CURVE, [&]() {
         CHKPV(g_drawingInfo.parentNode);
         g_drawingInfo.parentNode->SetAlpha(1.0f);
         if (!g_drawingInfo.multiSelectedNodes.empty()) {
@@ -818,7 +878,82 @@ void DragDrawing::AlphaChangedAnimation()
     },  []() { FI_HILOGD("AlphaChanged end"); });
 }
 
-void DragDrawing::ZoomOutAndAlphaChangedAnimation()
+void DragDrawing::ZoomInAnimation()
+{
+    FI_HILOGD("enter");
+    if (!CheckNodesValid()) {
+        FI_HILOGE("Check nodes valid failed");
+        return;
+    }
+    CHKPV(g_drawingInfo.parentNode);
+    g_drawingInfo.parentNode->SetScale(1.0f);
+    if (!g_drawingInfo.multiSelectedNodes.empty()) {
+        size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+        for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+            std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+            CHKPV(multiSelectedNode);
+            multiSelectedNode->SetScale(1.0f);
+        }
+    }
+    std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+    CHKPV(dragStyleNode);
+    dragStyleNode->SetScale(1.0f);
+
+    Rosen::RSAnimationTimingProtocol protocolZoomIn;
+    protocolZoomIn.SetDuration(ZOOM_IN_DURATION);
+    Rosen::RSNode::Animate(protocolZoomIn, CURVE, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetScale(ZOOM_IN_SCALE);
+        if (!g_drawingInfo.multiSelectedNodes.empty()) {
+            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+                CHKPV(multiSelectedNode);
+                multiSelectedNode->SetScale(ZOOM_IN_SCALE);
+            }
+        }
+        std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+        CHKPV(dragStyleNode);
+        dragStyleNode->SetScale(ZOOM_IN_SCALE);
+    },  []() { FI_HILOGD("ZoomIn end"); });
+
+    FI_HILOGD("leave");
+    return;
+}
+
+void DragDrawing::ZoomOutAnimation()
+{
+    FI_HILOGD("enter");
+    if (!CheckNodesValid()) {
+        FI_HILOGE("Check nodes valid failed");
+        return;
+    }
+    Rosen::RSAnimationTimingProtocol protocolZoomOut;
+    protocolZoomOut.SetDuration(ZOOM_OUT_DURATION);
+    Rosen::RSNode::Animate(protocolZoomOut, CURVE, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetScale(ZOOM_OUT_SCALE);
+        if (!g_drawingInfo.multiSelectedNodes.empty()) {
+            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+                CHKPV(multiSelectedNode);
+                multiSelectedNode->SetScale(ZOOM_OUT_SCALE);
+            }
+        }
+        std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+        CHKPV(dragStyleNode);
+        dragStyleNode->SetScale(ZOOM_OUT_SCALE);
+    },  []() { FI_HILOGD("ZoomOut end"); });
+
+    g_drawingInfo.startNum = START_TIME;
+    g_drawingInfo.needDestroyDragWindow = false;
+    StartVsync();
+    FI_HILOGD("leave");
+    return;
+}
+
+void DragDrawing::ZoomInOutAndAlphaChangedAnimation()
 {
     FI_HILOGD("enter");
     if (!CheckNodesValid()) {
@@ -826,9 +961,10 @@ void DragDrawing::ZoomOutAndAlphaChangedAnimation()
         return;
     }
     AlphaChangedAnimation();
+    ZoomInAnimation();
     Rosen::RSAnimationTimingProtocol protocolZoomOut;
     protocolZoomOut.SetDuration(ZOOM_DURATION);
-    Rosen::RSNode::Animate(protocolZoomOut, ZOOM_CURVE, [&]() {
+    Rosen::RSNode::Animate(protocolZoomOut, CURVE, [&]() {
         ShadowInfo shadowInfo;
         auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
         CHKPV(currentPixelMap);
@@ -838,7 +974,7 @@ void DragDrawing::ZoomOutAndAlphaChangedAnimation()
         shadowInfo.x = g_drawingInfo.pixelMapX * widthScale;
         shadowInfo.y = g_drawingInfo.pixelMapY * widthScale;
         UpdateShadowPic(shadowInfo);
-    },  []() { FI_HILOGD("ZoomOut end"); });
+    },  []() { FI_HILOGD("Scale zoom out end"); });
 
     g_drawingInfo.startNum = START_TIME;
     g_drawingInfo.needDestroyDragWindow = false;

@@ -257,7 +257,7 @@ public:
     int32_t StartVsync();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void OnDragSuccess(IContext* context);
-    void OnDragFail(IContext* context);
+    void OnDragFail(IContext* context, bool isLongPressDrag);
     void StopVSyncStation();
 #else
     void OnDragSuccess();
@@ -294,6 +294,7 @@ public:
     void UpdateDragState(DragState dragState);
     static std::shared_ptr<Media::PixelMap> AccessGlobalPixelMapLocked();
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
+    void ZoomOutAnimation();
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -366,7 +367,8 @@ private:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     int32_t RotateDragWindow(Rosen::Rotation rotation,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool isAnimated = false);
-    void ZoomOutAndAlphaChangedAnimation();
+    void ZoomInOutAndAlphaChangedAnimation();
+    void ZoomInAnimation();
     void AlphaChangedAnimation();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<AppExecFwk::EventHandler> GetSuperHubHandler();
@@ -387,6 +389,7 @@ private:
     void UpdateDragDataForSuperHub(const DragData &dragData);
     std::shared_ptr<Rosen::VSyncReceiver> AccessReceiverLocked();
     void UpdateReceiverLocked(std::shared_ptr<Rosen::VSyncReceiver> receiver);
+    void LongPressDragFail();
 
 private:
     int64_t interruptNum_ { -1 };
