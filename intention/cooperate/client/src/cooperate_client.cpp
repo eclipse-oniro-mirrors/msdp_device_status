@@ -398,11 +398,6 @@ int32_t CooperateClient::OnCoordinationMessage(const StreamClient &client, NetPa
     };
     OnCooperateMessageEvent(userData, networkId, msgInfo);
     auto stageRes = BizCooperateStageRes::RES_IDLE;
-    if (CoordinationMessage(nType) == CoordinationMessage::ACTIVATE_SUCCESS) {
-        stageRes = BizCooperateStageRes::RES_SUCCESS;
-    } else if (CoordinationMessage(nType) == CoordinationMessage::ACTIVATE_FAIL) {
-        stageRes = BizCooperateStageRes::RES_FAIL;
-    }
     CooperateRadarInfo radarInfo {
         .funcName = __FUNCTION__,
         .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
@@ -414,7 +409,13 @@ int32_t CooperateClient::OnCoordinationMessage(const StreamClient &client, NetPa
         .localNetId = "",
         .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
     };
-    CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    if (CoordinationMessage(nType) == CoordinationMessage::ACTIVATE_SUCCESS) {
+        stageRes = BizCooperateStageRes::RES_SUCCESS;
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    } else if (CoordinationMessage(nType) == CoordinationMessage::ACTIVATE_FAIL) {
+        stageRes = BizCooperateStageRes::RES_FAIL;
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
     return RET_OK;
 }
 
