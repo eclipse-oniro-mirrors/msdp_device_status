@@ -51,7 +51,7 @@ enum class BizCooperateStage {
 };
     
 enum class CooperateRadarErrCode {
-     CALLING_COOPERATE_SUCCESS = 0,
+    CALLING_COOPERATE_SUCCESS = 0,
     CALLING_COOPERATE_FAILED = 61145108,
     CHECK_SAME_ACCOUNT_FAILED,
     CHECK_LOCAL_SWITCH_FAILED,
@@ -81,7 +81,6 @@ struct CooperateRadarInfo {
     std::string toCallPkg;
     std::string localDeviceType;
     std::string peerDeviceType;
-
 };
 
 class CooperateRadar {

@@ -47,7 +47,6 @@ void CooperateRadar::ReportCooperateRadarInfo(struct CooperateRadarInfo &coopera
         "LOCAL_DEV_TYPE", cooperateRadarInfo.localDeviceType,
         "PEER_DEV_TYPE", cooperateRadarInfo.peerDeviceType);
 
-
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
