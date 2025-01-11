@@ -65,7 +65,6 @@ enum class CooperateRadarErrCode {
     SET_CURSOR_VISIBILITY_FAILED,
     SRV_EVENT_MGR_NOTIFY_FAILED,
     CLIENT_ON_MESSAGE_RCVD_FAILED
-
 };
     
 struct CooperateRadarInfo {
