@@ -136,7 +136,7 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
             .bizState = static_cast<int32_t> (BizState::STATE_END),
             .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_OPEN_DSOFTBUS_SESSION),
             .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-            .errCode = static_cast<int32_t> (CooperateRadarErrCode::OPEN_DSOFTBUS_SESSION_FAILED), .hostName = "",
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::OPEN_DSOFTBUS_SESSION_FAILED),
             .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
             .peerNetId = Utility::DFXRadarAnonymize(notice.remoteNetworkId.c_str())
         };

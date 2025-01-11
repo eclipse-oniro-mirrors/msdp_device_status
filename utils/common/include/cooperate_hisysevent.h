@@ -51,8 +51,8 @@ enum class BizCooperateStage {
 };
     
 enum class CooperateRadarErrCode {
-    CALLING_COOPERATE_SUCCESS = 61145108,
-    CALLING_COOPERATE_FAILED,
+     CALLING_COOPERATE_SUCCESS = 0,
+    CALLING_COOPERATE_FAILED = 61145108,
     CHECK_SAME_ACCOUNT_FAILED,
     CHECK_LOCAL_SWITCH_FAILED,
     CHECK_ALLOW_COOPERATE_FAILED,
@@ -65,18 +65,23 @@ enum class CooperateRadarErrCode {
     SET_CURSOR_VISIBILITY_FAILED,
     SRV_EVENT_MGR_NOTIFY_FAILED,
     CLIENT_ON_MESSAGE_RCVD_FAILED
+
 };
     
 struct CooperateRadarInfo {
     std::string funcName;
-    int32_t bizScene { -1 };
     int32_t bizState { -1 };
     int32_t bizStage { -1 };
     int32_t stageRes { -1 };
+    int32_t bizScene { -1 };
     int32_t errCode { -1 };
     std::string hostName;
     std::string localNetId;
     std::string peerNetId;
+    std::string toCallPkg;
+    std::string localDeviceType;
+    std::string peerDeviceType;
+
 };
 
 class CooperateRadar {
