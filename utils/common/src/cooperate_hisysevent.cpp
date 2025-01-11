@@ -46,6 +46,7 @@ void CooperateRadar::ReportCooperateRadarInfo(struct CooperateRadarInfo &coopera
         "TO_CALL_PKG", cooperateRadarInfo.toCallPkg,
         "LOCAL_DEV_TYPE", cooperateRadarInfo.localDeviceType,
         "PEER_DEV_TYPE", cooperateRadarInfo.peerDeviceType);
+}
 
 } // namespace DeviceStatus
 } // namespace Msdp
