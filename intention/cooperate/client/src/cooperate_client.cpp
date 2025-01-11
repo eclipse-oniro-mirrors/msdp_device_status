@@ -400,10 +400,10 @@ int32_t CooperateClient::OnCoordinationMessage(const StreamClient &client, NetPa
     auto stageRes = BizCooperateStageRes::RES_IDLE;
     CooperateRadarInfo radarInfo {
         .funcName = __FUNCTION__,
-        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
         .bizState = static_cast<int32_t> (BizState::STATE_END),
         .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CLIENT_ON_MESSAGE_RCVD),
         .stageRes = static_cast<int32_t> (stageRes),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
         .errCode = static_cast<int32_t> (msgInfo.errCode),
         .hostName = "",
         .localNetId = "",

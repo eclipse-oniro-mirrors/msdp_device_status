@@ -35,14 +35,17 @@ void CooperateRadar::ReportCooperateRadarInfo(struct CooperateRadarInfo &coopera
         HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "ORG_PKG", ORG_PKG_NAME,
         "FUNC", cooperateRadarInfo.funcName,
-        "BIZ_SCENE", cooperateRadarInfo.bizScene,
         "BIZ_STATE", cooperateRadarInfo.bizState,
         "BIZ_STAGE", cooperateRadarInfo.bizStage,
         "STAGE_RES", cooperateRadarInfo.stageRes,
+        "BIZ_SCENE", cooperateRadarInfo.bizScene,
         "ERROR_CODE", cooperateRadarInfo.errCode,
         "HOST_PKG", cooperateRadarInfo.hostName,
         "LOCAL_NET_ID", cooperateRadarInfo.localNetId,
-        "PEER_NET_ID", cooperateRadarInfo.peerNetId);
+        "PEER_NET_ID", cooperateRadarInfo.peerNetId,
+        "TO_CALL_PKG", cooperateRadarInfo.toCallPkg,
+        "LOCAL_DEV_TYPE", cooperateRadarInfo.localDeviceType,
+        "PEER_DEV_TYPE", cooperateRadarInfo.peerDeviceType);
 }
 
 } // namespace DeviceStatus
