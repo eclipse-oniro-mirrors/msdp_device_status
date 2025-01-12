@@ -359,19 +359,17 @@ napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info i
     }
 #endif
 
-    napi_status objStatus = napi_create_object(env, &result);
-    if (objStatus != napi_ok) {
-        return nullptr;
-    }
-
     ConstructMotion(env, jsThis);
 #ifdef MOTION_ENABLE
     if (g_motionObj == nullptr) {
         ThrowMotionErr(env, GETOPT_EXCEPTION, "Error invalid type");
         return nullptr;
     }
-    napi_value tmpValue = nullptr;
-    g_motionObj->CreateIntData(env, tmpValue, result, "OperatingHandStatus", static_cast<int32_t>(motionEvent.status));
+    napi_status ret = napi_create_int32(env, static_cast<int32_t>(motionEvent.status), &result);
+    if (ret != napi_ok) {
+        ThrowMotionErr(env, GETOPT_EXCEPTION, "napi_create_int32 failed");
+        return nullptr;
+    }
 #else
     ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
 #endif
@@ -466,9 +464,9 @@ EXTERN_C_END
 static napi_module g_module = {
     .nm_version = 1,
     .nm_flags = 0,
-    .nm_filename = "device_motion",
+    .nm_filename = "multimodalAwareness.motion",
     .nm_register_func = MotionInit,
-    .nm_modname = "device_motion",
+    .nm_modname = "multimodalAwareness.motion",
     .nm_priv = (static_cast<void *>(nullptr)),
     .reserved = { nullptr }
 };

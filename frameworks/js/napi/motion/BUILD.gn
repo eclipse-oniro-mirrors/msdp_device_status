@@ -17,7 +17,7 @@ config("device_motion_private_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_shared_library("devicestatus_motion") {
+ohos_shared_library("motion_napi") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -55,7 +55,7 @@ ohos_shared_library("devicestatus_motion") {
     ]
   }
 
-  relative_install_dir = "module"
+  relative_install_dir = "module/multimodalawareness"
   subsystem_name = "msdp"
   part_name = "${device_status_part_name}"
 }
