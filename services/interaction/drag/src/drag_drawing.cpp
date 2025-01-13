@@ -736,10 +736,12 @@ void DragDrawing::OnDragFail()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 {
     FI_HILOGI("enter");
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if (isLongPressDrag) {
         LongPressDragFail();
         return;
     }
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode = g_drawingInfo.surfaceNode;
     CHKPV(surfaceNode);
     std::shared_ptr<Rosen::RSNode> rootNode = g_drawingInfo.rootNode;
@@ -844,7 +846,7 @@ void DragDrawing::UpdateDragWindowState(bool visible, bool isZoomInAndAlphaChang
         CHKPV(dragStyleNode);
         dragStyleNode->SetAlpha(0.0f);
         g_drawingInfo.surfaceNode->SetVisible(true);
-        ZoomInOutAndAlphaChangedAnimation();
+        LongPressDragAnimation();
     } else {
         g_drawingInfo.surfaceNode->SetVisible(visible);
     }
@@ -852,7 +854,7 @@ void DragDrawing::UpdateDragWindowState(bool visible, bool isZoomInAndAlphaChang
     Rosen::RSTransaction::FlushImplicitTransaction();
 }
 
-void DragDrawing::AlphaChangedAnimation()
+void DragDrawing::LongPressDragAlphaAnimation()
 {
     FI_HILOGD("enter");
     if (!CheckNodesValid()) {
@@ -878,7 +880,7 @@ void DragDrawing::AlphaChangedAnimation()
     },  []() { FI_HILOGD("AlphaChanged end"); });
 }
 
-void DragDrawing::ZoomInAnimation()
+void DragDrawing::LongPressDragZoomInAnimation()
 {
     FI_HILOGD("enter");
     if (!CheckNodesValid()) {
@@ -921,7 +923,7 @@ void DragDrawing::ZoomInAnimation()
     return;
 }
 
-void DragDrawing::ZoomOutAnimation()
+void DragDrawing::LongPressDragZoomOutAnimation()
 {
     FI_HILOGD("enter");
     if (!CheckNodesValid()) {
@@ -953,15 +955,15 @@ void DragDrawing::ZoomOutAnimation()
     return;
 }
 
-void DragDrawing::ZoomInOutAndAlphaChangedAnimation()
+void DragDrawing::LongPressDragAnimation()
 {
     FI_HILOGD("enter");
     if (!CheckNodesValid()) {
         FI_HILOGE("Check nodes valid failed");
         return;
     }
-    AlphaChangedAnimation();
-    ZoomInAnimation();
+    LongPressDragAlphaAnimation();
+    LongPressDragZoomInAnimation();
     Rosen::RSAnimationTimingProtocol protocolZoomOut;
     protocolZoomOut.SetDuration(ZOOM_DURATION);
     Rosen::RSNode::Animate(protocolZoomOut, CURVE, [&]() {
