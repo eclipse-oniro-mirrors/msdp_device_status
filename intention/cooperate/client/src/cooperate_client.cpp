@@ -142,7 +142,9 @@ int32_t CooperateClient::Start(ITunnelClient &tunnel, const std::string &remoteN
 #ifdef ENABLE_PERFORMANCE_CHECK
     StartTrace(userData);
 #endif // ENABLE_PERFORMANCE_CHECK
-    StartCooperateParam param { userData, remoteNetworkId, startDeviceId, isCheckPermission };
+    int32_t cooperateParamType = 0;
+    CooperateOptions options;
+    StartCooperateParam param { userData, remoteNetworkId, startDeviceId, isCheckPermission, options, cooperateParamType };
     DefaultReply reply;
 
     int32_t ret = tunnel.Start(Intention::COOPERATE, param, reply);
@@ -164,7 +166,10 @@ int32_t CooperateClient::StartWithOptions(ITunnelClient &tunnel, const std::stri
 #ifdef ENABLE_PERFORMANCE_CHECK
     StartTrace(userData);
 #endif // ENABLE_PERFORMANCE_CHECK
-    StartCooperateWithOptionsParam param { userData, remoteNetworkId, startDeviceId, options };
+    // StartCooperateWithOptionsParam param { userData, remoteNetworkId, startDeviceId, options };
+    int32_t cooperateParamType = 1;
+    bool isCheckPermission = false;
+    StartCooperateParam param { userData, remoteNetworkId, startDeviceId, isCheckPermission, options, cooperateParamType };
     DefaultReply reply;
 
     int32_t ret = tunnel.Start(Intention::COOPERATE, param, reply);

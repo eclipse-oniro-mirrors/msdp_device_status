@@ -115,6 +115,9 @@ CooperateFree::Initial::Initial(CooperateFree &parent)
 void CooperateFree::Initial::OnProgress(Context &context, const CooperateEvent &event)
 {}
 
+void CooperateFree::Initial::OnProgressWithOptions(Context &context, const CooperateEvent &event)
+{}
+
 void CooperateFree::Initial::OnReset(Context &context, const CooperateEvent &event)
 {}
 

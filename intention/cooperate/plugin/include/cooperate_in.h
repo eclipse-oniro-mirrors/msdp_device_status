@@ -42,6 +42,7 @@ private:
 
         static void BuildChains(std::shared_ptr<Initial> self, CooperateIn &parent);
         static void RemoveChains(std::shared_ptr<Initial> self);
+        void OnProgressWithOptions(Context &context, const CooperateEvent &event) override;
 
     private:
         void OnDisable(Context &context, const CooperateEvent &event);
@@ -76,6 +77,7 @@ private:
 
         void OnProgress(Context &context, const CooperateEvent &event) override;
         void OnReset(Context &context, const CooperateEvent &event) override;
+        void OnProgressWithOptions(Context &context, const CooperateEvent &event) override; 
 
     private:
         void OnDisable(Context &context, const CooperateEvent &event);
@@ -92,6 +94,8 @@ private:
         void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
         void OnNormalWithOptions(Context &context, const CooperateEvent &event);
         void OnResetWithNotifyMessage(Context &context, const CooperateEvent &event);
+        void OnResponseWithOptions(Context &context, const CooperateEvent &event);
+        void OnResetWithOptionsNotifyMessage(Context &context, const CooperateEvent &event);
 
         CooperateIn &parent_;
         int32_t timerId_ { -1 };

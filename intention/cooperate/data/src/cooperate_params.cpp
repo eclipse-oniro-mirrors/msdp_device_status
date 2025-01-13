@@ -20,9 +20,10 @@ namespace Msdp {
 namespace DeviceStatus {
 
 StartCooperateParam::StartCooperateParam(int32_t userData, const std::string &remoteNetworkId,
-                                         int32_t startDeviceId, bool checkPermission)
-    : remoteNetworkId(remoteNetworkId), userData(userData),
-      startDeviceId(startDeviceId), checkPermission(checkPermission)
+                                         int32_t startDeviceId, bool checkPermission, const CooperateOptions &options,
+                                         int32_t cooperateParamType)
+    : remoteNetworkId(remoteNetworkId), userData(userData), startDeviceId(startDeviceId),
+      checkPermission(checkPermission), options(options), cooperateParamType(cooperateParamType)
 {}
 
 bool StartCooperateParam::Marshalling(MessageParcel &parcel) const
@@ -31,7 +32,11 @@ bool StartCooperateParam::Marshalling(MessageParcel &parcel) const
         parcel.WriteString(remoteNetworkId) &&
         parcel.WriteInt32(startDeviceId) &&
         parcel.WriteInt32(userData) &&
-        parcel.WriteBool(checkPermission)
+        parcel.WriteBool(checkPermission) &&
+        parcel.WriteInt32(options.displayX) &&
+        parcel.WriteInt32(options.displayY) &&
+        parcel.WriteInt32(options.displayId) &&
+        parcel.WriteInt32(cooperateParamType)
     );
 }
 
@@ -41,7 +46,11 @@ bool StartCooperateParam::Unmarshalling(MessageParcel &parcel)
         parcel.ReadString(remoteNetworkId) &&
         parcel.ReadInt32(startDeviceId) &&
         parcel.ReadInt32(userData) &&
-        parcel.ReadBool(checkPermission)
+        parcel.ReadBool(checkPermission) &&
+        parcel.ReadInt32(options.displayX) &&
+        parcel.ReadInt32(options.displayY) &&
+        parcel.ReadInt32(options.displayId) &&
+        parcel.ReadInt32(cooperateParamType)
     );
 }
 
@@ -149,37 +158,6 @@ bool RegisterHotAreaListenerParam::Unmarshalling(MessageParcel &parcel)
     return parcel.ReadInt32(userData) &&
         parcel.ReadBool(checkPermission);
 }
-
-StartCooperateWithOptionsParam::StartCooperateWithOptionsParam(int32_t userData,
-    const std::string &remoteNetworkId, int32_t startDeviceId, const CooperateOptions &options)
-    : remoteNetworkId(remoteNetworkId), userData(userData),
-      startDeviceId(startDeviceId), options(options)
-{}
-
-bool StartCooperateWithOptionsParam::Marshalling(MessageParcel &parcel) const
-{
-    return (
-        parcel.WriteString(remoteNetworkId) &&
-        parcel.WriteInt32(startDeviceId) &&
-        parcel.WriteInt32(userData) &&
-        parcel.WriteInt32(options.displayX) &&
-        parcel.WriteInt32(options.displayY) &&
-        parcel.WriteUint64(options.displayId)
-    );
-}
-
-bool StartCooperateWithOptionsParam::Unmarshalling(MessageParcel &parcel)
-{
-    return (
-        parcel.ReadString(remoteNetworkId) &&
-        parcel.ReadInt32(startDeviceId) &&
-        parcel.ReadInt32(userData) &&
-        parcel.ReadInt32(options.displayX) &&
-        parcel.ReadInt32(options.displayY) &&
-        parcel.ReadInt32(options.displayId)
-    );
-}
-
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

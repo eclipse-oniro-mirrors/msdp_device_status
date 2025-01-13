@@ -51,6 +51,7 @@ protected:
         virtual void OnEvent(Context &context, const CooperateEvent &event);
         virtual void OnProgress(Context &context, const CooperateEvent &event) = 0;
         virtual void OnReset(Context &context, const CooperateEvent &event) = 0;
+        virtual void OnProgressWithOptions(Context &context, const CooperateEvent &event) = 0;
 
         void SetNext(std::shared_ptr<ICooperateStep> next);
 

@@ -212,7 +212,7 @@ void CooperateIn::Initial::OnRelayWithOptions(Context &context, const CooperateE
 
     if (relay_ != nullptr) {
         Switch(relay_);
-        relay_->OnProgress(context, event);
+        relay_->OnProgressWithOptions(context, event);
     }
 }
 
@@ -440,6 +440,9 @@ void CooperateIn::Initial::OnProgress(Context &context, const CooperateEvent &ev
 void CooperateIn::Initial::OnReset(Context &context, const CooperateEvent &event)
 {}
 
+void CooperateIn::Initial::OnProgressWithOptions(Context &context, const CooperateEvent &event)
+{}
+
 CooperateIn::RelayConfirmation::RelayConfirmation(CooperateIn &parent, std::shared_ptr<ICooperateStep> prev)
     : ICooperateStep(parent, prev), parent_(parent)
 {
@@ -483,6 +486,10 @@ CooperateIn::RelayConfirmation::RelayConfirmation(CooperateIn &parent, std::shar
     AddHandler(CooperateEventType::DSOFTBUS_COOPERATE_WITH_OPTIONS,
         [this](Context &context, const CooperateEvent &event) {
             this->OnRemoteStartWithOptions(context, event);
+    });
+    AddHandler(CooperateEventType::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS_FINISHED,
+        [this](Context &context, const CooperateEvent &event) {
+            this->OnResponseWithOptions(context, event);
     });
 }
 
@@ -648,15 +655,26 @@ void CooperateIn::RelayConfirmation::OnResponse(Context &context, const Cooperat
     FI_HILOGI("[relay cooperate] \'%{public}s\' respond", Utility::Anonymize(notice.networkId).c_str());
     parent_.env_->GetTimerManager().RemoveTimer(timerId_);
     if (notice.normal) {
-    #ifdef OHOS_BUILD_ENABLE_INTERACTION
         OnNormal(context, event);
-    #endif //OHOS_BUILD_ENABLE_INTERACTION
-    #ifdef OHOS_BUILD_ENABLE_INTERACTION_WITH_OPTIONS
-        OnNormalWithOptions(context, event);
-    #endif //OHOS_BUILD_ENABLE_INTERACTION_WITH_OPTIONS
         Proceed(context, event);
     } else {
         OnResetWithNotifyMessage(context, event);
+    }
+}
+
+void CooperateIn::RelayConfirmation::OnResponseWithOptions(Context &context, const CooperateEvent &event)
+{
+    DSoftbusRelayCooperateFinished notice = std::get<DSoftbusRelayCooperateFinished>(event.event);
+    if (!context.IsPeer(notice.networkId)) {
+        return;
+    }
+    FI_HILOGI("[relay cooperate] \'%{public}s\' respond", Utility::Anonymize(notice.networkId).c_str());
+    parent_.env_->GetTimerManager().RemoveTimer(timerId_);
+    if (notice.normal) {
+        OnNormalWithOptions(context, event);
+        Proceed(context, event);
+    } else {
+        OnResetWithOptionsNotifyMessage(context, event);
     }
 }
 
@@ -718,6 +736,38 @@ void CooperateIn::RelayConfirmation::OnProgress(Context &context, const Cooperat
         .touchPadSpeed = context.GetTouchPadSpeed(),
     };
     context.dsoftbus_.RelayCooperate(context.Peer(), notice);
+    timerId_ = parent_.env_->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE,
+        [sender = context.Sender(), remoteNetworkId = context.Peer()]() mutable {
+            auto ret = sender.Send(CooperateEvent(
+                CooperateEventType::DSOFTBUS_RELAY_COOPERATE_FINISHED,
+                DSoftbusRelayCooperateFinished {
+                    .networkId = remoteNetworkId,
+                    .normal = false,
+                }));
+            if (ret != Channel<CooperateEvent>::NO_ERROR) {
+                FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+            }
+        });
+}
+
+void CooperateIn::RelayConfirmation::OnProgressWithOptions(Context &context, const CooperateEvent &event)
+{
+    std::string remoteNetworkId = parent_.process_.Peer();
+    FI_HILOGI("[relay cooperate] Connect \'%{public}s\'", Utility::Anonymize(remoteNetworkId).c_str());
+    int32_t ret = context.dsoftbus_.OpenSession(remoteNetworkId);
+    if (ret != RET_OK) {
+        FI_HILOGE("[relay cooperate] Failed to connect to \'%{public}s\'", Utility::Anonymize(remoteNetworkId).c_str());
+        OnResetWithOptionsNotifyMessage(context, event);
+        return;
+    }
+
+    FI_HILOGI("[relay cooperate] Notify origin(\'%{public}s\')", Utility::Anonymize(context.Peer()).c_str());
+    DSoftbusRelayCooperate notice {
+        .targetNetworkId = parent_.process_.Peer(),
+        .pointerSpeed = context.GetPointerSpeed(),
+        .touchPadSpeed = context.GetTouchPadSpeed(),
+    };
+    context.dsoftbus_.RelayCooperate(context.Peer(), notice);
     StartWithOptionsEvent startEvent = std::get<StartWithOptionsEvent>(event.event);
     startWithOptionsEvent_.displayX = startEvent.displayX;
     startWithOptionsEvent_.displayY = startEvent.displayY;
@@ -725,7 +775,7 @@ void CooperateIn::RelayConfirmation::OnProgress(Context &context, const Cooperat
     timerId_ = parent_.env_->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE,
         [sender = context.Sender(), remoteNetworkId = context.Peer()]() mutable {
             auto ret = sender.Send(CooperateEvent(
-                CooperateEventType::DSOFTBUS_RELAY_COOPERATE_FINISHED,
+                CooperateEventType::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS_FINISHED,
                 DSoftbusRelayCooperateFinished {
                     .networkId = remoteNetworkId,
                     .normal = false,
@@ -751,6 +801,17 @@ void CooperateIn::RelayConfirmation::OnResetWithNotifyMessage(Context &context, 
         .success = false
     };
     context.eventMgr_.StartCooperateFinish(result);
+    Reset(context, event);
+}
+
+void CooperateIn::RelayConfirmation::OnResetWithOptionsNotifyMessage(Context &context, const CooperateEvent &event)
+{
+    FI_HILOGI("[relay cooperate] reset cooperation with \'%{public}s\'",
+        Utility::Anonymize(parent_.process_.Peer()).c_str());
+    DSoftbusCooperateWithOptionsFinished result {
+        .success = false
+    };
+    context.eventMgr_.StartCooperateWithOptinsFinish(result);
     Reset(context, event);
 }
 

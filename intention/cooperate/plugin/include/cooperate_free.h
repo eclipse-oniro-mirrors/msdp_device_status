@@ -49,6 +49,7 @@ private:
 
         static void BuildChains(std::shared_ptr<Initial> self, CooperateFree &parent);
         static void RemoveChains(std::shared_ptr<Initial> self);
+        void OnProgressWithOptions(Context &context, const CooperateEvent &event) override;
 
     private:
         void OnStart(Context &context, const CooperateEvent &event);

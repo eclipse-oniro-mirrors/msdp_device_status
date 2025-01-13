@@ -97,7 +97,7 @@ int32_t CooperateServer::Start(CallingContext &context, MessageParcel &data, Mes
         FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
         return ret;
     }
-    #ifdef OHOS_BUILD_ENABLE_INTERACTION
+
     StartCooperateParam param;
     if (!param.Unmarshalling(data)) {
         FI_HILOGE("StartCooperateParam::Unmarshalling fail");
@@ -106,21 +106,11 @@ int32_t CooperateServer::Start(CallingContext &context, MessageParcel &data, Mes
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
-    return cooperate->Start(context.pid, param.userData, param.remoteNetworkId, param.startDeviceId);
-    #endif //OHOS_BUILD_ENABLE_INTERACTION
-
-    #ifdef OHOS_BUILD_ENABLE_INTERACTION_WITH_OPTIONS
-    StartCooperateWithOptionsParam param;
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("StartCooperateParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    CHKPR(context_, RET_ERR);
-    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
-    CHKPR(cooperate, RET_ERR);
-    return cooperate->StartWithOptions(context.pid, param.userData, param.remoteNetworkId,
+    if (param.cooperateParamType == 1) {
+        return cooperate->StartWithOptions(context.pid, param.userData, param.remoteNetworkId,
         param.startDeviceId, param.options);
-    #endif //OHOS_BUILD_ENABLE_INTERACTION_WITH_OPTIONS
+    }
+    return cooperate->Start(context.pid, param.userData, param.remoteNetworkId, param.startDeviceId);
 }
 
 int32_t CooperateServer::Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply)

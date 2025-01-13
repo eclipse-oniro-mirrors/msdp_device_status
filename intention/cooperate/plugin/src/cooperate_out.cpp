@@ -400,6 +400,9 @@ void CooperateOut::Initial::OnSoftbusSessionClosed(Context &context, const Coope
 void CooperateOut::Initial::OnProgress(Context &context, const CooperateEvent &event)
 {}
 
+void CooperateOut::Initial::OnProgressWithOptions(Context &context, const CooperateEvent &event)
+{}
+
 void CooperateOut::Initial::OnReset(Context &context, const CooperateEvent &event)
 {}
 
