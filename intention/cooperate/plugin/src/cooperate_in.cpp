@@ -767,7 +767,7 @@ void CooperateIn::RelayConfirmation::OnProgressWithOptions(Context &context, con
         .pointerSpeed = context.GetPointerSpeed(),
         .touchPadSpeed = context.GetTouchPadSpeed(),
     };
-    context.dsoftbus_.RelayCooperate(context.Peer(), notice);
+    context.dsoftbus_.RelayCooperateWithOptions(context.Peer(), notice);
     StartWithOptionsEvent startEvent = std::get<StartWithOptionsEvent>(event.event);
     startWithOptionsEvent_.displayX = startEvent.displayX;
     startWithOptionsEvent_.displayY = startEvent.displayY;

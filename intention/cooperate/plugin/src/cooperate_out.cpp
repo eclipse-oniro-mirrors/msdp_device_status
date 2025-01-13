@@ -131,6 +131,10 @@ CooperateOut::Initial::Initial(CooperateOut &parent)
         [this](Context &context, const CooperateEvent &event) {
             this->OnComeBackWithOptions(context, event);
     });
+    AddHandler(CooperateEventType::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS,
+        [this](Context &context, const CooperateEvent &event) {
+            this->OnRelayWithOptions(context, event);
+    });
 }
 
 void CooperateOut::Initial::OnDisable(Context &context, const CooperateEvent &event)
@@ -325,6 +329,34 @@ void CooperateOut::Initial::OnRelay(Context &context, const CooperateEvent &even
 
     resp.normal = true;
     context.dsoftbus_.RelayCooperateFinish(notice.networkId, resp);
+
+    context.RelayCooperate(notice);
+    context.inputEventInterceptor_.Update(context);
+    FI_HILOGI("[relay cooperate] Relay cooperation to \'%{public}s\'", Utility::Anonymize(context.Peer()).c_str());
+    context.OnRelayCooperation(context.Peer(), context.NormalizedCursorPosition());
+}
+
+void CooperateOut::Initial::OnRelayWithOptions(Context &context, const CooperateEvent &event)
+{
+    DSoftbusRelayCooperate notice = std::get<DSoftbusRelayCooperate>(event.event);
+    if (!context.IsPeer(notice.networkId)) {
+        return;
+    }
+    DSoftbusRelayCooperateFinished resp {
+        .targetNetworkId = notice.targetNetworkId,
+    };
+
+    int32_t ret = context.dsoftbus_.OpenSession(notice.targetNetworkId);
+    if (ret != RET_OK) {
+        FI_HILOGE("[relay cooperate] Failed to connect to \'%{public}s\'",
+            Utility::Anonymize(notice.targetNetworkId).c_str());
+        resp.normal = false;
+        context.dsoftbus_.RelayCooperateWithOptionsFinish(notice.networkId, resp);
+        return;
+    }
+
+    resp.normal = true;
+    context.dsoftbus_.RelayCooperateWithOptionsFinish(notice.networkId, resp);
 
     context.RelayCooperate(notice);
     context.inputEventInterceptor_.Update(context);

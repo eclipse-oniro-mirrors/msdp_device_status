@@ -61,6 +61,7 @@ private:
         void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
         void OnStartWithOptions(Context &context, const CooperateEvent &event);
         void OnComeBackWithOptions(Context &context, const CooperateEvent &event);
+        void OnRelayWithOptions(Context &context, const CooperateEvent &event);
 
         CooperateOut &parent_;
     };

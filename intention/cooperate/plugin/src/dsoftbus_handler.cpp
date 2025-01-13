@@ -77,7 +77,13 @@ DSoftbusHandler::DSoftbusHandler(IContext *env)
             this->OnRemoteHotPlug(networkId, packet);}},
         { static_cast<int32_t>(MessageId::DSOFTBUS_COOPERATE_WITH_OPTIONS),
         [this] (const std::string &networkId, NetPacket &packet) {
-            this->OnStartCooperateWithOptions(networkId, packet);}}
+            this->OnStartCooperateWithOptions(networkId, packet);}},
+        { static_cast<int32_t>(MessageId::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS),
+        [this] (const std::string &networkId, NetPacket &packet) {
+            this->OnRelayCooperateWithOptions(networkId, packet);}},
+        { static_cast<int32_t>(MessageId::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS_FINISHED),
+        [this] (const std::string &networkId, NetPacket &packet) {
+            this->OnRelayCooperateWithOptionsFinish(networkId, packet);}}
     };
     observer_ = std::make_shared<DSoftbusObserver>(*this);
     CHKPV(env_);
@@ -224,6 +230,39 @@ int32_t DSoftbusHandler::RelayCooperateFinish(const std::string &networkId, cons
 {
     CALL_INFO_TRACE;
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE_FINISHED);
+    packet << event.targetNetworkId << event.normal;
+    if (packet.ChkRWError()) {
+        FI_HILOGE("Failed to write data packet");
+        return RET_ERR;
+    }
+    int32_t ret = env_->GetDSoftbus().SendPacket(networkId, packet);
+    if (ret != RET_OK) {
+        OnCommunicationFailure(networkId);
+    }
+    return ret;
+}
+
+int32_t DSoftbusHandler::RelayCooperateWithOptions(const std::string &networkId, const DSoftbusRelayCooperate &event)
+{
+    CALL_INFO_TRACE;
+    NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS);
+    packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed;
+    if (packet.ChkRWError()) {
+        FI_HILOGE("Failed to write data packet");
+        return RET_ERR;
+    }
+    int32_t ret = env_->GetDSoftbus().SendPacket(networkId, packet);
+    if (ret != RET_OK) {
+        OnCommunicationFailure(networkId);
+    }
+    return ret;
+}
+
+int32_t DSoftbusHandler::RelayCooperateWithOptionsFinish(const std::string &networkId,
+    const DSoftbusRelayCooperateFinished &event)
+{
+    CALL_INFO_TRACE;
+    NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS_FINISHED);
     packet << event.targetNetworkId << event.normal;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
@@ -452,6 +491,49 @@ void DSoftbusHandler::OnRelayCooperateFinish(const std::string &networkId, NetPa
     }
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_RELAY_COOPERATE_FINISHED,
+        event));
+}
+
+void DSoftbusHandler::OnRelayCooperateWithOptions(const std::string &networkId, NetPacket &packet)
+{
+    CALL_INFO_TRACE;
+    DSoftbusRelayCooperate event {
+        .networkId = networkId,
+        .normal = true,
+    };
+    packet >> event.targetNetworkId;
+    if (packet.ChkRWError()) {
+        FI_HILOGE("Failed to read data packet");
+        return;
+    }
+    packet >> event.pointerSpeed;
+    if (packet.ChkRWError()) {
+        event.pointerSpeed = -1;
+    }
+    FI_HILOGI("Cur pointerSpeed:%{public}d", event.pointerSpeed);
+    packet >> event.touchPadSpeed;
+    if (packet.ChkRWError()) {
+        event.touchPadSpeed = -1;
+    }
+    FI_HILOGI("Cur touchPadSpeed:%{public}d", event.touchPadSpeed);
+    SendEvent(CooperateEvent(
+        CooperateEventType::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS,
+        event));
+}
+
+void DSoftbusHandler::OnRelayCooperateWithOptionsFinish(const std::string &networkId, NetPacket &packet)
+{
+    CALL_INFO_TRACE;
+    DSoftbusRelayCooperate event {
+        .networkId = networkId,
+    };
+    packet >> event.targetNetworkId >> event.normal;
+    if (packet.ChkRWError()) {
+        FI_HILOGE("Failed to read data packet");
+        return;
+    }
+    SendEvent(CooperateEvent(
+        CooperateEventType::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS_FINISHED,
         event));
 }
 
