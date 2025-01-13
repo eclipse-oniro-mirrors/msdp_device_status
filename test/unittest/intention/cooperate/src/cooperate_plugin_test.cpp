@@ -582,7 +582,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest14, TestSize.Level0)
     g_context->EnableDDM();
     g_context->boardObserver_->OnBoardOnline("test");
     g_context->boardObserver_->OnBoardOffline("test");
-    g_context->DisableDDM();
+    ASSERT_NO_FATAL_FAILURE(g_context->DisableDDM());
 }
 
 /**
@@ -829,7 +829,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest22, TestSize.Level0)
     g_context->mouseLocation_.localListeners_.insert(registerEventListenerEvent1.pid);
     g_context->mouseLocation_.remoteSubscribers_.insert(subscribeMouseLocation.networkId);
     g_context->mouseLocation_.ProcessData(pointerEvent);
-    g_context->mouseLocation_.OnUnSubscribeMouseLocation(subscribeMouseLocation);
+    ASSERT_NO_FATAL_FAILURE(g_context->mouseLocation_.OnUnSubscribeMouseLocation(subscribeMouseLocation));
     g_context->mouseLocation_.localListeners_.clear();
     g_context->mouseLocation_.remoteSubscribers_.clear();
 }
