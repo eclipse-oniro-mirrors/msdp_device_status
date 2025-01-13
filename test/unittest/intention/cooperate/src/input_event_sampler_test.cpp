@@ -35,8 +35,6 @@ namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 constexpr int32_t TEMP_RAW { 10 };
 constexpr int32_t TEMP_MIN_RAW { 0 };
-
-// NetPacket pkt(MessageId::INVALID);
 } // namespace
 
 class InputEventSamplerTest : public testing::Test {
