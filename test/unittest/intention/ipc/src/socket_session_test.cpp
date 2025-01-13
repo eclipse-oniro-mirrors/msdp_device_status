@@ -43,6 +43,7 @@ std::shared_ptr<SocketSessionManager> g_socketSessionManager { nullptr };
 IContext *g_context { nullptr };
 Intention g_intention { Intention::UNKNOWN_INTENTION };
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
+constexpr int32_t NUM_ONE { 1 };
 } // namespace
 
 void SocketSessionTest::SetUpTestCase() {}
@@ -417,7 +418,7 @@ HWTEST_F(SocketSessionTest, SocketSessionTest19, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t clientFd { -1 };
-    int32_t ret = g_socketSessionManager->AllocSocketFd("", 1, 1, 1, 1, clientFd);
+    int32_t ret = g_socketSessionManager->AllocSocketFd("", NUM_ONE, NUM_ONE, NUM_ONE, NUM_ONE, clientFd);
     EXPECT_EQ(ret, RET_ERR);
 }
 
