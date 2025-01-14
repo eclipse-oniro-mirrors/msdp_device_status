@@ -52,10 +52,10 @@ void CooperateOut::OnEnterState(Context &context)
     if (ret != RET_OK) {
         CooperateRadarInfo radarInfo {
             .funcName = __FUNCTION__,
-            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .bizState = static_cast<int32_t> (BizState::STATE_IDLE),
             .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_SET_CURSOR_VISIBILITY),
             .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .errCode = static_cast<int32_t> (CooperateRadarErrCode::SET_CURSOR_VISIBILITY_FAILED),
             .hostName = "",
             .localNetId = "",

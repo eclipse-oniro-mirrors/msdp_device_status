@@ -51,8 +51,8 @@ void CooperateIn::OnEnterState(Context &context)
     int32_t ret = env_->GetInput().SetPointerVisibility(!context.NeedHideCursor());
     CooperateRadarInfo radarInfo {
         .funcName = __FUNCTION__,
-        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
         .bizState = static_cast<int32_t> (BizState::STATE_IDLE),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
         .hostName = "",
         .localNetId = "",
         .peerNetId = ""

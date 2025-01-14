@@ -299,10 +299,10 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
         startEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
         CooperateRadarInfo radarInfo {
             .funcName =  __FUNCTION__,
-            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .bizState = static_cast<int32_t> (BizState::STATE_END),
             .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_SAME_ACCOUNT),
             .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_SAME_ACCOUNT_FAILED),
             .hostName = "",
             .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
@@ -317,10 +317,10 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
         startEvent.errCode->set_value(COMMON_NOT_ALLOWED_DISTRIBUTED);
         CooperateRadarInfo radarInfo {
             .funcName = __FUNCTION__,
-            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .bizState = static_cast<int32_t> (BizState::STATE_END),
             .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_ALLOW_COOPERATE),
             .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_ALLOW_COOPERATE_FAILED),
             .hostName = "",
             .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
@@ -505,8 +505,8 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
     DSoftbusStartCooperate startEvent = std::get<DSoftbusStartCooperate>(event.event);
     CooperateRadarInfo radarInfo {
         .funcName =  __FUNCTION__,
-        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
         .bizState = static_cast<int32_t> (BizState::STATE_END),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
         .hostName = "",
         .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
         .peerNetId = Utility::DFXRadarAnonymize(startEvent.originNetworkId.c_str())
