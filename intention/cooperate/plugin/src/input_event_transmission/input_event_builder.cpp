@@ -70,18 +70,6 @@ void InputEventBuilder::Enable(Context &context)
 {
     CALL_INFO_TRACE;
     if (enable_) {
-        CooperateRadarInfo radarInfo {
-            .funcName =  __FUNCTION__,
-            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
-            .bizState = static_cast<int32_t> (BizState::STATE_END),
-            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_SAME_ACCOUNT),
-            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-            .errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_SAME_ACCOUNT_FAILED),
-            .hostName = "",
-            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
-            .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())
-        };
-        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         return;
     }
     enable_ = true;
@@ -93,6 +81,21 @@ void InputEventBuilder::Enable(Context &context)
     Coordinate cursorPos = context.CursorPosition();
     TurnOffChannelScan();
     FI_HILOGI("Cursor transite in (%{private}d, %{private}d)", cursorPos.x, cursorPos.y);
+    if (!freezing_ && enable_)
+    {
+        CooperateRadarInfo radarInfo {
+            .funcName =  __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_INPUTEVENTBUILD_ENABLE),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::INPUTEVENTBUILD_ENABLE_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
     ExecuteInner();
 }
 

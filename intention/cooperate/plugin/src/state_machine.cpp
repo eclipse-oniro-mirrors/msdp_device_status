@@ -503,20 +503,30 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
 {
     CALL_DEBUG_ENTER;
     DSoftbusStartCooperate startEvent = std::get<DSoftbusStartCooperate>(event.event);
+    CooperateRadarInfo radarInfo {
+        .funcName =  __FUNCTION__,
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
+        .bizState = static_cast<int32_t> (BizState::STATE_END),
+        .hostName = "",
+        .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+        .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())
+    };
+    if (!env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId))
+    {
+        .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT),
+        .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+        .errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CHECK_SAME_ACCOUNT_FAILED)
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
+    if (!isCooperateEnable_)
+    {
+        .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_PEER_SWITCH),
+        .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+        .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_PEER_SWITCH_FAILED)
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
     if (!env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId) || !isCooperateEnable_) {
         FI_HILOGE("CheckSameAccountToLocal failed, switch is : %{public}d, unchain", isCooperateEnable_);
-        CooperateRadarInfo radarInfo {
-            .funcName =  __FUNCTION__,
-            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
-            .bizState = static_cast<int32_t> (BizState::STATE_END),
-            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_SAME_ACCOUNT),
-            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-            .errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_SAME_ACCOUNT_FAILED),
-            .hostName = "",
-            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
-            .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())
-        };
-        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         CooperateEvent stopEvent(
             CooperateEventType::STOP,
             StopCooperateEvent {
