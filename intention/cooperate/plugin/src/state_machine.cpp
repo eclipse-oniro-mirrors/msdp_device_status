@@ -524,15 +524,15 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
         );
         Transfer(context, stopEvent);
         if (checkSameAccount) {
-            radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT),
-            radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-            radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CHECK_SAME_ACCOUNT_FAILED)
+            radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT);
+            radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
+            radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CHECK_SAME_ACCOUNT_FAILED);
             CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         }
         if (cooperateEnable) {
-            radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_PEER_SWITCH),
-            radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-            radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_PEER_SWITCH_FAILED)
+            radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_PEER_SWITCH);
+            radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
+            radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_PEER_SWITCH_FAILED);
             CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         }
         return;
