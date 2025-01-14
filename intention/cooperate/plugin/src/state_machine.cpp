@@ -511,8 +511,8 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
         .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
         .peerNetId = Utility::DFXRadarAnonymize(startEvent.originNetworkId.c_str())
     };
-    bool checkSameAccount = (env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId));
-    bool cooperateEnable = (isCooperateEnable_);
+    bool checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId);
+    bool cooperateEnable = isCooperateEnable_;
     if (!checkSameAccount) {
         radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT);
         radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);

@@ -85,7 +85,7 @@ void InputEventBuilder::Enable(Context &context)
         CooperateRadarInfo radarInfo {
             .funcName =  __FUNCTION__,
             .bizState = static_cast<int32_t> (BizState::STATE_END),
-            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_INPUTEVENTBUILD_ENABLE),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STATE_INPUT_EVENT_BUILDER_ENABLE),
             .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
             .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
             .errCode = static_cast<int32_t> (CooperateRadarErrCode::INPUT_EVENT_BUILDER_ENABLE_FAILED),
