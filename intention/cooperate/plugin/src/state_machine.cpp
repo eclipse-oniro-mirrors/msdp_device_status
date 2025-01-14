@@ -511,21 +511,10 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
         .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
         .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())
     };
-    if (!env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId))
-    {
-        .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT),
-        .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-        .errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CHECK_SAME_ACCOUNT_FAILED)
-        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
-    }
-    if (!isCooperateEnable_)
-    {
-        .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_PEER_SWITCH),
-        .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-        .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_PEER_SWITCH_FAILED)
-        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
-    }
-    if (!env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId) || !isCooperateEnable_) {
+    bool checkSameAccount = (!env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId));
+    bool cooperateEnable = (!isCooperateEnable_);
+    bool allCheck = (checkSameAccount || cooperateEnable);
+    if (allCheck) {
         FI_HILOGE("CheckSameAccountToLocal failed, switch is : %{public}d, unchain", isCooperateEnable_);
         CooperateEvent stopEvent(
             CooperateEventType::STOP,
@@ -534,6 +523,18 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
             }
         );
         Transfer(context, stopEvent);
+        if (checkSameAccount) {
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CHECK_SAME_ACCOUNT_FAILED)
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+        }
+        if (cooperateEnable) {
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_PEER_SWITCH),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_PEER_SWITCH_FAILED)
+            CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+        }
         return;
     }
     Transfer(context, event);
