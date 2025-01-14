@@ -56,7 +56,7 @@ void CooperateIn::OnEnterState(Context &context)
         .hostName = "",
         .localNetId = "",
         .peerNetId = ""
-        };
+    };
     if (ret != RET_OK) {
         radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY);
         radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);

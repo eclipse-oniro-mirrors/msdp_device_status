@@ -14,11 +14,11 @@
  */
 
 #include "dsoftbus_handler.h"
-#include "cooperate_hisysevent.h"
 
 #include "ipc_skeleton.h"
 #include "token_setproc.h"
 
+#include "cooperate_hisysevent.h"
 #include "device.h"
 #include "devicestatus_define.h"
 #include "utility.h"
@@ -297,11 +297,11 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     };
     CooperateRadarInfo radarInfo {
         .funcName =  __FUNCTION__,
-        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
         .bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
         .hostName = "",
-        .localNetId = Utility::DFXRadarAnonymize(context_.Local().c_str()),
-        .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId.c_str())
+        .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
+        .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
     };
     packet >> event.originNetworkId >> event.cursorPos.x
         >> event.cursorPos.y >> event.success;
