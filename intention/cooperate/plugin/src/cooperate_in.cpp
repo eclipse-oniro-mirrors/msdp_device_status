@@ -58,14 +58,14 @@ void CooperateIn::OnEnterState(Context &context)
         .peerNetId = ""
         };
     if (ret != RET_OK) {
-        .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY),
-        .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-        .errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CURSOR_VISIBILITY_FAILED),
+        radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY),
+        radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+        radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CURSOR_VISIBILITY_FAILED),
         CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     }
-    .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY),
-    .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS),
-    .errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS),
+    radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY),
+    radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS),
+    radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS),
     CooperateRadar::ReportCooperateRadarInfo(radarInfo);
 }
 
