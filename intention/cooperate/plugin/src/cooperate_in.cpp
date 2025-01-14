@@ -14,6 +14,7 @@
  */
 
 #include "cooperate_in.h"
+#include "cooperate_hisysevent.h"
 
 #include "devicestatus_define.h"
 #include "utility.h"
@@ -47,7 +48,33 @@ void CooperateIn::OnEvent(Context &context, const CooperateEvent &event)
 void CooperateIn::OnEnterState(Context &context)
 {
     CALL_INFO_TRACE;
-    env_->GetInput().SetPointerVisibility(!context.NeedHideCursor());
+    int32_t ret = env_->GetInput().SetPointerVisibility(!context.NeedHideCursor());
+    if (ret != RET_OK) {
+        CooperateRadarInfo radarInfo {
+            .funcName = __FUNCTION__,
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
+            .bizState = static_cast<int32_t> (BizState::STATE_IDLE),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CURSOR_VISIBILITY_FAILED),
+            .hostName = "",
+            .localNetId = "",
+            .peerNetId = ""
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
+    CooperateRadarInfo radarInfo {
+        .funcName = __FUNCTION__,
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
+        .bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
+        .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY),
+        .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS),
+        .errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS),
+        .hostName = "",
+        .localNetId = "",            
+        .peerNetId = ""
+        };
+    CooperateRadar::ReportCooperateRadarInfo(radarInfo);
 }
 
 void CooperateIn::OnLeaveState(Context & context)
