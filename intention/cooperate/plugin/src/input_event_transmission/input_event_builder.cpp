@@ -92,7 +92,7 @@ void InputEventBuilder::Enable(Context &context)
             .errCode = static_cast<int32_t> (CooperateRadarErrCode::INPUT_EVENT_BUILDER_ENABLE_FAILED),
             .hostName = "",
             .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
-            .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())
+            .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId.c_str())
         };
         CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     }
