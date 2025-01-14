@@ -81,7 +81,7 @@ void InputEventBuilder::Enable(Context &context)
     Coordinate cursorPos = context.CursorPosition();
     TurnOffChannelScan();
     FI_HILOGI("Cursor transite in (%{private}d, %{private}d)", cursorPos.x, cursorPos.y);
-    if (!freezing_ && enable_)
+    if (!enable_)
     {
         CooperateRadarInfo radarInfo {
             .funcName =  __FUNCTION__,
@@ -89,7 +89,7 @@ void InputEventBuilder::Enable(Context &context)
             .bizState = static_cast<int32_t> (BizState::STATE_END),
             .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_INPUTEVENTBUILD_ENABLE),
             .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-            .errCode = static_cast<int32_t> (CooperateRadarErrCode::INPUTEVENTBUILD_ENABLE_FAILED),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::INPUT_EVENT_BUILDER_ENABLE_FAILED),
             .hostName = "",
             .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
             .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())

@@ -1239,7 +1239,6 @@ HWTEST_F(UtilityTest, UtityTest_RemoveTrailingChars2_005, TestSize.Level1)
     Utility::RemoveTrailingChars(path1, path2);
     ASSERT_STREQ(path2.c_str(), "abc");
 }
-
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

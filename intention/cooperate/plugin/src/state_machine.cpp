@@ -509,7 +509,7 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
         .bizState = static_cast<int32_t> (BizState::STATE_END),
         .hostName = "",
         .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
-        .peerNetId = Utility::DFXRadarAnonymize(startEvent.remoteNetworkId.c_str())
+        .peerNetId = Utility::DFXRadarAnonymize(startEvent.originNetworkId.c_str())
     };
     bool checkSameAccount = (!env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId));
     bool cooperateEnable = (!isCooperateEnable_);
@@ -524,15 +524,15 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
         );
         Transfer(context, stopEvent);
         if (checkSameAccount) {
-            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT),
-            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-            .errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CHECK_SAME_ACCOUNT_FAILED)
-        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+            radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT),
+            radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CHECK_SAME_ACCOUNT_FAILED)
+            CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         }
         if (cooperateEnable) {
-            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_PEER_SWITCH),
-            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-            .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_PEER_SWITCH_FAILED)
+            radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_PEER_SWITCH),
+            radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_PEER_SWITCH_FAILED)
             CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         }
         return;
