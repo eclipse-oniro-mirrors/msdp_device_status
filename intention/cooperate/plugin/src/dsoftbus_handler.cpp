@@ -295,6 +295,8 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     DSoftbusStartCooperate event {
         .networkId = networkId,
     };
+    packet >> event.originNetworkId >> event.cursorPos.x
+        >> event.cursorPos.y >> event.success;
     CooperateRadarInfo radarInfo {
         .funcName =  __FUNCTION__,
         .bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
@@ -303,8 +305,6 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
         .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
         .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
     };
-    packet >> event.originNetworkId >> event.cursorPos.x
-        >> event.cursorPos.y >> event.success;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to read data packet");
         radarInfo.bizStage =  static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_DEASERIALIZATION);
