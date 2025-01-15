@@ -14,11 +14,11 @@
  */
 
 #include "dsoftbus_handler.h"
-#include "cooperate_hisysevent.h"
 
 #include "ipc_skeleton.h"
 #include "token_setproc.h"
 
+#include "cooperate_hisysevent.h"
 #include "device.h"
 #include "devicestatus_define.h"
 #include "utility.h"
@@ -130,10 +130,10 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
         FI_HILOGE("Failed to write data packet");
         CooperateRadarInfo radarInfo {
             .funcName = __FUNCTION__,
-            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .bizState = static_cast<int32_t> (BizState::STATE_END),
             .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_SERIALIZE_INSTRUCTION),
             .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .errCode = static_cast<int32_t> (CooperateRadarErrCode::SERIALIZE_INSTRUCTION_FAILED),
             .hostName = "",
             .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
@@ -147,10 +147,10 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
         OnCommunicationFailure(networkId);
         CooperateRadarInfo radarInfo {
             .funcName = __FUNCTION__,
-            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .bizState = static_cast<int32_t> (BizState::STATE_END),
             .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_SEND_INSTRUCTION_TO_REMOTE),
             .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
             .errCode = static_cast<int32_t> (CooperateRadarErrCode::SEND_INSTRUCTION_TO_REMOTE_FAILED),
             .hostName = "",
             .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
@@ -295,10 +295,22 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     DSoftbusStartCooperate event {
         .networkId = networkId,
     };
+    CooperateRadarInfo radarInfo {
+        .funcName =  __FUNCTION__,
+        .bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
+        .hostName = "",
+        .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
+        .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
+    };
     packet >> event.originNetworkId >> event.cursorPos.x
         >> event.cursorPos.y >> event.success;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to read data packet");
+        radarInfo.bizStage =  static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_DEASERIALIZATION);
+        radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
+        radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_DEASERIALIZATION_FAILED);
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         return;
     }
     packet >> event.extra.priv;
@@ -318,6 +330,10 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_START_COOPERATE,
         event));
+    radarInfo.bizStage =  static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_DEASERIALIZATION);
+    radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS);
+    radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS);
+    CooperateRadar::ReportCooperateRadarInfo(radarInfo);
 }
 
 void DSoftbusHandler::OnStopCooperate(const std::string &networkId, NetPacket &packet)

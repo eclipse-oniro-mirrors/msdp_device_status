@@ -18,6 +18,7 @@
 #include "display_info.h"
 
 #include "cooperate_context.h"
+#include "cooperate_hisysevent.h"
 #include "devicestatus_define.h"
 #include "input_event_transmission/input_event_serialization.h"
 #include "utility.h"
@@ -80,6 +81,20 @@ void InputEventBuilder::Enable(Context &context)
     Coordinate cursorPos = context.CursorPosition();
     TurnOffChannelScan();
     FI_HILOGI("Cursor transite in (%{private}d, %{private}d)", cursorPos.x, cursorPos.y);
+    if (!enable_) {
+        CooperateRadarInfo radarInfo {
+            .funcName =  __FUNCTION__,
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STATE_INPUT_EVENT_BUILDER_ENABLE),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::INPUT_EVENT_BUILDER_ENABLE_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId_.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
     ExecuteInner();
 }
 

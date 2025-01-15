@@ -165,12 +165,12 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
 {
     CALL_DEBUG_ENTER;
     CooperateRadarInfo radarInfo {
-            .funcName =  __FUNCTION__,
-            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
-            .bizState = static_cast<int32_t> (BizState::STATE_END),
-            .hostName = "",
-            .localNetId = Utility::DFXRadarAnonymize(context_.Local().c_str()),
-            .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId.c_str())
+        .funcName =  __FUNCTION__,
+        .bizState = static_cast<int32_t> (BizState::STATE_END),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+        .hostName = "",
+        .localNetId = Utility::DFXRadarAnonymize(context_.Local().c_str()),
+        .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId.c_str())
     };
     if (!sm_.IsCooperateEnable()) {
         radarInfo.bizStage =  static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_LOCAL_SWITCH);
