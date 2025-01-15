@@ -61,6 +61,11 @@ struct CooperateOptions {
     int32_t displayId { -1 };
 };
 
+enum class CooperateParamType : int32_t {
+    DEFAULT,
+    WITHOPTIONS
+};
+
 inline constexpr uint32_t COORDINATION_DAMPLING_UP { 0x1 };
 inline constexpr uint32_t COORDINATION_DAMPLING_DOWN { COORDINATION_DAMPLING_UP << 0x1 };
 inline constexpr uint32_t COORDINATION_DAMPLING_LEFT { COORDINATION_DAMPLING_DOWN << 0x1 };

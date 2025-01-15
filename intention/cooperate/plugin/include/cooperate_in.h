@@ -77,7 +77,7 @@ private:
 
         void OnProgress(Context &context, const CooperateEvent &event) override;
         void OnReset(Context &context, const CooperateEvent &event) override;
-        void OnProgressWithOptions(Context &context, const CooperateEvent &event) override; 
+        void OnProgressWithOptions(Context &context, const CooperateEvent &event) override;
 
     private:
         void OnDisable(Context &context, const CooperateEvent &event);
