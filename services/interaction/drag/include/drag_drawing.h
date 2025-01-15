@@ -294,7 +294,7 @@ public:
     void UpdateDragState(DragState dragState);
     static std::shared_ptr<Media::PixelMap> AccessGlobalPixelMapLocked();
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
-    void ZoomOutAnimation();
+    void LongPressDragZoomOutAnimation();
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -367,9 +367,9 @@ private:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     int32_t RotateDragWindow(Rosen::Rotation rotation,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool isAnimated = false);
-    void ZoomInOutAndAlphaChangedAnimation();
-    void ZoomInAnimation();
-    void AlphaChangedAnimation();
+    void LongPressDragAnimation();
+    void LongPressDragZoomInAnimation();
+    void LongPressDragAlphaAnimation();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<AppExecFwk::EventHandler> GetSuperHubHandler();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
