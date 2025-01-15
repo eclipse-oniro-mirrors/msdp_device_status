@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "input_event_transmission/input_event_interceptor.h"
 
 #include "cooperate_context.h"
+#include "cooperate_hisysevent.h"
 #include "devicestatus_define.h"
 #include "display_manager.h"
 #include "power_mgr_client.h"
@@ -84,6 +85,18 @@ void InputEventInterceptor::Enable(Context &context)
         [this](std::shared_ptr<MMI::KeyEvent> keyEvent) { this->OnKeyEvent(keyEvent); });
     if (interceptorId_ < 0) {
         FI_HILOGE("Input::AddInterceptor fail");
+        CooperateRadarInfo radarInfo {
+            .funcName = __FUNCTION__,
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_ADD_MMI_EVENT_INTERCEPOR),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::ADD_MMI_EVENT_INTERCEPOR_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId_.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     }
     TurnOffChannelScan();
     HeartBeatSend();

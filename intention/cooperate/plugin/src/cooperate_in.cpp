@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "cooperate_in.h"
+#include "cooperate_hisysevent.h"
 
 #include "devicestatus_define.h"
 #include "utility.h"
@@ -47,7 +48,25 @@ void CooperateIn::OnEvent(Context &context, const CooperateEvent &event)
 void CooperateIn::OnEnterState(Context &context)
 {
     CALL_INFO_TRACE;
-    env_->GetInput().SetPointerVisibility(!context.NeedHideCursor());
+    int32_t ret = env_->GetInput().SetPointerVisibility(!context.NeedHideCursor());
+    CooperateRadarInfo radarInfo {
+        .funcName = __FUNCTION__,
+        .bizState = static_cast<int32_t> (BizState::STATE_END),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
+        .hostName = "",
+        .localNetId = "",
+        .peerNetId = ""
+    };
+    if (ret != RET_OK) {
+        radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY);
+        radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
+        radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CURSOR_VISIBILITY_FAILED);
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
+    radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY);
+    radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS);
+    radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS);
+    CooperateRadar::ReportCooperateRadarInfo(radarInfo);
 }
 
 void CooperateIn::OnLeaveState(Context & context)
@@ -659,6 +678,7 @@ void CooperateIn::RelayConfirmation::OnResponse(Context &context, const Cooperat
         Proceed(context, event);
     } else {
         OnResetWithNotifyMessage(context, event);
+        parent_.StopCooperate(context, event);
     }
 }
 

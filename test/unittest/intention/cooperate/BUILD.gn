@@ -263,6 +263,53 @@ ohos_unittest("InputEventSerializationTest") {
   ]
 }
 
+ohos_unittest("InputEventSamplerTest") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+  module_out_path = module_output_path
+  include_dirs = [ "${device_status_root_path}/intention/cooperate/plugin/include/input_event_transmission" ]
+
+  defines = []
+
+  sources = [ "src/input_event_sampler_test.cpp" ]
+
+  cflags = [ "-Dprivate=public" ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/common/channel:intention_channel",
+    "${device_status_root_path}/intention/cooperate/plugin:intention_cooperate",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/utils/common:devicestatus_util",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+  ]
+  external_deps = [
+    "ability_runtime:app_manager",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokensetproc_shared",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+    "window_manager:libdm",
+    "window_manager:libwmutil_base",
+  ]
+}
+
 ohos_unittest("InputEventBuilderTest") {
   sanitize = {
     cfi = true
@@ -462,6 +509,7 @@ group("unittest") {
     ":CooperateTest",
     ":InputEventBuilderTest",
     ":InputEventInterceptorTest",
+    ":InputEventSamplerTest",
     ":InputEventSerializationTest",
   ]
 }

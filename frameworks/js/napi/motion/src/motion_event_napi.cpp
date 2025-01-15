@@ -183,14 +183,12 @@ void MotionEventNapi::OnEventOperatingHand(int32_t eventType, size_t argc, const
 
 void MotionEventNapi::ConvertOperatingHandData(napi_value handler, size_t argc, const MotionEvent &event)
 {
-    napi_value motionValue = nullptr;
     napi_value result;
-    napi_status ret = napi_create_object(env_, &result);
+    napi_status ret = napi_create_int32(env_, event.status, &result);
     if (ret != napi_ok) {
-        FI_HILOGE("napi_create_object failed");
+        FI_HILOGE("napi_create_int32 failed");
         return;
     }
-    CreateIntData(env_, motionValue, result, "OperatingHandStatus", event.status);
     napi_value callResult = nullptr;
     ret = napi_call_function(env_, nullptr, handler, argc, &result, &callResult);
     if (ret != napi_ok) {
