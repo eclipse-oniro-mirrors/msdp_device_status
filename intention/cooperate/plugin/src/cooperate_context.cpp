@@ -434,16 +434,46 @@ void Context::OnResetCooperation()
 
 void Context::SetCursorPosition(const Coordinate &cursorPos)
 {
+    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHKPV(display);
+    auto cursor = SetCursorPos(cursorPos);
+    env_->GetInput().SetPointerLocation(cursorPos_.x, cursorPos_.y);
+    FI_HILOGI("Set cursor position (%{private}d,%{private}d)(%{private}d,%{private}d)(%{public}d,%{public}d)",
+        cursorPos.x, cursorPos.y, cursorPos_.x, cursorPos_.y, display->GetWidth(), display->GetHeight());
+}
+
+void Context::StopCooperateSetCursorPosition(const Coordinate &cursorPos)
+{
+    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    int32_t displayId = display->GetId();
+    if (displayId < 0) {
+        displayId = 0;
+    }
+    auto cursor = SetCursorPos(cursorPos);
+    env_->GetInput().SetPointerLocation(cursorPos_.x, cursorPos_.y, displayId);
+    FI_HILOGI("Set cursor position (%{private}d,%{private}d)(%{private}d,%{private}d)(%{public}d,%{public}d),"
+        "dafault display id is %{public}d",cursorPos.x, cursorPos.y, cursorPos_.x, cursorPos_.y,
+        display->GetWidth(), display->GetHeight(), displayId);
+}
+
+Coordinate Context::SetCursorPos(const Coordinate &cursorPos)
+{
     double xPercent = (PERCENT - std::clamp<double>(cursorPos.x, 0.0, PERCENT)) / PERCENT;
     double yPercent = std::clamp<double>(cursorPos.y, 0.0, PERCENT) / PERCENT;
 
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    CHKPV(display);
-    cursorPos_.x = static_cast<int32_t>(xPercent * display->GetWidth());
-    cursorPos_.y = static_cast<int32_t>(yPercent * display->GetHeight());
-    env_->GetInput().SetPointerLocation(cursorPos_.x, cursorPos_.y);
-    FI_HILOGI("Set cursor position (%{private}d,%{private}d)(%{private}d,%{private}d)(%{public}d,%{public}d)",
-        cursorPos.x, cursorPos.y, cursorPos_.x, cursorPos_.y, display->GetWidth(), display->GetHeight());
+    int32_t displayId = display->GetId();
+    if (displayId < 0) {
+        displayId = 0;
+    }
+    if (display == nullptr) {
+        FI_HILOGE("No default display");
+        return cursorPos_;
+    }
+    return Coordinate {
+        .x = static_cast<int32_t>(xPercent * display->GetWidth());
+        .y = static_cast<int32_t>(yPercent * display->GetHeight());
+    }
 }
 
 void Context::UpdateCursorPosition()
@@ -490,7 +520,7 @@ void Context::ResetCursorPosition()
         .x = 50,
         .y = 50,
     };
-    SetCursorPosition(defaultCursorPos);
+    StopCooperateSetCursorPosition(defaultCursorPos);
 }
 
 #ifdef ENABLE_PERFORMANCE_CHECK
