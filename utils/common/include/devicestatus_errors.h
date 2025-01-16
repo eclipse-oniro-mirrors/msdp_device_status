@@ -87,6 +87,7 @@ enum CustomErrCode : int32_t {
     SEND_PACKET_FAILED = 20900003,
     UNEXPECTED_START_CALL = 20900004,
     WORKER_THREAD_TIMEOUT = 20900005,
+    NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING = 20900006,
 };
 } // namespace DeviceStatus
 } // namespace Msdp

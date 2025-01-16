@@ -311,6 +311,11 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
         CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         return;
     }
+    if (env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Not allow cooperate");
+        startEvent.errCode->set_value(NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING);
+        return;
+    }
     UpdateApplicationStateObserver(startEvent.pid);
     if (!context.IsAllowCooperate()) {
         FI_HILOGI("Not allow cooperate");
