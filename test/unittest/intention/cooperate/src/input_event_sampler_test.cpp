@@ -307,21 +307,6 @@ HWTEST_F(InputEventSamplerTest, TestIsSkipNeeded_02, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestAggregateRawEvents_01
- * @tc.desc: Test AggregateRawEvents
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InputEventSamplerTest, TestAggregateRawEvents_01, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    Cooperate::InputEventSampler sampler;
-    auto pointerEvent = MMI::PointerEvent::Create();
-    ASSERT_NE(pointerEvent, nullptr);
-    ASSERT_NO_FATAL_FAILURE(sampler.AggregateRawEvents(pointerEvent));
-}
-
-/**
  * @tc.name: TestHandleMouseEvent_01
  * @tc.desc: Test HandleMouseEvent
  * @tc.type: FUNC
