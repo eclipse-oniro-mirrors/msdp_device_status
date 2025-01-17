@@ -3955,7 +3955,6 @@ float DragDrawing::GetMaxWidthScale(int32_t width)
         }
         return widthScale;
     }
-    
 }
 
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
