@@ -3924,36 +3924,38 @@ float DragDrawing::GetMaxWidthScale(int32_t width)
     }
 
     double currentPixelMapDiagonal = sqrt(pow(pixelMapWidth, DOUBLE_INT) + pow(pixelMapHeight, DOUBLE_INT));
-	if (currentPixelMapDiagonal < EPSILON) {
+    if (currentPixelMapDiagonal < EPSILON) {
         FI_HILOGW("PixelMapDiagonal is 0");
         return DEFAULT_SCALING;
-	}
-    FI_HILOGI("currentPixelMap width is %{public}d , height is %{public}d , diagonal is : %{public}f",
-        pixelMapWidth, pixelMapHeight, currentPixelMapDiagonal);
-        
-    switch (currentScreenSize_) {
-        case ScreenSizeType::SM: {
-            widthScale = (CIRCLE_R_SM * DOUBLE_INT) / currentPixelMapDiagonal;
-            FI_HILOGI("Screen Size Type is SM and widthScale is %{public}f", widthScale);
-            break;
+    } else {
+        FI_HILOGI("currentPixelMap width is %{public}d , height is %{public}d , diagonal is : %{public}f",
+            pixelMapWidth, pixelMapHeight, currentPixelMapDiagonal);
+            
+        switch (currentScreenSize_) {
+            case ScreenSizeType::SM: {
+                widthScale = (CIRCLE_R_SM * DOUBLE_INT) / currentPixelMapDiagonal;
+                FI_HILOGI("Screen Size Type is SM and widthScale is %{public}f", widthScale);
+                break;
+            }
+            case ScreenSizeType::MD: {
+                widthScale = (CIRCLE_R_MD * DOUBLE_INT) / currentPixelMapDiagonal;
+                FI_HILOGI("Screen Size Type is MD and widthScale is %{public}f", widthScale);
+                break;
+            }
+            case ScreenSizeType::LG: {
+                widthScale = (CIRCLE_R_LG * DOUBLE_INT) / currentPixelMapDiagonal;
+                FI_HILOGI("Screen Size Type is LG and widthScale is %{public}f", widthScale);
+                break;
+            }
+            default: {
+                widthScale = (CIRCLE_R_XL * DOUBLE_INT) / currentPixelMapDiagonal;
+                FI_HILOGI("Screen Size Type is XL and widthScale is %{public}f", widthScale);
+                break;
+            }
         }
-        case ScreenSizeType::MD: {
-            widthScale = (CIRCLE_R_MD * DOUBLE_INT) / currentPixelMapDiagonal;
-            FI_HILOGI("Screen Size Type is MD and widthScale is %{public}f", widthScale);
-            break;
-        }
-        case ScreenSizeType::LG: {
-            widthScale = (CIRCLE_R_LG * DOUBLE_INT) / currentPixelMapDiagonal;
-            FI_HILOGI("Screen Size Type is LG and widthScale is %{public}f", widthScale);
-            break;
-        }
-        default: {
-            widthScale = (CIRCLE_R_XL * DOUBLE_INT) / currentPixelMapDiagonal;
-            FI_HILOGI("Screen Size Type is XL and widthScale is %{public}f", widthScale);
-            break;
-        }
+        return widthScale;
     }
-    return widthScale;
+    
 }
 
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
