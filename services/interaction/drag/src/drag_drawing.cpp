@@ -3924,9 +3924,8 @@ float DragDrawing::GetMaxWidthScale(int32_t width)
     }
 
     double currentPixelMapDiagonal = sqrt(pow(pixelMapWidth, DOUBLE_INT) + pow(pixelMapHeight, DOUBLE_INT));
-	
-	if (currentPixelMapDiagonal < EPSILON){
-		FI_HILOGW("PixelMapDiagonal is 0");
+	if (currentPixelMapDiagonal < EPSILON) {
+        FI_HILOGW("PixelMapDiagonal is 0");
         return DEFAULT_SCALING;
 	}
     FI_HILOGI("currentPixelMap width is %{public}d , height is %{public}d , diagonal is : %{public}f",
