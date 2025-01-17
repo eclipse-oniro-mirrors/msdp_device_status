@@ -127,6 +127,8 @@ private:
     int32_t EnableInputDevMgr();
     void DisableInputDevMgr();
     void SetCursorPosition(const Coordinate &cursorPos);
+    void StopCooperateSetCursorPosition(const Coordinate &cursorPos);
+    Coordinate SetCursorPos(const Coordinate &cursorPos);
 
     IContext *env_ { nullptr };
     Channel<CooperateEvent>::Sender sender_;

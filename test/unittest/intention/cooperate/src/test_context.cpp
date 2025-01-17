@@ -88,7 +88,7 @@ int32_t MockInputAdapter::SetPointerVisibility(bool visible, int32_t priority)
     return RET_OK;
 }
 
-int32_t MockInputAdapter::SetPointerLocation(int32_t x, int32_t y)
+int32_t MockInputAdapter::SetPointerLocation(int32_t x, int32_t y, int32_t displayId)
 {
     return RET_OK;
 }
