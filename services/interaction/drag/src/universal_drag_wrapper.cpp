@@ -16,7 +16,8 @@
 #include "universal_drag_wrapper.h"
  
 #include <dlfcn.h>
- 
+
+#include "devicestatus_define.h"
 #include "fi_log.h"
 
 #undef LOG_TAG
@@ -28,7 +29,7 @@ namespace DeviceStatus {
 namespace {
 const std::string UNIVERSAL_DRAG_MANAGER_SO_PATH = "system/lib64/libuniversal_drag.z.so";
 }
- 
+
 bool UniversalDragWrapper::InitUniversalDrag()
 {
     FI_HILOGI("Enter InitUniversalDrag");
@@ -52,7 +53,7 @@ bool UniversalDragWrapper::InitUniversalDrag()
     }
     return initUniversalDragHandle_(env_);
 }
- 
+
 void UniversalDragWrapper::RmoveUniversalDrag()
 {
     FI_HILOGI("Enter RmoveUniversalDrag");
@@ -74,7 +75,7 @@ void UniversalDragWrapper::RmoveUniversalDrag()
         FI_HILOGI("RmoveUniversalDrag success");
     }
 }
- 
+
 void UniversalDragWrapper::SetDragableState(bool state)
 {
     CALL_DEBUG_ENTER;
@@ -95,7 +96,33 @@ void UniversalDragWrapper::SetDragableState(bool state)
         setDragableStateHandle_(state);
     }
 }
- 
+
+int32_t UniversalDragWrapper::GetAppDragSwitchState(const std::string &pkgName, bool &state)
+{
+    CALL_DEBUG_ENTER;
+    if (!universalDragHandle_) {
+        FI_HILOGE("universalDragHandle_ is null");
+        return RET_ERR;
+    }
+    if (getAppDragSwitchStateHandle_ == nullptr) {
+        getAppDragSwitchStateHandle_ =
+            reinterpret_cast<GetAppDragSwitchStateFunc>(dlsym(universalDragHandle_, "GetAppDragSwitchState"));
+        char *error = nullptr;
+        if ((error = dlerror()) != nullptr) {
+            FI_HILOGE("Symbol GetAppDragSwitchStateHandle error: %{public}s", error);
+            return RET_ERR;
+        }
+    }
+
+    if (getAppDragSwitchStateHandle_ == nullptr) {
+        FI_HILOGE("getAppDragSwitchStateHandle_ is null");
+        return RET_ERR;
+    }
+    auto ret = getAppDragSwitchStateHandle_(pkgName.c_str(), state);
+    FI_HILOGE("Failed to getAppDragSwitchStateHandle error: %{public}d", ret);
+    return ret;
+}
+
 UniversalDragWrapper::~UniversalDragWrapper()
 {
     FI_HILOGI("Destructor success");
