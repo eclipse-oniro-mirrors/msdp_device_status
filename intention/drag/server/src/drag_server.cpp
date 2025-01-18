@@ -156,6 +156,9 @@ int32_t DragServer::SetParam(CallingContext &context, uint32_t id, MessageParcel
         case DragRequestID::SET_DRAGGABLE_STATE: {
             return SetDraggableState(context, data, reply);
         }
+        case DragRequestID::SET_DRAGABLE_STATE_ASYNC: {
+            return SetDragableStateAsync(context, data);
+        }
         default: {
             FI_HILOGE("Unexpected request ID (%{public}u)", id);
             return RET_ERR;
@@ -198,6 +201,10 @@ int32_t DragServer::GetParam(CallingContext &context, uint32_t id, MessageParcel
         case DragRequestID::GET_EXTRA_INFO: {
             FI_HILOGI("Get extra info, from:%{public}d", context.pid);
             return GetExtraInfo(context, data, reply);
+        }
+        case DragRequestID::GET_UNIVERSAL_DRAG_APP_STATE: {
+            FI_HILOGI("Get universal drag app state, from:%{public}d", context.pid);
+            return GetAppDragSwitchState(context, data, reply);
         }
         default: {
             FI_HILOGE("Unexpected request ID (%{public}u)", id);
@@ -628,6 +635,42 @@ int32_t DragServer::SetDraggableState(CallingContext &context, MessageParcel &da
     }
 #ifdef OHOS_BUILD_UNIVERSAL_DRAG
     universalDragWrapper_.SetDragableState(param.state_);
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+    return RET_OK;
+}
+
+int32_t DragServer::GetAppDragSwitchState(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+{
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    bool state = false;
+    int32_t ret = universalDragWrapper_.GetAppDragSwitchState(GetPackageName(context.tokenId), state);
+    if (ret != RET_OK) {
+        FI_HILOGE("universalDragWrapper GetAppDragSwitchState fail, error:%{public}d", ret);
+        return ret;
+    }
+    GetUniversalDragAppStateReply getUniversalDragAppStateReply { state };
+
+    if (!getUniversalDragAppStateReply.Marshalling(reply)) {
+        FI_HILOGE("GetUniversalDragAppStateReply::Marshalling fail");
+        return RET_ERR;
+    }
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+    return RET_OK;
+}
+
+int32_t DragServer::SetDragableStateAsync(CallingContext &context, MessageParcel &data)
+{
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    CHKPR(env_, RET_ERR);
+    env_->GetDelegateTasks().PostAsyncTask([this, &data] {
+        SetDragableStateAsyncParam param {};
+        if (!param.Unmarshalling(data)) {
+            FI_HILOGE("SetDragableStateAsync::Unmarshalling fail");
+            return RET_ERR;
+        }
+        this->env_->GetDragManager().SetDragableStateAsync(param.state_, param.downTime_);
+        return RET_OK;
+    });
 #endif // OHOS_BUILD_UNIVERSAL_DRAG
     return RET_OK;
 }

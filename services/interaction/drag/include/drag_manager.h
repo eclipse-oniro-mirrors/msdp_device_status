@@ -130,6 +130,8 @@ public:
     int32_t RotateDragWindow(Rosen::Rotation rotation) override;
     int32_t ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation) override;
     void SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) override;
+    void SetDragableStateAsync(bool state, int64_t downTime) override;
+    LongPressDragableState GetDragableState() override;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t SetMouseDragMonitorState(bool state) override;
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
@@ -253,6 +255,7 @@ private:
     std::string peerNetId_;
     bool isLongPressDrag_ { false };
     bool needLongPressDragAnimation_ { true };
+    LongPressDragableState longPressDragableState_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

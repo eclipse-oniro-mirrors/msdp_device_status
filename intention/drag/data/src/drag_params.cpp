@@ -448,6 +448,37 @@ bool SetDraggableStateParam::Unmarshalling(MessageParcel &parcel)
 {
     return parcel.ReadBool(state_);
 }
+
+GetUniversalDragAppStateReply::GetUniversalDragAppStateReply(bool state)
+{
+    state_ = state;
+}
+
+bool GetUniversalDragAppStateReply::Marshalling(MessageParcel &parcel) const
+{
+    return parcel.WriteBool(state_);
+}
+
+bool GetUniversalDragAppStateReply::Unmarshalling(MessageParcel &parcel)
+{
+    return parcel.ReadBool(state_);
+}
+
+SetDragableStateAsyncParam::SetDragableStateAsyncParam(bool state, int64_t downTime)
+{
+    state_ = state;
+    downTime_ = downTime;
+}
+
+bool SetDragableStateAsyncParam::Marshalling(MessageParcel &parcel) const
+{
+    return (parcel.WriteBool(state_) && parcel.WriteInt64(downTime_));
+}
+
+bool SetDragableStateAsyncParam::Unmarshalling(MessageParcel &parcel)
+{
+    return (parcel.ReadBool(state_) && parcel.ReadInt64(downTime_));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

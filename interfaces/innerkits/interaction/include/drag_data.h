@@ -57,6 +57,11 @@ struct ShadowInfo {
     }
 };
 
+struct LongPressDragableState {
+    bool state = false;
+    int64_t downTime = -1;
+};
+
 struct DragData {
     std::vector<ShadowInfo> shadowInfos;
     std::vector<uint8_t> buffer;

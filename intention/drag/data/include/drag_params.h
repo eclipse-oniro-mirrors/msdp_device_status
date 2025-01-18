@@ -56,6 +56,8 @@ enum DragRequestID : uint32_t {
     SET_DRAG_WINDOW_SCREEN_ID,
     ADD_SELECTED_PIXELMAP,
     SET_DRAGGABLE_STATE,
+    SET_DRAGABLE_STATE_ASYNC,
+    GET_UNIVERSAL_DRAG_APP_STATE,
 };
 
 struct StartDragParam final : public ParamBase {
@@ -303,6 +305,27 @@ struct SetDraggableStateParam final : public ParamBase {
     bool Unmarshalling(MessageParcel &parcel) override;
 
     bool state_ { false };
+};
+
+struct GetUniversalDragAppStateReply final : public ParamBase {
+    GetUniversalDragAppStateReply() = default;
+    explicit GetUniversalDragAppStateReply(bool state);
+
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    bool state_ { false };
+};
+
+struct SetDragableStateAsyncParam final : public ParamBase {
+    SetDragableStateAsyncParam() = default;
+    SetDragableStateAsyncParam(bool state, int64_t downTime);
+
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    bool state_ { false };
+    int64_t downTime_ { -1 };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
