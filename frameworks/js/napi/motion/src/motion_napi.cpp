@@ -47,7 +47,7 @@ const std::vector<std::string> EXPECTED_UNSUB_TWO_ARG_TYPES = { "string", "funct
 const std::map<const std::string, int32_t> MOTION_TYPE_MAP = {
     { "operatingHandChanged", MOTION_TYPE_OPERATING_HAND },
     { "steadyStandingDetect", MOTION_TYPE_STAND },
-    { "remotePhotoStandingDetect", MOTION_TYPE_REMOTE_PHOTO},
+    { "remotePhotoStandingDetect", MOTION_TYPE_REMOTE_PHOTO },
 };
 MotionNapi *g_motionObj = nullptr;
 } // namespace
