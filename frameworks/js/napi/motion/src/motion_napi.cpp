@@ -40,12 +40,14 @@ constexpr int32_t INVALID_MOTION_TYPE = -1;
 constexpr size_t MAX_ARG_STRING_LEN = 512;
 constexpr int32_t MOTION_TYPE_OPERATING_HAND = 3601;
 constexpr int32_t MOTION_TYPE_STAND = 3602;
+constexpr int32_t MOTION_TYPE_REMOTE_PHOTO = 3604;
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES = { "string", "function" };
 const std::vector<std::string> EXPECTED_UNSUB_ONE_ARG_TYPES = { "string" };
 const std::vector<std::string> EXPECTED_UNSUB_TWO_ARG_TYPES = { "string", "function" };
 const std::map<const std::string, int32_t> MOTION_TYPE_MAP = {
     { "operatingHandChanged", MOTION_TYPE_OPERATING_HAND },
     { "steadyStandingDetect", MOTION_TYPE_STAND },
+    { "remotePhotoStandingDetect", MOTION_TYPE_REMOTE_PHOTO },
 };
 MotionNapi *g_motionObj = nullptr;
 } // namespace
