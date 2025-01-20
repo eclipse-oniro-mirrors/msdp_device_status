@@ -177,7 +177,7 @@ constexpr float CIRCLE_R_SM { 144.0f };
 constexpr float CIRCLE_R_MD { 260.0f };
 constexpr float CIRCLE_R_LG { 396.0f };
 constexpr float CIRCLE_R_XL { 396.0f };
-constexpr flaot DOUBLE_INT { 2 };
+constexpr int32_t DOUBLE_INT { 2 };
 const std::string THREAD_NAME { "os_AnimationEventRunner" };
 const std::string SUPER_HUB_THREAD_NAME { "os_SuperHubEventRunner" };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -3952,7 +3952,8 @@ float DragDrawing::GetMaxWidthScale(int32_t width)
             break;
         }
     }
-    return widthScale;
+    float scale = (widthScale >= DEFAULT_SCALING) ? DEFAULT_SCALING : widthScale;
+    return scale;
 }
 
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
