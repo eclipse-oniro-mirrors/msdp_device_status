@@ -3928,22 +3928,26 @@ float DragDrawing::GetMaxWidthScale(int32_t width)
         
     switch (currentScreenSize_) {
         case ScreenSizeType::SM: {
-            widthScale = (currentPixelMapDiagonal <= EPSILON) ? DEFAULT_SCALING : (CIRCLE_R_SM * DOUBLE_INT) / currentPixelMapDiagonal;
+            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
+                DEFAULT_SCALING : (CIRCLE_R_SM * DOUBLE_INT) / currentPixelMapDiagonal;
             FI_HILOGI("Screen Size Type is SM and widthScale is %{public}f", widthScale);
             break;
         }
         case ScreenSizeType::MD: {
-            widthScale = (currentPixelMapDiagonal <= EPSILON) ? DEFAULT_SCALING : (CIRCLE_R_MD * DOUBLE_INT) / currentPixelMapDiagonal;
+            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
+                DEFAULT_SCALING : (CIRCLE_R_MD * DOUBLE_INT) / currentPixelMapDiagonal;
             FI_HILOGI("Screen Size Type is SM and widthScale is %{public}f", widthScale);
             break;
         }
         case ScreenSizeType::LG: {
-            widthScale = (currentPixelMapDiagonal <= EPSILON) ? DEFAULT_SCALING : (CIRCLE_R_LG * DOUBLE_INT) / currentPixelMapDiagonal;
+            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
+                DEFAULT_SCALING : (CIRCLE_R_LG * DOUBLE_INT) / currentPixelMapDiagonal;
             FI_HILOGI("Screen Size Type is LG and widthScale is %{public}f", widthScale);
             break;
         }
         default: {
-            widthScale = (currentPixelMapDiagonal <= EPSILON) ? DEFAULT_SCALING : (CIRCLE_R_XL * DOUBLE_INT) / currentPixelMapDiagonal;
+            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
+                DEFAULT_SCALING : (CIRCLE_R_XL * DOUBLE_INT) / currentPixelMapDiagonal;
             FI_HILOGI("Screen Size Type is XL and widthScale is %{public}f", widthScale);
             break;
         }
