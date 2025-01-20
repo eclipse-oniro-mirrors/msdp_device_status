@@ -56,23 +56,17 @@ void JsEventCooperateTarget::EmitJsEnable(sptr<JsUtilCooperate::CallbackInfo> cb
     cb->data.enableResult = (msgInfo.msg == CoordinationMessage::PREPARE ||
         msgInfo.msg == CoordinationMessage::UNPREPARE);
     cb->data.msgInfo = msgInfo;
-    uv_loop_s *loop = nullptr;
-    CHKRV(napi_get_uv_event_loop(cb->env, &loop), GET_UV_EVENT_LOOP);
-    uv_work_s *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
-    cb->IncStrongRef(nullptr);
-    work->data = cb.GetRefPtr();
-    int32_t ret = 0;
-    if (cb->ref == nullptr) {
-        ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {}, CallEnablePromiseWork, uv_qos_default);
-    } else {
-        ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {}, CallEnableAsyncWork, uv_qos_default);
-    }
 
-    if (ret != 0) {
-        FI_HILOGE("Failed to execute uv_queue_work_with_qos");
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-        cb->DecStrongRef(nullptr);
+    auto task = [cb]() {
+        FI_HILOGI("Execute lambda");
+        if (cb->ref == nullptr) {
+            CallEnablePromiseWork(cb);
+        } else {
+            CallEnableAsyncWork(cb);
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(cb->env, task, napi_eprio_immediate)) {
+        FI_HILOGE("Failed to SendEvent");
     }
 }
 
@@ -84,23 +78,17 @@ void JsEventCooperateTarget::EmitJsStart(sptr<JsUtilCooperate::CallbackInfo> cb,
     CHKPV(cb->env);
     cb->data.startResult = (msgInfo.msg == CoordinationMessage::ACTIVATE_SUCCESS);
     cb->data.msgInfo = msgInfo;
-    uv_loop_s *loop = nullptr;
-    CHKRV(napi_get_uv_event_loop(cb->env, &loop), GET_UV_EVENT_LOOP);
-    uv_work_s *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
-    cb->IncStrongRef(nullptr);
-    work->data = cb.GetRefPtr();
-    int32_t ret = 0;
-    if (cb->ref == nullptr) {
-        ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {}, CallStartPromiseWork, uv_qos_default);
-    } else {
-        ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {}, CallStartAsyncWork, uv_qos_default);
-    }
 
-    if (ret != 0) {
-        FI_HILOGE("Failed to execute uv_queue_work_with_qos");
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-        cb->DecStrongRef(nullptr);
+    auto task = [cb]() {
+        FI_HILOGI("Execute lambda");
+        if (cb->ref == nullptr) {
+            CallStartPromiseWork(cb);
+        } else {
+            CallStartAsyncWork(cb);
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(cb->env, task, napi_eprio_immediate)) {
+        FI_HILOGE("Failed to SendEvent");
     }
 }
 
@@ -112,23 +100,17 @@ void JsEventCooperateTarget::EmitJsStop(sptr<JsUtilCooperate::CallbackInfo> cb,
     CHKPV(cb->env);
     cb->data.stopResult = (msgInfo.msg == CoordinationMessage::DEACTIVATE_SUCCESS);
     cb->data.msgInfo = msgInfo;
-    uv_loop_s *loop = nullptr;
-    CHKRV(napi_get_uv_event_loop(cb->env, &loop), GET_UV_EVENT_LOOP);
-    uv_work_s *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
-    cb->IncStrongRef(nullptr);
-    work->data = cb.GetRefPtr();
-    int32_t ret = 0;
-    if (cb->ref == nullptr) {
-        ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {}, CallStopPromiseWork, uv_qos_default);
-    } else {
-        ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {}, CallStopAsyncWork, uv_qos_default);
-    }
 
-    if (ret != 0) {
-        FI_HILOGE("Failed to execute uv_queue_work_with_qos");
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-        cb->DecStrongRef(nullptr);
+    auto task = [cb]() {
+        FI_HILOGI("Execute lambda");
+        if (cb->ref == nullptr) {
+            CallStopPromiseWork(cb);
+        } else {
+            CallStopAsyncWork(cb);
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(cb->env, task, napi_eprio_immediate)) {
+        FI_HILOGE("Failed to SendEvent");
     }
 }
 
@@ -138,23 +120,17 @@ void JsEventCooperateTarget::EmitJsGetState(sptr<JsUtilCooperate::CallbackInfo> 
     CHKPV(cb);
     CHKPV(cb->env);
     cb->data.coordinationOpened = state;
-    uv_loop_s *loop = nullptr;
-    CHKRV(napi_get_uv_event_loop(cb->env, &loop), GET_UV_EVENT_LOOP);
-    uv_work_s *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
-    cb->IncStrongRef(nullptr);
-    work->data = cb.GetRefPtr();
-    int32_t ret = 0;
-    if (cb->ref == nullptr) {
-        ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {}, CallGetStatePromiseWork, uv_qos_default);
-    } else {
-        ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {}, CallGetStateAsyncWork, uv_qos_default);
-    }
 
-    if (ret != 0) {
-        FI_HILOGE("Failed to execute uv_queue_work_with_qos");
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-        cb->DecStrongRef(nullptr);
+    auto task = [cb]() {
+        FI_HILOGI("Execute lambda");
+        if (cb->ref == nullptr) {
+            CallGetStatePromiseWork(cb);
+        } else {
+            CallGetStateAsyncWork(cb);
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(cb->env, task, napi_eprio_immediate)) {
+        FI_HILOGE("Failed to SendEvent");
     }
 }
 
@@ -251,36 +227,26 @@ void JsEventCooperateTarget::OnCoordinationMessage(const std::string &networkId,
     for (auto &item : changeEvent->second) {
         CHKPC(item);
         CHKPC(item->env);
-        uv_loop_s *loop = nullptr;
-        CHKRV(napi_get_uv_event_loop(item->env, &loop), GET_UV_EVENT_LOOP);
-        uv_work_t *uvWork = new (std::nothrow) uv_work_t;
-        CHKPV(uvWork);
         item->data.msgInfo.msg = msg;
         item->data.deviceDescriptor = networkId;
         item->IncStrongRef(nullptr);
-        uvWork->data = item.GetRefPtr();
-        int32_t ret = uv_queue_work_with_qos(loop, uvWork, [](uv_work_t *uvWork) {},
-            EmitCoordinationMessageEvent, uv_qos_default);
-        if (ret != 0) {
-            FI_HILOGE("Failed to execute uv_queue_work_with_qos");
-            item->DecStrongRef(nullptr);
-            JsUtilCooperate::DeletePtr<uv_work_t*>(uvWork);
+        auto task = [item]() {
+            FI_HILOGI("Execute lamdba");
+            EmitCoordinationMessageEvent(item);
+        };
+        if (napi_status::napi_ok != napi_send_event(item->env, task, napi_eprio_immediate)) {
+            FI_HILOGE("Failed to SendEvent");
         }
     }
 }
 
-void JsEventCooperateTarget::CallEnablePromiseWork(uv_work_t *work, int32_t status)
+void JsEventCooperateTarget::CallEnablePromiseWork(sptr<JsUtilCooperate::CallbackInfo> cb)
 {
     CALL_INFO_TRACE;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("Enable promise, check data is nullptr");
         return;
     }
-    sptr<JsUtilCooperate::CallbackInfo> cb(static_cast<JsUtilCooperate::CallbackInfo *>(work->data));
-    JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-    cb->DecStrongRef(nullptr);
     CHKPV(cb->env);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(cb->env, &scope);
@@ -312,18 +278,13 @@ void JsEventCooperateTarget::CallEnablePromiseWork(uv_work_t *work, int32_t stat
     napi_close_handle_scope(cb->env, scope);
 }
 
-void JsEventCooperateTarget::CallEnableAsyncWork(uv_work_t *work, int32_t status)
+void JsEventCooperateTarget::CallEnableAsyncWork(sptr<JsUtilCooperate::CallbackInfo> cb)
 {
     CALL_INFO_TRACE;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("Enable async, check data is nullptr");
         return;
     }
-    sptr<JsUtilCooperate::CallbackInfo> cb(static_cast<JsUtilCooperate::CallbackInfo *>(work->data));
-    JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-    cb->DecStrongRef(nullptr);
     CHKPV(cb->env);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(cb->env, &scope);
@@ -347,18 +308,13 @@ void JsEventCooperateTarget::CallEnableAsyncWork(uv_work_t *work, int32_t status
     napi_close_handle_scope(cb->env, scope);
 }
 
-void JsEventCooperateTarget::CallStartPromiseWork(uv_work_t *work, int32_t status)
+void JsEventCooperateTarget::CallStartPromiseWork(sptr<JsUtilCooperate::CallbackInfo> cb)
 {
     CALL_INFO_TRACE;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("Start promise, check data is nullptr");
         return;
     }
-    sptr<JsUtilCooperate::CallbackInfo> cb(static_cast<JsUtilCooperate::CallbackInfo *>(work->data));
-    JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-    cb->DecStrongRef(nullptr);
     CHKPV(cb->env);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(cb->env, &scope);
@@ -390,18 +346,13 @@ void JsEventCooperateTarget::CallStartPromiseWork(uv_work_t *work, int32_t statu
     napi_close_handle_scope(cb->env, scope);
 }
 
-void JsEventCooperateTarget::CallStartAsyncWork(uv_work_t *work, int32_t status)
+void JsEventCooperateTarget::CallStartAsyncWork(sptr<JsUtilCooperate::CallbackInfo> cb)
 {
     CALL_INFO_TRACE;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("Start async, check data is nullptr");
         return;
     }
-    sptr<JsUtilCooperate::CallbackInfo> cb(static_cast<JsUtilCooperate::CallbackInfo *>(work->data));
-    JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-    cb->DecStrongRef(nullptr);
     CHKPV(cb->env);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(cb->env, &scope);
@@ -425,18 +376,13 @@ void JsEventCooperateTarget::CallStartAsyncWork(uv_work_t *work, int32_t status)
     napi_close_handle_scope(cb->env, scope);
 }
 
-void JsEventCooperateTarget::CallStopPromiseWork(uv_work_t *work, int32_t status)
+void JsEventCooperateTarget::CallStopPromiseWork(sptr<JsUtilCooperate::CallbackInfo> cb)
 {
     CALL_INFO_TRACE;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("Stop promise, check data is nullptr");
         return;
     }
-    sptr<JsUtilCooperate::CallbackInfo> cb(static_cast<JsUtilCooperate::CallbackInfo *>(work->data));
-    JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-    cb->DecStrongRef(nullptr);
     CHKPV(cb->env);
     napi_handle_scope napiHandleScope = nullptr;
     napi_open_handle_scope(cb->env, &napiHandleScope);
@@ -469,18 +415,13 @@ void JsEventCooperateTarget::CallStopPromiseWork(uv_work_t *work, int32_t status
     napi_close_handle_scope(cb->env, napiHandleScope);
 }
 
-void JsEventCooperateTarget::CallStopAsyncWork(uv_work_t *work, int32_t status)
+void JsEventCooperateTarget::CallStopAsyncWork(sptr<JsUtilCooperate::CallbackInfo> cb)
 {
     CALL_INFO_TRACE;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("Stop async, check data is nullptr");
         return;
     }
-    sptr<JsUtilCooperate::CallbackInfo> cb(static_cast<JsUtilCooperate::CallbackInfo *>(work->data));
-    JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-    cb->DecStrongRef(nullptr);
     CHKPV(cb->env);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(cb->env, &scope);
@@ -504,18 +445,13 @@ void JsEventCooperateTarget::CallStopAsyncWork(uv_work_t *work, int32_t status)
     napi_close_handle_scope(cb->env, scope);
 }
 
-void JsEventCooperateTarget::CallGetStatePromiseWork(uv_work_t *work, int32_t status)
+void JsEventCooperateTarget::CallGetStatePromiseWork(sptr<JsUtilCooperate::CallbackInfo> cb)
 {
     CALL_INFO_TRACE;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("Get start promise, check data is nullptr");
         return;
     }
-    sptr<JsUtilCooperate::CallbackInfo> cb(static_cast<JsUtilCooperate::CallbackInfo *>(work->data));
-    JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-    cb->DecStrongRef(nullptr);
     CHKPV(cb->env);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(cb->env, &scope);
@@ -536,18 +472,13 @@ void JsEventCooperateTarget::CallGetStatePromiseWork(uv_work_t *work, int32_t st
     napi_close_handle_scope(cb->env, scope);
 }
 
-void JsEventCooperateTarget::CallGetStateAsyncWork(uv_work_t *work, int32_t status)
+void JsEventCooperateTarget::CallGetStateAsyncWork(sptr<JsUtilCooperate::CallbackInfo> cb)
 {
     CALL_INFO_TRACE;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("Get start async, check data is nullptr");
         return;
     }
-    sptr<JsUtilCooperate::CallbackInfo> cb(static_cast<JsUtilCooperate::CallbackInfo *>(work->data));
-    JsUtilCooperate::DeletePtr<uv_work_t*>(work);
-    cb->DecStrongRef(nullptr);
     CHKPV(cb->env);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(cb->env, &scope);
@@ -574,19 +505,14 @@ void JsEventCooperateTarget::CallGetStateAsyncWork(uv_work_t *work, int32_t stat
     napi_close_handle_scope(cb->env, scope);
 }
 
-void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32_t status)
+void JsEventCooperateTarget::EmitCoordinationMessageEvent(sptr<JsUtilCooperate::CallbackInfo> cb)
 {
     CALL_INFO_TRACE;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        JsUtilCooperate::DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("The data is nullptr");
         return;
     }
-    sptr<JsUtilCooperate::CallbackInfo> temp(static_cast<JsUtilCooperate::CallbackInfo*>(work->data));
-    JsUtilCooperate::DeletePtr<uv_work_t*>(work);
     std::lock_guard<std::mutex> guard(mutex_);
-    temp->DecStrongRef(nullptr);
     auto msgEvent = coordinationListeners_.find(COORDINATION);
     if (msgEvent == coordinationListeners_.end()) {
         FI_HILOGE("Failed to find the msgEvent");
@@ -594,7 +520,7 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(uv_work_t *work, int32
     }
     for (const auto &item : msgEvent->second) {
         CHKPC(item->env);
-        if (item->ref != temp->ref) {
+        if (item->ref != cb->ref) {
             continue;
         }
         napi_handle_scope scope = nullptr;
