@@ -77,12 +77,14 @@ napi_value JsDragManager::GetDataSummary(napi_env env)
 void JsDragManager::SetDragSwitchState(napi_env env, bool enable)
 {
     CALL_INFO_TRACE;
+    std::lock_guard<std::mutex> guard(mutex_);
     INTERACTION_MGR->SetDragSwitchState(enable, true);
 }
 
 void JsDragManager::SetAppDragSwitchState(napi_env env, bool enable, const std::string &pkgName)
 {
     CALL_INFO_TRACE;
+    std::lock_guard<std::mutex> guard(mutex_);
     if (pkgName.empty()) {
         FI_HILOGE("The pkgName is empty");
         return;
