@@ -61,7 +61,7 @@ private:
         }
     }
 
-    static void CallDragMsg(uv_work_t *work, int32_t status);
+    static void CallDragMsg(sptr<CallbackInfo> cb);
     void DeleteCallbackInfo(std::unique_ptr<CallbackInfo> callback);
     void ReleaseReference();
     bool IsSameHandle(napi_env env, napi_value handle, napi_ref ref);
