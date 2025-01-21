@@ -225,8 +225,7 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 void DragManager::ResetMouseDragMonitorTimerId(const DragData &dragData)
 {
-    if ((context_ != nullptr) && (mouseDragMonitorTimerId_ >= 0) &&
-        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE)) {
+    if ((context_ != nullptr) && (mouseDragMonitorTimerId_ >= 0)) {
         context_->GetTimerManager().RemoveTimer(mouseDragMonitorTimerId_);
         mouseDragMonitorTimerId_ = -1;
     }
@@ -1900,6 +1899,7 @@ int32_t DragManager::SetMouseDragMonitorState(bool state)
         }
     } else {
         ResetMouseDragMonitorInfo();
+        ResetMouseDragMonitorTimerId();
     }
     mouseDragMonitorState_ = state;
     return RET_OK;
