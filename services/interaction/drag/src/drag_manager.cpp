@@ -615,6 +615,29 @@ int32_t DragManager::NotifyHideIcon()
     return RET_OK;
 }
 
+void DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t targetDisplayId)
+{
+    CHKPV(pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    int32_t displayX = -1;
+    int32_t displayY = -1;
+    if (MMI::PointerEvent::FixedMode::ONE_HAND == pointerEvent->GetFixedMode()) {
+        displayX = pointerItem.GetFixedDisplayX();
+        displayY = pointerItem.GetFixedDisplayY();
+    } else {
+        displayX = pointerItem.GetDisplayX();
+        displayY = pointerItem.GetDisplayY();
+    }
+    dragDrawing_.DetachToDisplay(targetDisplayId);
+    bool isNeedAdjustDisplayXY = true;
+    bool isMultiSelectedAnimation = false;
+    dragDrawing_.Draw(targetDisplayId, displayX, displayY, isNeedAdjustDisplayXY, isMultiSelectedAnimation);
+    dragDrawing_.UpdateDragWindowDisplay(targetDisplayId);
+    dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
+    lastDisplayId_ = targetDisplayId;
+}
+
 void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
@@ -649,17 +672,7 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     }
     int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
     if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW) && (lastDisplayId_ != targetDisplayId)) {
-        MMI::PointerEvent::PointerItem pointerItem;
-        pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-        int32_t displayX = pointerItem.GetDisplayX();
-        int32_t displayY = pointerItem.GetDisplayY();
-        dragDrawing_.DetachToDisplay(targetDisplayId);
-        bool isNeedAdjustDisplayXY = true;
-        bool isMultiSelectedAnimation = false;
-        dragDrawing_.Draw(targetDisplayId, displayX, displayY, isNeedAdjustDisplayXY, isMultiSelectedAnimation);
-        dragDrawing_.UpdateDragWindowDisplay(targetDisplayId);
-        dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
-        lastDisplayId_ = targetDisplayId;
+        DealPullInWindowEvent(pointerEvent, targetDisplayId);
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL) {
         dragDrawing_.StopVSyncStation();
@@ -671,14 +684,8 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         pointerEvent->GetSourceType(), pointerEvent->GetPointerId(), pointerAction);
 }
 
-void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+void DragManager::DoLongPressDragZoomOutAnimation(int32_t displayX, int32_t displayY)
 {
-    CHKPV(pointerEvent);
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    int32_t pointerId = pointerEvent->GetPointerId();
-    int32_t displayX = pointerItem.GetDisplayX();
-    int32_t displayY = pointerItem.GetDisplayY();
     auto LongPressDragZoomOutAnimation = [displayX, displayY, this]() {
         if (needLongPressDragAnimation_) {
             DragData dragData = DRAG_DATA_MGR.GetDragData();
@@ -696,9 +703,26 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         int32_t ret = context_->GetDelegateTasks().PostAsyncTask(LongPressDragZoomOutAnimation);
         if (ret != RET_OK) {
             FI_HILOGE("Post async task failed, ret:%{public}d", ret);
-            return;
         }
     }
+}
+
+void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    CHKPV(pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    int32_t pointerId = pointerEvent->GetPointerId();
+    int32_t displayX = -1;
+    int32_t displayY = -1;
+    if (MMI::PointerEvent::FixedMode::ONE_HAND == pointerEvent->GetFixedMode()) {
+        displayX = pointerItem.GetFixedDisplayX();
+        displayY = pointerItem.GetFixedDisplayY();
+    } else {
+        displayX = pointerItem.GetDisplayX();
+        displayY = pointerItem.GetDisplayY();
+    }
+    DoLongPressDragZoomOutAnimation(displayX, displayY);
     int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
     FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{private}d, displayY:%{private}d, "
         "targetDisplayId:%{public}d, pullId:%{public}d", pointerEvent->GetSourceType(), pointerId, displayX, displayY,
