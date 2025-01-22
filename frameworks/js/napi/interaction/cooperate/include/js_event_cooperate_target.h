@@ -61,15 +61,15 @@ public:
     void OnCoordinationMessage(const std::string &networkId, CoordinationMessage msg) override;
 
 private:
-    static void CallEnablePromiseWork(uv_work_t *work, int32_t status);
-    static void CallEnableAsyncWork(uv_work_t *work, int32_t status);
-    static void CallStartPromiseWork(uv_work_t *work, int32_t status);
-    static void CallStartAsyncWork(uv_work_t *work, int32_t status);
-    static void CallStopPromiseWork(uv_work_t *work, int32_t status);
-    static void CallStopAsyncWork(uv_work_t *work, int32_t status);
-    static void CallGetStatePromiseWork(uv_work_t *work, int32_t status);
-    static void CallGetStateAsyncWork(uv_work_t *work, int32_t status);
-    static void EmitCoordinationMessageEvent(uv_work_t *work, int32_t status);
+    static void CallEnablePromiseWork(sptr<JsUtilCooperate::CallbackInfo> cb);
+    static void CallEnableAsyncWork(sptr<JsUtilCooperate::CallbackInfo> cb);
+    static void CallStartPromiseWork(sptr<JsUtilCooperate::CallbackInfo> cb);
+    static void CallStartAsyncWork(sptr<JsUtilCooperate::CallbackInfo> cb);
+    static void CallStopPromiseWork(sptr<JsUtilCooperate::CallbackInfo> cb);
+    static void CallStopAsyncWork(sptr<JsUtilCooperate::CallbackInfo> cb);
+    static void CallGetStatePromiseWork(sptr<JsUtilCooperate::CallbackInfo> cb);
+    static void CallGetStateAsyncWork(sptr<JsUtilCooperate::CallbackInfo> cb);
+    static void EmitCoordinationMessageEvent(sptr<JsUtilCooperate::CallbackInfo> cb);
 
     inline static std::map<CoordinationMessage, CooperateMessage> messageTransform = {
         { CoordinationMessage::PREPARE, CooperateMessage::STATE_ON },

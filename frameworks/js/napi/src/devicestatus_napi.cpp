@@ -51,27 +51,21 @@ void DeviceStatusCallback::OnDeviceStatusChanged(const Data& devicestatusData)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(env_, &loop);
-    CHKPV(loop);
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
     FI_HILOGD("devicestatusData.type:%{public}d, devicestatusData.value:%{public}d",
         devicestatusData.type, devicestatusData.value);
     data_ = devicestatusData;
-    work->data = static_cast<void *>(&data_);
-    int32_t ret = uv_queue_work_with_qos(loop, work, [] (uv_work_t *work) {}, EmitOnEvent, uv_qos_default);
-    if (ret != 0) {
-        delete work;
-        FI_HILOGE("Failed to uv_queue_work_with_qos");
+
+    auto task = [this]() {
+        FI_HILOGI("Execute lamdba");
+        EmitOnEvent(&this->data_);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+        FI_HILOGE("Failed to SendEvent");
     }
 }
 
-void DeviceStatusCallback::EmitOnEvent(uv_work_t *work, int32_t status)
+void DeviceStatusCallback::EmitOnEvent(Data* data)
 {
-    CHKPV(work);
-    Data* data = static_cast<Data*>(work->data);
-    delete work;
     CHKPV(data);
     DeviceStatusNapi* deviceStatusNapi = DeviceStatusNapi::GetDeviceStatusNapi();
     CHKPV(deviceStatusNapi);

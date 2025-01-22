@@ -36,7 +36,7 @@ public:
     explicit MotionCallback(napi_env env) : env_(env) {}
     ~MotionCallback() override {};
     void OnMotionChanged(const MotionEvent& event) override;
-    static void EmitOnEvent(uv_work_t *work, int32_t status);
+    static void EmitOnEvent(MotionEvent* data);
 
 private:
     napi_env env_;

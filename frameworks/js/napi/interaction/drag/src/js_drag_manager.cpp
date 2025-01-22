@@ -155,34 +155,26 @@ void JsDragManager::OnDragMessage(DragState state)
     for (auto &item : listeners_) {
         CHKPC(item);
         CHKPC(item->env);
-        uv_loop_s* loop = nullptr;
-        CHKRV(napi_get_uv_event_loop(item->env, &loop), GET_UV_EVENT_LOOP);
-        uv_work_t* work = new (std::nothrow) uv_work_t;
-        CHKPV(work);
         item->state = state;
         item->IncStrongRef(nullptr);
-        work->data = item.GetRefPtr();
-        int32_t result = uv_queue_work_with_qos(loop, work, [](uv_work_t* work) {}, CallDragMsg, uv_qos_default);
-        if (result != 0) {
-            FI_HILOGE("uv_queue_work_with_qos failed");
-            item->DecStrongRef(nullptr);
-            DeletePtr<uv_work_t*>(work);
+
+        auto task = [item]() {
+            FI_HILOGI("Execute lamdba");
+            CallDragMsg(item);
+        };
+        if (napi_status::napi_ok != napi_send_event(item->env, task, napi_eprio_immediate)) {
+            FI_HILOGE("Failed to SendEvent");
         }
     }
 }
 
-void JsDragManager::CallDragMsg(uv_work_t *work, int32_t status)
+void JsDragManager::CallDragMsg(sptr<CallbackInfo> cb)
 {
     CALL_DEBUG_ENTER;
-    CHKPV(work);
-    if (work->data == nullptr) {
-        DeletePtr<uv_work_t*>(work);
+    if (cb == nullptr) {
         FI_HILOGE("Check data is nullptr");
         return;
     }
-    sptr<CallbackInfo> temp(static_cast<CallbackInfo*>(work->data));
-    DeletePtr<uv_work_t*>(work);
-    temp->DecStrongRef(nullptr);
     std::lock_guard<std::mutex> guard(mutex_);
     if (listeners_.empty()) {
         FI_HILOGE("The listener list is empty");
@@ -190,7 +182,7 @@ void JsDragManager::CallDragMsg(uv_work_t *work, int32_t status)
     }
     for (const auto &item : listeners_) {
         CHKPC(item->env);
-        if (item->ref != temp->ref) {
+        if (item->ref != cb->ref) {
             continue;
         }
         napi_handle_scope scope = nullptr;
