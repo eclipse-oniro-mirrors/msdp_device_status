@@ -346,13 +346,13 @@ bool InputEventBuilder::DampPointerMotion(std::shared_ptr<MMI::PointerEvent> poi
     // First transition will trigger special effect which would damp pointer movement. We want to
     // damp pointer movement even further than that could be achieved by setting pointer speed.
     // By scaling increment of pointer movement, we want to enlarge the range of pointer speed setting.
-    if (item.GetRawDx() >= 0) {
+    if (item.GetRawDx() > 0) {
         double rawDxRight = rawDxRightRemainder_ + item.GetRawDx() * GetDamplingCoefficient(
             DamplingDirection::DAMPLING_DIRECTION_RIGHT);
         int32_t rawDxIntegerRight = static_cast<int32_t>(rawDxRight);
         rawDxRightRemainder_ = rawDxRight - static_cast<double>(rawDxIntegerRight);
         item.SetRawDx(rawDxIntegerRight);
-    } else {
+    } else if (item.GetRawDx() < 0) {
         double rawDxLeft = rawDxLeftRemainder_ + item.GetRawDx() * GetDamplingCoefficient(
             DamplingDirection::DAMPLING_DIRECTION_LEFT);
         int32_t rawDxIntegerLeft = static_cast<int32_t>(rawDxLeft);
