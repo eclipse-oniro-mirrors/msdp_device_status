@@ -1889,7 +1889,7 @@ void DragManager::ResetMouseDragMonitorInfo()
     existMouseMoveDragCallback_ = false;
     mouseDragMonitorState_ = false;
     DRAG_DATA_MGR.SetEventId(-1);
-    if (context_ != nullptr) && (mouseDragMonitorTimerId_ >= 0) {
+    if ((context_ != nullptr) && (mouseDragMonitorTimerId_ >= 0)) {
         context_->GetTimerManager().RemoveTimer(mouseDragMonitorTimerId_);
         mouseDragMonitorTimerId_ = -1;
     }
