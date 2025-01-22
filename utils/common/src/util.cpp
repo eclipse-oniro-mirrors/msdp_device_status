@@ -15,6 +15,7 @@
 
 #include "include/util.h"
 
+#include <regex>
 #include <string>
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -54,6 +55,8 @@ constexpr int32_t ROTATE_POLICY_FOLD_MODE { 2 };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 const int32_t ROTATE_POLICY = OHOS::system::GetIntParameter("const.window.device.rotate_policy", 0);
 const std::string FOLD_ROTATE_POLICY = OHOS::system::GetParameter("const.window.foldabledevice.rotate_policy", "0,0");
+const std::string FOLD_SCREEN_TYPE = OHOS::system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
+const std::string SECONDARY_FOLD_DISPLAY = "6";
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 const std::string SVG_PATH { "/system/etc/device_status/drag_icon/" };
 } // namespace
@@ -338,6 +341,43 @@ void GetRotatePolicy(bool &isScreenRotation, std::vector<std::string> &foldRotat
         return;
     }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+}
+
+std::vector<std::string> StringSplit(const std::string& str, char delim)
+{
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    std::size_t previous = 0;
+    std::size_t current = str.find(delim);
+    std::vector<std::string> elems;
+    while (current != std::string::npos) {
+        if (current > previous) {
+            elems.push_back(str.substr(previous, current - previous));
+        }
+        previous = current + 1;
+        current = str.find(delim, previous);
+    }
+    if (previous != str.size()) {
+        elems.push_back(str.substr(previous));
+    }
+    return elems;
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
+    return {};
+}
+
+bool IsSecondaryDevice()
+{
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    std::regex reg("^([0-9],){3}[0-9]{1}$");
+    if (!std::regex_match(FOLD_SCREEN_TYPE, reg)) {
+        return false;
+    }
+    std::vector<std::string> foldTypes = StringSplit(FOLD_SCREEN_TYPE, ',');
+    if (foldTypes.empty()) {
+        return false;
+    }
+    return foldTypes[0] == SECONDARY_FOLD_DISPLAY;
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
+    return false;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

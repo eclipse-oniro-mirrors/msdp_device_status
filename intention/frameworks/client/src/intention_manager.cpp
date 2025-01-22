@@ -438,10 +438,26 @@ int32_t IntentionManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTr
             return drag_.RotateDragWindowSync(*tunnel_, rsTransaction);
         }
         Rosen::FoldStatus foldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
-        if (((foldStatus == Rosen::FoldStatus::EXPAND) && (foldRotatePolicys_[INDEX_EXPAND] == SCREEN_ROTATION)) ||
-            ((foldStatus == Rosen::FoldStatus::FOLDED) && (foldRotatePolicys_[INDEX_FOLDED] == SCREEN_ROTATION))) {
-            FI_HILOGD("Full display rotation, not need rotate drag window");
-            return RET_OK;
+        if (IsSecondaryDevice()) {
+            bool isExpand = (foldStatus == Rosen::FoldStatus::EXPAND || foldStatus == Rosen::FoldStatus::HALF_FOLD ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED);
+            bool isFold = (foldStatus == Rosen::FoldStatus::FOLDED ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED);
+            if ((isExpand && (foldRotatePolicys_[INDEX_EXPAND] == SCREEN_ROTATION)) ||
+                (isFold && (foldRotatePolicys_[INDEX_FOLDED] == SCREEN_ROTATION))) {
+                FI_HILOGD("Secondary device Full display rotation, not need rotate drag window");
+                return RET_OK;
+            }
+        } else {
+            if (((foldStatus == Rosen::FoldStatus::EXPAND) && (foldRotatePolicys_[INDEX_EXPAND] == SCREEN_ROTATION)) ||
+                ((foldStatus == Rosen::FoldStatus::FOLDED) && (foldRotatePolicys_[INDEX_FOLDED] == SCREEN_ROTATION))) {
+                FI_HILOGD("Full display rotation, not need rotate drag window");
+                return RET_OK;
+            }
         }
     }
     return drag_.RotateDragWindowSync(*tunnel_, rsTransaction);
