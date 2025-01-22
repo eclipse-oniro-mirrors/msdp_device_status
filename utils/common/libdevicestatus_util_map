@@ -20,6 +20,7 @@
             "OHOS::Msdp::DeviceStatus::GetThisThreadId()";
             "OHOS::Msdp::DeviceStatus::GetPid()";
             "OHOS::Msdp::DeviceStatus::GetProgramName()";
+            "OHOS::Msdp::DeviceStatus::IsSecondaryDevice()";
             "OHOS::Msdp::DeviceStatus::GetRotatePolicy(bool&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
             "OHOS::Msdp::DeviceStatus::IsValidSvgFile(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
             "OHOS::Msdp::DeviceStatus::IsNum(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";

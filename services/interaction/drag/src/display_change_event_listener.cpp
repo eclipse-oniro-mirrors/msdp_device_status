@@ -48,7 +48,6 @@ void DisplayChangeEventListener::OnDestroy(Rosen::DisplayId displayId)
 void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
 {
     if (Rosen::DisplayManager::GetInstance().IsFoldable()) {
-        Rosen::FoldStatus foldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
         bool isScreenRotation = false;
         std::vector<std::string> foldRotatePolicys;
         GetRotatePolicy(isScreenRotation, foldRotatePolicys);
@@ -56,8 +55,21 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
             FI_HILOGE("foldRotatePolicys is invalid");
             return;
         }
-        if (((foldStatus == Rosen::FoldStatus::EXPAND) && (foldRotatePolicys[INDEX_EXPAND] == SCREEN_ROTATION)) ||
-            ((foldStatus == Rosen::FoldStatus::FOLDED) && (foldRotatePolicys[INDEX_FOLDED] == SCREEN_ROTATION))) {
+        Rosen::FoldStatus foldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
+        bool isExpand = (foldStatus == Rosen::FoldStatus::EXPAND);
+        bool isFold = (foldStatus == Rosen::FoldStatus::FOLDED);
+        if (IsSecondaryDevice()) {
+            isExpand = (foldStatus == Rosen::FoldStatus::EXPAND || foldStatus == Rosen::FoldStatus::HALF_FOLD ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED);
+            isFold = (foldStatus == Rosen::FoldStatus::FOLDED ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND ||
+                foldStatus == Rosen::FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED);
+        }
+        if ((isExpand && (foldRotatePolicys[INDEX_EXPAND] == SCREEN_ROTATION)) ||
+            (isFold && (foldRotatePolicys[INDEX_FOLDED] == SCREEN_ROTATION))) {
             if (lastRotation_ == Rosen::Rotation::ROTATION_0) {
                 FI_HILOGD("Last rotation is zero");
                 return;
