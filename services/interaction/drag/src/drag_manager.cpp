@@ -225,7 +225,8 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 void DragManager::ResetMouseDragMonitorTimerId(const DragData &dragData)
 {
-    if ((context_ != nullptr) && (mouseDragMonitorTimerId_ >= 0)) {
+    if ((context_ != nullptr) && (mouseDragMonitorTimerId_ >= 0) &&
+        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE)) {
         context_->GetTimerManager().RemoveTimer(mouseDragMonitorTimerId_);
         mouseDragMonitorTimerId_ = -1;
     }
@@ -372,7 +373,8 @@ int32_t DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
-int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::string &packageName, int32_t pid)
+int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::string &packageName, int32_t pid,
+    bool isStopCooperate)
 {
     FI_HILOGI("enter");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -397,7 +399,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t ret = RET_OK;
-    if (OnStopDrag(dropResult.result, dropResult.hasCustomAnimation, packageName, pid) != RET_OK) {
+    if (OnStopDrag(dropResult.result, dropResult.hasCustomAnimation, packageName, pid, isStopCooperate) != RET_OK) {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteStopDrag(dragState_, dropResult, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
@@ -1177,7 +1179,8 @@ int32_t DragManager::OnStartDrag(const std::string &packageName, int32_t pid)
     return RET_OK;
 }
 
-int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation, const std::string &packageName, int32_t pid)
+int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation, const std::string &packageName, int32_t pid,
+    bool isStopCooperate)
 {
     FI_HILOGI("Add custom animation:%{public}s", hasCustomAnimation ? "true" : "false");
     DragData dragData = DRAG_DATA_MGR.GetDragData();
@@ -1206,7 +1209,13 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation, cons
         if (dragState_ != DragState::MOTION_DRAGGING) {
             FI_HILOGI("Set the pointer cursor visible");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-            MMI::InputManager::GetInstance()->SetPointerVisible(true);
+            if (isStopCooperate) {
+                CHKPR(context_, RET_ERR);
+                bool hasLocalPointerDevice = context_->GetDeviceManager().HasLocalPointerDevice();
+                MMI::InputManager::GetInstance()->SetPointerVisible(hasLocalPointerDevice);
+            } else {
+                MMI::InputManager::GetInstance()->SetPointerVisible(true);
+            }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
         }
     }
@@ -1879,6 +1888,11 @@ void DragManager::ResetMouseDragMonitorInfo()
     mouseDragMonitorDisplayY_ = -1;
     existMouseMoveDragCallback_ = false;
     mouseDragMonitorState_ = false;
+    DRAG_DATA_MGR.SetEventId(-1);
+    if ((context_ != nullptr) && (mouseDragMonitorTimerId_ >= 0) {
+        context_->GetTimerManager().RemoveTimer(mouseDragMonitorTimerId_);
+        mouseDragMonitorTimerId_ = -1;
+    }
     FI_HILOGI("leave");
 }
 
@@ -1899,7 +1913,6 @@ int32_t DragManager::SetMouseDragMonitorState(bool state)
         }
     } else {
         ResetMouseDragMonitorInfo();
-        ResetMouseDragMonitorTimerId();
     }
     mouseDragMonitorState_ = state;
     return RET_OK;
