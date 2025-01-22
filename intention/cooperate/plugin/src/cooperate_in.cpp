@@ -228,11 +228,11 @@ void CooperateIn::Initial::OnRelayWithOptions(Context &context, const CooperateE
     StartWithOptionsEvent startEvent = std::get<StartWithOptionsEvent>(event.event);
     parent_.process_.StartCooperateWithOptions(context, startEvent);
     FI_HILOGI("[relay cooperate With Options] To '%{public}s'", Utility::Anonymize(parent_.process_.Peer()).c_str());
-
     if (relay_ != nullptr) {
         Switch(relay_);
         relay_->OnProgressWithOptions(context, event);
     }
+    FI_HILOGE("relay_ is nullptr");
 }
 
 void CooperateIn::Initial::OnStartWithOptions(Context &context, const CooperateEvent &event)

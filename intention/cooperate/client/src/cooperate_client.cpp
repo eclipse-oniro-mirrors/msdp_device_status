@@ -176,16 +176,10 @@ int32_t CooperateClient::StartWithOptions(ITunnelClient &tunnel, const std::stri
 
     int32_t ret = tunnel.Start(Intention::COOPERATE, param, reply);
     if (ret != RET_OK) {
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-        CooperateDFX::WriteStart(OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         FI_HILOGE("Activate cooperate failed");
         return ret;
     }
     devCooperateEvent_.insert_or_assign(param.userData, event);
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-    CooperateDFX::WriteStart(OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
     return RET_OK;
 }
 
