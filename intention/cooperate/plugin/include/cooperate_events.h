@@ -270,13 +270,13 @@ struct UpdateVirtualDeviceIdMapEvent {
 };
 
 struct StartWithOptionsEvent {
-    int32_t pid;
-    int32_t userData;
+    int32_t pid { -1 };
+    int32_t userData { 0 };
     std::string remoteNetworkId;
-    int32_t startDeviceId;
-    int32_t displayX;
-    int32_t displayY;
-    int32_t displayId;
+    int32_t startDeviceId { -1 };
+    int32_t displayX { -1 };
+    int32_t displayY { -1 };
+    int32_t displayId { -1 };
     std::shared_ptr<std::promise<int32_t>> errCode;
 };
 
