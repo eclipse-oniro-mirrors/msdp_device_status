@@ -36,6 +36,7 @@ namespace {
 constexpr int32_t REPEAT_ONCE { 1 };
 constexpr int32_t DEFAULT_UNLOAD_COOLING_TIME_MS { 60000 };
 constexpr int32_t SYNC_TASK_TIMEOUT_DURATION { 2500 };
+constexpr int32_t WITHOPTIONS { 1 };
 }
 
 CooperateServer::CooperateServer(IContext *context)
@@ -97,6 +98,7 @@ int32_t CooperateServer::Start(CallingContext &context, MessageParcel &data, Mes
         FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
         return ret;
     }
+
     StartCooperateParam param;
     if (!param.Unmarshalling(data)) {
         FI_HILOGE("StartCooperateParam::Unmarshalling fail");
@@ -105,6 +107,10 @@ int32_t CooperateServer::Start(CallingContext &context, MessageParcel &data, Mes
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
+    if (param.cooperateParamType == WITHOPTIONS) {
+        return cooperate->StartWithOptions(context.pid, param.userData, param.remoteNetworkId,
+            param.startDeviceId, param.options);
+    }
     return cooperate->Start(context.pid, param.userData, param.remoteNetworkId, param.startDeviceId);
 }
 

@@ -72,10 +72,15 @@ public:
     void CloseAllSessions();
 
     int32_t StartCooperate(const std::string &networkId, const DSoftbusStartCooperate &event);
+    int32_t StartCooperateWithOptions(const std::string &networkId, const DSoftbusCooperateOptions &event);
     int32_t StopCooperate(const std::string &networkId, const DSoftbusStopCooperate &event);
     int32_t ComeBack(const std::string &networkId, const DSoftbusComeBack &event);
+    int32_t ComeBackWithOptions(const std::string &networkId, const DSoftbusComeBackWithOptions &event);
     int32_t RelayCooperate(const std::string &networkId, const DSoftbusRelayCooperate &event);
     int32_t RelayCooperateFinish(const std::string &networkId, const DSoftbusRelayCooperateFinished &event);
+    int32_t RelayCooperateWithOptions(const std::string &networkId, const DSoftbusRelayCooperate &event);
+    int32_t RelayCooperateWithOptionsFinish(const std::string &networkId,
+        const DSoftbusRelayCooperateFinished &event);
     static std::string GetLocalNetworkId();
 
 private:
@@ -87,7 +92,9 @@ private:
     void OnCommunicationFailure(const std::string &networkId);
     void OnStartCooperate(const std::string &networkId, NetPacket &packet);
     void OnStopCooperate(const std::string &networkId, NetPacket &packet);
+    void OnStartCooperateWithOptions(const std::string &networkId, NetPacket &packet);
     void OnComeBack(const std::string &networkId, NetPacket &packet);
+    void OnComeBackWithOptions(const std::string &networkId, NetPacket &packet);
     void OnRelayCooperate(const std::string &networkId, NetPacket &packet);
     void OnRelayCooperateFinish(const std::string &networkId, NetPacket &packet);
     void OnSubscribeMouseLocation(const std::string& networKId, NetPacket &packet);
@@ -98,6 +105,8 @@ private:
     void OnRemoteInputDevice(const std::string& networKId, NetPacket &packet);
     void OnRemoteHotPlug(const std::string& networKId, NetPacket &packet);
     int32_t DeserializeDevice(std::shared_ptr<IDevice> device, NetPacket &packet);
+    void OnRelayCooperateWithOptions(const std::string &networkId, NetPacket &packet);
+    void OnRelayCooperateWithOptionsFinish(const std::string &networkId, NetPacket &packet);
 
     IContext *env_ { nullptr };
     std::mutex lock_;

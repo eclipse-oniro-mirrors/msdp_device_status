@@ -42,6 +42,7 @@ private:
 
         static void BuildChains(std::shared_ptr<Initial> self, CooperateIn &parent);
         static void RemoveChains(std::shared_ptr<Initial> self);
+        void OnProgressWithOptions(Context &context, const CooperateEvent &event) override;
 
     private:
         void OnDisable(Context &context, const CooperateEvent &event);
@@ -59,6 +60,10 @@ private:
         void OnUpdateCooperateFlag(Context &context, const CooperateEvent &event);
         void OnRemoteHotPlug(Context &context, const CooperateEvent &event);
         void OnRemoteInputDevice(Context &context, const CooperateEvent &event);
+        void OnStartWithOptions(Context &context, const CooperateEvent &event);
+        void OnComeBackWithOptions(Context &context, const CooperateEvent &event);
+        void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
+        void OnRelayWithOptions(Context &context, const CooperateEvent &event);
 
         CooperateIn &parent_;
         static std::set<int32_t> filterPointerActions_;
@@ -72,6 +77,7 @@ private:
 
         void OnProgress(Context &context, const CooperateEvent &event) override;
         void OnReset(Context &context, const CooperateEvent &event) override;
+        void OnProgressWithOptions(Context &context, const CooperateEvent &event) override;
 
     private:
         void OnDisable(Context &context, const CooperateEvent &event);
@@ -85,10 +91,15 @@ private:
         void OnBoardOffline(Context &context, const CooperateEvent &event);
         void OnSwitchChanged(Context &context, const CooperateEvent &event);
         void OnSoftbusSessionClosed(Context &context, const CooperateEvent &event);
+        void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
+        void OnNormalWithOptions(Context &context, const CooperateEvent &event);
         void OnResetWithNotifyMessage(Context &context, const CooperateEvent &event);
+        void OnResponseWithOptions(Context &context, const CooperateEvent &event);
+        void OnResetWithOptionsNotifyMessage(Context &context, const CooperateEvent &event);
 
         CooperateIn &parent_;
         int32_t timerId_ { -1 };
+        StartWithOptionsEvent startWithOptionsEvent_;
     };
 
     void StopCooperate(Context &context, const CooperateEvent &event);

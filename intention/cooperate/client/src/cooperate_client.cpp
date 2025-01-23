@@ -143,7 +143,35 @@ int32_t CooperateClient::Start(ITunnelClient &tunnel, const std::string &remoteN
 #ifdef ENABLE_PERFORMANCE_CHECK
     StartTrace(userData);
 #endif // ENABLE_PERFORMANCE_CHECK
-    StartCooperateParam param { userData, remoteNetworkId, startDeviceId, isCheckPermission };
+    CooperateParamType paramType = CooperateParamType::DEFAULT;
+    CooperateOptions options;
+    StartCooperateParam param { userData, remoteNetworkId, startDeviceId, isCheckPermission, options,
+        static_cast<int32_t>(paramType) };
+    DefaultReply reply;
+
+    int32_t ret = tunnel.Start(Intention::COOPERATE, param, reply);
+    if (ret != RET_OK) {
+        FI_HILOGE("Activate cooperate failed");
+        return ret;
+    }
+    devCooperateEvent_.insert_or_assign(param.userData, event);
+    return RET_OK;
+}
+
+int32_t CooperateClient::StartWithOptions(ITunnelClient &tunnel, const std::string &remoteNetworkId,
+    int32_t startDeviceId, CooperateMessageCallback callback, const CooperateOptions &options)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    CooperateEvent event { callback };
+    auto userData = GenerateRequestID();
+#ifdef ENABLE_PERFORMANCE_CHECK
+    StartTrace(userData);
+#endif // ENABLE_PERFORMANCE_CHECK
+    CooperateParamType paramType = CooperateParamType::WITHOPTIONS;
+    bool isCheckPermission = false;
+    StartCooperateParam param { userData, remoteNetworkId, startDeviceId, isCheckPermission, options,
+        static_cast<int32_t>(paramType) };
     DefaultReply reply;
 
     int32_t ret = tunnel.Start(Intention::COOPERATE, param, reply);
