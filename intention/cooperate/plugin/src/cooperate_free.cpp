@@ -62,7 +62,8 @@ void CooperateFree::OnLeaveState(Context &context)
 void CooperateFree::SetPointerVisible(Context &context)
 {
     CHKPV(env_);
-    bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice();
+    bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice() ||
+        env_->GetInput().HasLocalPointerDevice();
     bool visible = !context.NeedHideCursor() && hasLocalPointerDevice;
     FI_HILOGI("Set pointer visible:%{public}s, HasLocalPointerDevice:%{public}s",
         visible ? "true" : "false", hasLocalPointerDevice ? "true" : "false");
@@ -195,7 +196,8 @@ void CooperateFree::Initial::OnDisable(Context &context, const CooperateEvent &e
         FI_HILOGI("drag state is start");
         return;
     }
-    bool hasLocalPointerDevice =  parent_.env_->GetDeviceManager().HasLocalPointerDevice();
+    bool hasLocalPointerDevice =  parent_.env_->GetDeviceManager().HasLocalPointerDevice() ||
+        parent_.env_->GetInput().HasLocalPointerDevice();
     FI_HILOGI("HasLocalPointerDevice:%{public}s", hasLocalPointerDevice ? "true" : "false");
     context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     parent_.env_->GetInput().SetPointerVisibility(hasLocalPointerDevice, PRIORITY);

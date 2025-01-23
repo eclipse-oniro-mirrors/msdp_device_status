@@ -643,7 +643,8 @@ void CooperateIn::StopCooperate(Context &context, const CooperateEvent &event)
 void CooperateIn::SetPointerVisible(Context &context)
 {
     CHKPV(env_);
-    bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice();
+    bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice() ||
+        env_->GetInput().HasLocalPointerDevice();
     FI_HILOGI("HasLocalPointerDevice:%{public}s", hasLocalPointerDevice ? "true" : "false");
     env_->GetInput().SetPointerVisibility(hasLocalPointerDevice, PRIORITY);
 }

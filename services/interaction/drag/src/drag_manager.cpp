@@ -1251,7 +1251,8 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation, cons
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
             if (isStopCooperate) {
                 CHKPR(context_, RET_ERR);
-                bool hasLocalPointerDevice = context_->GetDeviceManager().HasLocalPointerDevice();
+                bool hasLocalPointerDevice = context_->GetDeviceManager().HasLocalPointerDevice() ||
+                    context_->GetInput().HasLocalPointerDevice();
                 MMI::InputManager::GetInstance()->SetPointerVisible(hasLocalPointerDevice);
             } else {
                 MMI::InputManager::GetInstance()->SetPointerVisible(true);
