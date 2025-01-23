@@ -61,7 +61,7 @@ public:
     bool HasLocalPointerDevice() override;
 private:
     bool IsLocalPointerDevice(std::shared_ptr<MMI::InputDevice> device);
-    bool IsVirtualTrackPad(std::shared_ptr<MMI::InputDevice> device);
+    bool IsVirtualTrackpad(std::shared_ptr<MMI::InputDevice> device);
 };
 
 class PointerFilter : public MMI::IInputEventFilter {

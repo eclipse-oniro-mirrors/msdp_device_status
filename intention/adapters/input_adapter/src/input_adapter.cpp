@@ -26,7 +26,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-const std::string VIRTUAL_TRACK_PAD_NAME { "VirtualTrackPad" }; // defined in multimodalinput
+const std::string VIRTUAL_TRACK_PAD_NAME { "VirtualTrackpad" }; // defined in multimodalinput
 constexpr int32_t MIN_VIRTUAL_INPUT_DEVICE_ID { 1000 }; // defined in multimodalinput
 }
 
@@ -196,7 +196,7 @@ bool InputAdapter::IsLocalPointerDevice(std::shared_ptr<MMI::InputDevice> device
         device->GetId() < MIN_VIRTUAL_INPUT_DEVICE_ID;
 }
 
-bool InputAdapter::IsVirtualTrackPad(std::shared_ptr<MMI::InputDevice> device)
+bool InputAdapter::IsVirtualTrackpad(std::shared_ptr<MMI::InputDevice> device)
 {
     CHKPR(device, false);
     return device->GetName() == VIRTUAL_TRACK_PAD_NAME;
@@ -206,7 +206,7 @@ bool InputAdapter::HasLocalPointerDevice()
 {
     std::vector<int32_t> deviceIds;
     if (MMI::InputManager::GetInstance()->GetDeviceIds(
-        [&deviceIds](std::vector<int32_t> & ids) {deviceIds = ids;}) != RET_OK) {
+        [&deviceIds](std::vector<int32_t> &ids) { deviceIds = ids; }) != RET_OK) {
         FI_HILOGE("GetDeviceIds failed");
         return false;
     }
@@ -214,7 +214,7 @@ bool InputAdapter::HasLocalPointerDevice()
         bool isLocalPointerDevice { false };
         auto ret = MMI::InputManager::GetInstance()->GetDevice(deviceId, [&isLocalPointerDevice, this] (
             std::shared_ptr<MMI::InputDevice> device) {
-                if (this->IsLocalPointerDevice(device) || this->IsVirtualTrackPad(device)) {
+                if (this->IsLocalPointerDevice(device) || this->IsVirtualTrackpad(device)) {
                     isLocalPointerDevice = true;
                 }
             });
