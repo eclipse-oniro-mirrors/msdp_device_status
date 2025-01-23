@@ -244,7 +244,11 @@ CLEANUP:
 void VirtualMouse::MoveProcess(int32_t dx, int32_t dy)
 {
     CALL_DEBUG_ENTER;
+#ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+#else
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+#endif // OHOS_BUILD_PC_PRODUCT
     CHKPV(display);
     g_screenWidth = display->GetWidth();
     g_screenHeight = display->GetHeight();
