@@ -61,6 +61,7 @@ public:
     int32_t SetPointerSpeed(int32_t speed) override;
     int32_t GetTouchPadSpeed(int32_t &speed) override;
     int32_t SetTouchPadSpeed(int32_t speed) override;
+    bool HasLocalPointerDevice() override;
 };
 
 class MockPluginManager : public IPluginManager {
