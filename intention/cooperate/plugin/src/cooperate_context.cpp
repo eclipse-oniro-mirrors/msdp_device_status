@@ -197,7 +197,7 @@ NormalizedCoordinate Context::NormalizedCursorPosition() const
 #ifndef OHOS_BUILD_PC_PRODUCT
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(currentDisplayId_);
 #else
-    auto display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(currentDisplayId_);
+    auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(currentDisplayId_);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGE("No default display");

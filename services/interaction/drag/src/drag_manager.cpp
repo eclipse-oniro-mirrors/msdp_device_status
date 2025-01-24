@@ -1166,7 +1166,7 @@ int32_t DragManager::OnStartDrag(const std::string &packageName, int32_t pid)
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(dragData.displayId);
 #else
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(dragData.displayId);
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(dragData.displayId);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display != nullptr) {
         std::string displayName = display->GetName();
