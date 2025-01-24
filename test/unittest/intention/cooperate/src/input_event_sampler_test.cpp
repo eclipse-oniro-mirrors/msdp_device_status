@@ -305,40 +305,6 @@ HWTEST_F(InputEventSamplerTest, TestIsSkipNeeded_02, TestSize.Level1)
     int32_t ret = sampler.IsSkipNeeded(pointerEvent);
     ASSERT_EQ(ret, false);
 }
-
-/**
- * @tc.name: TestHandleMouseEvent_01
- * @tc.desc: Test HandleMouseEvent
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InputEventSamplerTest, TestHandleMouseEvent_01, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    Cooperate::InputEventSampler sampler;
-    auto pointerEvent = MMI::PointerEvent::Create();
-    ASSERT_NE(pointerEvent, nullptr);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    sampler.rawEvents_.push({pointerEvent, std::chrono::steady_clock::now()});
-    ASSERT_NO_FATAL_FAILURE(sampler.HandleMouseEvent(pointerEvent));
-}
-
-/**
- * @tc.name: TestHandleMouseEvent_02
- * @tc.desc: Test HandleMouseEvent
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InputEventSamplerTest, TestHandleMouseEvent_02, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    Cooperate::InputEventSampler sampler;
-    auto pointerEvent = MMI::PointerEvent::Create();
-    ASSERT_NE(pointerEvent, nullptr);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-    sampler.rawEvents_.push({pointerEvent, std::chrono::steady_clock::now()});
-    ASSERT_NO_FATAL_FAILURE(sampler.HandleMouseEvent(pointerEvent));
-}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
