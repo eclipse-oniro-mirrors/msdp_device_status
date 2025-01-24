@@ -84,7 +84,7 @@ VirtualTouchScreenBuilder::VirtualTouchScreenBuilder() : VirtualDeviceBuilder(Ge
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
     CHKPV(display);
     g_absMaxWidth = display->GetWidth();

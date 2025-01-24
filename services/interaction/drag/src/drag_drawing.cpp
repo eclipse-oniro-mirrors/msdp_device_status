@@ -238,14 +238,14 @@ float GetScaling()
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
 #else
     sptr<Rosen::Display> display =
-        Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(g_drawingInfo.displayId);
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(g_drawingInfo.displayId);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-        display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
         if (display == nullptr) {
             FI_HILOGE("Get display info failed, display is nullptr");
@@ -1732,14 +1732,14 @@ int32_t DragDrawing::InitLayer()
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
 #else
     sptr<Rosen::Display> display =
-        Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(g_drawingInfo.displayId);
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(g_drawingInfo.displayId);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-        display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
         if (display == nullptr) {
             FI_HILOGE("Get display info failed, display is nullptr");
@@ -1829,14 +1829,14 @@ void DragDrawing::CreateWindow()
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
 #else
     sptr<Rosen::Display> display =
-        Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(g_drawingInfo.displayId);
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(g_drawingInfo.displayId);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-        display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
         if (display == nullptr) {
             FI_HILOGE("Get display info failed, display is nullptr");
@@ -3028,14 +3028,14 @@ void DragDrawing::RotateDisplayXY(int32_t &displayX, int32_t &displayY)
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
 #else
     sptr<Rosen::Display> display =
-        Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(g_drawingInfo.displayId);
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(g_drawingInfo.displayId);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-        display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
         CHKPV(display);
     }
@@ -3081,14 +3081,14 @@ void DragDrawing::RotatePosition(float &displayX, float &displayY)
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
 #else
     sptr<Rosen::Display> display =
-        Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(g_drawingInfo.displayId);
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(g_drawingInfo.displayId);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-        display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
         CHKPV(display);
     }
@@ -3351,14 +3351,14 @@ void DragDrawing::ScreenRotateAdjustDisplayXY(
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
 #else
     sptr<Rosen::Display> display =
-        Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(g_drawingInfo.displayId);
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(g_drawingInfo.displayId);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-        display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
         CHKPV(display);
     }
@@ -3926,14 +3926,14 @@ float DragDrawing::CalculateWidthScale()
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
 #else
     sptr<Rosen::Display> display =
-        Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(g_drawingInfo.displayId);
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(g_drawingInfo.displayId);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-        display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
         if (display == nullptr) {
             FI_HILOGE("Get display info failed, display is nullptr");
@@ -4076,14 +4076,14 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
 #else
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(displayId);
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(displayId);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", displayId);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-        display = Rosen::DisplayManager::GetInstance().GetAvailableDisplayById(0);
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
         if (display == nullptr) {
             FI_HILOGE("Get display info failed, display is nullptr");
