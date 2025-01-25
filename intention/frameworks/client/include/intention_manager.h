@@ -91,7 +91,7 @@ public:
     void OnDisconnected();
     int32_t SetDraggableState(bool state);
     int32_t GetAppDragSwitchState(bool &state);
-    void SetDragableStateAsync(bool state, int64_t downTime);
+    void SetDraggableStateAsync(bool state, int64_t downTime);
 
 private:
     void InitClient();

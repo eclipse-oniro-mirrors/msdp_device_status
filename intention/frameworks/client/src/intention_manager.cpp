@@ -528,10 +528,10 @@ int32_t IntentionManager::GetAppDragSwitchState(bool &state)
     return drag_.GetAppDragSwitchState(*tunnel_, state);
 }
 
-void IntentionManager::SetDragableStateAsync(bool state, int64_t downTime)
+void IntentionManager::SetDraggableStateAsync(bool state, int64_t downTime)
 {
     CALL_DEBUG_ENTER;
-    return drag_.SetDragableStateAsync(*tunnel_, state, downTime);
+    return drag_.SetDraggableStateAsync(*tunnel_, state, downTime);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

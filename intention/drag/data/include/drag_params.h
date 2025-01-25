@@ -317,9 +317,9 @@ struct GetUniversalDragAppStateReply final : public ParamBase {
     bool state_ { false };
 };
 
-struct SetDragableStateAsyncParam final : public ParamBase {
-    SetDragableStateAsyncParam() = default;
-    SetDragableStateAsyncParam(bool state, int64_t downTime);
+struct SetDraggableStateAsyncParam final : public ParamBase {
+    SetDraggableStateAsyncParam() = default;
+    SetDraggableStateAsyncParam(bool state, int64_t downTime);
 
     bool Marshalling(MessageParcel &parcel) const override;
     bool Unmarshalling(MessageParcel &parcel) override;

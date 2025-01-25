@@ -83,9 +83,9 @@ int32_t InteractionManager::GetAppDragSwitchState(bool &state)
     return INTER_MGR_IMPL.GetAppDragSwitchState(state);
 }
 
-void InteractionManager::SetDragableStateAsync(bool state, int64_t downTime)
+void InteractionManager::SetDraggableStateAsync(bool state, int64_t downTime)
 {
-    INTER_MGR_IMPL.SetDragableStateAsync(state, downTime);
+    INTER_MGR_IMPL.SetDraggableStateAsync(state, downTime);
 }
 
 int32_t InteractionManager::GetCoordinationState(

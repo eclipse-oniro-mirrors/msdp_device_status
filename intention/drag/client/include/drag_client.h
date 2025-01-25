@@ -79,7 +79,7 @@ public:
     void OnDisconnected(ITunnelClient &tunnel);
     int32_t SetDraggableState(ITunnelClient &tunnel, bool state);
     int32_t GetAppDragSwitchState(ITunnelClient &tunnel, bool &state);
-    void SetDragableStateAsync(ITunnelClient &tunnel, bool state, int64_t downTime);
+    void SetDraggableStateAsync(ITunnelClient &tunnel, bool state, int64_t downTime);
 
 private:
     mutable std::mutex mtx_;

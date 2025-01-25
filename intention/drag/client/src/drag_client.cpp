@@ -557,9 +557,9 @@ int32_t DragClient::GetAppDragSwitchState(ITunnelClient &tunnel, bool &state)
     return RET_OK;
 }
 
-void DragClient::SetDragableStateAsync(ITunnelClient &tunnel, bool state, int64_t downTime)
+void DragClient::SetDraggableStateAsync(ITunnelClient &tunnel, bool state, int64_t downTime)
 {
-    SetDragableStateAsyncParam param {state, downTime};
+    SetDraggableStateAsyncParam param {state, downTime};
     DefaultReply reply {};
     int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_DRAGABLE_STATE_ASYNC, param, reply);
     if (ret != RET_OK) {

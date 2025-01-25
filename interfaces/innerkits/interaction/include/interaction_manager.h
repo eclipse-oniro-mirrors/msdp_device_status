@@ -439,7 +439,7 @@ public:
      * @return
      * @since 15
      */
-    void SetDragableStateAsync(bool state, int64_t downTime);
+    void SetDraggableStateAsync(bool state, int64_t downTime);
 #else
     /**
      * @brief convert relative pointerEvent action to PULL_MOVE or PULL_UP.

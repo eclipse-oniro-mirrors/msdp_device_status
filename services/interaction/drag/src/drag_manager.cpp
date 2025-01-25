@@ -251,18 +251,6 @@ std::string DragManager::GetPackageName(int32_t pid)
     return packageName;
 }
 
-void DragManager::SetDragableStateAsync(bool state, int64_t downTime)
-{
-    FI_HILOGD("state:%{public}d, downTime:%{public}" PRId64 "", state, downTime);
-    longPressDragableState_.state = state;
-    longPressDragableState_.downTime = downTime;
-}
-
-LongPressDragableState DragManager::GetDragableState()
-{
-    return longPressDragableState_;
-}
-
 int32_t DragManager::StartDrag(
     const DragData &dragData, int32_t pid, const std::string &peerNetId, bool isLongPressDrag)
 {

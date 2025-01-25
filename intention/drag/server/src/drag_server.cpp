@@ -157,7 +157,7 @@ int32_t DragServer::SetParam(CallingContext &context, uint32_t id, MessageParcel
             return SetDraggableState(context, data, reply);
         }
         case DragRequestID::SET_DRAGABLE_STATE_ASYNC: {
-            return SetDragableStateAsync(context, data);
+            return SetDraggableStateAsync(context, data);
         }
         default: {
             FI_HILOGE("Unexpected request ID (%{public}u)", id);
@@ -658,14 +658,14 @@ int32_t DragServer::GetAppDragSwitchState(CallingContext &context, MessageParcel
     return RET_OK;
 }
 
-int32_t DragServer::SetDragableStateAsync(CallingContext &context, MessageParcel &data)
+int32_t DragServer::SetDraggableStateAsync(CallingContext &context, MessageParcel &data)
 {
 #ifdef OHOS_BUILD_UNIVERSAL_DRAG
     CHKPR(env_, RET_ERR);
     env_->GetDelegateTasks().PostAsyncTask([this, &data] {
-        SetDragableStateAsyncParam param {};
+        SetDraggableStateAsyncParam param {};
         if (!param.Unmarshalling(data)) {
-            FI_HILOGE("SetDragableStateAsync::Unmarshalling fail");
+            FI_HILOGE("SetDraggableStateAsync::Unmarshalling fail");
             return RET_ERR;
         }
         this->universalDragWrapper_.SetDragableStateAsync(param.state_, param.downTime_);

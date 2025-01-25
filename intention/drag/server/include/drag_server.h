@@ -73,7 +73,7 @@ private:
     int32_t AddListener(CallingContext &context, MessageParcel &data);
     int32_t SetMouseDragMonitorState(CallingContext &context, MessageParcel &data, MessageParcel &reply);
     int32_t GetAppDragSwitchState(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t SetDragableStateAsync(CallingContext &context, MessageParcel &data);
+    int32_t SetDraggableStateAsync(CallingContext &context, MessageParcel &data);
 
     IContext *env_ { nullptr };
 #ifdef OHOS_BUILD_UNIVERSAL_DRAG

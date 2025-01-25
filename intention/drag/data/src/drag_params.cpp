@@ -464,18 +464,18 @@ bool GetUniversalDragAppStateReply::Unmarshalling(MessageParcel &parcel)
     return parcel.ReadBool(state_);
 }
 
-SetDragableStateAsyncParam::SetDragableStateAsyncParam(bool state, int64_t downTime)
+SetDraggableStateAsyncParam::SetDraggableStateAsyncParam(bool state, int64_t downTime)
 {
     state_ = state;
     downTime_ = downTime;
 }
 
-bool SetDragableStateAsyncParam::Marshalling(MessageParcel &parcel) const
+bool SetDraggableStateAsyncParam::Marshalling(MessageParcel &parcel) const
 {
     return (parcel.WriteBool(state_) && parcel.WriteInt64(downTime_));
 }
 
-bool SetDragableStateAsyncParam::Unmarshalling(MessageParcel &parcel)
+bool SetDraggableStateAsyncParam::Unmarshalling(MessageParcel &parcel)
 {
     return (parcel.ReadBool(state_) && parcel.ReadInt64(downTime_));
 }
