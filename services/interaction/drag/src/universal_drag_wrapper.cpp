@@ -118,9 +118,31 @@ int32_t UniversalDragWrapper::GetAppDragSwitchState(const std::string &pkgName, 
         FI_HILOGE("getAppDragSwitchStateHandle_ is null");
         return RET_ERR;
     }
-    auto ret = getAppDragSwitchStateHandle_(pkgName.c_str(), state);
-    FI_HILOGE("Failed to getAppDragSwitchStateHandle error: %{public}d", ret);
-    return ret;
+    return getAppDragSwitchStateHandle_(pkgName.c_str(), state);
+}
+
+void UniversalDragWrapper::SetDragableStateAsync(bool state, int64_t downTime)
+{
+    CALL_DEBUG_ENTER;
+    if (!universalDragHandle_) {
+        FI_HILOGE("universalDragHandle_ is null");
+        return;
+    }
+    if (setDragableStateAsyncHandle_ == nullptr) {
+        setDragableStateAsyncHandle_ =
+            reinterpret_cast<SetDragableStateAsyncFunc>(dlsym(universalDragHandle_, "SetDragableStateAsync"));
+        char *error = nullptr;
+        if ((error = dlerror()) != nullptr) {
+            FI_HILOGE("Symbol SetDragableStateAsyncHandle error: %{public}s", error);
+            return;
+        }
+    }
+
+    if (setDragableStateAsyncHandle_ == nullptr) {
+        FI_HILOGE("setDragableStateAsyncHandle_ is null");
+        return;
+    }
+    setDragableStateAsyncHandle_(state, downTime);
 }
 
 UniversalDragWrapper::~UniversalDragWrapper()

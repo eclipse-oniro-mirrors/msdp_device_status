@@ -668,7 +668,7 @@ int32_t DragServer::SetDragableStateAsync(CallingContext &context, MessageParcel
             FI_HILOGE("SetDragableStateAsync::Unmarshalling fail");
             return RET_ERR;
         }
-        this->env_->GetDragManager().SetDragableStateAsync(param.state_, param.downTime_);
+        this->universalDragWrapper_.SetDragableStateAsync(param.state_, param.downTime_);
         return RET_OK;
     });
 #endif // OHOS_BUILD_UNIVERSAL_DRAG
