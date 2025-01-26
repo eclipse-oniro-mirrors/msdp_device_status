@@ -27,7 +27,6 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 const std::string VIRTUAL_TRACK_PAD_NAME { "VirtualTrackpad" }; // defined in multimodalinput
-constexpr int32_t MIN_VIRTUAL_INPUT_DEVICE_ID { 1000 }; // defined in multimodalinput
 }
 
 int32_t InputAdapter::AddMonitor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> callback)
@@ -192,8 +191,7 @@ int32_t InputAdapter::SetTouchPadSpeed(int32_t speed)
 bool InputAdapter::IsLocalPointerDevice(std::shared_ptr<MMI::InputDevice> device)
 {
     CHKPR(device, false);
-    return device->HasCapability(MMI::InputDeviceCapability::INPUT_DEV_CAP_POINTER) &&
-        device->GetId() < MIN_VIRTUAL_INPUT_DEVICE_ID;
+    return device->HasCapability(MMI::InputDeviceCapability::INPUT_DEV_CAP_POINTER);
 }
 
 bool InputAdapter::IsVirtualTrackpad(std::shared_ptr<MMI::InputDevice> device)
@@ -204,6 +202,7 @@ bool InputAdapter::IsVirtualTrackpad(std::shared_ptr<MMI::InputDevice> device)
 
 bool InputAdapter::HasLocalPointerDevice()
 {
+    // Just used to check virtualTrackpad on Some special device.
     std::vector<int32_t> deviceIds;
     if (MMI::InputManager::GetInstance()->GetDeviceIds(
         [&deviceIds](std::vector<int32_t> &ids) { deviceIds = ids; }) != RET_OK) {
@@ -214,7 +213,7 @@ bool InputAdapter::HasLocalPointerDevice()
         bool isLocalPointerDevice { false };
         auto ret = MMI::InputManager::GetInstance()->GetDevice(deviceId, [&isLocalPointerDevice, this] (
             std::shared_ptr<MMI::InputDevice> device) {
-                if (this->IsLocalPointerDevice(device) || this->IsVirtualTrackpad(device)) {
+                if (this->IsLocalPointerDevice(device) && this->IsVirtualTrackpad(device)) {
                     isLocalPointerDevice = true;
                 }
             });
