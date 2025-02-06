@@ -152,6 +152,27 @@ void UniversalDragWrapper::SetAppDragSwitchState(const std::string &pkgName, boo
         setAppDragSwitchStateHandle_(pkgName.c_str(), enable);
     }
 }
+
+void UniversalDragWrapper::StopLongPressDrag()
+{
+    CALL_DEBUG_ENTER;
+    if (!universalDragHandle_) {
+        FI_HILOGE("universalDragHandle_ is null");
+        return;
+    }
+    if (StopLongPressDragHandle_ == nullptr) {
+        StopLongPressDragHandle_ =
+            reinterpret_cast<StopLongPressDragFunc>(dlsym(universalDragHandle_, "StopLongPressDrag"));
+        char *error = nullptr;
+        if ((error = dlerror()) != nullptr) {
+            FI_HILOGE("Symbol setAppDragSwitchStateHandle error: %{public}s", error);
+            return;
+        }
+    }
+    if (StopLongPressDragHandle_ != nullptr) {
+        StopLongPressDragHandle_();
+    }
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

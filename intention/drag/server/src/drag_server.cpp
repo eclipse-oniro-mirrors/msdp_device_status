@@ -82,6 +82,9 @@ int32_t DragServer::Stop(CallingContext &context, MessageParcel &data, MessagePa
         FI_HILOGE("Failed to unmarshalling param");
         return RET_ERR;
     }
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    universalDragWrapper_.StopLongPressDrag();
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
     CHKPR(env_, RET_ERR);
     return env_->GetDragManager().StopDrag(param.dropResult_, GetPackageName(context.tokenId), context.pid);
 }
