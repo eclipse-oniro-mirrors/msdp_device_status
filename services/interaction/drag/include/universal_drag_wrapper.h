@@ -28,7 +28,8 @@ typedef void (*SetDragableStateFunc)(bool);
 typedef void (*SetDragSwitchStateFunc)(bool);
 typedef void (*SetAppDragSwitchStateFunc)(const char *, bool);
 typedef int32_t (*GetAppDragSwitchStateFunc)(const char *, bool &);
-typedef void (*SetDragableStateAsyncFunc)(bool, int64_t);
+typedef void (*SetDraggableStateAsyncFunc)(bool, int64_t);
+typedef void (*StopLongPressDragFunc)();
  
 class UniversalDragWrapper {
 public:
@@ -40,7 +41,8 @@ public:
     void SetDragSwitchState(bool enable);
     void SetAppDragSwitchState(const std::string &pkgName, bool enable);
     int32_t GetAppDragSwitchState(const std::string &pkgName, bool &state);
-    void SetDragableStateAsync(bool state, int64_t downTime);
+    void SetDraggableStateAsync(bool state, int64_t downTime);
+    void StopLongPressDrag();
  
 private:
     IContext* env_ { nullptr };
@@ -51,7 +53,8 @@ private:
     SetDragSwitchStateFunc setDragSwitchStateHandle_ { nullptr };
     SetAppDragSwitchStateFunc setAppDragSwitchStateHandle_ { nullptr };
     GetAppDragSwitchStateFunc getAppDragSwitchStateHandle_ { nullptr };
-    SetDragableStateAsyncFunc setDragableStateAsyncHandle_ { nullptr };
+    SetDraggableStateAsyncFunc setDraggableStateAsyncHandle_ { nullptr };
+    StopLongPressDragFunc StopLongPressDragHandle_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

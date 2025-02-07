@@ -107,6 +107,12 @@ void ICooperateState::Process::StartCooperate(Context &context, const StartCoope
     startDeviceId_ = event.startDeviceId;
 }
 
+void ICooperateState::Process::StartCooperateWithOptions(Context &context, const StartWithOptionsEvent &event)
+{
+    remoteNetworkId_ = event.remoteNetworkId;
+    startDeviceId_ = event.startDeviceId;
+}
+
 void ICooperateState::Process::RemoteStart(Context &context, const DSoftbusStartCooperate &event)
 {
     remoteNetworkId_ = event.networkId;

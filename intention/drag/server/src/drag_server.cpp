@@ -82,6 +82,9 @@ int32_t DragServer::Stop(CallingContext &context, MessageParcel &data, MessagePa
         FI_HILOGE("Failed to unmarshalling param");
         return RET_ERR;
     }
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    universalDragWrapper_.StopLongPressDrag();
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
     CHKPR(env_, RET_ERR);
     return env_->GetDragManager().StopDrag(param.dropResult_, GetPackageName(context.tokenId), context.pid);
 }
@@ -668,7 +671,7 @@ int32_t DragServer::SetDraggableStateAsync(CallingContext &context, MessageParce
             FI_HILOGE("SetDraggableStateAsync::Unmarshalling fail");
             return RET_ERR;
         }
-        this->universalDragWrapper_.SetDragableStateAsync(param.state_, param.downTime_);
+        this->universalDragWrapper_.SetDraggableStateAsync(param.state_, param.downTime_);
         return RET_OK;
     });
 #endif // OHOS_BUILD_UNIVERSAL_DRAG

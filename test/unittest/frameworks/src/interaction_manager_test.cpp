@@ -1017,7 +1017,11 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_002, TestSize.Level1)
 {
     CALL_DEBUG_ENTER;
     SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
+#ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+#else
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
+#endif // OHOS_BUILD_PC_PRODUCT
     CHKPV(display);
     g_screenWidth = display->GetWidth();
     g_screenHeight = display->GetHeight();
@@ -2976,6 +2980,36 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState, T
     InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
+}
+
+/**
+ * @tc.name: InteractionManagerTest_ActivateCooperateWithOptions
+ * @tc.desc: Activate coordination
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCooperateWithOptions, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
+    std::string remoteNetworkId("");
+    int32_t startDeviceId = -1;
+    auto fun = [](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
+        FI_HILOGD("Start coordination success");
+        (void) listener;
+    };
+    CooperateOptions withOptions;
+    withOptions.displayX = 500;
+    withOptions.displayY = 500;
+    withOptions.displayId = 0;
+    int32_t ret = InteractionManager::GetInstance()->ActivateCooperateWithOptions(remoteNetworkId, startDeviceId,
+        fun, withOptions);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_TRUE((ret == RET_OK || ret == COMMON_PERMISSION_CHECK_ERROR || ret == COMMON_NOT_ALLOWED_DISTRIBUTED));
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+    RemovePermission();
 }
 } // namespace DeviceStatus
 } // namespace Msdp

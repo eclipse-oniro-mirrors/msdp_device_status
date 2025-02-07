@@ -50,7 +50,7 @@ public:
     virtual int32_t StartDrag(const DragData &dragData) = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     virtual int32_t StopDrag(const DragDropResult &dropResult, const std::string &packageName = "",
-        int32_t pid = -1) = 0;
+        int32_t pid = -1, bool isStopCooperate = false) = 0;
     virtual int32_t GetDragData(DragData &dragData) = 0;
     virtual int32_t GetDragTargetPid() const = 0;
     virtual int32_t GetUdKey(std::string &udKey) const = 0;

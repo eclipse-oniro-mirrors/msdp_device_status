@@ -67,6 +67,12 @@ int32_t InteractionManager::ActivateCoordination(const std::string &remoteNetwor
     return INTER_MGR_IMPL.ActivateCoordination(remoteNetworkId, startDeviceId, callback, isCompatible);
 }
 
+int32_t InteractionManager::ActivateCooperateWithOptions(const std::string &remoteNetworkId, int32_t startDeviceId,
+    CooperateMsgInfoCallback callback, const CooperateOptions &cooperateOptions)
+{
+    return INTER_MGR_IMPL.ActivateCooperateWithOptions(remoteNetworkId, startDeviceId, callback, cooperateOptions);
+}
+
 int32_t InteractionManager::DeactivateCoordination(bool isUnchained, CooperateMsgInfoCallback callback,
     bool isCompatible)
 {

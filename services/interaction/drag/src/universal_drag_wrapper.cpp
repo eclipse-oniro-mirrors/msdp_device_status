@@ -121,28 +121,28 @@ int32_t UniversalDragWrapper::GetAppDragSwitchState(const std::string &pkgName, 
     return getAppDragSwitchStateHandle_(pkgName.c_str(), state);
 }
 
-void UniversalDragWrapper::SetDragableStateAsync(bool state, int64_t downTime)
+void UniversalDragWrapper::SetDraggableStateAsync(bool state, int64_t downTime)
 {
     CALL_DEBUG_ENTER;
     if (!universalDragHandle_) {
         FI_HILOGE("universalDragHandle_ is null");
         return;
     }
-    if (setDragableStateAsyncHandle_ == nullptr) {
-        setDragableStateAsyncHandle_ =
-            reinterpret_cast<SetDragableStateAsyncFunc>(dlsym(universalDragHandle_, "SetDragableStateAsync"));
+    if (setDraggableStateAsyncHandle_ == nullptr) {
+        setDraggableStateAsyncHandle_ =
+            reinterpret_cast<SetDraggableStateAsyncFunc>(dlsym(universalDragHandle_, "SetDraggableStateAsync"));
         char *error = nullptr;
         if ((error = dlerror()) != nullptr) {
-            FI_HILOGE("Symbol SetDragableStateAsyncHandle error: %{public}s", error);
+            FI_HILOGE("Symbol SetDraggableStateAsyncHandle error: %{public}s", error);
             return;
         }
     }
 
-    if (setDragableStateAsyncHandle_ == nullptr) {
-        FI_HILOGE("setDragableStateAsyncHandle_ is null");
+    if (setDraggableStateAsyncHandle_ == nullptr) {
+        FI_HILOGE("setDraggableStateAsyncHandle_ is null");
         return;
     }
-    setDragableStateAsyncHandle_(state, downTime);
+    setDraggableStateAsyncHandle_(state, downTime);
 }
 
 UniversalDragWrapper::~UniversalDragWrapper()
@@ -199,6 +199,27 @@ void UniversalDragWrapper::SetAppDragSwitchState(const std::string &pkgName, boo
     }
     if (setAppDragSwitchStateHandle_ != nullptr) {
         setAppDragSwitchStateHandle_(pkgName.c_str(), enable);
+    }
+}
+
+void UniversalDragWrapper::StopLongPressDrag()
+{
+    CALL_DEBUG_ENTER;
+    if (!universalDragHandle_) {
+        FI_HILOGE("universalDragHandle_ is null");
+        return;
+    }
+    if (StopLongPressDragHandle_ == nullptr) {
+        StopLongPressDragHandle_ =
+            reinterpret_cast<StopLongPressDragFunc>(dlsym(universalDragHandle_, "StopLongPressDrag"));
+        char *error = nullptr;
+        if ((error = dlerror()) != nullptr) {
+            FI_HILOGE("Symbol setAppDragSwitchStateHandle error: %{public}s", error);
+            return;
+        }
+    }
+    if (StopLongPressDragHandle_ != nullptr) {
+        StopLongPressDragHandle_();
     }
 }
 } // namespace DeviceStatus

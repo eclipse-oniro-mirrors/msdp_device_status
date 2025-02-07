@@ -40,12 +40,14 @@ constexpr int32_t INVALID_MOTION_TYPE = -1;
 constexpr size_t MAX_ARG_STRING_LEN = 512;
 constexpr int32_t MOTION_TYPE_OPERATING_HAND = 3601;
 constexpr int32_t MOTION_TYPE_STAND = 3602;
+constexpr int32_t MOTION_TYPE_REMOTE_PHOTO = 3604;
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES = { "string", "function" };
 const std::vector<std::string> EXPECTED_UNSUB_ONE_ARG_TYPES = { "string" };
 const std::vector<std::string> EXPECTED_UNSUB_TWO_ARG_TYPES = { "string", "function" };
 const std::map<const std::string, int32_t> MOTION_TYPE_MAP = {
     { "operatingHandChanged", MOTION_TYPE_OPERATING_HAND },
     { "steadyStandingDetect", MOTION_TYPE_STAND },
+    { "remotePhotoStandingDetect", MOTION_TYPE_REMOTE_PHOTO },
 };
 MotionNapi *g_motionObj = nullptr;
 } // namespace
@@ -57,59 +59,36 @@ void MotionCallback::OnMotionChanged(const MotionEvent &event)
 {
     FI_HILOGD("Enter");
     std::lock_guard<std::mutex> guard(g_mutex);
-    uv_loop_s *loop = nullptr;
-    napi_status status = napi_get_uv_event_loop(env_, &loop);
-    if (status != napi_ok) {
-        FI_HILOGE("napi_get_uv_event_loop failed");
-        return;
-    }
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        FI_HILOGE("Failed to get work");
-        return;
-    }
-    auto data = new (std::nothrow) MotionEvent();
-    if (data == nullptr) {
-        FI_HILOGE("The data create failed");
-        delete work;
-        return;
-    }
+    auto* data = new (std::nothrow) MotionEvent();
+    CHKPV(data);
     data->type = event.type;
     data->status = event.status;
     data->dataLen = event.dataLen;
     data->data = event.data;
-    work->data = static_cast<void*>(data);
-    int32_t ret = uv_queue_work_with_qos(loop, work, [] (uv_work_t *work) {}, EmitOnEvent, uv_qos_default);
-    if (ret != 0) {
-        FI_HILOGE("Failed to execute work queue");
-        delete static_cast<MotionEvent*>(work->data);
-        delete work;
+
+    auto task = [data]() {
+        FI_HILOGI("Execute lamdba");
+        EmitOnEvent(data);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+        FI_HILOGE("Failed to SendEvent");
     }
     FI_HILOGD("Exit");
 }
 
-void MotionCallback::EmitOnEvent(uv_work_t *work, int32_t status)
+void MotionCallback::EmitOnEvent(MotionEvent* data)
 {
-    if (work == nullptr) {
-        FI_HILOGE("Failed to get work");
+    if (data == nullptr) {
+        FI_HILOGE("data is nullptr");
         return;
     }
 
-    if (work->data == nullptr) {
-        FI_HILOGE("work is nullptr");
-        delete work;
-        return;
-    }
-
-    MotionEvent* data = static_cast<MotionEvent *>(work->data);
     if (g_motionObj == nullptr) {
         FI_HILOGE("Failed to get g_motionObj");
-        delete static_cast<MotionEvent*>(work->data);
-        delete work;
+        delete data;
     }
     g_motionObj->OnEventOperatingHand(data->type, 1, *data);
-    delete static_cast<MotionEvent*>(work->data);
-    delete work;
+    delete data;
 }
 #endif
 

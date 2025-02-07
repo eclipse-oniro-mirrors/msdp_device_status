@@ -69,7 +69,9 @@ public:
     int32_t StartDrag(const DragData &dragData) override;
     int32_t UpdatePointerAction(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    int32_t StopDrag(const DragDropResult &dropResult, const std::string &packageName = "", int32_t pid = -1) override;
+    int32_t StopDrag(
+        const DragDropResult &dropResult, const std::string &packageName = "",
+        int32_t pid = -1, bool isStopCooperate = false) override;
     int32_t GetDragTargetPid() const override;
     int32_t GetUdKey(std::string &udKey) const override;
     void SendDragData(int32_t targetTid, const std::string &udKey);
@@ -177,7 +179,7 @@ private:
     int32_t InitDataManager(const DragData &dragData) const;
     int32_t OnStartDrag(const std::string &packageName = "", int32_t pid = -1);
     int32_t OnStopDrag(DragResult result, bool hasCustomAnimation, const std::string &packageName = "",
-        int32_t pid = -1);
+        int32_t pid = -1, bool isStopCooperate = false);
     std::string GetDragState(DragState value) const;
     std::string GetDragResult(DragResult value) const;
     std::string GetDragCursorStyle(DragCursorStyle value) const;
@@ -194,6 +196,8 @@ private:
     inline std::string GetDragStyleName(DragCursorStyle style);
     DragCursorStyle GetRealDragStyle(DragCursorStyle style);
     void GetDragBehavior(const DragDropResult &dropResult, DragBehavior &dragBehavior);
+    void DoLongPressDragZoomOutAnimation(int32_t displayX, int32_t displayY);
+    void DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t targetDisplayId);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t NotifyAddSelectedPixelMapResult(bool result);
     void ResetMouseDragMonitorInfo();

@@ -134,6 +134,11 @@ int32_t MockInputAdapter::SetTouchPadSpeed(int32_t speed)
     return RET_OK;
 }
 
+bool MockInputAdapter::HasLocalPointerDevice()
+{
+    return true;
+}
+
 MockPluginManager::MockPluginManager(IContext *context)
 {
     pluginMgr_ = std::make_unique<PluginManager>(context);

@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "coordination_message.h"
 #include "intention_identity.h"
 
 namespace OHOS {
@@ -39,7 +40,8 @@ enum CooperateRequestID : uint32_t {
 struct StartCooperateParam final : public ParamBase {
     StartCooperateParam() = default;
     StartCooperateParam(int32_t userData, const std::string &remoteNetworkId,
-                        int32_t startDeviceId, bool checkPermission);
+                        int32_t startDeviceId, bool checkPermission, const CooperateOptions &options,
+                        int32_t cooperateParamType);
     bool Marshalling(MessageParcel &parcel) const override;
     bool Unmarshalling(MessageParcel &parcel) override;
 
@@ -47,6 +49,8 @@ struct StartCooperateParam final : public ParamBase {
     int32_t userData { -1 };
     int32_t startDeviceId { -1 };
     bool checkPermission { false };
+    CooperateOptions options;
+    int32_t cooperateParamType { 0 };
 };
 
 struct StopCooperateParam final : public ParamBase {

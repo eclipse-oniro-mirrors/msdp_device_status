@@ -51,27 +51,21 @@ void DeviceStatusCallback::OnDeviceStatusChanged(const Data& devicestatusData)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(env_, &loop);
-    CHKPV(loop);
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    CHKPV(work);
     FI_HILOGD("devicestatusData.type:%{public}d, devicestatusData.value:%{public}d",
         devicestatusData.type, devicestatusData.value);
     data_ = devicestatusData;
-    work->data = static_cast<void *>(&data_);
-    int32_t ret = uv_queue_work_with_qos(loop, work, [] (uv_work_t *work) {}, EmitOnEvent, uv_qos_default);
-    if (ret != 0) {
-        delete work;
-        FI_HILOGE("Failed to uv_queue_work_with_qos");
+
+    auto task = [this]() {
+        FI_HILOGI("Execute lamdba");
+        EmitOnEvent(&this->data_);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+        FI_HILOGE("Failed to SendEvent");
     }
 }
 
-void DeviceStatusCallback::EmitOnEvent(uv_work_t *work, int32_t status)
+void DeviceStatusCallback::EmitOnEvent(Data* data)
 {
-    CHKPV(work);
-    Data* data = static_cast<Data*>(work->data);
-    delete work;
     CHKPV(data);
     DeviceStatusNapi* deviceStatusNapi = DeviceStatusNapi::GetDeviceStatusNapi();
     CHKPV(deviceStatusNapi);
@@ -202,7 +196,7 @@ bool DeviceStatusNapi::CheckGetArguments(napi_env env, napi_callback_info info)
 std::tuple<bool, napi_value, std::string, int32_t, int32_t> DeviceStatusNapi::CheckSubscribeParam(napi_env env,
     napi_callback_info info)
 {
-    std::tuple<bool, napi_value, std::string, int32_t, int32_t> result { false, nullptr, "", -1, -1 };
+    std::tuple<bool, napi_value, std::string, int32_t, int64_t> result { false, nullptr, "", -1, -1 };
     size_t argc = ARG_4;
     napi_value args[ARG_4] = { nullptr };
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
@@ -232,8 +226,8 @@ std::tuple<bool, napi_value, std::string, int32_t, int32_t> DeviceStatusNapi::Ch
         ThrowErr(env, PARAM_ERROR, "Failed to get event value item");
         return result;
     }
-    int32_t latencyMode = 0;
-    status = napi_get_value_int32(env, args[ARG_2], &latencyMode);
+    int64_t latencyMode = 0;
+    status = napi_get_value_int64(env, args[ARG_2], &latencyMode);
     if (status != napi_ok) {
         ThrowErr(env, PARAM_ERROR, "Failed to get latency value item");
         return result;
@@ -269,7 +263,7 @@ std::tuple<bool, napi_value, int32_t> DeviceStatusNapi::CheckGetParam(napi_env e
         return result;
     }
     int32_t type = ConvertTypeToInt(mode);
-    if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
+    if ((type != Type::TYPE_STILL) && (type != Type::TYPE_RELATIVE_STILL)) {
         ThrowErr(env, PARAM_ERROR, "Type is illegal");
         return result;
     }
@@ -292,7 +286,7 @@ napi_value DeviceStatusNapi::GetParameters(napi_env env, size_t argc, const napi
         return nullptr;
     }
     int32_t type = DeviceStatusNapi::ConvertTypeToInt(mode);
-    if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
+    if ((type != Type::TYPE_STILL) && (type != Type::TYPE_RELATIVE_STILL)) {
         ThrowErr(env, PARAM_ERROR, "Type is illegal");
         return nullptr;
     }
@@ -306,6 +300,7 @@ napi_value DeviceStatusNapi::GetParameters(napi_env env, size_t argc, const napi
         ThrowErr(env, PARAM_ERROR, "Event is illegal");
         return nullptr;
     }
+    CHKPP(g_obj);
     if ((argc < 3) || IsMatchType(env, args[2], napi_undefined) || IsMatchType(env, args[2], napi_null)) {
         if (!g_obj->RemoveAllCallback(type)) {
             FI_HILOGE("Callback type is not exist");
@@ -396,7 +391,7 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
     }
     int32_t type = ConvertTypeToInt(typeMode);
     FI_HILOGD("type:%{public}d, event:%{public}d, latency:%{public}d", type, event, latency);
-    if ((type < Type::TYPE_ABSOLUTE_STILL) || (type > Type::TYPE_LID_OPEN)) {
+    if ((type != Type::TYPE_STILL) && (type != Type::TYPE_RELATIVE_STILL)) {
         ThrowErr(env, PARAM_ERROR, "Type is illegal");
         return nullptr;
     }
@@ -414,7 +409,6 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
 napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback_info info)
 {
     CALL_DEBUG_ENTER;
-    CHKPP(g_obj);
     size_t argc = 3;
     napi_value args[3] = { nullptr };
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);

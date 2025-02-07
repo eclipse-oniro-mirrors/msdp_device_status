@@ -47,6 +47,7 @@ enum class CooperateEventType {
     ENABLE,
     DISABLE,
     START,
+    WITH_OPTIONS_START,
     STOP,
     GET_COOPERATE_STATE,
     REGISTER_EVENT_LISTENER,
@@ -74,7 +75,11 @@ enum class CooperateEventType {
     DSOFTBUS_MOUSE_LOCATION,
     DSOFTBUS_INPUT_DEV_SYNC,
     DSOFTBUS_INPUT_DEV_HOT_PLUG,
-    UPDATE_VIRTUAL_DEV_ID_MAP
+    UPDATE_VIRTUAL_DEV_ID_MAP,
+    DSOFTBUS_COME_BACK_WITH_OPTIONS,
+    DSOFTBUS_COOPERATE_WITH_OPTIONS,
+    DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS,
+    DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS_FINISHED
 };
 
 struct Rectangle {
@@ -187,10 +192,21 @@ struct DSoftbusStartCooperate {
     int32_t touchPadSpeed { -1 };
 };
 
+struct DSoftbusCooperateOptions {
+    std::string networkId;
+    std::string originNetworkId;
+    bool success;
+    NormalizedCooperateOptions cooperateOptions;
+    StartCooperateData extra;
+    int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
+};
+
 using DSoftbusStartCooperateFinished = DSoftbusStartCooperate;
 using DSoftbusComeBack = DSoftbusStartCooperate;
 using DSoftbusStopCooperate = DDMBoardOnlineEvent;
 using DSoftbusStopCooperateFinished = DDMBoardOnlineEvent;
+using DSoftbusCooperateWithOptionsFinished = DSoftbusCooperateOptions;
+using DSoftbusComeBackWithOptions = DSoftbusCooperateOptions;
 
 struct DSoftbusRelayCooperate {
     std::string networkId;
@@ -253,6 +269,17 @@ struct UpdateVirtualDeviceIdMapEvent {
     std::unordered_map<int32_t, int32_t> remote2VirtualIds;
 };
 
+struct StartWithOptionsEvent {
+    int32_t pid { -1 };
+    int32_t userData { 0 };
+    std::string remoteNetworkId;
+    int32_t startDeviceId { -1 };
+    int32_t displayX { -1 };
+    int32_t displayY { -1 };
+    int32_t displayId { -1 };
+    std::shared_ptr<std::promise<int32_t>> errCode;
+};
+
 struct CooperateEvent {
     CooperateEvent() : type(CooperateEventType::QUIT) {}
 
@@ -284,7 +311,9 @@ struct CooperateEvent {
         SetDamplingCoefficientEvent,
         DSoftbusSyncInputDevice,
         DSoftbusHotPlugEvent,
-        UpdateVirtualDeviceIdMapEvent
+        UpdateVirtualDeviceIdMapEvent,
+        StartWithOptionsEvent,
+        DSoftbusCooperateOptions
     > event;
 };
 

@@ -62,7 +62,8 @@ void CooperateFree::OnLeaveState(Context &context)
 void CooperateFree::SetPointerVisible(Context &context)
 {
     CHKPV(env_);
-    bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice();
+    bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice() ||
+        env_->GetInput().HasLocalPointerDevice();
     bool visible = !context.NeedHideCursor() && hasLocalPointerDevice;
     FI_HILOGI("Set pointer visible:%{public}s, HasLocalPointerDevice:%{public}s",
         visible ? "true" : "false", hasLocalPointerDevice ? "true" : "false");
@@ -85,6 +86,9 @@ CooperateFree::Initial::Initial(CooperateFree &parent)
     AddHandler(CooperateEventType::START, [this](Context &context, const CooperateEvent &event) {
         this->OnStart(context, event);
     });
+    AddHandler(CooperateEventType::WITH_OPTIONS_START, [this](Context &context, const CooperateEvent &event) {
+        this->OnStartWithOptions(context, event);
+    });
     AddHandler(CooperateEventType::STOP, [this](Context &context, const CooperateEvent &event) {
         this->OnStop(context, event);
     });
@@ -104,9 +108,16 @@ CooperateFree::Initial::Initial(CooperateFree &parent)
         [this](Context &context, const CooperateEvent &event) {
             this->OnUpdateCooperateFlag(context, event);
     });
+    AddHandler(CooperateEventType::DSOFTBUS_COOPERATE_WITH_OPTIONS,
+        [this](Context &context, const CooperateEvent &event) {
+            this->OnRemoteStartWithOptions(context, event);
+    });
 }
 
 void CooperateFree::Initial::OnProgress(Context &context, const CooperateEvent &event)
+{}
+
+void CooperateFree::Initial::OnProgressWithOptions(Context &context, const CooperateEvent &event)
 {}
 
 void CooperateFree::Initial::OnReset(Context &context, const CooperateEvent &event)
@@ -186,6 +197,46 @@ void CooperateFree::Initial::OnStop(Context &context, const CooperateEvent &even
     parent_.UnchainConnections(context, param);
 }
 
+void CooperateFree::Initial::OnStartWithOptions(Context &context, const CooperateEvent &event)
+{
+    CALL_INFO_TRACE;
+    StartWithOptionsEvent notice = std::get<StartWithOptionsEvent>(event.event);
+    FI_HILOGI("[start cooperation With Options] With \'%{public}s\'",
+        Utility::Anonymize(notice.remoteNetworkId).c_str());
+    context.StartCooperateWithOptions(notice);
+    context.eventMgr_.StartCooperateWithOptions(notice);
+    int32_t ret = context.dsoftbus_.OpenSession(context.Peer());
+    if (ret != RET_OK) {
+        FI_HILOGE("[start cooperation] Failed to connect to \'%{public}s\'",
+            Utility::Anonymize(context.Peer()).c_str());
+        int32_t errNum = (ret == RET_ERR ? static_cast<int32_t>(CoordinationErrCode::OPEN_SESSION_FAILED) : ret);
+        DSoftbusStartCooperateFinished failNotice {
+            .success = false,
+            .errCode = errNum
+        };
+        context.eventMgr_.StartCooperateFinish(failNotice);
+        return;
+    }
+    DSoftbusCooperateOptions startNotice {
+        .originNetworkId = context.Local(),
+        .success = true,
+        .cooperateOptions = {notice.displayX, notice.displayY, notice.displayId},
+    };
+    context.OnStartCooperate(startNotice.extra);
+    context.dsoftbus_.StartCooperateWithOptions(context.Peer(), startNotice);
+    context.inputEventInterceptor_.Enable(context);
+    context.eventMgr_.StartCooperateWithOptinsFinish(startNotice);
+    FI_HILOGI("[start cooperation] Cooperation with \'%{public}s\' established",
+        Utility::Anonymize(context.Peer()).c_str());
+    TransiteTo(context, CooperateState::COOPERATE_STATE_OUT);
+    context.OnTransitionOut();
+#ifdef ENABLE_PERFORMANCE_CHECK
+    std::ostringstream ss;
+    ss << "start_cooperation_with_ " << Utility::Anonymize(context.Peer()).c_str();
+    context.FinishTrace(ss.str());
+#endif // ENABLE_PERFORMANCE_CHECK
+}
+
 void CooperateFree::Initial::OnDisable(Context &context, const CooperateEvent &event)
 {
     FI_HILOGI("[disable cooperation] Stop cooperation");
@@ -195,7 +246,8 @@ void CooperateFree::Initial::OnDisable(Context &context, const CooperateEvent &e
         FI_HILOGI("drag state is start");
         return;
     }
-    bool hasLocalPointerDevice =  parent_.env_->GetDeviceManager().HasLocalPointerDevice();
+    bool hasLocalPointerDevice =  parent_.env_->GetDeviceManager().HasLocalPointerDevice() ||
+        parent_.env_->GetInput().HasLocalPointerDevice();
     FI_HILOGI("HasLocalPointerDevice:%{public}s", hasLocalPointerDevice ? "true" : "false");
     context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     parent_.env_->GetInput().SetPointerVisibility(hasLocalPointerDevice, PRIORITY);
@@ -221,6 +273,22 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
     context.eventMgr_.RemoteStartFinish(notice);
     context.inputDevMgr_.AddVirtualInputDevice(context.Peer());
     FI_HILOGI("[remote start] Cooperation with \'%{public}s\' established", Utility::Anonymize(context.Peer()).c_str());
+    TransiteTo(context, CooperateState::COOPERATE_STATE_IN);
+    context.OnTransitionIn();
+}
+
+void CooperateFree::Initial::OnRemoteStartWithOptions(Context &context, const CooperateEvent &event)
+{
+    CALL_INFO_TRACE;
+    DSoftbusCooperateOptions notice = std::get<DSoftbusCooperateOptions>(event.event);
+    context.OnRemoteStartCooperate(notice.extra);
+    context.eventMgr_.RemoteStartWithOptions(notice);
+    context.OnRemoteStart(notice);
+    context.inputEventBuilder_.Enable(context);
+    context.eventMgr_.RemoteStartWithOptionsFinish(notice);
+    context.inputDevMgr_.AddVirtualInputDevice(context.Peer());
+    FI_HILOGI("[remote start with options] Cooperation with \'%{public}s\' established",
+        Utility::Anonymize(context.Peer()).c_str());
     TransiteTo(context, CooperateState::COOPERATE_STATE_IN);
     context.OnTransitionIn();
 }

@@ -95,6 +95,8 @@ public:
     void OnRelayCooperation(const std::string &networkId, const NormalizedCoordinate &cursorPos);
     void OnResetCooperation();
     void CloseDistributedFileConnection(const std::string &remoteNetworkId);
+    void OnRemoteStart(const DSoftbusCooperateWithOptionsFinished &event);
+    void StartCooperateWithOptions(const StartWithOptionsEvent &event);
     void StorePeerPointerSpeed(int32_t speed);
     void ClearPeerPointerSpeed();
     void StoreOriginPointerSpeed();

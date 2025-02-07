@@ -51,6 +51,7 @@ protected:
         virtual void OnEvent(Context &context, const CooperateEvent &event);
         virtual void OnProgress(Context &context, const CooperateEvent &event) = 0;
         virtual void OnReset(Context &context, const CooperateEvent &event) = 0;
+        virtual void OnProgressWithOptions(Context &context, const CooperateEvent &event) = 0;
 
         void SetNext(std::shared_ptr<ICooperateStep> next);
 
@@ -82,6 +83,7 @@ protected:
         bool IsPeer(const std::string &networkId) const;
 
         void StartCooperate(Context &context, const StartCooperateEvent &event);
+        void StartCooperateWithOptions(Context &context, const StartWithOptionsEvent &event);
         void RemoteStart(Context &context, const DSoftbusStartCooperate &event);
         void RelayCooperate(Context &context, const DSoftbusRelayCooperate &event);
 

@@ -42,6 +42,7 @@ private:
 
         static void BuildChains(std::shared_ptr<Initial> self, CooperateOut &parent);
         static void RemoveChains(std::shared_ptr<Initial> self);
+        void OnProgressWithOptions(Context &context, const CooperateEvent &event) override;
 
     private:
         void OnDisable(Context &context, const CooperateEvent &event);
@@ -57,6 +58,10 @@ private:
         void OnBoardOffline(Context &context, const CooperateEvent &event);
         void OnSwitchChanged(Context &context, const CooperateEvent &event);
         void OnSoftbusSessionClosed(Context &context, const CooperateEvent &event);
+        void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
+        void OnStartWithOptions(Context &context, const CooperateEvent &event);
+        void OnComeBackWithOptions(Context &context, const CooperateEvent &event);
+        void OnRelayWithOptions(Context &context, const CooperateEvent &event);
 
         CooperateOut &parent_;
     };
