@@ -150,13 +150,14 @@ public:
 #ifdef OHOS_DRAG_ENABLE_MONITOR
     class MonitorConsumer : public MMI::IInputEventConsumer {
     public:
-        explicit MonitorConsumer(
-            std::function<void (std::shared_ptr<MMI::PointerEvent>)> cb) : pointerEventCallback_(cb) {}
+        explicit MonitorConsumer(std::function<void (std::shared_ptr<MMI::PointerEvent>)> cb, IContext* context)
+            : pointerEventCallback_(cb), context_(context) {}
         void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override;
         void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
         void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
     private:
         std::function<void (std::shared_ptr<MMI::PointerEvent>)> pointerEventCallback_;
+        IContext* context_ { nullptr };
     };
 #endif //OHOS_DRAG_ENABLE_MONITOR
 #else
