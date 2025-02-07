@@ -3657,6 +3657,8 @@ void DrawDragStopModifier::Draw(Rosen::RSDrawingContext &context) const
     }
     std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
     CHKPV(dragStyleNode);
+    CHKPV(styleScale_);
+    CHKPV(styleAlpha_);
     dragStyleNode->SetScale(styleScale_->Get());
     dragStyleNode->SetAlpha(styleAlpha_->Get());
     FI_HILOGD("leave");

@@ -836,7 +836,12 @@ void DragManager::MonitorConsumer::OnInputEvent(std::shared_ptr<MMI::PointerEven
     pointerEventCallback_(pointerEvent);
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         FI_HILOGI("Pointer button is released, appened extra data");
-        MMI::InputManager::GetInstance()->AppendExtraData(DragManager::CreateExtraData(false));
+        int32_t ret = context_->GetDelegateTasks().PostAsyncTask([] {
+            return MMI::InputManager::GetInstance()->AppendExtraData(DragManager::CreateExtraData(false));
+        });
+        if (ret != RET_OK) {
+            FI_HILOGE("Post async task failed");
+        }
     }
     FI_HILOGD("leave");
 }
@@ -1000,7 +1005,7 @@ int32_t DragManager::AddPointerEventHandler(uint32_t deviceTags)
 #ifdef OHOS_DRAG_ENABLE_MONITOR
         auto monitor = std::make_shared<MonitorConsumer>([this](std::shared_ptr<MMI::PointerEvent> pointerEvent) {
             return this->DragCallback(pointerEvent);
-        });
+        }, context_);
         pointerEventMonitorId_ = MMI::InputManager::GetInstance()->AddMonitor(monitor);
         if (pointerEventMonitorId_ <= 0) {
             FI_HILOGE("Failed to add pointer event monitor");
