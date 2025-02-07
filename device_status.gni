@@ -23,12 +23,16 @@ declare_args() {
   device_status_performance_check = true
   device_status_sensor_enable = true
   device_status_memmgr_enable = false
+  device_status_motion_enable = false
   if (defined(global_parts_info)) {
     if (!defined(global_parts_info.sensors_sensor)) {
       device_status_sensor_enable = false
     }
     if (defined(global_parts_info.resourceschedule_memmgr_override)) {
       device_status_memmgr_enable = true
+    }
+    if (defined(global_parts_info.msdp_motion)) {
+      device_status_motion_enable = true
     }
   }
 }
