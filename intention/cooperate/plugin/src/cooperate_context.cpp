@@ -19,6 +19,7 @@
 
 #include "display_manager.h"
 
+#include "display_info.h"
 #include "ddm_adapter.h"
 #include "devicestatus_define.h"
 #include "dsoftbus_handler.h"
@@ -197,7 +198,8 @@ NormalizedCoordinate Context::NormalizedCursorPosition() const
 #ifndef OHOS_BUILD_PC_PRODUCT
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(currentDisplayId_);
 #else
-    auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(currentDisplayId_);
+    sptr<Rosen::DisplayInfo> display =
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(currentDisplayId_);
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGE("No default display");

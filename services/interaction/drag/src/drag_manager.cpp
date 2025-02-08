@@ -1168,11 +1168,7 @@ int32_t DragManager::OnStartDrag(const std::string &packageName, int32_t pid)
     auto extraData = CreateExtraData(true, drawCursor);
     bool isHicarOrSuperLauncher = false;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(dragData.displayId);
-#else
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(dragData.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display != nullptr) {
         std::string displayName = display->GetName();
         isHicarOrSuperLauncher = ((displayName == "HiCar") || (displayName == "SuperLauncher"));
