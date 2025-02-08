@@ -86,18 +86,10 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
             return;
         }
     }
-#ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-#else
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGW("Get display info failed, display:%{public}" PRIu64"", displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
-        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
         if (display == nullptr) {
             FI_HILOGE("Get display info failed, display is nullptr");
             return;
@@ -107,7 +99,7 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
     if (currentRotation == lastRotation_) {
         return;
     }
-    
+
     bool isScreenRotation = false;
     std::vector<std::string> foldRotatePolicys;
     GetRotatePolicy(isScreenRotation, foldRotatePolicys);
