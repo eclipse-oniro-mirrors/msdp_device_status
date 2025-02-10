@@ -18,7 +18,6 @@
 #include <algorithm>
 
 #include "display_manager.h"
-
 #include "display_info.h"
 #include "ddm_adapter.h"
 #include "devicestatus_define.h"
