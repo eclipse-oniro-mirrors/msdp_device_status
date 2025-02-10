@@ -259,7 +259,7 @@ float GetScaling()
             return DEFAULT_SCALING;
         }
     }
-    int32_t deviceDpi = displayInfo->GetVirtualPixelRatio{} * DOT_PER_INCH;
+    int32_t deviceDpi = displayInfo->GetVirtualPixelRatio() * DOT_PER_INCH;
 #endif // OHOS_BUILD_PC_PRODUCT
 #else
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
