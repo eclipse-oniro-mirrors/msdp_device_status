@@ -558,7 +558,7 @@ void DragDrawing::DestroyDragWindow()
         g_drawingInfo.rootNode = nullptr;
     }
     if (g_drawingInfo.surfaceNode != nullptr) {
-        g_drawingInfo.surfaceNode->DetachToDisplay(screenId_);
+        g_drawingInfo.surfaceNode->DetachFromWindowContainer(screenId_);
         screenId_ = 0;
         g_drawingInfo.displayId = -1;
         g_drawingInfo.surfaceNode = nullptr;
@@ -1246,7 +1246,7 @@ int32_t DragDrawing::InitLayer()
     }
     auto surface = g_drawingInfo.surfaceNode->GetSurface();
     if (surface == nullptr) {
-        g_drawingInfo.surfaceNode->DetachToDisplay(g_drawingInfo.displayId);
+        g_drawingInfo.surfaceNode->DetachFromWindowContainer(g_drawingInfo.displayId);
         g_drawingInfo.surfaceNode = nullptr;
         FI_HILOGE("Init layer failed, surface is nullptr");
         Rosen::RSTransaction::FlushImplicitTransaction();
@@ -1361,7 +1361,7 @@ void DragDrawing::CreateWindow()
     g_drawingInfo.surfaceNode->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
     g_drawingInfo.surfaceNode->SetPositionZ(DRAG_WINDOW_POSITION_Z);
     g_drawingInfo.surfaceNode->SetBackgroundColor(SK_ColorTRANSPARENT);
-    g_drawingInfo.surfaceNode->AttachToDisplay(rsScreenId);
+    g_drawingInfo.surfaceNode->AttachToWindowContainer(rsScreenId);
     g_drawingInfo.surfaceNode->SetVisible(false);
     Rosen::RSTransaction::FlushImplicitTransaction();
 }
