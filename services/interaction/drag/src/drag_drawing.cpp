@@ -3909,7 +3909,7 @@ float DragDrawing::CalculateWidthScale()
 
 float DragDrawing::GetMaxWidthScale(int32_t width)
 {
-    FI_HILOGI("current device screen's width is %{public}d", width);
+    FI_HILOGD("current device screen's width is %{public}d", width);
     float widthScale = 1.0;
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     if (currentPixelMap == nullptr) {
@@ -3923,35 +3923,33 @@ float DragDrawing::GetMaxWidthScale(int32_t width)
         return DEFAULT_SCALING;
     }
     double currentPixelMapDiagonal = sqrt(pow(pixelMapWidth, DOUBLE_INT) + pow(pixelMapHeight, DOUBLE_INT));
-    FI_HILOGI("currentPixelMap width is %{public}d , height is %{public}d , diagonal is : %{public}f",
+    FI_HILOGD("currentPixelMap width is %{public}d , height is %{public}d , diagonal is : %{public}f",
         pixelMapWidth, pixelMapHeight, currentPixelMapDiagonal);
         
     switch (currentScreenSize_) {
         case ScreenSizeType::SM: {
             widthScale = (currentPixelMapDiagonal <= EPSILON) ?
                 DEFAULT_SCALING : (CIRCLE_R_SM * DOUBLE_INT) / currentPixelMapDiagonal;
-            FI_HILOGI("Screen Size Type is SM and widthScale is %{public}f", widthScale);
             break;
         }
         case ScreenSizeType::MD: {
             widthScale = (currentPixelMapDiagonal <= EPSILON) ?
                 DEFAULT_SCALING : (CIRCLE_R_MD * DOUBLE_INT) / currentPixelMapDiagonal;
-            FI_HILOGI("Screen Size Type is SM and widthScale is %{public}f", widthScale);
             break;
         }
         case ScreenSizeType::LG: {
             widthScale = (currentPixelMapDiagonal <= EPSILON) ?
                 DEFAULT_SCALING : (CIRCLE_R_LG * DOUBLE_INT) / currentPixelMapDiagonal;
-            FI_HILOGI("Screen Size Type is LG and widthScale is %{public}f", widthScale);
             break;
         }
         default: {
             widthScale = (currentPixelMapDiagonal <= EPSILON) ?
                 DEFAULT_SCALING : (CIRCLE_R_XL * DOUBLE_INT) / currentPixelMapDiagonal;
-            FI_HILOGI("Screen Size Type is XL and widthScale is %{public}f", widthScale);
             break;
         }
     }
+    FI_HILOGD("Screen Size Type is %{public}d and widthScale is %{public}f",
+        static_cast<int32_t>(currentScreenSize_), widthScale);
     float scale = (widthScale >= DEFAULT_SCALING) ? DEFAULT_SCALING : widthScale;
     return scale;
 }
