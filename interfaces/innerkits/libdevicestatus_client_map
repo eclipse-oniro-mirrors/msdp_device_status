@@ -77,6 +77,9 @@
             "OHOS::Msdp::DeviceStatus::InteractionManager::SetMouseDragMonitorState(bool)";
 	        "OHOS::Msdp::DeviceStatus::InteractionManager::AddSelectedPixelMap(std::__h::shared_ptr<OHOS::Media::PixelMap>, std::__h::function<void (bool)>)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::SetDraggableState(bool)";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::GetAppDragSwitchState(bool&)";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::SetDraggableStateAsync(bool, long)";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::SetDraggableStateAsync(bool, long long)";
         };
     local:
         *;

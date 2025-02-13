@@ -378,7 +378,7 @@ public:
      * @param enable Switch state.
      * @param isJsCaller Indicates whether to add checking.
      * @return Returns <b>0</b> if the operation is successful; returns other values if the operation fails.
-     * @since 14
+     * @since 15
      */
     int32_t SetDragSwitchState(bool enable, bool isJsCaller = false);
 
@@ -388,7 +388,7 @@ public:
      * @param pkgName App package name.
      * @param isJsCaller Indicates whether to add checking.
      * @return Returns <b>0</b> if the operation is successful; returns other values if the operation fails.
-     * @since 14
+     * @since 15
      */
     int32_t SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller = false);
 #else
@@ -432,9 +432,26 @@ public:
      * @brief Set drag state.
      * @param state drag state, if application can drag, set true, else set false.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
-     * @since 14
+     * @since 15
      */
     int32_t SetDraggableState(bool state);
+
+    /**
+     * @brief Get the app switch for enhancing the drag capability.
+     * @param state Switch state.
+     * @return Returns <b>0</b> if the operation is successful; returns other values if the operation fails.
+     * @since 15
+     */
+    int32_t GetAppDragSwitchState(bool &state);
+
+    /**
+     * @brief Set drag state asynchronous.
+     * @param state drag state, if application can drag, set true, else set false.
+     * @param downTime input down time.
+     * @return
+     * @since 15
+     */
+    void SetDraggableStateAsync(bool state, int64_t downTime);
 #else
     /**
      * @brief convert relative pointerEvent action to PULL_MOVE or PULL_UP.

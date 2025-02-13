@@ -84,6 +84,16 @@ int32_t InteractionManager::SetDraggableState(bool state)
     return INTER_MGR_IMPL.SetDraggableState(state);
 }
 
+int32_t InteractionManager::GetAppDragSwitchState(bool &state)
+{
+    return INTER_MGR_IMPL.GetAppDragSwitchState(state);
+}
+
+void InteractionManager::SetDraggableStateAsync(bool state, int64_t downTime)
+{
+    INTER_MGR_IMPL.SetDraggableStateAsync(state, downTime);
+}
+
 int32_t InteractionManager::GetCoordinationState(
     const std::string &networkId, std::function<void(bool)> callback, bool isCompatible)
 {

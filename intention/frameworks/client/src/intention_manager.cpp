@@ -554,6 +554,18 @@ int32_t IntentionManager::SetDraggableState(bool state)
     CALL_DEBUG_ENTER;
     return drag_.SetDraggableState(*tunnel_, state);
 }
+
+int32_t IntentionManager::GetAppDragSwitchState(bool &state)
+{
+    CALL_DEBUG_ENTER;
+    return drag_.GetAppDragSwitchState(*tunnel_, state);
+}
+
+void IntentionManager::SetDraggableStateAsync(bool state, int64_t downTime)
+{
+    CALL_DEBUG_ENTER;
+    return drag_.SetDraggableStateAsync(*tunnel_, state, downTime);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

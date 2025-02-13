@@ -542,6 +542,31 @@ int32_t DragClient::SetDraggableState(ITunnelClient &tunnel, bool state)
     return ret;
 }
 
+int32_t DragClient::GetAppDragSwitchState(ITunnelClient &tunnel, bool &state)
+{
+    DefaultParam param {};
+    GetUniversalDragAppStateReply reply {};
+
+    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_UNIVERSAL_DRAG_APP_STATE, param, reply);
+    if (ret != RET_OK) {
+        FI_HILOGE("ITunnelClient::GetParam fail");
+        return ret;
+    }
+
+    state = reply.state_;
+    return RET_OK;
+}
+
+void DragClient::SetDraggableStateAsync(ITunnelClient &tunnel, bool state, int64_t downTime)
+{
+    SetDraggableStateAsyncParam param {state, downTime};
+    DefaultReply reply {};
+    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_DRAGABLE_STATE_ASYNC, param, reply);
+    if (ret != RET_OK) {
+        FI_HILOGE("ITunnelClient::SetParam fail");
+    }
+}
+
 int32_t DragClient::OnStateChangedMessage(const StreamClient &client, NetPacket &pkt)
 {
     CALL_DEBUG_ENTER;
