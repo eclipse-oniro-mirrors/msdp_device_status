@@ -173,13 +173,14 @@ constexpr int32_t TIME_STOP { 0 };
 constexpr int64_t TIME_SLEEP { 30000 };
 constexpr int32_t INTERRUPT_SCALE { 15 };
 constexpr int32_t TIMEOUT_MS { 500 };
-constexpr float MAX_SCREEN_WIDTH_SM { 320.0f };
-constexpr float MAX_SCREEN_WIDTH_MD { 600.0f };
-constexpr float MAX_SCREEN_WIDTH_LG { 840.0f };
-constexpr float MAX_SCREEN_WIDTH_XL { 1024.0f };
-constexpr float SCALE_SM { 2.0f / 4 };
-constexpr float SCALE_MD { 3.0f / 8 };
-constexpr float SCALE_LG { 4.0f / 12 };
+constexpr float MAX_SCREEN_WIDTH_SM { 600.0f };
+constexpr float MAX_SCREEN_WIDTH_MD { 840.0f };
+constexpr float MAX_SCREEN_WIDTH_LG { 1440.0f };
+constexpr float CIRCLE_R_SM { 144.0f };
+constexpr float CIRCLE_R_MD { 260.0f };
+constexpr float CIRCLE_R_LG { 396.0f };
+constexpr float CIRCLE_R_XL { 396.0f };
+constexpr int32_t DOUBLE_INT { 2 };
 const std::string THREAD_NAME { "os_AnimationEventRunner" };
 const std::string SUPER_HUB_THREAD_NAME { "os_SuperHubEventRunner" };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -3969,12 +3970,10 @@ float DragDrawing::CalculateWidthScale()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     FI_HILOGD("density:%{public}f, width:%{public}d", density, width);
     if (width < MAX_SCREEN_WIDTH_SM * density) {
-        currentScreenSize_ = ScreenSizeType::XS;
-    } else if (width < MAX_SCREEN_WIDTH_MD * density) {
         currentScreenSize_ = ScreenSizeType::SM;
-    } else if (width < MAX_SCREEN_WIDTH_LG * density) {
+    } else if (width < MAX_SCREEN_WIDTH_MD * density) {
         currentScreenSize_ = ScreenSizeType::MD;
-    } else if (width < MAX_SCREEN_WIDTH_XL * density) {
+    } else if (width < MAX_SCREEN_WIDTH_LG * density) {
         currentScreenSize_ = ScreenSizeType::LG;
     } else {
         currentScreenSize_ = ScreenSizeType::XL;
@@ -3985,7 +3984,7 @@ float DragDrawing::CalculateWidthScale()
 
 float DragDrawing::GetMaxWidthScale(int32_t width)
 {
-    float scale = 1.0;
+    FI_HILOGD("current device screen's width is %{public}d", width);
     float widthScale = 1.0;
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     if (currentPixelMap == nullptr) {
@@ -3993,44 +3992,41 @@ float DragDrawing::GetMaxWidthScale(int32_t width)
         return DEFAULT_SCALING;
     }
     int32_t pixelMapWidth = currentPixelMap->GetWidth();
-    if (pixelMapWidth == 0) {
-        FI_HILOGW("pixelMapWidth is 0");
+    int32_t pixelMapHeight = currentPixelMap->GetHeight();
+    if (pixelMapWidth == 0 || pixelMapHeight == 0) {
+        FI_HILOGE("pixelMap width or height is 0");
         return DEFAULT_SCALING;
     }
+    double currentPixelMapDiagonal = sqrt(pow(pixelMapWidth, DOUBLE_INT) + pow(pixelMapHeight, DOUBLE_INT));
+    FI_HILOGD("currentPixelMap width is %{public}d , height is %{public}d , diagonal is : %{public}f",
+        pixelMapWidth, pixelMapHeight, currentPixelMapDiagonal);
+        
     switch (currentScreenSize_) {
-        case ScreenSizeType::XS: {
-            return widthScale;
-        }
         case ScreenSizeType::SM: {
-            scale = width * SCALE_SM;
-            if (pixelMapWidth > scale) {
-                widthScale = scale / pixelMapWidth;
-                return widthScale;
-            }
-            return widthScale;
+            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
+                DEFAULT_SCALING : (CIRCLE_R_SM * DOUBLE_INT) / currentPixelMapDiagonal;
+            break;
         }
         case ScreenSizeType::MD: {
-            scale = width * SCALE_MD;
-            if (pixelMapWidth > scale) {
-                widthScale = scale / pixelMapWidth;
-                return widthScale;
-            }
-            return widthScale;
+            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
+                DEFAULT_SCALING : (CIRCLE_R_MD * DOUBLE_INT) / currentPixelMapDiagonal;
+            break;
         }
         case ScreenSizeType::LG: {
-            scale = width * SCALE_LG;
-            if (pixelMapWidth > scale) {
-                widthScale = scale / pixelMapWidth;
-                return widthScale;
-            }
-            return widthScale;
+            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
+                DEFAULT_SCALING : (CIRCLE_R_LG * DOUBLE_INT) / currentPixelMapDiagonal;
+            break;
         }
         default: {
-            FI_HILOGI("Screen Size Type is XL");
+            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
+                DEFAULT_SCALING : (CIRCLE_R_XL * DOUBLE_INT) / currentPixelMapDiagonal;
             break;
         }
     }
-    return widthScale;
+    FI_HILOGD("Screen Size Type is %{public}d and widthScale is %{public}f",
+        static_cast<int32_t>(currentScreenSize_), widthScale);
+    float scale = (widthScale >= DEFAULT_SCALING) ? DEFAULT_SCALING : widthScale;
+    return scale;
 }
 
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X

@@ -177,15 +177,13 @@ struct ExtraInfo {
 enum class ScreenSizeType {
     // Undefined screen width
     UNDEFINED = 0,
-    // Screen width size is XS, grids is 2
-    XS,
-    // Screen width size is SM, grids is 4
+    // Screen width size is SM, limit is 600vp, circle’s Radius is 144vp
     SM,
-    // Screen width size is MD, grids is 8
+    // Screen width size is MD, limit is 840vp, circle’s Radius is 260vp
     MD,
-    // Screen width size is LG, grids is 12
+    // Screen width size is LG, limit is 1440vp, circle’s Radius is 396vp
     LG,
-    // Screen width size is XL, maxi number of grids
+    // Screen width size is XL, no limit , circle’s Radius is 396vp
     XL,
 };
 
