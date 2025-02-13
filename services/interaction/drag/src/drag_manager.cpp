@@ -521,8 +521,15 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     int32_t pointerId = pointerEvent->GetPointerId();
-    int32_t displayX = pointerItem.GetDisplayX();
-    int32_t displayY = pointerItem.GetDisplayY();
+    int32_t displayX = -1;
+    int32_t displayY = -1;
+    if (MMI::PointerEvent::FixedMode::ONE_HAND == pointerEvent->GetFixedMode()) {
+        displayX = pointerItem.GetFixedDisplayX();
+        displayY = pointerItem.GetFixedDisplayY();
+    } else {
+        displayX = pointerItem.GetDisplayX();
+        displayY = pointerItem.GetDisplayY();
+    }
     FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{private}d, displayY:%{private}d, "
         "pullId:%{public}d", pointerEvent->GetSourceType(), pointerId, displayX, displayY, pointerEvent->GetPullId());
     dragDrawing_.OnDragMove(pointerEvent->GetTargetDisplayId(), displayX,
