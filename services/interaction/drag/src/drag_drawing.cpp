@@ -1016,6 +1016,9 @@ void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData)
         return;
     }
     g_drawingInfo.isCurrentDefaultStyle = true;
+    FI_HILOGI("leave");
+}
+
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 void DragDrawing::OnStartDragExt()
 {
