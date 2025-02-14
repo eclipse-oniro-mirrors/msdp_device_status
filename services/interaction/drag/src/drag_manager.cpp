@@ -283,6 +283,7 @@ int32_t DragManager::StartDrag(
     if (notifyPUllUpCallback_ != nullptr) {
         notifyPUllUpCallback_(false);
     }
+    dragDrawing_.OnStartDragExt();
     SetDragState(DragState::START);
     dragDrawing_.OnStartDragExt();
     stateNotify_.StateChangedNotify(DragState::START);
