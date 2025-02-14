@@ -245,6 +245,7 @@ public:
 #else
     int32_t Init(const DragData &dragData, bool isLongPressDrag = false);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+    void OnStartDragExt();
     void NotifyDragInfo(const std::string &sourceName, const std::string &targetName);
     void Draw(int32_t displayId, int32_t displayX, int32_t displayY, bool isNeedAdjustDisplayXY = true,
         bool isMultiSelectedAnimation = true);

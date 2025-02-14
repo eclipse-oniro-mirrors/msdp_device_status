@@ -1016,6 +1016,12 @@ void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData)
         return;
     }
     g_drawingInfo.isCurrentDefaultStyle = true;
+
+    FI_HILOGI("leave");
+}
+    
+void DragDrawing::OnStartDragExt()
+{
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if (dragExtHandler_ == nullptr) {
         FI_HILOGE("Fail to open drag drop extension library");
@@ -1039,8 +1045,8 @@ void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData)
     }
 #endif // OHOS_DRAG_ENABLE_ANIMATION
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    FI_HILOGI("leave");
 }
+
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 void DragDrawing::NotifyDragInfo(const std::string &sourceName, const std::string &targetName)
