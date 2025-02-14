@@ -284,6 +284,7 @@ int32_t DragManager::StartDrag(
         notifyPUllUpCallback_(false);
     }
     SetDragState(DragState::START);
+    dragDrawing_.OnStartDragExt();
     stateNotify_.StateChangedNotify(DragState::START);
     StateChangedNotify(DragState::START);
     ReportStartDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_SUCCESS, DragRadarErrCode::DRAG_SUCCESS, packageName,
