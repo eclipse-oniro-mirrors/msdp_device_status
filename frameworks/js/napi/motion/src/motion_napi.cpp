@@ -32,9 +32,9 @@ namespace {
 #ifdef MOTION_ENABLE
 auto &g_motionClient = MotionClient::GetInstance();
 constexpr int32_t PERMISSION_DENIED = 201;
+static constexpr uint8_t ARG_1 = 1;
 #endif
 static constexpr uint8_t ARG_0 = 0;
-static constexpr uint8_t ARG_1 = 1;
 static constexpr uint8_t ARG_2 = 2;
 constexpr int32_t INVALID_MOTION_TYPE = -1;
 constexpr size_t MAX_ARG_STRING_LEN = 512;
