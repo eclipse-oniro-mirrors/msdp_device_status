@@ -26,16 +26,16 @@ namespace Msdp {
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
 constexpr int32_t PARAM_EXCEPTION { 401 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
-constexpr int32_t SUBSCRIBE_EXCEPTION { 31500001 };
-constexpr int32_t UNSUBSCRIBE_EXCEPTION { 31500002 };
-constexpr int32_t GETOPT_EXCEPTION { 31500003 };
+constexpr int32_t SERVICE_EXCEPTION { 31500001 };
+constexpr int32_t SUBSCRIBE_EXCEPTION { 31500002 };
+constexpr int32_t UNSUBSCRIBE_EXCEPTION { 31500003 };
 const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {PERMISSION_EXCEPTION, "Permission check failed."},
     {PARAM_EXCEPTION, "Params check failed."},
     {DEVICE_EXCEPTION, "The device does not support this API."},
+    {SERVICE_EXCEPTION, "Service exception."},
     {SUBSCRIBE_EXCEPTION, "Subscribe failed."},
-    {UNSUBSCRIBE_EXCEPTION, "UnSubscribe failed."},
-    {GETOPT_EXCEPTION, "GetOpt failed."}
+    {UNSUBSCRIBE_EXCEPTION, "UnSubscribe failed."}
 };
 
 napi_value CreateMotionNapiError(const napi_env &env, int32_t errorCode, const std::string &errorMsg);
