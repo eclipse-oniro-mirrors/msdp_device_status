@@ -32,9 +32,9 @@ namespace {
 #ifdef MOTION_ENABLE
 auto &g_motionClient = MotionClient::GetInstance();
 constexpr int32_t PERMISSION_DENIED = 201;
+static constexpr uint8_t ARG_1 = 1;
 #endif
 static constexpr uint8_t ARG_0 = 0;
-static constexpr uint8_t ARG_1 = 1;
 static constexpr uint8_t ARG_2 = 2;
 constexpr int32_t INVALID_MOTION_TYPE = -1;
 constexpr size_t MAX_ARG_STRING_LEN = 512;
@@ -250,7 +250,7 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
     }
 
     if (!g_motionObj->AddCallback(type, args[ARG_1])) {
-        ThrowMotionErr(env, SUBSCRIBE_EXCEPTION, "AddCallback failed");
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "AddCallback failed");
         return nullptr;
     }
     napi_get_undefined(env, &result);
@@ -269,7 +269,7 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    size_t argc = ARG_1;
+    size_t argc = ARG_2;
     napi_value args[ARG_2] = { nullptr };
     napi_value jsThis = nullptr;
     napi_value result = nullptr;
@@ -279,9 +279,9 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto expectedArgs = EXPECTED_UNSUB_ONE_ARG_TYPES;
-    if (argc == ARG_2) {
-        expectedArgs = EXPECTED_UNSUB_TWO_ARG_TYPES;
+    auto expectedArgs = EXPECTED_UNSUB_TWO_ARG_TYPES;
+    if (argc != ARG_2) {
+        expectedArgs = EXPECTED_UNSUB_ONE_ARG_TYPES;
     }
     if (!ValidateArgsType(env, args, argc, expectedArgs)) {
         ThrowMotionErr(env, PARAM_EXCEPTION, "validateargstype failed");
@@ -302,7 +302,7 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 
 #ifdef MOTION_ENABLE
     if (!g_motionObj->RemoveCallback(type)) {
-        ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "RemoveCallback failed");
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
         return nullptr;
     }
 
@@ -326,7 +326,7 @@ napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info i
 
     napi_status status = napi_get_cb_info(env, info, &argc, NULL, &jsThis, nullptr);
     if (status != napi_ok) {
-        ThrowMotionErr(env, GETOPT_EXCEPTION, "napi_get_cb_info failed");
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
         return nullptr;
     }
 
@@ -341,12 +341,12 @@ napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info i
     ConstructMotion(env, jsThis);
 #ifdef MOTION_ENABLE
     if (g_motionObj == nullptr) {
-        ThrowMotionErr(env, GETOPT_EXCEPTION, "Error invalid type");
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "Error invalid type");
         return nullptr;
     }
     napi_status ret = napi_create_int32(env, static_cast<int32_t>(motionEvent.status), &result);
     if (ret != napi_ok) {
-        ThrowMotionErr(env, GETOPT_EXCEPTION, "napi_create_int32 failed");
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_create_int32 failed");
         return nullptr;
     }
 #else
