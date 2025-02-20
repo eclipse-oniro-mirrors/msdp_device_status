@@ -412,7 +412,6 @@ void MotionNapi::SetInt32Property(napi_env env, napi_value targetObj, int32_t va
         return;
     }
     SetPropertyName(env, targetObj, propName, prop);
-
 }
 
 void MotionNapi::SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue)
