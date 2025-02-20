@@ -29,6 +29,7 @@ public:
 
     virtual void Enable(std::shared_ptr<AppExecFwk::EventHandler>) = 0;
     virtual void Disable() = 0;
+    virtual void OnRemoteStartCooperateSetPointerButtonDown() = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

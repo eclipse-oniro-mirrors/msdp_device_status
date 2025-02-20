@@ -401,12 +401,11 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     if (packet.ChkRWError()) {
         event.pointerSpeed = -1;
     }
-    FI_HILOGI("Cur pointerSpeed:%{public}d", event.pointerSpeed);
     packet >> event.touchPadSpeed;
     if (packet.ChkRWError()) {
         event.touchPadSpeed = -1;
     }
-    FI_HILOGI("Cur touchPadSpeed:%{public}d", event.touchPadSpeed);
+    FI_HILOGI("Cur pointerSpeed:%{public}d, touchPadSpeed:%{public}d,", event.pointerSpeed, event.touchPadSpeed);
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_START_COOPERATE,
         event));
@@ -414,6 +413,12 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS);
     radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS);
     CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    auto motionDrag = env_->GetPluginManager().LoadMotionDrag();
+    if (motionDrag == nullptr) {
+        FI_HILOGE("Failed to load motion drag");
+        return;
+    }
+    motionDrag->OnRemoteStartCooperateSetPointerButtonDown();
 }
 
 void DSoftbusHandler::OnStopCooperate(const std::string &networkId, NetPacket &packet)
