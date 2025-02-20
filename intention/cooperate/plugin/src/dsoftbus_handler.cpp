@@ -405,7 +405,7 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     if (packet.ChkRWError()) {
         event.touchPadSpeed = -1;
     }
-    FI_HILOGI("Cur pointerSpeed:%{public}d, Cur touchPadSpeed:%{public}d,", event.pointerSpeed, event.touchPadSpeed);
+    FI_HILOGI("Cur pointerSpeed:%{public}d, touchPadSpeed:%{public}d,", event.pointerSpeed, event.touchPadSpeed);
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_START_COOPERATE,
         event));
