@@ -27,6 +27,9 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
 constexpr size_t MAX_INPUT_DEV_PER_DEVICE { 10 };
+namespace {
+const std::string VIRTUAL_TRACK_PAD_NAME { "VirtualTrackpad" }; // defined in multimodalinput
+}
 
 InputDeviceMgr::InputDeviceMgr(IContext *context) : env_(context) {}
 
@@ -123,15 +126,18 @@ void InputDeviceMgr::HandleRemoteHotPlug(const DSoftbusHotPlugEvent &notice)
 void InputDeviceMgr::NotifyInputDeviceToRemote(const std::string &remoteNetworkId)
 {
     CALL_INFO_TRACE;
-    if (!env_->GetDeviceManager().HasKeyboard() && !env_->GetDeviceManager().HasLocalPointerDevice()) {
+    auto virTrackPads = env_->GetDeviceManager().GetVirTrackPad();
+    if ((virTrackPads.size() == 0) &&
+        (!env_->GetDeviceManager().HasKeyboard() && !env_->GetDeviceManager().HasLocalPointerDevice())) {
         FI_HILOGE("Local device have no keyboard or pointer device, skip");
         return;
     }
     auto keyboards = env_->GetDeviceManager().GetKeyboard();
     auto pointerDevices =  env_->GetDeviceManager().GetPointerDevice();
     NetPacket packet(MessageId::DSOFTBUS_INPUT_DEV_SYNC);
-    FI_HILOGI("Num: keyboard:%{public}zu, pointerDevice:%{public}zu", keyboards.size(), pointerDevices.size());
-    int32_t inputDeviceNum = static_cast<int32_t>(keyboards.size() + pointerDevices.size());
+    FI_HILOGI("Num: keyboard:%{public}zu, pointerDevice:%{public}zu, virTrackPads:%{public}zu",
+        keyboards.size(), pointerDevices.size(), virTrackPads.size());
+    int32_t inputDeviceNum = static_cast<int32_t>(keyboards.size() + pointerDevices.size() + virTrackPads.size());
     packet << inputDeviceNum;
     for (const auto &keyboard : keyboards) {
         if (SerializeDevice(keyboard, packet) != RET_OK) {
@@ -146,6 +152,15 @@ void InputDeviceMgr::NotifyInputDeviceToRemote(const std::string &remoteNetworkI
             return;
         }
         DispDeviceInfo(pointerDevice);
+    }
+    if (virTrackPads.size() > 0) {
+        for (const auto &virTrackPad : virTrackPads) {
+            if (SerializeDevice(virTrackPad, packet) != RET_OK) {
+                FI_HILOGE("Serialize virTrackPad failed");
+                return;
+            }
+            DispDeviceInfo(virTrackPad);
+        }
     }
     if (int32_t ret = env_->GetDSoftbus().SendPacket(remoteNetworkId, packet); ret != RET_OK) {
         FI_HILOGE("SenPacket to networkId:%{public}s failed, ret:%{public}d",
@@ -287,6 +302,10 @@ std::shared_ptr<MMI::InputDevice> InputDeviceMgr::Transform(std::shared_ptr<IDev
     }
     if (device->IsPointerDevice()) {
         inputDevice->AddCapability(MMI::InputDeviceCapability::INPUT_DEV_CAP_POINTER);
+    }
+    if (device->GetName() == VIRTUAL_TRACK_PAD_NAME) {
+        inputDevice->AddCapability(MMI::InputDeviceCapability::INPUT_DEV_CAP_POINTER);
+        inputDevice->AddCapability(MMI::InputDeviceCapability::INPUT_DEV_CAP_KEYBOARD);
     }
     return inputDevice;
 }
