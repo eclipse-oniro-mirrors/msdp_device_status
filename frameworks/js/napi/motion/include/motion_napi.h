@@ -68,9 +68,11 @@ private:
     static bool ValidateArgsType(napi_env env, napi_value *args, size_t argc,
         const std::vector<std::string> &expectedTypes);
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
+    static bool CheckDeviceType();
+    static void SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
+    static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
 
 private:
-    napi_ref motionValueRef_ = nullptr;
     napi_env env_;
 };
 } // namespace Msdp
