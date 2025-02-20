@@ -414,6 +414,12 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS);
     radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS);
     CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    auto motionDrag = env_->GetPluginManager().LoadMotionDrag();
+    if (motionDrag == nullptr) {
+        FI_HILOGE("Failed to load motion drag");
+        return;
+    }
+    motionDrag->OnRemoteStartCooperateSetPointerButtonDown();
 }
 
 void DSoftbusHandler::OnStopCooperate(const std::string &networkId, NetPacket &packet)
