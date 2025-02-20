@@ -22,6 +22,7 @@
 #include "motion_client.h"
 #endif
 #include "motion_napi_error.h"
+#include "parameters.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DeviceMotionNapi"
@@ -41,6 +42,9 @@ constexpr size_t MAX_ARG_STRING_LEN = 512;
 constexpr int32_t MOTION_TYPE_OPERATING_HAND = 3601;
 constexpr int32_t MOTION_TYPE_STAND = 3602;
 constexpr int32_t MOTION_TYPE_REMOTE_PHOTO = 3604;
+constexpr int32_t BASE_HAND = 0;
+constexpr int32_t LEFT_HAND = 1;
+constexpr int32_t RIGHT_HAND = 2;
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES = { "string", "function" };
 const std::vector<std::string> EXPECTED_UNSUB_ONE_ARG_TYPES = { "string" };
 const std::vector<std::string> EXPECTED_UNSUB_TWO_ARG_TYPES = { "string", "function" };
@@ -98,11 +102,7 @@ MotionNapi::MotionNapi(napi_env env, napi_value thisVar) : MotionEventNapi(env, 
 }
 
 MotionNapi::~MotionNapi()
-{
-    if (motionValueRef_ != nullptr) {
-        napi_delete_reference(env_, motionValueRef_);
-    }
-}
+{}
 
 int32_t MotionNapi::GetMotionType(const std::string &type)
 {
@@ -212,6 +212,10 @@ bool MotionNapi::ConstructMotion(napi_env env, napi_value jsThis) __attribute__(
 napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
+    if (!CheckDeviceType()) {
+        ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+        return nullptr;
+    }
     size_t argc = ARG_2;
     napi_value args[ARG_2] = { nullptr };
     napi_value jsThis = nullptr;
@@ -264,6 +268,10 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
 napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
+    if (!CheckDeviceType()) {
+        ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+        return nullptr;
+    }
     if (g_motionObj == nullptr) {
         ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "g_motionObj is nullptr");
         return nullptr;
@@ -320,6 +328,10 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
+    if (!CheckDeviceType()) {
+        ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+        return nullptr;
+    }
     napi_value result = nullptr;
     size_t argc = ARG_0;
     napi_value jsThis;
@@ -365,8 +377,50 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("getRecentOperatingHandStatus", GetRecentOptHandStatus),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
+
+    napi_value operatingHandStatus;
+    napi_status status = napi_create_object(env, &operatingHandStatus);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed create object");
+        return exports;
+    }
+
+    SetInt32Property(env, operatingHandStatus, BASE_HAND, "UNKNOWN_STATUS");
+    SetInt32Property(env, operatingHandStatus, LEFT_HAND, "LEFT_HAND_OPERATED");
+    SetInt32Property(env, operatingHandStatus, RIGHT_HAND, "RIGHT_HAND_OPERATED");
+    SetPropertyName(env, exports, "OperatingHandStatus ", operatingHandStatus);
     FI_HILOGD("Exit");
     return exports;
+}
+
+bool MotionNapi::CheckDeviceType()
+{
+    std::string model = OHOS::system::GetParameter("const.build.product", "0");
+    if (model == "VDE" || model == "ALN") {
+        return true;
+    }
+    FI_HILOGE("The device is not support");
+    return false;
+}
+
+void MotionNapi::SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName)
+{
+    napi_value prop = nullptr;
+    napi_status ret = napi_create_int32(env, value, &prop);
+    if (ret != napi_ok) {
+        FI_HILOGE("napi_create_int32 failed");
+        return;
+    }
+    SetPropertyName(env, targetObj, propName, prop);
+}
+
+void MotionNapi::SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue)
+{
+    napi_status status = napi_set_named_property(env, targetObj, propName, propValue);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to set the name property");
+        return;
+    }
 }
 
 bool MotionNapi::ValidateArgsType(napi_env env, napi_value *args, size_t argc,
