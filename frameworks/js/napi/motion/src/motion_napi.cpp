@@ -388,7 +388,7 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
     SetInt32Property(env, operatingHandStatus, BASE_HAND, "UNKNOWN_STATUS");
     SetInt32Property(env, operatingHandStatus, LEFT_HAND, "LEFT_HAND_OPERATED");
     SetInt32Property(env, operatingHandStatus, RIGHT_HAND, "RIGHT_HAND_OPERATED");
-    SetPropertyName(env, exports, "OperatingHandStatus ", operatingHandStatus);
+    SetPropertyName(env, exports, "OperatingHandStatus", operatingHandStatus);
     FI_HILOGD("Exit");
     return exports;
 }
