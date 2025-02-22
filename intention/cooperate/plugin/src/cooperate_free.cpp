@@ -80,6 +80,23 @@ void CooperateFree::UnchainConnections(Context &context, const StopCooperateEven
     }
 }
 
+void CooperateFree::SimulateShowPointerEvent()
+{
+    CALL_INFO_TRACE;
+    CHKPV(env_);
+    auto pointerEvent = OHOS::MMI::PointerEvent::Create();
+    OHOS::MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetRawDx(0);
+    item.SetRawDy(0);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
+    pointerEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
+    pointerEvent->SetPointerId(0);
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->AddPointerItem(item);
+    env_->GetInput().SimulateInputEvent(pointerEvent);
+}
+
 CooperateFree::Initial::Initial(CooperateFree &parent)
     : ICooperateStep(parent, nullptr), parent_(parent)
 {
@@ -275,6 +292,7 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
     FI_HILOGI("[remote start] Cooperation with \'%{public}s\' established", Utility::Anonymize(context.Peer()).c_str());
     TransiteTo(context, CooperateState::COOPERATE_STATE_IN);
     context.OnTransitionIn();
+    parent_.SimulateShowPointerEvent();
 }
 
 void CooperateFree::Initial::OnRemoteStartWithOptions(Context &context, const CooperateEvent &event)
