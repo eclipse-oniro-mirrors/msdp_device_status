@@ -29,6 +29,7 @@
 #include "device.h"
 #include "devicestatus_define.h"
 #include "fi_log.h"
+#include "input_manager.h"
 #include "napi_constants.h"
 #include "utility.h"
 
@@ -44,6 +45,8 @@ constexpr size_t EXPECTED_SUBMATCH { 1 };
 const std::string FINGER_PRINT { "hw_fingerprint_mouse" };
 const std::string WATCH { "WATCH" };
 const std::string PENCIL { "Pencil" };
+const std::string VIRTUAL_TRACK_PAD_NAME { "VirtualTrackpad" };
+constexpr int32_t INVALID_DEVICE_ID { -1 };
 } // namespace
 
 DeviceManager::HotplugHandler::HotplugHandler(DeviceManager &devMgr)
@@ -223,6 +226,18 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
     return dev;
 }
 
+bool DeviceManager::IsLocalPointerDevice(std::shared_ptr<MMI::InputDevice> device)
+{
+    CHKPR(device, false);
+    return device->HasCapability(MMI::InputDeviceCapability::INPUT_DEV_CAP_POINTER);
+}
+
+bool DeviceManager::IsVirtualTrackpad(std::shared_ptr<MMI::InputDevice> device)
+{
+    CHKPR(device, false);
+    return device->GetName() == VIRTUAL_TRACK_PAD_NAME;
+}
+
 std::shared_ptr<IDevice> DeviceManager::RemoveDevice(const std::string &devNode)
 {
     CALL_INFO_TRACE;
@@ -265,7 +280,7 @@ void DeviceManager::DeviceInfo(std::shared_ptr<IDevice> dev)
     FI_HILOGI("  name:          \"%{public}s\"", Utility::Anonymize(dev->GetName()).c_str());
     FI_HILOGD("  location:      \"%{public}s\"", dev->GetPhys().c_str());
     FI_HILOGD("  unique id:     \"%{private}s\"", dev->GetUniq().c_str());
-    FI_HILOGD("  is pointer:    %{public}s, is keyboard:%{public}s",
+    FI_HILOGI("  is pointer:    %{public}s, is keyboard:%{public}s",
         dev->IsPointerDevice() ? "True" : "False", dev->IsKeyboard() ? "True" : "False");
 }
 
@@ -476,6 +491,34 @@ std::vector<std::shared_ptr<IDevice>> DeviceManager::GetPointerDevice()
         }
     }
     return pointerDevices;
+}
+
+std::vector<std::shared_ptr<IDevice>> DeviceManager::GetVirTrackPad()
+{
+    std::vector<int32_t> deviceIds;
+    std::vector<std::shared_ptr<IDevice>> VirTrackPadDevices;
+    if (MMI::InputManager::GetInstance()->GetDeviceIds(
+        [&deviceIds](std::vector<int32_t> &ids) { deviceIds = ids; }) != RET_OK) {
+        FI_HILOGE("GetDeviceIds failed");
+        return VirTrackPadDevices;
+    }
+    for (int32_t dev : deviceIds) {
+        std::shared_ptr<Device> virDev = std::make_shared<Device>(INVALID_DEVICE_ID);
+        auto ret = MMI::InputManager::GetInstance()->GetDevice(dev,
+        [virDev, &VirTrackPadDevices, dev, this] (
+            std::shared_ptr<MMI::InputDevice> device) {
+                if (this->IsLocalPointerDevice(device) && this->IsVirtualTrackpad(device)) {
+                    FI_HILOGI("Has VirtualTrackpad");
+                    virDev->SetName(device->GetName().c_str());
+                    virDev->SetId(dev);
+                    VirTrackPadDevices.push_back(virDev);
+                }
+            });
+        if (ret != RET_OK) {
+            FI_HILOGE("GetDevice failed");
+        }
+    }
+    return VirTrackPadDevices;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
