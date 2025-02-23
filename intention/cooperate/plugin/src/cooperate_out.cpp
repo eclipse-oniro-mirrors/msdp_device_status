@@ -82,6 +82,23 @@ void CooperateOut::SetPointerVisible(Context &context)
     env_->GetInput().SetPointerVisibility(visible, PRIORITY);
 }
 
+void CooperateOut::SimulateShowPointerEvent()
+{
+    CALL_INFO_TRACE;
+    CHKPV(env_);
+    auto pointerEvent = OHOS::MMI::PointerEvent::Create();
+    OHOS::MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetRawDx(0);
+    item.SetRawDy(0);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
+    pointerEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
+    pointerEvent->SetPointerId(0);
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->AddPointerItem(item);
+    env_->GetInput().SimulateInputEvent(pointerEvent);
+}
+
 void CooperateOut::Initial::BuildChains(std::shared_ptr<Initial> self, CooperateOut &parent)
 {}
 
@@ -226,6 +243,7 @@ void CooperateOut::Initial::OnComeBack(Context &context, const CooperateEvent &e
     context.eventMgr_.RemoteStartFinish(notice);
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnBack();
+    parent_.SimulateShowPointerEvent();
 }
 
 void CooperateOut::Initial::OnComeBackWithOptions(Context &context, const CooperateEvent &event)
