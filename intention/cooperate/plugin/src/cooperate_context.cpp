@@ -194,12 +194,7 @@ void Context::DisableInputDevMgr()
 
 NormalizedCoordinate Context::NormalizedCursorPosition() const
 {
-#ifndef OHOS_BUILD_PC_PRODUCT
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(currentDisplayId_);
-#else
-    sptr<Rosen::DisplayInfo> display =
-        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(currentDisplayId_);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGE("No default display");
         return cursorPos_;
