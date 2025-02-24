@@ -22,6 +22,7 @@
 
 #include "accesstoken_kit.h"
 #include "display_manager.h"
+#include "display_info.h"
 #include <gtest/gtest.h>
 #include "input_device.h"
 #include "input_manager.h"
