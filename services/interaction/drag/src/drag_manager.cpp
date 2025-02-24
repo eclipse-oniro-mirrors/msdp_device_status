@@ -675,7 +675,7 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
     if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW) && (lastDisplayId_ != targetDisplayId)) {
-        FI_HILOGI("Enter the processing interface of the expansion screen");
+        FI_HILOGI("Interface for processing extended screen access");
         DealPullInWindowEvent(pointerEvent, targetDisplayId);
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL) {
