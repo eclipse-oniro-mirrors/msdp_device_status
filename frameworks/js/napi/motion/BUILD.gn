@@ -42,7 +42,6 @@ ohos_shared_library("motion_napi") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
   ]
