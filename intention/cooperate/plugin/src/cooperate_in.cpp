@@ -170,6 +170,18 @@ void CooperateIn::Initial::OnStart(Context &context, const CooperateEvent &event
     StartCooperateEvent startEvent = std::get<StartCooperateEvent>(event.event);
     context.ResetPriv();
 
+    if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Not allow cooperate");
+        NotAollowCooperateWhenMotionDragging result {
+            .pid = startEvent.pid,
+            .userData = startEvent.userData,
+            .networkId = startEvent.remoteNetworkId,
+            .success = false,
+            .errCode = static_cast<int32_t>(CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING)
+        };
+        context.eventMgr_.ErrorNotAollowCooperateWhenMotionDragging(result);
+        return;
+    }
     if (context.IsLocal(startEvent.remoteNetworkId)) {
         DSoftbusStartCooperateFinished result {
             .success = false,
