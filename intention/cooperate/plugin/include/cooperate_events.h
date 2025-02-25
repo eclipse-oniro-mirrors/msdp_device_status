@@ -321,7 +321,7 @@ struct CooperateEvent {
         DSoftbusHotPlugEvent,
         UpdateVirtualDeviceIdMapEvent,
         StartWithOptionsEvent,
-        DSoftbusCooperateOptions，
+        DSoftbusCooperateOptions,
         NotAollowCooperateWhenMotionDragging
     > event;
 };
