@@ -154,6 +154,18 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
     context.StartCooperate(notice);
     context.eventMgr_.StartCooperate(notice);
 
+    if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Not allow cooperate");
+        NotAollowCooperateWhenMotionDragging result {
+            .pid = notice.pid,
+            .userData = notice.userData,
+            .networkId = notice.remoteNetworkId,
+            .success = false,
+            .errCode = static_cast<int32_t>(CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING)
+        };
+        context.eventMgr_.ErrorNotAollowCooperateWhenMotionDragging(result);
+        return;
+    }
     int32_t ret = context.dsoftbus_.OpenSession(context.Peer());
     if (ret != RET_OK) {
         FI_HILOGE("[start cooperation] Failed to connect to \'%{public}s\'",

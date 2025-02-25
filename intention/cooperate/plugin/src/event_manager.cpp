@@ -269,6 +269,19 @@ void EventManager::OnClientDied(const ClientDiedEvent &event)
     }
 }
 
+void EventManager::ErrorNotAollowCooperateWhenMotionDragging(const NotAollowCooperateWhenMotionDragging &event)
+{
+    CooperateNotice notice {
+        .pid = event.pid,
+        .msgId = MessageId::COORDINATION_MESSAGE,
+        .userData = event.userData,
+        .networkId = event.networkId,
+        .msg = (event.success ? CoordinationMessage::ACTIVATE_SUCCESS : CoordinationMessage::ACTIVATE_FAIL),
+        .errCode = event.errCode
+    };
+    NotifyCooperateMessage(notice);
+}
+
 void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
 {
     auto session = env_->GetSocketSessionManager().FindSessionByPid(notice.pid);
