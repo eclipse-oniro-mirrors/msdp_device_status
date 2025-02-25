@@ -180,6 +180,18 @@ void CooperateOut::Initial::OnStart(Context &context, const CooperateEvent &even
 {
     StartCooperateEvent param = std::get<StartCooperateEvent>(event.event);
 
+    if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Not allow cooperate");
+        NotAollowCooperateWhenMotionDragging result {
+            .pid = param.pid,
+            .userData = param.userData,
+            .networkId = param.remoteNetworkId,
+            .success = false,
+            .errCode = static_cast<int32_t>(CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING)
+        };
+        context.eventMgr_.ErrorNotAollowCooperateWhenMotionDragging(result);
+        return;
+    }
     context.eventMgr_.StartCooperate(param);
     FI_HILOGI("[start] Start cooperation with \'%{public}s\', report success when out",
         Utility::Anonymize(context.Peer()).c_str());
