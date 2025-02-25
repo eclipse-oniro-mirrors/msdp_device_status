@@ -250,6 +250,14 @@ struct DSoftbusHotPlugEvent {
     std::shared_ptr<IDevice> device;
 };
 
+struct NotAollowCooperateWhenMotionDragging {
+    int32_t pid;
+    int32_t userData;
+    std::string networkId;
+    bool success;
+    int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
+};
+
 using DSoftbusReplyUnSubscribeMouseLocation = DSoftbusReplySubscribeMouseLocation;
 using DSoftbusUnSubscribeMouseLocation = DSoftbusSubscribeMouseLocation;
 
@@ -313,7 +321,8 @@ struct CooperateEvent {
         DSoftbusHotPlugEvent,
         UpdateVirtualDeviceIdMapEvent,
         StartWithOptionsEvent,
-        DSoftbusCooperateOptions
+        DSoftbusCooperateOptions，
+        NotAollowCooperateWhenMotionDragging
     > event;
 };
 
