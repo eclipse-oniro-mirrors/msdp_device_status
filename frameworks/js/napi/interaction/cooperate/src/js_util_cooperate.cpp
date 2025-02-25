@@ -104,6 +104,9 @@ int32_t JsUtilCooperate::GetErrCode(const CoordinationMsgInfo &msgInfo)
         case CoordinationErrCode::WORKER_THREAD_TIMEOUT: {
             return CustomErrCode::WORKER_THREAD_TIMEOUT;
         }
+        case CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING: {
+            return CustomErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING;
+        }
         default:
             return msgInfo.errCode;
     }
@@ -136,6 +139,10 @@ bool JsUtilCooperate::GetErrMsg(const CoordinationMsgInfo &msgInfo, std::string 
         }
         case CoordinationErrCode::WORKER_THREAD_TIMEOUT: {
             msg += "Worker thread timeout";
+            break;
+        }
+        case CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING: {
+            msg += "Not allow cooperate when motion dragging";
             break;
         }
         default:
