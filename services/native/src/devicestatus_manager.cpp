@@ -16,6 +16,7 @@
 #include "devicestatus_manager.h"
 
 #include "devicestatus_define.h"
+#include "devicestatus_napi_manager.h"
 #include "fi_log.h"
 
 #undef LOG_TAG
@@ -31,6 +32,12 @@ void DeviceStatusManager::DeviceStatusCallbackDeathRecipient::OnRemoteDied(const
     FI_HILOGI("Recv death notice");
 }
 
+void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+{
+    CHKPV(remote);
+    FI_HILOGI("Recv death notice");
+}
+
 bool DeviceStatusManager::Init()
 {
     CALL_DEBUG_ENTER;
@@ -38,6 +45,14 @@ bool DeviceStatusManager::Init()
         devicestatusCBDeathRecipient_ = new (std::nothrow) DeviceStatusCallbackDeathRecipient();
         if (devicestatusCBDeathRecipient_ == nullptr) {
             FI_HILOGE("devicestatusCBDeathRecipient_ failed");
+            return false;
+        }
+    }
+
+    if (boomerangCBDeathRecipient_ == nullptr) {
+        boomerangCBDeathRecipient_ = new (std::nothrow) BoomerangCallbackDeathRecipient();
+        if (boomerangCBDeathRecipient_ == nullptr) {
+            FI_HILOGE("boomerangCBDeathRecipient_ failed");
             return false;
         }
     }
@@ -263,6 +278,145 @@ void DeviceStatusManager::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
     } else {
         FI_HILOGI("Other subscribe exist");
     }
+}
+
+void DeviceStatusManager::Subscribe(BoomerangType type, std::string bundleName,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(callback);
+    if ((type <= BOOMERANG_TYPE_INVALID) || (type >= BOOMERANG_TYPE_MAX)) {
+        FI_HILOGE("Subscribe boomerangType_:%{public}d is error", boomerangType_);
+        return;
+    }
+    boomerangType_ = type;
+    std::lock_guard lock(mutex_);
+    std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp> listeners;
+    auto object = callback->AsObject();
+    CHKPV(object);
+    FI_HILOGI("boomerangListeners_.size:%{public}zu", boomerangListeners_.size());
+    auto dtTypeIter = boomerangListeners_.find(bundleName);
+    if (dtTypeIter == boomerangListeners_.end()) {
+        if (listeners.insert(callback).second) {
+            FI_HILOGI("No found set list of type, insert success");
+            object->AddDeathRecipient(boomerangCBDeathRecipient_);
+        }
+        auto [_, ret] = boomerangListeners_.insert(std::make_pair(bundleName, listeners));
+        if (!ret) {
+            FI_HILOGW("type is duplicated");
+        }
+    } else {
+        FI_HILOGI("callbacklist.size:%{public}zu", boomerangListeners_[dtTypeIter->first].size());
+        auto iter = boomerangListeners_[dtTypeIter->first].find(callback);
+        if (iter != boomerangListeners_[dtTypeIter->first].end()) {
+            return;
+        }
+        if (boomerangListeners_[dtTypeIter->first].insert(callback).second) {
+            FI_HILOGI("Find set list of type, insert success");
+            object->AddDeathRecipient(boomerangCBDeathRecipient_);
+        }
+    }
+}
+ 
+void DeviceStatusManager::Unsubscribe(BoomerangType type, std::string bundleName,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(callback);
+    if ((type <= BOOMERANG_TYPE_INVALID) || (type >= BOOMERANG_TYPE_MAX)) {
+        FI_HILOGE("Unsubscribe type_:%{public}d is error", type);
+        return;
+    }
+    auto object = callback->AsObject();
+    CHKPV(object);
+    std::lock_guard lock(mutex_);
+    auto dtTypeIter = boomerangListeners_.find(bundleName);
+    if (dtTypeIter == boomerangListeners_.end()) {
+        FI_HILOGE("Failed to find listener for type");
+        return;
+    }
+    FI_HILOGI("callbacklist.size:%{public}zu", boomerangListeners_[dtTypeIter->first].size());
+    auto iter = boomerangListeners_[dtTypeIter->first].find(callback);
+    if (iter != boomerangListeners_[dtTypeIter->first].end()) {
+        if (boomerangListeners_[dtTypeIter->first].erase(callback) != 0) {
+            object->RemoveDeathRecipient(boomerangCBDeathRecipient_);
+            if (boomerangListeners_[dtTypeIter->first].empty()) {
+                boomerangListeners_.erase(dtTypeIter);
+            }
+        }
+    }
+    FI_HILOGI("listeners_.size:%{public}zu", boomerangListeners_.size());
+}
+ 
+void DeviceStatusManager::NotifyMedata(std::string bundleName, sptr<IRemoteBoomerangCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(callback);
+    auto object = callback->AsObject();
+    CHKPV(object);
+    std::lock_guard lock(mutex_);
+    std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp> listeners;
+    auto iter = boomerangListeners_.find(bundleName);
+    if (iter == boomerangListeners_.end()) {
+        FI_HILOGE("bundleName:%{public}s is not exits", bundleName.c_str());
+        return;
+    }
+    listeners = (std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp>)(iter->second);
+    for (const auto &listener : listeners) {
+        if (listener == nullptr) {
+            FI_HILOGE("listener is nullptr");
+            return;
+        }
+       BoomerangData data {};
+       data.type = BoomerangType::BOOMERANG_TYPE_BOOMERANG;
+       data.status = BoomerangStatus::BOOMERANG_STATUS_SCREEN_SHOT;
+       listener->OnScreenshotResult(data);
+    }
+    notityListener_ = callback;
+}
+ 
+void DeviceStatusManager::SubmitMetadata(std::string metadata)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(notityListener_);
+    std::lock_guard lock(mutex_);
+    notityListener_->OnNotifyMetadata(metadata);
+}
+ 
+void DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(callback);
+    std::lock_guard lock(mutex_);
+    std::shared_ptr<Media::PixelMap> encodePixelMap;
+    std::shared_ptr<BoomerangAlgoImpl> algo = std::make_shared<BoomerangAlgoImpl>();
+    if (algo == nullptr) {
+        FI_HILOGE("Boomerang Algo init faild");
+        return;
+    }
+    algo->EncodeImage(pixelMap, matedata, encodePixelMap);
+    if (encodePixelMap == nullptr) {
+        FI_HILOGE("encode image is null");
+        return;
+    }
+    callback->OnEncodeImageResult(pixelMap);
+}
+ 
+void DeviceStatusManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(callback);
+    std::lock_guard lock(mutex_);
+    std::string metadata;
+    std::shared_ptr<BoomerangAlgoImpl> algo = std::make_shared<BoomerangAlgoImpl>();
+    if (algo == nullptr) {
+        FI_HILOGE("Boomerang Algo init faild");
+        return;
+    }
+    algo->DecodeImage(pixelMap, metadata);
+    callback->OnNotifyMetadata(metadata);
 }
 
 int32_t DeviceStatusManager::LoadAlgorithm()
