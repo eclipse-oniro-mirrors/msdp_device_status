@@ -89,6 +89,14 @@ enum CustomErrCode : int32_t {
     WORKER_THREAD_TIMEOUT = 20900005,
     NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING = 20900006,
 };
+
+enum BoomerangErrCode : int32_t {
+    HANDLER_FAILD = 32100001,
+    ENCODE_FAILED = 32100002,
+    DECODE_FAILED = 32100003,
+    SUBSCRIBE_FAILED = 32100004,
+    UNSUBSCRIBE_FAILED = 32100005,
+};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
