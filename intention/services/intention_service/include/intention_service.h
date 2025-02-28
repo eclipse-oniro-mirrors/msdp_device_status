@@ -18,6 +18,8 @@
 
 #include "nocopyable.h"
 
+#include "boomerang_dumper.h"
+#include "boomerang_server.h"
 #include "cooperate_server.h"
 #include "drag_server.h"
 #include "intention_dumper.h"
@@ -57,6 +59,8 @@ private:
     CooperateServer cooperate_;
     DragServer drag_;
     IntentionDumper dumper_;
+    BoomerangServer boomerang_;
+    BoomerangDumper boomerangDumper_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
