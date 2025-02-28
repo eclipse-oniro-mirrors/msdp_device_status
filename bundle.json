@@ -96,7 +96,8 @@
           "//base/msdp/device_status/frameworks/native/src:deviceagent",
           "//base/msdp/device_status/sa_profile:devicestatus_sa_profile",
           "//base/msdp/device_status/tools:devicestatus_tools",
-          "//base/msdp/device_status:devicestatus_service_group"
+          "//base/msdp/device_status:devicestatus_service_group",
+          "//base/msdp/device_status/frameworks/js/napi/boomerang:boomerang_napi"
         ]
       },
       "inner_kits": [
