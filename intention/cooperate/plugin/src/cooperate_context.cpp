@@ -455,6 +455,7 @@ void Context::SetCursorPosition(const Coordinate &cursorPos)
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHKPV(display);
     auto cursor = SetCursorPos(cursorPos);
+    cursorPos_ = cursor;
     env_->GetInput().SetPointerLocation(cursor.x, cursor.y);
     FI_HILOGI("Set cursor position (%{private}d,%{private}d)(%{private}d,%{private}d)(%{public}d,%{public}d)",
         cursorPos.x, cursorPos.y, cursor.x, cursor.y, display->GetWidth(), display->GetHeight());
