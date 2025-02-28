@@ -400,7 +400,7 @@ void DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> 
         FI_HILOGE("encode image is null");
         return;
     }
-    callback->OnEncodeImageResult(pixelMap);
+    callback->OnEncodeImageResult(encodePixelMap);
 }
  
 void DeviceStatusManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
