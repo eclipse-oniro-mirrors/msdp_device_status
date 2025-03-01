@@ -258,7 +258,7 @@ napi_value BoomerangNapi::Register(napi_env env, napi_callback_info info)
     size_t argc = 3;
     napi_value argv[3] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
-    if (argc < 2) {
+    if (argc < ARG_2) {
         THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
         return nullptr;
     }
@@ -276,7 +276,7 @@ napi_value BoomerangNapi::Register(napi_env env, napi_callback_info info)
     char bundleName[MAX_STRING_LEN] = {0};
     size_t strLength = 0;
     CHKRP(napi_get_value_string_utf8(env, argv[1], bundleName, sizeof(bundleName), &strLength), CREATE_STRING_UTF8);
-    return SubscribeMeatadataCallback(env, info, argv[2], type, bundleName);
+    return SubscribeMeatadataCallback(env, info, argv[ARG_2], type, bundleName);
 }
 
 napi_value BoomerangNapi::SubscribeMeatadataCallback(
@@ -387,7 +387,7 @@ napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info 
     size_t argc = 2;
     napi_value argv[2] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
-    if (argc < 2) {
+    if (argc < ARG_2) {
         THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
         return nullptr;
     }
@@ -491,7 +491,7 @@ napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
     CHKRP(napi_get_value_string_utf8(env, argv[1], bundleName, sizeof(bundleName), &strLength), CREATE_STRING_UTF8);
 
     CHKPP(g_obj);
-    if (!g_obj->Off(type, argv[2])) {
+    if (!g_obj->Off(type, argv[ARG_2])) {
         FI_HILOGE("Not ready to unsubscribe for type:%{public}d", type);
         return nullptr;
     }
