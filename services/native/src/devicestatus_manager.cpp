@@ -367,10 +367,10 @@ void DeviceStatusManager::NotifyMedata(std::string bundleName, sptr<IRemoteBoome
             FI_HILOGE("listener is nullptr");
             return;
         }
-       BoomerangData data {};
-       data.type = BoomerangType::BOOMERANG_TYPE_BOOMERANG;
-       data.status = BoomerangStatus::BOOMERANG_STATUS_SCREEN_SHOT;
-       listener->OnScreenshotResult(data);
+        BoomerangData data {};
+        data.type = BoomerangType::BOOMERANG_TYPE_BOOMERANG;
+        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREEN_SHOT;
+        listener->OnScreenshotResult(data);
     }
     notityListener_ = callback;
 }
