@@ -50,8 +50,6 @@ bool SubscribeBoomerangParam::Unmarshalling(MessageParcel &parcel)
         return false;
     }
     callback_ = iface_cast<IRemoteBoomerangCallback>(obj);
-    if(callback_ == nullptr) {
-    }
     return (callback_ != nullptr);
 }
 
@@ -79,8 +77,6 @@ bool NotifyMetadataParam::Unmarshalling(MessageParcel &parcel)
         return false;
     }
     callback_ = iface_cast<IRemoteBoomerangCallback>(obj);
-    if(callback_ == nullptr) {
-    }
     return (callback_ != nullptr);
 }
 
@@ -128,8 +124,6 @@ bool EncodeImageParam::Unmarshalling(MessageParcel &parcel)
         return false;
     }
     callback_ = iface_cast<IRemoteBoomerangCallback>(obj);
-    if(callback_ == nullptr) {
-    }
     return (callback_ != nullptr);
 }
 
@@ -159,8 +153,6 @@ bool DecodeImageParam::Unmarshalling(MessageParcel &parcel)
         return false;
     }
     callback_ = iface_cast<IRemoteBoomerangCallback>(obj);
-    if(callback_ == nullptr) {
-    }
     return (callback_ != nullptr);
 }
 } // namespace DeviceStatus
