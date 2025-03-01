@@ -50,8 +50,8 @@ struct AppInfo {
 
 struct BoomerangAppInfo {
     std::string startTime;
-    int32_t uid {};
-    int32_t pid {};
+    int32_t uid = 0;
+    int32_t pid = 0;
     Security::AccessToken::AccessTokenID tokenId;
     std::string packageName;
     BoomerangType type { BOOMERANG_TYPE_INVALID };
