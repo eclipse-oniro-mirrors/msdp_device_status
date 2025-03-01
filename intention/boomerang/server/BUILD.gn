@@ -10,9 +10,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 import("../../../device_status.gni")
- 
+
 config("intention_boomerang_server_public_config") {
   include_dirs = [
     "include",
@@ -21,7 +21,7 @@ config("intention_boomerang_server_public_config") {
     "${device_status_root_path}/services/native/include",
   ]
 }
- 
+
 ohos_source_set("intention_boomerang_server") {
   sanitize = {
     integer_overflow = true
@@ -31,31 +31,29 @@ ohos_source_set("intention_boomerang_server") {
     cfi_cross_dso = true
     debug = false
   }
- 
+
   branch_protector_ret = "pac_ret"
- 
+
   include_dirs = [
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
     "${device_status_root_path}/libs/interface",
   ]
- 
-  sources = [
-    "src/boomerang_server.cpp",
-  ]
- 
+
+  sources = [ "src/boomerang_server.cpp" ]
+
   public_configs = [ ":intention_boomerang_server_public_config" ]
- 
+
   defines = device_status_default_defines
- 
+
   deps = [
+    "${device_status_root_path}/intention/boomerang/data:intention_boomerang_data",
     "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/prototype:intention_prototype",
-    "${device_status_root_path}/intention/boomerang/data:intention_boomerang_data",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
- 
+
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "graphic_2d:librender_service_client",
@@ -65,7 +63,7 @@ ohos_source_set("intention_boomerang_server") {
     "input:libmmi-client",
     "window_manager:libdm",
   ]
- 
+
   subsystem_name = "${device_status_subsystem_name}"
   part_name = "${device_status_part_name}"
 }

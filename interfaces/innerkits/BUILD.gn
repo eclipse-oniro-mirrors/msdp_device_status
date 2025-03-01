@@ -54,6 +54,9 @@ ohos_shared_library("devicestatus_client") {
     "${device_status_frameworks_path}/native/interaction/src/drag_data_util.cpp",
     "${device_status_frameworks_path}/native/interaction/src/drag_manager_impl.cpp",
     "${device_status_frameworks_path}/native/interaction/src/interaction_manager.cpp",
+    "${device_status_frameworks_path}/native/src/boomerang_callback_proxy.cpp",
+    "${device_status_frameworks_path}/native/src/boomerang_callback_stub.cpp",
+    "${device_status_frameworks_path}/native/src/boomerang_manager.cpp",
     "${device_status_frameworks_path}/native/src/client.cpp",
     "${device_status_frameworks_path}/native/src/devicestatus_callback_proxy.cpp",
     "${device_status_frameworks_path}/native/src/devicestatus_callback_stub.cpp",
@@ -61,9 +64,6 @@ ohos_shared_library("devicestatus_client") {
     "${device_status_frameworks_path}/native/src/fd_listener.cpp",
     "${device_status_frameworks_path}/native/src/stationary_manager.cpp",
     "${device_status_root_path}/services/communication/client/src/devicestatus_srv_proxy.cpp",
-    "${device_status_frameworks_path}/native/src/boomerang_callback_proxy.cpp",
-    "${device_status_frameworks_path}/native/src/boomerang_manager.cpp",
-    "${device_status_frameworks_path}/native/src/boomerang_callback_stub.cpp",
   ]
 
   if (device_status_intention_framework) {
@@ -86,13 +86,13 @@ ohos_shared_library("devicestatus_client") {
 
   if (device_status_intention_framework) {
     deps += [
+      "${device_status_root_path}/intention/boomerang/client:intention_boomerang_client",
       "${device_status_root_path}/intention/cooperate/client:intention_cooperate_client",
       "${device_status_root_path}/intention/drag/client:intention_drag_client",
       "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
       "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_client",
       "${device_status_root_path}/intention/prototype:intention_prototype",
       "${device_status_root_path}/intention/stationary/client:intention_stationary_client",
-      "${device_status_root_path}/intention/boomerang/client:intention_boomerang_client",
     ]
   }
 

@@ -10,16 +10,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 import("../../../device_status.gni")
- 
+
 config("intention_boomerang_data_public_config") {
   include_dirs = [
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
   ]
 }
- 
+
 ohos_source_set("intention_boomerang_data") {
   sanitize = {
     integer_overflow = true
@@ -29,28 +29,26 @@ ohos_source_set("intention_boomerang_data") {
     cfi_cross_dso = true
     debug = false
   }
- 
+
   branch_protector_ret = "pac_ret"
- 
+
   include_dirs = [
     "include",
     "${device_status_root_path}/intention/data/include",
     "${device_status_root_path}/interfaces/innerkits/include",
   ]
- 
+
   sources = [ "src/boomerang_params.cpp" ]
- 
+
   public_configs = [ ":intention_boomerang_data_public_config" ]
- 
+
   deps = [
-         "${device_status_root_path}/intention/prototype:intention_prototype",
-         "${device_status_root_path}/utils/common:devicestatus_util"
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/utils/common:devicestatus_util",
   ]
- 
-   external_deps = [
-    "image_framework:image_native",
-  ]
- 
+
+  external_deps = [ "image_framework:image_native" ]
+
   subsystem_name = "${device_status_subsystem_name}"
   part_name = "${device_status_part_name}"
 }
