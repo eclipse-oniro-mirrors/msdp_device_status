@@ -34,7 +34,8 @@ constexpr int32_t SERVER_TIMEOUT { 5 };
 }
 
 IntentionService::IntentionService(IContext *context)
-    : context_(context), socketServer_(context), cooperate_(context), drag_(context), dumper_(context, stationary_)
+    : context_(context), socketServer_(context), cooperate_(context), drag_(context), dumper_(context, stationary_),
+    boomerangDumper_(context, boomerang_)
 {}
 
 int32_t IntentionService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -258,6 +259,9 @@ IPlugin* IntentionService::LoadPlugin(Intention intention)
         }
         case Intention::DRAG: {
             return &drag_;
+        }
+        case Intention::BOOMERANG: {
+            return &boomerang_;
         }
         default: {
             return nullptr;

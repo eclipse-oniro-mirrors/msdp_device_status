@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,7 @@
 
 import("../../../device_status.gni")
 
-config("intention_stationary_server_public_config") {
+config("intention_boomerang_server_public_config") {
   include_dirs = [
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
@@ -22,7 +22,7 @@ config("intention_stationary_server_public_config") {
   ]
 }
 
-ohos_source_set("intention_stationary_server") {
+ohos_source_set("intention_boomerang_server") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -38,26 +38,18 @@ ohos_source_set("intention_stationary_server") {
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
     "${device_status_root_path}/libs/interface",
-    "${device_status_root_path}/services/native/include",
   ]
 
-  sources = [
-    "${device_status_root_path}/services/native/src/devicestatus_dumper.cpp",
-    "${device_status_root_path}/services/native/src/devicestatus_hisysevent.cpp",
-    "${device_status_root_path}/services/native/src/devicestatus_manager.cpp",
-    "${device_status_root_path}/services/native/src/devicestatus_msdp_client_impl.cpp",
-    "${device_status_root_path}/services/native/src/devicestatus_napi_manager.cpp",
-    "src/stationary_server.cpp",
-  ]
+  sources = [ "src/boomerang_server.cpp" ]
 
-  public_configs = [ ":intention_stationary_server_public_config" ]
+  public_configs = [ ":intention_boomerang_server_public_config" ]
 
   defines = device_status_default_defines
 
   deps = [
+    "${device_status_root_path}/intention/boomerang/data:intention_boomerang_data",
     "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/prototype:intention_prototype",
-    "${device_status_root_path}/intention/stationary/data:intention_stationary_data",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
@@ -66,19 +58,11 @@ ohos_source_set("intention_stationary_server") {
     "access_token:libaccesstoken_sdk",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "input:libmmi-client",
     "window_manager:libdm",
   ]
-
-  if (device_status_hisysevent_enable) {
-    external_deps += [ "hisysevent:libhisysevent" ]
-    defines += [ "MSDP_HIVIEWDFX_HISYSEVENT_ENABLE" ]
-  }
-
-  if (device_status_hitrace_enable) {
-    external_deps += [ "hitrace:hitrace_meter" ]
-    defines += [ "MSDP_HIVIEWDFX_HITRACE_ENABLE" ]
-  }
 
   subsystem_name = "${device_status_subsystem_name}"
   part_name = "${device_status_part_name}"

@@ -80,6 +80,15 @@
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetAppDragSwitchState(bool&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::SetDraggableStateAsync(bool, long)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::SetDraggableStateAsync(bool, long long)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::GetInstance()";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::SubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::UnsubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::SubmitMetadata(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::NotifyMetadataBindingEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::BoomerangEncodeImage(std::__h::shared_ptr<OHOS::Media::PixelMap>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::BoomerangDecodeImage(std::__h::shared_ptr<OHOS::Media::PixelMap>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
+            "VTT for OHOS::Msdp::DeviceStatus::BoomerangCallbackStub";
+            "OHOS::Msdp::DeviceStatus::BoomerangCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
         };
     local:
         *;

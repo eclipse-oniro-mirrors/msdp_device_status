@@ -317,6 +317,60 @@ void DeviceStatusDumper::RemoveAppInfo(std::shared_ptr<AppInfo> appInfo)
     }
 }
 
+void DeviceStatusDumper::SaveBoomerangAppInfo(std::shared_ptr<BoomerangAppInfo> appInfo)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(appInfo);
+    GetTimeStamp(appInfo->startTime);
+    std::set<std::shared_ptr<BoomerangAppInfo>> appInfos;
+    std::unique_lock lock(mutex_);
+    auto iter = boomerangAppInfos_.find(appInfo->type);
+    if (iter == boomerangAppInfos_.end()) {
+        if (appInfos.insert(appInfo).second) {
+            auto [_, ret] = boomerangAppInfos_.insert(std::make_pair(appInfo->type, appInfos));
+            if (!ret) {
+                FI_HILOGW("type is duplicated");
+            }
+        }
+    } else {
+        if (!boomerangAppInfos_[iter->first].insert(appInfo).second) {
+            FI_HILOGW("appInfo is duplicated");
+        }
+    }
+}
+ 
+void DeviceStatusDumper::SetNotifyMetadatAppInfo(std::shared_ptr<BoomerangAppInfo> appInfo)
+{
+    CALL_DEBUG_ENTER;
+    notifyMetadatAppInfo_ = appInfo;
+}
+ 
+void DeviceStatusDumper::RemoveBoomerangAppInfo(std::shared_ptr<BoomerangAppInfo> appInfo)
+{
+    CALL_DEBUG_ENTER;
+    CHKPV(appInfo);
+    CHKPV(appInfo->boomerangCallback);
+    std::unique_lock lock(mutex_);
+    auto appInfoSetIter = boomerangAppInfos_.find(appInfo->type);
+    if (appInfoSetIter == boomerangAppInfos_.end()) {
+        FI_HILOGE("Not exist %{public}d type boomerangAppInfo", appInfo->type);
+        return;
+    }
+    FI_HILOGI("callbacklist type:%{public}d, size:%{public}zu, boomerangAppInfoMap size:%{public}zu",
+        appInfo->type, boomerangAppInfos_[appInfoSetIter->first].size(), boomerangAppInfos_.size());
+    auto iter = boomerangAppInfos_.find(appInfo->type);
+    if (iter == boomerangAppInfos_.end()) {
+        FI_HILOGW("Remove boomerang app info is not exists");
+        return;
+    }
+    for (const auto &item : iter->second) {
+        if (item->pid == appInfo->pid) {
+            iter->second.erase(item);
+            break;
+        }
+    }
+}
+
 void DeviceStatusDumper::PushDeviceStatus(const Data &data)
 {
     CALL_DEBUG_ENTER;

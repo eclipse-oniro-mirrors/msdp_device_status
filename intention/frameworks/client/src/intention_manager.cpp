@@ -121,6 +121,40 @@ int32_t IntentionManager::UnsubscribeCallback(Type type, ActivityEvent event, sp
     return stationary_.UnsubscribeCallback(*tunnel_, type, event, callback);
 }
 
+int32_t IntentionManager::SubscribeCallback(BoomerangType type, std::string bundleName,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    return boomerang_.SubscribeCallback(*tunnel_, type, bundleName, callback);
+}
+ 
+int32_t IntentionManager::UnsubscribeCallback(BoomerangType type, std::string bundleName,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    return boomerang_.UnsubscribeCallback(*tunnel_, type, bundleName, callback);
+}
+ 
+int32_t IntentionManager::NotifyMetadataBindingEvent(std::string bundleName, sptr<IRemoteBoomerangCallback> callback)
+{
+    return boomerang_.NotifyMetadataBindingEvent(*tunnel_, bundleName, callback);
+}
+ 
+int32_t IntentionManager::SubmitMetadata(std::string metadata)
+{
+    return boomerang_.SubmitMetadata(*tunnel_, metadata);
+}
+ 
+int32_t IntentionManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    return boomerang_.BoomerangEncodeImage(*tunnel_, pixelMap, matedata, callback);
+}
+ 
+int32_t IntentionManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    return boomerang_.BoomerangDecodeImage(*tunnel_, pixelMap, callback);
+}
+
 Data IntentionManager::GetDeviceStatusData(const Type type)
 {
     return stationary_.GetDeviceStatusData(*tunnel_, type);

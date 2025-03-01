@@ -20,6 +20,8 @@
 #include <map>
 
 #include "accesstoken_kit.h"
+#include "boomerang_callback.h"
+#include "boomerang_data.h"
 #include "devicestatus_msdp_client_impl.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
@@ -41,6 +43,13 @@ public:
         virtual ~DeviceStatusCallbackDeathRecipient() = default;
     };
 
+    class BoomerangCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        BoomerangCallbackDeathRecipient() = default;
+        virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
+        virtual ~BoomerangCallbackDeathRecipient() = default;
+    };
+
     bool Init();
     bool Enable(Type type);
     bool InitAlgoMngrInterface(Type type);
@@ -49,6 +58,13 @@ public:
     int32_t NotifyDeviceStatusChange(const Data &devicestatusData);
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
     void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
+    void Subscribe(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    void Unsubscribe(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    void NotifyMedata(std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    void SubmitMetadata(std::string metadata);
+    void BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
+        sptr<IRemoteBoomerangCallback> callback);
+    void BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
     Data GetLatestDeviceStatusData(Type type);
     int32_t MsdpDataCallback(const Data &data);
     int32_t LoadAlgorithm();
@@ -62,14 +78,26 @@ private:
             return left->AsObject() < right->AsObject();
         }
     };
+
+    struct boomerangClasscomp {
+        bool operator()(sptr<IRemoteBoomerangCallback> left, sptr<IRemoteBoomerangCallback> right) const
+        {
+            return left->AsObject() < right->AsObject();
+        }
+    };
     static constexpr int32_t argSize_ { TYPE_MAX };
 
     std::mutex mutex_;
     sptr<IRemoteObject::DeathRecipient> devicestatusCBDeathRecipient_ { nullptr };
+    sptr<IRemoteObject::DeathRecipient> boomerangCBDeathRecipient_ { nullptr };
     std::shared_ptr<DeviceStatusMsdpClientImpl> msdpImpl_ { nullptr };
     std::map<Type, OnChangedValue> msdpData_;
     std::map<Type, std::set<const sptr<IRemoteDevStaCallback>, classcomp>> listeners_;
+    std::map<std::string, std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp>> boomerangListeners_;
+    sptr<IRemoteBoomerangCallback> notityListener_;
+    sptr<IRemoteBoomerangCallback> encodeCallback_;
     int32_t type_ { -1 };
+    int32_t boomerangType_ { -1 };
     int32_t event_ { -1 };
     int32_t arrs_[argSize_] {};
 };
