@@ -53,19 +53,19 @@ int32_t BoomerangManager::NotifyMetadataBindingEvent(std::string bundleName,
 
 int32_t BoomerangManager::SubmitMetadata(std::string metadata)
 {
-   return INTER_MGR_IMPL.SubmitMetadata(metadata);
+    return INTER_MGR_IMPL.SubmitMetadata(metadata);
 }
 
 int32_t BoomerangManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
     sptr<IRemoteBoomerangCallback> callback)
 {
-   return INTER_MGR_IMPL.BoomerangEncodeImage(pixelMap, matedata, callback);
+    return INTER_MGR_IMPL.BoomerangEncodeImage(pixelMap, matedata, callback);
 }
 
 int32_t BoomerangManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
     sptr<IRemoteBoomerangCallback> callback)
 {
-   return INTER_MGR_IMPL.BoomerangDecodeImage(pixelMap, callback);
+    return INTER_MGR_IMPL.BoomerangDecodeImage(pixelMap, callback);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
