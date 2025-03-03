@@ -53,6 +53,11 @@ struct AsyncContext {
     napi_async_work work = nullptr;
     napi_deferred deferred = nullptr;
     napi_handle_scope scope;
+    sptr<IRemoteBoomerangCallback> callback = nullptr;
+    std::string bundleName;
+    std::string metadata;
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    int32_t result;
 };
 
 class BoomerangNapi : public BoomerangEvent {
@@ -81,6 +86,18 @@ public:
 private:
     static bool CheckArguments(napi_env env, napi_callback_info info);
     static bool IsSameHandle(napi_env env, napi_value handle, napi_ref ref);
+    static bool CreateMetadataExecution(napi_env env, napi_deferred deferred, std::string typeInt,
+        sptr<IRemoteBoomerangCallback> callbacks);
+    static void NotifyMetadataExecuteCB(napi_env env, void* data);
+    static void NotifyMetadataCompleteCB(napi_env env, napi_status status, void* data);
+    static bool CreateEncodeImageExecution(napi_env env, napi_deferred deferred, std::string metadata,
+        std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
+    static void EncodeImageExecuteCB(napi_env env, void* data);
+    static void EncodeImageCompleteCB(napi_env env, napi_status status, void* data);
+    static bool CreateDecodeImageExecution(napi_env env, napi_deferred deferred,
+        std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
+    static void DecodeImageExecuteCB(napi_env env, void* data);
+    static void DecodeImageCompleteCB(napi_env env, napi_status status, void* data);
     static AsyncContext *asyncContext_;
     static AsyncContext *encodeAsyncContext_;
     static AsyncContext *decodeAsyncContext_;
