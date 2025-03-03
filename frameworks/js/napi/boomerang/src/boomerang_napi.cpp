@@ -568,7 +568,7 @@ bool BoomerangNapi::CreateMetadataExecution(napi_env env, napi_deferred deferred
 {
     if (asyncContext_ == nullptr) {
         FI_HILOGE("not init notity metadata asyncContext");
-        return;
+        return false;
     }
     asyncContext_->callback = callback;
     asyncContext_->bundleName = bundleName;
@@ -586,7 +586,7 @@ bool BoomerangNapi::CreateEncodeImageExecution(napi_env env, napi_deferred defer
 {
     if (encodeAsyncContext_ == nullptr) {
         FI_HILOGE("not init encode image asyncContext");
-        return;
+        return false;
     }
     encodeAsyncContext_->callback = callback;
     encodeAsyncContext_->metadata = metadata;
@@ -605,7 +605,7 @@ bool BoomerangNapi::CreateDecodeImageExecution(napi_env env, napi_deferred defer
 {
     if (decodeAsyncContext_ == nullptr) {
         FI_HILOGE("not init decode image asyncContext");
-        return;
+        return false;
     }
     decodeAsyncContext_->callback = callback;
     decodeAsyncContext_->pixelMap = pixelMap;
