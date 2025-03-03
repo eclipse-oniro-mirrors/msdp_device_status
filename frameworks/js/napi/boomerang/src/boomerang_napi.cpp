@@ -566,6 +566,10 @@ bool BoomerangNapi::CheckArguments(napi_env env, napi_callback_info info)
 bool BoomerangNapi::CreateMetadataExecution(napi_env env, napi_deferred deferred, std::string bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
+    if (asyncContext_ == nullptr) {
+        FI_HILOGE("not init notity metadata asyncContext");
+        return;
+    }
     asyncContext_->callback = callback;
     asyncContext_->bundleName = bundleName;
     napi_value resource = nullptr;
@@ -580,6 +584,10 @@ bool BoomerangNapi::CreateMetadataExecution(napi_env env, napi_deferred deferred
 bool BoomerangNapi::CreateEncodeImageExecution(napi_env env, napi_deferred deferred, std::string metadata,
     std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback)
 {
+    if (encodeAsyncContext_ == nullptr) {
+        FI_HILOGE("not init encode image asyncContext");
+        return;
+    }
     encodeAsyncContext_->callback = callback;
     encodeAsyncContext_->metadata = metadata;
     encodeAsyncContext_->pixelMap = pixelMap;
@@ -595,6 +603,10 @@ bool BoomerangNapi::CreateEncodeImageExecution(napi_env env, napi_deferred defer
 bool BoomerangNapi::CreateDecodeImageExecution(napi_env env, napi_deferred deferred,
     std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback)
 {
+    if (decodeAsyncContext_ == nullptr) {
+        FI_HILOGE("not init decode image asyncContext");
+        return;
+    }
     decodeAsyncContext_->callback = callback;
     decodeAsyncContext_->pixelMap = pixelMap;
     napi_value resource = nullptr;
