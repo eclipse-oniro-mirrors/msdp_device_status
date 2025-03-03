@@ -49,6 +49,8 @@ inline constexpr std::string_view CREATE_STRING_UTF8 { "napi_create_string_utf8"
 inline constexpr std::string_view CREATE_ARRAY { "napi_create_array" };
 inline constexpr std::string_view CREATE_INT64 { "napi_create_int64" };
 inline constexpr std::string_view SET_ELEMENT { "napi_set_element" };
+inline constexpr std::string_view CREAT_ASYNC_WORK { "napi_create_async_work" };
+inline constexpr std::string_view QUEUE_ASYNC_WORK { "napi_queue_async_work_with_qos" };
 inline constexpr int32_t ZERO_PARAM { 0 };
 inline constexpr int32_t ONE_PARAM { 1 };
 inline constexpr int32_t TWO_PARAM { 2 };

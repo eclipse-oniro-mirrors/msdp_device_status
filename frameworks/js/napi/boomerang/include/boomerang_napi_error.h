@@ -20,6 +20,7 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "util_napi_error.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -28,7 +29,9 @@ constexpr int32_t PARAM_ERROR { 401 };
 constexpr int32_t SERVICE_EXCEPTION { 801 };
 const std::map <int32_t, std::string> ERROR_MESSAGES = {
     {SERVICE_EXCEPTION, "Service exception."},
-    {PARAM_ERROR, "Param error."}
+    {PARAM_ERROR, "Param error."},
+    {SUBSCRIBE_FAILED, "boomerang subscribe exception."},
+    {UNSUBSCRIBE_FAILED, "boomerang unsubscribe exception."},
 };
 
 napi_value CreateNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage);
