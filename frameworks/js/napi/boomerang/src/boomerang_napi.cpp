@@ -630,7 +630,7 @@ void BoomerangNapi::NotifyMetadataCompleteCB(napi_env env, napi_status status, v
     napi_create_int32(env, result, &intValue);
     if (outerAsyncContext->deferred) {
         FI_HILOGE("callback the error notify metadata result:%{public}d", result);
-        napi_resolve_deferred(env, outerAsyncContext->deferred, intValue);
+        napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
     }
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
@@ -661,7 +661,7 @@ void BoomerangNapi::EncodeImageCompleteCB(napi_env env, napi_status status, void
     napi_create_int32(env, result, &intValue);
     if (outerAsyncContext->deferred) {
         FI_HILOGE("callback the error encode image result:%{public}d", result);
-        napi_resolve_deferred(env, outerAsyncContext->deferred, intValue);
+        napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
     }
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
@@ -691,7 +691,7 @@ void BoomerangNapi::DecodeImageCompleteCB(napi_env env, napi_status status, void
     napi_create_int32(env, result, &intValue);
     if (outerAsyncContext->deferred) {
         FI_HILOGE("callback the error decode image result:%{public}d", result);
-        napi_resolve_deferred(env, outerAsyncContext->deferred, intValue);
+        napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
     }
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
