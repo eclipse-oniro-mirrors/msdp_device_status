@@ -641,7 +641,7 @@ void BoomerangNapi::EncodeImageExecuteCB(napi_env env, void* data)
     AsyncContext*  innerAsyncContext = static_cast<AsyncContext*>(data);
     std::string metadata = static_cast<std::string>(innerAsyncContext->metadata);
     sptr<IRemoteBoomerangCallback> callback = static_cast<sptr<IRemoteBoomerangCallback>>(innerAsyncContext->callback);
-    std::shared_ptr<Media::PixelMap> pixelMap = static_cast<std::shared_ptr<Media::PixelMap>>(innerAsyncContext->pixelMap);
+    auto pixelMap = static_cast<std::shared_ptr<Media::PixelMap>>(innerAsyncContext->pixelMap);
     if (metadata.empty() || callback == nullptr || pixelMap == nullptr) {
         FI_HILOGE("bundleName or callback or pixelMap is error");
         return;
@@ -670,7 +670,7 @@ void BoomerangNapi::EncodeImageCompleteCB(napi_env env, napi_status status, void
 void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
 {
     AsyncContext*  innerAsyncContext = static_cast<AsyncContext*>(data);
-    std::shared_ptr<Media::PixelMap> pixelMap = static_cast<std::shared_ptr<Media::PixelMap>>(innerAsyncContext->pixelMap);
+    auto pixelMap = static_cast<std::shared_ptr<Media::PixelMap>>(innerAsyncContext->pixelMap);
     sptr<IRemoteBoomerangCallback> callback = static_cast<sptr<IRemoteBoomerangCallback>>(innerAsyncContext->callback);
     if (pixelMap == nullptr || callback == nullptr) {
         FI_HILOGE("callback or pixelMap is error");

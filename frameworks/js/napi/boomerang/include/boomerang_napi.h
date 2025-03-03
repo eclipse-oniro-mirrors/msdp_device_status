@@ -90,7 +90,7 @@ private:
         sptr<IRemoteBoomerangCallback> callbacks);
     static void NotifyMetadataExecuteCB(napi_env env, void* data);
     static void NotifyMetadataCompleteCB(napi_env env, napi_status status, void* data);
-    static bool CreateEncodeImageExecution(napi_env env, napi_deferred deferred, std::string metadata, 
+    static bool CreateEncodeImageExecution(napi_env env, napi_deferred deferred, std::string metadata,
         std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
     static void EncodeImageExecuteCB(napi_env env, void* data);
     static void EncodeImageCompleteCB(napi_env env, napi_status status, void* data);
