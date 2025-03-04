@@ -256,7 +256,9 @@ void CooperateOut::Initial::OnComeBack(Context &context, const CooperateEvent &e
     context.eventMgr_.RemoteStartFinish(notice);
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnBack();
-    parent_.SimulateShowPointerEvent();
+    if (!context.NeedHideCursor()) {
+        parent_.SimulateShowPointerEvent();
+    }
 }
 
 void CooperateOut::Initial::OnComeBackWithOptions(Context &context, const CooperateEvent &event)

@@ -69,6 +69,7 @@ public:
     bool IsPeer(const std::string &networkId) const;
     bool NeedHideCursor() const;
     bool IsCooperateWithCrossDrag() const;
+    bool NeedFreezeCursor() const;
 
     void EnableCooperate(const EnableCooperateEvent &event);
     void DisableCooperate(const DisableCooperateEvent &event);
@@ -220,6 +221,11 @@ inline bool Context::NeedHideCursor() const
 inline bool Context::IsCooperateWithCrossDrag() const
 {
     return (priv_ & COOPERATE_WITH_CROSS_DRAGGING);
+}
+
+inline bool Context::NeedFreezeCursor() const
+{
+    return (flag_ & COOPERATE_FLAG_FREEZE_CURSOR);
 }
 } // namespace Cooperate
 } // namespace DeviceStatus

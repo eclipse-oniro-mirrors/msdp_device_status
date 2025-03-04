@@ -305,7 +305,9 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
     FI_HILOGI("[remote start] Cooperation with \'%{public}s\' established", Utility::Anonymize(context.Peer()).c_str());
     TransiteTo(context, CooperateState::COOPERATE_STATE_IN);
     context.OnTransitionIn();
-    parent_.SimulateShowPointerEvent();
+    if (!context.NeedFreezeCursor()) {
+        parent_.SimulateShowPointerEvent();
+    }
 }
 
 void CooperateFree::Initial::OnRemoteStartWithOptions(Context &context, const CooperateEvent &event)
