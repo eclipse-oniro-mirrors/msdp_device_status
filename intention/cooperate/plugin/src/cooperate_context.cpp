@@ -465,7 +465,7 @@ void Context::StopCooperateSetCursorPosition(const Coordinate &cursorPos)
 {
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHKPV(display);
-    int32_t displayId = display->GetId();
+    int32_t displayId = static_cast<int32_t>(display->GetId());
     if (displayId < 0) {
         displayId = 0;
     }
@@ -482,7 +482,7 @@ Coordinate Context::SetCursorPos(const Coordinate &cursorPos)
     double yPercent = std::clamp<double>(cursorPos.y, 0.0, PERCENT) / PERCENT;
 
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    int32_t displayId = display->GetId();
+    int32_t displayId = static_cast<int32_t>(display->GetId());
     if (displayId < 0) {
         displayId = 0;
     }
