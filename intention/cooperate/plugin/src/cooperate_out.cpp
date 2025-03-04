@@ -91,6 +91,7 @@ void CooperateOut::SimulateShowPointerEvent()
     item.SetPointerId(0);
     item.SetRawDx(0);
     item.SetRawDy(0);
+    CHKPV(pointerEvent);
     pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
     pointerEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
     pointerEvent->SetPointerId(0);
