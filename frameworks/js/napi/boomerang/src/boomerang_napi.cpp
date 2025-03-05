@@ -185,8 +185,7 @@ void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
     int32_t height = pixelMap->GetHeight();
     const unsigned char *data = pixelMap->GetPixels();
     int32_t rowStride = pixelMap->GetRowStride();
-    int32_t imageCount = width * height;
-    int32_t bufferSize = imageCount * BITMAP_TRAVERSE_STEP;
+    int32_t bufferSize = width * height * BITMAP_TRAVERSE_STEP;
     uint8_t *pixelArrayBuffer = new uint8_t[bufferSize];
     napi_value buffer;
     napi_status createArrayBuffer =
@@ -197,11 +196,9 @@ void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
         return;
     }
 
-    int32_t rowIndex = 0;
     for (int32_t y = 0; y < height; ++y) {
-        rowIndex = y * rowStride;
         for (int32_t x = 0; x < width; ++x) {
-            uint32_t pixIndex = rowIndex + x * BITMAP_TRAVERSE_STEP;
+            uint32_t pixIndex = y * rowStride + x * BITMAP_TRAVERSE_STEP;
             uint32_t b = data[pixIndex];
             uint32_t g = data[pixIndex + GREEN_TRAVERSE_STEP];
             uint32_t r = data[pixIndex + RED_TRAVERSE_STEP];
@@ -635,6 +632,7 @@ void BoomerangNapi::NotifyMetadataExecuteCB(napi_env env, void* data)
 void BoomerangNapi::NotifyMetadataCompleteCB(napi_env env, napi_status status, void* data)
 {
     if (asyncContext_ == nullptr) {
+        FI_HILOGE("notify metadata AsyncContext is null");
         return;
     }
     AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
@@ -668,9 +666,9 @@ void BoomerangNapi::EncodeImageExecuteCB(napi_env env, void* data)
 void BoomerangNapi::EncodeImageCompleteCB(napi_env env, napi_status status, void* data)
 {
     if (encodeAsyncContext_ == nullptr) {
+        FI_HILOGE("encode image AsyncContext is null");
         return;
     }
-    FI_HILOGI("jjy EncodeImageCompleteCB");
     AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
     int32_t result = static_cast<int32_t>(outerAsyncContext->result);
     if (result != RET_OK) {
@@ -702,6 +700,7 @@ void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
 void BoomerangNapi::DecodeImageCompleteCB(napi_env env, napi_status status, void* data)
 {
     if (decodeAsyncContext_ == nullptr) {
+        FI_HILOGE("decode image AsyncContext is null");
         return;
     }
     AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
