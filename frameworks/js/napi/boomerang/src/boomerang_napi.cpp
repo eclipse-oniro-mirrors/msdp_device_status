@@ -160,7 +160,6 @@ void BoomerangNapi::OnMetadata(std::string metadata, bool isOnce)
             FI_HILOGE("Failed to resolve deferred");
             return;
         }
-        delete context;
     };
 
     if (decodeAsyncContext_) {
@@ -175,57 +174,56 @@ void BoomerangNapi::OnMetadata(std::string metadata, bool isOnce)
 void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mutex_);
     if (encodeAsyncContext_ == nullptr || pixelMap == nullptr) {
         FI_HILOGE("the encodeAsyncContext_ or pixelMap is error");
         return;
     }
 
     napi_value pixelMapNapi;
-    int32_t imageCount = pixelMap->GetWidth() * pixelMap->GetHeight();
-    int32_t bufferSize = imageCount * BITMAP_TRAVERSE_STEP;
+    int32_t width = pixelMap->GetWidth();
+    int32_t height = pixelMap->GetHeight();
+    const unsigned char *data = pixelMap->GetPixels();
+    int32_t rowStride = pixelMap->GetRowStride();
+    int32_t bufferSize = width * height * BITMAP_TRAVERSE_STEP;
     uint8_t *pixelArrayBuffer = new uint8_t[bufferSize];
     napi_value buffer;
     napi_status createArrayBuffer =
         napi_create_arraybuffer(encodeAsyncContext_->env, bufferSize, (void **)&pixelArrayBuffer, &buffer);
     if (createArrayBuffer != napi_ok) {
         FI_HILOGE("napi create arraybuffer failed");
-        delete encodeAsyncContext_;
+        delete[] pixelArrayBuffer;
         return;
     }
 
-    int32_t rowIndex = 0;
-    for (int32_t y = 0; y < pixelMap->GetHeight(); ++y) {
-        rowIndex = y * pixelMap->GetRowStride();
-        for (int32_t x = 0; x < pixelMap->GetWidth(); ++x) {
-            uint32_t pixIndex = rowIndex + x * BITMAP_TRAVERSE_STEP;
-            uint32_t r = pixelMap->GetPixels()[pixIndex];
-            uint32_t g = pixelMap->GetPixels()[pixIndex + GREEN_TRAVERSE_STEP];
-            uint32_t b = pixelMap->GetPixels()[pixIndex + RED_TRAVERSE_STEP];
-            uint32_t a = pixelMap->GetPixels()[pixIndex + ALPHA_TRAVERSE_STEP];
-            int32_t arrayIndex = (y * pixelMap->GetWidth() + (x)) * BITMAP_TRAVERSE_STEP;
+    for (int32_t y = 0; y < height; ++y) {
+        for (int32_t x = 0; x < width; ++x) {
+            uint32_t pixIndex = y * rowStride + x * BITMAP_TRAVERSE_STEP;
+            uint32_t b = data[pixIndex];
+            uint32_t g = data[pixIndex + GREEN_TRAVERSE_STEP];
+            uint32_t r = data[pixIndex + RED_TRAVERSE_STEP];
+            uint32_t a = data[pixIndex + ALPHA_TRAVERSE_STEP];
+            int32_t arrayIndex = (y * width + (x)) * BITMAP_TRAVERSE_STEP;
             uint32_t pixelValue = ((a << ALPHA_SHIFT) | (r << RED_SHIFT) | (g << GREEN_SHIFT) | b);
             *(reinterpret_cast<uint32_t *>(pixelArrayBuffer + arrayIndex)) = pixelValue;
         }
     }
 
     struct OhosPixelMapCreateOps createOps;
-    createOps.width = pixelMap->GetWidth();
-    createOps.height = pixelMap->GetHeight();
+    createOps.width = width;
+    createOps.height = height;
     createOps.pixelFormat = PIXEL_FORMAT;
     createOps.alphaType = ALPHA_TYPE;
     int32_t res = OH_PixelMap_CreatePixelMap(
         encodeAsyncContext_->env, createOps, (uint8_t *)pixelArrayBuffer, bufferSize, &pixelMapNapi);
+    delete[] pixelArrayBuffer;
     if (res != 0 || pixelMapNapi == nullptr) {
         FI_HILOGI("wrap create pixelMap failed");
-        delete encodeAsyncContext_;
         return;
     }
-
-    delete[] pixelArrayBuffer;
     if (encodeAsyncContext_->deferred) {
         napi_resolve_deferred(encodeAsyncContext_->env, encodeAsyncContext_->deferred, pixelMapNapi);
     }
-    delete encodeAsyncContext_;
 }
 
 BoomerangNapi *BoomerangNapi::GetDeviceStatusNapi()
@@ -315,6 +313,7 @@ napi_value BoomerangNapi::SubscribeMeatadataCallback(
 napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
+    std::lock_guard<std::mutex> guard(mutex_);
     size_t argc = 1;
     napi_value argv[1] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
@@ -632,18 +631,21 @@ void BoomerangNapi::NotifyMetadataExecuteCB(napi_env env, void* data)
  
 void BoomerangNapi::NotifyMetadataCompleteCB(napi_env env, napi_status status, void* data)
 {
-    AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
-    int32_t result = static_cast<int32_t>(outerAsyncContext->result);
-    if (result == RET_OK) {
-        FI_HILOGI("notify metadata success");
+    if (asyncContext_ == nullptr) {
+        FI_HILOGE("notify metadata AsyncContext is null");
         return;
     }
-    napi_value intValue;
-    napi_create_int32(env, result, &intValue);
-    if (outerAsyncContext->deferred) {
-        FI_HILOGE("callback the error notify metadata result:%{public}d", result);
-        napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
+    AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
+    int32_t result = static_cast<int32_t>(outerAsyncContext->result);
+    if (result != RET_OK) {
+        napi_value intValue;
+        napi_create_int32(env, result, &intValue);
+        if (outerAsyncContext->deferred) {
+            FI_HILOGE("callback the error notify metadata result:%{public}d", result);
+            napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
+        }
     }
+    asyncContext_ = nullptr;
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
 }
@@ -660,25 +662,29 @@ void BoomerangNapi::EncodeImageExecuteCB(napi_env env, void* data)
     }
     innerAsyncContext->result = BoomerangManager::GetInstance()->BoomerangEncodeImage(pixelMap, metadata, callback);
 }
- 
+
 void BoomerangNapi::EncodeImageCompleteCB(napi_env env, napi_status status, void* data)
 {
-    AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
-    int32_t result = static_cast<int32_t>(outerAsyncContext->result);
-    if (result == RET_OK) {
-        FI_HILOGI("encode image success");
+    if (encodeAsyncContext_ == nullptr) {
+        FI_HILOGE("encode image AsyncContext is null");
         return;
     }
-    napi_value intValue;
-    napi_create_int32(env, result, &intValue);
-    if (outerAsyncContext->deferred) {
-        FI_HILOGE("callback the error encode image result:%{public}d", result);
-        napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
+    AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
+    int32_t result = static_cast<int32_t>(outerAsyncContext->result);
+    if (result != RET_OK) {
+        napi_value intValue;
+        napi_create_int32(env, result, &intValue);
+        if (outerAsyncContext->deferred) {
+            FI_HILOGE("callback the error encode image result:%{public}d", result);
+            napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
+        }
     }
+    FI_HILOGI("encode image success");
+    encodeAsyncContext_ = nullptr;
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
 }
- 
+
 void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
 {
     AsyncContext*  innerAsyncContext = static_cast<AsyncContext*>(data);
@@ -693,18 +699,22 @@ void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
  
 void BoomerangNapi::DecodeImageCompleteCB(napi_env env, napi_status status, void* data)
 {
-    AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
-    int32_t result = static_cast<int32_t>(outerAsyncContext->result);
-    if (result == RET_OK) {
-        FI_HILOGI("decode image success");
+    if (decodeAsyncContext_ == nullptr) {
+        FI_HILOGE("decode image AsyncContext is null");
         return;
     }
-    napi_value intValue;
-    napi_create_int32(env, result, &intValue);
-    if (outerAsyncContext->deferred) {
-        FI_HILOGE("callback the error decode image result:%{public}d", result);
-        napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
+    AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
+    int32_t result = static_cast<int32_t>(outerAsyncContext->result);
+    if (result != RET_OK) {
+        napi_value intValue;
+        napi_create_int32(env, result, &intValue);
+        if (outerAsyncContext->deferred) {
+            FI_HILOGE("callback the error decode image result:%{public}d", result);
+            napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
+        }
     }
+    FI_HILOGI("decode image success");
+    decodeAsyncContext_ = nullptr;
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
 }
