@@ -216,9 +216,9 @@ void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
     createOps.alphaType = ALPHA_TYPE;
     int32_t res = OH_PixelMap_CreatePixelMap(
         encodeAsyncContext_->env, createOps, (uint8_t *)pixelArrayBuffer, bufferSize, &pixelMapNapi);
-    delete[] pixelArrayBuffer;
     if (res != 0 || pixelMapNapi == nullptr) {
         FI_HILOGI("wrap create pixelMap failed");
+        delete[] pixelArrayBuffer;
         return;
     }
     if (encodeAsyncContext_->deferred) {
