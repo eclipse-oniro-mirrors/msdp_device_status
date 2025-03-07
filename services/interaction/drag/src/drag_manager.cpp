@@ -1508,6 +1508,18 @@ void DragManager::MoveTo(int32_t x, int32_t y, bool isMultiSelectedAnimation)
     dragDrawing_.Draw(dragData.displayId, x, y, true, isMultiSelectedAnimation);
 }
 
+void DragManager::SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation)
+{
+    FI_HILOGI("needMultiSelectedAnimation:%{public}d", needMultiSelectedAnimation);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, needMultiSelectedAnimation] {
+        this->dragDrawing_.SetMultiSelectedAnimationFlag(needMultiSelectedAnimation);
+        return RET_OK;
+    });
+    if (ret != RET_OK) {
+        FI_HILOGE("Post async task failed, ret:%{public}d", ret);
+    }
+}
+
 int32_t DragManager::UpdatePreviewStyle(const PreviewStyle &previewStyle)
 {
     if (dragState_ != DragState::START && dragState_ != DragState::MOTION_DRAGGING) {

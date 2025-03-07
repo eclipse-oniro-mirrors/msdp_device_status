@@ -295,6 +295,7 @@ public:
     static std::shared_ptr<Media::PixelMap> AccessGlobalPixelMapLocked();
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
     void LongPressDragZoomOutAnimation();
+    void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -395,6 +396,7 @@ private:
     float CalculateDefaultScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide);
 
 private:
+    bool needMultiSelectedAnimation_ { true };
     int64_t interruptNum_ { -1 };
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ { nullptr };
     std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };
