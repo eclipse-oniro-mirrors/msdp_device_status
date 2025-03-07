@@ -475,6 +475,9 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
 void DragDrawing::DoMultiSelectedAnimation(float positionX, float positionY, float adjustSize,
     bool isMultiSelectedAnimation)
 {
+    if (isMultiSelectedAnimation) {
+        isMultiSelectedAnimation = needMultiSelectedAnimation_;
+    }
     size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
     size_t multiSelectedPixelMapsSize = g_drawingInfo.multiSelectedPixelMaps.size();
     for (size_t i = 0; (i < multiSelectedNodesSize) && (i < multiSelectedPixelMapsSize); ++i) {
@@ -936,6 +939,12 @@ void DragDrawing::LongPressDragZoomInAnimation()
 
     FI_HILOGD("leave");
     return;
+}
+
+void DragDrawing::SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation)
+{
+    FI_HILOGI("needMultiSelectedAnimation:%{public}d", needMultiSelectedAnimation);
+    needMultiSelectedAnimation_ = needMultiSelectedAnimation;
 }
 
 void DragDrawing::LongPressDragZoomOutAnimation()
@@ -3227,6 +3236,7 @@ void DragDrawing::ResetParameter()
     g_drawingInfo.needDestroyDragWindow = false;
     needRotatePixelMapXY_ = false;
     hasRunningStopAnimation_ = false;
+    needMultiSelectedAnimation_ = true;
     pointerStyle_ = {};
     g_drawingInfo.isExistScalingValue = false;
     g_drawingInfo.currentPositionX = -1.0f;
