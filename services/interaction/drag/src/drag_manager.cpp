@@ -1516,7 +1516,7 @@ void DragManager::SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation)
         return RET_OK;
     });
     if (ret != RET_OK) {
-        FI_HILOGE("Post async task failed");
+        FI_HILOGE("Post async task failed, ret:%{public}d", ret);
     }
 }
 
