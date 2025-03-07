@@ -80,6 +80,7 @@ public:
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     virtual void SetPointerEventFilterTime(int64_t filterTime) = 0;
     virtual void MoveTo(int32_t x, int32_t y, bool isMultiSelectedAnimation = true) = 0;
+    virtual void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation) = 0;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual int32_t UpdateDragStyle(
         DragCursorStyle style, int32_t targetPid, int32_t targetTid, int32_t eventId = -1) = 0;

@@ -111,6 +111,7 @@ public:
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void SetPointerEventFilterTime(int64_t filterTime) override;
     void MoveTo(int32_t x, int32_t y, bool isMultiSelectedAnimation = true) override;
+    void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation) override;
     DragResult GetDragResult() const override;
     DragState GetDragState() const override;
     void SetDragState(DragState state) override;
