@@ -1511,6 +1511,8 @@ void DragManager::MoveTo(int32_t x, int32_t y, bool isMultiSelectedAnimation)
 void DragManager::SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation)
 {
     FI_HILOGI("needMultiSelectedAnimation:%{public}d", needMultiSelectedAnimation);
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, needMultiSelectedAnimation] {
         this->dragDrawing_.SetMultiSelectedAnimationFlag(needMultiSelectedAnimation);
         return RET_OK;
@@ -1518,6 +1520,7 @@ void DragManager::SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation)
     if (ret != RET_OK) {
         FI_HILOGE("Post async task failed, ret:%{public}d", ret);
     }
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
 int32_t DragManager::UpdatePreviewStyle(const PreviewStyle &previewStyle)
