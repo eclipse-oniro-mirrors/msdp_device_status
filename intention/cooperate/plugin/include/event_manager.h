@@ -92,6 +92,7 @@ public:
     void RemoteStartWithOptionsFinish(const DSoftbusCooperateWithOptionsFinished &event);
     void StartCooperateWithOptinsFinish(const DSoftbusCooperateWithOptionsFinished &event);
     void StartCooperateWithOptions(const StartWithOptionsEvent &event);
+    void ErrorNotAollowCooperateWhenMotionDragging(const NotAollowCooperateWhenMotionDragging &event);
 
 private:
     void OnCooperateMessage(CoordinationMessage msg, const std::string &networkId);

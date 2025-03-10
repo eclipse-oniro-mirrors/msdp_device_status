@@ -80,6 +80,24 @@ void CooperateFree::UnchainConnections(Context &context, const StopCooperateEven
     }
 }
 
+void CooperateFree::SimulateShowPointerEvent()
+{
+    CALL_INFO_TRACE;
+    CHKPV(env_);
+    auto pointerEvent = OHOS::MMI::PointerEvent::Create();
+    OHOS::MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetRawDx(0);
+    item.SetRawDy(0);
+    CHKPV(pointerEvent);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
+    pointerEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
+    pointerEvent->SetPointerId(0);
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->AddPointerItem(item);
+    env_->GetInput().SimulateInputEvent(pointerEvent);
+}
+
 CooperateFree::Initial::Initial(CooperateFree &parent)
     : ICooperateStep(parent, nullptr), parent_(parent)
 {
@@ -137,6 +155,18 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
     context.StartCooperate(notice);
     context.eventMgr_.StartCooperate(notice);
 
+    if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Not allow cooperate");
+        NotAollowCooperateWhenMotionDragging result {
+            .pid = notice.pid,
+            .userData = notice.userData,
+            .networkId = notice.remoteNetworkId,
+            .success = false,
+            .errCode = static_cast<int32_t>(CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING)
+        };
+        context.eventMgr_.ErrorNotAollowCooperateWhenMotionDragging(result);
+        return;
+    }
     int32_t ret = context.dsoftbus_.OpenSession(context.Peer());
     if (ret != RET_OK) {
         FI_HILOGE("[start cooperation] Failed to connect to \'%{public}s\'",
@@ -275,6 +305,9 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
     FI_HILOGI("[remote start] Cooperation with \'%{public}s\' established", Utility::Anonymize(context.Peer()).c_str());
     TransiteTo(context, CooperateState::COOPERATE_STATE_IN);
     context.OnTransitionIn();
+    if (!context.NeedFreezeCursor()) {
+        parent_.SimulateShowPointerEvent();
+    }
 }
 
 void CooperateFree::Initial::OnRemoteStartWithOptions(Context &context, const CooperateEvent &event)

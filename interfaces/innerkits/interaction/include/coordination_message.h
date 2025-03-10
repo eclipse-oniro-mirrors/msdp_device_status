@@ -39,7 +39,8 @@ enum class CoordinationErrCode {
     OPEN_SESSION_FAILED = 1,
     SEND_PACKET_FAILED = 2,
     UNEXPECTED_START_CALL = 3,
-    WORKER_THREAD_TIMEOUT = 4
+    WORKER_THREAD_TIMEOUT = 4,
+    NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING = 5
 };
 
 struct CoordinationMsgInfo {

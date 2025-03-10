@@ -22,7 +22,6 @@
 #include "motion_client.h"
 #endif
 #include "motion_napi_error.h"
-#include "parameters.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DeviceMotionNapi"
@@ -138,6 +137,10 @@ bool MotionNapi::SubscribeCallback(napi_env env, int32_t type)
             FI_HILOGE("failed to subscribe");
             ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
             return false;
+        } else if (ret == DEVICE_EXCEPTION) {
+            FI_HILOGE("failed to subscribe");
+            ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+            return false;
         } else {
             FI_HILOGE("failed to subscribe");
             ThrowMotionErr(env, SUBSCRIBE_EXCEPTION, "Subscribe failed");
@@ -170,6 +173,10 @@ bool MotionNapi::UnSubscribeCallback(napi_env env, int32_t type)
         if (ret == PERMISSION_DENIED) {
             FI_HILOGE("failed to unsubscribe");
             ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
+            return false;
+        } else if (ret == DEVICE_EXCEPTION) {
+            FI_HILOGE("failed to unsubscribe");
+            ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
             return false;
         } else {
             FI_HILOGE("failed to unsubscribe");
@@ -212,10 +219,6 @@ bool MotionNapi::ConstructMotion(napi_env env, napi_value jsThis) __attribute__(
 napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
-    if (!CheckDeviceType()) {
-        ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
-        return nullptr;
-    }
     size_t argc = ARG_2;
     napi_value args[ARG_2] = { nullptr };
     napi_value jsThis = nullptr;
@@ -268,10 +271,6 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
 napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
-    if (!CheckDeviceType()) {
-        ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
-        return nullptr;
-    }
     if (g_motionObj == nullptr) {
         ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "g_motionObj is nullptr");
         return nullptr;
@@ -328,10 +327,6 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
-    if (!CheckDeviceType()) {
-        ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
-        return nullptr;
-    }
     napi_value result = nullptr;
     size_t argc = ARG_0;
     napi_value jsThis;
@@ -344,6 +339,10 @@ napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info i
 
 #ifdef MOTION_ENABLE
     MotionEvent motionEvent = g_motionClient.GetMotionData(MOTION_TYPE_OPERATING_HAND);
+    if (motionEvent.status == DEVICE_EXCEPTION) {
+        ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+        return nullptr;
+    }
     if (motionEvent.status == -1) {
         ThrowMotionErr(env, PERMISSION_EXCEPTION, "Invalid Type");
         return nullptr;
@@ -388,19 +387,9 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
     SetInt32Property(env, operatingHandStatus, BASE_HAND, "UNKNOWN_STATUS");
     SetInt32Property(env, operatingHandStatus, LEFT_HAND, "LEFT_HAND_OPERATED");
     SetInt32Property(env, operatingHandStatus, RIGHT_HAND, "RIGHT_HAND_OPERATED");
-    SetPropertyName(env, exports, "OperatingHandStatus ", operatingHandStatus);
+    SetPropertyName(env, exports, "OperatingHandStatus", operatingHandStatus);
     FI_HILOGD("Exit");
     return exports;
-}
-
-bool MotionNapi::CheckDeviceType()
-{
-    std::string model = OHOS::system::GetParameter("const.build.product", "0");
-    if (model == "VDE" || model == "ALN") {
-        return true;
-    }
-    FI_HILOGE("The device is not support");
-    return false;
 }
 
 void MotionNapi::SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName)

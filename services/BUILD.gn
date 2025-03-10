@@ -62,6 +62,7 @@ sources_set = [
   "native/src/devicestatus_msdp_client_impl.cpp",
   "native/src/devicestatus_service.cpp",
   "native/src/stream_server.cpp",
+  "native/src/devicestatus_napi_manager.cpp",
 ]
 
 external_deps_set = [

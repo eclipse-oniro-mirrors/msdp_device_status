@@ -119,6 +119,10 @@ bool JsUtil::GetErrMsg(const CoordinationMsgInfo &msgInfo, std::string &msg)
             msg += "Worker thread timeout";
             break;
         }
+        case CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING: {
+            msg += "Not allow cooperate when motion dragging";
+            break;
+        }
         default:
             msg +="Softbus bind failed";
     }
@@ -139,6 +143,9 @@ int32_t JsUtil::GetErrCode(const CoordinationMsgInfo &msgInfo)
         }
         case CoordinationErrCode::WORKER_THREAD_TIMEOUT: {
             return CustomErrCode::WORKER_THREAD_TIMEOUT;
+        }
+        case CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING: {
+            return CustomErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING;
         }
         default:
             return msgInfo.errCode;

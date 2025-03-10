@@ -665,12 +665,12 @@ int32_t DragServer::SetDraggableStateAsync(CallingContext &context, MessageParce
 {
 #ifdef OHOS_BUILD_UNIVERSAL_DRAG
     CHKPR(env_, RET_ERR);
-    env_->GetDelegateTasks().PostAsyncTask([this, &data] {
-        SetDraggableStateAsyncParam param {};
-        if (!param.Unmarshalling(data)) {
-            FI_HILOGE("SetDraggableStateAsync::Unmarshalling fail");
-            return RET_ERR;
-        }
+    SetDraggableStateAsyncParam param {};
+    if (!param.Unmarshalling(data)) {
+        FI_HILOGE("SetDraggableStateAsync::Unmarshalling fail");
+        return RET_ERR;
+    }
+    env_->GetDelegateTasks().PostAsyncTask([this, param] {
         this->universalDragWrapper_.SetDraggableStateAsync(param.state_, param.downTime_);
         return RET_OK;
     });

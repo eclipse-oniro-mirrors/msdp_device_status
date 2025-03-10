@@ -42,6 +42,7 @@ enum class Intention : uint32_t {
     STATIONARY,
     DRAG,
     COOPERATE,
+    BOOMERANG,
 };
 
 inline constexpr uint32_t PARAMBITS { 12U };

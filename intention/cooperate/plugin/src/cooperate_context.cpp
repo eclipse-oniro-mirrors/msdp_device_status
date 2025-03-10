@@ -194,12 +194,7 @@ void Context::DisableInputDevMgr()
 
 NormalizedCoordinate Context::NormalizedCursorPosition() const
 {
-#ifndef OHOS_BUILD_PC_PRODUCT
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(currentDisplayId_);
-#else
-    sptr<Rosen::DisplayInfo> display =
-        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(currentDisplayId_);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGE("No default display");
         return cursorPos_;
@@ -460,6 +455,7 @@ void Context::SetCursorPosition(const Coordinate &cursorPos)
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHKPV(display);
     auto cursor = SetCursorPos(cursorPos);
+    cursorPos_ = cursor;
     env_->GetInput().SetPointerLocation(cursor.x, cursor.y);
     FI_HILOGI("Set cursor position (%{private}d,%{private}d)(%{private}d,%{private}d)(%{public}d,%{public}d)",
         cursorPos.x, cursorPos.y, cursor.x, cursor.y, display->GetWidth(), display->GetHeight());
@@ -469,7 +465,7 @@ void Context::StopCooperateSetCursorPosition(const Coordinate &cursorPos)
 {
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHKPV(display);
-    int32_t displayId = display->GetId();
+    int32_t displayId = static_cast<int32_t>(display->GetId());
     if (displayId < 0) {
         displayId = 0;
     }
@@ -486,7 +482,7 @@ Coordinate Context::SetCursorPos(const Coordinate &cursorPos)
     double yPercent = std::clamp<double>(cursorPos.y, 0.0, PERCENT) / PERCENT;
 
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    int32_t displayId = display->GetId();
+    int32_t displayId = static_cast<int32_t>(display->GetId());
     if (displayId < 0) {
         displayId = 0;
     }

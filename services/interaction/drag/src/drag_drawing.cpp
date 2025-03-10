@@ -176,11 +176,9 @@ constexpr int32_t TIMEOUT_MS { 500 };
 constexpr float MAX_SCREEN_WIDTH_SM { 600.0f };
 constexpr float MAX_SCREEN_WIDTH_MD { 840.0f };
 constexpr float MAX_SCREEN_WIDTH_LG { 1440.0f };
-constexpr float CIRCLE_R_SM { 144.0f };
-constexpr float CIRCLE_R_MD { 260.0f };
-constexpr float CIRCLE_R_LG { 396.0f };
-constexpr float CIRCLE_R_XL { 396.0f };
-constexpr int32_t DOUBLE_INT { 2 };
+constexpr int32_t SCALE_TYPE_FIRST = 2;
+constexpr int32_t SCALE_TYPE_SECOND = 3;
+constexpr int32_t SCALE_TYPE_THIRD = 4;
 const std::string THREAD_NAME { "os_AnimationEventRunner" };
 const std::string SUPER_HUB_THREAD_NAME { "os_SuperHubEventRunner" };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -477,6 +475,9 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
 void DragDrawing::DoMultiSelectedAnimation(float positionX, float positionY, float adjustSize,
     bool isMultiSelectedAnimation)
 {
+    if (isMultiSelectedAnimation) {
+        isMultiSelectedAnimation = needMultiSelectedAnimation_;
+    }
     size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
     size_t multiSelectedPixelMapsSize = g_drawingInfo.multiSelectedPixelMaps.size();
     for (size_t i = 0; (i < multiSelectedNodesSize) && (i < multiSelectedPixelMapsSize); ++i) {
@@ -938,6 +939,12 @@ void DragDrawing::LongPressDragZoomInAnimation()
 
     FI_HILOGD("leave");
     return;
+}
+
+void DragDrawing::SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation)
+{
+    FI_HILOGI("needMultiSelectedAnimation:%{public}d", needMultiSelectedAnimation);
+    needMultiSelectedAnimation_ = needMultiSelectedAnimation;
 }
 
 void DragDrawing::LongPressDragZoomOutAnimation()
@@ -3229,6 +3236,7 @@ void DragDrawing::ResetParameter()
     g_drawingInfo.needDestroyDragWindow = false;
     needRotatePixelMapXY_ = false;
     hasRunningStopAnimation_ = false;
+    needMultiSelectedAnimation_ = true;
     pointerStyle_ = {};
     g_drawingInfo.isExistScalingValue = false;
     g_drawingInfo.currentPositionX = -1.0f;
@@ -3961,6 +3969,7 @@ float DragDrawing::CalculateWidthScale()
         return DEFAULT_SCALING;
     }
     int32_t width = display->GetWidth();
+    int32_t height = display->GetHeight();
     float density = defaultDisplay->GetVirtualPixelRatio();
 #else
     if (window_ == nullptr) {
@@ -3968,26 +3977,68 @@ float DragDrawing::CalculateWidthScale()
         return DEFAULT_SCALING;
     }
     int32_t width = window_->GetRect().width_;
+    int32_t height = window_->GetRect().height_;
     float density = window_->GetDensity();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    FI_HILOGD("density:%{public}f, width:%{public}d", density, width);
-    if (width < MAX_SCREEN_WIDTH_SM * density) {
+    int32_t minSide = std::min(width, height);
+    FI_HILOGD("density:%{public}f, minSide:%{public}d", density, minSide);
+    if (minSide < MAX_SCREEN_WIDTH_SM * density) {
         currentScreenSize_ = ScreenSizeType::SM;
-    } else if (width < MAX_SCREEN_WIDTH_MD * density) {
+    } else if (minSide < MAX_SCREEN_WIDTH_MD * density) {
         currentScreenSize_ = ScreenSizeType::MD;
-    } else if (width < MAX_SCREEN_WIDTH_LG * density) {
+    } else if (minSide < MAX_SCREEN_WIDTH_LG * density) {
         currentScreenSize_ = ScreenSizeType::LG;
     } else {
         currentScreenSize_ = ScreenSizeType::XL;
     }
-    float widthScale = GetMaxWidthScale(width);
-    return widthScale;
+    float scale = GetMaxWidthScale(width, height);
+    return scale;
 }
 
-float DragDrawing::GetMaxWidthScale(int32_t width)
+float DragDrawing::CalculateSMScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide)
+{
+    float scale = 1.0;
+    if (g_dragDataForSuperHub.summarys.find("plain-text") != g_dragDataForSuperHub.summarys.end()) {
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide,
+                                            shortSide / SCALE_TYPE_FIRST);
+    } else {
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide / SCALE_TYPE_FIRST,
+                                            shortSide / SCALE_TYPE_FIRST);
+    }
+    return scale;
+}
+
+float DragDrawing::CalculateMDScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide)
+{
+    float scale = 1.0;
+    if (g_dragDataForSuperHub.summarys.find("plain-text") != g_dragDataForSuperHub.summarys.end()) {
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide / SCALE_TYPE_FIRST,
+                                            shortSide / SCALE_TYPE_THIRD);
+    } else {
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide / SCALE_TYPE_THIRD,
+                                            shortSide / SCALE_TYPE_THIRD);
+    }
+    return scale;
+}
+
+float DragDrawing::CalculateDefaultScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide)
+{
+    float scale = 1.0;
+    if (g_dragDataForSuperHub.summarys.find("plain-text") != g_dragDataForSuperHub.summarys.end()) {
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight,
+                                            shortSide * SCALE_TYPE_FIRST / SCALE_TYPE_SECOND,
+                                            shortSide / SCALE_TYPE_SECOND);
+    } else {
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide / SCALE_TYPE_SECOND,
+                                            shortSide / SCALE_TYPE_SECOND);
+    }
+    return scale;
+}
+
+float DragDrawing::GetMaxWidthScale(int32_t width, int32_t height)
 {
     FI_HILOGD("current device screen's width is %{public}d", width);
-    float widthScale = 1.0;
+    float scale = 1.0;
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     if (currentPixelMap == nullptr) {
         FI_HILOGE("pixelMap is nullptr");
@@ -3999,35 +4050,34 @@ float DragDrawing::GetMaxWidthScale(int32_t width)
         FI_HILOGE("pixelMap width or height is 0");
         return DEFAULT_SCALING;
     }
-    double currentPixelMapDiagonal = sqrt(pow(pixelMapWidth, DOUBLE_INT) + pow(pixelMapHeight, DOUBLE_INT));
-    FI_HILOGD("currentPixelMap width is %{public}d , height is %{public}d , diagonal is : %{public}f",
-        pixelMapWidth, pixelMapHeight, currentPixelMapDiagonal);
-        
+    int32_t shortSide = fmin(width, height);
+    FI_HILOGD("currentPixelMap width is %{public}d , height is %{public}d , shortSide is : %{public}d",
+        width, height, shortSide);
     switch (currentScreenSize_) {
         case ScreenSizeType::SM: {
-            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
-                DEFAULT_SCALING : (CIRCLE_R_SM * DOUBLE_INT) / currentPixelMapDiagonal;
+            scale = CalculateSMScale(pixelMapWidth, pixelMapHeight, shortSide);
             break;
         }
         case ScreenSizeType::MD: {
-            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
-                DEFAULT_SCALING : (CIRCLE_R_MD * DOUBLE_INT) / currentPixelMapDiagonal;
-            break;
-        }
-        case ScreenSizeType::LG: {
-            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
-                DEFAULT_SCALING : (CIRCLE_R_LG * DOUBLE_INT) / currentPixelMapDiagonal;
+            scale = CalculateMDScale(pixelMapWidth, pixelMapHeight, shortSide);
             break;
         }
         default: {
-            widthScale = (currentPixelMapDiagonal <= EPSILON) ?
-                DEFAULT_SCALING : (CIRCLE_R_XL * DOUBLE_INT) / currentPixelMapDiagonal;
+            scale = CalculateDefaultScale(pixelMapWidth, pixelMapHeight, shortSide);
             break;
         }
     }
-    FI_HILOGD("Screen Size Type is %{public}d and widthScale is %{public}f",
-        static_cast<int32_t>(currentScreenSize_), widthScale);
-    float scale = (widthScale >= DEFAULT_SCALING) ? DEFAULT_SCALING : widthScale;
+    FI_HILOGD("Screen Size Type is %{public}d and scale is %{public}f",
+        static_cast<int32_t>(currentScreenSize_), scale);
+    return scale;
+}
+
+float DragDrawing::CalculateScale(float width, float height, float widthLimit, float heightLimit)
+{
+    float scale = 1.0;
+    if ((width > 0 && height > 0) && (width > widthLimit || height > heightLimit)) {
+        scale = fmin(widthLimit / width, heightLimit / height);
+    }
     return scale;
 }
 

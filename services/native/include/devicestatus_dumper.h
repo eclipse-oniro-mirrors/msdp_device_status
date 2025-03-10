@@ -27,6 +27,7 @@
 #include <singleton.h>
 
 #include "accesstoken_kit.h"
+#include "boomerang_callback.h"
 #include "i_context.h"
 #include "stationary_callback.h"
 #include "stationary_data.h"
@@ -44,6 +45,17 @@ struct AppInfo {
     std::string packageName;
     Type type { TYPE_INVALID };
     sptr<IRemoteDevStaCallback> callback { nullptr };
+    sptr<IRemoteBoomerangCallback> boomerangCallback { nullptr };
+};
+
+struct BoomerangAppInfo {
+    std::string startTime;
+    int32_t uid = 0;
+    int32_t pid = 0;
+    Security::AccessToken::AccessTokenID tokenId;
+    std::string packageName;
+    BoomerangType type { BOOMERANG_TYPE_INVALID };
+    sptr<IRemoteBoomerangCallback> boomerangCallback { nullptr };
 };
 
 struct DeviceStatusRecord {
@@ -66,6 +78,10 @@ public:
     void DumpDeviceStatusChanges(int32_t fd);
     void DumpDeviceStatusCurrentStatus(int32_t fd, const std::vector<Data> &datas) const;
 
+    void SaveBoomerangAppInfo(std::shared_ptr<BoomerangAppInfo> appInfo);
+    void RemoveBoomerangAppInfo(std::shared_ptr<BoomerangAppInfo> appInfo);
+    void SetNotifyMetadatAppInfo(std::shared_ptr<BoomerangAppInfo> appInfo);
+
 private:
     DISALLOW_COPY_AND_MOVE(DeviceStatusDumper);
     std::string GetStatusType(Type type) const;
@@ -78,6 +94,8 @@ private:
 
 private:
     std::map<Type, std::set<std::shared_ptr<AppInfo>>> appInfos_;
+    std::map<BoomerangType, std::set<std::shared_ptr<BoomerangAppInfo>>> boomerangAppInfos_;
+    std::shared_ptr<BoomerangAppInfo> notifyMetadatAppInfo_;
     std::queue<std::shared_ptr<DeviceStatusRecord>> deviceStatusQueue_;
     std::mutex mutex_;
     IContext *context_ { nullptr };

@@ -82,6 +82,24 @@ void CooperateOut::SetPointerVisible(Context &context)
     env_->GetInput().SetPointerVisibility(visible, PRIORITY);
 }
 
+void CooperateOut::SimulateShowPointerEvent()
+{
+    CALL_INFO_TRACE;
+    CHKPV(env_);
+    auto pointerEvent = OHOS::MMI::PointerEvent::Create();
+    OHOS::MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetRawDx(0);
+    item.SetRawDy(0);
+    CHKPV(pointerEvent);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
+    pointerEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
+    pointerEvent->SetPointerId(0);
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->AddPointerItem(item);
+    env_->GetInput().SimulateInputEvent(pointerEvent);
+}
+
 void CooperateOut::Initial::BuildChains(std::shared_ptr<Initial> self, CooperateOut &parent)
 {}
 
@@ -163,6 +181,18 @@ void CooperateOut::Initial::OnStart(Context &context, const CooperateEvent &even
 {
     StartCooperateEvent param = std::get<StartCooperateEvent>(event.event);
 
+    if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Not allow cooperate");
+        NotAollowCooperateWhenMotionDragging result {
+            .pid = param.pid,
+            .userData = param.userData,
+            .networkId = param.remoteNetworkId,
+            .success = false,
+            .errCode = static_cast<int32_t>(CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING)
+        };
+        context.eventMgr_.ErrorNotAollowCooperateWhenMotionDragging(result);
+        return;
+    }
     context.eventMgr_.StartCooperate(param);
     FI_HILOGI("[start] Start cooperation with \'%{public}s\', report success when out",
         Utility::Anonymize(context.Peer()).c_str());
@@ -226,6 +256,9 @@ void CooperateOut::Initial::OnComeBack(Context &context, const CooperateEvent &e
     context.eventMgr_.RemoteStartFinish(notice);
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnBack();
+    if (!context.NeedHideCursor()) {
+        parent_.SimulateShowPointerEvent();
+    }
 }
 
 void CooperateOut::Initial::OnComeBackWithOptions(Context &context, const CooperateEvent &event)

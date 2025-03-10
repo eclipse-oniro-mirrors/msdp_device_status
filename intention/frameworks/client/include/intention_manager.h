@@ -20,6 +20,7 @@
 
 #include "singleton.h"
 
+#include "boomerang_client.h"
 #include "cooperate_client.h"
 #include "drag_client.h"
 #include "drag_data.h"
@@ -89,6 +90,13 @@ public:
     int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
     int32_t SetMouseDragMonitorState(bool state);
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap, std::function<void(bool)> callback);
+    int32_t SubscribeCallback(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t UnsubscribeCallback(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t NotifyMetadataBindingEvent(std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t SubmitMetadata(std::string metadata);
+    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
+        sptr<IRemoteBoomerangCallback> callback);
+    int32_t BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
     void OnConnected();
     void OnDisconnected();
     int32_t SetDraggableState(bool state);
@@ -105,6 +113,7 @@ private:
     CooperateClient cooperate_;
     DragClient drag_;
     StationaryClient stationary_;
+    BoomerangClient boomerang_;
     bool isScreenRotation_ { false };
     std::vector<std::string> foldRotatePolicys_ {};
 };

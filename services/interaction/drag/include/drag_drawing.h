@@ -285,7 +285,8 @@ public:
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void SetRotation(Rosen::Rotation rotation);
     float CalculateWidthScale();
-    float GetMaxWidthScale(int32_t width);
+    float GetMaxWidthScale(int32_t width, int32_t height);
+    float CalculateScale(float width, float height, float widthLimit, float heightLimit);
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
     void UpdateDragWindowDisplay(int32_t displayId);
     void DetachToDisplay(int32_t displayId);
@@ -294,6 +295,7 @@ public:
     static std::shared_ptr<Media::PixelMap> AccessGlobalPixelMapLocked();
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
     void LongPressDragZoomOutAnimation();
+    void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -389,8 +391,12 @@ private:
     std::shared_ptr<Rosen::VSyncReceiver> AccessReceiverLocked();
     void UpdateReceiverLocked(std::shared_ptr<Rosen::VSyncReceiver> receiver);
     void LongPressDragFail();
+    float CalculateSMScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide);
+    float CalculateMDScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide);
+    float CalculateDefaultScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide);
 
 private:
+    bool needMultiSelectedAnimation_ { true };
     int64_t interruptNum_ { -1 };
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ { nullptr };
     std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };
