@@ -617,9 +617,9 @@ int32_t DragManager::NotifyHideIcon()
     return RET_OK;
 }
 
-void DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t targetDisplayId)
+int32_t DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t targetDisplayId)
 {
-    CHKPV(pointerEvent);
+    CHKPR(pointerEvent, RET_ERR);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     int32_t displayX = -1;
@@ -638,6 +638,7 @@ void DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> point
     dragDrawing_.UpdateDragWindowDisplay(targetDisplayId);
     dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
     lastDisplayId_ = targetDisplayId;
+    return RET_OK;
 }
 
 void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
@@ -676,7 +677,13 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW) && (lastDisplayId_ != targetDisplayId)) {
         FI_HILOGI("Interface for processing extended screen access");
-        DealPullInWindowEvent(pointerEvent, targetDisplayId);
+        CHKPV(context_);
+        int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent, targetDisplayId] {
+            return this->DealPullInWindowEvent(pointerEvent, targetDisplayId);
+        });
+        if (ret != RET_OK) {
+            FI_HILOGE("Post async task failed");
+        }
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL) {
         dragDrawing_.StopVSyncStation();
