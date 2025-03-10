@@ -110,6 +110,10 @@ void BoomerangAlgoImpl::EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, 
         resultPixelMap = pixelMap;
         FI_HILOGE("BoomerangAlgoImpl Encode fail");
     }
+    if (resultPixelMap == nullptr) {
+        resultPixelMap = pixelMap;
+        FI_HILOGE("BoomerangAlgoImpl Encode image is empty");
+    }
     FI_HILOGI("BoomerangAlgoImpl Encode Success");
 }
 
