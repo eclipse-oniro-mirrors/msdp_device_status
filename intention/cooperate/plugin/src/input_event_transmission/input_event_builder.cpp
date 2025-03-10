@@ -264,6 +264,7 @@ void InputEventBuilder::OnKeyEvent(Msdp::NetPacket &packet)
     }
     FI_HILOGD("KeyEvent(No:%{public}d,Key:%{private}d,Action:%{public}d)",
         keyEvent_->GetId(), keyEvent_->GetKeyCode(), keyEvent_->GetKeyAction());
+    keyEvent_->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
     env_->GetInput().SimulateInputEvent(keyEvent_);
 }
 
