@@ -42,6 +42,12 @@ namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 const std::string SYSTEM_CORE { "system_core" };
 uint64_t g_tokenID { 0 };
+constexpr int32_t PERMISSION_NUM = 5;
+constexpr int32_t FIRST_PARAM_INDEX = 0;
+constexpr int32_t SECOND_PARAM_INDEX = 1;
+constexpr int32_t THIRD_PARAM_INDEX = 2;
+constexpr int32_t FOURTH_PARAM_INDEX = 3;
+constexpr int32_t FIFTH_PARAM_INDEX = 4;
 } // namespace
 
 class InputAdapterTest : public testing::Test {
@@ -56,15 +62,15 @@ public:
 void InputAdapterTest::SetPermission()
 {
     CALL_DEBUG_ENTER;
-    const char** perms = new const char *[5];
-    perms[0] = "ohos.permission.INPUT_MONITORING";
-    perms[1] = "ohos.permission.INJECT_INPUT_EVENT";
-    perms[2] = "ohos.permission.INTERCEPT_INPUT_EVENT";
-    perms[3] = "ohos.permission.FILTER_INPUT_EVENT";
-    perms[4] = "ohos.permission.MANAGE_MOUSE_CURSOR";
+    const char** perms = new const char *[PERMISSION_NUM];
+    perms[FIRST_PARAM_INDEX] = "ohos.permission.INPUT_MONITORING";
+    perms[SECOND_PARAM_INDEX] = "ohos.permission.INJECT_INPUT_EVENT";
+    perms[THIRD_PARAM_INDEX] = "ohos.permission.INTERCEPT_INPUT_EVENT";
+    perms[FOURTH_PARAM_INDEX] = "ohos.permission.FILTER_INPUT_EVENT";
+    perms[FIFTH_PARAM_INDEX] = "ohos.permission.MANAGE_MOUSE_CURSOR";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 5,
+        .permsNum = PERMISSION_NUM,
         .aclsNum = 0,
         .dcaps = nullptr,
         .perms = perms,
