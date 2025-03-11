@@ -42,8 +42,6 @@ namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 const std::string SYSTEM_CORE { "system_core" };
 uint64_t g_tokenID { 0 };
-const char* g_cores[] = { "ohos.permission.INPUT_MONITORING" };
-const char* g_coresInject[] = { "ohos.permission.INJECT_INPUT_EVENT" };
 } // namespace
 
 class InputAdapterTest : public testing::Test {
@@ -51,31 +49,33 @@ public:
     void SetUp();
     void TearDown();
     static void SetUpTestCase();
-    static void SetPermission(const std::string &level, const char** perms, size_t permAmount);
+    static void SetPermission();
     static void RemovePermission();
 };
 
-void InputAdapterTest::SetPermission(const std::string &level, const char** perms, size_t permAmount)
+void InputAdapterTest::SetPermission()
 {
     CALL_DEBUG_ENTER;
-    if (perms == nullptr || permAmount == 0) {
-        FI_HILOGE("The perms is empty");
-        return;
-    }
-
+    const char** perms = new const char *[5];
+    perms[0] = "ohos.permission.INPUT_MONITORING";
+    perms[1] = "ohos.permission.INJECT_INPUT_EVENT";
+    perms[2] = "ohos.permission.INTERCEPT_INPUT_EVENT";
+    perms[3] = "ohos.permission.FILTER_INPUT_EVENT";
+    perms[4] = "ohos.permission.MANAGE_MOUSE_CURSOR";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = permAmount,
+        .permsNum = 5,
         .aclsNum = 0,
         .dcaps = nullptr,
         .perms = perms,
         .acls = nullptr,
         .processName = "InputAdapterTest",
-        .aplStr = level.c_str(),
+        .aplStr = SYSTEM_CORE.c_str(),
     };
     g_tokenID = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(g_tokenID);
+    EXPECT_EQ(0, SetSelfTokenID(g_tokenID));
     OHOS::Security::AccessToken::AccessTokenKit::AccessTokenKit::ReloadNativeTokenInfo();
+    delete[] perms;
 }
 
 void InputAdapterTest::RemovePermission()
@@ -106,7 +106,7 @@ void InputAdapterTest::TearDown()
 HWTEST_F(InputAdapterTest, TestPointerAddMonitor, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     auto callback = [] (std::shared_ptr<OHOS::MMI::PointerEvent>) {
         FI_HILOGI("OnEvent");
@@ -125,7 +125,7 @@ HWTEST_F(InputAdapterTest, TestPointerAddMonitor, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TestKeyAddMonitor, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     auto callback = [] (std::shared_ptr<OHOS::MMI::KeyEvent>) {
         FI_HILOGI("OnEvent");
@@ -144,7 +144,7 @@ HWTEST_F(InputAdapterTest, TestKeyAddMonitor, TestSize.Level1)
 HWTEST_F(InputAdapterTest, AddKeyEventInterceptor, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     auto callback = [] (std::shared_ptr<OHOS::MMI::KeyEvent>) {
         FI_HILOGI("OnEvent");
@@ -164,7 +164,7 @@ HWTEST_F(InputAdapterTest, AddKeyEventInterceptor, TestSize.Level1)
 HWTEST_F(InputAdapterTest, AddPointerEventInterceptor, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     auto callback = [] (std::shared_ptr<OHOS::MMI::PointerEvent>) {
         FI_HILOGI("OnEvent");
@@ -184,7 +184,7 @@ HWTEST_F(InputAdapterTest, AddPointerEventInterceptor, TestSize.Level1)
 HWTEST_F(InputAdapterTest, AddBothEventInterceptor, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     auto pointerCallback = [] (std::shared_ptr<OHOS::MMI::PointerEvent>) {
         FI_HILOGI("OnEvent");
@@ -207,7 +207,7 @@ HWTEST_F(InputAdapterTest, AddBothEventInterceptor, TestSize.Level1)
 HWTEST_F(InputAdapterTest, AddFilter, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     auto filterCallback = [] (std::shared_ptr<OHOS::MMI::PointerEvent>) -> bool {
         FI_HILOGI("OnEvent");
@@ -228,7 +228,7 @@ HWTEST_F(InputAdapterTest, AddFilter, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TestSetPointerVisibility, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     int32_t filterId = inputAdapter->SetPointerVisibility(true);
     ASSERT_FALSE(filterId > 0);
@@ -244,10 +244,10 @@ HWTEST_F(InputAdapterTest, TestSetPointerVisibility, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TestSetPointerLocation, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
-    int32_t filterId = inputAdapter->SetPointerLocation(0, 0);
-    ASSERT_TRUE(filterId > 0);
+    int32_t ret= inputAdapter->SetPointerLocation(0, 0);
+    EXPECT_EQ(RET_OK, ret);
     RemovePermission();
 }
 
@@ -260,7 +260,7 @@ HWTEST_F(InputAdapterTest, TestSetPointerLocation, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TestEnableInputDevice, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     int32_t ret = inputAdapter->EnableInputDevice(true);
     ASSERT_EQ(ret, RET_OK);
@@ -276,7 +276,7 @@ HWTEST_F(InputAdapterTest, TestEnableInputDevice, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TestSimulateKeyEvent, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_coresInject, sizeof(g_coresInject) / sizeof(g_coresInject[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     ASSERT_NO_FATAL_FAILURE(inputAdapter->SimulateInputEvent(MMI::KeyEvent::Create()));
     RemovePermission();
@@ -291,7 +291,7 @@ HWTEST_F(InputAdapterTest, TestSimulateKeyEvent, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TestSimulatePointerEvent, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_coresInject, sizeof(g_coresInject) / sizeof(g_coresInject[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     ASSERT_NO_FATAL_FAILURE(inputAdapter->SimulateInputEvent(MMI::PointerEvent::Create()));
     RemovePermission();
@@ -306,7 +306,7 @@ HWTEST_F(InputAdapterTest, TestSimulatePointerEvent, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TestPointerAddMonitor1, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     auto callback = [] (std::shared_ptr<OHOS::MMI::PointerEvent>) {};
     int32_t monitorId = inputAdapter->AddMonitor(callback);
@@ -323,7 +323,7 @@ HWTEST_F(InputAdapterTest, TestPointerAddMonitor1, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TestKeyAddMonitor1, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     auto callback = [] (std::shared_ptr<OHOS::MMI::KeyEvent>) {};
     int32_t monitorId = inputAdapter->AddMonitor(callback);
@@ -340,7 +340,7 @@ HWTEST_F(InputAdapterTest, TestKeyAddMonitor1, TestSize.Level1)
 HWTEST_F(InputAdapterTest, AddKeyEventInterceptor1, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     int32_t interceptorId = inputAdapter->AddInterceptor(nullptr, nullptr);
     ASSERT_EQ(interceptorId, RET_ERR);
@@ -357,14 +357,14 @@ HWTEST_F(InputAdapterTest, AddKeyEventInterceptor1, TestSize.Level1)
 HWTEST_F(InputAdapterTest, AddFilter1, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    SetPermission();
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
     auto filterCallback = [] (std::shared_ptr<OHOS::MMI::PointerEvent>) -> bool {
         FI_HILOGI("OnEvent");
         return false;
     };
     int32_t filterId = inputAdapter->AddFilter(filterCallback);
-    ASSERT_TRUE(filterId < 0);
+    ASSERT_TRUE(filterId > 0);
     inputAdapter->RemoveFilter(filterId);
     RemovePermission();
 }
@@ -378,7 +378,7 @@ HWTEST_F(InputAdapterTest, AddFilter1, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TesOnInputEvent, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_coresInject, sizeof(g_coresInject) / sizeof(g_coresInject[0]));
+    SetPermission();
     auto pointerCb = [](std::shared_ptr<MMI::PointerEvent> pointerEvent) {
         pointerEvent =  MMI::PointerEvent::Create();
         return ;
@@ -405,7 +405,7 @@ HWTEST_F(InputAdapterTest, TesOnInputEvent, TestSize.Level1)
 HWTEST_F(InputAdapterTest, TestOnInputEvent1, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_CORE, g_coresInject, sizeof(g_coresInject) / sizeof(g_coresInject[0]));
+    SetPermission();
     InterceptorConsumer interceptorConsumer1 {
         [](std::shared_ptr<MMI::PointerEvent> cb) -> void {},
         [](std::shared_ptr<MMI::KeyEvent> cb) -> void {}
