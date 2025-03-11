@@ -107,8 +107,8 @@ void InputEventBuilder::Disable()
         TurnOnChannelScan();
         ResetPressedEvents();
     }
-    if ((pointerEventTimer_ >= 0) && (env_->GetTimerManager().IsExist(pointerEventTimer_))) {
-        env_->GetTimerManager().RemoveTimer(pointerEventTimer_);
+    if ((pointerEventTimer_ >= 0)) {
+        env_->GetTimerManager().RemoveTimerAsync(pointerEventTimer_);
         pointerEventTimer_ = -1;
     }
     HandleStopTimer();
@@ -211,8 +211,8 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
     if (scanState_) {
         TurnOffChannelScan();
     }
-    if ((pointerEventTimer_ >= 0) && (env_->GetTimerManager().IsExist(pointerEventTimer_))) {
-        env_->GetTimerManager().RemoveTimer(pointerEventTimer_);
+    if ((pointerEventTimer_ >= 0)) {
+        env_->GetTimerManager().RemoveTimerAsync(pointerEventTimer_);
         pointerEventTimer_ = -1;
     }
     pointerEvent_->Reset();
@@ -231,7 +231,7 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
     if (IsActive(pointerEvent_)) {
         env_->GetInput().SimulateInputEvent(pointerEvent_);
     }
-    pointerEventTimer_ = env_->GetTimerManager().AddTimer(POINTER_EVENT_TIMEOUT, REPEAT_ONCE, [this]() {
+    pointerEventTimer_ = env_->GetTimerManager().AddTimerAsync(POINTER_EVENT_TIMEOUT, REPEAT_ONCE, [this]() {
         TurnOnChannelScan();
         pointerEventTimer_ = -1;
     });
@@ -270,6 +270,7 @@ void InputEventBuilder::OnKeyEvent(Msdp::NetPacket &packet)
 
 void InputEventBuilder::TurnOffChannelScan()
 {
+    CALL_INFO_TRACE;
     scanState_ = false;
     if (SetWifiScene(FORBIDDEN_SCENE) != RET_OK) {
         scanState_ = true;
@@ -296,6 +297,7 @@ void InputEventBuilder::HandleStopTimer()
 
 void InputEventBuilder::TurnOnChannelScan()
 {
+    CALL_INFO_TRACE;
     scanState_ = true;
     if (SetWifiScene(RESTORE_SCENE) != RET_OK) {
         scanState_ = false;

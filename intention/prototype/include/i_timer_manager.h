@@ -29,7 +29,9 @@ public:
     virtual ~ITimerManager() = default;
 
     virtual int32_t AddTimer(int32_t, int32_t, std::function<void()>) = 0;
+    virtual int32_t AddTimerAsync(int32_t, int32_t, std::function<void()>) = 0;
     virtual int32_t RemoveTimer(int32_t) = 0;
+    virtual int32_t RemoveTimerAsync(int32_t) = 0;
     virtual bool IsExist(int32_t) const = 0;
 };
 } // namespace DeviceStatus

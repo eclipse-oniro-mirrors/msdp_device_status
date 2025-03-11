@@ -75,6 +75,15 @@ int32_t TimerManager::AddTimer(int32_t intervalMs, int32_t repeatCount, std::fun
     });
 }
 
+int32_t TimerManager::AddTimerAsync(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(context_, RET_ERR);
+    return context_->GetDelegateTasks().PostAsyncTask([this, intervalMs, repeatCount, callback] {
+        return this->OnAddTimer(intervalMs, repeatCount, callback);
+    });
+}
+
 int32_t TimerManager::OnRemoveTimer(int32_t timerId)
 {
     int32_t ret = RemoveTimerInternal(timerId);
@@ -89,6 +98,15 @@ int32_t TimerManager::RemoveTimer(int32_t timerId)
     CALL_DEBUG_ENTER;
     CHKPR(context_, RET_ERR);
     return context_->GetDelegateTasks().PostSyncTask([this, timerId] {
+        return this->OnRemoveTimer(timerId);
+    });
+}
+
+int32_t TimerManager::RemoveTimerAsync(int32_t timerId)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(context_, RET_ERR);
+    return context_->GetDelegateTasks().PostAsyncTask([this, timerId] {
         return this->OnRemoveTimer(timerId);
     });
 }
