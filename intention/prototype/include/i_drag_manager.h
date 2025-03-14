@@ -77,6 +77,7 @@ public:
     virtual void RegisterCrossDrag(std::function<void(bool)> callback) = 0;
     virtual void UnregisterCrossDrag() = 0;
     virtual void NotifyCrossDrag(bool isButtonDown) = 0;
+    virtual bool IsCrossDragging() = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     virtual void SetPointerEventFilterTime(int64_t filterTime) = 0;
     virtual void MoveTo(int32_t x, int32_t y, bool isMultiSelectedAnimation = true) = 0;

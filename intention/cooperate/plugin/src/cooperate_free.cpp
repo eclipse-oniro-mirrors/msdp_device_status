@@ -214,7 +214,7 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
 
 void CooperateFree::Initial::OnStop(Context &context, const CooperateEvent &event)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     StopCooperateEvent param = std::get<StopCooperateEvent>(event.event);
     context.eventMgr_.StopCooperate(param);
     param.networkId = context.Peer();
@@ -272,7 +272,10 @@ void CooperateFree::Initial::OnDisable(Context &context, const CooperateEvent &e
     FI_HILOGI("[disable cooperation] Stop cooperation");
     CHKPV(parent_.env_);
     auto dragState = parent_.env_->GetDragManager().GetDragState();
-    if (dragState == DragState::START) {
+    if (dragState == DragState::START && parent_.env_->GetDragManager().IsCrossDragging()) {
+        FI_HILOGI("reset cooperation");
+        context.OnResetCooperation();
+    } else if (dragState == DragState::START) {
         FI_HILOGI("drag state is start");
         return;
     }

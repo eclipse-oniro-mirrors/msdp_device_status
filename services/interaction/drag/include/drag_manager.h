@@ -108,6 +108,7 @@ public:
     void RegisterCrossDrag(std::function<void(bool)> callback) override;
     void UnregisterCrossDrag() override;
     void NotifyCrossDrag(bool isButtonDown) override;
+    bool IsCrossDragging() override;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void SetPointerEventFilterTime(int64_t filterTime) override;
     void MoveTo(int32_t x, int32_t y, bool isMultiSelectedAnimation = true) override;
@@ -227,6 +228,7 @@ private:
     std::atomic<DragAction> dragAction_ { DragAction::MOVE };
     DragDrawing dragDrawing_;
     bool isControlCollaborationVisible_ { false };
+    bool isCrossDragging_ {false};
     inline static std::atomic<int32_t> pullId_ { -1 };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     StateChangeNotify stateNotify_;
