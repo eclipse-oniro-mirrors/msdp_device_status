@@ -624,7 +624,7 @@ int32_t DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> po
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     int32_t displayX = -1;
     int32_t displayY = -1;
-    if (MMI::PointerEvent::FixedMode::ONE_HAND == pointerEvent->GetFixedMode()) {
+    if (MMI::PointerEvent::FixedMode::AUTO == pointerEvent->GetFixedMode()) {
         displayX = pointerItem.GetFixedDisplayX();
         displayY = pointerItem.GetFixedDisplayY();
     } else {
@@ -726,7 +726,7 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t displayX = -1;
     int32_t displayY = -1;
-    if (MMI::PointerEvent::FixedMode::ONE_HAND == pointerEvent->GetFixedMode()) {
+    if (MMI::PointerEvent::FixedMode::AUTO == pointerEvent->GetFixedMode()) {
         displayX = pointerItem.GetFixedDisplayX();
         displayY = pointerItem.GetFixedDisplayY();
     } else {
