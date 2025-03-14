@@ -251,11 +251,21 @@ std::string DragManager::GetPackageName(int32_t pid)
     return packageName;
 }
 
+bool DragManager::IsCrossDragging()
+{
+    return isCrossDragging_;
+}
+
 int32_t DragManager::StartDrag(
     const DragData &dragData, int32_t pid, const std::string &peerNetId, bool isLongPressDrag)
 {
     FI_HILOGI("enter");
     ResetMouseDragMonitorTimerId(dragData);
+    if (pid == -1) {
+        isCrossDragging_ = true;
+    } else {
+        isCrossDragging_ = false;
+    }
     if (dragState_ == DragState::START || dragState_ == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Drag instance already exists, no need to start drag again");
         return RET_ERR;
