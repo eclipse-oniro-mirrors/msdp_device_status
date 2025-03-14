@@ -660,7 +660,8 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         return;
     }
     FI_HILOGD("DragCallback, pointerAction:%{public}d", pointerAction);
-    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+    if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) ||
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL)) {
         dragDrawing_.StopVSyncStation();
         mouseDragMonitorDisplayX_ = -1;
         mouseDragMonitorDisplayY_ = -1;
@@ -684,12 +685,6 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         if (ret != RET_OK) {
             FI_HILOGE("Post async task failed");
         }
-    }
-    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL) {
-        dragDrawing_.StopVSyncStation();
-        mouseDragMonitorDisplayX_ = -1;
-        mouseDragMonitorDisplayY_ = -1;
-        OnDragCancel(pointerEvent);
     }
     FI_HILOGD("Unknown action, sourceType:%{public}d, pointerId:%{public}d, pointerAction:%{public}d",
         pointerEvent->GetSourceType(), pointerEvent->GetPointerId(), pointerAction);
