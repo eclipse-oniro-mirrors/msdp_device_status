@@ -252,7 +252,9 @@ napi_value JsDragContext::SetDragSwitchState(napi_env env, napi_callback_info in
     }
     bool enable = false;
     CHKRP(napi_get_value_bool(env, argv[ZERO_PARAM], &enable), GET_VALUE_BOOL);
-    jsDragMgr->SetDragSwitchState(env, enable);
+    if (jsDragMgr->SetDragSwitchState(env, enable) == COMMON_NOT_SYSTEM_APP) {
+        THROWERR_CUSTOM(env, COMMON_NOT_SYSTEM_APP, "Not system application.");
+    }
     return nullptr;
 }
 
@@ -290,7 +292,9 @@ napi_value JsDragContext::SetAppDragSwitchState(napi_env env, napi_callback_info
         return nullptr;
     }
     std::string pkgName = param;
-    jsDragMgr->SetAppDragSwitchState(env, enable, pkgName);
+    if (jsDragMgr->SetAppDragSwitchState(env, enable, pkgName) == COMMON_NOT_SYSTEM_APP) {
+        THROWERR_CUSTOM(env, COMMON_NOT_SYSTEM_APP, "Not system application.");
+    }
     return nullptr;
 }
 
