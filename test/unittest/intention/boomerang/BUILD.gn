@@ -32,8 +32,8 @@ ohos_unittest("BoomerangClientTest") {
     "${device_status_utils_path}",
     "${device_status_utils_path}/include",
     "${device_status_root_path}/intention/boomerang/client/include",
-    "${device_status_root_path}/test/unittest/intention/boomerang/include",
     "${device_status_root_path}/intention/ipc/tunnel/include",
+    "${device_status_root_path}/test/unittest/intention/boomerang/include",
   ]
 
   sources = [
@@ -90,14 +90,14 @@ ohos_unittest("BoomerangServerTest") {
   module_out_path = module_output_path
   include_dirs = [
     "include",
-    "${device_status_interfaces_path}/innerkits/interaction/include",
     "${device_status_interfaces_path}/innerkits/include",
+    "${device_status_interfaces_path}/innerkits/interaction/include",
     "${device_status_utils_path}",
     "${device_status_utils_path}/include",
     "${device_status_root_path}/intention/boomerang/data/include",
     "${device_status_root_path}/intention/boomerang/server/include",
-    "${device_status_root_path}/intention/prototype/include",
     "${device_status_root_path}/intention/data/include",
+    "${device_status_root_path}/intention/prototype/include",
     "${device_status_root_path}/libs/interface",
     "${device_status_root_path}/services/native/include",
     "${device_status_root_path}/services/communication/service/include",
