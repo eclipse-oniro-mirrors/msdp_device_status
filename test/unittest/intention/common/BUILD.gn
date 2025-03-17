@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../device_status.gni")
 
-module_output_path = "${device_status_part_name}/unit_out"
+module_output_path = "${device_status_part_name}/device_status/unit_out"
 
 config("module_private_config") {
   visibility = [ ":*" ]
@@ -64,7 +64,7 @@ ohos_unittest("EpollManagerTest") {
 }
 
 ohos_unittest("ChannelTest") {
-  module_out_path = "${device_status_part_name}/devicestatussrv"
+  module_out_path = "${device_status_part_name}/device_status/devicestatussrv"
 
   sources = [ "src/channel_test.cpp" ]
 

@@ -20,6 +20,7 @@ group("intention_test") {
 
   deps += [
     "adapters:unittest",
+    "boomerang:unittest",
     "common:unittest",
     "cooperate:unittest",
     "drag:unittest",
@@ -27,5 +28,5 @@ group("intention_test") {
     "scheduler:unittest",
     "services:unittest",
     "stationary:unittest",
-   ]
+  ]
 }

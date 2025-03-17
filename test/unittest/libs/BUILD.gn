@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../device_status.gni")
 
-module_output_path = "${device_status_part_name}/devicestatussrv"
+module_output_path = "${device_status_part_name}/device_status/devicestatussrv"
 
 config("devicestatus_private_config") {
   visibility = [ ":*" ]
