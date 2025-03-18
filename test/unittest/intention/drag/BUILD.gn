@@ -49,6 +49,7 @@ ohos_unittest("DragManagerTest") {
   ]
   external_deps = [
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -102,6 +103,7 @@ ohos_unittest("DragServerTest") {
     "access_token:libtokensetproc_shared",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "device_manager:devicemanagersdk",
     "graphic_2d:libcomposer",
     "graphic_2d:librender_service_base",

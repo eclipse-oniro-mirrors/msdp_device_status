@@ -133,6 +133,7 @@ constexpr float ROTATION_270 { 270.0f };
 constexpr float ZOOM_IN_SCALE { 1.03f };
 constexpr float ZOOM_OUT_SCALE { 0.9f };
 constexpr float ZOOM_END_SCALE { 1.0f };
+constexpr float THROW_SLIP_TIME { 616.0f };
 constexpr uint32_t TRANSPARENT_COLOR_ARGB { 0x00000000 };
 constexpr int32_t DEFAULT_MOUSE_SIZE { 1 };
 constexpr int32_t DEFAULT_COLOR_VALUE { 0 };
@@ -898,6 +899,67 @@ void DragDrawing::LongPressDragAlphaAnimation()
     },  []() { FI_HILOGD("AlphaChanged end"); });
 }
 
+void DragDrawing::PullThrowAnimation(double tx, double ty, float vx,
+    float vy, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    FI_HILOGI("enter");
+    CHKPV(pointerEvent);
+    auto parentNode = g_drawingInfo.parentNode;
+    auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
+    CHKPV(parentNode);
+    CHKPV(currentPixelMap);
+    const Rosen::RSAnimationTimingProtocol THROW_SLIP_TIMING_PROTOCOL(std::round(THROW_SLIP_TIME)); // animation time
+    const Rosen::RSAnimationTimingCurve THROW_SLIP_CURVE_X =
+        Rosen::RSAnimationTimingCurve::CreateSpringCurve(vx, 1.0f, 128.0f, 30.0f);
+    const Rosen::RSAnimationTimingCurve THROW_SLIP_CURVE_Y =
+        Rosen::RSAnimationTimingCurve::CreateSpringCurve(vy, 1.0f, 128.0f, 30.0f);
+    int32_t adjustSize = TWELVE_SIZE * GetScaling();
+    int32_t positionX = tx + g_drawingInfo.pixelMapX;
+    int32_t positionY = ty + g_drawingInfo.pixelMapY - adjustSize;
+    // 执行动画X
+    Rosen::RSNode::Animate(THROW_SLIP_TIMING_PROTOCOL, THROW_SLIP_CURVE_X, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetFramePositionX(positionX);
+        Rosen::RSTransaction::FlushImplicitTransaction();
+    },  [&]() {
+        pullThrowAnimationXCompleted_ = true;
+        FI_HILOGI("PullThrowAnimationX end");
+        animationCV_.notify_all();  // 动画X完成，通知主线程
+    });
+
+    // 执行动画Y
+    Rosen::RSNode::Animate(THROW_SLIP_TIMING_PROTOCOL, THROW_SLIP_CURVE_Y, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetFramePositionY(positionY);
+        Rosen::RSTransaction::FlushImplicitTransaction();
+    },  [&]() {
+        pullThrowAnimationYCompleted_ = true;
+        FI_HILOGI("PullThrowAnimationY end");
+        animationCV_.notify_all();  // 动画Y完成，通知主线程
+    });
+    
+    // 等待两个动画都完成
+    std::unique_lock<std::mutex> lock(animationMutex_);
+    animationCV_.wait(lock, [this] { return pullThrowAnimationXCompleted_ && pullThrowAnimationYCompleted_; });
+    
+    // 动画完成后执行后续逻辑
+    FI_HILOGI("set pointer event");
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+
+    pointerItem.SetDisplayX(tx);
+    pointerItem.SetDisplayY(ty);
+    pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
+    MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
+
+    // 重置动画状态
+    pullThrowAnimationXCompleted_ = false;
+    pullThrowAnimationYCompleted_ = false;
+    FI_HILOGI("leave");
+    return;
+}
+
 void DragDrawing::LongPressDragZoomInAnimation()
 {
     FI_HILOGD("enter");
@@ -1551,6 +1613,27 @@ void DragDrawing::OnDragMove(int32_t displayId, int32_t displayX, int32_t displa
 #else
     UpdateDragPosition(displayId, displayX, displayY);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+}
+
+void DragDrawing::OnPullThrowDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime)
+{
+    FI_HILOGD("enter");
+    
+    if (screenRotateState_) {
+        screenRotateState_ = false;
+    }
+    if (isRunningRotateAnimation_) {
+        FI_HILOGD("Doing rotate drag window animate, ignore draw drag window");
+        return;
+    }
+#ifdef IOS_PLATFORM
+    actionTime_ = actionTime;
+#endif // IOS_PLATFORM
+    if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        UpdateDragPosition(displayId, displayX, displayY);
+        return;
+    }
+    UpdateDragPosition(displayId, displayX, displayY);
 }
 
 int32_t DragDrawing::DrawStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode,
