@@ -248,12 +248,12 @@ int32_t InteractionManager::GetDragSummary(std::map<std::string, int64_t> &summa
 
 int32_t InteractionManager::SetDragSwitchState(bool enable, bool isJsCaller)
 {
-    return INTER_MGR_IMPL.SetDragSwitchState(enable);
+    return INTER_MGR_IMPL.SetDragSwitchState(enable, isJsCaller);
 }
 
 int32_t InteractionManager::SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller)
 {
-    return INTER_MGR_IMPL.SetAppDragSwitchState(enable, pkgName);
+    return INTER_MGR_IMPL.SetAppDragSwitchState(enable, pkgName, isJsCaller);
 }
 
 int32_t InteractionManager::GetDragAction(DragAction &dragAction)
