@@ -48,7 +48,7 @@ void CooperateIn::OnEvent(Context &context, const CooperateEvent &event)
 void CooperateIn::OnEnterState(Context &context)
 {
     CALL_INFO_TRACE;
-    int32_t ret = env_->GetInput().SetPointerVisibility(!context.NeedHideCursor());
+    int32_t ret = env_->GetInput().SetPointerVisibility(!context.NeedHideCursor(), PRIORITY);
     CooperateRadarInfo radarInfo {
         .funcName = __FUNCTION__,
         .bizState = static_cast<int32_t> (BizState::STATE_END),
