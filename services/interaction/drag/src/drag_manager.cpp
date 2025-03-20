@@ -1419,6 +1419,10 @@ void DragManager::GetAllowDragState(bool &isAllowDrag)
 void DragManager::SetDragState(DragState state)
 {
     FI_HILOGI("SetDragState:%{public}d to %{public}d", static_cast<int32_t>(dragState_), static_cast<int32_t>(state));
+    if ((dragState_ == DragState::STOP) && (state == DragState::MOTION_DRAGGING)) {
+        FI_HILOGW("Unreasonable drag state switching");
+        return;
+    }
     dragState_ = state;
     dragDrawing_.UpdateDragState(state);
     if (state == DragState::START) {
