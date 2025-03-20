@@ -726,6 +726,13 @@ void DragManager::DoLongPressDragZoomOutAnimation(int32_t displayX, int32_t disp
 void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if (pointerEvent->GetSourceType() != dragData.sourceType) {
+        FI_HILOGW("The pointer source type invaild, the event should be ignored,"
+            "pointer sourceType:%{public}d, drag sourceType:%{public}d",
+            pointerEvent->GetSourceType(), dragData.sourceType);
+        return;
+    }
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     int32_t pointerId = pointerEvent->GetPointerId();
