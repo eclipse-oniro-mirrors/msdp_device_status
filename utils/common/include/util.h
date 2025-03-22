@@ -74,6 +74,14 @@ struct DragRadarInfo {
     std::string callingPid;
     std::string packageName;
     std::string appVersionId;
+    std::string appCallee;
+    std::string appCaller;
+};
+
+struct DragRadarPackageName {
+    std::string packageName;
+    std::string appCallee;
+    std::string appCaller;
 };
 
 int32_t GetPid();
