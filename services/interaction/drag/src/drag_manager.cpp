@@ -257,7 +257,8 @@ bool DragManager::IsCrossDragging()
 }
 
 int32_t DragManager::StartDrag(
-    const DragData &dragData, int32_t pid, const std::string &peerNetId, bool isLongPressDrag)
+    const DragData &dragData, int32_t pid, const std::string &peerNetId, bool isLongPressDrag,
+    const std::string &appCaller)
 {
     FI_HILOGI("enter");
     ResetMouseDragMonitorTimerId(dragData);
@@ -272,17 +273,25 @@ int32_t DragManager::StartDrag(
     }
     peerNetId_ = peerNetId;
     std::string packageName = GetPackageName(pid);
-    ReportStartDragRadarInfo(BizState::STATE_BEGIN, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, packageName,
-        peerNetId);
+     DragRadarPackageName dragRadarPackageName;
+    dragRadarPackageName.packageName = packageName;
+    if (pid == -1) {
+        dragRadarPackageName.appCaller = appCaller;
+    } else {
+        dragRadarPackageName.appCaller = packageName;
+    }
+    ReportStartDragRadarInfo(BizState::STATE_BEGIN, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, peerNetId,
+        dragRadarPackageName);
     PrintDragData(dragData, packageName);
-    if (InitDataManager(dragData) != RET_OK) {
+    if (InitDataManager(dragData, dragRadarPackageName.appCaller) != RET_OK) {
         FI_HILOGE("Failed to init data manager");
         ResetMouseDragMonitorInfo();
-        ReportStartDragFailedRadarInfo(StageRes::RES_FAIL, DragRadarErrCode::INVALID_DRAG_DATA, __func__, packageName);
+        ReportStartDragFailedRadarInfo(StageRes::RES_FAIL, DragRadarErrCode::INVALID_DRAG_DATA, __func__,
+            dragRadarPackageName);
         return RET_ERR;
     }
     isLongPressDrag_ = isLongPressDrag;
-    if (OnStartDrag(packageName, pid) != RET_OK) {
+    if (OnStartDrag(dragRadarPackageName, pid) != RET_OK) {
 #ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteStartDrag(dragState_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
 #endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
@@ -297,8 +306,8 @@ int32_t DragManager::StartDrag(
     dragDrawing_.OnStartDragExt();
     stateNotify_.StateChangedNotify(DragState::START);
     StateChangedNotify(DragState::START);
-    ReportStartDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_SUCCESS, DragRadarErrCode::DRAG_SUCCESS, packageName,
-        peerNetId);
+    ReportStartDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_SUCCESS, DragRadarErrCode::DRAG_SUCCESS, peerNetId,
+        dragRadarPackageName);
     if (pid == -1) {
         ReportStartDragUEInfo(packageName);
     }
@@ -387,11 +396,19 @@ int32_t DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::string &packageName, int32_t pid,
-    bool isStopCooperate)
+    bool isStopCooperate, const std::string &appCallee)
 {
     FI_HILOGI("enter");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    ReportStopDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, pid, packageName);
+    DragRadarPackageName dragRadarPackageName;
+    dragRadarPackageName.packageName = packageName;
+    if (pid == -1) {
+        dragRadarPackageName.appCallee = appCallee;
+    } else {
+        dragRadarPackageName.appCallee = packageName;
+    }
+    ReportStopDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, pid,
+        dragRadarPackageName);
     std::string dragOutPkgName =
         (dragOutSession_ == nullptr) ? "Cross-device drag" : dragOutSession_->GetProgramName();
     FI_HILOGI("mainWindow:%{public}d, dragResult:%{public}d, drop packageName:%{public}s,"
@@ -400,7 +417,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     if (dragState_ == DragState::STOP) {
         FI_HILOGE("No drag instance running, can not stop drag");
         ReportStopDragRadarInfo(BizState::STATE_END, StageRes::RES_FAIL, DragRadarErrCode::REPEATE_STOP_DRAG_EXCEPTION,
-            pid, packageName);
+            pid, dragRadarPackageName);
         return RET_ERR;
     }
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
@@ -434,7 +451,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     if (NotifyDragResult(dropResult.result, dragBehavior) != RET_OK) {
         FI_HILOGE("Notify drag result failed");
         ReportStopDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_FAIL, DragRadarErrCode::FAILED_NOTIFY_DRAG_RESULT,
-            pid, packageName);
+            pid, dragRadarPackageName);
     }
     lastDisplayId_ = -1;
     lastEventId_ = -1;
@@ -446,6 +463,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     isLongPressDrag_ = false;
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(dropResult.result);
+    appCallee_ = dragRadarPackageName.appCallee;
     StateChangedNotify(DragState::STOP);
 #else
     DragBehavior dragBehavior = dropResult.dragBehavior;
@@ -1031,10 +1049,10 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor)
     return extraData;
 }
 
-int32_t DragManager::InitDataManager(const DragData &dragData) const
+int32_t DragManager::InitDataManager(const DragData &dragData, const std::string &appCaller)
 {
     FI_HILOGI("enter");
-    DRAG_DATA_MGR.Init(dragData);
+    DRAG_DATA_MGR.Init(dragData, appCaller);
     FI_HILOGI("leave");
     return RET_OK;
 }
@@ -1172,7 +1190,7 @@ int32_t DragManager::RemoveKeyEventMonitor()
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
-int32_t DragManager::OnStartDrag(const std::string &packageName, int32_t pid)
+int32_t DragManager::OnStartDrag(const struct DragRadarPackageName &dragRadarPackageName, int32_t pid)
 {
     FI_HILOGI("enter");
     pullId_ = GenerateId();
@@ -1211,7 +1229,7 @@ int32_t DragManager::OnStartDrag(const std::string &packageName, int32_t pid)
         dragDrawing_.UpdateDrawingState();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
         ReportStartDragFailedRadarInfo(StageRes::RES_FAIL, DragRadarErrCode::FAILED_INIT_DRAWING, __func__,
-            packageName);
+            dragRadarPackageName);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
         return RET_ERR;
     }
@@ -1219,7 +1237,7 @@ int32_t DragManager::OnStartDrag(const std::string &packageName, int32_t pid)
         FI_HILOGE("Init drag drawing cancel, drag animation is running");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
         ReportStartDragFailedRadarInfo(StageRes::RES_CANCEL, DragRadarErrCode::REPEATE_START_DRAG_EXCEPTION, __func__,
-            packageName);
+            dragRadarPackageName);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
         return RET_ERR;
     }
@@ -1235,7 +1253,7 @@ int32_t DragManager::OnStartDrag(const std::string &packageName, int32_t pid)
     }
     FI_HILOGI("Start drag, appened extra data");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    ret = AddDragEvent(dragData, packageName);
+    ret = AddDragEvent(dragData, dragRadarPackageName);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to add drag event handler");
         return RET_ERR;
@@ -1445,6 +1463,11 @@ void DragManager::SetDragOriginDpi(float dragOriginDpi)
 DragResult DragManager::GetDragResult() const
 {
     return dragResult_;
+}
+
+std::string DragManager::GetAppCallee() const
+{
+    return appCallee_;
 }
 
 void DragManager::SetControlCollaborationVisible(bool visible)
@@ -1930,7 +1953,7 @@ void DragManager::SetSVGFilePath(const std::string &filePath)
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-int32_t DragManager::AddDragEvent(const DragData &dragData, const std::string &packageName)
+int32_t DragManager::AddDragEvent(const DragData &dragData, const struct DragRadarPackageName &dragRadarPackageName)
 {
     bool drawCursor = false;
 #ifdef OHOS_BUILD_PC_PRODUCT
@@ -1944,7 +1967,7 @@ int32_t DragManager::AddDragEvent(const DragData &dragData, const std::string &p
         dragDrawing_.DestroyDragWindow();
         dragDrawing_.UpdateDrawingState();
         ReportStartDragFailedRadarInfo(StageRes::RES_FAIL, DragRadarErrCode::FAILED_APPEND_EXTRA_DATA, __func__,
-            packageName);
+            dragRadarPackageName);
         return RET_ERR;
     }
     if (pointerEventMonitorId_ <= 0) {
@@ -1953,7 +1976,7 @@ int32_t DragManager::AddDragEvent(const DragData &dragData, const std::string &p
             dragDrawing_.DestroyDragWindow();
             dragDrawing_.UpdateDrawingState();
             ReportStartDragFailedRadarInfo(StageRes::RES_FAIL, DragRadarErrCode::FAILED_ADD_INPUT_MONITOR, __func__,
-                packageName);
+                dragRadarPackageName);
             return RET_ERR;
         }
     }
@@ -2023,7 +2046,7 @@ void DragManager::ReportDragWindowVisibleRadarInfo(StageRes stageRes, DragRadarE
 }
  
 void DragManager::ReportStopDragRadarInfo(BizState bizState, StageRes stageRes, DragRadarErrCode errCode, int32_t pid,
-    const std::string &packageName)
+    struct DragRadarPackageName &dragRadarPackageName)
 {
     DragRadarInfo dragRadarInfo;
     dragRadarInfo.funcName = "StopDrag";
@@ -2031,13 +2054,14 @@ void DragManager::ReportStopDragRadarInfo(BizState bizState, StageRes stageRes, 
     dragRadarInfo.bizStage = static_cast<int32_t>(BizStage::STAGE_STOP_DRAG);
     dragRadarInfo.stageRes = static_cast<int32_t>(stageRes);
     dragRadarInfo.errCode = static_cast<int32_t>(errCode);
-    dragRadarInfo.hostName = packageName;
+    dragRadarInfo.hostName = dragRadarPackageName.packageName;
     dragRadarInfo.callingPid = std::to_string(pid);
+    dragRadarInfo.appCallee = dragRadarPackageName.appCallee;
     ReportDragRadarInfo(dragRadarInfo);
 }
 
 void DragManager::ReportStartDragRadarInfo(BizState bizState, StageRes stageRes, DragRadarErrCode errCode,
-    const std::string &packageName, const std::string &peerNetId)
+    const std::string &peerNetId, struct DragRadarPackageName &dragRadarPackageName)
 {
     DragRadarInfo dragRadarInfo;
     dragRadarInfo.funcName = "StartDrag";
@@ -2045,13 +2069,14 @@ void DragManager::ReportStartDragRadarInfo(BizState bizState, StageRes stageRes,
     dragRadarInfo.bizStage = static_cast<int32_t>(BizStage::STAGE_START_DRAG);
     dragRadarInfo.stageRes = static_cast<int32_t>(stageRes);
     dragRadarInfo.errCode = static_cast<int32_t>(errCode);
-    dragRadarInfo.hostName = packageName;
+    dragRadarInfo.hostName = dragRadarPackageName.packageName;
     dragRadarInfo.peerNetId = peerNetId;
+    dragRadarInfo.appCaller = dragRadarPackageName.appCaller;
     ReportDragRadarInfo(dragRadarInfo);
 }
 
 void DragManager::ReportStartDragFailedRadarInfo(StageRes stageRes, DragRadarErrCode errCode,
-    const std::string &funcName, const std::string &packageName)
+    const std::string &funcName, const struct DragRadarPackageName &dragRadarPackageName)
 {
     DragRadarInfo dragRadarInfo;
     dragRadarInfo.funcName = funcName;
@@ -2059,7 +2084,8 @@ void DragManager::ReportStartDragFailedRadarInfo(StageRes stageRes, DragRadarErr
     dragRadarInfo.bizStage = static_cast<int32_t>(BizStage::STAGE_START_DRAG);
     dragRadarInfo.stageRes = static_cast<int32_t>(stageRes);
     dragRadarInfo.errCode = static_cast<int32_t>(errCode);
-    dragRadarInfo.hostName = packageName;
+    dragRadarInfo.hostName = dragRadarPackageName.packageName;
+    dragRadarInfo.appCaller = dragRadarPackageName.appCaller;
     ReportDragRadarInfo(dragRadarInfo);
 }
 
@@ -2087,7 +2113,9 @@ void DragManager::ReportDragRadarInfo(struct DragRadarInfo &dragRadarInfo)
         "LOCAL_NET_ID", dragRadarInfo.localNetId,
         "PEER_NET_ID", dragRadarInfo.peerNetId,
         "DRAG_SUMMARY", summary,
-        "APP_CALLER", dragRadarInfo.callingPid);
+        "PACKAGE_NAME", dragRadarInfo.callingPid,
+        "APP_CALLEE", dragRadarInfo.appCallee,
+        "APP_CALLER", dragRadarInfo.appCaller);
 #endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 }
 
