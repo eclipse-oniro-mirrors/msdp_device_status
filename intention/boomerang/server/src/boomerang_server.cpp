@@ -187,6 +187,10 @@ int32_t BoomerangServer::Unsubscribe(CallingContext &context, MessageParcel &dat
 
 int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, MessageParcel &data)
 {
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
     NotifyMetadataParam param {};
     if (!param.Unmarshalling(data)) {
         FI_HILOGE("GetNotifyMetadataParam::Unmarshalling fail");

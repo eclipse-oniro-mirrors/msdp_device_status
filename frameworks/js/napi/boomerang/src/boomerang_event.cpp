@@ -137,7 +137,7 @@ void BoomerangEvent::SaveCallback(int32_t eventType, napi_ref onHandlerRef, bool
     FI_HILOGD("Add handler to list %{public}d", eventType);
 }
 
-bool BoomerangEvent::Off(int32_t eventType, napi_value handler)
+bool BoomerangEvent::Off(int32_t eventType)
 {
     FI_HILOGD("Unregister handler of event(%{public}d)", eventType);
     std::lock_guard<std::mutex> guard(mutex_);

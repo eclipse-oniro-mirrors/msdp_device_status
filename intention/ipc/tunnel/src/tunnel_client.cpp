@@ -197,7 +197,7 @@ int32_t TunnelClient::AddWatch(Intention intention, uint32_t id, ParamBase &data
         int32_t ret = devicestatusProxy_->AddWatch(intention, id, dataParcel, replyParcel);
         if (ret != RET_OK) {
             FI_HILOGE("proxy::AddWatch fail");
-            return RET_ERR;
+            return ret;
         }
     }
     if (!reply.Unmarshalling(replyParcel)) {

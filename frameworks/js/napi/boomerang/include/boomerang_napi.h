@@ -84,7 +84,7 @@ public:
     static std::map<int32_t, sptr<IRemoteBoomerangCallback>> callbacks_;
 
 private:
-    static bool CheckArguments(napi_env env, napi_callback_info info);
+    static bool CheckArguments(napi_env env, napi_callback_info info, int32_t validataType);
     static bool IsSameHandle(napi_env env, napi_value handle, napi_ref ref);
     static bool CreateMetadataExecution(napi_env env, napi_deferred deferred, std::string typeInt,
         sptr<IRemoteBoomerangCallback> callbacks);
@@ -98,6 +98,7 @@ private:
         std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
     static void DecodeImageExecuteCB(napi_env env, void* data);
     static void DecodeImageCompleteCB(napi_env env, napi_status status, void* data);
+    static void ProcessErrorResult(napi_env env, int32_t result, int32_t code, AsyncContext* asyncContext);
     static AsyncContext *asyncContext_;
     static AsyncContext *encodeAsyncContext_;
     static AsyncContext *decodeAsyncContext_;

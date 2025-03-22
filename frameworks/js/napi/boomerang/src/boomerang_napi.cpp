@@ -58,6 +58,8 @@ constexpr int32_t ALPHA_TYPE = 2;
 constexpr int32_t ALPHA_SHIFT = 24;
 constexpr int32_t RED_SHIFT = 16;
 constexpr int32_t GREEN_SHIFT = 8;
+constexpr int32_t VALIDATA_ON_PARAM = 1;
+constexpr int32_t VALIDATA_OFF_PARAM = 2;
 }  // namespace
 std::map<int32_t, sptr<IRemoteBoomerangCallback>> BoomerangNapi::callbacks_;
 napi_ref BoomerangNapi::boomerangValueRef_ = nullptr;
@@ -259,7 +261,7 @@ napi_value BoomerangNapi::Register(napi_env env, napi_callback_info info)
         THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
         return nullptr;
     }
-    if (!CheckArguments(env, info)) {
+    if (!CheckArguments(env, info, VALIDATA_ON_PARAM)) {
         ThrowErr(env, PARAM_ERROR, "Failed to get on arguments");
         return nullptr;
     }
@@ -352,6 +354,7 @@ napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback
 napi_value BoomerangNapi::SubmitMetadata(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
+    std::lock_guard<std::mutex> guard(mutex_);
     size_t argc = 1;
     napi_value argv[1] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
@@ -378,6 +381,7 @@ napi_value BoomerangNapi::SubmitMetadata(napi_env env, napi_callback_info info)
 napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
+    std::lock_guard<std::mutex> guard(mutex_);
     size_t argc = 2;
     napi_value argv[2] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
@@ -423,6 +427,7 @@ napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info 
 napi_value BoomerangNapi::DecodeImage(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
+    std::lock_guard<std::mutex> guard(mutex_);
     size_t argc = 1;
     napi_value argv[1] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
@@ -462,7 +467,7 @@ napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
     napi_value argv[3] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
-    if (!CheckArguments(env, info)) {
+    if (!CheckArguments(env, info, VALIDATA_OFF_PARAM)) {
         ThrowErr(env, PARAM_ERROR, "failed to get on arguments");
         return nullptr;
     }
@@ -477,7 +482,7 @@ napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
     CHKRP(napi_get_value_string_utf8(env, argv[1], bundleName, sizeof(bundleName), &strLength), CREATE_STRING_UTF8);
 
     CHKPP(g_obj);
-    if (!g_obj->Off(type, argv[ARG_2])) {
+    if (!g_obj->Off(type)) {
         FI_HILOGE("Not ready to unsubscribe for type:%{public}d", type);
         return nullptr;
     }
@@ -534,7 +539,7 @@ bool BoomerangNapi::InitNapiObject(napi_env env, napi_callback_info info)
     return true;
 }
 
-bool BoomerangNapi::CheckArguments(napi_env env, napi_callback_info info)
+bool BoomerangNapi::CheckArguments(napi_env env, napi_callback_info info, int32_t validataType)
 {
     CALL_DEBUG_ENTER;
     int32_t arr[ARG_3] = {0};
@@ -555,9 +560,17 @@ bool BoomerangNapi::CheckArguments(napi_env env, napi_callback_info info)
         FI_HILOGD("valueType:%{public}d", valueType);
         arr[i] = valueType;
     }
-    if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_string || arr[ARG_2] != napi_function) {
-        FI_HILOGE("Failed to get arguements");
-        return false;
+    if (validataType == VALIDATA_ON_PARAM) {
+        if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_string || arr[ARG_2] != napi_function) {
+            FI_HILOGE("Failed to get arguements");
+            return false;
+        }
+    }
+    if (validataType == VALIDATA_OFF_PARAM) {
+        if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_string) {
+            FI_HILOGE("Failed to get arguements");
+            return false;
+        }
     }
     return true;
 }
@@ -637,14 +650,7 @@ void BoomerangNapi::NotifyMetadataCompleteCB(napi_env env, napi_status status, v
     }
     AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
     int32_t result = static_cast<int32_t>(outerAsyncContext->result);
-    if (result != RET_OK) {
-        napi_value intValue;
-        napi_create_int32(env, result, &intValue);
-        if (outerAsyncContext->deferred) {
-            FI_HILOGE("callback the error notify metadata result:%{public}d", result);
-            napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
-        }
-    }
+    ProcessErrorResult(env, result, HANDLER_FAILD, outerAsyncContext);
     asyncContext_ = nullptr;
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
@@ -671,15 +677,7 @@ void BoomerangNapi::EncodeImageCompleteCB(napi_env env, napi_status status, void
     }
     AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
     int32_t result = static_cast<int32_t>(outerAsyncContext->result);
-    if (result != RET_OK) {
-        napi_value intValue;
-        napi_create_int32(env, result, &intValue);
-        if (outerAsyncContext->deferred) {
-            FI_HILOGE("callback the error encode image result:%{public}d", result);
-            napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
-        }
-    }
-    FI_HILOGI("encode image success");
+    ProcessErrorResult(env, result, ENCODE_FAILED, outerAsyncContext);
     encodeAsyncContext_ = nullptr;
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
@@ -705,15 +703,7 @@ void BoomerangNapi::DecodeImageCompleteCB(napi_env env, napi_status status, void
     }
     AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
     int32_t result = static_cast<int32_t>(outerAsyncContext->result);
-    if (result != RET_OK) {
-        napi_value intValue;
-        napi_create_int32(env, result, &intValue);
-        if (outerAsyncContext->deferred) {
-            FI_HILOGE("callback the error decode image result:%{public}d", result);
-            napi_reject_deferred(env, outerAsyncContext->deferred, intValue);
-        }
-    }
-    FI_HILOGI("decode image success");
+    ProcessErrorResult(env, result, DECODE_FAILED, outerAsyncContext);
     decodeAsyncContext_ = nullptr;
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
@@ -740,6 +730,25 @@ int32_t BoomerangNapi::ConvertTypeToInt(const std::string &type)
     } else {
         return BoomerangType::BOOMERANG_TYPE_INVALID;
     }
+}
+
+void BoomerangNapi::ProcessErrorResult(napi_env env, int32_t result, int32_t code, AsyncContext* asyncContext)
+{
+    if (env == nullptr || asyncContext == nullptr || !asyncContext->deferred) {
+        FI_HILOGE("Parameter error for %{public}d. Please check", code);
+        return;
+    }
+
+    if (result == RET_OK) {
+        FI_HILOGI("handler requset success");
+        return;
+    }
+
+    napi_value intValue;
+    int32_t callResult = (result == RET_ERR) ? code : result;
+    napi_create_int32(env, callResult, &intValue);
+    FI_HILOGI("callback the error result:%{public}d", callResult);
+    napi_reject_deferred(env, asyncContext->deferred, intValue);
 }
 
 napi_value BoomerangNapi::Init(napi_env env, napi_value exports)
