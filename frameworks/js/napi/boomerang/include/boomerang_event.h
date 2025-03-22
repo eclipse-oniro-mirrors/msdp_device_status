@@ -38,7 +38,7 @@ public:
     virtual ~BoomerangEvent();
 
     virtual bool On(int32_t eventType, napi_value handler, bool isOnce);
-    virtual bool Off(int32_t eventType, napi_value handler);
+    virtual bool Off(int32_t eventType);
 
 protected:
     virtual bool OffOnce(int32_t eventType, napi_value handler);
