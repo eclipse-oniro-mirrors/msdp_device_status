@@ -728,7 +728,7 @@ int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent
     dragDrawing_.StopVSyncStation();
     isHPR_ = PRODUCT_TYPE == DEVICE_TYPE_HPR;
     if (!isHPR_) {
-        FI_HILOGE("Fail to pull throw, feature not support");
+        FI_HILOGW("Fail to pull throw, feature not support");
         return RET_ERR;
     }
 
@@ -751,7 +751,7 @@ int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent
     float vx = std::abs(throwSpeed * std::cos(throwAngle * M_PI / 180.0));
     float vy = std::abs(throwSpeed * std::sin(throwAngle * M_PI / 180.0));
 
-    FI_HILOGI("Throw params: angle=%f, direction=%d, state=%d, speeds=(%f,%f)",
+    FI_HILOGI("angle=%{public}f, direction=%{public}d, state=%{public}d, speeds=(%{public}f,%{public}f)",
               throwAngle, throwDir, throwState_, vx, vy);
     
     FI_HILOGD("VK Status: NONE = 0, TOUCHPAD = 1, PIXED = 2, FLOATING = 3");
@@ -796,6 +796,10 @@ void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         FI_HILOGD("Remove timer");
     }
 
+    if (dragData.shadowInfos.size() <= 0) {
+        FI_HILOGE("shadow info size is 0");
+        return;
+    }
     const ShadowInfo &shadowInfo = dragData.shadowInfos[0];
     CHKPV(shadowInfo.pixelMap);
     double hotZoneX = TARGET_X + shadowInfo.x;

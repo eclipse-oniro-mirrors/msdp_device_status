@@ -50,6 +50,7 @@ bool PullThrowListener::RegisterFoldStatusListener()
     auto ret = Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
     if (ret != Rosen::DMError::DM_OK) {
         FI_HILOGE("RegisterFoldStatusListener failed");
+        delete foldStatusListener_;
         foldStatusListener_ = nullptr;
         return false;
     }
@@ -83,6 +84,7 @@ bool PullThrowListener::RegisterScreenMagneticStateListener()
     auto ret = Rosen::DisplayManager::GetInstance().RegisterScreenMagneticStateListener(screenMagneticStateListener_);
     if (ret != Rosen::DMError::DM_OK) {
         FI_HILOGE("RegisterScreenMagneticStateListener failed");
+        delete screenMagneticStateListener_;
         screenMagneticStateListener_ = nullptr;
         return false;
     }
@@ -165,6 +167,7 @@ int32_t PullThrowListener::GetStringValue(const std::string &key, std::string &v
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo("KEYWORD", key);
     Uri uri((SETTING_URI_PROXY + "&key=" + key));
+    CHKPR(helper, RET_ERR);
     auto resultSet = helper->Query(uri, predicates, columns);
     ReleaseDataShareHelper(helper);
     const int32_t index = 0;
@@ -173,7 +176,7 @@ int32_t PullThrowListener::GetStringValue(const std::string &key, std::string &v
     int32_t ret = resultSet->GetString(index, value);
     if (ret != ERR_OK) {
         FI_HILOGE("GetString failed, ret:%{public}d", ret);
-        return ERROR;
+        return ret;
     }
     resultSet->Close();
     return ERR_OK;
@@ -231,7 +234,7 @@ bool PullThrowListener::RegisterPullThrowListener()
         GetIntValue(SETTING_VK_KEY, obstatusVk_);
         if (obstatusVk_ ==  1) {
             FI_HILOGI("VK UpdateFunc Thorw cancel; obstatusVk_: %{public}d", obstatusVk_);
-
+            CHKPV(manager_);
             manager_->OnDragCancel(manager_->currentPointerEvent_);
         } else {
             FI_HILOGD("Virtual keyboard obstatusVk_: %{public}d", obstatusVk_);
