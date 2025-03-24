@@ -477,7 +477,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     ReportStopDragRadarInfo(BizState::STATE_END, StageRes::RES_SUCCESS, DragRadarErrCode::DRAG_SUCCESS, pid,
-        packageName);
+        dragRadarPackageName);
     if (dragOutSession_ == nullptr) {
         ReportStopDragUEInfo(packageName);
     }
