@@ -362,7 +362,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level1)
     EXPECT_FLOAT_EQ(1.0f, dragDrawing.CalculateScale(200, 300, 200, 300));
     EXPECT_FLOAT_EQ(0.5f, dragDrawing.CalculateScale(400, 200, 200, 300));
     EXPECT_FLOAT_EQ(0.4f, dragDrawing.CalculateScale(200, 500, 300, 200));
-    EXPECT_FLOAT_EQ(0.5f, dragDrawing.CalculateScale(400, 600, 200, 300)); 
+    EXPECT_FLOAT_EQ(0.5f, dragDrawing.CalculateScale(400, 600, 200, 300));
 }
 } // namespace
 } // namespace DeviceStatus
