@@ -256,6 +256,21 @@ bool DragManager::IsCrossDragging()
     return isCrossDragging_;
 }
 
+DragRadarPackageName DragManager::GetDragRadarPackageName(int32_t pid, const std::string &packageName,
+    const std::string &appCaller)
+{
+    FI_HILOGI("enter");
+    DragRadarPackageName dragRadarPackageName;
+    dragRadarPackageName.packageName = packageName;
+    if (pid == -1) {
+        dragRadarPackageName.appCaller = appCaller;
+    } else {
+        dragRadarPackageName.appCaller = packageName;
+    }
+    FI_HILOGI("leave");
+    return dragRadarPackageName;
+}
+
 int32_t DragManager::StartDrag(
     const DragData &dragData, int32_t pid, const std::string &peerNetId, bool isLongPressDrag,
     const std::string &appCaller)
@@ -273,13 +288,7 @@ int32_t DragManager::StartDrag(
     }
     peerNetId_ = peerNetId;
     std::string packageName = GetPackageName(pid);
-     DragRadarPackageName dragRadarPackageName;
-    dragRadarPackageName.packageName = packageName;
-    if (pid == -1) {
-        dragRadarPackageName.appCaller = appCaller;
-    } else {
-        dragRadarPackageName.appCaller = packageName;
-    }
+    DragRadarPackageName dragRadarPackageName = GetDragRadarPackageName(pid, packageName, appCaller);
     ReportStartDragRadarInfo(BizState::STATE_BEGIN, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, peerNetId,
         dragRadarPackageName);
     PrintDragData(dragData, packageName);
