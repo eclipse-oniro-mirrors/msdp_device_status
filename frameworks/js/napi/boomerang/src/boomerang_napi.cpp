@@ -254,6 +254,7 @@ BoomerangNapi::~BoomerangNapi()
 napi_value BoomerangNapi::Register(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
+    std::lock_guard<std::mutex> guard(mutex_);
     size_t argc = 3;
     napi_value argv[3] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
@@ -290,7 +291,6 @@ napi_value BoomerangNapi::SubscribeMeatadataCallback(
         return nullptr;
     }
 
-    std::lock_guard<std::mutex> guard(g_obj->mutex_);
     auto callbackIter = callbacks_.find(type);
     if (callbackIter != callbacks_.end()) {
         FI_HILOGD("Callback exists");
@@ -493,6 +493,7 @@ napi_value BoomerangNapi::DecodeImage(napi_env env, napi_callback_info info)
 napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
+    std::lock_guard<std::mutex> guard(mutex_);
     size_t argc = 3;
     napi_value argv[3] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
