@@ -190,7 +190,7 @@ private:
     static MMI::ExtraData CreateExtraData(bool appended, bool drawCursor = false);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void StateChangedNotify(DragState state);
-        int32_t AddDragEvent(const DragData &dragData, const struct DragRadarPackageName &dragRadarPackageName);
+    int32_t AddDragEvent(const DragData &dragData, const struct DragRadarPackageName &dragRadarPackageName);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void CtrlKeyStyleChangedNotify(DragCursorStyle style, DragAction action);
     int32_t HandleDragResult(DragResult result, bool hasCustomAnimation);
