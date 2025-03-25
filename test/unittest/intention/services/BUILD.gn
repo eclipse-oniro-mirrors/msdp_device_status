@@ -84,6 +84,7 @@ ohos_unittest("IntentionServiceTest") {
     "access_token:libaccesstoken_sdk",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "device_manager:devicemanagersdk",
     "googletest:gtest_main",
     "graphic_2d:libcomposer",
@@ -125,6 +126,7 @@ ohos_unittest("MonitorTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
@@ -166,6 +168,7 @@ ohos_unittest("EnumeratorTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
@@ -205,6 +208,7 @@ ohos_unittest("DeviceTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
@@ -263,6 +267,7 @@ ohos_unittest("IntentionDeviceManagerTest") {
     "access_token:libaccesstoken_sdk",
     "cJSON:cjson",
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",

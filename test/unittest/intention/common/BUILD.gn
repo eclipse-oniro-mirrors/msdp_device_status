@@ -58,6 +58,7 @@ ohos_unittest("EpollManagerTest") {
 
   external_deps = [
     "c_utils:utils",
+    "data_share:datashare_consumer",
     "googletest:gtest_main",
     "hilog:libhilog",
   ]

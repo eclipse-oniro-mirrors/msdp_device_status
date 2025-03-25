@@ -30,10 +30,14 @@
 #include "collaboration_service_status_change.h"
 #include "display_change_event_listener.h"
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#include "data_ability_observer_stub.h"
+#include "datashare_helper.h"
 #include "devicestatus_define.h"
+#include "display_manager.h"
 #include "drag_data.h"
 #include "drag_drawing.h"
 #include "id_factory.h"
+#include "pull_throw_listener.h"
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "event_hub.h"
 #include "i_context.h"
@@ -45,16 +49,43 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+enum class ThrowDirection : int32_t {
+    UP = 1,
+    DOWN,
+    LEFT,
+    RIGHT
+};
+
+enum class ScreenId : int32_t {
+    UPSCREEN = 1,
+    DOWNSCREEN,
+    INVALID
+};
+
+enum class ThrowState : int32_t {
+    NOT_THROW = 0,
+    IN_DOWNSCREEN = 1,
+    IN_UPSCREEN = 2
+};
 class DragManager : public IDragManager,
                     public IdFactory<int32_t> {
 public:
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
     static DragManager &GetInstance();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    DragManager() = default;
+    DragManager();
     DISALLOW_COPY_AND_MOVE(DragManager);
     ~DragManager();
+    std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
+    ThrowDirection GetThrowDirection(double angle);
+    ScreenId GetScreenId(int32_t displayY);
 
+    bool ValidateThrowDirection(ScreenId currentScreen, ThrowDirection throwDir);
+    bool ValidateThrowConditions() { return listener_.ValidateThrowConditions(); }
+    bool RegisterPullThrowListener() { return listener_.RegisterPullThrowListener(); }
+    double NormalizeThrowAngle(double angle);
+    int32_t OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    void InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t Init(IContext* context);
     void OnSessionLost(SocketSessionPtr session);
@@ -167,6 +198,7 @@ public:
     void AddDragDestroy(std::function<void()> cb) override;
     void SetSVGFilePath(const std::string &filePath) override;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+    ThrowState throwState_ { ThrowState::NOT_THROW };
 private:
     void PrintDragData(const DragData &dragData, const std::string &packageName = "");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -221,6 +253,9 @@ private:
     void ReportStopDragUEInfo(const std::string &packageName);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 private:
+    int32_t dragTimerId_ { -1 };
+    PullThrowListener listener_;
+    std::atomic_bool isHPR_ { false };
     int32_t timerId_ { -1 };
     int32_t mouseDragMonitorTimerId_ { -1 };
     DragState dragState_ { DragState::STOP };

@@ -266,6 +266,7 @@ public:
     void SetSVGFilePath(const std::string &filePath);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void OnDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime);
+    void OnPullThrowDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime);
     void EraseMouseIcon();
     void DestroyDragWindow();
     void UpdateDrawingState();
@@ -296,6 +297,7 @@ public:
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
     void LongPressDragZoomOutAnimation();
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
+    void PullThrowAnimation(double tx, double ty, float vx, float vy, std::shared_ptr<MMI::PointerEvent> pointerEvent);
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -429,6 +431,10 @@ private:
     DragState dragState_ { DragState::STOP };
     int32_t timerId_ { -1 };
     std::shared_mutex receiverMutex_;
+    bool pullThrowAnimationXCompleted_  { false };
+    bool pullThrowAnimationYCompleted_ { false };
+    std::mutex animationMutex_;
+    std::condition_variable animationCV_;
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<OHOS::Rosen::Window> window_ { nullptr };
     std::function<void()> callback_ { nullptr };

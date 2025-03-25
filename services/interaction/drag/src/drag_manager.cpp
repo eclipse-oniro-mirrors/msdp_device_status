@@ -17,6 +17,7 @@
 
 #include <atomic>
 
+#include "display_info.h"
 #include "display_manager.h"
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "extra_data.h"
@@ -24,6 +25,7 @@
 #include "hitrace_meter.h"
 #endif // MSDP_HIVIEWDFX_HITRACE_ENABLE
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#include "parameters.h"
 #include "pixel_map.h"
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #ifdef MSDP_FRAMEWORK_UDMF_ENABLED
@@ -33,6 +35,8 @@
 #include "window_manager_lite.h"
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
+#include <dlfcn.h>
+#include "device_manager.h"
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_data_manager.h"
@@ -63,6 +67,26 @@ const std::string APP_VERSION_ID {"1.0.0"};
 const std::string DRAG_FRAMEWORK {"DRAG_FRAMEWORK"};
 const std::string START_CROSSING_DRAG {"START_CROSSING_DRAG"};
 const std::string END_CROSSING_DRAG {"END_CROSSING_DRAG"};
+const std::string DEVICE_TYPE_HPR {"HPR"};
+const std::string PRODUCT_TYPE = OHOS::system::GetParameter("const.build.product", "HYM");
+// 屏幕坐标常量
+constexpr int32_t UP_SCREEN_MAX_Y { 1608 };       // 上屏最大 Y 坐标
+constexpr int32_t DOWN_SCREEN_MIN_Y { 1690 };     // 下屏最小 Y 坐标
+constexpr int32_t DOWN_SCREEN_MAX_Y { 3296 };     // 下屏最大 Y 坐标
+constexpr int32_t TARGET_X { 1236 };              // 目标 X 坐标
+constexpr int32_t TARGET_Y_DOWN { 1800 };         // 下屏目标 Y 坐标
+constexpr int32_t TARGET_Y_UP { 1500 };           // 上屏目标 Y 坐标
+constexpr int32_t TIMER_TIMEOUT_MS { 30000 };     // 定时器超时值，30秒
+
+// 角度常量
+constexpr double ANGLE_DOWN_MIN { 65.0 };         // 下方角度范围最小值
+constexpr double ANGLE_DOWN_MAX { 115.0 };        // 下方角度范围最大值
+constexpr double ANGLE_UP_MIN { 245.0 };          // 上方角度范围最小值
+constexpr double ANGLE_UP_MAX { 295.0 };          // 上方角度范围最大值
+constexpr double ANGLE_LEFT_MIN { 115.0 };        // 左方角度范围最小值
+constexpr double ANGLE_LEFT_MAX { 245.0 };        // 左方角度范围最大值
+constexpr double FULL_CIRCLE_DEGREES = { 360.0 };
+constexpr double ANGLE_EPSILON {1e-9};
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
 constexpr int32_t DRAG_PRIORITY { 500 };
 #endif // OHOS_DRAG_ENABLE_INTERCEPTOR
@@ -75,7 +99,7 @@ DragManager &DragManager::GetInstance()
     return instance;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-
+DragManager::DragManager() : listener_(this) {}
 DragManager::~DragManager()
 {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -127,6 +151,10 @@ int32_t DragManager::Init(IContext* context)
         }
         ret = samgrProxy->SubscribeSystemAbility(DEVICE_COLLABORATION_SA_ID, CollaborationServiceStatusChange_);
         FI_HILOGI("SubscribeSystemAbility DEVICE_COLLABORATION_SA_ID result:%{public}d", ret);
+        if (!RegisterPullThrowListener()) {
+            FI_HILOGE("RegisterPullThrowListener fail");
+            return;
+        }
     });
     FI_HILOGI("leave");
     return RET_OK;
@@ -651,10 +679,159 @@ int32_t DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> po
     return RET_OK;
 }
 
+double DragManager::NormalizeThrowAngle(double angle)
+{
+    return (angle < ANGLE_EPSILON) ? angle + FULL_CIRCLE_DEGREES : angle;
+}
+
+ThrowDirection DragManager::GetThrowDirection(double angle)
+{
+    if (angle >= ANGLE_DOWN_MIN && angle < ANGLE_DOWN_MAX) {
+        return ThrowDirection::DOWN;
+    }
+    if (angle >= ANGLE_UP_MIN && angle < ANGLE_UP_MAX) {
+        return ThrowDirection::UP;
+    }
+    if (angle >= ANGLE_LEFT_MIN && angle < ANGLE_LEFT_MAX) {
+        return ThrowDirection::LEFT;
+    }
+    return ThrowDirection::RIGHT;
+}
+
+ScreenId DragManager::GetScreenId(int32_t displayY)
+{
+    if (displayY <= UP_SCREEN_MAX_Y) {
+        return ScreenId::UPSCREEN;
+    }
+    if (displayY >= DOWN_SCREEN_MIN_Y && displayY <= DOWN_SCREEN_MAX_Y) {
+        return ScreenId::DOWNSCREEN;
+    }
+    return ScreenId::INVALID;
+}
+
+bool DragManager::ValidateThrowDirection(ScreenId currentScreen, ThrowDirection throwDir)
+{
+    bool isDownThrow = (throwDir == ThrowDirection::DOWN &&
+                        currentScreen == ScreenId::UPSCREEN &&
+                        throwState_ == ThrowState::NOT_THROW);
+
+    bool isUpThrow = (throwDir == ThrowDirection::UP &&
+                      currentScreen == ScreenId::DOWNSCREEN &&
+                      throwState_ == ThrowState::NOT_THROW);
+
+    return isDownThrow || isUpThrow;
+}
+
+int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    CHKPR(pointerEvent, RET_ERR);
+    dragDrawing_.StopVSyncStation();
+    isHPR_ = PRODUCT_TYPE == DEVICE_TYPE_HPR;
+    if (!isHPR_) {
+        FI_HILOGW("Fail to pull throw, feature not support");
+        return RET_ERR;
+    }
+
+    if (!ValidateThrowConditions()) {
+        FI_HILOGI("ThrowConditions Not satisfied");
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
+        MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
+        return RET_ERR;
+    }
+
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    ScreenId currentScreen = GetScreenId(pointerItem.GetDisplayY());
+
+    double throwAngle = pointerEvent->GetThrowAngle();
+    double throwSpeed = pointerEvent->GetThrowSpeed();
+    throwAngle = NormalizeThrowAngle(throwAngle);
+
+    ThrowDirection throwDir = GetThrowDirection(throwAngle);
+    float vx = std::abs(throwSpeed * std::cos(throwAngle * M_PI / 180.0));
+    float vy = std::abs(throwSpeed * std::sin(throwAngle * M_PI / 180.0));
+
+    FI_HILOGI("angle=%{public}f, direction=%{public}d, state=%{public}d, speeds=(%{public}f,%{public}f)",
+              throwAngle, throwDir, throwState_, vx, vy);
+    
+    FI_HILOGD("VK Status: NONE = 0, TOUCHPAD = 1, PIXED = 2, FLOATING = 3");
+    FI_HILOGD("Fold Status: UNKNOWN = 0, EXPAND = 1, FOLDED = 2, HALF_FOLD = 3");
+    FI_HILOGD("Throw State: Not Throw = 0, In downscreen = 1, In upscreen = 2");
+
+    if (ValidateThrowDirection(currentScreen, throwDir)) {
+        throwState_ = (throwDir == ThrowDirection::DOWN) ? ThrowState::IN_DOWNSCREEN : ThrowState::IN_UPSCREEN;
+        int targetY = (throwDir == ThrowDirection::DOWN) ? TARGET_Y_DOWN : TARGET_Y_UP;
+        FI_HILOGI("SUCCESS: Screen=%{public}d, Direction=%{public}d, Angle=%{public}f, ThrowState=%{public}d",
+                  currentScreen, throwDir, throwAngle, throwState_);
+        dragDrawing_.PullThrowAnimation(TARGET_X, targetY, vx, vy, pointerEvent);
+        
+        int32_t repeatCount = 1;
+        CHKPR(context_, RET_ERR);
+        dragTimerId_ = context_->GetTimerManager().AddTimer(TIMER_TIMEOUT_MS, repeatCount, [this]() {
+            FI_HILOGI("Timeout 30s, automatically stop dragging");
+            CHKPV(currentPointerEvent_);
+            currentPointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
+            MMI::InputManager::GetInstance()->SimulateInputEvent(currentPointerEvent_);
+        });
+    } else {
+        FI_HILOGD("Screen=%{public}d, Direction=%{public}d, Angle=%{public}f, ThrowState=%{public}d",
+                  currentScreen, throwDir, throwAngle, throwState_);
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
+        MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
+    }
+    return RET_OK;
+}
+
+void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    CHKPV(pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+
+    CHKPV(context_);
+    if (dragTimerId_ >= 0) {
+        context_->GetTimerManager().RemoveTimer(dragTimerId_);
+        dragTimerId_ = -1;
+        FI_HILOGD("Remove timer");
+    }
+
+    if (dragData.shadowInfos.size() <= 0) {
+        FI_HILOGE("shadow info size is 0");
+        return;
+    }
+    const ShadowInfo &shadowInfo = dragData.shadowInfos[0];
+    CHKPV(shadowInfo.pixelMap);
+    double hotZoneX = TARGET_X + shadowInfo.x;
+    double baseY = (throwState_ == ThrowState::IN_DOWNSCREEN) ? TARGET_Y_DOWN : TARGET_Y_UP;
+    double hotZoneY = baseY + shadowInfo.y;
+
+    FI_HILOGI("DRAGDOWN throw state: %{public}d", throwState_);
+    FI_HILOGD("Pointer X: %{public}d, Y: %{public}d",
+              pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+    FI_HILOGD("Hotzone X: %{public}f, Y: %{public}f, Width: %{public}d, Height: %{public}d",
+              hotZoneX, hotZoneY, shadowInfo.pixelMap->GetWidth(), shadowInfo.pixelMap->GetHeight());
+
+    bool isPointerOutsideHotZone =
+        (hotZoneY + shadowInfo.pixelMap->GetHeight() <= pointerItem.GetDisplayY()) ||
+        (pointerItem.GetDisplayY() <= hotZoneY) ||
+        (hotZoneX + shadowInfo.pixelMap->GetWidth() <= pointerItem.GetDisplayX()) ||
+        (pointerItem.GetDisplayX() <= hotZoneX);
+    if (isPointerOutsideHotZone) {
+        FI_HILOGI("In POINTER_ACTION_DOWN, Cancel, not in hotzone");
+        dragDrawing_.StopVSyncStation();
+        mouseDragMonitorDisplayX_ = -1;
+        mouseDragMonitorDisplayY_ = -1;
+        OnDragCancel(pointerEvent);
+        throwState_ = ThrowState::NOT_THROW;
+    }
+}
+
 void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
+    currentPointerEvent_ = pointerEvent;
     if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) && mouseDragMonitorState_) {
         MMI::PointerEvent::PointerItem pointerItem;
@@ -669,9 +846,17 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         OnDragMove(pointerEvent);
         return;
     }
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_THROW) {
+        int32_t ret = OnPullThrow(pointerEvent);
+        if (ret != RET_OK) {
+            FI_HILOGE("PullThrow failed");
+        }
+        return;
+    }
     FI_HILOGD("DragCallback, pointerAction:%{public}d", pointerAction);
     if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) ||
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL)) {
+        throwState_ = ThrowState::NOT_THROW;
         dragDrawing_.StopVSyncStation();
         mouseDragMonitorDisplayX_ = -1;
         mouseDragMonitorDisplayY_ = -1;
@@ -682,6 +867,16 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         if (ret != RET_OK) {
             FI_HILOGE("Post async task failed");
         }
+        if (dragTimerId_ >= 0 && pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL) {
+            CHKPV(context_);
+            context_->GetTimerManager().RemoveTimer(dragTimerId_);
+            dragTimerId_ = -1;
+            FI_HILOGD("Remove timer");
+        }
+        return;
+    }
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN && throwState_ != ThrowState::NOT_THROW) {
+        InPullThrow(pointerEvent);
         return;
     }
     int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
@@ -762,7 +957,13 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
         lastDisplayId_ = targetDisplayId;
     } else {
-        dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
+        if (throwState_ == ThrowState::NOT_THROW) {
+            FI_HILOGD("Drag move ThrowState::NOT_THROW");
+            dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
+        } else {
+            FI_HILOGD("Drag move other ThrowState");
+            dragDrawing_.OnPullThrowDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
+        }
     }
 }
 

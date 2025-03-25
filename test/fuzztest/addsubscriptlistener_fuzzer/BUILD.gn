@@ -21,6 +21,7 @@ deps_ex = [
   "access_token:libaccesstoken_sdk",
   "cJSON:cjson",
   "c_utils:utils",
+  "data_share:datashare_consumer",
   "device_manager:devicemanagersdk",
   "graphic_2d:libcomposer",
   "graphic_2d:window_animation",
