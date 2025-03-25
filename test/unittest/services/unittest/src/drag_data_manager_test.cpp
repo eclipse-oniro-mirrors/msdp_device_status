@@ -349,6 +349,21 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level0)
     dragDrawing.Draw(pointerEvent->GetTargetDisplayId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     dragDrawing.DestroyDragWindow();
 }
+
+/**
+ * @tc.name: InteractionDragDrawingTest_CalculateScale
+ * @tc.desc: normal test DragDrawing CalculateScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    EXPECT_FLOAT_EQ(1.0f, dragDrawing.CalculateScale(200, 300, 200, 300));
+    EXPECT_FLOAT_EQ(0.5f, dragDrawing.CalculateScale(400, 200, 200, 300));
+    EXPECT_FLOAT_EQ(0.4f, dragDrawing.CalculateScale(200, 500, 300, 200));
+    EXPECT_FLOAT_EQ(0.5f, dragDrawing.CalculateScale(400, 600, 200, 300));
+}
 } // namespace
 } // namespace DeviceStatus
 } // namespace Msdp
