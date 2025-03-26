@@ -30,6 +30,7 @@ deps_ex = [
   "hitrace:hitrace_meter",
   "hilog:libhilog",
   "input:libmmi-client",
+  "safwk:system_ability_fwk",
   "window_manager:libdm",
 ]
 
