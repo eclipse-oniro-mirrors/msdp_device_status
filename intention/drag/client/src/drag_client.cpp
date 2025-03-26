@@ -351,7 +351,7 @@ int32_t DragClient::SetDragSwitchState(ITunnelClient &tunnel, bool enable, bool 
 
     int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_DRAG_SWITCH_STATE, param, reply);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
+        FI_HILOGE("ITunnelClient::SetParam fail, %{public}d", ret);
     }
     return ret;
 }
@@ -364,7 +364,7 @@ int32_t DragClient::SetAppDragSwitchState(ITunnelClient &tunnel, bool enable, co
 
     int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_APP_DRAG_SWITCH_STATE, param, reply);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
+        FI_HILOGE("ITunnelClient::SetParam fail, %{public}d", ret);
     }
     return ret;
 }

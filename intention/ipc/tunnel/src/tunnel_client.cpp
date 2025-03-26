@@ -263,7 +263,7 @@ int32_t TunnelClient::SetParam(Intention intention, uint32_t id, ParamBase &data
         int32_t ret = devicestatusProxy_->SetParam(intention, id, dataParcel, replyParcel);
         if (ret != RET_OK) {
             FI_HILOGE("proxy::SetParam fail");
-            return RET_ERR;
+            return ret;
         }
     }
     if (!reply.Unmarshalling(replyParcel)) {
