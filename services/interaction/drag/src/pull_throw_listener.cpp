@@ -15,6 +15,7 @@
 
 #include "pull_throw_listener.h"
 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "devicestatus_define.h"
 #include "drag_manager.h"
 #include "fi_log.h"
@@ -256,7 +257,7 @@ bool PullThrowListener::ValidateThrowConditions()
               obstatusVk_, currentMagneticState_, oldFoldStatus_);
     return !(obstatusVk_ == 1 || oldFoldStatus_ != Rosen::FoldStatus::HALF_FOLD || currentMagneticState_);
 }
-
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 } // namespace DeviceStatus
 } // namespace Msdp

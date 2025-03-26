@@ -28,16 +28,16 @@
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "collaboration_service_status_change.h"
-#include "display_change_event_listener.h"
-#endif // OHOS_BUILD_ENABLE_ARKUI_X
 #include "data_ability_observer_stub.h"
 #include "datashare_helper.h"
-#include "devicestatus_define.h"
+#include "display_change_event_listener.h"
 #include "display_manager.h"
+#include "pull_throw_listener.h"
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
+#include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_drawing.h"
 #include "id_factory.h"
-#include "pull_throw_listener.h"
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "event_hub.h"
 #include "i_context.h"
@@ -79,10 +79,11 @@ public:
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     ThrowDirection GetThrowDirection(double angle);
     ScreenId GetScreenId(int32_t displayY);
-
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     bool ValidateThrowDirection(ScreenId currentScreen, ThrowDirection throwDir);
     bool ValidateThrowConditions() { return listener_.ValidateThrowConditions(); }
     bool RegisterPullThrowListener() { return listener_.RegisterPullThrowListener(); }
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     double NormalizeThrowAngle(double angle);
     int32_t OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent);
@@ -254,7 +255,9 @@ private:
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 private:
     int32_t dragTimerId_ { -1 };
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     PullThrowListener listener_;
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     std::atomic_bool isHPR_ { false };
     int32_t timerId_ { -1 };
     int32_t mouseDragMonitorTimerId_ { -1 };
