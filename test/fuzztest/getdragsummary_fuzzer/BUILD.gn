@@ -32,6 +32,7 @@ deps_ex = [
   "hilog:libhilog",
   "input:libmmi-client",
   "image_framework:image_native",
+  "safwk:system_ability_fwk",
   "window_manager:libwm",
   "window_manager:libdm",
 ]

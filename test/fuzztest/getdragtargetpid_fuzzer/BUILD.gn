@@ -33,6 +33,7 @@ deps_ex = [
   "image_framework:image_native",
   "window_manager:libwm",
   "window_manager:libdm",
+  "safwk:system_ability_fwk",
 ]
 
 ###############################fuzztest#################################
