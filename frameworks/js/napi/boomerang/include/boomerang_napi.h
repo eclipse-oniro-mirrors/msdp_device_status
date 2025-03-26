@@ -102,6 +102,7 @@ private:
     static AsyncContext *asyncContext_;
     static AsyncContext *encodeAsyncContext_;
     static AsyncContext *decodeAsyncContext_;
+    static sptr<IRemoteBoomerangCallback> callback_;
     static napi_ref boomerangValueRef_;
     napi_env env_ { nullptr };
     inline static std::mutex mutex_;
