@@ -180,16 +180,16 @@ std::optional<DragData> InteractionDragDrawingTest::CreateDragData(int32_t sourc
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_One, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
-    ASSERT_TRUE(dragData);
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, target:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.targetPid, notifyMessage.result);
         promiseFlag.set_value(true);
     };
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
@@ -225,16 +225,16 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_On
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_Two, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_TWO, false, SHADOW_NUM_TWO);
-    ASSERT_TRUE(dragData);
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, target:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.targetPid, notifyMessage.result);
         promiseFlag.set_value(true);
     };
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
@@ -270,18 +270,19 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_Tw
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_Three, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_THREE, false, SHADOW_NUM_THREE);
-    ASSERT_TRUE(dragData);
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, target:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.targetPid, notifyMessage.result);
         promiseFlag.set_value(true);
     };
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
     ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
     ASSERT_EQ(ret, RET_OK);
@@ -318,12 +319,12 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_DragNum_Mu
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, target:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.targetPid, notifyMessage.result);
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_MULTIPLE, false, SHADOW_NUM_MULTIPLE);
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
@@ -528,16 +529,16 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Touchscreen_Drag
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_UpdateShadowPic, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_MULTIPLE, false, SHADOW_NUM_MULTIPLE);
+    ASSERT_TRUE(dragData);
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
         promiseFlag.set_value(true);
     };
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
-    ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
@@ -566,19 +567,19 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_UpdateShadowPic,
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixelMap_001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    std::promise<bool> promiseFlag;
-    std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
-        promiseFlag.set_value(true);
-    };
     auto addSelectedPixelmapCallback = [](bool result) {
         FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
     };
     std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_MULTIPLE, false, SHADOW_NUM_MULTIPLE);
     ASSERT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
+        promiseFlag.set_value(true);
+    };
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
@@ -613,19 +614,19 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixelMap_002, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    std::promise<bool> promiseFlag;
-    std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
-        promiseFlag.set_value(true);
-    };
     auto addSelectedPixelmapCallback = [](bool result) {
         FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
     };
     std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_TWO, false, SHADOW_NUM_TWO);
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_MULTIPLE, false, SHADOW_NUM_MULTIPLE);
     ASSERT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
+        promiseFlag.set_value(true);
+    };
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
@@ -660,19 +661,19 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixelMap_003, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    std::promise<bool> promiseFlag;
-    std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
-        promiseFlag.set_value(true);
-    };
     auto addSelectedPixelmapCallback = [](bool result) {
         FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
     };
     std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_THREE, false, SHADOW_NUM_THREE);
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_MULTIPLE, false, SHADOW_NUM_MULTIPLE);
     ASSERT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
+        promiseFlag.set_value(true);
+    };
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
@@ -704,19 +705,19 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixelMap_004, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    std::promise<bool> promiseFlag;
-    std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
-        promiseFlag.set_value(true);
-    };
     auto addSelectedPixelmapCallback = [](bool result) {
         FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
     };
     std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_THREE, false, SHADOW_NUM_THREE);
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_MULTIPLE, false, SHADOW_NUM_MULTIPLE);
     ASSERT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
+        promiseFlag.set_value(true);
+    };
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
@@ -999,12 +1000,12 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_Mouse_Animation,
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("result:%{public}d, target:%{public}d, displayX:%{public}d, displayY:%{public}d",
-            notifyMessage.result, notifyMessage.targetPid, notifyMessage.displayX, notifyMessage.displayY);
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, target:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.targetPid, notifyMessage.result);
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));

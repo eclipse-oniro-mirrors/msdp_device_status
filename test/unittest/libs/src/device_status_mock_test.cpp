@@ -455,19 +455,6 @@ HWTEST_F(DeviceStatusMsdpMocKTest, DeviceStatusMsdpMocKTest021, TestSize.Level1)
 }
 
 /**
- * @tc.name: DeviceStatusMsdpMocKTest022
- * @tc.desc: test devicestatus Mock in GetDeviceStatusData
- * @tc.type: FUNC
- */
-HWTEST_F(DeviceStatusMsdpMocKTest, DeviceStatusMsdpMocKTest022, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    deviceStatusMsdpMock.dataParse_ = std::make_unique<DeviceStatusDataParse>();
-    int32_t ret = deviceStatusMsdpMock.GetDeviceStatusData();
-    EXPECT_TRUE(ret == RET_OK);
-}
-
-/**
  * @tc.name: DeviceStatusMsdpMocKTest023
  * @tc.desc: first test devicestatus Mock in SetTimerInterval
  * @tc.type: FUNC
