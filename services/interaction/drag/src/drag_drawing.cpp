@@ -1838,7 +1838,7 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
 void DragDrawing::CreateWindow()
 {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    FI_HILOGD("Parameter screen number:%{public}llu", static_cast<unsigned long long>(screenId_));
+    FI_HILOGI("Parameter screen number:%{public}llu", static_cast<unsigned long long>(screenId_));
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig;
     surfaceNodeConfig.SurfaceNodeName = "drag window";
     surfaceNodeConfig.surfaceWindowType = Rosen::SurfaceWindowType::SYSTEM_SCB_WINDOW;
@@ -1864,6 +1864,7 @@ void DragDrawing::CreateWindow()
         }
     }
     uint64_t rsScreenId = screenId_;
+#ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Screen> screen = Rosen::ScreenManager::GetInstance().GetScreenById(screenId_);
     if ((screen != nullptr) && (!screen->IsReal())) {
         if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {
@@ -1871,7 +1872,14 @@ void DragDrawing::CreateWindow()
             return;
         }
     }
+#else
+    if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {
+        FI_HILOGE("ConvertScreenIdToRsScreenId failed");
+        return;
+    }
+#endif // OHOS_BUILD_PC_PRODUCT
     screenId_ = rsScreenId;
+    FI_HILOGI("Parameter rsScreen number:%{public}llu", static_cast<unsigned long long>(rsScreenId));
     int32_t surfaceNodeSize = std::max(display->GetWidth(), display->GetHeight());
     g_drawingInfo.surfaceNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
 #else
