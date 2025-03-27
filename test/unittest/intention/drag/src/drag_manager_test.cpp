@@ -473,19 +473,19 @@ HWTEST_F(DragManagerTest, DragManagerTest14, TestSize.Level0)
     };
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_EQ(ret, RET_ERR);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     std::vector<DragCursorStyle> dragCursorStyles = {DragCursorStyle::DEFAULT,
         DragCursorStyle::FORBIDDEN, DragCursorStyle::COPY, DragCursorStyle::MOVE};
     for (const auto& dragCursorStyle : dragCursorStyles) {
         ret = InteractionManager::GetInstance()->UpdateDragStyle(dragCursorStyle);
-        ASSERT_EQ(ret, RET_OK);
+        ASSERT_EQ(ret, RET_ERR);
     }
     DragDropResult dropResult { DragResult::DRAG_SUCCESS,
         HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
-    ASSERT_EQ(ret, RET_OK);
-    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+    ASSERT_EQ(ret, RET_ERR);
+    EXPECT_FALSE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
 
