@@ -17,18 +17,19 @@
 
 #include <atomic>
 
-#include "display_info.h"
 #include "display_manager.h"
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+#include "display_info.h"
 #include "extra_data.h"
 #ifdef MSDP_HIVIEWDFX_HITRACE_ENABLE
 #include "hitrace_meter.h"
 #endif // MSDP_HIVIEWDFX_HITRACE_ENABLE
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-#include "parameters.h"
 #include "pixel_map.h"
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #ifdef MSDP_FRAMEWORK_UDMF_ENABLED
+#include "device_manager.h"
+#include "parameters.h"
 #include "udmf_client.h"
 #endif // MSDP_FRAMEWORK_UDMF_ENABLED
 #include "unified_types.h"
@@ -36,7 +37,6 @@
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 #include <dlfcn.h>
-#include "device_manager.h"
 #include "devicestatus_define.h"
 #include "drag_data.h"
 #include "drag_data_manager.h"
@@ -68,7 +68,9 @@ const std::string DRAG_FRAMEWORK {"DRAG_FRAMEWORK"};
 const std::string START_CROSSING_DRAG {"START_CROSSING_DRAG"};
 const std::string END_CROSSING_DRAG {"END_CROSSING_DRAG"};
 const std::string DEVICE_TYPE_HPR {"HPR"};
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 const std::string PRODUCT_TYPE = OHOS::system::GetParameter("const.build.product", "HYM");
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 // 屏幕坐标常量
 constexpr int32_t UP_SCREEN_MAX_Y { 1608 };       // 上屏最大 Y 坐标
 constexpr int32_t DOWN_SCREEN_MIN_Y { 1690 };     // 下屏最小 Y 坐标
@@ -99,7 +101,11 @@ DragManager &DragManager::GetInstance()
     return instance;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 DragManager::DragManager() : listener_(this) {}
+#else
+DragManager::DragManager() {}
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 DragManager::~DragManager()
 {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X

@@ -16,16 +16,18 @@
 #ifndef PULL_THROW_LISTENER_H
 #define PULL_THROW_LISTENER_H
 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "data_ability_observer_stub.h"
 #include "datashare_helper.h"
 #include "display_manager.h"
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
 class DragManager;
-
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 class PullThrowListener {
 public:
     explicit PullThrowListener(DragManager* manager);
@@ -42,7 +44,7 @@ public:
     private:
         UpdateFunc update_ = nullptr;
     };
-    
+
     class FoldStatusListener : public Rosen::DisplayManager::IFoldStatusListener {
     public:
         explicit FoldStatusListener(PullThrowListener* listener) : listener_(listener) {}
@@ -97,6 +99,7 @@ private:
     sptr<Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_;
     sptr<Rosen::DisplayManager::IScreenMagneticStateListener> screenMagneticStateListener_;
 };
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
