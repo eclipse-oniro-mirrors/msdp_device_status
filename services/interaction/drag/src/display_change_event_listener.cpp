@@ -56,7 +56,7 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
             return;
         }
         Rosen::FoldStatus foldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
-        bool isExpand = (foldStatus == Rosen::FoldStatus::EXPAND);
+        bool isExpand = (foldStatus == Rosen::FoldStatus::EXPAND || foldStatus == Rosen::FoldStatus::HALF_FOLD);
         bool isFold = (foldStatus == Rosen::FoldStatus::FOLDED);
         if (IsSecondaryDevice()) {
             isExpand = (foldStatus == Rosen::FoldStatus::EXPAND || foldStatus == Rosen::FoldStatus::HALF_FOLD ||
