@@ -214,7 +214,11 @@ private:
     int32_t NotifyHideIcon();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t InitDataManager(const DragData &dragData, const std::string &appCaller = "");
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t OnStartDrag(const struct DragRadarPackageName &dragRadarPackageName, int32_t pid = -1);
+#else
+    int32_t OnStartDrag();
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t OnStopDrag(DragResult result, bool hasCustomAnimation, const std::string &packageName = "",
         int32_t pid = -1, bool isStopCooperate = false);
     std::string GetDragState(DragState value) const;
