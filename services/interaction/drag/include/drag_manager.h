@@ -96,14 +96,14 @@ public:
     int32_t RemoveSubscriptListener(int32_t pid) override;
     int32_t StartDrag(
         const DragData &dragData, int32_t pid, const std::string &peerNetId = "",
-        bool isLongPressDrag = false) override;
+        bool isLongPressDrag = false, const std::string &appCaller = "") override;
 #else
     int32_t StartDrag(const DragData &dragData) override;
     int32_t UpdatePointerAction(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t StopDrag(
         const DragDropResult &dropResult, const std::string &packageName = "",
-        int32_t pid = -1, bool isStopCooperate = false) override;
+        int32_t pid = -1, bool isStopCooperate = false, const std::string &appCallee = "") override;
     int32_t GetDragTargetPid() const override;
     int32_t GetUdKey(std::string &udKey) const override;
     void SendDragData(int32_t targetTid, const std::string &udKey);
@@ -146,6 +146,7 @@ public:
     void MoveTo(int32_t x, int32_t y, bool isMultiSelectedAnimation = true) override;
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation) override;
     DragResult GetDragResult() const override;
+    std::string GetAppCallee() const override;
     DragState GetDragState() const override;
     void SetDragState(DragState state) override;
     void SetDragOriginDpi(float dragOriginDpi) override;
@@ -212,8 +213,8 @@ private:
     int32_t NotifyDragResult(DragResult result, DragBehavior dragBehavior);
     int32_t NotifyHideIcon();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    int32_t InitDataManager(const DragData &dragData) const;
-    int32_t OnStartDrag(const std::string &packageName = "", int32_t pid = -1);
+    int32_t InitDataManager(const DragData &dragData, const std::string &appCaller = "");
+    int32_t OnStartDrag(const struct DragRadarPackageName &dragRadarPackageName, int32_t pid = -1);
     int32_t OnStopDrag(DragResult result, bool hasCustomAnimation, const std::string &packageName = "",
         int32_t pid = -1, bool isStopCooperate = false);
     std::string GetDragState(DragState value) const;
@@ -222,7 +223,7 @@ private:
     static MMI::ExtraData CreateExtraData(bool appended, bool drawCursor = false);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void StateChangedNotify(DragState state);
-    int32_t AddDragEvent(const DragData &dragData, const std::string &packageName);
+    int32_t AddDragEvent(const DragData &dragData, const struct DragRadarPackageName &dragRadarPackageName);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void CtrlKeyStyleChangedNotify(DragCursorStyle style, DragAction action);
     int32_t HandleDragResult(DragResult result, bool hasCustomAnimation);
@@ -239,16 +240,18 @@ private:
     void ResetMouseDragMonitorInfo();
     void ResetMouseDragMonitorTimerId(const DragData &dragData);
     std::string GetPackageName(int32_t pid);
+    DragRadarPackageName GetDragRadarPackageName(int32_t pid, const std::string &packageName,
+        const std::string &appCaller);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void ReportDragWindowVisibleRadarInfo(StageRes stageRes, DragRadarErrCode errCode, const std::string &funcName);
     void ReportDragRadarInfo(struct DragRadarInfo &dragRadarInfo);
     void ReportStartDragRadarInfo(BizState bizState, StageRes stageRes, DragRadarErrCode errCode,
-        const std::string &packageName, const std::string &peerNetId);
+        const std::string &peerNetId, struct DragRadarPackageName &dragRadarPackageName);
     void ReportStopDragRadarInfo(BizState bizState, StageRes stageRes, DragRadarErrCode errCode, int32_t pid,
-        const std::string &packageName);
+        struct DragRadarPackageName &dragRadarPackageName);
     void ReportStartDragFailedRadarInfo(StageRes stageRes, DragRadarErrCode errCode, const std::string &funcName,
-        const std::string &packageName);
+        const struct DragRadarPackageName &dragRadarPackageName);
     void ReportDragUEInfo(struct DragRadarInfo &dragRadarInfo, const std::string &eventDescription);
     void ReportStartDragUEInfo(const std::string &packageName);
     void ReportStopDragUEInfo(const std::string &packageName);
@@ -263,6 +266,7 @@ private:
     int32_t mouseDragMonitorTimerId_ { -1 };
     DragState dragState_ { DragState::STOP };
     DragResult dragResult_ { DragResult::DRAG_FAIL };
+    std::string appCallee_;
     std::atomic<DragAction> dragAction_ { DragAction::MOVE };
     DragDrawing dragDrawing_;
     bool isControlCollaborationVisible_ { false };
