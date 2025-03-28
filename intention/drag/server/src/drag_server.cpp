@@ -92,6 +92,7 @@ int32_t DragServer::Stop(CallingContext &context, MessageParcel &data, MessagePa
 int32_t DragServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    CHKPR(env_, RET_ERR);
     switch (id) {
         case DragRequestID::ADD_DRAG_LISTENER: {
             return AddListener(context, data);
@@ -110,6 +111,7 @@ int32_t DragServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel
 int32_t DragServer::RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    CHKPR(env_, RET_ERR);
     switch (id) {
         case DragRequestID::REMOVE_DRAG_LISTENER: {
             return RemoveListener(context, data);
@@ -219,6 +221,7 @@ int32_t DragServer::GetParam(CallingContext &context, uint32_t id, MessageParcel
 int32_t DragServer::Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;
+    CHKPR(env_, RET_ERR);
     switch (id) {
         case DragRequestID::ADD_PRIVILEGE: {
             FI_HILOGI("Add privilege, from:%{public}d", context.pid);
@@ -260,6 +263,7 @@ int32_t DragServer::AddListener(CallingContext &context, MessageParcel &data)
         return COMMON_NOT_SYSTEM_APP;
     }
     FI_HILOGI("Add drag listener, from:%{public}d", context.pid);
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().AddListener(context.pid);
 }
 
@@ -276,6 +280,7 @@ int32_t DragServer::RemoveListener(CallingContext &context, MessageParcel &data)
         return COMMON_NOT_SYSTEM_APP;
     }
     FI_HILOGD("Remove drag listener, from:%{public}d", context.pid);
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().RemoveListener(context.pid);
 }
 
@@ -288,6 +293,7 @@ int32_t DragServer::SetDragWindowVisible(CallingContext &context, MessageParcel 
         return RET_ERR;
     }
     FI_HILOGI("SetDragWindowVisible(%{public}d, %{public}d)", param.visible_, param.isForce_);
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().OnSetDragWindowVisible(param.visible_, param.isForce_);
 }
 
@@ -300,6 +306,7 @@ int32_t DragServer::UpdateDragStyle(CallingContext &context, MessageParcel &data
         return RET_ERR;
     }
     FI_HILOGI("UpdateDragStyle(%{public}d)", static_cast<int32_t>(param.cursorStyle_));
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().UpdateDragStyle(param.cursorStyle_, context.pid, context.tokenId, param.eventId_);
 }
 
@@ -312,6 +319,7 @@ int32_t DragServer::UpdateShadowPic(CallingContext &context, MessageParcel &data
         return RET_ERR;
     }
     FI_HILOGD("Updata shadow pic");
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().UpdateShadowPic(param.shadowInfo_);
 }
 
@@ -323,6 +331,7 @@ int32_t DragServer::AddSelectedPixelMap(CallingContext &context, MessageParcel &
         FI_HILOGE("AddSelectedPixelMap::Unmarshalling fail");
         return RET_ERR;
     }
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().AddSelectedPixelMap(param.pixelMap_);
 }
 
@@ -334,6 +343,7 @@ int32_t DragServer::UpdatePreviewStyle(CallingContext &context, MessageParcel &d
         FI_HILOGE("UpdatePreviewStyleParam::Unmarshalling fail");
         return RET_ERR;
     }
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().UpdatePreviewStyle(param.previewStyle_);
 }
 
@@ -345,6 +355,7 @@ int32_t DragServer::UpdatePreviewAnimation(CallingContext &context, MessageParce
         FI_HILOGE("UpdatePreviewAnimationParam::Unmarshalling fail");
         return RET_ERR;
     }
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().UpdatePreviewStyleWithAnimation(param.previewStyle_, param.previewAnimation_);
 }
 
@@ -356,6 +367,7 @@ int32_t DragServer::RotateDragWindowSync(CallingContext &context, MessageParcel 
         FI_HILOGE("RotateDragWindowSync::Unmarshalling fail");
         return RET_ERR;
     }
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().RotateDragWindowSync(param.rsTransaction_);
 }
 
@@ -367,12 +379,14 @@ int32_t DragServer::SetDragWindowScreenId(CallingContext &context, MessageParcel
         FI_HILOGE("SetDragWindowScreenId::Unmarshalling fail");
         return RET_ERR;
     }
+    CHKPR(env_, RET_ERR);
     env_->GetDragManager().SetDragWindowScreenId(param.displayId_, param.screenId_);
     return RET_OK;
 }
 
 int32_t DragServer::GetDragTargetPid(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
+    CHKPR(env_, RET_ERR);
     int32_t targetPid = env_->GetDragManager().GetDragTargetPid();
     GetDragTargetPidReply targetPidReply { targetPid };
 
@@ -386,7 +400,7 @@ int32_t DragServer::GetDragTargetPid(CallingContext &context, MessageParcel &dat
 int32_t DragServer::GetUdKey(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
     std::string udKey;
-
+    CHKPR(env_, RET_ERR);
     int32_t ret = env_->GetDragManager().GetUdKey(udKey);
     if (ret != RET_OK) {
         FI_HILOGE("IDragManager::GetUdKey fail, error:%{public}d", ret);
@@ -404,7 +418,7 @@ int32_t DragServer::GetUdKey(CallingContext &context, MessageParcel &data, Messa
 int32_t DragServer::GetShadowOffset(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
     ShadowOffset shadowOffset {};
-
+    CHKPR(env_, RET_ERR);
     int32_t ret = env_->GetDragManager().OnGetShadowOffset(shadowOffset);
     if (ret != RET_OK) {
         FI_HILOGE("IDragManager::GetShadowOffset fail, error:%{public}d", ret);
@@ -422,7 +436,7 @@ int32_t DragServer::GetShadowOffset(CallingContext &context, MessageParcel &data
 int32_t DragServer::GetDragData(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
     DragData dragData {};
-
+    CHKPR(env_, RET_ERR);
     int32_t ret = env_->GetDragManager().GetDragData(dragData);
     if (ret != RET_OK) {
         FI_HILOGE("IDragManager::GetDragData fail, error:%{public}d", ret);
@@ -440,7 +454,7 @@ int32_t DragServer::GetDragData(CallingContext &context, MessageParcel &data, Me
 int32_t DragServer::GetDragState(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
     DragState dragState {};
-
+    CHKPR(env_, RET_ERR);
     int32_t ret = env_->GetDragManager().GetDragState(dragState);
     if (ret != RET_OK) {
         FI_HILOGE("IDragManager::GetDragState fail, error:%{public}d", ret);
@@ -468,7 +482,7 @@ int32_t DragServer::GetDragSummary(CallingContext &context, MessageParcel &data,
         return COMMON_NOT_SYSTEM_APP;
     }
     std::map<std::string, int64_t> summaries;
-
+    CHKPR(env_, RET_ERR);
     int32_t ret = env_->GetDragManager().GetDragSummary(summaries);
     if (ret != RET_OK) {
         FI_HILOGE("IDragManager::GetDragSummary fail, error:%{public}d", ret);
@@ -522,7 +536,7 @@ int32_t DragServer::SetAppDragSwitchState(CallingContext &context, MessageParcel
 int32_t DragServer::GetDragAction(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
     DragAction dragAction {};
-
+    CHKPR(env_, RET_ERR);
     int32_t ret = env_->GetDragManager().GetDragAction(dragAction);
     if (ret != RET_OK) {
         FI_HILOGE("IDragManager::GetDragSummary fail, error:%{public}d", ret);
@@ -540,7 +554,7 @@ int32_t DragServer::GetDragAction(CallingContext &context, MessageParcel &data, 
 int32_t DragServer::GetExtraInfo(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
     std::string extraInfo;
-
+    CHKPR(env_, RET_ERR);
     int32_t ret = env_->GetDragManager().GetExtraInfo(extraInfo);
     if (ret != RET_OK) {
         FI_HILOGE("IDragManager::GetExtraInfo fail, error:%{public}d", ret);
@@ -563,6 +577,7 @@ int32_t DragServer::EnterTextEditorArea(CallingContext &context, MessageParcel &
         FI_HILOGE("EnterTextEditorAreaParam::Unmarshalling fail");
         return RET_ERR;
     }
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().EnterTextEditorArea(param.state);
 }
 
@@ -574,6 +589,7 @@ int32_t DragServer::SetMouseDragMonitorState(CallingContext &context, MessagePar
         FI_HILOGE("SetMouseDragMonitorStateParam::Unmarshalling fail");
         return RET_ERR;
     }
+    CHKPR(env_, RET_ERR);
     return env_->GetDragManager().SetMouseDragMonitorState(param.state);
 }
 
