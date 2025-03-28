@@ -157,10 +157,6 @@ int32_t DragManager::Init(IContext* context)
         }
         ret = samgrProxy->SubscribeSystemAbility(DEVICE_COLLABORATION_SA_ID, CollaborationServiceStatusChange_);
         FI_HILOGI("SubscribeSystemAbility DEVICE_COLLABORATION_SA_ID result:%{public}d", ret);
-        if (!RegisterPullThrowListener()) {
-            FI_HILOGE("RegisterPullThrowListener fail");
-            return;
-        }
     });
     FI_HILOGI("leave");
     return RET_OK;

@@ -16,6 +16,7 @@
 #include "display_change_event_listener.h"
 
 #include "devicestatus_define.h"
+#include "parameters.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DisplayChangeEventListener"
@@ -28,6 +29,8 @@ constexpr int32_t INDEX_FOLDED { 0 };
 constexpr int32_t INDEX_EXPAND { 1 };
 constexpr size_t MAX_INDEX_LENGTH { 2 };
 const std::string SCREEN_ROTATION { "1" };
+const std::string DEVICE_TYPE_HPR {"HPR"};
+const std::string HPR_PRODUCT_TYPE = OHOS::system::GetParameter("const.build.product", "HYM");
 } // namespace
 
 DisplayChangeEventListener::DisplayChangeEventListener(IContext *context)
@@ -156,6 +159,13 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     displayChangeEventListener_ = sptr<DisplayChangeEventListener>::MakeSptr(context_);
     CHKPV(displayChangeEventListener_);
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(displayChangeEventListener_);
+    isHPR_ = HPR_PRODUCT_TYPE == DEVICE_TYPE_HPR;
+    if (!isHPR_) {
+        if (!context_->GetDragManager().RegisterPullThrowListener()) {
+            FI_HILOGE("RegisterPullThrowListener fail");
+            return;
+        }
+    }
 }
 
 void DisplayAbilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)

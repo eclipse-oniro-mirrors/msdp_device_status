@@ -82,7 +82,7 @@ public:
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     bool ValidateThrowDirection(ScreenId currentScreen, ThrowDirection throwDir);
     bool ValidateThrowConditions() { return listener_.ValidateThrowConditions(); }
-    bool RegisterPullThrowListener() { return listener_.RegisterPullThrowListener(); }
+    bool RegisterPullThrowListener() override { return listener_.RegisterPullThrowListener(); }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     double NormalizeThrowAngle(double angle);
     int32_t OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent);
