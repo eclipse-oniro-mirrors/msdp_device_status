@@ -26,7 +26,7 @@
 #undef LOG_TAG
 #define LOG_TAG "DeviceMotionNapi"
 
-namespace OHOS {
+namespace OHOS {11
 namespace Msdp {
 namespace {
 #ifdef MOTION_ENABLE

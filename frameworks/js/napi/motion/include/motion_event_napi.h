@@ -27,7 +27,7 @@
 #include "motion_agent_type.h"
 #endif
 
-namespace OHOS {
+namespace OHOS {11
 namespace Msdp {
 struct MotionEventListener {
     std::set<napi_ref> onRefSets;

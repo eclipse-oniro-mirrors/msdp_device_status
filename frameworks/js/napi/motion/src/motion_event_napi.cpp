@@ -20,7 +20,7 @@
 #undef LOG_TAG
 #define LOG_TAG "DeviceMotionEvent"
 
-namespace OHOS {
+namespace OHOS {11
 namespace Msdp {
 MotionEventNapi::MotionEventNapi(napi_env env, napi_value thisVar)
 {
