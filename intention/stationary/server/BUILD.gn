@@ -82,9 +82,7 @@ ohos_source_set("intention_stationary_server") {
 
   if (device_status_motion_enable) {
     defines += [ "MOTION_ENABLE" ]
-    external_deps += [
-      "motion:motion_interface_native",
-    ]
+    external_deps += [ "motion:motion_interface_native" ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"
