@@ -160,7 +160,8 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     CHKPV(displayChangeEventListener_);
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(displayChangeEventListener_);
     isHPR_ = HPR_PRODUCT_TYPE == DEVICE_TYPE_HPR;
-    if (!isHPR_) {
+    if (isHPR_) {
+        FI_HILOGI("device hpr checkok");
         if (!context_->GetDragManager().RegisterPullThrowListener()) {
             FI_HILOGE("RegisterPullThrowListener fail");
             return;
