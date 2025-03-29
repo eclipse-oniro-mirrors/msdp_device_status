@@ -14,10 +14,12 @@
  */
 
 #include "accesstoken_kit.h"
+#include <gmock/gmock.h>
 #include "gtest/gtest.h"
 #include "ipc_skeleton.h"
 
 #include "boomerang_callback_stub.h"
+#include "boomerang_server_test_mock.h"
 #include "boomerang_params.h"
 #include "boomerang_server.h"
 #include "default_params.h"
@@ -29,6 +31,7 @@
 #include "fi_log.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
+#include "parcel.h"
 
 #undef LOG_TAG
 #define LOG_TAG "BoomerangServerTest"
@@ -39,7 +42,7 @@ namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
 BoomerangServer boomerang_;
-int32_t FD { 5 };
+int32_t g_fd { 5 };
 inline constexpr size_t MAX_STRING_LEN{1024};
 Intention intention_ { Intention::BOOMERANG };
 
@@ -53,21 +56,17 @@ public:
     void TearDown() {};
     class BoomerangServerTestCallback : public BoomerangCallbackStub {
     public:
-        void OnScreenshotResult(const BoomerangData& data);
-    private:
-        BoomerangData data_;
+    explicit BoomerangServerTestCallback() {}
+    virtual ~BoomerangServerTestCallback() {};
+    MOCK_METHOD(void, OnScreenshotResult, (const BoomerangData& data), (override));
+    MOCK_METHOD(void, OnNotifyMetadata, (const std::string& metadata), (override));
+    MOCK_METHOD(void, OnEncodeImageResult, (std::shared_ptr<Media::PixelMap> pixelMap), (override));
+    MOCK_METHOD(void, EmitOnEvent, (BoomerangData& data));
+    MOCK_METHOD(void, EmitOnMetadata, (std::string metadata));
+    MOCK_METHOD(void, EmitOnEncodeImage, (std::shared_ptr<Media::PixelMap> pixelMap));
     };
 };
 
-
-void BoomerangServerTest::BoomerangServerTestCallback::OnScreenshotResult(const BoomerangData& data)
-{
-    GTEST_LOG_(INFO) << "BoomerangClientTestCallback type: " << data.type;
-    GTEST_LOG_(INFO) << "BoomerangClientTestCallback status: " << data.status;
-    EXPECT_FALSE(data.type == BoomerangType::BOOMERANG_TYPE_BOOMERANG &&
-        data.status == BoomerangStatus::BOOMERANG_STATUS_NOT_SCREEN_SHOT)
-        << "BoomerangClientTestCallback failed";
-}
 /**
  * @tc.name: BoomerangServerTest
  * @tc.desc: BoomerangServerTest001
@@ -148,6 +147,8 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest004, TestSize.Level1)
     };
     MessageParcel datas;
     MessageParcel reply;
+    testing::NiceMock<BoomerangParamMock> BoomerangParamMock;
+    EXPECT_CALL(BoomerangParamMock, Unmarshalling) .Times(1).WillOnce(testing::Return(false));
     int32_t ret = boomerang_.AddWatch(context, BoomerangRequestID::ENCODE_IMAGE, datas, reply);
     EXPECT_EQ(ret, RET_ERR);
 }
@@ -245,7 +246,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest008, TestSize.Level1)
 HWTEST_F(BoomerangServerTest, BoomerangServerTest009, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    ASSERT_NO_FATAL_FAILURE(boomerang_.DumpCurrentDeviceStatus(FD));
+    ASSERT_NO_FATAL_FAILURE(boomerang_.DumpCurrentDeviceStatus(g_fd));
 }
 
 /**
@@ -295,6 +296,84 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest011, TestSize.Level1)
     NotifyMetadataParam param { bundleName, callback };
     ASSERT_TRUE(param.Marshalling(datas));
     int32_t ret = boomerang_.AddWatch(context, BoomerangRequestID::NOTIFY_METADATA, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest012
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest012, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    char bundleName[MAX_STRING_LEN] = {0};
+    BoomerangType type { BOOMERANG_TYPE_INVALID };
+    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangServerTestCallback();
+    SubscribeBoomerangParam param { type, bundleName, callback };
+    ASSERT_TRUE(param.Marshalling(datas));
+    int32_t ret = boomerang_.RemoveWatch(context, BoomerangRequestID::REMOVE_BOOMERAMG_LISTENER, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest013
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest013, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    DecodeImageParam param {};
+    EXPECT_FALSE(param.Marshalling(datas));
+    int32_t ret = boomerang_.AddWatch(context, BoomerangRequestID::DECODE_IMAGE, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest014
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest014, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    std::string metadata {};
+    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangServerTestCallback();
+    std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
+    testing::NiceMock<BoomerangParamMock> BoomerangParamMock;
+    EXPECT_CALL(BoomerangParamMock, Marshalling) .Times(1).WillOnce(testing::Return(true));
+    EXPECT_CALL(BoomerangParamMock, Unmarshalling) .Times(1).WillOnce(testing::Return(true));
+    EncodeImageParam param { pixelMap, metadata, callback };
+    EXPECT_TRUE(param.Marshalling(datas));
+    int32_t ret = boomerang_.AddWatch(context, BoomerangRequestID::ENCODE_IMAGE, datas, reply);
     EXPECT_EQ(ret, RET_OK);
 }
 

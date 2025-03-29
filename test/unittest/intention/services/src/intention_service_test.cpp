@@ -68,6 +68,7 @@ std::shared_ptr<IntentionService> g_intentionService { nullptr };
 std::shared_ptr<IntentionService> g_intentionServiceNullptr { nullptr };
 std::shared_ptr<IntentionDumper> g_intentionDumper { nullptr };
 IContext *g_contextNullptr { nullptr };
+int32_t PERMISSION_EXCEPTION { 201 };
 } // namespace
 
 int32_t MockDelegateTasks::PostSyncTask(DTaskCallback callback)
@@ -1068,6 +1069,51 @@ HWTEST_F(IntentionServiceTest, IntentionDumper_Dump, TestSize.Level0)
     int32_t fd = 1;
     std::vector<std::string> args {"help", "subscribe", "list", "current", "drag", "macroState", "unknow"};
     ASSERT_NO_FATAL_FAILURE(g_intentionDumper->Dump(fd, args));
+}
+ 
+/**
+ * @tc.name: IntentionServiceTest_002
+ * @tc.desc: Test Enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    int32_t ret = g_intentionService->Enable(Intention::SOCKET, dataParcel, replyParcel);
+    EXPECT_EQ(ret, RET_ERR);
+}
+ 
+/**
+ * @tc.name: IntentionServiceTest_003
+ * @tc.desc: Test Enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable003, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    int32_t ret = g_intentionService->Enable(Intention::COOPERATE, dataParcel, replyParcel);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
+}
+ 
+/**
+ * @tc.name: IntentionServiceTest_004
+ * @tc.desc: Test Enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable004, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    int32_t ret = g_intentionService->Enable(Intention::BOOMERANG, dataParcel, replyParcel);
+    EXPECT_EQ(ret, RET_ERR);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
