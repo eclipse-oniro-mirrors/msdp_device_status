@@ -16,9 +16,7 @@
 #include "display_change_event_listener.h"
 
 #include "devicestatus_define.h"
-#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "parameters.h"
-#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 #undef LOG_TAG
 #define LOG_TAG "DisplayChangeEventListener"
