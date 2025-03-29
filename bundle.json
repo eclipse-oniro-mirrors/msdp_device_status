@@ -12,7 +12,10 @@
     "syscap": [
       "SystemCapability.Msdp.DeviceStatus.Drag",
       "SystemCapability.Msdp.DeviceStatus.Cooperate",
-      "SystemCapability.Msdp.DeviceStatus.Stationary"
+      "SystemCapability.Msdp.DeviceStatus.Stationary",
+      "SystemCapability.MultimodalAwareness.MetadataBinding",
+      "SystemCapability.MultimodalAwareness.Motion",
+      "SystemCapability.MultimodalAwareness.DeviceStatus"
     ],
     "hisysevent_config": [
       "//base/msdp/device_status/hisysevent.yaml",
@@ -88,7 +91,8 @@
           "//base/msdp/device_status/frameworks/js/napi:stationary",
           "//base/msdp/device_status/frameworks/js/napi/interaction:interaction_jsapi_group",
           "//base/msdp/device_status/frameworks/js/napi/motion:motion_napi",
-          "//base/msdp/device_status/frameworks/js/napi/boomerang:metadatabinding_napi"
+          "//base/msdp/device_status/frameworks/js/napi/boomerang:metadatabinding_napi",
+          "//base/msdp/device_status/frameworks/js/napi/device_status:device_status_napi"
         ],
         "service_group":[
           "//base/msdp/device_status/libs:devicestatus_algo",
