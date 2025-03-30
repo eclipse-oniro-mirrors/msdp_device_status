@@ -31,6 +31,7 @@ enum Type {
     TYPE_RELATIVE_STILL,
     TYPE_CAR_BLUETOOTH,
     TYPE_LID_OPEN,
+    TYPE_STAND,
     TYPE_MAX
 };
 
