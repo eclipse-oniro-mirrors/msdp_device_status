@@ -1402,7 +1402,11 @@ int32_t DragManager::RemoveKeyEventMonitor()
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 int32_t DragManager::OnStartDrag(const struct DragRadarPackageName &dragRadarPackageName, int32_t pid)
+#else
+int32_t DragManager::OnStartDrag()
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 {
     FI_HILOGI("enter");
     pullId_ = GenerateId();
