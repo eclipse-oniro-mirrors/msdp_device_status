@@ -76,7 +76,7 @@ public:
     DragManager();
     DISALLOW_COPY_AND_MOVE(DragManager);
     ~DragManager();
-    std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
+    std::shared_ptr<MMI::PointerEvent> currentPointerEvent_ { nullptr };
     ThrowDirection GetThrowDirection(double angle);
     ScreenId GetScreenId(int32_t displayY);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
