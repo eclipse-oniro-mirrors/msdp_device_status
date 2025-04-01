@@ -1833,40 +1833,7 @@ void DragManager::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
 void DragManager::DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CHKPV(keyEvent);
-    if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
-        CHKPV(currentPointerEvent_);
-        currentPointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
-        MMI::InputManager::GetInstance()->SimulateInputEvent(currentPointerEvent_);
-        return;
-    }
-    auto keyItems = keyEvent->GetKeyItems();
-    auto iter = std::find_if(keyItems.begin(), keyItems.end(),
-        [] (std::optional<MMI::KeyEvent::KeyItem> keyItem) {
-            return ((keyItem->GetKeyCode() == MMI::KeyEvent::KEYCODE_CTRL_LEFT) ||
-                    (keyItem->GetKeyCode() == MMI::KeyEvent::KEYCODE_CTRL_RIGHT));
-        });
-    if (iter == keyItems.end()) {
-        dragAction_.store(DragAction::MOVE);
-        return;
-    }
-    if ((DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::DEFAULT) ||
-        (DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::FORBIDDEN)) {
-        dragAction_.store(DragAction::MOVE);
-        return;
-    }
-    if (!iter->IsPressed()) {
-        CtrlKeyStyleChangedNotify(DRAG_DATA_MGR.GetDragStyle(), DragAction::MOVE);
-        HandleCtrlKeyEvent(DRAG_DATA_MGR.GetDragStyle(), DragAction::MOVE);
-        dragAction_.store(DragAction::MOVE);
-        return;
-    }
-    if (DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::COPY) {
-        FI_HILOGD("Not need update drag style");
-        return;
-    }
-    CtrlKeyStyleChangedNotify(DragCursorStyle::COPY, DragAction::COPY);
-    HandleCtrlKeyEvent(DragCursorStyle::COPY, DragAction::COPY);
-    dragAction_.store(DragAction::COPY);
+
 }
 
 void DragManager::HandleCtrlKeyEvent(DragCursorStyle style, DragAction action)
