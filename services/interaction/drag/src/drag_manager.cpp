@@ -500,6 +500,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     existMouseMoveDragCallback_ = false;
     needLongPressDragAnimation_ = true;
     isLongPressDrag_ = false;
+    currentPointerEvent_ = nullptr;
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(dropResult.result);
     appCallee_ = dragRadarPackageName.appCallee;
@@ -1832,6 +1833,12 @@ void DragManager::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
 void DragManager::DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CHKPV(keyEvent);
+    if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
+        CHKPV(currentPointerEvent_);
+        currentPointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
+        MMI::InputManager::GetInstance()->SimulateInputEvent(currentPointerEvent_);
+        return;
+    }
     auto keyItems = keyEvent->GetKeyItems();
     auto iter = std::find_if(keyItems.begin(), keyItems.end(),
         [] (std::optional<MMI::KeyEvent::KeyItem> keyItem) {
