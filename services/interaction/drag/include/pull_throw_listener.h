@@ -88,10 +88,11 @@ public:
     bool RegisterScreenMagneticStateListener();
     bool RegisterVKObserver(const sptr<VKObserver> &observer);
     bool RegisterPullThrowListener();
+    bool RegisterVKListener();
 
     Rosen::FoldStatus oldFoldStatus_;
     bool currentMagneticState_ { false };
-    int32_t obstatusVk_ = -1;;
+    int32_t obstatusVk_ = -1;
     sptr<VKObserver> CreateVKObserver(const VKObserver::UpdateFunc &func);
 
 private:

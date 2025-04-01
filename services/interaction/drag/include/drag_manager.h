@@ -83,6 +83,8 @@ public:
     bool ValidateThrowDirection(ScreenId currentScreen, ThrowDirection throwDir);
     bool ValidateThrowConditions() { return listener_.ValidateThrowConditions(); }
     bool RegisterPullThrowListener() override { return listener_.RegisterPullThrowListener(); }
+    bool RegisterVKListener() override { return listener_.RegisterVKListener(); }
+    void RegisterVKeyboard();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     double NormalizeThrowAngle(double angle);
     int32_t OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent);
@@ -261,6 +263,7 @@ private:
     void ReportStopDragUEInfo(const std::string &packageName);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 private:
+    bool existVkListener_ { false };
     int32_t dragTimerId_ { -1 };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     PullThrowListener listener_;

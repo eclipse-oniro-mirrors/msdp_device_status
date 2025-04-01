@@ -752,6 +752,19 @@ bool DragManager::ValidateThrowDirection(ScreenId currentScreen, ThrowDirection 
     return isDownThrow || isUpThrow;
 }
 
+void DragManager::RegisterVKeyboard()
+{
+    if (!existVkListener_) {
+        FI_HILOGI("VkListener_ not exist, try register");
+        if (!RegisterVKListener()) {
+            FI_HILOGE("RegisterVKListener fail");
+            return;
+        }
+        existVkListener_ = true;
+    }
+    return;
+}
+
 int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPR(pointerEvent, RET_ERR);
@@ -762,6 +775,7 @@ int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent
         return RET_ERR;
     }
 
+    RegisterVKeyboard();
     if (!ValidateThrowConditions()) {
         FI_HILOGI("ThrowConditions Not satisfied");
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
@@ -783,10 +797,8 @@ int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent
 
     FI_HILOGI("angle=%{public}f, direction=%{public}d, state=%{public}d, speeds=(%{public}f,%{public}f)",
               throwAngle, throwDir, throwState_, vx, vy);
-    
     FI_HILOGD("VK Status: NONE = 0, TOUCHPAD = 1, PIXED = 2, FLOATING = 3");
     FI_HILOGD("Fold Status: UNKNOWN = 0, EXPAND = 1, FOLDED = 2, HALF_FOLD = 3");
-    FI_HILOGD("Throw State: Not Throw = 0, In downscreen = 1, In upscreen = 2");
 
     if (ValidateThrowDirection(currentScreen, throwDir)) {
         throwState_ = (throwDir == ThrowDirection::DOWN) ? ThrowState::IN_DOWNSCREEN : ThrowState::IN_UPSCREEN;
@@ -804,7 +816,7 @@ int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent
             MMI::InputManager::GetInstance()->SimulateInputEvent(currentPointerEvent_);
         });
     } else {
-        FI_HILOGD("Screen=%{public}d, Direction=%{public}d, Angle=%{public}f, ThrowState=%{public}d",
+        FI_HILOGD("Fail: Screen=%{public}d, Direction=%{public}d, Angle=%{public}f, ThrowState=%{public}d",
                   currentScreen, throwDir, throwAngle, throwState_);
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
         MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
