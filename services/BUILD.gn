@@ -83,6 +83,7 @@ external_deps_set = [
   "qos_manager:qos",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
+  "safwk:system_ability_fwk",
   "window_manager:libwm",
   "window_manager:libdm",
 ]
