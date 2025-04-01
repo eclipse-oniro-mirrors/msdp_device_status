@@ -41,7 +41,8 @@ public:
 #ifdef MOTION_ENABLE
     bool AddCallback(int32_t eventType, napi_value handler);
     bool CheckEvents(int32_t eventType);
-    bool RemoveCallback(int32_t eventType);
+    bool RemoveAllCallback(int32_t eventType);
+    bool RemoveCallback(int32_t eventType, napi_value handler);
     virtual void OnEventOperatingHand(int32_t eventType, size_t argc, const MotionEvent &event);
     void CreateIntData(napi_env env, napi_value motionValue, napi_value result, std::string name, int32_t value);
 

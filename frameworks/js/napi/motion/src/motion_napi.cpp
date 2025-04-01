@@ -75,6 +75,7 @@ void MotionCallback::OnMotionChanged(const MotionEvent &event)
     };
     if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
         FI_HILOGE("Failed to SendEvent");
+        delete data;
     }
     FI_HILOGD("Exit");
 }
@@ -89,6 +90,7 @@ void MotionCallback::EmitOnEvent(MotionEvent* data)
     if (g_motionObj == nullptr) {
         FI_HILOGE("Failed to get g_motionObj");
         delete data;
+        return;
     }
     g_motionObj->OnEventOperatingHand(data->type, 1, *data);
     delete data;
@@ -252,12 +254,11 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
     }
 
 #ifdef MOTION_ENABLE
-    if (!SubscribeCallback(env, type)) {
-        return nullptr;
-    }
-
     if (!g_motionObj->AddCallback(type, args[ARG_1])) {
         ThrowMotionErr(env, SERVICE_EXCEPTION, "AddCallback failed");
+        return nullptr;
+    }
+    if (!SubscribeCallback(env, type)) {
         return nullptr;
     }
     napi_get_undefined(env, &result);
@@ -308,9 +309,16 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
     }
 
 #ifdef MOTION_ENABLE
-    if (!g_motionObj->RemoveCallback(type)) {
-        ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
-        return nullptr;
+    if (argc != ARG_2) {
+        if (!g_motionObj->RemoveAllCallback(type)) {
+            ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
+            return nullptr;
+        }
+    } else {
+        if (!g_motionObj->RemoveCallback(type, args[ARG_1])) {
+            ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
+            return nullptr;
+        }
     }
 
     if (!UnSubscribeCallback(env, type)) {
