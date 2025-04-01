@@ -206,6 +206,7 @@ bool PullThrowListener::RegisterVKObserver(const sptr<VKObserver> &observer)
     FI_HILOGI("Succeed to register observer of virtual keyboard");
     return true;
 }
+
 void PullThrowListener::VKObserver::OnChange()
 {
     if (update_ != nullptr) {
@@ -231,9 +232,18 @@ sptr<PullThrowListener::VKObserver> PullThrowListener::CreateVKObserver(const VK
 
 bool PullThrowListener::RegisterPullThrowListener()
 {
+    if (!RegisterFoldStatusListener() || !RegisterScreenMagneticStateListener()) {
+        FI_HILOGD("unable to register FoldStatusListener or MagneticStateListener");
+        return false;
+    }
+    return true;
+}
+
+bool PullThrowListener::RegisterVKListener()
+{
     const VKObserver::UpdateFunc updateFunc = [&]() {
         GetIntValue(SETTING_VK_KEY, obstatusVk_);
-        if (obstatusVk_ ==  1) {
+        if (obstatusVk_ == 1) {
             FI_HILOGI("VK UpdateFunc Thorw cancel; obstatusVk_: %{public}d", obstatusVk_);
             CHKPV(manager_);
             manager_->OnDragCancel(manager_->currentPointerEvent_);
@@ -242,8 +252,8 @@ bool PullThrowListener::RegisterPullThrowListener()
         }
     };
     auto VKobserver_ = CreateVKObserver(updateFunc);
-    if (!RegisterFoldStatusListener() || !RegisterScreenMagneticStateListener() || !RegisterVKObserver(VKobserver_)) {
-        FI_HILOGD("unable to register all necessary listeners");
+    if (!RegisterVKObserver(VKobserver_)) {
+        FI_HILOGD("unable to register VK listener");
         return false;
     }
     return true;
@@ -251,7 +261,6 @@ bool PullThrowListener::RegisterPullThrowListener()
 
 bool PullThrowListener::ValidateThrowConditions()
 {
-    GetIntValue(SETTING_VK_KEY, obstatusVk_);
     oldFoldStatus_ = Rosen::DisplayManager::GetInstance().GetFoldStatus();
     FI_HILOGI("Listener params: VK Status=%{public}d, MK Status=%{public}d, Fold Status=%{public}u",
               obstatusVk_, currentMagneticState_, oldFoldStatus_);
