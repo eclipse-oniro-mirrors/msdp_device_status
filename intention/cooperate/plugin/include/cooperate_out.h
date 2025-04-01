@@ -54,7 +54,6 @@ private:
         void OnRelay(Context &context, const CooperateEvent &event);
         void OnHotplug(Context &context, const CooperateEvent &event);
         void OnAppClosed(Context &context, const CooperateEvent &event);
-        void OnPointerEvent(Context &context, const CooperateEvent &event);
         void OnBoardOffline(Context &context, const CooperateEvent &event);
         void OnSwitchChanged(Context &context, const CooperateEvent &event);
         void OnSoftbusSessionClosed(Context &context, const CooperateEvent &event);
