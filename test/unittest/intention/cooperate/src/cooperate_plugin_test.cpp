@@ -3186,43 +3186,6 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent086, TestSize.Level0)
 }
 
 /**
- * @tc.name: cooperateOut_test087
- * @tc.desc: Test cooperate plugin
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(CooperatePluginTest, cooperateOut_test087, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    Context cooperateContext(env);
-    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
-    Cooperate::CooperateOut stateOut(*g_stateMachine, env);
-    auto relay = std::make_shared<Cooperate::CooperateOut::Initial>(stateOut);
-    ASSERT_NE(relay, nullptr);
-    auto pointerEvent = MMI::PointerEvent::Create();
-    ASSERT_NE(pointerEvent, nullptr);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    int32_t testDeviceId = 10;
-    CooperateEvent event(
-        CooperateEventType::INPUT_POINTER_EVENT,
-        InputPointerEvent {
-            .deviceId = testDeviceId,
-            .pointerAction = pointerEvent->GetPointerAction(),
-            .sourceType = pointerEvent->GetSourceType(),
-            .position = Coordinate {
-                .x = pointerItem.GetDisplayX(),
-                .y = pointerItem.GetDisplayY(),
-            }
-        });
-    ASSERT_NO_FATAL_FAILURE(relay->OnPointerEvent(cooperateContext, event));
-}
-
-/**
  * @tc.name: cooperateOut_test088
  * @tc.desc: Test cooperate plugin
  * @tc.type: FUNC

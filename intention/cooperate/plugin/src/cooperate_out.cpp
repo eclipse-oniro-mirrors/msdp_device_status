@@ -127,9 +127,6 @@ CooperateOut::Initial::Initial(CooperateOut &parent)
     AddHandler(CooperateEventType::INPUT_HOTPLUG_EVENT, [this](Context &context, const CooperateEvent &event) {
         this->OnHotplug(context, event);
     });
-    AddHandler(CooperateEventType::INPUT_POINTER_EVENT, [this](Context &context, const CooperateEvent &event) {
-        this->OnPointerEvent(context, event);
-    });
     AddHandler(CooperateEventType::DDM_BOARD_OFFLINE, [this](Context &context, const CooperateEvent &event) {
         this->OnBoardOffline(context, event);
     });
@@ -428,19 +425,6 @@ void CooperateOut::Initial::OnAppClosed(Context &context, const CooperateEvent &
     FI_HILOGI("[app closed] Close all connections");
     context.dsoftbus_.CloseAllSessions();
     FI_HILOGI("[app closed] Stop cooperation");
-    parent_.StopCooperate(context, event);
-}
-
-void CooperateOut::Initial::OnPointerEvent(Context &context, const CooperateEvent &event)
-{
-    InputPointerEvent notice = std::get<InputPointerEvent>(event.event);
-
-    if ((notice.sourceType != MMI::PointerEvent::SOURCE_TYPE_MOUSE) ||
-        (notice.deviceId == context.StartDeviceId()) ||
-        (notice.deviceId < 0)) {
-        return;
-    }
-    FI_HILOGI("Stop cooperation on operation of undedicated pointer");
     parent_.StopCooperate(context, event);
 }
 
