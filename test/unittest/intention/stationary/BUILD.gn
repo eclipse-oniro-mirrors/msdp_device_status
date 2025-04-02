@@ -47,6 +47,11 @@ ohos_unittest("StationaryServerTest") {
     "input:libmmi-client",
     "window_manager:libdm",
   ]
+  defines = []
+  if (device_status_motion_enable) {
+    defines += [ "MOTION_ENABLE" ]
+    external_deps += [ "motion:motion_interface_native" ]
+  }
 }
 
 group("unittest") {

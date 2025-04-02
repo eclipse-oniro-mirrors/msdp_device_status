@@ -96,6 +96,10 @@ ohos_unittest("IntentionServiceTest") {
     "window_manager:libdm",
     "window_manager:libwmutil_base",
   ]
+  if (device_status_motion_enable) {
+    defines += [ "MOTION_ENABLE" ]
+    external_deps += [ "motion:motion_interface_native" ]
+  }
 }
 
 ohos_unittest("MonitorTest") {
