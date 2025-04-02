@@ -280,6 +280,7 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
         return nullptr;
     }
     {
+        std::lock_guard<std::mutex> guard(g_mutex);
         bool retRemove = argc == ARG_2 ?
             g_deviceStatusObj->RemoveCallback(type, args[ARG_1]) : g_deviceStatusObj->RemoveCallback(type);
         if (!retRemove) {

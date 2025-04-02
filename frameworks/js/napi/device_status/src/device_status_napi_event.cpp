@@ -137,7 +137,7 @@ bool DeviceStatusNapiEvent::RemoveCallback(DeviceStatus::Type eventType, napi_va
         FI_HILOGE("Refs is empty");
         return false;
     }
-    bool isSubscribe = false;
+    bool isUnsubscribe = false;
     for (auto it = iter->second->onRefSets.begin(); it != iter->second->onRefSets.end();) {
         if (it->first == nullptr) {
             ++it;
@@ -157,12 +157,12 @@ bool DeviceStatusNapiEvent::RemoveCallback(DeviceStatus::Type eventType, napi_va
                 FI_HILOGE("napi_delete_reference failed");
             }
             it = iter->second->onRefSets.erase(it);
-            isSubscribe = true;
+            isUnsubscribe = true;
         } else {
             ++it;
         }
     }
-    if (!isSubscribe) {
+    if (!isUnsubscribe) {
         FI_HILOGE("dont find the callback, return err");
         return false;
     }
