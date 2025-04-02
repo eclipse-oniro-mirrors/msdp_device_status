@@ -137,6 +137,7 @@ bool DeviceStatusNapiEvent::RemoveCallback(DeviceStatus::Type eventType, napi_va
         FI_HILOGE("Refs is empty");
         return false;
     }
+    bool isUnsubscribe = false;
     for (auto it = iter->second->onRefSets.begin(); it != iter->second->onRefSets.end();) {
         if (it->first == nullptr) {
             ++it;
@@ -156,9 +157,14 @@ bool DeviceStatusNapiEvent::RemoveCallback(DeviceStatus::Type eventType, napi_va
                 FI_HILOGE("napi_delete_reference failed");
             }
             it = iter->second->onRefSets.erase(it);
+            isUnsubscribe = true;
         } else {
             ++it;
         }
+    }
+    if (!isUnsubscribe) {
+        FI_HILOGE("dont find the callback, return err");
+        return false;
     }
     if (iter->second->onRefSets.empty()) {
         FI_HILOGE("onRefSets is empty");
@@ -208,7 +214,7 @@ bool DeviceStatusNapiEvent::InsertRef(std::shared_ptr<DeviceStatusEventListener>
     return true;
 }
 
-void DeviceStatusNapiEvent::OnEvent(DeviceStatus::Type eventType, size_t argc, const DeviceStatus::Data &event)
+void DeviceStatusNapiEvent::OnEvent(DeviceStatus::Type eventType, size_t argc, const DeviceStatus::Data event)
 {
     FI_HILOGD("eventType: %{public}d", eventType);
     auto typeIter = events_.find(eventType);
@@ -230,7 +236,7 @@ void DeviceStatusNapiEvent::OnEvent(DeviceStatus::Type eventType, size_t argc, c
     }
 }
 
-void DeviceStatusNapiEvent::ConvertEventData(napi_value handler, size_t argc, const DeviceStatus::Data &event)
+void DeviceStatusNapiEvent::ConvertEventData(napi_value handler, size_t argc, const DeviceStatus::Data event)
 {
     napi_value result;
     int32_t status = 0;

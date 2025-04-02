@@ -303,7 +303,7 @@ int32_t StationaryServer::SubscribeMotion(Type type, sptr<IRemoteDevStaCallback>
     FI_HILOGI("motionCallback is not null, subscribe ok");
     auto iter = deviceStatusMotionCallbacks_.find(type);
     if (iter == deviceStatusMotionCallbacks_.end()) {
-        deviceStatusMotionCallbacks_[type] = std::set<sptr<IRemoteDevStaCallback>, Cmp>();
+        deviceStatusMotionCallbacks_[type] = std::set<sptr<IRemoteDevStaCallback>, DevStaCallbackCmp>();
     }
     deviceStatusMotionCallbacks_[type].insert(callback);
     auto object = callback->AsObject();

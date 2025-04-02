@@ -35,7 +35,7 @@ public:
     explicit DeviceStatusCallback(napi_env env) : env_(env) {}
     virtual ~DeviceStatusCallback() {}
     void OnDeviceStatusChanged(const DeviceStatus::Data &devicestatusData) override;
-    static void EmitOnEvent(DeviceStatus::Data *data);
+    static void EmitOnEvent(DeviceStatus::Data data);
 private:
     napi_env env_;
 };
@@ -47,13 +47,13 @@ public:
 
     static napi_value Init(napi_env env, napi_value exports);
     static napi_value SubscribeDeviceStatus(napi_env env, napi_callback_info info);
-    static napi_value UnSubscribeDeviceStatus(napi_env env, napi_callback_info info);
+    static napi_value UnsubscribeDeviceStatus(napi_env env, napi_callback_info info);
 
     std::map<DeviceStatus::Type, sptr<DeviceStatus::IRemoteDevStaCallback>> callbacks_;
 
 private:
     static bool SubscribeCallback(napi_env env, DeviceStatus::Type type);
-    static bool UnSubscribeCallback(napi_env env, DeviceStatus::Type type);
+    static bool UnsubscribeCallback(napi_env env, DeviceStatus::Type type);
     static DeviceStatus::Type GetDeviceStatusType(const std::string &type);
     static bool ConstructDeviceStatus(napi_env env, napi_value jsThis);
     static bool ValidateArgsType(napi_env env, napi_value *args, size_t argc,

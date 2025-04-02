@@ -164,6 +164,10 @@ ohos_shared_library("devicestatus_service") {
     external_deps += [ "hitrace:hitrace_meter" ]
     defines += [ "MSDP_HIVIEWDFX_HITRACE_ENABLE" ]
   }
+  if (device_status_motion_enable) {
+    defines += [ "MOTION_ENABLE" ]
+    external_deps += [ "motion:motion_interface_native" ]
+  }
 
   subsystem_name = "${device_status_subsystem_name}"
   part_name = "${device_status_part_name}"
@@ -232,6 +236,10 @@ ohos_static_library("devicestatus_static_service") {
   if (device_status_memmgr_enable) {
     defines += [ "MEMMGR_ENABLE" ]
     external_deps += [ "memmgr:memmgrclient" ]
+  }
+  if (device_status_motion_enable) {
+    defines += [ "MOTION_ENABLE" ]
+    external_deps += [ "motion:motion_interface_native" ]
   }
 
   if (device_status_hisysevent_enable) {

@@ -39,13 +39,13 @@ public:
     bool CheckEvents(DeviceStatus::Type eventType);
     bool RemoveCallback(DeviceStatus::Type eventType);
     bool RemoveCallback(DeviceStatus::Type eventType, napi_value handler);
-    virtual void OnEvent(DeviceStatus::Type eventType, size_t argc, const DeviceStatus::Data &event);
+    virtual void OnEvent(DeviceStatus::Type eventType, size_t argc, const DeviceStatus::Data event);
     void CreateIntData(napi_env env, napi_value status, napi_value result, std::string name, int32_t value);
 
 protected:
     bool IsSameValue(const napi_env &env, const napi_value &lhs, const napi_value &rhs);
     bool InsertRef(std::shared_ptr<DeviceStatusEventListener> listener, const napi_value &handler);
-    void ConvertEventData(napi_value handler, size_t argc, const DeviceStatus::Data &event);
+    void ConvertEventData(napi_value handler, size_t argc, const DeviceStatus::Data event);
 
 protected:
     napi_env env_;

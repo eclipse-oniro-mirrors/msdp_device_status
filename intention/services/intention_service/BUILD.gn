@@ -79,6 +79,11 @@ ohos_shared_library("intention_service") {
     "window_manager:libdm",
   ]
 
+  if (device_status_motion_enable) {
+    defines += [ "MOTION_ENABLE" ]
+    external_deps += [ "motion:motion_interface_native" ]
+  }
+
   subsystem_name = "${device_status_subsystem_name}"
   part_name = "${device_status_part_name}"
 }
