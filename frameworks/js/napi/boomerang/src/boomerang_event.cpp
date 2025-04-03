@@ -42,6 +42,15 @@ BoomerangEvent::BoomerangEvent(napi_env env)
 
 BoomerangEvent::~BoomerangEvent()
 {
+    for (auto& eventPair : events_) {
+        for (auto& listener : eventPair.second) {
+            napi_status status = napi_delete_reference(env_, listener->onHandlerRef);
+            if (status != napi_ok) {
+                FI_HILOGW("Failed to napi_delete_reference");
+            }
+            listener->onHandlerRef = nullptr;
+        }
+    }
     eventOnces_.clear();
     events_.clear();
 }
@@ -137,7 +146,7 @@ void BoomerangEvent::SaveCallback(int32_t eventType, napi_ref onHandlerRef, bool
     FI_HILOGD("Add handler to list %{public}d", eventType);
 }
 
-bool BoomerangEvent::Off(int32_t eventType, napi_value handler)
+bool BoomerangEvent::Off(int32_t eventType)
 {
     FI_HILOGD("Unregister handler of event(%{public}d)", eventType);
     std::lock_guard<std::mutex> guard(mutex_);
@@ -179,6 +188,13 @@ bool BoomerangEvent::RemoveAllCallback(int32_t eventType)
     if (iter == events_.end()) {
         FI_HILOGE("evenType %{public}d not found", eventType);
         return false;
+    }
+    for (auto& listener : events_[eventType]) {
+        napi_status status = napi_delete_reference(env_, listener->onHandlerRef);
+        if (status != napi_ok) {
+            FI_HILOGW("Failed to napi_delete_reference");
+        }
+        listener->onHandlerRef = nullptr;
     }
     events_.erase(eventType);
     return true;
