@@ -72,7 +72,7 @@ bool DeviceStatusManager::Init()
     }
 
     if (boomerangCBDeathRecipient_ == nullptr) {
-        boomerangCBDeathRecipient_ = new (std::nothrow) BoomerangCallbackDeathRecipient();
+        boomerangCBDeathRecipient_ = new (std::nothrow) BoomerangCallbackDeathRecipient(this);
         if (boomerangCBDeathRecipient_ == nullptr) {
             FI_HILOGE("boomerangCBDeathRecipient_ failed");
             return false;
