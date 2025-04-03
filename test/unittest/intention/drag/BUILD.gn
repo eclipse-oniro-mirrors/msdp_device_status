@@ -114,6 +114,7 @@ ohos_unittest("DragServerTest") {
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
