@@ -36,6 +36,28 @@ void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wp
 {
     CHKPV(remote);
     FI_HILOGI("Recv death notice");
+    if (manager_ == nullptr) {
+        return;
+    }
+    for (auto& entry : manager_->boomerangListeners_) {
+        auto& callbacks = entry.second;
+        auto it = callbacks.begin();
+        if (it == callbacks.end()) {
+            FI_HILOGI("this app is not Subscribe");
+        }
+        while (it != callbacks.end()) {
+            auto callback_remote = (*it)->AsObject();
+            if (callback_remote && callback_remote == remote) {
+                it = callbacks.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    if (manager_->notityListener_ != nullptr && remote == manager_->notityListener_->AsObject()) {
+        FI_HILOGI("jjy this screenshot app died");
+        manager_->notityListener_ = nullptr;
+    }
 }
 
 bool DeviceStatusManager::Init()
@@ -348,31 +370,41 @@ void DeviceStatusManager::Unsubscribe(BoomerangType type, std::string bundleName
     FI_HILOGI("listeners_.size:%{public}zu", boomerangListeners_.size());
 }
  
-void DeviceStatusManager::NotifyMedata(std::string bundleName, sptr<IRemoteBoomerangCallback> callback)
+int32_t DeviceStatusManager::NotifyMedata(std::string bundleName, sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
-    CHKPV(callback);
+    if (callback == nullptr) {
+        return RET_ERR;
+    }
     auto object = callback->AsObject();
-    CHKPV(object);
+    if (object == nullptr) {
+        return RET_ERR;
+    }
     std::lock_guard lock(mutex_);
-    std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp> listeners;
     auto iter = boomerangListeners_.find(bundleName);
     if (iter == boomerangListeners_.end()) {
         FI_HILOGE("bundleName:%{public}s is not exits", bundleName.c_str());
-        return;
+        return RET_ERR;
     }
-    listeners = (std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp>)(iter->second);
-    for (const auto &listener : listeners) {
+    auto& callbacks = iter->second;
+    if (callbacks.size() == 0) {
+        FI_HILOGE("this hap is not Subscribe envent");
+        return RET_ERR;
+    }
+
+    for (const auto &listener : callbacks) {
         if (listener == nullptr) {
             FI_HILOGE("listener is nullptr");
-            return;
+            return RET_ERR;
         }
         BoomerangData data {};
         data.type = BoomerangType::BOOMERANG_TYPE_BOOMERANG;
         data.status = BoomerangStatus::BOOMERANG_STATUS_SCREEN_SHOT;
         listener->OnScreenshotResult(data);
     }
+    object->AddDeathRecipient(boomerangCBDeathRecipient_);
     notityListener_ = callback;
+    return RET_OK;
 }
  
 void DeviceStatusManager::SubmitMetadata(std::string metadata)
