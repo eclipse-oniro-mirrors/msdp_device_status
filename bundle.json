@@ -12,10 +12,7 @@
     "syscap": [
       "SystemCapability.Msdp.DeviceStatus.Drag",
       "SystemCapability.Msdp.DeviceStatus.Cooperate",
-      "SystemCapability.Msdp.DeviceStatus.Stationary",
-      "SystemCapability.MultimodalAwareness.Motion",
-      "SystemCapability.MultimodalAwareness.MetadataBinding",
-      "SystemCapability.MultimodalAwareness.DeviceStatus"
+      "SystemCapability.Msdp.DeviceStatus.Stationary"
     ],
     "hisysevent_config": [
       "//base/msdp/device_status/hisysevent.yaml",
