@@ -288,7 +288,7 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
             return nullptr;
         }
 
-        if (!UnSubscribeCallback(env, type)) {
+        if (!UnsubscribeCallback(env, type)) {
             return nullptr;
         }
     }
