@@ -203,8 +203,7 @@ int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, Mes
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
     appInfo->boomerangCallback = param.callback_;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    manager_.NotifyMedata(param.bundleName_, param.callback_);
-    return RET_OK;
+    return manager_.NotifyMedata(param.bundleName_, param.callback_);
 }
 
 int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, MessageParcel &data)

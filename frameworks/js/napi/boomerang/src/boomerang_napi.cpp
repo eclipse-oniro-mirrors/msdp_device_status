@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,8 @@ AsyncContext *BoomerangNapi::asyncContext_ = nullptr;
 AsyncContext *BoomerangNapi::encodeAsyncContext_ = nullptr;
 AsyncContext *BoomerangNapi::decodeAsyncContext_ = nullptr;
 sptr<IRemoteBoomerangCallback> BoomerangNapi::callback_ = nullptr;
+std::atomic<bool> BoomerangNapi::submitMetadataSuccess { false };
+std::string BoomerangNapi::metadata_;
 
 void BoomerangCallback::OnScreenshotResult(const BoomerangData &screenshotData)
 {
@@ -123,7 +125,8 @@ void BoomerangCallback::EmitOnMetadata(std::string metadata)
 {
     BoomerangNapi *boomerangNapi = BoomerangNapi::GetDeviceStatusNapi();
     CHKPV(boomerangNapi);
-    boomerangNapi->OnMetadata(metadata, false);
+    boomerangNapi->metadata_ = metadata;
+    boomerangNapi->submitMetadataSuccess = true;
 }
 
 void BoomerangCallback::EmitOnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -177,7 +180,7 @@ void BoomerangNapi::OnMetadata(std::string metadata, bool isOnce)
 void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mutex_);
+    std::lock_guard<std::mutex> guard(encodeMutex_);
     if (encodeAsyncContext_ == nullptr || pixelMap == nullptr) {
         FI_HILOGE("the encodeAsyncContext_ or pixelMap is error");
         return;
@@ -377,6 +380,7 @@ napi_value BoomerangNapi::SubmitMetadata(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
+    submitMetadataSuccess = false;
     size_t argc = 1;
     napi_value argv[1] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
@@ -403,7 +407,7 @@ napi_value BoomerangNapi::SubmitMetadata(napi_env env, napi_callback_info info)
 napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
-    std::lock_guard<std::mutex> guard(mutex_);
+    std::lock_guard<std::mutex> guard(encodeMutex_);
     size_t argc = 2;
     napi_value argv[2] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
@@ -679,13 +683,12 @@ bool BoomerangNapi::CreateDecodeImageExecution(napi_env env, napi_deferred defer
  
 void BoomerangNapi::NotifyMetadataExecuteCB(napi_env env, void* data)
 {
-    AsyncContext*  innerAsyncContext = static_cast<AsyncContext*>(data);
+    std::lock_guard<std::mutex> guard(mutex_);
+    auto innerAsyncContext = static_cast<AsyncContext*>(data);
     std::string bundleName = static_cast<std::string>(innerAsyncContext->bundleName);
     sptr<IRemoteBoomerangCallback> callback = static_cast<sptr<IRemoteBoomerangCallback>>(innerAsyncContext->callback);
     if (bundleName.empty() || callback == nullptr) {
         FI_HILOGE("bundleName or callback is error");
-        delete innerAsyncContext->callback;
-        delete innerAsyncContext;
         return;
     }
     innerAsyncContext->result = BoomerangManager::GetInstance()->NotifyMetadataBindingEvent(bundleName, callback);
@@ -693,28 +696,41 @@ void BoomerangNapi::NotifyMetadataExecuteCB(napi_env env, void* data)
  
 void BoomerangNapi::NotifyMetadataCompleteCB(napi_env env, napi_status status, void* data)
 {
-    if (asyncContext_ == nullptr) {
+    std::lock_guard<std::mutex> guard(mutex_);
+    if (asyncContext_ == nullptr || !submitMetadataSuccess) {
         FI_HILOGE("notify metadata AsyncContext is null");
         return;
     }
-    AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
+    auto outerAsyncContext = static_cast<AsyncContext*>(data);
     int32_t result = static_cast<int32_t>(outerAsyncContext->result);
-    ProcessErrorResult(env, result, HANDLER_FAILD, outerAsyncContext);
-    asyncContext_ = nullptr;
+    if (result == RET_OK) {
+        napi_value result;
+        napi_status status = napi_create_string_utf8(outerAsyncContext->env, metadata_.c_str(),
+            NAPI_AUTO_LENGTH, &result);
+        if (status != napi_ok) {
+            FI_HILOGE("Failed to create string utf8");
+        }
+        status = napi_resolve_deferred(outerAsyncContext->env, outerAsyncContext->deferred, result);
+        if (status != napi_ok) {
+            FI_HILOGE("Failed to resolve deferred");
+        }
+    } else {
+        ProcessErrorResult(env, result, HANDLER_FAILD, outerAsyncContext);
+    }
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
-    delete outerAsyncContext;
+    delete asyncContext_;
+    asyncContext_ = nullptr;
 }
  
 void BoomerangNapi::EncodeImageExecuteCB(napi_env env, void* data)
 {
-    AsyncContext*  innerAsyncContext = static_cast<AsyncContext*>(data);
+    std::lock_guard<std::mutex> guard(encodeMutex_);
+    auto  innerAsyncContext = static_cast<AsyncContext*>(data);
     std::string metadata = static_cast<std::string>(innerAsyncContext->metadata);
     sptr<IRemoteBoomerangCallback> callback = static_cast<sptr<IRemoteBoomerangCallback>>(innerAsyncContext->callback);
     auto pixelMap = static_cast<std::shared_ptr<Media::PixelMap>>(innerAsyncContext->pixelMap);
     if (metadata.empty() || callback == nullptr || pixelMap == nullptr) {
         FI_HILOGE("bundleName or callback or pixelMap is error");
-        delete innerAsyncContext->callback;
-        delete innerAsyncContext;
         return;
     }
     innerAsyncContext->result = BoomerangManager::GetInstance()->BoomerangEncodeImage(pixelMap, metadata, callback);
@@ -722,16 +738,18 @@ void BoomerangNapi::EncodeImageExecuteCB(napi_env env, void* data)
 
 void BoomerangNapi::EncodeImageCompleteCB(napi_env env, napi_status status, void* data)
 {
+    std::lock_guard<std::mutex> guard(encodeMutex_);
     if (encodeAsyncContext_ == nullptr) {
         FI_HILOGE("encode image AsyncContext is null");
         return;
     }
-    AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
+
+    auto outerAsyncContext = static_cast<AsyncContext*>(data);
     int32_t result = static_cast<int32_t>(outerAsyncContext->result);
     ProcessErrorResult(env, result, ENCODE_FAILED, outerAsyncContext);
-    encodeAsyncContext_ = nullptr;
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
-    delete outerAsyncContext;
+    delete encodeAsyncContext_;
+    encodeAsyncContext_ = nullptr;
 }
 
 void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
@@ -741,8 +759,6 @@ void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
     sptr<IRemoteBoomerangCallback> callback = static_cast<sptr<IRemoteBoomerangCallback>>(innerAsyncContext->callback);
     if (pixelMap == nullptr || callback == nullptr) {
         FI_HILOGE("callback or pixelMap is error");
-        delete innerAsyncContext->callback;
-        delete innerAsyncContext;
         return;
     }
     innerAsyncContext->result = BoomerangManager::GetInstance()->BoomerangDecodeImage(pixelMap, callback);
@@ -750,16 +766,31 @@ void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
  
 void BoomerangNapi::DecodeImageCompleteCB(napi_env env, napi_status status, void* data)
 {
+    std::lock_guard<std::mutex> guard(encodeMutex_);
     if (decodeAsyncContext_ == nullptr) {
         FI_HILOGE("decode image AsyncContext is null");
         return;
     }
-    AsyncContext* outerAsyncContext = static_cast<AsyncContext*>(data);
+    auto outerAsyncContext = static_cast<AsyncContext*>(data);
     int32_t result = static_cast<int32_t>(outerAsyncContext->result);
+    if (result == RET_OK) {
+        napi_value result;
+        napi_status status = napi_create_string_utf8(outerAsyncContext->env, metadata_.c_str(),
+            NAPI_AUTO_LENGTH, &result);
+        if (status != napi_ok) {
+            FI_HILOGE("Failed to create string utf8");
+        }
+        status = napi_resolve_deferred(outerAsyncContext->env, outerAsyncContext->deferred, result);
+        if (status != napi_ok) {
+            FI_HILOGE("Failed to resolve deferred");
+        }
+    } else {
+        ProcessErrorResult(env, result, ENCODE_FAILED, outerAsyncContext);
+    }
     ProcessErrorResult(env, result, DECODE_FAILED, outerAsyncContext);
-    decodeAsyncContext_ = nullptr;
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
-    delete outerAsyncContext;
+    delete decodeAsyncContext_;
+    decodeAsyncContext_ = nullptr;
 }
 
 bool BoomerangNapi::IsSameHandle(napi_env env, napi_value handle, napi_ref ref)

@@ -82,6 +82,8 @@ public:
     void OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap);
     static BoomerangNapi* GetDeviceStatusNapi();
     static std::map<int32_t, sptr<IRemoteBoomerangCallback>> callbacks_;
+    static std::string metadata_;
+    static std::atomic<bool> submitMetadataSuccess;
 
 private:
     static bool CheckArguments(napi_env env, napi_callback_info info, int32_t validataType);
@@ -106,6 +108,8 @@ private:
     static napi_ref boomerangValueRef_;
     napi_env env_ { nullptr };
     inline static std::mutex mutex_;
+    inline static std::mutex notifyMutex_;
+    inline static std::mutex encodeMutex_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
