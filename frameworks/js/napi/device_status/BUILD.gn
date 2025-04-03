@@ -21,7 +21,7 @@ config("device_status_napi_private_config") {
   ]
 }
 
-ohos_shared_library("device_status_napi") {
+ohos_shared_library("devicestatus_napi") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
