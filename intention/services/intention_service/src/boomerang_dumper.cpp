@@ -31,6 +31,15 @@ void BoomerangDumper::Dump(int32_t fd, const std::vector<std::string> &args)
     constexpr size_t bufSize { 1024 };
     char buf[bufSize] { "hidumper" };
 
+    size_t totalLen = std::strlen(buf) + 1;
+    for (const auto& arg : args) {
+        totalLen += arg.size() + 1;
+    }
+
+    if (totalLen > bufSize) {
+        FI_HILOGE("Total length of arguments exceeds buffer size");
+        return;
+    }
     std::vector<char *> argv(args.size() + 1);
     argv[0] = buf;
 

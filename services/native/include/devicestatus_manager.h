@@ -45,9 +45,12 @@ public:
 
     class BoomerangCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
-        BoomerangCallbackDeathRecipient() = default;
+        BoomerangCallbackDeathRecipient(DeviceStatusManager* deviceStatusManager) : manager_(deviceStatusManager) {}
         virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
         virtual ~BoomerangCallbackDeathRecipient() = default;
+    private:
+        DeviceStatusManager* manager_;
+        friend class DeviceStatusManager;
     };
 
     bool Init();
@@ -60,7 +63,7 @@ public:
     void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
     void Subscribe(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
     void Unsubscribe(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
-    void NotifyMedata(std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t NotifyMedata(std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
     void SubmitMetadata(std::string metadata);
     void BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
         sptr<IRemoteBoomerangCallback> callback);
