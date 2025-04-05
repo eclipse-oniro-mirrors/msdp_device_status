@@ -1841,14 +1841,19 @@ void DragManager::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
     screenId_ = screenId;
 }
 
+void DragManager::SimulatePullCancelEvent()
+{
+    CHKPV(currentPointerEvent_);
+    currentPointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
+    MMI::InputManager::GetInstance()->SimulateInputEvent(currentPointerEvent_);
+}
+
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 void DragManager::DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CHKPV(keyEvent);
     if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
-        CHKPV(currentPointerEvent_);
-        currentPointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
-        MMI::InputManager::GetInstance()->SimulateInputEvent(currentPointerEvent_);
+        SimulatePullCancelEvent();
         return;
     }
     auto keyItems = keyEvent->GetKeyItems();
