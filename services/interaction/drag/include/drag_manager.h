@@ -169,6 +169,7 @@ public:
     int32_t RotateDragWindow(Rosen::Rotation rotation) override;
     int32_t ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation) override;
     void SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) override;
+    void SimulatePullCancelEvent() override;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t SetMouseDragMonitorState(bool state) override;
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
