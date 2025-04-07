@@ -261,6 +261,7 @@ private:
     std::string peerNetId_;
     bool isLongPressDrag_ { false };
     bool needLongPressDragAnimation_ { true };
+    std::shared_ptr<MMI::PointerEvent> currentPointerEvent_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
