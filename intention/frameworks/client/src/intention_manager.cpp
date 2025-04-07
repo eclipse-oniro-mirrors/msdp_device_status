@@ -504,7 +504,8 @@ int32_t IntentionManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTr
                 return RET_OK;
             }
         } else {
-            if (((foldStatus == Rosen::FoldStatus::EXPAND) && (foldRotatePolicys_[INDEX_EXPAND] == SCREEN_ROTATION)) ||
+            if ((((foldStatus == Rosen::FoldStatus::EXPAND) || (foldStatus == Rosen::FoldStatus::HALF_FOLD)) &&
+                (foldRotatePolicys_[INDEX_EXPAND] == SCREEN_ROTATION)) ||
                 ((foldStatus == Rosen::FoldStatus::FOLDED) && (foldRotatePolicys_[INDEX_FOLDED] == SCREEN_ROTATION))) {
                 FI_HILOGD("Full display rotation, not need rotate drag window");
                 return RET_OK;
