@@ -48,12 +48,10 @@ std::mutex g_mutex;
 void DeviceStatusCallback::OnDeviceStatusChanged(const DeviceStatus::Data &event)
 {
     FI_HILOGD("Enter");
-    std::lock_guard<std::mutex> guard(g_mutex);
-    auto* data = new (std::nothrow) DeviceStatus::Data();
-    CHKPV(data);
+    DeviceStatus::Data data;
     // 这里只用类型和当前回调值
-    data->type = event.type;
-    data->value = event.value;
+    data.type = event.type;
+    data.value = event.value;
 
     auto task = [data]() {
         FI_HILOGI("Execute lamdba");
@@ -61,25 +59,18 @@ void DeviceStatusCallback::OnDeviceStatusChanged(const DeviceStatus::Data &event
     };
     if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
         FI_HILOGE("Failed to SendEvent");
-        delete data;
     }
     FI_HILOGD("Exit");
 }
 
-void DeviceStatusCallback::EmitOnEvent(DeviceStatus::Data* data)
+void DeviceStatusCallback::EmitOnEvent(DeviceStatus::Data data)
 {
-    if (data == nullptr) {
-        FI_HILOGE("data is nullptr");
-        return;
-    }
-
+    std::lock_guard<std::mutex> guard(g_mutex);
     if (g_deviceStatusObj == nullptr) {
         FI_HILOGE("Failed to get g_deviceStatusObj");
-        delete data;
         return;
     }
-    g_deviceStatusObj->OnEvent(data->type, 1, *data);
-    delete data;
+    g_deviceStatusObj->OnEvent(data.type, 1, data);
 }
 
 DeviceStatusNapi::DeviceStatusNapi(napi_env env, napi_value thisVar) : DeviceStatusNapiEvent(env, thisVar)
@@ -140,7 +131,7 @@ bool DeviceStatusNapi::SubscribeCallback(napi_env env, DeviceStatus::Type type)
     return true;
 }
 
-bool DeviceStatusNapi::UnSubscribeCallback(napi_env env, DeviceStatus::Type type)
+bool DeviceStatusNapi::UnsubscribeCallback(napi_env env, DeviceStatus::Type type)
 {
     if (g_deviceStatusObj == nullptr) {
         ThrowDeviceStatusErr(env, UNSUBSCRIBE_EXCEPTION, "g_deviceStatusObj is nullptr");
@@ -174,9 +165,8 @@ bool DeviceStatusNapi::UnSubscribeCallback(napi_env env, DeviceStatus::Type type
     return false;
 }
 
-bool DeviceStatusNapi::ConstructDeviceStatus(napi_env env, napi_value jsThis) __attribute__((no_sanitize("cfi")))
+bool DeviceStatusNapi::ConstructDeviceStatus(napi_env env, napi_value jsThis)
 {
-    std::lock_guard<std::mutex> guard(g_mutex);
     if (g_deviceStatusObj == nullptr) {
         g_deviceStatusObj = new (std::nothrow) DeviceStatusNapi(env, jsThis);
         if (g_deviceStatusObj == nullptr) {
@@ -231,25 +221,27 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
         ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "Type is illegal");
         return nullptr;
     }
+    {
+        std::lock_guard<std::mutex> guard(g_mutex);
+        if (!ConstructDeviceStatus(env, jsThis)) {
+            ThrowDeviceStatusErr(env, SUBSCRIBE_EXCEPTION, "Failed to get g_deviceStatusObj");
+            return nullptr;
+        }
 
-    if (!ConstructDeviceStatus(env, jsThis)) {
-        ThrowDeviceStatusErr(env, SUBSCRIBE_EXCEPTION, "Failed to get g_deviceStatusObj");
-        return nullptr;
-    }
+        if (!SubscribeCallback(env, type)) {
+            return nullptr;
+        }
 
-    if (!SubscribeCallback(env, type)) {
-        return nullptr;
-    }
-
-    if (!g_deviceStatusObj->AddCallback(type, args[ARG_1])) {
-        ThrowDeviceStatusErr(env, SERVICE_EXCEPTION, "AddCallback failed, probably repeat subscribe");
-        return nullptr;
+        if (!g_deviceStatusObj->AddCallback(type, args[ARG_1])) {
+            ThrowDeviceStatusErr(env, SERVICE_EXCEPTION, "AddCallback failed, probably repeat subscribe");
+            return nullptr;
+        }
     }
     napi_get_undefined(env, &result);
     return result;
 }
 
-napi_value DeviceStatusNapi::UnSubscribeDeviceStatus(napi_env env, napi_callback_info info)
+napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
     if (g_deviceStatusObj == nullptr) {
@@ -287,15 +279,18 @@ napi_value DeviceStatusNapi::UnSubscribeDeviceStatus(napi_env env, napi_callback
         ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "Type is illegal");
         return nullptr;
     }
-    bool retRemove = argc == ARG_2 ?
-        g_deviceStatusObj->RemoveCallback(type, args[ARG_1]) : g_deviceStatusObj->RemoveCallback(type);
-    if (!retRemove) {
-        ThrowDeviceStatusErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
-        return nullptr;
-    }
+    {
+        std::lock_guard<std::mutex> guard(g_mutex);
+        bool retRemove = argc == ARG_2 ?
+            g_deviceStatusObj->RemoveCallback(type, args[ARG_1]) : g_deviceStatusObj->RemoveCallback(type);
+        if (!retRemove) {
+            ThrowDeviceStatusErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
+            return nullptr;
+        }
 
-    if (!UnSubscribeCallback(env, type)) {
-        return nullptr;
+        if (!UnsubscribeCallback(env, type)) {
+            return nullptr;
+        }
     }
     napi_get_undefined(env, &result);
     return result;
@@ -306,7 +301,7 @@ napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
     FI_HILOGD("Enter");
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_FUNCTION("on", SubscribeDeviceStatus),
-        DECLARE_NAPI_STATIC_FUNCTION("off", UnSubscribeDeviceStatus),
+        DECLARE_NAPI_STATIC_FUNCTION("off", UnsubscribeDeviceStatus),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
 

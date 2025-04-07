@@ -47,7 +47,7 @@ public:
 private:
     StationaryServerEvent event_;
 };
-struct Cmp {
+struct DevStaCallbackCmp {
     bool operator() (const sptr<IRemoteDevStaCallback> lhs, const sptr<IRemoteDevStaCallback> rhs)
     {
         return lhs->AsObject() < rhs->AsObject();
@@ -89,7 +89,7 @@ private:
     void ReportSensorSysEvent(CallingContext &context, int32_t type, bool enable);
 
 #ifdef MOTION_ENABLE
-    std::map<Type, std::set<sptr<IRemoteDevStaCallback>, Cmp>> deviceStatusMotionCallbacks_;
+    std::map<Type, std::set<sptr<IRemoteDevStaCallback>, DevStaCallbackCmp>> deviceStatusMotionCallbacks_;
     std::map<Type, Data> cacheData_;
     sptr<IMotionCallback> motionCallback_ { nullptr };
     std::mutex mtx_;
