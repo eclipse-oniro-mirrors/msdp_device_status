@@ -105,9 +105,9 @@ public:
     virtual int32_t AddPrivilege(int32_t tokenId) = 0;
     virtual int32_t EraseMouseIcon() = 0;
     virtual void SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) = 0;
-    virtual void SimulatePullCancelEvent() = 0;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) = 0;
+    virtual void SimulatePullCancelEvent() = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual int32_t SetMouseDragMonitorState(bool state) = 0;
