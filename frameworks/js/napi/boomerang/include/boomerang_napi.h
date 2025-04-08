@@ -83,7 +83,6 @@ public:
     static BoomerangNapi* GetDeviceStatusNapi();
     static std::map<int32_t, sptr<IRemoteBoomerangCallback>> callbacks_;
     static std::string metadata_;
-    static std::atomic<bool> submitMetadataSuccess;
 
 private:
     static bool CheckArguments(napi_env env, napi_callback_info info, int32_t validataType);

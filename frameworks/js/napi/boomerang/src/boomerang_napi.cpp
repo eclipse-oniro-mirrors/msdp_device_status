@@ -67,7 +67,6 @@ AsyncContext *BoomerangNapi::asyncContext_ = nullptr;
 AsyncContext *BoomerangNapi::encodeAsyncContext_ = nullptr;
 AsyncContext *BoomerangNapi::decodeAsyncContext_ = nullptr;
 sptr<IRemoteBoomerangCallback> BoomerangNapi::callback_ = nullptr;
-std::atomic<bool> BoomerangNapi::submitMetadataSuccess { false };
 std::string BoomerangNapi::metadata_;
 
 void BoomerangCallback::OnScreenshotResult(const BoomerangData &screenshotData)
@@ -126,7 +125,6 @@ void BoomerangCallback::EmitOnMetadata(std::string metadata)
     BoomerangNapi *boomerangNapi = BoomerangNapi::GetDeviceStatusNapi();
     CHKPV(boomerangNapi);
     boomerangNapi->metadata_ = metadata;
-    boomerangNapi->submitMetadataSuccess = true;
 }
 
 void BoomerangCallback::EmitOnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -380,7 +378,6 @@ napi_value BoomerangNapi::SubmitMetadata(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mutex_);
-    submitMetadataSuccess = false;
     size_t argc = 1;
     napi_value argv[1] = {nullptr};
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
@@ -697,7 +694,7 @@ void BoomerangNapi::NotifyMetadataExecuteCB(napi_env env, void* data)
 void BoomerangNapi::NotifyMetadataCompleteCB(napi_env env, napi_status status, void* data)
 {
     std::lock_guard<std::mutex> guard(mutex_);
-    if (asyncContext_ == nullptr || !submitMetadataSuccess) {
+    if (asyncContext_ == nullptr) {
         FI_HILOGE("notify metadata AsyncContext is null");
         return;
     }
