@@ -106,7 +106,10 @@ int32_t SocketSessionManager::AllocSocketFd(const std::string& programName, int3
     session = std::make_shared<SocketSession>(programName, moduleType, tokenType, sockFds[0], uid, pid);
     if (!AddSession(session)) {
         FI_HILOGE("AddSession failed, errCode:%{public}d", ADD_SESSION_FAIL);
-        goto CLOSE_SOCK;
+        if (sockFds[1] > 0 && ::close(sockFds[1]) != 0) {
+            FI_HILOGE("close(%{public}d) failed:%{public}s", sockFds[0], ::strerror(errno));
+        }
+        return RET_ERR;
     }
 
     clientFd = sockFds[1];
