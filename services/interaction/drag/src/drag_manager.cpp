@@ -444,6 +444,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     existMouseMoveDragCallback_ = false;
     needLongPressDragAnimation_ = true;
     isLongPressDrag_ = false;
+    currentPointerEvent_ = nullptr;
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(dropResult.result);
     StateChangedNotify(DragState::STOP);
@@ -654,6 +655,7 @@ int32_t DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> po
 void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
+    currentPointerEvent_ = pointerEvent;
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) && mouseDragMonitorState_) {
@@ -1582,6 +1584,12 @@ void DragManager::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
 void DragManager::DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CHKPV(keyEvent);
+    if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
+        CHKPV(currentPointerEvent_);
+        currentPointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
+        MMI::InputManager::GetInstance()->SimulateInputEvent(currentPointerEvent_);
+        return;
+    }
     auto keyItems = keyEvent->GetKeyItems();
     auto iter = std::find_if(keyItems.begin(), keyItems.end(),
         [] (std::optional<MMI::KeyEvent::KeyItem> keyItem) {
