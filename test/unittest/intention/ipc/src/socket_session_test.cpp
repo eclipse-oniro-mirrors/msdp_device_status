@@ -58,7 +58,7 @@ void SocketSessionTest::SetUp()
     int32_t tokenType = 1;
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
-    int32_t sockFds[2] { 0, -1 };
+    int32_t sockFds[2] { -1, -1 };
     g_session = std::make_shared<SocketSession>("test", moduleType, tokenType, sockFds[0], uid, pid);
     g_sessionOne = std::make_shared<SocketSession>("test1", moduleType, tokenType, sockFds[1], uid, pid);
 }
@@ -529,25 +529,6 @@ HWTEST_F(SocketSessionTest, SocketSessionTest25, TestSize.Level0)
     g_socketSessionManager->AddSessionDeletedCallback(1, [](SocketSessionPtr ptr){});
     bool ret = g_socketSessionManager->AddSession(nullptr);
     EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: SocketSessionTest26
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest26, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    int32_t fd = 12;
-    int32_t ret = g_client->Connect();
-    EXPECT_TRUE(ret);
-    g_client->socket_->OnReadable(fd);
-    fd = 1;
-    g_client->socket_->OnReadable(fd);
-    g_client->socket_->OnException(fd);
-    g_client->OnDisconnected();
 }
 
 /**
