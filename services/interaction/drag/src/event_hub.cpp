@@ -82,7 +82,12 @@ void EventHub::OnReceiveEvent(const EventFwk::CommonEventData &event)
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this] {
         CHKPR(this->context_, RET_ERR);
         if (this->context_->GetDragManager().GetDragState() == DragState::START) {
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
             this->context_->GetDragManager().SimulatePullCancelEvent();
+#else
+            DragDropResult dropResult { DragResult::DRAG_CANCEL, false, -1 };
+            this->context_->GetDragManager().StopDrag(dropResult);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
         }
         return RET_OK;
     });
