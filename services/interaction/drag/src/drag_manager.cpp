@@ -1841,12 +1841,14 @@ void DragManager::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
     screenId_ = screenId;
 }
 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 void DragManager::SimulatePullCancelEvent()
 {
     CHKPV(currentPointerEvent_);
     currentPointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
     MMI::InputManager::GetInstance()->SimulateInputEvent(currentPointerEvent_);
 }
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 void DragManager::DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent)
