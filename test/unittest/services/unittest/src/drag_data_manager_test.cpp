@@ -366,11 +366,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level1)
 }
 
  /**
- * @tc.name: DragDataManagerTest012
+ * @tc.name: DragDataManagerTest013
  * @tc.desc: normal test DragDrawing drawing
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level0)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     DRAG_DATA_MGR.SetEventId(g_eventId);
