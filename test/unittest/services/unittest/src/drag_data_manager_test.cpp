@@ -373,8 +373,9 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level1)
 HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DRAG_DATA_MGR.SetEventId(g_eventId);
-    EXPECT_TRUE(DRAG_DATA_MGR.GetEventId() == g_eventId);
+    int32_t eventId = 1;
+    DRAG_DATA_MGR.SetEventId(eventId);
+    EXPECT_TRUE(DRAG_DATA_MGR.GetEventId() == eventId);
 }
 } // namespace
 } // namespace DeviceStatus
