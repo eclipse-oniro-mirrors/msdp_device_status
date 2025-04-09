@@ -364,6 +364,19 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level1)
     EXPECT_FLOAT_EQ(0.4f, dragDrawing.CalculateScale(200, 500, 300, 200));
     EXPECT_FLOAT_EQ(0.5f, dragDrawing.CalculateScale(400, 600, 200, 300));
 }
+
+ /**
+ * @tc.name: DragDataManagerTest013
+ * @tc.desc: normal test DragDrawing drawing
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t eventId = 1;
+    DRAG_DATA_MGR.SetEventId(eventId);
+    EXPECT_TRUE(DRAG_DATA_MGR.GetEventId() == eventId);
+}
 } // namespace
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -3012,6 +3012,31 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCooperateWithOpt
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     RemovePermission();
 }
+
+/**
+ * @tc.name: InteractionManagerTest_SetAppDragSwitchState002
+ * @tc.desc: Check SetAppDragSwitchState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002, TestSize.Level1)
+{
+    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
+    CALL_TEST_DEBUG;
+    int32_t ret = InteractionManager::GetInstance()->SetDragSwitchState(true, true);
+    EXPECT_EQ(ret, RET_OK);
+    std::string pkgName;
+    ret = InteractionManager::GetInstance()->SetAppDragSwitchState(true, pkgName, true);
+    EXPECT_EQ(ret, RET_OK);
+    ret = InteractionManager::GetInstance()->SetDraggableState(true);
+    EXPECT_EQ(ret, RET_OK);
+    int64_t downTime = 0;
+    InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
+    bool status = true;
+    ret = InteractionManager::GetInstance()->GetAppDragSwitchState(status);
+    EXPECT_NE(ret, RET_OK);
+    RemovePermission();
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
