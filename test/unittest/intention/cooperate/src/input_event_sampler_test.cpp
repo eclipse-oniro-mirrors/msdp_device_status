@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -304,6 +304,127 @@ HWTEST_F(InputEventSamplerTest, TestIsSkipNeeded_02, TestSize.Level1)
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     int32_t ret = sampler.IsSkipNeeded(pointerEvent);
     ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TestOnPointerEvent_01
+ * @tc.desc: Test OnPointerEvent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSamplerTest, TestOnPointerEvent_01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    Cooperate::InputEventSampler sampler;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+    int32_t ret = sampler.IsSkipNeeded(pointerEvent);
+    ASSERT_EQ(ret, true);
+    sampler.OnPointerEvent(pointerEvent);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    int32_t ret1 = sampler.IsSkipNeeded(pointerEvent);
+    ASSERT_EQ(ret1, false);
+    sampler.OnPointerEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: TestOnPointerEvent_02
+ * @tc.desc: Test OnPointerEvent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSamplerTest, TestOnPointerEvent_02, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    Cooperate::InputEventSampler sampler;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+    int32_t ret = sampler.IsSkipNeeded(pointerEvent);
+    ASSERT_EQ(ret, true);
+    int32_t ret1 = sampler.IsRawEventsExpired();
+    ASSERT_EQ(ret1, false);
+    sampler.OnPointerEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: TestAggregateRawEvents_01
+ * @tc.desc: Test AggregateRawEvents
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSamplerTest, TestAggregateRawEvents_02, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    Cooperate::InputEventSampler sampler;
+    ASSERT_NO_FATAL_FAILURE(sampler.AggregateRawEvents(pointerEvent));
+    pointerEvent->SetPointerId(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetDeviceId(1);
+    pointerItem.SetDisplayX(0);
+    pointerItem.SetDisplayY(0);
+    pointerEvent->AddPointerItem(pointerItem);
+    ASSERT_NO_FATAL_FAILURE(sampler.AggregateRawEvents(pointerEvent));
+}
+
+/**
+ * @tc.name: TesHandleMouseEvent_01
+ * @tc.desc: Test HandleMouseEvent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSamplerTest, TestHandleMouseEvent_01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    Cooperate::InputEventSampler sampler;
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetDeviceId(1);
+    pointerItem.SetDisplayX(0);
+    pointerItem.SetDisplayY(0);
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+    int32_t ret = sampler.IsSpecialEvent(pointerEvent);
+    ASSERT_EQ(ret, true);
+    sampler.HandleMouseEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: TestOnDownSampledEvent_01
+ * @tc.desc: Test OnDownSampledEvent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSamplerTest, TestOnDownSampledEvent_01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    Cooperate::InputEventSampler sampler;
+    sampler.HandleTouchPadEvent(pointerEvent);
+    ASSERT_NO_FATAL_FAILURE(sampler.OnDownSampledEvent());
+}
+
+/**
+ * @tc.name: TestIsAggregationIntervalMatched_01
+ * @tc.desc: Test IsAggregationIntervalMatched
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSamplerTest, TestIsAggregationIntervalMatched_01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    Cooperate::InputEventSampler sampler;
+    sampler.UpdateAggregationTimeStamp();
+    ASSERT_NO_FATAL_FAILURE(sampler.IsAggregationIntervalMatched());
 }
 } // namespace DeviceStatus
 } // namespace Msdp
