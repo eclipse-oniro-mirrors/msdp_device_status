@@ -137,8 +137,8 @@ bool InputEventSampler::IsRawEventsExpired()
     }
     auto currentTimeStamp = std::chrono::steady_clock::now();
     if (auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (
-        currentTimeStamp - lastEvent.rcvdTimeStamp).count() > expiredIntervalMS_) {
-        FI_HILOGD("Raw event expired, action:%{public}d", duration);
+        currentTimeStamp - lastEvent.rcvdTimeStamp).count(); duration > expiredIntervalMS_) {
+        FI_HILOGD("Raw event expired, action:%{public}lld", duration);
         return true;
     }
     return false;
@@ -180,6 +180,7 @@ void InputEventSampler::AggregateRawEvents(std::shared_ptr<MMI::PointerEvent> po
         sampledEvents_.push(pointerEvent);
     }
     ClearRawEvents();
+    UpdateAggregationTimeStamp();
     prefixRawDxSum_ = 0;
     prefixRawDySum_ = 0;
 }
@@ -193,7 +194,7 @@ void InputEventSampler::HandleTouchPadEvent(std::shared_ptr<MMI::PointerEvent> p
 void InputEventSampler::HandleMouseEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
-    if (IsSpecialEvent(pointerEvent) || IsDurationMatched()) {
+    if (IsSpecialEvent(pointerEvent) || IsAggregationIntervalMatched() || IsDurationMatched()) {
         AggregateRawEvents(pointerEvent);
     } else {
         MMI::PointerEvent::PointerItem item;
@@ -229,6 +230,24 @@ void InputEventSampler::ClearRawEvents()
     auto rawEvents = std::queue<RawEvent>();
     rawEvents_ = rawEvents;
 }
+
+void InputEventSampler::UpdateAggregationTimeStamp()
+{
+    std::lock_guard<std::mutex> guard(aggregationTimeStampMutex_);
+    aggregationTimeStamp_ = std::chrono::steady_clock::now();
+}
+
+bool InputEventSampler::IsAggregationIntervalMatched()
+{
+    std::lock_guard<std::mutex> guard(aggregationTimeStampMutex_);
+    if (auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (
+        std::chrono::steady_clock::now() - aggregationTimeStamp_).count(); duration >= idealEventIntervalMS_) {
+        FI_HILOGD("Aggregation interval matched, duration:%{public}lld", duration);
+        return true;
+    }
+    return false;
+}
+
 } // namespace Cooperate
 } // namespace DeviceStatus
 } // namespace Msdp
