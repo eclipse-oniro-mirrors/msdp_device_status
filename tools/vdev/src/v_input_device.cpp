@@ -48,6 +48,7 @@ namespace {
 const struct Range KEY_BLOCKS[] { { KEY_ESC, BTN_MISC },
     { KEY_OK, BTN_DPAD_UP },
     { KEY_ALS_TOGGLE, BTN_TRIGGER_HAPPY } };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 } // namespace
 
 VInputDevice::VInputDevice(const std::string &node) : devPath_(node) {}
@@ -83,6 +84,7 @@ int32_t VInputDevice::Open()
             FI_HILOGD("Opening \'%{public}s\' successfully", buf);
             break;
         }
+        fdsan_exchange_owner_tag(fd_, 0, DOMAIN_ID);
     }
     QueryDeviceInfo();
     QuerySupportedEvents();
@@ -94,9 +96,7 @@ void VInputDevice::Close()
 {
     CALL_DEBUG_ENTER;
     if (fd_ >= 0) {
-        if (close(fd_) != 0) {
-            FI_HILOGE("Close error:%{public}s", strerror(errno));
-        }
+        fdsan_close_with_tag(fd_, DOMAIN_ID);
         fd_ = -1;
     }
 }

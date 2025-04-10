@@ -48,6 +48,7 @@ struct Range {
 namespace {
 constexpr int32_t COMMENT_SUBSCRIPT { 0 };
 constexpr ssize_t MAX_FILE_SIZE_ALLOWED { 0x5000 };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 
 const struct Range KEY_BLOCKS[] {
     { KEY_ESC, BTN_MISC },
@@ -93,6 +94,7 @@ int32_t Device::Open()
             FI_HILOGD("Successful opening \'%{public}s\'", buf);
             break;
         }
+        fdsan_exchange_owner_tag(fd_, 0, DOMAIN_ID);
     }
     QueryDeviceInfo();
     QuerySupportedEvents();
@@ -105,9 +107,7 @@ void Device::Close()
 {
     CALL_DEBUG_ENTER;
     if (fd_ >= 0) {
-        if (close(fd_) < 0) {
-            FI_HILOGE("Close fd failed, error:%{public}s, fd_:%{public}d", strerror(errno), fd_);
-        }
+        fdsan_close_with_tag(fd_, DOMAIN_ID);
         fd_ = -1;
     }
 }

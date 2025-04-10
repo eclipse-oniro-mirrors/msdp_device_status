@@ -37,6 +37,7 @@ constexpr int32_t FILE_SIZE_MAX { 0x5000 };
 constexpr int32_t READ_DATA_BUFF_SIZE { 256 };
 const std::string MSDP_DATA_PATH { "/data/msdp/device_status_data.json" };
 const std::string MSDP_DATA_DIR { "/data/msdp" };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 } // namespace
 
 std::vector<int32_t> DeviceStatusDataParse::tempcount_ =
@@ -49,9 +50,8 @@ int32_t DeviceStatusDataParse::CreateJsonFile()
         FI_HILOGE("open failed");
         return DEVICESTATUS_FAILED;
     }
-    if (close(fd) < 0) {
-        FI_HILOGE("close fd failed, error:%{public}s, fd:%{public}d", strerror(errno), fd);
-    }
+    fdsan_exchange_owner_tag(fd, 0, DOMAIN_ID);
+    fdsan_close_with_tag(fd, DOMAIN_ID);
 
     struct stat buf;
     if (stat(MSDP_DATA_DIR.c_str(), &buf) != 0) {
