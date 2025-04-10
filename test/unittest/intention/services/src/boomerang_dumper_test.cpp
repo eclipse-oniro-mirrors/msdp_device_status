@@ -182,7 +182,7 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest003, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atof("l")));
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("l")));
 }
 
 /**
@@ -197,7 +197,7 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest004, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atof("c")));
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("c")));
 }
 
 /**
@@ -212,7 +212,7 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest005, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atof("d")));
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("d")));
 }
 
 /**
@@ -227,7 +227,7 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest006, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atof("m")));
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("m")));
 }
 
 /**
@@ -242,7 +242,7 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest007, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atof("x")));
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("x")));
 }
 } // namespace DeviceStatus
 } // namespace Msdp
