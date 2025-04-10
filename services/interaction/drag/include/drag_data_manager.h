@@ -33,7 +33,7 @@ class DragDataManager final {
 public:
     DISALLOW_MOVE(DragDataManager);
 
-    void Init(const DragData &dragData);
+    void Init(const DragData &dragData, const std::string &appCaller = "");
     void SetDragStyle(DragCursorStyle style);
     void SetShadowInfos(const std::vector<ShadowInfo> &shadowInfos);
     void UpdateShadowInfos(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
