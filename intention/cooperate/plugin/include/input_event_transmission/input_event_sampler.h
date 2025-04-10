@@ -52,12 +52,16 @@ private:
     void HandleMouseEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnDownSampledEvent();
     void ClearRawEvents();
+    void UpdateAggregationTimeStamp();
+    bool IsAggregationIntervalMatched();
 private:
     PointerEventHandler pointerEventHandler_;
     std::mutex rawEventMutex_;
     std::queue<RawEvent> rawEvents_;
     std::mutex sampledEventMutex_;
     std::queue<std::shared_ptr<MMI::PointerEvent>> sampledEvents_;
+    std::mutex aggregationTimeStampMutex_;
+    std::chrono::steady_clock::time_point aggregationTimeStamp_;
 
     std::atomic_int32_t prefixRawDxSum_ { 0 };
     std::atomic_int32_t prefixRawDySum_ { 0 };
