@@ -51,6 +51,7 @@ namespace {
 constexpr int32_t MAXIMUM_WAIT_TIME_ALLOWED { 3000 };
 constexpr int32_t MINIMUM_WAIT_TIME_ALLOWED { 5 };
 constexpr ssize_t MAXIMUM_FILESIZE_ALLOWED { 0x100000 };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 } // namespace
 
 VirtualDeviceBuilder::VirtualDeviceBuilder(const std::string &name, uint16_t bustype,
@@ -276,7 +277,7 @@ bool VirtualDeviceBuilder::SetUp()
         FI_HILOGE("Unable to open uinput");
         return false;
     }
-
+    fdsan_exchange_owner_tag(fd_, 0, DOMAIN_ID);
     SetAbsResolution();
     SetPhys();
     SetSupportedEvents();
@@ -284,9 +285,7 @@ bool VirtualDeviceBuilder::SetUp()
 
     if (ioctl(fd_, UI_DEV_CREATE) < 0) {
         FI_HILOGE("Failed to setup uinput device");
-        if (close(fd_) != 0) {
-            FI_HILOGE("Close error:%{public}s", strerror(errno));
-        }
+        fdsan_close_with_tag(fd_, DOMAIN_ID);
         fd_ = -1;
         return false;
     }
@@ -299,9 +298,7 @@ void VirtualDeviceBuilder::Close()
         if (ioctl(fd_, UI_DEV_DESTROY) < 0) {
             FI_HILOGE("ioctl error:%{public}s", strerror(errno));
         }
-        if (close(fd_) != 0) {
-            FI_HILOGE("close error:%{public}s", strerror(errno));
-        }
+        fdsan_close_with_tag(fd_, DOMAIN_ID);
         fd_ = -1;
     }
 }

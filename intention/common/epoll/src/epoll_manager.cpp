@@ -27,6 +27,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr int32_t MAX_N_EVENTS { 64 };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 } // namespace
 
 EpollManager::~EpollManager()
@@ -44,15 +45,14 @@ bool EpollManager::Open()
         FI_HILOGE("epoll_create1 failed:%{public}s", ::strerror(errno));
         return false;
     }
+    fdsan_exchange_owner_tag(epollFd_, 0, DOMAIN_ID);
     return true;
 }
 
 void EpollManager::Close()
 {
     if (epollFd_ != -1) {
-        if (::close(epollFd_) != 0) {
-            FI_HILOGE("close(%d) failed:%{public}s", epollFd_, ::strerror(errno));
-        }
+        fdsan_close_with_tag(epollFd_, DOMAIN_ID);
         epollFd_ = -1;
     }
 }
