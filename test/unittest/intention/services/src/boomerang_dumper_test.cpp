@@ -167,7 +167,8 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest002, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atof("s")));
+    int32_t value = 's';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
@@ -182,7 +183,8 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest003, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("l")));
+    int32_t value = 'l';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
@@ -197,7 +199,8 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest004, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("c")));
+    int32_t value = 'c';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
@@ -212,7 +215,8 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest005, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("d")));
+    int32_t value = 'd';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
@@ -227,7 +231,8 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest006, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("m")));
+    int32_t value = 'k';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
