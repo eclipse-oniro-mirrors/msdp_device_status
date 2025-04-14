@@ -84,7 +84,8 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest002, TestSize.Level1)
     CALL_TEST_DEBUG;
     IContext *env { nullptr };
     IntentionDumper dumper = IntentionDumper(env, stationary);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("s")));
+    int32_t value = 's';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
@@ -98,7 +99,8 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest003, TestSize.Level1)
     CALL_TEST_DEBUG;
     IContext *env { nullptr };
     IntentionDumper dumper = IntentionDumper(env, stationary);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("l")));
+    int32_t value = 'l';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
@@ -112,7 +114,8 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest004, TestSize.Level1)
     CALL_TEST_DEBUG;
     IContext *env { nullptr };
     IntentionDumper dumper = IntentionDumper(env, stationary);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("c")));
+    int32_t value = 'c';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
@@ -126,7 +129,8 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest005, TestSize.Level1)
     CALL_TEST_DEBUG;
     IContext *env { nullptr };
     IntentionDumper dumper = IntentionDumper(env, stationary);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("d")));
+    int32_t value = 'd';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
@@ -140,7 +144,8 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest006, TestSize.Level1)
     CALL_TEST_DEBUG;
     IContext *env { nullptr };
     IntentionDumper dumper = IntentionDumper(env, stationary);
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("m")));
+    int32_t value = 'm';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 
 /**
@@ -155,7 +160,8 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest007, TestSize.Level1)
     IContext *env { nullptr };
     IntentionDumper dumper = IntentionDumper(env, stationary);
 
-    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("y")));
+    int32_t value = 'y';
+    ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 } // namespace DeviceStatus
 } // namespace Msdp
