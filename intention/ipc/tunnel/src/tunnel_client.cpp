@@ -65,7 +65,7 @@ int32_t TunnelClient::Enable(Intention intention, ParamBase &data, ParamBase &re
         int32_t ret = devicestatusProxy_->Enable(intention, dataParcel, replyParcel);
         if (ret != RET_OK) {
             FI_HILOGE("proxy::Enable fail");
-            return RET_ERR;
+            return ret;
         }
     }
     if (!reply.Unmarshalling(replyParcel)) {
@@ -98,7 +98,7 @@ int32_t TunnelClient::Disable(Intention intention, ParamBase &data, ParamBase &r
         int32_t ret = devicestatusProxy_->Disable(intention, dataParcel, replyParcel);
         if (ret != RET_OK) {
             FI_HILOGE("proxy::Disable fail");
-            return RET_ERR;
+            return ret;
         }
     }
     if (!reply.Unmarshalling(replyParcel)) {
