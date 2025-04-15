@@ -297,6 +297,7 @@ int32_t StationaryServer::SubscribeMotion(Type type, sptr<IRemoteDevStaCallback>
         ret = SubscribeCallback(MOTION_TYPE_MAP[type], motionCallback_);
         if (ret != RET_OK) {
             FI_HILOGE("subscribe motion failed, ret = %{public}d", ret);
+            motionCallback_ = nullptr;
             return ret;
         }
     }
