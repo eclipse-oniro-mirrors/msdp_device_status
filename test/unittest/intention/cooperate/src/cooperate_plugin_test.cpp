@@ -249,7 +249,7 @@ public:
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest1, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest1, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Cooperate::RegisterEventListenerEvent registerEventListenerEvent {};
@@ -301,7 +301,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest1, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest2, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest2, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Cooperate::RegisterEventListenerEvent registerEventListenerEvent1 {IPCSkeleton::GetCallingPid(), "test"};
@@ -321,7 +321,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest2, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest3, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest3, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     g_context->mouseLocation_.ProcessData(nullptr);
@@ -342,7 +342,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest3, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest4, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest4, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     g_socketSessionMgr.Enable();
@@ -383,7 +383,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest4, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest5, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest5, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto [sender, receiver] = Channel<CooperateEvent>::OpenChannel();
@@ -400,7 +400,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest5, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest6, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest6, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t ret = g_context->dsoftbus_.StartCooperate("test", {});
@@ -413,7 +413,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest6, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest7, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest7, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t ret = g_context->dsoftbus_.StopCooperate("test", {});
@@ -426,7 +426,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest7, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest8, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest8, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t ret = g_context->dsoftbus_.ComeBack("test", {});
@@ -439,7 +439,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest8, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest9, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest9, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t ret = g_context->dsoftbus_.RelayCooperate("test", {});
@@ -452,7 +452,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest9, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest10, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest10, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     g_context->dsoftbus_.GetLocalNetworkId();
@@ -468,7 +468,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest10, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest11, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest11, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event{};
@@ -495,7 +495,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest11, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest12, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest12, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     RegisterListenerEvent registerListenerEvent{IPCSkeleton::GetCallingPid(), 1};
@@ -552,7 +552,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest12, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest13, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest13, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t ret = g_context->StartEventHandler();
@@ -576,7 +576,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest13, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest14, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest14, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     g_context->EnableDDM();
@@ -591,7 +591,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest14, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest16, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest16, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t ret = g_context->EnableDevMgr();
@@ -606,7 +606,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest16, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest17, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest17, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     EnableCooperateEvent enableCooperateEvent{1, 1, 1};
@@ -658,7 +658,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest17, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest18, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest18, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::shared_ptr<ICooperateObserver> observer = std::make_shared<CooperateObserver>();
@@ -716,7 +716,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest18, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest19, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest19, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Cooperate::RegisterEventListenerEvent registerEventListenerEvent1 {IPCSkeleton::GetCallingPid(), "test"};
@@ -740,7 +740,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest19, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest20, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest20, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Cooperate::RegisterEventListenerEvent registerEventListenerEvent1 {IPCSkeleton::GetCallingPid(), "test"};
@@ -772,7 +772,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest20, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest21, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest21, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Cooperate::DSoftbusSubscribeMouseLocation subscribeMouseLocation {
@@ -804,7 +804,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest21, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest22, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest22, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Cooperate::RegisterEventListenerEvent registerEventListenerEvent1 {IPCSkeleton::GetCallingPid(), "test"};
@@ -840,7 +840,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest22, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest23, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest23, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -856,7 +856,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest23, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, CooperatePluginTest24, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, CooperatePluginTest24, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -872,7 +872,7 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest24, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent001, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event;
@@ -890,7 +890,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent002, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent002, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(CooperateEventType::QUIT);
@@ -908,7 +908,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent003, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent003, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -930,7 +930,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent004, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent004, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     bool switchStatus = false;
@@ -954,7 +954,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent005, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent005, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -977,7 +977,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent006, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent006, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -1000,7 +1000,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent006, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent007, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent007, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto pointerEvent = MMI::PointerEvent::Create();
@@ -1035,7 +1035,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent007, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent008, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent008, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto pointerEvent = MMI::PointerEvent::Create();
@@ -1069,7 +1069,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent008, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent009, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent009, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t fd = -1;
@@ -1093,7 +1093,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent009, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent010, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent010, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1125,7 +1125,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent010, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent011, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent011, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(CooperateEventType::NOOP);
@@ -1143,7 +1143,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent011, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent012, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent012, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t userData { 0 };
@@ -1169,7 +1169,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent012, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent013, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent013, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::shared_ptr<ICooperateObserver> observer { nullptr };
@@ -1198,7 +1198,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent013, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent014, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent014, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent onlineEvent(
@@ -1226,7 +1226,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent014, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent015, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent015, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1248,7 +1248,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent015, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent016, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent016, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1277,7 +1277,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent016, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent017, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent017, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1306,7 +1306,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent017, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
 */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent018, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent018, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1345,7 +1345,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent018, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
 */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent019, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent019, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1379,7 +1379,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent019, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent020, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent020, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::string remoteNetworkId("");
@@ -1411,7 +1411,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent020, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent021, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent021, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::string remoteNetworkId("");
@@ -1443,7 +1443,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent021, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent022, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent022, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::string remoteNetworkId("");
@@ -1478,7 +1478,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent022, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent023, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent023, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::string remoteNetworkId("");
@@ -1509,7 +1509,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent023, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent024, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent024, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event;
@@ -1531,7 +1531,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent024, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent025, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent025, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent onlineEvent(
@@ -1572,7 +1572,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent025, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
 */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent026, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent026, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1629,7 +1629,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent026, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent027, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent027, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1648,7 +1648,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent027, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent028, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent028, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     bool switchStatus = false;
@@ -1669,7 +1669,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent028, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
 */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent029, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent029, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1713,7 +1713,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent029, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent030, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent030, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto pointerEvent = MMI::PointerEvent::Create();
@@ -1744,7 +1744,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent030, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent031, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent031, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -1768,7 +1768,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent031, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent032, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent032, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -1811,7 +1811,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent032, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent033, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent033, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto dev = std::make_shared<Device>(DEVICE_ID);
@@ -1832,7 +1832,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent033, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent034, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent034, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -1855,7 +1855,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent034, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent035, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent035, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event;
@@ -1884,7 +1884,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent035, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent036, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent036, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event;
@@ -1907,7 +1907,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent036, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent037, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent037, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -1934,7 +1934,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent037, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent038, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent038, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -1962,7 +1962,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent038, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent039, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent039, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -1995,7 +1995,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent039, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent040, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent040, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     bool normal = false;
@@ -2024,7 +2024,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent040, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent041, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent041, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     bool normal = false;
@@ -2055,7 +2055,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent041, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent042, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent042, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto cursorpos = g_context->NormalizedCursorPosition();
@@ -2086,7 +2086,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent042, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent043, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent043, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent normalEvent(
@@ -2122,7 +2122,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent043, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent044, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent044, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2150,7 +2150,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent044, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent045, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent045, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2183,7 +2183,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent045, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent046, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent046, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2216,7 +2216,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent046, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent047, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent047, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2251,7 +2251,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent047, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent048, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent048, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -2280,7 +2280,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent048, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent049, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent049, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -2311,7 +2311,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent049, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent050, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent050, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::string localNetworkId = g_context->dsoftbus_.GetLocalNetworkId();
@@ -2354,7 +2354,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent050, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent051, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent051, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2396,7 +2396,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent051, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent052, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent052, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2438,7 +2438,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent052, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent053, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent053, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent stopEvent(
@@ -2475,7 +2475,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent053, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent054, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent054, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent closeEvent(
@@ -2513,7 +2513,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent054, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test055, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test055, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto [sender, receiver] = Channel<CooperateEvent>::OpenChannel();
@@ -2534,7 +2534,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test055, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test056, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test056, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DSoftbusSyncInputDevice dSoftbusSyncInputDevice {};
@@ -2549,7 +2549,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test056, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test057, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test057, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DSoftbusHotPlugEvent notice1 = {
@@ -2574,7 +2574,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test057, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test058, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test058, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     ASSERT_NO_FATAL_FAILURE(g_context->inputDevMgr_.NotifyInputDeviceToRemote(REMOTE_NETWORKID));
@@ -2599,7 +2599,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test058, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test059, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test059, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::shared_ptr<IDevice> g_device = std::make_shared<Device>(VREMOTE_NETWORKID);
@@ -2620,7 +2620,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test059, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test060, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test060, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::shared_ptr<IDevice> g_device = std::make_shared<Device>(VREMOTE_NETWORKID);
@@ -2641,7 +2641,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test060, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test061, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test061, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::shared_ptr<IDevice> g_device = std::make_shared<Device>(VREMOTE_NETWORKID);
@@ -2661,7 +2661,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test061, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test063, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test063, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2676,7 +2676,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test063, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test064, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test064, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DeviceStatus::InputHotplugEvent inputHotplugEvent;
@@ -2692,7 +2692,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test064, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, inputDevcieMgr_test065, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, inputDevcieMgr_test065, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DeviceStatus::InputHotplugEvent inputHotplugEvent;
@@ -2708,7 +2708,7 @@ HWTEST_F(CooperatePluginTest, inputDevcieMgr_test065, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test065, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test065, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     g_context->inputDevMgr_.enable_ = true;
@@ -2723,7 +2723,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test065, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test067, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test067, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2744,7 +2744,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test067, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test068, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test068, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2766,7 +2766,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test068, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test069, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test069, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2785,7 +2785,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test069, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test070, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test070, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2801,7 +2801,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test070, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test071, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test071, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2817,7 +2817,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test071, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent072, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent072, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent closeEvent(
@@ -2846,7 +2846,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent072, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, dsoftbusHandler_test073, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test073, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::string localNetworkId = g_context->dsoftbus_.GetLocalNetworkId();
@@ -2859,7 +2859,7 @@ HWTEST_F(CooperatePluginTest, dsoftbusHandler_test073, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, dsoftbusHandler_test074, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test074, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     NetPacket pkt(MessageId::DSOFTBUS_START_COOPERATE);
@@ -2873,7 +2873,7 @@ HWTEST_F(CooperatePluginTest, dsoftbusHandler_test074, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, dsoftbusHandler_test075, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test075, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     NetPacket pkt(MessageId::DSOFTBUS_START_COOPERATE);
@@ -2889,7 +2889,7 @@ HWTEST_F(CooperatePluginTest, dsoftbusHandler_test075, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, dsoftbusHandler_test076, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test076, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     NetPacket pkt(MessageId::DSOFTBUS_START_COOPERATE);
@@ -2903,7 +2903,7 @@ HWTEST_F(CooperatePluginTest, dsoftbusHandler_test076, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, dsoftbusHandler_test077, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, dsoftbusHandler_test077, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     NetPacket pkt(MessageId::DSOFTBUS_START_COOPERATE);
@@ -2917,7 +2917,7 @@ HWTEST_F(CooperatePluginTest, dsoftbusHandler_test077, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test078, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test078, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2943,7 +2943,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test078, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test079, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test079, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2966,7 +2966,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test079, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test080, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test080, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -2990,7 +2990,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test080, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, cooperateIn_test081, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, cooperateIn_test081, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     
@@ -3017,7 +3017,7 @@ HWTEST_F(CooperatePluginTest, cooperateIn_test081, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, cooperateIn_test082, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, cooperateIn_test082, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -3055,7 +3055,7 @@ HWTEST_F(CooperatePluginTest, cooperateIn_test082, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, cooperateIn_test083, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, cooperateIn_test083, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -3094,7 +3094,7 @@ HWTEST_F(CooperatePluginTest, cooperateIn_test083, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, cooperateIn_test084, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, cooperateIn_test084, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -3133,7 +3133,7 @@ HWTEST_F(CooperatePluginTest, cooperateIn_test084, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent085, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent085, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -3163,7 +3163,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent085, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent086, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent086, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -3191,7 +3191,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent086, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, cooperateOut_test088, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, cooperateOut_test088, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -3221,7 +3221,7 @@ HWTEST_F(CooperatePluginTest, cooperateOut_test088, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, cooperateOut_test089, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, cooperateOut_test089, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -3251,7 +3251,7 @@ HWTEST_F(CooperatePluginTest, cooperateOut_test089, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, cooperateOut_test090, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, cooperateOut_test090, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -3273,7 +3273,7 @@ HWTEST_F(CooperatePluginTest, cooperateOut_test090, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent91, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent91, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -3306,7 +3306,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent91, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent092, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent092, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent closeEvent(
@@ -3335,7 +3335,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent092, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent093, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent093, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent startEvent(
@@ -3371,7 +3371,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent093, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent094, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent094, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent startEvent(
@@ -3398,7 +3398,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent094, TestSize.Level0)
  * @tc.require:
  */
 
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent095, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent095, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -3426,7 +3426,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent095, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent96, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent96, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -3462,7 +3462,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent96, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent097, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent097, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event(
@@ -3488,7 +3488,7 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent097, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test098, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test098, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
@@ -3509,7 +3509,7 @@ HWTEST_F(CooperatePluginTest, stateMachine_test098, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperatePluginTest, stateMachine_test099, TestSize.Level0)
+HWTEST_F(CooperatePluginTest, stateMachine_test099, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
