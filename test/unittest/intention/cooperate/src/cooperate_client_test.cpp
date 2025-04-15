@@ -23,7 +23,9 @@
 #include <gmock/gmock.h>
 
 #include "cooperate_client_test_mock.h"
+#define private public
 #include "cooperate_client.h"
+#undef private
 #include "devicestatus_define.h"
 #include "devicestatus_errors.h"
 #include "i_hotarea_listener.h"
@@ -442,6 +444,9 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_OnCoordinationMessage_01, Test
     pkt << userData << networkId << nType << errCode;
     ret = cooperateClient.OnCoordinationMessage(client, pkt);
     ASSERT_EQ(ret, RET_OK);
+    EXPECT_CALL(cooperateClientMock, Stop).WillOnce(Return(RET_OK));
+    ret = cooperateClient.Stop(tunnel, true, callback, isCheckPermission);
+    ASSERT_EQ(ret, RET_OK);
     EXPECT_CALL(cooperateClientMock, Disable).WillOnce(Return(RET_OK));
     ret = cooperateClient.Disable(tunnel, callback, isCheckPermission);
     ASSERT_EQ(ret, RET_OK);
@@ -481,6 +486,127 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_OnCoordinationMessage_02, Test
     EXPECT_CALL(cooperateClientMock, Disable).WillOnce(Return(RET_OK));
     ret = cooperateClient.Disable(tunnel, callback, isCheckPermission);
     ASSERT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: CooperateClientTest_Enable
+ * @tc.desc: On Coordination Enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateClientTest, CooperateClientTest_enable, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    bool isCheckPermission = true;
+    TunnelClient tunnel;
+    CooperateClient::CooperateMessageCallback callback;
+    CooperateClient cooperateClient;
+    NiceMock<CooperateClientMock> cooperateClientMock;
+    EXPECT_CALL(cooperateClientMock, Enable).WillOnce(Return(RET_OK));
+    int32_t ret = cooperateClient.Enable(tunnel, callback, isCheckPermission);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_CALL(cooperateClientMock, Disable).WillOnce(Return(RET_OK));
+    ret = cooperateClient.Disable(tunnel, callback, isCheckPermission);
+    ASSERT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: CooperateClientTest_GetCooperateState_01
+ * @tc.desc: On Coordination GetCooperateState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateClientTest, CooperateClientTest_GetCooperateState_01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    bool isCheckPermission = true;
+    TunnelClient tunnel;
+    std::string networkId("softbus");
+    CooperateClient::CooperateStateCallback callback;
+    CooperateClient::CooperateMessageCallback callback1;
+    CooperateClient cooperateClient;
+    NiceMock<CooperateClientMock> cooperateClientMock;
+    EXPECT_CALL(cooperateClientMock, GetParam).WillOnce(Return(RET_OK));
+    int32_t ret = cooperateClient.GetCooperateState(tunnel, networkId, callback, isCheckPermission);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_CALL(cooperateClientMock, Disable).WillOnce(Return(RET_OK));
+    ret = cooperateClient.Disable(tunnel, callback1, isCheckPermission);
+    ASSERT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: CooperateClientTest_GetCooperateState_02
+ * @tc.desc: On Coordination GetCooperateState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateClientTest, CooperateClientTest_GetCooperateState_02, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    bool isCheckPermission = true;
+    CooperateClient::CooperateMessageCallback callback;
+    bool state = true;
+    TunnelClient tunnel;
+    std::string udId ("softbus");
+    CooperateClient cooperateClient;
+    NiceMock<CooperateClientMock> cooperateClientMock;
+    EXPECT_CALL(cooperateClientMock, GetParam).WillOnce(Return(RET_OK));
+    int32_t ret = cooperateClient.GetCooperateState(tunnel, udId, state);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_CALL(cooperateClientMock, Disable).WillOnce(Return(RET_OK));
+    ret = cooperateClient.Disable(tunnel, callback, isCheckPermission);
+    ASSERT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: CooperateClientTest_GetCooperateState_03
+ * @tc.desc: On Coordination GetCooperateState error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateClientTest, CooperateClientTest_GetCooperateState_03, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    bool isCheckPermission = true;
+    std::string networkId("softbus");
+    CooperateClient::CooperateMessageCallback callback;
+    CooperateClient::CooperateStateCallback callback1;
+    bool state = true;
+    TunnelClient tunnel;
+    std::string udId ("softbus");
+    CooperateClient cooperateClient;
+    NiceMock<CooperateClientMock> cooperateClientMock;
+    EXPECT_CALL(cooperateClientMock, GetParam).WillOnce(Return(RET_ERR));
+    int32_t ret = cooperateClient.GetCooperateState(tunnel, udId, state);
+    ASSERT_EQ(ret, RET_ERR);
+    EXPECT_CALL(cooperateClientMock, GetParam).WillOnce(Return(RET_ERR));
+    ret = cooperateClient.GetCooperateState(tunnel, networkId, callback1, isCheckPermission);
+    ASSERT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: CooperateClientTest_DumpPerformanceInfo_01
+ * @tc.desc: On Hot Area Listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateClientTest, CooperateClientTest_DumpPerformanceInfo_01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+#ifdef ENABLE_PERFORMANCE_CHECK
+    CooperateClient cooperateClient;
+    int32_t COOPERATENUM { 100 };
+    for (int32_t  userData = 0; userData < COOPERATENUM; userData++) {
+        cooperateClient.StartTrace(userData);
+        cooperateClient.FinishTrace(userData, CoordinationMessage::ACTIVATE_SUCCESS);
+        userData++;
+        cooperateClient.StartTrace(userData);
+        cooperateClient.FinishTrace(userData, CoordinationMessage::ACTIVATE_FAIL);
+    }
+    int32_t ret = cooperateClient.GetFirstSuccessIndex();
+    ASSERT_NE(ret, INVALID_INDEX);
+    cooperateClient.DumpPerformanceInfo();
+#endif // ENABLE_PERFORMANCE_CHECK
 }
 } // namespace DeviceStatus
 } // namespace Msdp

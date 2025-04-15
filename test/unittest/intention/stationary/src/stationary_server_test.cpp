@@ -19,7 +19,10 @@
 #include "devicestatus_define.h"
 #include "fi_log.h"
 #include "stationary_params.h"
+#define private public
 #include "stationary_server.h"
+#undef private
+#include "ipc_skeleton.h"
 
 #undef LOG_TAG
 #define LOG_TAG "StationaryServerTest"
@@ -28,15 +31,21 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
-
-CallingContext context_;
+CallingContext context_ {
+        .intention = Intention::STATIONARY,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
 MessageParcel data_;
 MessageParcel reply_;
 StationaryServer stationary_;
 uint32_t SUBSCRIBE_STATIONARY_ONE = 1U;
 uint32_t SUBSCRIBE_STATIONARY_TWO = 2U;
 uint32_t SUBSCRIBE_STATIONARY_THREE = 3U;
-
+#ifndef MOTION_ENABLE
+constexpr int32_t RET_NO_SUPPORT = 801;
+#endif
 class StationaryServerTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -135,6 +144,22 @@ HWTEST_F(StationaryServerTest, GetParamTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: GetParamTest002
+ * @tc.desc: Test func named GetParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(StationaryServerTest, GetParamTest002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    GetStaionaryDataParam param;
+    param.type_ = TYPE_HORIZONTAL_POSITION;
+    bool isSuccess = param.Marshalling(data_);
+    EXPECT_TRUE(isSuccess);
+    int32_t  ret = stationary_.GetParam(context_, SUBSCRIBE_STATIONARY_THREE, data_, reply_);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
  * @tc.name: ControlTest001
  * @tc.desc: Test func named Control
  * @tc.type: FUNC
@@ -158,8 +183,8 @@ HWTEST_F(StationaryServerTest, AddWatchTest001, TestSize.Level0)
     ASSERT_NE(cb, nullptr);
     SubscribeStationaryParam param;
     param.type_ = TYPE_HORIZONTAL_POSITION;
-    param.event_ = ENTER;
-    param.latency_ = SHORT;
+    param.event_ = DeviceStatus::ActivityEvent::EVENT_INVALID;
+    param.latency_ = DeviceStatus::ReportLatencyNs::Latency_INVALID;
     param.callback_ = cb;
     bool isSuccess = param.Marshalling(data_);
     EXPECT_TRUE(isSuccess);
@@ -181,10 +206,60 @@ HWTEST_F(StationaryServerTest, AddWatchTest001, TestSize.Level0)
 HWTEST_F(StationaryServerTest, AddWatchTest002, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    SubscribeStationaryParam param;
+    param.callback_ = nullptr;
+    bool isFalse = param.Marshalling(data_);
+    EXPECT_FALSE(isFalse);
+    int32_t ret = stationary_.AddWatch(context_, SUBSCRIBE_STATIONARY_ONE, data_, reply_);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: AddWatchTest003
+ * @tc.desc: Test func named addWatch fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(StationaryServerTest, AddWatchTest003, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
     int32_t ret = stationary_.AddWatch(context_, SUBSCRIBE_STATIONARY_TWO, data_, reply_);
     EXPECT_EQ(ret, RET_ERR);
 }
 
+/**
+ * @tc.name: AddWatchTest004
+ * @tc.desc: Test func named addWatch success
+ * @tc.type: FUNC
+ */
+HWTEST_F(StationaryServerTest, AddWatchTest004, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    sptr<IRemoteDevStaCallback> cb = new (std::nothrow) StationaryServerTestCallback();
+    ASSERT_NE(cb, nullptr);
+    SubscribeStationaryParam param;
+    param.type_ = TYPE_STAND;
+    param.event_ = DeviceStatus::ActivityEvent::EVENT_INVALID;
+    param.latency_ = DeviceStatus::ReportLatencyNs::Latency_INVALID;
+    param.callback_ = cb;
+    bool isSuccess = param.Marshalling(data_);
+    EXPECT_TRUE(isSuccess);
+    int32_t ret = stationary_.AddWatch(context_, SUBSCRIBE_STATIONARY_ONE, data_, reply_);
+#ifdef MOTION_ENABLE
+    EXPECT_EQ(ret, RET_OK);
+#else
+    EXPECT_EQ(ret, RET_NO_SUPPORT);
+#endif
+    UnsubscribeStationaryParam param1;
+    param1 = param;
+    isSuccess = param1.Marshalling(data_);
+    EXPECT_TRUE(isSuccess);
+    ret = stationary_.RemoveWatch(context_, SUBSCRIBE_STATIONARY_TWO, data_, reply_);
+#ifdef MOTION_ENABLE
+    EXPECT_EQ(ret, RET_OK);
+#else
+    EXPECT_EQ(ret, RET_NO_SUPPORT);
+#endif
+}
 /**
  * @tc.name: RemoveWatchTest001
  * @tc.desc: Test func named RemoveWatch
@@ -199,6 +274,19 @@ HWTEST_F(StationaryServerTest, RemoveWatchTest001, TestSize.Level0)
     EXPECT_EQ(ret, RET_ERR);
 }
 
+/**
+ * @tc.name: DumpCurrentDeviceStatusTest001
+ * @tc.desc: Test func named DumpCurrentDeviceStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(StationaryServerTest, DumpCurrentDeviceStatusTest001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t fd = -1;
+    stationary_.DumpCurrentDeviceStatus(fd);
+    int32_t ret = stationary_.RemoveWatch(context_, SUBSCRIBE_STATIONARY_TWO, data_, reply_);
+    EXPECT_EQ(ret, RET_ERR);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
