@@ -197,7 +197,7 @@ void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
     }
     for (int32_t y = 0; y < height; ++y) {
         for (int32_t x = 0; x < width; ++x) {
-            uint32_t pixIndex = y * rowStride + x * BITMAP_TRAVERSE_STEP;
+            uint32_t pixIndex = static_cast<uint32_t>(y * rowStride + x * BITMAP_TRAVERSE_STEP);
             uint32_t b = data[pixIndex];
             uint32_t g = data[pixIndex + GREEN_TRAVERSE_STEP];
             uint32_t r = data[pixIndex + RED_TRAVERSE_STEP];
@@ -209,8 +209,8 @@ void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
     }
 
     struct OhosPixelMapCreateOps createOps;
-    createOps.width = width;
-    createOps.height = height;
+    createOps.width = static_cast<uint32_t>(width);
+    createOps.height = static_cast<uint32_t>(height);
     createOps.pixelFormat = PIXEL_FORMAT;
     createOps.alphaType = ALPHA_TYPE;
     int32_t res = OH_PixelMap_CreatePixelMap(
