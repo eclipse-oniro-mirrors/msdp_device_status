@@ -52,7 +52,6 @@ bool PullThrowListener::RegisterFoldStatusListener()
     if (ret != Rosen::DMError::DM_OK) {
         FI_HILOGE("RegisterFoldStatusListener failed");
         delete foldStatusListener_;
-        foldStatusListener_ = nullptr;
         return false;
     }
     FI_HILOGI("RegisterFoldStatusListener success");
@@ -86,7 +85,6 @@ bool PullThrowListener::RegisterScreenMagneticStateListener()
     if (ret != Rosen::DMError::DM_OK) {
         FI_HILOGE("RegisterScreenMagneticStateListener failed");
         delete screenMagneticStateListener_;
-        screenMagneticStateListener_ = nullptr;
         return false;
     }
     FI_HILOGI("RegisterScreenMagneticStateListener success");

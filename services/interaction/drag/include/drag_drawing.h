@@ -298,7 +298,10 @@ public:
     void LongPressDragZoomOutAnimation();
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
     void PullThrowAnimation(double tx, double ty, float vx, float vy, std::shared_ptr<MMI::PointerEvent> pointerEvent);
-
+    void SetHovering(double tx, double ty, std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    void PullThrowBreatheAnimation();
+    void PullThrowBreatheEndAnimation();
+    
 private:
     int32_t CheckDragData(const DragData &dragData);
     int32_t InitLayer();
