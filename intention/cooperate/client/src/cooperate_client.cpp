@@ -553,6 +553,35 @@ void CooperateClient::OnDevMouseLocationListener(const std::string &networkId, c
     }
 }
 
+void CooperateClient::OnConnected(ITunnelClient &tunnel)
+{
+    CALL_INFO_TRACE;
+    if (connectedCooperateListeners_.empty()) {
+        FI_HILOGE("The connect cooperate listener list is empty");
+        return;
+    }
+    for (const auto &listener : connectedCooperateListeners_) {
+        if (RegisterListener(tunnel, listener) != RET_OK) {
+            FI_HILOGW("AddCooperatelistener failed");
+        }
+    }
+}
+
+void CooperateClient::OnDisconnected(ITunnelClient &tunnel)
+{
+    CALL_INFO_TRACE;
+    if (isListeningProcess_) {
+        std::lock_guard<std::mutex> guard(mtx_);
+        if (devCooperateListener_.empty()) {
+            FI_HILOGE("The cooperate listener list is empty");
+            return;
+        }
+        connectedCooperateListeners_ = devCooperateListener_;
+        devCooperateListener_.clear();
+        isListeningProcess_ = false;
+    }
+}
+
 #ifdef ENABLE_PERFORMANCE_CHECK
 int32_t CooperateClient::GetFirstSuccessIndex()
 {

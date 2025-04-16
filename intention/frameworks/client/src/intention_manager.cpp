@@ -575,6 +575,7 @@ void IntentionManager::OnConnected()
     CALL_DEBUG_ENTER;
     CHKPV(tunnel_);
     drag_.OnConnected(*tunnel_);
+    cooperate_.OnConnected(*tunnel_);
 }
 
 void IntentionManager::OnDisconnected()
@@ -582,6 +583,7 @@ void IntentionManager::OnDisconnected()
     CALL_DEBUG_ENTER;
     CHKPV(tunnel_);
     drag_.OnDisconnected(*tunnel_);
+    cooperate_.OnDisconnected(*tunnel_);
 }
 
 int32_t IntentionManager::SetDraggableState(bool state)
