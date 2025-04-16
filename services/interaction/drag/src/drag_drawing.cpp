@@ -4130,6 +4130,7 @@ void DragDrawing::UpdateDragState(DragState dragState)
 
 void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
 {
+FI_HILOGI("Parameter screen number:%{public}llu", static_cast<unsigned long long>(screenId_));
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(g_drawingInfo.rootNode);
     CHKPV(g_drawingInfo.surfaceNode);
@@ -4150,7 +4151,17 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
         }
         return;
     }
+#ifndef OHOS_BUILD_PC_PRODUCT
     screenId_ = static_cast<uint64_t>(displayId);
+#else
+    uint64_t rsScreenId = screenId_;
+    if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {
+        FI_HILOGE("ConvertScreenIdToRsScreenId failed");
+        return;
+    }
+    screenId_ = rsScreenId;
+#endif // OHOS_BUILD_PC_PRODUCT
+    FI_HILOGI("Parameter rsScreen number:%{public}llu", static_cast<unsigned long long>(screenId_));
     int32_t surfaceNodeSize = std::max(display->GetWidth(), display->GetHeight());
     g_drawingInfo.rootNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
     g_drawingInfo.rootNode->SetFrame(0, 0, surfaceNodeSize, surfaceNodeSize);
