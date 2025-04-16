@@ -93,6 +93,8 @@ public:
     int32_t OnCoordinationState(const StreamClient &client, NetPacket &pkt);
     int32_t OnHotAreaListener(const StreamClient &client, NetPacket &pkt);
     int32_t OnMouseLocationListener(const StreamClient &client, NetPacket &pkt);
+    void OnConnected(ITunnelClient &tunnel);
+    void OnDisconnected(ITunnelClient &tunnel);
 
 private:
     int32_t GenerateRequestID();
@@ -110,6 +112,7 @@ private:
 
     std::list<CooperateListenerPtr> devCooperateListener_;
     std::map<std::string, std::set<MouseLocationListenerPtr>> eventListener_;
+    std::list<CooperateListenerPtr> connectedCooperateListeners_;
     std::list<HotAreaListenerPtr> devHotAreaListener_;
     std::map<int32_t, CooperateEvent> devCooperateEvent_;
     mutable std::mutex mtx_;
