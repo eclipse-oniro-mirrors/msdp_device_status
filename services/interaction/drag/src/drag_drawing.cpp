@@ -4130,7 +4130,6 @@ void DragDrawing::UpdateDragState(DragState dragState)
 
 void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
 {
-FI_HILOGI("Parameter screen number:%{public}llu", static_cast<unsigned long long>(screenId_));
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(g_drawingInfo.rootNode);
     CHKPV(g_drawingInfo.surfaceNode);
@@ -4151,9 +4150,8 @@ FI_HILOGI("Parameter screen number:%{public}llu", static_cast<unsigned long long
         }
         return;
     }
-#ifndef OHOS_BUILD_PC_PRODUCT
     screenId_ = static_cast<uint64_t>(displayId);
-#else
+#ifdef OHOS_BUILD_PC_PRODUCT
     uint64_t rsScreenId = screenId_;
     if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {
         FI_HILOGE("ConvertScreenIdToRsScreenId failed");
