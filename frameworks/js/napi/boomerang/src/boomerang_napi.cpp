@@ -44,20 +44,20 @@ constexpr size_t ARG_3{3};
 inline constexpr size_t MAX_STRING_LEN{1024};
 const std::vector<std::string> vecDeviceStatusValue{"VALUE_ENTER", "VALUE_EXIT"};
 thread_local BoomerangNapi *g_obj = nullptr;
-constexpr int32_t BITMAP_TRAVERSE_STEP = 4;
+constexpr uint32_t BITMAP_TRAVERSE_STEP = 4;
 // bitmap green值偏移量
-constexpr int32_t GREEN_TRAVERSE_STEP = 1;
+constexpr uint32_t GREEN_TRAVERSE_STEP = 1;
 // bitmap red值偏移量
-constexpr int32_t RED_TRAVERSE_STEP = 2;
+constexpr uint32_t RED_TRAVERSE_STEP = 2;
 // bitmap alpha值偏移量
-constexpr int32_t ALPHA_TRAVERSE_STEP = 3;
+constexpr uint32_t ALPHA_TRAVERSE_STEP = 3;
 // 图片的格式,格式为BGRA_8888
-constexpr int32_t PIXEL_FORMAT = 4;
+constexpr uint32_t PIXEL_FORMAT = 4;
 // 图片的alpha类型,RGB前乘alpha
-constexpr int32_t ALPHA_TYPE = 2;
-constexpr int32_t ALPHA_SHIFT = 24;
-constexpr int32_t RED_SHIFT = 16;
-constexpr int32_t GREEN_SHIFT = 8;
+constexpr uint32_t ALPHA_TYPE = 2;
+constexpr uint32_t ALPHA_SHIFT = 24;
+constexpr uint32_t RED_SHIFT = 16;
+constexpr uint32_t GREEN_SHIFT = 8;
 constexpr int32_t VALIDATA_ON_PARAM = 1;
 constexpr int32_t VALIDATA_OFF_PARAM = 2;
 }  // namespace
