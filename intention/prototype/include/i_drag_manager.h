@@ -99,7 +99,10 @@ public:
         const PreviewAnimation &animation) = 0;
     virtual int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
     virtual void GetAllowDragState(bool &isAllowDrag) = 0;
-    virtual int32_t RotateDragWindow(Rosen::Rotation rotation) = 0;
+    virtual int32_t RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation) = 0;
+    virtual void SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation) = 0;
+    virtual Rosen::Rotation GetRotation(Rosen::DisplayId displayId) = 0;
+    virtual void DestoryDisplayIdInMap(Rosen::DisplayId displayId) = 0;
     virtual int32_t ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation) = 0;
     virtual int32_t EnterTextEditorArea(bool enable) = 0;
     virtual int32_t AddPrivilege(int32_t tokenId) = 0;

@@ -34,11 +34,12 @@ public:
     void OnChange(Rosen::DisplayId displayId) override;
 
 private:
-    void RotateDragWindow(Rosen::Rotation rotation);
+    void RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation);
     void ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation);
+    Rosen::Rotation GetRotation(Rosen::DisplayId displayId);
+    bool IsRotation(Rosen::DisplayId displayId, Rosen::Rotation CurrentRotation);
 
 private:
-    Rosen::Rotation lastRotation_ { Rosen::Rotation::ROTATION_0 };
     IContext *context_ { nullptr };
 };
 

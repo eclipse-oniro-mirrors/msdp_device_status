@@ -563,7 +563,8 @@ int32_t DragDrawing::UpdateShadowPic(const ShadowInfo &shadowInfo)
 #endif // OHOS_BUILD_PC_PRODUCT
     ProcessFilter();
     Draw(g_drawingInfo.displayId, g_drawingInfo.displayX, g_drawingInfo.displayY, false);
-    RotateDragWindow(rotation_);
+    Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
+    RotateDragWindow(rotation);
     Rosen::RSTransaction::FlushImplicitTransaction();
     CHKPR(rsUiDirector_, RET_ERR);
     rsUiDirector_->SendMessages();
@@ -1855,8 +1856,9 @@ int32_t DragDrawing::InitLayer()
     CHKPR(window_, RET_ERR);
     InitCanvas(window_->GetRect().width_, window_->GetRect().height_);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    if (rotation_ != Rosen::Rotation::ROTATION_0) {
-        RotateDragWindow(rotation_);
+    Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
+    if (rotation != Rosen::Rotation::ROTATION_0) {
+        RotateDragWindow(rotation);
     } else {
         DragWindowRotateInfo_.rotation = ROTATION_0;
     }
@@ -2587,9 +2589,51 @@ void DragDrawing::RotateCanvasNode(float pivotX, float pivotY, float rotation)
     FI_HILOGD("leave");
 }
 
-void DragDrawing::SetRotation(Rosen::Rotation rotation)
+void DragDrawing::SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation)
 {
-    rotation_ = rotation;
+    FI_HILOGI("displayId:%{public}d, rotation:%{public}d",
+        static_cast<int32_t>(displayId), static_cast<int32_t>(rotation));
+    if (rotationMap_.empty()) {
+        FI_HILOGE("rotation map is empty");
+        return;
+    }
+    auto iter = rotationMap_.find(displayId);
+    if (iter == rotationMap_.end()) {
+        rotationMap_.emplace(displayId, rotation);
+        FI_HILOGW("Create a new element");
+        return;
+    }
+    if (iter->second != rotation) {
+        rotationMap_[displayId] = rotation;
+    }
+}
+
+Rosen::Rotation DragDrawing::GetRotation(Rosen::DisplayId displayId)
+{
+    if (!rotationMap_.empty()) {
+        auto iter = rotationMap_.find(displayId);
+        if (iter != rotationMap_.end()) {
+            FI_HILOGI("displayId:%{public}d, rotation:%{public}d",
+                static_cast<int32_t>(iter->first), static_cast<int32_t>(iter->second));
+            return iter->second;
+        }
+    }
+    return Rosen::Rotation::ROTATION_0;
+}
+
+void DragDrawing::DestoryDisplayIdInMap(Rosen::DisplayId displayId)
+{
+    FI_HILOGI("displayId:%{public}d", static_cast<int32_t>(displayId));
+    if (rotationMap_.empty()) {
+        FI_HILOGE("rotation map is empty");
+        return;
+    }
+    auto iter = rotationMap_.find(displayId);
+    if (iter == rotationMap_.end()) {
+        FI_HILOGW("displayId does not exist in rotation map");
+        return;
+    }
+    rotationMap_.erase(displayId);
 }
 
 void DragDrawing::ProcessFilter()
@@ -2865,8 +2909,8 @@ int32_t DragDrawing::RotateDragWindowAsync(Rosen::Rotation rotation)
     int32_t repeatTime = 1;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPR(context_, RET_ERR);
-    timerId_ = context_->GetTimerManager().AddTimer(ASYNC_ROTATE_TIME, repeatTime, [this]() {
-        RotateDragWindow(rotation_, nullptr, true);
+    timerId_ = context_->GetTimerManager().AddTimer(ASYNC_ROTATE_TIME, repeatTime, [this, rotation]() {
+        RotateDragWindow(rotation, nullptr, true);
         isRunningRotateAnimation_ = false;
     });
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
@@ -2882,7 +2926,8 @@ int32_t DragDrawing::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransac
 {
     FI_HILOGD("enter");
     isRunningRotateAnimation_ = true;
-    RotateDragWindow(rotation_, rsTransaction, true);
+    Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
+    RotateDragWindow(rotation, rsTransaction, true);
     isRunningRotateAnimation_ = false;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if ((context_ != nullptr) && (timerId_ >= 0)) {
@@ -3134,6 +3179,7 @@ void DragDrawing::ClearMultiSelectedData()
 
 void DragDrawing::RotateDisplayXY(int32_t &displayX, int32_t &displayY)
 {
+Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
@@ -3143,6 +3189,7 @@ void DragDrawing::RotateDisplayXY(int32_t &displayX, int32_t &displayY)
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
+        rotation = GetRotation(0);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
@@ -3157,7 +3204,7 @@ void DragDrawing::RotateDisplayXY(int32_t &displayX, int32_t &displayY)
     int32_t width = window_->GetRect().width_;
     int32_t height = window_->GetRect().height_;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    switch (rotation_) {
+    switch (rotation) {
         case Rosen::Rotation::ROTATION_0: {
             break;
         }
@@ -3179,7 +3226,7 @@ void DragDrawing::RotateDisplayXY(int32_t &displayX, int32_t &displayY)
             break;
         }
         default: {
-            FI_HILOGW("Unknown parameter, rotation:%{public}d", static_cast<int32_t>(rotation_));
+            FI_HILOGW("Unknown parameter, rotation:%{public}d", static_cast<int32_t>(rotation));
             break;
         }
     }
@@ -3187,6 +3234,7 @@ void DragDrawing::RotateDisplayXY(int32_t &displayX, int32_t &displayY)
 
 void DragDrawing::RotatePosition(float &displayX, float &displayY)
 {
+Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
@@ -3196,6 +3244,7 @@ void DragDrawing::RotatePosition(float &displayX, float &displayY)
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
+        rotation = GetRotation(0);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
@@ -3210,7 +3259,7 @@ void DragDrawing::RotatePosition(float &displayX, float &displayY)
     int32_t width = window_->GetRect().width_;
     int32_t height = window_->GetRect().height_;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    switch (rotation_) {
+    switch (rotation) {
         case Rosen::Rotation::ROTATION_0: {
             break;
         }
@@ -3232,7 +3281,7 @@ void DragDrawing::RotatePosition(float &displayX, float &displayY)
             break;
         }
         default: {
-            FI_HILOGE("Invalid parameter, rotation:%{public}d", static_cast<int32_t>(rotation_));
+            FI_HILOGE("Invalid parameter, rotation:%{public}d", static_cast<int32_t>(rotation));
             break;
         }
     }
@@ -3240,10 +3289,11 @@ void DragDrawing::RotatePosition(float &displayX, float &displayY)
 
 void DragDrawing::RotatePixelMapXY()
 {
-    FI_HILOGI("rotation:%{public}d", static_cast<int32_t>(rotation_));
+    Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
+    FI_HILOGI("displayId:%{public}d, rotation:%{public}d", g_drawingInfo.displayId, static_cast<int32_t>(rotation));
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     CHKPV(currentPixelMap);
-    switch (rotation_) {
+    switch (rotation) {
         case Rosen::Rotation::ROTATION_0:
         case Rosen::Rotation::ROTATION_180: {
             g_drawingInfo.pixelMapX = -(HALF_RATIO * currentPixelMap->GetWidth());
@@ -3257,7 +3307,7 @@ void DragDrawing::RotatePixelMapXY()
             break;
         }
         default: {
-            FI_HILOGE("Invalid parameter, rotation:%{public}d", static_cast<int32_t>(rotation_));
+            FI_HILOGE("Invalid parameter, rotation:%{public}d", static_cast<int32_t>(rotation));
             break;
         }
     }
@@ -3401,10 +3451,11 @@ int32_t DragDrawing::DoRotateDragWindow(float rotation,
 template <typename T>
 void DragDrawing::AdjustRotateDisplayXY(T &displayX, T &displayY)
 {
-    FI_HILOGD("rotation:%{public}d", static_cast<int32_t>(rotation_));
+    Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
+    FI_HILOGD("displayId:%{public}d, rotation:%{public}d", g_drawingInfo.displayId, static_cast<int32_t>(rotation));
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     CHKPV(currentPixelMap);
-    switch (rotation_) {
+    switch (rotation) {
         case Rosen::Rotation::ROTATION_0: {
             break;
         }
@@ -3428,7 +3479,7 @@ void DragDrawing::AdjustRotateDisplayXY(T &displayX, T &displayY)
             break;
         }
         default: {
-            FI_HILOGE("Invalid parameter, rotation:%{public}d", static_cast<int32_t>(rotation_));
+            FI_HILOGE("Invalid parameter, rotation:%{public}d", static_cast<int32_t>(rotation));
             break;
         }
     }

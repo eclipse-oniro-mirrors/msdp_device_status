@@ -1831,7 +1831,16 @@ int32_t DragManager::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
 
 int32_t DragManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    return dragDrawing_.RotateDragWindowSync(rsTransaction);
+    auto SetDragWindowRotateAnimation= [rsTransaction, this]() {
+        return dragDrawing_.RotateDragWindowSync(rsTransaction);
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask(SetDragWindowRotateAnimation);
+    if (ret != RET_OK) {
+        FI_HILOGE("Post async task failed, ret:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
 }
 
 void DragManager::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
@@ -2078,13 +2087,14 @@ int32_t DragManager::EraseMouseIcon()
     return RET_OK;
 }
 
-int32_t DragManager::RotateDragWindow(Rosen::Rotation rotation)
+int32_t DragManager::RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation)
 {
-    FI_HILOGI("Rotation:%{public}d", static_cast<int32_t>(rotation));
-    auto SetDragWindowRotate = [rotation, this]() {
-        dragDrawing_.SetRotation(rotation);
+    FI_HILOGI("displayId:%{public}d, rotation:%{public}d",
+        static_cast<int32_t>(displayId), static_cast<int32_t>(rotation));
+    auto SetDragWindowRotate = [displayId, rotation, this]() {
+        SetRotation(displayId, rotation);
         if ((dragState_ == DragState::START) || (dragState_ == DragState::MOTION_DRAGGING)) {
-            dragDrawing_.RotateDragWindowAsync(rotation);
+           return dragDrawing_.RotateDragWindowAsync(rotation);
         }
         return RET_OK;
     };
@@ -2100,6 +2110,36 @@ int32_t DragManager::RotateDragWindow(Rosen::Rotation rotation)
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     FI_HILOGD("leave");
     return RET_OK;
+}
+
+void DragManager::SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation)
+{
+    CHKPV(context_);
+    context_->GetDelegateTasks().PostSyncTask([this, displayId, rotation] {
+        this->dragDrawing_.SetRotation(displayId, rotation);
+        return RET_OK;
+    });
+}
+
+Rosen::Rotation DragManager::GetRotation(Rosen::DisplayId displayId)
+{
+    Rosen::Rotation rotation = Rosen::Rotation::ROTATION_0;
+    if (context_ != nullptr) {
+        context_->GetDelegateTasks().PostSyncTask([this, displayId, &rotation] {
+            rotation = this->dragDrawing_.GetRotation(displayId);
+            return RET_OK;
+        });
+    }
+    return rotation;
+}
+
+void DragManager::DestoryDisplayIdInMap(Rosen::DisplayId displayId)
+{
+    CHKPV(context_);
+    context_->GetDelegateTasks().PostSyncTask([this, displayId] {
+        this->dragDrawing_.DestoryDisplayIdInMap(displayId);
+        return RET_OK;
+    });
 }
 
 int32_t DragManager::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation)
