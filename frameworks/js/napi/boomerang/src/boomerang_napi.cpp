@@ -185,24 +185,24 @@ void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
     }
 
     napi_value pixelMapNapi;
-    int32_t width = pixelMap->GetWidth();
-    int32_t height = pixelMap->GetHeight();
+    uint32_t width = pixelMap->GetWidth();
+    uint32_t height = pixelMap->GetHeight();
     const unsigned char *data = pixelMap->GetPixels();
-    int32_t rowStride = pixelMap->GetRowStride();
-    int32_t bufferSize = width * height * BITMAP_TRAVERSE_STEP;
+    uint32_t rowStride = pixelMap->GetRowStride();
+    uint32_t bufferSize = width * height * BITMAP_TRAVERSE_STEP;
     uint8_t *pixelArrayBuffer = new (std::nothrow) uint8_t[bufferSize];
     if (pixelArrayBuffer == nullptr) {
         FI_HILOGE("create pixelmap buff error");
         return;
     }
-    for (int32_t y = 0; y < height; ++y) {
-        for (int32_t x = 0; x < width; ++x) {
+    for (uint32_t y = 0; y < height; ++y) {
+        for (uint32_t x = 0; x < width; ++x) {
             uint32_t pixIndex = y * rowStride + x * BITMAP_TRAVERSE_STEP;
             uint32_t b = data[pixIndex];
             uint32_t g = data[pixIndex + GREEN_TRAVERSE_STEP];
             uint32_t r = data[pixIndex + RED_TRAVERSE_STEP];
             uint32_t a = data[pixIndex + ALPHA_TRAVERSE_STEP];
-            int32_t arrayIndex = (y * width + (x)) * BITMAP_TRAVERSE_STEP;
+            uint32_t arrayIndex = (y * width + (x)) * BITMAP_TRAVERSE_STEP;
             uint32_t pixelValue = ((a << ALPHA_SHIFT) | (r << RED_SHIFT) | (g << GREEN_SHIFT) | b);
             *(reinterpret_cast<uint32_t *>(pixelArrayBuffer + arrayIndex)) = pixelValue;
         }
