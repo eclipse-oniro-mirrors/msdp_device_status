@@ -44,20 +44,20 @@ constexpr size_t ARG_3{3};
 inline constexpr size_t MAX_STRING_LEN{1024};
 const std::vector<std::string> vecDeviceStatusValue{"VALUE_ENTER", "VALUE_EXIT"};
 thread_local BoomerangNapi *g_obj = nullptr;
-constexpr int32_t BITMAP_TRAVERSE_STEP = 4;
+constexpr uint32_t BITMAP_TRAVERSE_STEP = 4;
 // bitmap green值偏移量
-constexpr int32_t GREEN_TRAVERSE_STEP = 1;
+constexpr uint32_t GREEN_TRAVERSE_STEP = 1;
 // bitmap red值偏移量
-constexpr int32_t RED_TRAVERSE_STEP = 2;
+constexpr uint32_t RED_TRAVERSE_STEP = 2;
 // bitmap alpha值偏移量
-constexpr int32_t ALPHA_TRAVERSE_STEP = 3;
+constexpr uint32_t ALPHA_TRAVERSE_STEP = 3;
 // 图片的格式,格式为BGRA_8888
-constexpr int32_t PIXEL_FORMAT = 4;
+constexpr uint32_t PIXEL_FORMAT = 4;
 // 图片的alpha类型,RGB前乘alpha
-constexpr int32_t ALPHA_TYPE = 2;
-constexpr int32_t ALPHA_SHIFT = 24;
-constexpr int32_t RED_SHIFT = 16;
-constexpr int32_t GREEN_SHIFT = 8;
+constexpr uint32_t ALPHA_TYPE = 2;
+constexpr uint32_t ALPHA_SHIFT = 24;
+constexpr uint32_t RED_SHIFT = 16;
+constexpr uint32_t GREEN_SHIFT = 8;
 constexpr int32_t VALIDATA_ON_PARAM = 1;
 constexpr int32_t VALIDATA_OFF_PARAM = 2;
 }  // namespace
@@ -185,24 +185,24 @@ void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
     }
 
     napi_value pixelMapNapi;
-    int32_t width = pixelMap->GetWidth();
-    int32_t height = pixelMap->GetHeight();
+    uint32_t width = pixelMap->GetWidth();
+    uint32_t height = pixelMap->GetHeight();
     const unsigned char *data = pixelMap->GetPixels();
-    int32_t rowStride = pixelMap->GetRowStride();
-    int32_t bufferSize = width * height * BITMAP_TRAVERSE_STEP;
+    uint32_t rowStride = pixelMap->GetRowStride();
+    uint32_t bufferSize = width * height * BITMAP_TRAVERSE_STEP;
     uint8_t *pixelArrayBuffer = new (std::nothrow) uint8_t[bufferSize];
     if (pixelArrayBuffer == nullptr) {
         FI_HILOGE("create pixelmap buff error");
         return;
     }
-    for (int32_t y = 0; y < height; ++y) {
-        for (int32_t x = 0; x < width; ++x) {
-            uint32_t pixIndex = static_cast<uint32_t>(y * rowStride + x * BITMAP_TRAVERSE_STEP);
+    for (uint32_t y = 0; y < height; ++y) {
+        for (uint32_t x = 0; x < width; ++x) {
+            uint32_t pixIndex = y * rowStride + x * BITMAP_TRAVERSE_STEP;
             uint32_t b = data[pixIndex];
             uint32_t g = data[pixIndex + GREEN_TRAVERSE_STEP];
             uint32_t r = data[pixIndex + RED_TRAVERSE_STEP];
             uint32_t a = data[pixIndex + ALPHA_TRAVERSE_STEP];
-            int32_t arrayIndex = (y * width + (x)) * BITMAP_TRAVERSE_STEP;
+            uint32_t arrayIndex = (y * width + (x)) * BITMAP_TRAVERSE_STEP;
             uint32_t pixelValue = ((a << ALPHA_SHIFT) | (r << RED_SHIFT) | (g << GREEN_SHIFT) | b);
             *(reinterpret_cast<uint32_t *>(pixelArrayBuffer + arrayIndex)) = pixelValue;
         }
