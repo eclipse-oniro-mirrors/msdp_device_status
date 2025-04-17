@@ -81,12 +81,12 @@ constexpr int32_t TARGET_Y_UP { 1500 };           // 上屏目标 Y 坐标
 constexpr int32_t TIMER_TIMEOUT_MS { 30000 };     // 定时器超时值，30秒
 
 // 角度常量
-constexpr double ANGLE_DOWN_MIN { 65.0 };         // 下方角度范围最小值
-constexpr double ANGLE_DOWN_MAX { 115.0 };        // 下方角度范围最大值
-constexpr double ANGLE_UP_MIN { 245.0 };          // 上方角度范围最小值
-constexpr double ANGLE_UP_MAX { 295.0 };          // 上方角度范围最大值
-constexpr double ANGLE_LEFT_MIN { 115.0 };        // 左方角度范围最小值
-constexpr double ANGLE_LEFT_MAX { 245.0 };        // 左方角度范围最大值
+constexpr double ANGLE_DOWN_MIN { 45.0 };         // 下方角度范围最小值
+constexpr double ANGLE_DOWN_MAX { 135.0 };        // 下方角度范围最大值
+constexpr double ANGLE_UP_MIN { 225.0 };          // 上方角度范围最小值
+constexpr double ANGLE_UP_MAX { 315.0 };          // 上方角度范围最大值
+constexpr double ANGLE_LEFT_MIN { 135.0 };        // 左方角度范围最小值
+constexpr double ANGLE_LEFT_MAX { 225.0 };        // 左方角度范围最大值
 constexpr double FULL_CIRCLE_DEGREES = { 360.0 };
 constexpr double ANGLE_EPSILON {1e-9};
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
@@ -501,6 +501,8 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     needLongPressDragAnimation_ = true;
     isLongPressDrag_ = false;
     currentPointerEvent_ = nullptr;
+    inHoveringState_ = true;
+    throwState_ = ThrowState::NOT_THROW;
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(dropResult.result);
     appCallee_ = dragRadarPackageName.appCallee;
@@ -797,8 +799,6 @@ int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent
 
     FI_HILOGI("angle=%{public}f, direction=%{public}d, state=%{public}d, speeds=(%{public}f,%{public}f)",
               throwAngle, throwDir, throwState_, vx, vy);
-    FI_HILOGD("VK Status: NONE = 0, TOUCHPAD = 1, PIXED = 2, FLOATING = 3");
-    FI_HILOGD("Fold Status: UNKNOWN = 0, EXPAND = 1, FOLDED = 2, HALF_FOLD = 3");
 
     if (ValidateThrowDirection(currentScreen, throwDir)) {
         throwState_ = (throwDir == ThrowDirection::DOWN) ? ThrowState::IN_DOWNSCREEN : ThrowState::IN_UPSCREEN;
@@ -830,7 +830,7 @@ void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-
+    dragDrawing_.PullThrowBreatheEndAnimation();
     CHKPV(context_);
     if (dragTimerId_ >= 0) {
         context_->GetTimerManager().RemoveTimer(dragTimerId_);
@@ -866,6 +866,16 @@ void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         mouseDragMonitorDisplayY_ = -1;
         OnDragCancel(pointerEvent);
         throwState_ = ThrowState::NOT_THROW;
+    } else {
+        FI_HILOGD("inHoveringState_: %{public}d", inHoveringState_);
+        inHoveringState_ = false;
+        if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            bool drawCursor = true;
+            auto extraData = CreatePullThrowExtraData(true, drawCursor, pointerEvent);
+            if (MMI::InputManager::GetInstance()->AppendExtraData(extraData) != RET_OK) {
+                FI_HILOGE("Failed to append extra data to MMI");
+            }
+        }
     }
 }
 
@@ -889,9 +899,12 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         return;
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_THROW) {
-        int32_t ret = OnPullThrow(pointerEvent);
+        CHKPV(context_);
+        int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent] {
+            return this->OnPullThrow(pointerEvent);
+        });
         if (ret != RET_OK) {
-            FI_HILOGE("PullThrow failed");
+            FI_HILOGE("Post async task failed");
         }
         return;
     }
@@ -917,7 +930,10 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         }
         return;
     }
-    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN && throwState_ != ThrowState::NOT_THROW) {
+    if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) &&
+        throwState_ != ThrowState::NOT_THROW &&
+        inHoveringState_) {
         InPullThrow(pointerEvent);
         return;
     }
@@ -1270,6 +1286,29 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor)
     extraData.drawCursor = drawCursor;
     extraData.eventId = DRAG_DATA_MGR.GetEventId();
     FI_HILOGD("sourceType:%{public}d, pointerId:%{public}d, eventId:%{public}d",
+        extraData.sourceType, extraData.pointerId, extraData.eventId);
+    return extraData;
+}
+
+MMI::ExtraData DragManager::CreatePullThrowExtraData(bool appended, bool drawCursor,
+    std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    FI_HILOGI("enter");
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    DragData mouseDragData = dragData;
+    mouseDragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    mouseDragData.pointerId = pointerEvent->GetPointerId();
+    DRAG_DATA_MGR.Init(mouseDragData, mouseDragData.appCaller);
+
+    MMI::ExtraData extraData;
+    extraData.buffer = mouseDragData.buffer;
+    extraData.sourceType = mouseDragData.sourceType;
+    extraData.pointerId = mouseDragData.pointerId;
+    extraData.appended = appended;
+    extraData.pullId = pullId_;
+    extraData.drawCursor = drawCursor;
+    extraData.eventId = pointerEvent->GetId();
+    FI_HILOGD("pullthrow sourceType:%{public}d, pointerId:%{public}d, eventId:%{public}d",
         extraData.sourceType, extraData.pointerId, extraData.eventId);
     return extraData;
 }

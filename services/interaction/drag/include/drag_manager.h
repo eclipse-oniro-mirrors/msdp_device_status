@@ -85,6 +85,8 @@ public:
     bool RegisterPullThrowListener() override { return listener_.RegisterPullThrowListener(); }
     bool RegisterVKListener() override { return listener_.RegisterVKListener(); }
     void RegisterVKeyboard();
+    MMI::ExtraData CreatePullThrowExtraData(bool appended, bool drawCursor,
+    std::shared_ptr<MMI::PointerEvent> pointerEvent);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     double NormalizeThrowAngle(double angle);
     int32_t OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent);
@@ -265,6 +267,7 @@ private:
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 private:
     bool existVkListener_ { false };
+    bool inHoveringState_ { true };
     int32_t dragTimerId_ { -1 };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     PullThrowListener listener_;

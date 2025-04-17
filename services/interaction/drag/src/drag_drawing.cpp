@@ -134,6 +134,8 @@ constexpr float ZOOM_IN_SCALE { 1.03f };
 constexpr float ZOOM_OUT_SCALE { 0.9f };
 constexpr float ZOOM_END_SCALE { 1.0f };
 constexpr float THROW_SLIP_TIME { 616.0f };
+constexpr float BREATHE_TIME { 600.0f };
+constexpr float BREATHE_REPEAT { 50 };
 constexpr uint32_t TRANSPARENT_COLOR_ARGB { 0x00000000 };
 constexpr int32_t DEFAULT_MOUSE_SIZE { 1 };
 constexpr int32_t DEFAULT_COLOR_VALUE { 0 };
@@ -899,6 +901,21 @@ void DragDrawing::LongPressDragAlphaAnimation()
     },  []() { FI_HILOGD("AlphaChanged end"); });
 }
 
+void DragDrawing::SetHovering(double tx, double ty, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    FI_HILOGI("enter");
+    CHKPV(pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    pointerItem.SetDisplayX(tx);
+    pointerItem.SetDisplayY(ty);
+    pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
+    MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
+    pullThrowAnimationXCompleted_ = false;
+    pullThrowAnimationYCompleted_ = false;
+}
+
 void DragDrawing::PullThrowAnimation(double tx, double ty, float vx,
     float vy, std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
@@ -917,45 +934,111 @@ void DragDrawing::PullThrowAnimation(double tx, double ty, float vx,
     int32_t positionX = tx + g_drawingInfo.pixelMapX;
     int32_t positionY = ty + g_drawingInfo.pixelMapY - adjustSize;
     // 执行动画X
+    ResetAnimationParameter();
     Rosen::RSNode::Animate(THROW_SLIP_TIMING_PROTOCOL, THROW_SLIP_CURVE_X, [&]() {
         CHKPV(g_drawingInfo.parentNode);
         g_drawingInfo.parentNode->SetFramePositionX(positionX);
-        Rosen::RSTransaction::FlushImplicitTransaction();
-    },  [&]() {
-        pullThrowAnimationXCompleted_ = true;
+        if (!g_drawingInfo.multiSelectedNodes.empty()) {
+            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+                CHKPV(multiSelectedNode);
+                multiSelectedNode->SetFramePositionX(positionX);
+            }
+        }
+    },  [this, pointerEvent, tx, ty]() {
         FI_HILOGI("PullThrowAnimationX end");
-        animationCV_.notify_all();  // 动画X完成，通知主线程
+        if (pullThrowAnimationYCompleted_) {
+            PullThrowBreatheAnimation();
+            SetHovering(tx, ty, pointerEvent);
+        } else {
+            pullThrowAnimationXCompleted_ = true;
+        }
     });
 
     // 执行动画Y
     Rosen::RSNode::Animate(THROW_SLIP_TIMING_PROTOCOL, THROW_SLIP_CURVE_Y, [&]() {
         CHKPV(g_drawingInfo.parentNode);
         g_drawingInfo.parentNode->SetFramePositionY(positionY);
-        Rosen::RSTransaction::FlushImplicitTransaction();
-    },  [&]() {
-        pullThrowAnimationYCompleted_ = true;
+        if (!g_drawingInfo.multiSelectedNodes.empty()) {
+            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+                CHKPV(multiSelectedNode);
+                multiSelectedNode->SetFramePositionY(positionY);
+            }
+        }
+    },  [this, pointerEvent, tx, ty]() {
         FI_HILOGI("PullThrowAnimationY end");
-        animationCV_.notify_all();  // 动画Y完成，通知主线程
+        if (pullThrowAnimationXCompleted_) {
+            PullThrowBreatheAnimation();
+            SetHovering(tx, ty, pointerEvent);
+        } else {
+            pullThrowAnimationYCompleted_ = true;
+        }
     });
-    
-    // 等待两个动画都完成
-    std::unique_lock<std::mutex> lock(animationMutex_);
-    animationCV_.wait(lock, [this] { return pullThrowAnimationXCompleted_ && pullThrowAnimationYCompleted_; });
-    
-    // 动画完成后执行后续逻辑
-    FI_HILOGI("set pointer event");
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    Rosen::RSTransaction::FlushImplicitTransaction();
+    FI_HILOGI("leave");
+    return;
+}
 
-    pointerItem.SetDisplayX(tx);
-    pointerItem.SetDisplayY(ty);
-    pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
-    MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
+void DragDrawing::PullThrowBreatheAnimation()
+{
+    FI_HILOGI("enter");
+    auto parentNode = g_drawingInfo.parentNode;
+    CHKPV(parentNode);
+    Rosen::RSAnimationTimingProtocol BREATHE_TIMING_PROTOCOL(std::round(BREATHE_TIME)); // animation time
+    Rosen::RSAnimationTimingCurve BREATHE_CURVE = Rosen::RSAnimationTimingCurve::LINEAR;
 
-    // 重置动画状态
-    pullThrowAnimationXCompleted_ = false;
-    pullThrowAnimationYCompleted_ = false;
+    BREATHE_TIMING_PROTOCOL.SetAutoReverse(true);
+    BREATHE_TIMING_PROTOCOL.SetRepeatCount(BREATHE_REPEAT);
+ 
+    // 执行动画
+    parentNode->SetScale(1.0f);
+    if (!g_drawingInfo.multiSelectedNodes.empty()) {
+        size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+        for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+            std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+            CHKPV(multiSelectedNode);
+            multiSelectedNode->SetScale(1.0f);
+        }
+    }
+    Rosen::RSNode::Animate(BREATHE_TIMING_PROTOCOL, BREATHE_CURVE, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetScale(1.2f);
+        if (!g_drawingInfo.multiSelectedNodes.empty()) {
+            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+                CHKPV(multiSelectedNode);
+                multiSelectedNode->SetScale(1.2f);
+            }
+        }
+    },  [&]() {
+        FI_HILOGI("Breathe end");
+    });
+    Rosen::RSTransaction::FlushImplicitTransaction();
+    FI_HILOGI("leave");
+    return;
+}
+
+void DragDrawing::PullThrowBreatheEndAnimation()
+{
+    FI_HILOGI("enter");
+    auto parentNode = g_drawingInfo.parentNode;
+    CHKPV(parentNode);
+    Rosen::RSAnimationTimingProtocol BREATHE_TIMING_END_PROTOCOL(std::round(0.0f)); // animation time
+    Rosen::RSAnimationTimingCurve BREATHE_CURVE = Rosen::RSAnimationTimingCurve::LINEAR;
+ 
+    // 执行动画
+    parentNode->SetScale(0.99f);
+    Rosen::RSNode::Animate(BREATHE_TIMING_END_PROTOCOL, BREATHE_CURVE, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetScale(1.0f);
+    },  [&]() {
+        FI_HILOGI("Breathe end Animation End");
+    });
+    Rosen::RSTransaction::FlushImplicitTransaction();
     FI_HILOGI("leave");
     return;
 }

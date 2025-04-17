@@ -90,7 +90,7 @@ public:
     bool RegisterPullThrowListener();
     bool RegisterVKListener();
 
-    Rosen::FoldStatus oldFoldStatus_;
+    Rosen::FoldStatus oldFoldStatus_ {Rosen::FoldStatus::UNKNOWN};
     bool currentMagneticState_ { false };
     int32_t obstatusVk_ = -1;
     sptr<VKObserver> CreateVKObserver(const VKObserver::UpdateFunc &func);
