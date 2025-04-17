@@ -149,6 +149,7 @@ ohos_unittest("CooperateServerTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
   ]
