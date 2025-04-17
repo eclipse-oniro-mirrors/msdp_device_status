@@ -209,8 +209,8 @@ void BoomerangNapi::OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap)
     }
 
     struct OhosPixelMapCreateOps createOps;
-    createOps.width = width;
-    createOps.height = height;
+    createOps.width = static_cast<uint32_t>(width);
+    createOps.height = static_cast<uint32_t>(height);
     createOps.pixelFormat = PIXEL_FORMAT;
     createOps.alphaType = ALPHA_TYPE;
     int32_t res = OH_PixelMap_CreatePixelMap(
