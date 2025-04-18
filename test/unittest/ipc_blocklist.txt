@@ -19,3 +19,7 @@ src:*base/msdp/device_status/test/unittest/frameworks/*
 src:*base/msdp/device_status/test/unittest/intention/*
 src:*base/msdp/device_status/test/unittest/services/unittest/*
 src:*base/msdp/device_status/test/unittest/utils/*
+src:*foundation/mulitimodalinput/input/*
+type:*OHOS::MMI::InputDeviceImpl
+type:*OHOS::MMI::InputManager
+type:*OHOS::MMI::InputManagerImpl
