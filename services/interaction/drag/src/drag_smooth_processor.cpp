@@ -42,9 +42,9 @@ DragMoveEvent DragSmoothProcessor::SmoothMoveEvent(uint64_t nanoTimestamp, uint6
 {
     resampleTimeStamp_ = nanoTimestamp - vSyncPeriod + ONE_MS_IN_NS;
     auto targetTimeStamp = resampleTimeStamp_;
+    std::lock_guard<std::mutex> lock(mtx_);
     std::vector<DragMoveEvent> currentEvents;
     {
-        std::lock_guard<std::mutex> lock(mtx_);
         currentEvents.swap(moveEvents_);
     }
     size_t historyEventSize = historyEvents_.size();
