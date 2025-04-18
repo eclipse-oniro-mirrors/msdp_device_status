@@ -1831,7 +1831,7 @@ int32_t DragManager::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
 
 int32_t DragManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    auto SetDragWindowRotateAnimation= [rsTransaction, this]() {
+    auto SetDragWindowRotateAnimation = [rsTransaction, this]() {
         return dragDrawing_.RotateDragWindowSync(rsTransaction);
     };
     CHKPR(context_, RET_ERR);
@@ -2094,7 +2094,7 @@ int32_t DragManager::RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotatio
     auto SetDragWindowRotate = [displayId, rotation, this]() {
         SetRotation(displayId, rotation);
         if ((dragState_ == DragState::START) || (dragState_ == DragState::MOTION_DRAGGING)) {
-           return dragDrawing_.RotateDragWindowAsync(rotation);
+            return dragDrawing_.RotateDragWindowAsync(rotation);
         }
         return RET_OK;
     };
