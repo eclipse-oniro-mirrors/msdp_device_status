@@ -1290,6 +1290,7 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor)
     return extraData;
 }
 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
 MMI::ExtraData DragManager::CreatePullThrowExtraData(bool appended, bool drawCursor,
     std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
@@ -1312,6 +1313,7 @@ MMI::ExtraData DragManager::CreatePullThrowExtraData(bool appended, bool drawCur
         extraData.sourceType, extraData.pointerId, extraData.eventId);
     return extraData;
 }
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 int32_t DragManager::InitDataManager(const DragData &dragData, const std::string &appCaller)
 {
