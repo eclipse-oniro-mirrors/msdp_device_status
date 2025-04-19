@@ -40,13 +40,11 @@ void DragSmoothProcessor::InsertEvent(const DragMoveEvent &event)
 
 DragMoveEvent DragSmoothProcessor::SmoothMoveEvent(uint64_t nanoTimestamp, uint64_t vSyncPeriod)
 {
+    std::lock_guard<std::mutex> lock(mtx_);
     resampleTimeStamp_ = nanoTimestamp - vSyncPeriod + ONE_MS_IN_NS;
     auto targetTimeStamp = resampleTimeStamp_;
-    std::lock_guard<std::mutex> lock(mtx_);
     std::vector<DragMoveEvent> currentEvents;
-    {
-        currentEvents.swap(moveEvents_);
-    }
+    currentEvents.swap(moveEvents_);
     size_t historyEventSize = historyEvents_.size();
     if (currentEvents.empty() && historyEventSize > 0) {
         if (historyEventSize > 1) {
