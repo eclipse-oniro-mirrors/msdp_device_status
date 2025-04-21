@@ -149,6 +149,7 @@ ohos_unittest("CooperateServerTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
   ]
@@ -213,6 +214,7 @@ ohos_unittest("CooperatePluginTest") {
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
+    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
@@ -376,6 +378,7 @@ ohos_unittest("InputEventBuilderTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
   ]
@@ -442,6 +445,7 @@ ohos_unittest("InputEventInterceptorTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
   ]
@@ -502,6 +506,7 @@ ohos_unittest("CooperateTest") {
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
+    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",

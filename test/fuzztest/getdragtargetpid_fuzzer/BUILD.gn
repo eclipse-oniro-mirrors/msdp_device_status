@@ -31,9 +31,10 @@ deps_ex = [
   "hilog:libhilog",
   "input:libmmi-client",
   "image_framework:image_native",
+  "safwk:system_ability_fwk",
+  "samgr:samgr_proxy",
   "window_manager:libwm",
   "window_manager:libdm",
-  "safwk:system_ability_fwk",
 ]
 
 ###############################fuzztest#################################

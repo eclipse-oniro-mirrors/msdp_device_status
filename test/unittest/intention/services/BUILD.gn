@@ -94,6 +94,7 @@ ohos_unittest("IntentionServiceTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
   ]
@@ -281,6 +282,7 @@ ohos_unittest("IntentionDeviceManagerTest") {
     "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
   ]

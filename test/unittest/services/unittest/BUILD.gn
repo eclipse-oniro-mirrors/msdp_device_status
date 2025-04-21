@@ -125,6 +125,7 @@ ohos_unittest("DragDataManagerTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "libxml2:libxml2",
     "window_manager:libdm",
   ]
 }

@@ -31,6 +31,7 @@ deps_ex = [
   "hilog:libhilog",
   "input:libmmi-client",
   "safwk:system_ability_fwk",
+  "samgr:samgr_proxy",
   "window_manager:libdm",
 ]
 
