@@ -855,7 +855,6 @@ void CooperateIn::StopCooperate(Context &context, const CooperateEvent &event)
 
     DSoftbusStopCooperate notice {};
     context.dsoftbus_.StopCooperate(context.Peer(), notice);
-    context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnResetCooperation();
     SetPointerVisible(context);

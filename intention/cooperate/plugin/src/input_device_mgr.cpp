@@ -106,6 +106,18 @@ void InputDeviceMgr::RemoveVirtualInputDevice(const std::string &networkId)
     }
 }
 
+void InputDeviceMgr::RemoveAllVirtualInputDevice()
+{
+    CALL_INFO_TRACE;
+    for (const auto& [key, deviceSet] : remoteDevices_) {
+        for (const auto &device : deviceSet) {
+            CHKPC(device);
+            FI_HILOGI("Remove virtual device from %{public}s", Utility::Anonymize(key).c_str());
+            RemoveVirtualInputDevice(key, device->GetId());
+        }
+    }
+}
+
 void InputDeviceMgr::HandleRemoteHotPlug(const DSoftbusHotPlugEvent &notice)
 {
     CALL_INFO_TRACE;

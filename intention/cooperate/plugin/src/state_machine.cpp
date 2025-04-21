@@ -291,6 +291,7 @@ void StateMachine::DisableCooperate(Context &context, const CooperateEvent &even
     context.DisableCooperate(disableEvent);
     context.eventMgr_.DisableCooperate(disableEvent);
     context.commonEvent_.RemoveObserver(observer_);
+    context.inputDevMgr_.RemoveAllVirtualInputDevice();
     RemoveSessionObserver(context, disableEvent);
     RemoveMonitor(context);
     isCooperateEnable_ = false;
@@ -345,6 +346,7 @@ void StateMachine::StopCooperate(Context &context, const CooperateEvent &event)
     CALL_DEBUG_ENTER;
     context.CloseDistributedFileConnection(context.Peer());
     context.OnStopCooperate();
+    context.inputDevMgr_.RemoveAllVirtualInputDevice();
     Transfer(context, event);
 }
 

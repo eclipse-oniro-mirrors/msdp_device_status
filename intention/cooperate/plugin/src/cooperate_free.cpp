@@ -223,7 +223,6 @@ void CooperateFree::Initial::OnStop(Context &context, const CooperateEvent &even
         .normal = true,
     };
     context.eventMgr_.StopCooperateFinish(notice);
-    context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     parent_.UnchainConnections(context, param);
 }
 
@@ -282,7 +281,6 @@ void CooperateFree::Initial::OnDisable(Context &context, const CooperateEvent &e
     bool hasLocalPointerDevice =  parent_.env_->GetDeviceManager().HasLocalPointerDevice() ||
         parent_.env_->GetInput().HasLocalPointerDevice();
     FI_HILOGI("HasLocalPointerDevice:%{public}s", hasLocalPointerDevice ? "true" : "false");
-    context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     parent_.env_->GetInput().SetPointerVisibility(hasLocalPointerDevice, PRIORITY);
 }
 

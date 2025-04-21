@@ -49,6 +49,7 @@ public:
     void HandleRemoteHotPlug(const DSoftbusHotPlugEvent &notice);
     void OnRemoteInputDevice(const DSoftbusSyncInputDevice &notice);
     void OnRemoteHotPlug(const DSoftbusHotPlugEvent &notice);
+    void RemoveAllVirtualInputDevice();
 
 private:
     void NotifyInputDeviceToRemote(const std::string &remoteNetworkId);
