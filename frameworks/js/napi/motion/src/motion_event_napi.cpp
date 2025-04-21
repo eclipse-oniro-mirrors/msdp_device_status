@@ -82,22 +82,25 @@ bool MotionEventNapi::AddCallback(int32_t eventType, napi_value handler)
     return true;
 }
 
-bool MotionEventNapi::RemoveAllCallback(int32_t eventType)
+bool MotionEventNapi::RemoveCallback(int32_t eventType)
 {
-    FI_HILOGD("RemoveAllCallback in, event:%{public}d", eventType);
+    FI_HILOGD("Enter, event:%{public}d", eventType);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
         FI_HILOGE("EventType %{public}d not found", eventType);
         return false;
     }
+
     if (iter->second == nullptr) {
         FI_HILOGE("listener is nullptr");
         return false;
     }
+
     if (iter->second->onRefSets.empty()) {
-        FI_HILOGE("onRefSets is empty");
+        FI_HILOGE("Refs is empty");
         return false;
     }
+
     for (auto it = iter->second->onRefSets.begin(); it != iter->second->onRefSets.end();) {
         if (*it == nullptr) {
             ++it;
@@ -118,59 +121,12 @@ bool MotionEventNapi::RemoveAllCallback(int32_t eventType)
     return true;
 }
 
-bool MotionEventNapi::RemoveCallback(int32_t eventType, napi_value handler)
-{
-    FI_HILOGD("RemoveCallback in, event:%{public}d", eventType);
-    auto iter = events_.find(eventType);
-    if (iter == events_.end()) {
-        FI_HILOGE("EventType %{public}d not found", eventType);
-        return false;
-    }
-    if (iter->second == nullptr) {
-        FI_HILOGE("listener is nullptr");
-        return false;
-    }
-    if (iter->second->onRefSets.empty()) {
-        FI_HILOGE("onRefSets is empty");
-        return false;
-    }
-    for (auto it = iter->second->onRefSets.begin(); it != iter->second->onRefSets.end();) {
-        if (*it == nullptr) {
-            ++it;
-            continue;
-        }
-        napi_value deleteHandler;
-        napi_status status = napi_get_reference_value(env_, *it, &deleteHandler);
-        if (status != napi_ok) {
-            FI_HILOGE("napi_get_reference_value failed");
-            ++it;
-            continue;
-        }
-        if (IsSameValue(env_, handler, deleteHandler)) {
-            status = napi_delete_reference(env_, *it);
-            if (status != napi_ok) {
-                FI_HILOGE("napi_delete_reference failed");
-                ++it;
-                continue;
-            }
-            iter->second->onRefSets.erase(it++);
-            break;
-        }
-        ++it;
-    }
-    if (iter->second->onRefSets.empty()) {
-        events_.erase(eventType);
-    }
-    return true;
-}
-
 bool MotionEventNapi::InsertRef(std::shared_ptr<MotionEventListener> listener, const napi_value &handler)
 {
     if (listener == nullptr) {
         FI_HILOGE("listener is nullptr");
         return false;
     }
-    bool hasHandler = false;
     for (auto item : listener->onRefSets) {
         napi_value onHandler = nullptr;
         napi_status status = napi_get_reference_value(env_, item, &onHandler);
@@ -183,27 +139,24 @@ bool MotionEventNapi::InsertRef(std::shared_ptr<MotionEventListener> listener, c
             }
             continue;
         }
-        if (IsSameValue(env_, handler, onHandler)) {
-            hasHandler = true;
-            break;
-        }
-    }
-    if (hasHandler) {
-        FI_HILOGD("napi repeat subscribe");
-        return true;
-    }
-    napi_ref onHandlerRef = nullptr;
-    napi_status status = napi_create_reference(env_, handler, 1, &(onHandlerRef));
-    if (status != napi_ok) {
-        FI_HILOGE("napi_create_reference failed");
-        return false;
-    }
 
-    FI_HILOGD("Insert new ref");
-    auto ret = listener->onRefSets.insert(onHandlerRef);
-    if (!ret.second) {
-        FI_HILOGE("Failed to insert");
-        return false;
+        if (IsSameValue(env_, handler, onHandler)) {
+            continue;
+        }
+
+        napi_ref onHandlerRef = nullptr;
+        status = napi_create_reference(env_, handler, 1, &(onHandlerRef));
+        if (status != napi_ok) {
+            FI_HILOGE("napi_create_reference failed");
+            return false;
+        }
+
+        FI_HILOGD("Insert new ref");
+        auto ret = listener->onRefSets.insert(onHandlerRef);
+        if (!ret.second) {
+            FI_HILOGE("Failed to insert");
+            return false;
+        }
     }
     FI_HILOGD("ref size %{public}zu", listener->onRefSets.size());
     return true;
