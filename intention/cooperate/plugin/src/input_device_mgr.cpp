@@ -116,7 +116,6 @@ void InputDeviceMgr::RemoveAllVirtualInputDevice()
             RemoveVirtualInputDevice(key, device->GetId());
         }
     }
-    
 }
 
 void InputDeviceMgr::HandleRemoteHotPlug(const DSoftbusHotPlugEvent &notice)
