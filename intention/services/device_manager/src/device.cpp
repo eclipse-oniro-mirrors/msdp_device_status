@@ -92,9 +92,9 @@ int32_t Device::Open()
             }
         } else {
             FI_HILOGD("Successful opening \'%{public}s\'", buf);
+            fdsan_exchange_owner_tag(fd_, 0, DOMAIN_ID);
             break;
         }
-        fdsan_exchange_owner_tag(fd_, 0, DOMAIN_ID);
     }
     QueryDeviceInfo();
     QuerySupportedEvents();
