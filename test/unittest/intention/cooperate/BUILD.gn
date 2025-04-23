@@ -229,6 +229,7 @@ ohos_unittest("InputEventSerializationTest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./../../ipc_blocklist.txt"
   }
   branch_protector_ret = "pac_ret"
   module_out_path = module_output_path
@@ -277,6 +278,7 @@ ohos_unittest("InputEventSamplerTest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./../../ipc_blocklist.txt"
   }
   branch_protector_ret = "pac_ret"
   module_out_path = module_output_path
@@ -459,6 +461,7 @@ ohos_unittest("CooperateTest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./../../ipc_blocklist.txt"
   }
 
   branch_protector_ret = "pac_ret"
