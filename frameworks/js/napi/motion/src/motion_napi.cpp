@@ -145,7 +145,7 @@ bool MotionNapi::SubscribeCallback(napi_env env, int32_t type)
             return false;
         } else {
             FI_HILOGE("failed to subscribe");
-            ThrowMotionErr(env, SUBSCRIBE_EXCEPTION, "Subscribe failed");
+            ThrowMotionErr(env, SERVICE_EXCEPTION, "Subscribe failed");
             return false;
         }
     }
@@ -182,7 +182,7 @@ bool MotionNapi::UnSubscribeCallback(napi_env env, int32_t type)
             return false;
         } else {
             FI_HILOGE("failed to unsubscribe");
-            ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+            ThrowMotionErr(env, SERVICE_EXCEPTION, "Unsubscribe failed");
             return false;
         }
     }
@@ -259,7 +259,7 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
     }
 
     if (!g_motionObj->AddCallback(type, args[ARG_1])) {
-        ThrowMotionErr(env, SERVICE_EXCEPTION, "AddCallback failed");
+        ThrowMotionErr(env, SUBSCRIBE_EXCEPTION, "AddCallback failed");
         return nullptr;
     }
     napi_get_undefined(env, &result);
@@ -311,7 +311,7 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 
 #ifdef MOTION_ENABLE
     if (!g_motionObj->RemoveCallback(type)) {
-        ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
+        ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "RemoveCallback failed");
         return nullptr;
     }
 
