@@ -107,7 +107,8 @@ private:
     int32_t DeserializeDevice(std::shared_ptr<IDevice> device, NetPacket &packet);
     void OnRelayCooperateWithOptions(const std::string &networkId, NetPacket &packet);
     void OnRelayCooperateWithOptionsFinish(const std::string &networkId, NetPacket &packet);
-
+    void RemoteStartCooperate();
+    
     IContext *env_ { nullptr };
     std::mutex lock_;
     Channel<CooperateEvent>::Sender sender_;

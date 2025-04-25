@@ -137,7 +137,7 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
     NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE);
     packet << event.originNetworkId << event.cursorPos.x
         << event.cursorPos.y << event.success << event.extra.priv << event.pointerSpeed
-        << event.touchPadSpeed;
+        << event.touchPadSpeed << event.uid;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         CooperateRadarInfo radarInfo {
@@ -405,7 +405,12 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     if (packet.ChkRWError()) {
         event.touchPadSpeed = -1;
     }
-    FI_HILOGI("Cur pointerSpeed:%{public}d, touchPadSpeed:%{public}d,", event.pointerSpeed, event.touchPadSpeed);
+    packet >> event.uid;
+    if (packet.ChkRWError()) {
+        event.uid = 0;
+    }
+    FI_HILOGI("Cur pointerSpeed:%{public}d, touchPadSpeed:%{public}d, uid:%{public}d",
+        event.pointerSpeed, event.touchPadSpeed, event.uid);
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_START_COOPERATE,
         event));
@@ -413,6 +418,11 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS);
     radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS);
     CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    RemoteStartCooperate();
+}
+
+void DSoftbusHandler::RemoteStartCooperate()
+{
     auto motionDrag = env_->GetPluginManager().LoadMotionDrag();
     if (motionDrag == nullptr) {
         FI_HILOGE("Failed to load motion drag");

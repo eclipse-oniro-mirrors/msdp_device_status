@@ -111,7 +111,7 @@ int32_t CooperateServer::Start(CallingContext &context, MessageParcel &data, Mes
         return cooperate->StartWithOptions(context.pid, param.userData, param.remoteNetworkId,
             param.startDeviceId, param.options);
     }
-    return cooperate->Start(context.pid, param.userData, param.remoteNetworkId, param.startDeviceId);
+    return cooperate->Start(context.pid, param.userData, param.remoteNetworkId, param.startDeviceId, context.uid);
 }
 
 int32_t CooperateServer::Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply)

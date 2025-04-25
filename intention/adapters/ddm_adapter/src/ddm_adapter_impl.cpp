@@ -124,7 +124,43 @@ int32_t DDMAdapterImpl::GetTrustedDeviceList(std::vector<DistributedHardware::Dm
     return RET_OK;
 }
 
-bool DDMAdapterImpl::CheckSameAccountToLocal(const std::string &networkId)
+bool DDMAdapterImpl::CheckSameAccountToLocal(const std::string &networkId, const int32_t uid)
+{
+    CALL_INFO_TRACE;
+    int32_t appUserId = -1;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, appUserId);
+    FI_HILOGI("GetOsAccountLocalIdFromUid uid:%{public}d, localId:%{public}d", uid, appUserId);
+    bool isForegroundUser = false;
+    int32_t res = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(appUserId, isForegroundUser);
+    if (res != ERR_OK) {
+        FI_HILOGI("app userId %{public}d is not Foreground, ret:%{public}d", appUserId, res);
+        return false;
+    }
+    if (!isForegroundUser) {
+        FI_HILOGI("app userId is not Foreground");
+        return false;
+    }
+    isForegroundUser = false;
+    std::vector<AccountSA::ForegroundOsAccount> accounts;
+    ErrCode errCode = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccounts(accounts);
+    if (errCode != ERR_OK || accounts.empty()) {
+        FI_HILOGE("GetForegroundOsAccounts fail, ret : %{public}d", errCode);
+        return false;
+    }
+    for (auto account : accounts) {
+        if (account.localId == appUserId) {
+            isForegroundUser = true;
+            break;
+        }
+    }
+    if (!isForegroundUser) {
+        FI_HILOGI("app userId is not Foreground");
+        return false;
+    }
+    return CheckIsSameAccount(networkId);
+}
+
+bool DDMAdapterImpl::CheckIsSameAccount(const std::string &networkId)
 {
     CALL_INFO_TRACE;
     std::vector<int32_t> ids;
