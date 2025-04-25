@@ -623,6 +623,27 @@ HWTEST_F(SocketSessionTest, SocketSessionTest32, TestSize.Level0)
     ASSERT_NO_FATAL_FAILURE(g_socketSessionManager->OnEpollIn(*epollEventSource));
     ASSERT_NO_FATAL_FAILURE(g_socketSessionManager->DeleteCollaborationServiceByName());
 }
+
+/**
+ * @tc.name: SocketSessionTest33
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SocketSessionTest, SocketSessionTest33, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto onDisconnected = []() {
+        return;
+    };
+    int32_t fd = g_session->GetFd();;
+    auto recv = [](const NetPacket &pkt) {
+        return;
+    };
+    SocketConnection socketConnection(1, recv, onDisconnected);
+    ASSERT_NO_FATAL_FAILURE(socketConnection.OnReadable(fd));
+    ASSERT_NO_FATAL_FAILURE(socketConnection.OnShutdown(fd));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
