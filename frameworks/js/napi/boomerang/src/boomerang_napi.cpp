@@ -211,7 +211,7 @@ void BoomerangNapi::OnEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap>
         return;
     }
     if (deferred != nullptr) {
-        napi_resolve_deferred(env,deferred, pixelMapNapi);
+        napi_resolve_deferred(env, deferred, pixelMapNapi);
     }
 }
 
