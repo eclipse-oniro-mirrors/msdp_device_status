@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,9 +174,10 @@ int32_t DragClient::RemoveSubscriptListener(ITunnelClient &tunnel, SubscriptList
     return RET_OK;
 }
 
-int32_t DragClient::SetDragWindowVisible(ITunnelClient &tunnel, bool visible, bool isForce)
+int32_t DragClient::SetDragWindowVisible(
+    ITunnelClient &tunnel, bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    SetDragWindowVisibleParam param { visible, isForce };
+    SetDragWindowVisibleParam param { visible, isForce, rsTransaction };
     DefaultReply reply {};
 
     int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_DRAG_WINDOW_VISIBLE, param, reply);
