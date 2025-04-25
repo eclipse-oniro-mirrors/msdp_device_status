@@ -89,7 +89,7 @@ bool StopDragParam::Unmarshalling(MessageParcel &parcel)
 }
 
 SetDragWindowVisibleParam::SetDragWindowVisibleParam(
-    bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) 
+    bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
     : visible_(visible), isForce_(isForce), rsTransaction_(rsTransaction)
 {}
 
