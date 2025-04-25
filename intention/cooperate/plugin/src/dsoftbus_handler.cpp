@@ -104,6 +104,12 @@ void DSoftbusHandler::AttachSender(Channel<CooperateEvent>::Sender sender)
     sender_ = sender;
 }
 
+int32_t DSoftbusHandler::CheckDeviceOnline(const std::string &networkId)
+{
+    int32_t ret = env_->GetDSoftbus().CheckDeviceOnline(networkId);
+    return ret;
+}
+
 int32_t DSoftbusHandler::OpenSession(const std::string &networkId)
 {
     CALL_INFO_TRACE;

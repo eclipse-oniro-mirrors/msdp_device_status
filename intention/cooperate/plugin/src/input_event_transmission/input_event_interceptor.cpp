@@ -65,11 +65,11 @@ InputEventInterceptor::~InputEventInterceptor()
     Disable();
 }
 
-void InputEventInterceptor::Enable(Context &context)
+int32_t InputEventInterceptor::Enable(Context &context)
 {
     CALL_INFO_TRACE;
     if (interceptorId_ > 0) {
-        return;
+        return RET_OK;
     }
     auto cursorPos = context.CursorPosition();
     FI_HILOGI("Cursor transite out at (%{private}d, %{private}d)", cursorPos.x, cursorPos.y);
@@ -97,10 +97,12 @@ void InputEventInterceptor::Enable(Context &context)
             .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId_.c_str())
         };
         CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+        return RET_ERR;
     }
     TurnOffChannelScan();
     HeartBeatSend();
     ExecuteInner();
+    return RET_OK;
 }
 
 void InputEventInterceptor::HeartBeatSend()

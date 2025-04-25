@@ -61,6 +61,8 @@ private:
         void OnUpdateCooperateFlag(Context &context, const CooperateEvent &event);
         void OnStartWithOptions(Context &context, const CooperateEvent &event);
         void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
+        void CooperateFail(Context &context, int32_t ret);
+        void InitiatorPointerVisible(bool visible);
 
         CooperateFree &parent_;
     };

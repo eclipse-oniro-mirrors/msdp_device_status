@@ -169,25 +169,14 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
     }
     int32_t ret = context.dsoftbus_.OpenSession(context.Peer());
     if (ret != RET_OK) {
-        FI_HILOGE("[start cooperation] Failed to connect to \'%{public}s\'",
-            Utility::Anonymize(context.Peer()).c_str());
-        CooperateRadarInfo radarInfo {
-            .funcName = __FUNCTION__,
-            .bizState = static_cast<int32_t> (BizState::STATE_END),
-            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_OPEN_DSOFTBUS_SESSION),
-            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
-            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
-            .errCode = static_cast<int32_t> (CooperateRadarErrCode::OPEN_DSOFTBUS_SESSION_FAILED),
-            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
-            .peerNetId = Utility::DFXRadarAnonymize(notice.remoteNetworkId.c_str())
-        };
-        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
-        int32_t errNum = (ret == RET_ERR ? static_cast<int32_t>(CoordinationErrCode::OPEN_SESSION_FAILED) : ret);
-        DSoftbusStartCooperateFinished failNotice {
-            .success = false,
-            .errCode = errNum
-        };
-        context.eventMgr_.StartCooperateFinish(failNotice);
+        CooperateFail(context, ret);
+        return;
+    }
+    InitiatorPointerVisible(false);
+    ret = context.dsoftbus_.CheckDeviceOnline(context.Peer());
+    if (ret != RET_OK) {
+        FI_HILOGE("CheckDeviceOnline failed, networkId:%{public}s", Utility::Anonymize(context.Peer()).c_str());
+        InitiatorPointerVisible(true);
         return;
     }
     DSoftbusStartCooperate startNotice {
@@ -198,8 +187,16 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
         .touchPadSpeed = context.GetTouchPadSpeed(),
     };
     context.OnStartCooperate(startNotice.extra);
-    context.dsoftbus_.StartCooperate(context.Peer(), startNotice);
-    context.inputEventInterceptor_.Enable(context);
+    ret = context.dsoftbus_.StartCooperate(context.Peer(), startNotice);
+    if (ret != RET_OK) {
+        InitiatorPointerVisible(true);
+        return;
+    }
+    ret = context.inputEventInterceptor_.Enable(context);
+    if (ret != RET_OK) {
+        InitiatorPointerVisible(true);
+        return;
+    }
     context.eventMgr_.StartCooperateFinish(startNotice);
     FI_HILOGI("[start cooperation] Cooperation with \'%{public}s\' established",
         Utility::Anonymize(context.Peer()).c_str());
@@ -210,6 +207,40 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
     ss << "start_cooperation_with_ " << Utility::Anonymize(context.Peer()).c_str();
     context.FinishTrace(ss.str());
 #endif // ENABLE_PERFORMANCE_CHECK
+}
+
+void CooperateFree::Initial::InitiatorPointerVisible(bool visible)
+{
+    FI_HILOGI("Set pointer visible:%{public}s", visible ? "true" : "false");
+    CHKPV(parent_.env_);
+    parent_.env_->GetInput().SetPointerVisibility(visible);
+}
+
+void CooperateFree::Initial::CooperateFail(Context &context, int32_t ret)
+{
+    CALL_INFO_TRACE;
+    if (ret != RET_OK) {
+        FI_HILOGE("[start cooperation] Failed to connect to \'%{public}s\'",
+            Utility::Anonymize(context.Peer()).c_str());
+        CooperateRadarInfo radarInfo {
+            .funcName = __FUNCTION__,
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_OPEN_DSOFTBUS_SESSION),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::OPEN_DSOFTBUS_SESSION_FAILED),
+            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(context.Peer().c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+        int32_t errNum = (ret == RET_ERR ? static_cast<int32_t>(CoordinationErrCode::OPEN_SESSION_FAILED) : ret);
+        DSoftbusStartCooperateFinished failNotice {
+            .success = false,
+            .errCode = errNum
+        };
+        context.eventMgr_.StartCooperateFinish(failNotice);
+        return;
+    }
 }
 
 void CooperateFree::Initial::OnStop(Context &context, const CooperateEvent &event)

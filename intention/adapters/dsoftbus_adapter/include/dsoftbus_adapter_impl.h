@@ -81,6 +81,7 @@ public:
     int32_t OpenSession(const std::string &networkId) override;
     void CloseSession(const std::string &networkId) override;
     void CloseAllSessions() override;
+    int32_t CheckDeviceOnline(const std::string &networkId) override;
 
     int32_t SendPacket(const std::string &networkId, NetPacket &packet) override;
     int32_t SendParcel(const std::string &networkId, Parcel &parcel) override;
@@ -109,7 +110,6 @@ private:
     void HandleSessionData(const std::string &networkId, CircleStreamBuffer &circleBuffer);
     void HandlePacket(const std::string &networkId, NetPacket &packet);
     void HandleRawData(const std::string &networkId, const void *data, uint32_t dataLen);
-    bool CheckDeviceOnline(const std::string &networkId);
     void InitHeartBeat();
     int32_t KeepHeartBeating(const std::string &networkId);
     void UpdateHeartBeatState(const std::string &networkId, bool state);

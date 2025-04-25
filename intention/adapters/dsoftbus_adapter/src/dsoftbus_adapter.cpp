@@ -40,6 +40,11 @@ void DSoftbusAdapter::RemoveObserver(std::shared_ptr<IDSoftbusObserver> observer
     DSoftbusAdapterImpl::GetInstance()->RemoveObserver(observer);
 }
 
+int32_t DSoftbusAdapter::CheckDeviceOnline(const std::string &networkId)
+{
+    return DSoftbusAdapterImpl::GetInstance()->CheckDeviceOnline(networkId);
+}
+
 int32_t DSoftbusAdapter::OpenSession(const std::string &networkId)
 {
     return DSoftbusAdapterImpl::GetInstance()->OpenSession(networkId);

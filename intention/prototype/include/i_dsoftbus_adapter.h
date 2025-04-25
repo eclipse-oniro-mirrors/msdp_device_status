@@ -48,6 +48,7 @@ public:
     virtual void AddObserver(std::shared_ptr<IDSoftbusObserver> observer) = 0;
     virtual void RemoveObserver(std::shared_ptr<IDSoftbusObserver> observer) = 0;
 
+    virtual int32_t CheckDeviceOnline(const std::string &networkId) = 0;
     virtual int32_t OpenSession(const std::string &networkId) = 0;
     virtual void CloseSession(const std::string &networkId) = 0;
     virtual void CloseAllSessions() = 0;

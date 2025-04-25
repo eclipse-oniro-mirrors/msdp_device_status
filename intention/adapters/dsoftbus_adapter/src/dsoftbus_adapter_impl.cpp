@@ -113,24 +113,24 @@ void DSoftbusAdapterImpl::RemoveObserver(std::shared_ptr<IDSoftbusObserver> obse
     observers_.erase(Observer());
 }
 
-bool DSoftbusAdapterImpl::CheckDeviceOnline(const std::string &networkId)
+int32_t DSoftbusAdapterImpl::CheckDeviceOnline(const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     std::vector<DistributedHardware::DmDeviceInfo> deviceList;
     if (D_DEV_MGR.GetTrustedDeviceList(FI_PKG_NAME, "", deviceList) != RET_OK) {
         FI_HILOGE("GetTrustedDeviceList failed");
-        return false;
+        return RET_ERR;
     }
     if (deviceList.empty()) {
         FI_HILOGE("Trust device list size is invalid");
-        return false;
+        return RET_ERR;
     }
     for (const auto &deviceInfo : deviceList) {
         if (std::string(deviceInfo.networkId) == networkId) {
-            return true;
+            return RET_OK;
         }
     }
-    return false;
+    return RET_ERR;
 }
 
 int32_t DSoftbusAdapterImpl::OpenSession(const std::string &networkId)
@@ -140,10 +140,6 @@ int32_t DSoftbusAdapterImpl::OpenSession(const std::string &networkId)
 #ifdef ENABLE_PERFORMANCE_CHECK
     auto startStamp = std::chrono::steady_clock::now();
 #endif // ENABLE_PERFORMANCE_CHECK
-    if (!DSoftbusAdapterImpl::CheckDeviceOnline(networkId)) {
-        FI_HILOGE("CheckDeviceOnline failed, networkId:%{public}s", Utility::Anonymize(networkId).c_str());
-        return RET_ERR;
-    }
     int32_t ret = OpenSessionLocked(networkId);
 #ifdef ENABLE_PERFORMANCE_CHECK
     auto openSessionDuration = std::chrono::duration_cast<std::chrono::milliseconds>(
