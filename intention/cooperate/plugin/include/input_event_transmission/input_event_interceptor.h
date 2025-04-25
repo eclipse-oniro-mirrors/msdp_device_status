@@ -37,7 +37,7 @@ public:
     ~InputEventInterceptor();
     DISALLOW_COPY_AND_MOVE(InputEventInterceptor);
 
-    void Enable(Context &context);
+    int32_t Enable(Context &context);
     void Disable();
     void Update(Context &context);
 

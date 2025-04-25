@@ -82,6 +82,7 @@ public:
     int32_t RelayCooperateWithOptionsFinish(const std::string &networkId,
         const DSoftbusRelayCooperateFinished &event);
     static std::string GetLocalNetworkId();
+    int32_t CheckDeviceOnline(const std::string &networkId);
 
 private:
     void OnBind(const std::string &networkId);
