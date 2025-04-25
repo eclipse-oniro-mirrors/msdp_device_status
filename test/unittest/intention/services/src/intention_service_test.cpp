@@ -62,11 +62,9 @@ constexpr int32_t MAX_PIXEL_MAP_HEIGHT { 600 };
 constexpr bool HAS_CANCELED_ANIMATION { true };
 constexpr bool HAS_CUSTOM_ANIMATION { true };
 Intention g_intention { Intention::DRAG };
-static StationaryServer stationary_;
 std::shared_ptr<ContextService> g_context { nullptr };
 std::shared_ptr<IntentionService> g_intentionService { nullptr };
 std::shared_ptr<IntentionService> g_intentionServiceNullptr { nullptr };
-std::shared_ptr<IntentionDumper> g_intentionDumper { nullptr };
 IContext *g_contextNullptr { nullptr };
 int32_t PERMISSION_EXCEPTION { 201 };
 } // namespace
@@ -147,14 +145,12 @@ void IntentionServiceTest::SetUpTestCase()
 {
     g_intentionService = std::make_shared<IntentionService>(ContextService::GetInstance());
     g_intentionServiceNullptr = std::make_shared<IntentionService>(g_contextNullptr);
-    g_intentionDumper = std::make_shared<IntentionDumper>(ContextService::GetInstance(), stationary_);
 }
 
 void IntentionServiceTest::TearDownTestCase()
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     g_intentionServiceNullptr = nullptr;
-    g_intentionDumper = nullptr;
 }
 
 void IntentionServiceTest::SetUp() {}
@@ -1056,20 +1052,6 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam018, TestSize.Level0
     ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_EXTRA_INFO, dataParcel, replyParcel);
     EXPECT_EQ(ret, RET_ERR);
 }
-
-/**
- * @tc.name: IntentionDumper_Dump
- * @tc.desc: Test Dump
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionDumper_Dump, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    int32_t fd = 1;
-    std::vector<std::string> args {"help", "subscribe", "list", "current", "drag", "macroState", "unknow"};
-    ASSERT_NO_FATAL_FAILURE(g_intentionDumper->Dump(fd, args));
-}
  
 /**
  * @tc.name: IntentionServiceTest_002
@@ -1100,7 +1082,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable003, TestSize.Level0)
     int32_t ret = g_intentionService->Enable(Intention::COOPERATE, dataParcel, replyParcel);
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
- 
+
 /**
  * @tc.name: IntentionServiceTest_004
  * @tc.desc: Test Enable
@@ -1115,6 +1097,37 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable004, TestSize.Level0)
     int32_t ret = g_intentionService->Enable(Intention::BOOMERANG, dataParcel, replyParcel);
     EXPECT_EQ(ret, RET_ERR);
 }
+
+/**
+ * @tc.name: IntentionServiceTest_005
+ * @tc.desc: Test Enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable005, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    int32_t ret = g_intentionService->Enable(Intention::UNKNOWN_INTENTION, dataParcel, replyParcel);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest_006
+ * @tc.desc: Test Enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable006, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    int32_t ret = g_intentionService->Enable(Intention::STATIONARY, dataParcel, replyParcel);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

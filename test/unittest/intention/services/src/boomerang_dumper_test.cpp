@@ -231,7 +231,7 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest006, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    int32_t value = 'k';
+    int32_t value = 'm';
     ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
 

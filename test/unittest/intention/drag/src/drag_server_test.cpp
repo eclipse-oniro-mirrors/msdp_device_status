@@ -87,6 +87,7 @@ Security::AccessToken::HapPolicyParams g_testPolicyPrams = {
     .permList = {},
     .permStateList = {}
 };
+int32_t PERMISSION_EXCEPTION { 202 };
 } // namespace
 
 ContextService::ContextService()
@@ -470,15 +471,15 @@ HWTEST_F(DragServerTest, DragServerTest7, TestSize.Level0)
     };
     MessageParcel reply;
     MessageParcel datas;
-    int32_t ret = -1;
     std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
         DragRequestID::SET_DRAG_WINDOW_VISIBLE, DragRequestID::UPDATE_DRAG_STYLE,
         DragRequestID::UPDATE_SHADOW_PIC, DragRequestID::UPDATE_PREVIEW_STYLE,
-        DragRequestID::UPDATE_PREVIEW_STYLE_WITH_ANIMATION, DragRequestID::SET_DRAG_WINDOW_SCREEN_ID};
+        DragRequestID::UPDATE_PREVIEW_STYLE_WITH_ANIMATION, DragRequestID::SET_DRAG_WINDOW_SCREEN_ID,
+        DragRequestID::SET_DRAG_SWITCH_STATE, DragRequestID::SET_APP_DRAG_SWITCH_STATE,
+        DragRequestID::SET_DRAGGABLE_STATE, DragRequestID::SET_DRAGABLE_STATE_ASYNC};
     for (const auto& dragRequestID : dragRequestIDs) {
         GTEST_LOG_(INFO) << "dragRequestID: " << dragRequestID;
-        ret = g_dragServer->SetParam(context, dragRequestID, datas, reply);
-        EXPECT_EQ(ret, RET_ERR);
+        ASSERT_NO_FATAL_FAILURE(g_dragServer->SetParam(context, dragRequestID, datas, reply));
     }
 }
 
@@ -1413,6 +1414,13 @@ HWTEST_F(DragServerTest, DragServerTest47, TestSize.Level0)
     MessageParcel datas;
     int32_t ret = g_dragServer->SetDragWindowScreenId(context, datas, reply);
     EXPECT_EQ(ret, RET_ERR);
+    uint64_t displayId = 0;
+    uint64_t screenId = 0;
+    SetDragWindowScreenIdParam param { displayId, screenId };
+    bool ret1 = param.Marshalling(datas);
+    EXPECT_EQ(ret1, true);
+    int32_t ret2 = g_dragServer->SetDragWindowScreenId(context, datas, reply);
+    EXPECT_EQ(ret2, RET_OK);
 }
 
 /**
@@ -1528,6 +1536,84 @@ HWTEST_F(DragServerTest, DragClientTest53, TestSize.Level0)
     NetPacket packet(MessageId::DRAG_NOTIFY_RESULT);
     int32_t ret = g_dragClient.OnDragStyleChangedMessage(*g_streamClient, packet);
     EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest54
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest54, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    bool isJsCaller = -1;
+    RemoveDraglistenerParam param { isJsCaller };
+    bool ret = param.Marshalling(datas);
+    EXPECT_EQ(ret, true);
+    int32_t ret1 = g_dragServer->RemoveListener(context, datas);
+    EXPECT_EQ(ret1, PERMISSION_EXCEPTION);
+}
+
+/**
+ * @tc.name: DragServerTest55
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest55, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->SetMouseDragMonitorState(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+    bool state = true;
+    SetMouseDragMonitorStateParam param { state };
+    bool ret1 = param.Marshalling(datas);
+    EXPECT_EQ(ret1, true);
+    int32_t ret2 = g_dragServer->SetMouseDragMonitorState(context, datas, reply);
+    EXPECT_EQ(ret2, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest56
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest56, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->SetDraggableState(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+    bool state = true;
+    SetDraggableStateParam param { state };
+    bool ret1 = param.Marshalling(datas);
+    EXPECT_EQ(ret1, true);
+    int32_t ret2 = g_dragServer->SetDraggableState(context, datas, reply);
+    EXPECT_EQ(ret2, RET_OK);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
