@@ -844,7 +844,8 @@ void DragDrawing::UpdateDrawingState()
     FI_HILOGD("leave");
 }
 
-void DragDrawing::UpdateDragWindowState(bool visible, bool isZoomInAndAlphaChanged)
+void DragDrawing::UpdateDragWindowState(
+    bool visible, bool isZoomInAndAlphaChanged, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHKPV(g_drawingInfo.surfaceNode);
     if (visible && isZoomInAndAlphaChanged) {
@@ -868,11 +869,19 @@ void DragDrawing::UpdateDragWindowState(bool visible, bool isZoomInAndAlphaChang
         dragStyleNode->SetAlpha(0.0f);
         g_drawingInfo.surfaceNode->SetVisible(true);
         LongPressDragAnimation();
+        Rosen::RSTransaction::FlushImplicitTransaction();
     } else {
-        g_drawingInfo.surfaceNode->SetVisible(visible);
+        if (rsTransaction != nullptr) {
+            Rosen::RSTransaction::FlushImplicitTransaction();
+            rsTransaction->Begin();
+            g_drawingInfo.surfaceNode->SetVisible(visible);
+            rsTransaction->Commit();
+        } else {
+            g_drawingInfo.surfaceNode->SetVisible(visible);
+            Rosen::RSTransaction::FlushImplicitTransaction();
+        }
     }
     FI_HILOGI("Drag surfaceNode %{public}s success", visible ? "show" : "hide");
-    Rosen::RSTransaction::FlushImplicitTransaction();
 }
 
 void DragDrawing::LongPressDragAlphaAnimation()
