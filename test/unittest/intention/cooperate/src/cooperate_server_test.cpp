@@ -443,6 +443,31 @@ HWTEST_F(CooperateServerTest, RemoveWatch4, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RemoveWatch5
+ * @tc.desc: Test func named remove watch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, RemoveWatch5, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    UnregisterEventListenerParam param { "networkId" };
+    param.Marshalling(data);
+    ASSERT_TRUE(param.Marshalling(data));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RemoveWatch(
+        context, CooperateRequestID::UNREGISTER_EVENT_LISTENER, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
  * @tc.name: SetParam
  * @tc.desc: Test func named set param
  * @tc.type: FUNC
@@ -461,6 +486,7 @@ HWTEST_F(CooperateServerTest, SetParam, TestSize.Level0)
     MessageParcel reply;
     ASSERT_NO_FATAL_FAILURE(
         cooperateServer_->SetParam(context, CooperateRequestID::SET_DAMPLING_COEFFICIENT, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -482,6 +508,7 @@ HWTEST_F(CooperateServerTest, SetParam1, TestSize.Level0)
     MessageParcel reply;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetParam(
         context, CooperateRequestID::REGISTER_LISTENER, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -502,8 +529,13 @@ HWTEST_F(CooperateServerTest, SetParam2, TestSize.Level0)
     };
     MessageParcel data;
     MessageParcel reply;
+    uint32_t direction = 0;
+    double coefficient = 0;
+    SetDamplingCoefficientParam param { direction, coefficient };
+    ASSERT_TRUE(param.Marshalling(data));
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetParam(
-        context, CooperateRequestID::REGISTER_LISTENER, data, reply));
+        context, CooperateRequestID::SET_DAMPLING_COEFFICIENT, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
 }
 /**
  * @tc.name: GetParam1
@@ -574,6 +606,28 @@ HWTEST_F(CooperateServerTest, GetParam3, TestSize.Level0)
     MessageParcel reply;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetParam(
         context, CooperateRequestID::GET_COOPERATE_STATE_SYNC, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: GetParam4
+ * @tc.desc: Test func named get param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, GetParam4, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetParam(
+        context, CooperateRequestID::SET_DAMPLING_COEFFICIENT, data, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
