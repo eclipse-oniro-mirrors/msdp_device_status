@@ -284,7 +284,9 @@ public:
     void SetScreenId(uint64_t screenId);
     int32_t RotateDragWindowAsync(Rosen::Rotation rotation);
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    void SetRotation(Rosen::Rotation rotation);
+    void SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation);
+    Rosen::Rotation GetRotation(Rosen::DisplayId displayId);
+    void DestoryDisplayIdInMap(Rosen::DisplayId displayId);
     float CalculateWidthScale();
     float GetMaxWidthScale(int32_t width, int32_t height);
     float CalculateScale(float width, float height, float widthLimit, float heightLimit);
@@ -423,7 +425,7 @@ private:
     void* dragExtHandler_ { nullptr };
     bool needRotatePixelMapXY_ { false };
     uint64_t screenId_ { 0 };
-    Rosen::Rotation rotation_ { Rosen::Rotation::ROTATION_0 };
+    std::map<Rosen::DisplayId, Rosen::Rotation> rotationMap_;
     ScreenSizeType currentScreenSize_ = ScreenSizeType::UNDEFINED;
     MMI::PointerStyle pointerStyle_;
     DragVSyncStation vSyncStation_;
