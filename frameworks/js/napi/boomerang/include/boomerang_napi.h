@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,16 +32,18 @@ namespace Msdp {
 namespace DeviceStatus {
 class BoomerangCallback : public BoomerangCallbackStub {
 public:
-    explicit BoomerangCallback(napi_env env) : env_(env) {}
+    explicit BoomerangCallback(napi_env env, napi_deferred deferred) : env_(env), deferred_(deferred) {}
     virtual ~BoomerangCallback() {};
     void OnScreenshotResult(const BoomerangData& data) override;
     void OnNotifyMetadata(const std::string& metadata) override;
     void OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pixelMap) override;
     static void EmitOnEvent(BoomerangData* data);
-    static void EmitOnMetadata(std::string metadata);
-    static void EmitOnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap);
+    static void EmitOnMetadata(napi_env env, std::string metadata, napi_deferred deferred);
+    static void EmitOnEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap> pixelMap,
+        napi_deferred deferred);
 private:
     napi_env env_ { nullptr };
+    napi_deferred deferred_;
     std::mutex mutex_;
     BoomerangData data_;
     std::string metadata_;
@@ -78,33 +80,27 @@ public:
         int32_t type, std::string bundleName);
     static int32_t ConvertTypeToInt(const std::string &type);
     void OnScreenshot(int32_t type, int32_t value, bool isOnce);
-    void OnMetadata(std::string metadata, bool isOnce);
-    void OnEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap);
+    void OnMetadata(napi_env env, std::string metadata, bool isOnce, napi_deferred deferred);
+    void OnEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap> pixelMap, napi_deferred deferred);
     static BoomerangNapi* GetDeviceStatusNapi();
     static std::map<int32_t, sptr<IRemoteBoomerangCallback>> callbacks_;
-    static std::string metadata_;
-    static std::atomic<bool> submitMetadataSuccess;
 
 private:
     static bool CheckArguments(napi_env env, napi_callback_info info, int32_t validataType);
     static bool IsSameHandle(napi_env env, napi_value handle, napi_ref ref);
-    static bool CreateMetadataExecution(napi_env env, napi_deferred deferred, std::string typeInt,
+    static bool CreateMetadataExecution(napi_env env, AsyncContext *asyncContext, std::string typeInt,
         sptr<IRemoteBoomerangCallback> callbacks);
     static void NotifyMetadataExecuteCB(napi_env env, void* data);
     static void NotifyMetadataCompleteCB(napi_env env, napi_status status, void* data);
-    static bool CreateEncodeImageExecution(napi_env env, napi_deferred deferred, std::string metadata,
-        std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
+    static bool CreateEncodeImageExecution(napi_env env, AsyncContext *asyncContext,
+        std::string metadata, std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
     static void EncodeImageExecuteCB(napi_env env, void* data);
     static void EncodeImageCompleteCB(napi_env env, napi_status status, void* data);
-    static bool CreateDecodeImageExecution(napi_env env, napi_deferred deferred,
+    static bool CreateDecodeImageExecution(napi_env env, AsyncContext *asyncContext,
         std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
     static void DecodeImageExecuteCB(napi_env env, void* data);
     static void DecodeImageCompleteCB(napi_env env, napi_status status, void* data);
     static void ProcessErrorResult(napi_env env, int32_t result, int32_t code, AsyncContext* asyncContext);
-    static AsyncContext *asyncContext_;
-    static AsyncContext *encodeAsyncContext_;
-    static AsyncContext *decodeAsyncContext_;
-    static sptr<IRemoteBoomerangCallback> callback_;
     static napi_ref boomerangValueRef_;
     napi_env env_ { nullptr };
     inline static std::mutex mutex_;
