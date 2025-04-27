@@ -63,7 +63,6 @@ constexpr int32_t VALIDATA_OFF_PARAM = 2;
 }  // namespace
 std::map<int32_t, sptr<IRemoteBoomerangCallback>> BoomerangNapi::callbacks_;
 napi_ref BoomerangNapi::boomerangValueRef_ = nullptr;
-std::string BoomerangNapi::metadata_;
 
 void BoomerangCallback::OnScreenshotResult(const BoomerangData &screenshotData)
 {
@@ -176,10 +175,10 @@ void BoomerangNapi::OnEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap>
     }
 
     napi_value pixelMapNapi;
-    uint32_t width = pixelMap->GetWidth();
-    uint32_t height = pixelMap->GetHeight();
+    uint32_t width = static_cast<uint32_t>(pixelMap->GetWidth());
+    uint32_t height = static_cast<uint32_t>(pixelMap->GetHeight());
     const unsigned char *data = pixelMap->GetPixels();
-    uint32_t rowStride = pixelMap->GetRowStride();
+    uint32_t rowStride = static_cast<uint32_t>(pixelMap->GetRowStride());
     uint32_t bufferSize = width * height * BITMAP_TRAVERSE_STEP;
     uint8_t *pixelArrayBuffer = new (std::nothrow) uint8_t[bufferSize];
     if (pixelArrayBuffer == nullptr) {
@@ -341,7 +340,7 @@ napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback
     bool result = CreateMetadataExecution(env, asyncContext, bundleName, callback);
     if (!result) {
         FI_HILOGE("notify metadataBinding event error by Create execution");
-        delete callback;
+        delete asyncContext;
     }
     return promise;
 }
@@ -423,7 +422,7 @@ napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info 
     bool result = CreateEncodeImageExecution(env, asyncContext, metadata, pixelMap, callback);
     if (!result) {
         FI_HILOGE("encode image error by Create execution");
-        delete callback;
+        delete asyncContext;
     }
     return promise;
 }
@@ -468,7 +467,7 @@ napi_value BoomerangNapi::DecodeImage(napi_env env, napi_callback_info info)
     bool result = CreateDecodeImageExecution(env, asyncContext, pixelMap, callback);
     if (!result) {
         FI_HILOGE("decode image error by Create execution");
-        delete callback;
+        delete asyncContext;
     }
     return promise;
 }

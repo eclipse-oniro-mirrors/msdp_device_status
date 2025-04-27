@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,7 +84,6 @@ public:
     void OnEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap> pixelMap, napi_deferred deferred);
     static BoomerangNapi* GetDeviceStatusNapi();
     static std::map<int32_t, sptr<IRemoteBoomerangCallback>> callbacks_;
-    static std::string metadata_;
 
 private:
     static bool CheckArguments(napi_env env, napi_callback_info info, int32_t validataType);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,15 +31,6 @@ void BoomerangDumper::Dump(int32_t fd, const std::vector<std::string> &args)
     constexpr size_t bufSize { 1024 };
     char buf[bufSize] { "hidumper" };
 
-    size_t totalLen = std::strlen(buf) + 1;
-    for (const auto& arg : args) {
-        totalLen += arg.size() + 1;
-    }
-
-    if (totalLen > bufSize) {
-        FI_HILOGE("Total length of arguments exceeds buffer size");
-        return;
-    }
     std::vector<char *> argv(args.size() + 1);
     argv[0] = buf;
 
@@ -48,17 +39,21 @@ void BoomerangDumper::Dump(int32_t fd, const std::vector<std::string> &args)
     size_t bufLen = sizeof(buf) - len;
 
     for (size_t index = 0, cnt = args.size(); index < cnt; ++index) {
-        len = args[index].size() + 1;
-        if (len > bufLen) {
+        size_t argLen = args[index].size();
+        if (argLen + 1 > bufLen) {
             FI_HILOGE("Buffer overflow");
             return;
         }
-        args[index].copy(pbuf, args[index].size());
-        pbuf[args[index].size()] = '\0';
+        if (argLen > 0) {
+            args[index].copy(pbuf, argLen);
+            pbuf[argLen] = '\0';
+        } else {
+            pbuf[0] = '\0';
+        }
 
         argv[index + 1] = pbuf;
-        pbuf += len;
-        bufLen -= len;
+        pbuf += argLen + 1;
+        bufLen -= argLen + 1;
     }
 
     struct option dumpOptions[] {
