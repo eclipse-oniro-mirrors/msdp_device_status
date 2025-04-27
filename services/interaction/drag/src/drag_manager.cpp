@@ -1872,6 +1872,7 @@ int32_t DragManager::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
 
 int32_t DragManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     auto SetDragWindowRotateAnimation = [rsTransaction, this]() {
         return dragDrawing_.RotateDragWindowSync(rsTransaction);
     };
@@ -1882,6 +1883,9 @@ int32_t DragManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransac
         return ret;
     }
     return RET_OK;
+#else
+    return dragDrawing_.RotateDragWindowSync(rsTransaction);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
 void DragManager::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
@@ -2155,32 +2159,44 @@ int32_t DragManager::RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotatio
 
 void DragManager::SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation)
 {
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(context_);
     context_->GetDelegateTasks().PostSyncTask([this, displayId, rotation] {
         this->dragDrawing_.SetRotation(displayId, rotation);
         return RET_OK;
     });
+#else
+    dragDrawing_.SetRotation(displayId, rotation);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
 Rosen::Rotation DragManager::GetRotation(Rosen::DisplayId displayId)
 {
     Rosen::Rotation rotation = Rosen::Rotation::ROTATION_0;
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if (context_ != nullptr) {
         context_->GetDelegateTasks().PostSyncTask([this, displayId, &rotation] {
             rotation = this->dragDrawing_.GetRotation(displayId);
             return RET_OK;
         });
     }
+#else
+    dragDrawing_.GetRotation(displayId);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     return rotation;
 }
 
 void DragManager::DestoryDisplayIdInMap(Rosen::DisplayId displayId)
 {
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(context_);
     context_->GetDelegateTasks().PostSyncTask([this, displayId] {
         this->dragDrawing_.DestoryDisplayIdInMap(displayId);
         return RET_OK;
     });
+#else
+    dragDrawing_.DestoryDisplayIdInMap(displayId);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
 int32_t DragManager::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation)
