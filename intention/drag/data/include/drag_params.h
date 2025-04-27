@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,13 +88,14 @@ struct StopDragParam final : public ParamBase {
 
 struct SetDragWindowVisibleParam final : public ParamBase {
     SetDragWindowVisibleParam() = default;
-    SetDragWindowVisibleParam(bool visible, bool isForce);
+    SetDragWindowVisibleParam(bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
 
     bool Marshalling(MessageParcel &parcel) const override;
     bool Unmarshalling(MessageParcel &parcel) override;
 
     bool visible_ { false };
     bool isForce_ { false };
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction_ { nullptr };
 };
 
 struct UpdateDragStyleParam final : public ParamBase {

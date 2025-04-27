@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,20 +88,28 @@ bool StopDragParam::Unmarshalling(MessageParcel &parcel)
     return true;
 }
 
-SetDragWindowVisibleParam::SetDragWindowVisibleParam(bool visible, bool isForce)
-    : visible_(visible), isForce_(isForce)
+SetDragWindowVisibleParam::SetDragWindowVisibleParam(
+    bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    : visible_(visible), isForce_(isForce), rsTransaction_(rsTransaction)
 {}
 
 bool SetDragWindowVisibleParam::Marshalling(MessageParcel &parcel) const
 {
-    return (parcel.WriteBool(visible_) &&
-            parcel.WriteBool(isForce_));
+    if (rsTransaction_ == nullptr) {
+        FI_HILOGD("rsTransaction_ is nullptr");
+        return (parcel.WriteBool(visible_) && parcel.WriteBool(isForce_));
+    }
+    return (parcel.WriteBool(visible_) && parcel.WriteBool(isForce_) && parcel.WriteParcelable(rsTransaction_.get()));
 }
 
 bool SetDragWindowVisibleParam::Unmarshalling(MessageParcel &parcel)
 {
-    return (parcel.ReadBool(visible_) &&
-            parcel.ReadBool(isForce_));
+    bool ret = parcel.ReadBool(visible_) && parcel.ReadBool(isForce_);
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction(parcel.ReadParcelable<Rosen::RSTransaction>());
+    if (rsTransaction != nullptr) {
+        rsTransaction_ = rsTransaction;
+    }
+    return ret;
 }
 
 UpdateDragStyleParam::UpdateDragStyleParam(DragCursorStyle style, int32_t eventId)

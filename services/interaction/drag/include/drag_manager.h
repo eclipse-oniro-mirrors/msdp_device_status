@@ -130,7 +130,8 @@ public:
 #else
     int32_t OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    int32_t OnSetDragWindowVisible(bool visible, bool isForce = false, bool isZoomInAndAlphaChanged = false) override;
+    int32_t OnSetDragWindowVisible(bool visible, bool isForce = false, bool isZoomInAndAlphaChanged = false,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
     MMI::ExtraData GetExtraData(bool appended) const override;
     int32_t OnGetShadowOffset(ShadowOffset &shadowOffset) override;
     bool GetControlCollaborationVisible() const override;

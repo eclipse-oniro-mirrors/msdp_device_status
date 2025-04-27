@@ -583,7 +583,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam008, TestSize.Level0
     MessageParcel replyParcel;
     MessageParcel dataParcel;
     env->dragMgr_.dragState_ = DragState::START;
-    SetDragWindowVisibleParam param { true, true };
+    SetDragWindowVisibleParam param { true, true, nullptr };
     int32_t ret = param.Marshalling(dataParcel);
     EXPECT_EQ(ret, READ_OK);
     ret = g_intentionService->SetParam(Intention::DRAG, DragRequestID::SET_DRAG_WINDOW_VISIBLE,
