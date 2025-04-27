@@ -283,15 +283,15 @@ napi_value BoomerangNapi::SubscribeMeatadataCallback(
         return nullptr;
     }
 
-    auto callback_ = new (std::nothrow) BoomerangCallback(env, nullptr);
-    CHKPP(callback_);
+    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, nullptr);
+    CHKPP(callback);
     int32_t subscribeRet =
-        BoomerangManager::GetInstance()->SubscribeCallback(static_cast<BoomerangType>(type), bundleName, callback_);
+        BoomerangManager::GetInstance()->SubscribeCallback(static_cast<BoomerangType>(type), bundleName, callback);
     if (subscribeRet != RET_OK) {
         ThrowErr(env, SUBSCRIBE_FAILED, "On:Failed to SubscribeCallback");
         return nullptr;
     }
-    auto ret = callbacks_.insert(std::pair<int32_t, sptr<IRemoteBoomerangCallback>>(type, callback_));
+    auto ret = callbacks_.insert(std::pair<int32_t, sptr<IRemoteBoomerangCallback>>(type, callback));
     if (!ret.second) {
         FI_HILOGE("Failed to insert");
     }
@@ -335,7 +335,7 @@ napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback
     }
 
     asyncContext->deferred = deferred;
-    auto callback = new (std::nothrow) BoomerangCallback(env, deferred);
+    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, deferred);
     CHKPP(callback);
     bool result = CreateMetadataExecution(env, asyncContext, bundleName, callback);
     if (!result) {
@@ -417,7 +417,7 @@ napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info 
     }
 
     asyncContext->deferred = deferred;
-    auto callback = new (std::nothrow) BoomerangCallback(env, deferred);
+    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, deferred);
     CHKPP(callback);
     bool result = CreateEncodeImageExecution(env, asyncContext, metadata, pixelMap, callback);
     if (!result) {
@@ -462,7 +462,7 @@ napi_value BoomerangNapi::DecodeImage(napi_env env, napi_callback_info info)
 
     asyncContext->deferred = deferred;
     asyncContext->env = env;
-    auto callback = new (std::nothrow) BoomerangCallback(env, deferred);
+    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, deferred);
     CHKPP(callback);
     bool result = CreateDecodeImageExecution(env, asyncContext, pixelMap, callback);
     if (!result) {
