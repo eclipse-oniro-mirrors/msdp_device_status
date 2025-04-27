@@ -106,7 +106,7 @@ bool SetDragWindowVisibleParam::Unmarshalling(MessageParcel &parcel)
 {
     bool ret = parcel.ReadBool(visible_) && parcel.ReadBool(isForce_);
     std::shared_ptr<Rosen::RSTransaction> rsTransaction(parcel.ReadParcelable<Rosen::RSTransaction>());
-    if (rsTransaction != nullptr) {
+    if (ret && (rsTransaction != nullptr)) {
         rsTransaction_ = rsTransaction;
     }
     return ret;

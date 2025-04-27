@@ -318,7 +318,8 @@ int32_t InteractionManager::GetUdKey(std::string &udKey)
     return DRAG_MANAGER.GetUdKey(udKey);
 }
 
-int32_t InteractionManager::SetDragWindowVisible(bool visible, bool isForce)
+int32_t InteractionManager::SetDragWindowVisible(
+    bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     return DRAG_MANAGER.OnSetDragWindowVisible(visible, isForce);
 }
