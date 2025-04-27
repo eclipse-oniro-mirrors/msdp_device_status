@@ -33,9 +33,13 @@ const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {PERMISSION_EXCEPTION, "Permission check failed."},
     {PARAM_EXCEPTION, "Params check failed."},
     {DEVICE_EXCEPTION, "The device does not support this API."},
-    {SERVICE_EXCEPTION, "Service exception."},
-    {SUBSCRIBE_EXCEPTION, "Subscribe failed."},
-    {UNSUBSCRIBE_EXCEPTION, "UnSubscribe failed."}
+    {SERVICE_EXCEPTION, "Service exception. Possible causes: 1. A system error, such as null pointer, "
+        "container-related exception; 2. N-API invocation exception, invalid N-API status."},
+    {SUBSCRIBE_EXCEPTION, "Subscribe Failed. Possible causes: 1. Callback registration failure; "
+        "2. Failed to bind native object to js wrapper; 3. N-API invocation exception, invalid N-API status; "
+        "4. IPC request exception."},
+    {UNSUBSCRIBE_EXCEPTION, "Unsubscribe Failed. Possible causes: 1. Callback failure; "
+        "2. N-API invocation exception, invalid N-API status; 3. IPC request exception."}
 };
 
 napi_value CreateMotionNapiError(const napi_env &env, int32_t errorCode, const std::string &errorMsg);
