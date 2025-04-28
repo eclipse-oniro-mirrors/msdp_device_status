@@ -2685,10 +2685,6 @@ void DragDrawing::SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotati
 {
     FI_HILOGI("displayId:%{public}d, rotation:%{public}d",
         static_cast<int32_t>(displayId), static_cast<int32_t>(rotation));
-    if (rotationMap_.empty()) {
-        FI_HILOGE("rotation map is empty");
-        return;
-    }
     auto iter = rotationMap_.find(displayId);
     if (iter == rotationMap_.end()) {
         rotationMap_.emplace(displayId, rotation);

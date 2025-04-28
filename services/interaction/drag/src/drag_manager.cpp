@@ -2182,7 +2182,7 @@ Rosen::Rotation DragManager::GetRotation(Rosen::DisplayId displayId)
         });
     }
 #else
-    dragDrawing_.GetRotation(displayId);
+    rotation = dragDrawing_.GetRotation(displayId);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     return rotation;
 }
