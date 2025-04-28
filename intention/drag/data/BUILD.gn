@@ -48,6 +48,7 @@ ohos_source_set("intention_drag_data") {
   ]
 
   external_deps = [
+    "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "image_framework:image_native",
   ]
