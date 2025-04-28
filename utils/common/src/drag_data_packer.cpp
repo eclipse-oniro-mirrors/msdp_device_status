@@ -33,13 +33,6 @@ int32_t DragDataPacker::Marshalling(const DragData &dragData, Parcel &data, bool
         FI_HILOGE("Marshalling shadowInfos failed");
         return RET_ERR;
     }
-    if (!isCross) {
-        if (dragData.toolType < SourceTool::UNKNOWN || dragData.toolType > SourceTool::JOYSTICK) {
-            FI_HILOGE("toolType error");
-            return RET_ERR;
-        }
-        WRITEINT32(data, dragData.toolType, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
-    }
     WRITEUINT8VECTOR(data, dragData.buffer, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
     WRITESTRING(data, dragData.udKey, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
     WRITESTRING(data, dragData.extraInfo, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
@@ -66,9 +59,6 @@ int32_t DragDataPacker::UnMarshalling(Parcel &data, DragData &dragData, bool isC
     if (ShadowPacker::UnMarshalling(data, dragData.shadowInfos, isCross) != RET_OK) {
         FI_HILOGE("UnMarshalling shadowInfos failed");
         return RET_ERR;
-    }
-    if (!isCross) {
-        READINT32(data, dragData.toolType, E_DEVICESTATUS_READ_PARCEL_ERROR);
     }
     READUINT8VECTOR(data, dragData.buffer, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READSTRING(data, dragData.udKey, E_DEVICESTATUS_READ_PARCEL_ERROR);

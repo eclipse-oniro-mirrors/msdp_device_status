@@ -1278,7 +1278,6 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor)
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     MMI::ExtraData extraData;
     extraData.buffer = dragData.buffer;
-    extraData.toolType = dragData.toolType;
     extraData.sourceType = dragData.sourceType;
     extraData.pointerId = dragData.pointerId;
     extraData.appended = appended;
