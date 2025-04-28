@@ -54,10 +54,10 @@ void DDMAdapter::RemoveBoardObserver(std::shared_ptr<IBoardObserver> observer)
     ddm_->RemoveBoardObserver(observer);
 }
 
-bool DDMAdapter::CheckSameAccountToLocal(const std::string &networkId)
+bool DDMAdapter::CheckSameAccountToLocal(const std::string &networkId, const int32_t uid)
 {
     CALL_DEBUG_ENTER;
-    return ddm_->CheckSameAccountToLocal(networkId);
+    return ddm_->CheckSameAccountToLocal(networkId, uid);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

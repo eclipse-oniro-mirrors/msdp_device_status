@@ -185,6 +185,7 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
         .cursorPos = context.NormalizedCursorPosition(),
         .pointerSpeed = context.GetPointerSpeed(),
         .touchPadSpeed = context.GetTouchPadSpeed(),
+        .uid = notice.uid,
     };
     context.OnStartCooperate(startNotice.extra);
     ret = context.dsoftbus_.StartCooperate(context.Peer(), startNotice);
