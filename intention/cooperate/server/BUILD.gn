@@ -47,6 +47,7 @@ ohos_source_set("intention_cooperate_server") {
 
   external_deps = [
     "access_token:libtokenid_sdk",
+    "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
