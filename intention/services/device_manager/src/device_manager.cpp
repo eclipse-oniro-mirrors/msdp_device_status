@@ -170,7 +170,10 @@ int32_t DeviceManager::ParseDeviceId(const std::string &devNode)
 
     if (std::regex_match(devNode, mr, pattern)) {
         if (mr.ready() && mr.size() == EXPECTED_N_SUBMATCHES) {
-            return std::stoi(mr[EXPECTED_SUBMATCH].str());
+            std::string value = mr[EXPECTED_SUBMATCH].str();
+            if ((!value.empty()) && (Utility::IsInteger(value))) {
+                return std::stoi(mr[EXPECTED_SUBMATCH].str());
+            }
         }
     }
     return RET_ERR;
