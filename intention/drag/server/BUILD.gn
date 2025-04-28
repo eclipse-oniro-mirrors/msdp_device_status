@@ -45,6 +45,7 @@ ohos_shared_library("intention_drag") {
 
   external_deps = [
     "access_token:libtokenid_sdk",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
