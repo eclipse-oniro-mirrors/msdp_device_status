@@ -288,7 +288,10 @@ napi_value BoomerangNapi::SubscribeMeatadataCallback(
     int32_t subscribeRet =
         BoomerangManager::GetInstance()->SubscribeCallback(static_cast<BoomerangType>(type), bundleName, callback);
     if (subscribeRet != RET_OK) {
-        ThrowErr(env, SUBSCRIBE_FAILED, "On:Failed to SubscribeCallback");
+        ThrowErr(env,
+            SUBSCRIBE_FAILED,
+            "Subscribe Failed. Possible causes: 1. Abnormal system capability; 2. IPC communication abnormality; 3. "
+            "Algorithm loading exception.");
         return nullptr;
     }
     auto ret = callbacks_.insert(std::pair<int32_t, sptr<IRemoteBoomerangCallback>>(type, callback));
@@ -319,7 +322,7 @@ napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback
     CHKRP(napi_get_value_string_utf8(env, argv[0], bundleName, sizeof(bundleName), &strLength), CREATE_STRING_UTF8);
 
     if (!InitNapiObject(env, info)) {
-        THROWERR_CUSTOM(env, HANDLER_FAILD, "notify metadataBinding event by init boomerang napi");
+        THROWERR_CUSTOM(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
         return nullptr;
     }
 
@@ -330,7 +333,7 @@ napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback
     napi_deferred deferred = nullptr;
     napi_status status = napi_create_promise(env, &deferred, &promise);
     if (status != napi_ok) {
-        THROWERR_CUSTOM(env, HANDLER_FAILD, "get the metadata from napi error");
+        THROWERR_CUSTOM(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
         return nullptr;
     }
 
@@ -367,7 +370,7 @@ napi_value BoomerangNapi::SubmitMetadata(napi_env env, napi_callback_info info)
 
     int32_t result = BoomerangManager::GetInstance()->SubmitMetadata(metadata);
     if (result != RET_OK) {
-        ThrowErr(env, HANDLER_FAILD, "failed to Submit Metadata");
+        ThrowErr(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
     }
     return nullptr;
 }
@@ -400,7 +403,7 @@ napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info 
     CHKRP(napi_get_value_string_utf8(env, argv[1], metadata, sizeof(metadata), &strLength), CREATE_STRING_UTF8);
 
     if (!InitNapiObject(env, info)) {
-        THROWERR_CUSTOM(env, HANDLER_FAILD, "encode image error by init boomerang napi");
+        THROWERR_CUSTOM(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
         return nullptr;
     }
 
@@ -412,7 +415,7 @@ napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info 
     napi_deferred deferred = nullptr;
     napi_status status = napi_create_promise(env, &deferred, &promise);
     if (status != napi_ok) {
-        THROWERR_CUSTOM(env, HANDLER_FAILD, "encode image error by create promise");
+        THROWERR_CUSTOM(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
         return nullptr;
     }
 
@@ -446,7 +449,7 @@ napi_value BoomerangNapi::DecodeImage(napi_env env, napi_callback_info info)
     std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMapNapi::GetPixelMap(env, argv[0]);
     CHKPP(pixelMap);
     if (!InitNapiObject(env, info)) {
-        THROWERR_CUSTOM(env, HANDLER_FAILD, "decode image error by init boomerang napi");
+        THROWERR_CUSTOM(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
         return nullptr;
     }
 
@@ -507,7 +510,9 @@ napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
     int32_t unsubscribeRet = BoomerangManager::GetInstance()->UnsubscribeCallback(
         static_cast<BoomerangType>(type), bundleName, callbackIter->second);
     if (unsubscribeRet != RET_OK) {
-        ThrowErr(env, UNSUBSCRIBE_FAILED, "failed to UnsubscribeCallback");
+        ThrowErr(env,
+            UNSUBSCRIBE_FAILED,
+            "Unsubscribe Failed. Possible causes: 1. Abnormal system capability; 2. IPC communication abnormality.");
     }
     callbacks_.erase(type);
     return nullptr;
@@ -712,7 +717,7 @@ void BoomerangNapi::DecodeImageCompleteCB(napi_env env, napi_status status, void
     auto outerAsyncContext = static_cast<AsyncContext*>(data);
     int32_t result = static_cast<int32_t>(outerAsyncContext->result);
     if (result != RET_OK) {
-        ProcessErrorResult(env, result, HANDLER_FAILD, outerAsyncContext);
+        ProcessErrorResult(env, result, DECODE_FAILED, outerAsyncContext);
     }
     napi_delete_async_work(outerAsyncContext->env, outerAsyncContext->work);
     delete outerAsyncContext;
