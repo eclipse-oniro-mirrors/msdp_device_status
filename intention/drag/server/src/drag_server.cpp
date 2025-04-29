@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -288,7 +288,7 @@ int32_t DragServer::SetDragWindowVisible(CallingContext &context, MessageParcel 
         return RET_ERR;
     }
     FI_HILOGI("SetDragWindowVisible(%{public}d, %{public}d)", param.visible_, param.isForce_);
-    return env_->GetDragManager().OnSetDragWindowVisible(param.visible_, param.isForce_);
+    return env_->GetDragManager().OnSetDragWindowVisible(param.visible_, param.isForce_, false, param.rsTransaction_);
 }
 
 int32_t DragServer::UpdateDragStyle(CallingContext &context, MessageParcel &data, MessageParcel &reply)

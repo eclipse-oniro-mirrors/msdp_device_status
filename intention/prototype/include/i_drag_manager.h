@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,8 @@ public:
     virtual int32_t GetDragSummary(std::map<std::string, int64_t> &summarys) = 0;
     virtual int32_t GetDragAction(DragAction &dragAction) const = 0;
     virtual int32_t OnSetDragWindowVisible(
-        bool visible, bool isForce = false, bool isZoomInAndAlphaChanged = false) = 0;
+        bool visible, bool isForce = false, bool isZoomInAndAlphaChanged = false,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
     virtual OHOS::MMI::ExtraData GetExtraData(bool appended) const = 0;
     virtual bool GetControlCollaborationVisible() const = 0;
     virtual void SetControlCollaborationVisible(bool visible) = 0;

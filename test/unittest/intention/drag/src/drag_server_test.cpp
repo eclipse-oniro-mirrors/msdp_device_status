@@ -942,7 +942,7 @@ HWTEST_F(DragServerTest, DragServerTest27, TestSize.Level0)
     MessageParcel reply;
     MessageParcel datas;
     g_dragMgr.dragState_ = DragState::START;
-    SetDragWindowVisibleParam param { true, true };
+    SetDragWindowVisibleParam param { true, true, nullptr };
     int32_t ret = param.Marshalling(datas);
     EXPECT_EQ(ret, READ_OK);
     ret = g_dragServer->SetDragWindowVisible(context, datas, reply);

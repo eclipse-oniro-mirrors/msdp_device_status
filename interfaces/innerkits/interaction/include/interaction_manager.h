@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -263,10 +263,12 @@ public:
      * For example, if you set the drag window to Hidden and isForce to true during a drag, the setting does not
      * take effect when the drag window is displayed and isForce is false, and the setting becomes invalid at the
      * end of the current drag.
+     * @param rsTransaction Indicates utterances displays or hides the sync handle.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 10
      */
-    int32_t SetDragWindowVisible(bool visible, bool isForce = false);
+    int32_t SetDragWindowVisible(bool visible, bool isForce = false,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     /**
      * @brief Obtains the position of the touch point or mouse pointer relative to
