@@ -55,6 +55,7 @@ ohos_source_set("intention_cooperate_client") {
 
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "input:libmmi-client",

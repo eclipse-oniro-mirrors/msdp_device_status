@@ -43,6 +43,7 @@ ohos_source_set("intention_input_adapter") {
   ]
 
   external_deps = [
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "input:libmmi-client",
   ]

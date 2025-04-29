@@ -38,6 +38,7 @@ ohos_source_set("devicestatus_vdev") {
 
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "input:libmmi-client",
     "json:nlohmann_json_static",
@@ -74,6 +75,7 @@ ohos_source_set("devicestatus_vdev_builders") {
 
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -97,6 +99,7 @@ ohos_executable("vdevadm") {
 
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "json:nlohmann_json_static",
   ]
