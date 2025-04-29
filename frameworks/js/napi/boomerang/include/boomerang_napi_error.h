@@ -30,8 +30,11 @@ constexpr int32_t SERVICE_EXCEPTION { 801 };
 const std::map <int32_t, std::string> ERROR_MESSAGES = {
     {SERVICE_EXCEPTION, "Service exception."},
     {PARAM_ERROR, "Param error."},
-    {SUBSCRIBE_FAILED, "boomerang subscribe exception."},
-    {UNSUBSCRIBE_FAILED, "boomerang unsubscribe exception."},
+    {SUBSCRIBE_FAILED,
+        "Subscribe Failed. Possible causes: 1. Abnormal system capability; 2. IPC communication abnormality; 3. "
+        "Algorithm loading exception."},
+    {UNSUBSCRIBE_FAILED,
+        "Unsubscribe Failed. Possible causes: 1. Abnormal system capability; 2. IPC communication abnormality."},
 };
 
 napi_value CreateNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage);
