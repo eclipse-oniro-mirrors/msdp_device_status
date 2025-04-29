@@ -77,7 +77,7 @@ public:
     virtual int32_t Enable(int32_t tokenId, int32_t pid, int32_t userData) = 0;
     virtual int32_t Disable(int32_t pid, int32_t userData) = 0;
     virtual int32_t Start(int32_t pid, int32_t userData,
-        const std::string &remoteNetworkId, int32_t startDeviceId) = 0;
+        const std::string &remoteNetworkId, int32_t startDeviceId, int32_t uid = 0) = 0;
     virtual int32_t Stop(int32_t pid, int32_t userData, bool isUnchained) = 0;
     virtual int32_t StartWithOptions(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
         int32_t startDeviceId, const NormalizedCooperateOptions &CooperateOptions) = 0;
