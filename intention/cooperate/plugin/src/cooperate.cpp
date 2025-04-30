@@ -161,7 +161,8 @@ int32_t Cooperate::Disable(int32_t pid, int32_t userData)
     return RET_OK;
 }
 
-int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remoteNetworkId, int32_t startDeviceId)
+int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
+    int32_t startDeviceId, const int32_t uid)
 {
     CALL_DEBUG_ENTER;
     CooperateRadarInfo radarInfo {
@@ -189,6 +190,7 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
         .remoteNetworkId = remoteNetworkId,
         .startDeviceId = startDeviceId,
         .errCode = std::make_shared<std::promise<int32_t>>(),
+        .uid = uid,
     };
     auto errCode = event.errCode->get_future();
     auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::START, event));
