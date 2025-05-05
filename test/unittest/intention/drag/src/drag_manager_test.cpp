@@ -1593,7 +1593,7 @@ HWTEST_F(DragManagerTest, DragManagerTest64, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     MessageParcel data;
-    SetDragWindowVisibleParam param { true, true };
+    SetDragWindowVisibleParam param { true, true, nullptr };
     bool ret = param.Marshalling(data);
     EXPECT_TRUE(ret);
     ret = param.Unmarshalling(data);

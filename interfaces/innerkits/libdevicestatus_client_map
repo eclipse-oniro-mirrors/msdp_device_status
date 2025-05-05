@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@
             "OHOS::Msdp::DeviceStatus::InteractionManager::SetDamplingCoefficient(unsigned int, double)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::StartDrag(OHOS::Msdp::DeviceStatus::DragData const&, std::__h::shared_ptr<OHOS::Msdp::DeviceStatus::IStartDragListener>)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::StopDrag(OHOS::Msdp::DeviceStatus::DragDropResult const&)";
-            "OHOS::Msdp::DeviceStatus::InteractionManager::SetDragWindowVisible(bool, bool)";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::SetDragWindowVisible(bool, bool, std::__h::shared_ptr<OHOS::Rosen::RSTransaction> const&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetShadowOffset(int&, int&, int&, int&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::UpdateDragStyle(OHOS::Msdp::DeviceStatus::DragCursorStyle, int)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::UpdateShadowPic(OHOS::Msdp::DeviceStatus::ShadowInfo const&)";

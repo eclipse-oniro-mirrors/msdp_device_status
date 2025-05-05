@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -179,9 +179,10 @@ int32_t InteractionManager::RemoveSubscriptListener(SubscriptListenerPtr listene
     return INTER_MGR_IMPL.RemoveSubscriptListener(listener);
 }
 
-int32_t InteractionManager::SetDragWindowVisible(bool visible, bool isForce)
+int32_t InteractionManager::SetDragWindowVisible(
+    bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    return INTER_MGR_IMPL.SetDragWindowVisible(visible, isForce);
+    return INTER_MGR_IMPL.SetDragWindowVisible(visible, isForce, rsTransaction);
 }
 
 int32_t InteractionManager::GetShadowOffset(int32_t &offsetX, int32_t &offsetY, int32_t &width, int32_t &height)
@@ -317,7 +318,8 @@ int32_t InteractionManager::GetUdKey(std::string &udKey)
     return DRAG_MANAGER.GetUdKey(udKey);
 }
 
-int32_t InteractionManager::SetDragWindowVisible(bool visible, bool isForce)
+int32_t InteractionManager::SetDragWindowVisible(
+    bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     return DRAG_MANAGER.OnSetDragWindowVisible(visible, isForce);
 }

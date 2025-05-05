@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,8 @@ public:
     int32_t RemoveDraglistener(ITunnelClient &tunnel, DragListenerPtr listener, bool isJsCaller = false);
     int32_t AddSubscriptListener(ITunnelClient &tunnel, SubscriptListenerPtr listener);
     int32_t RemoveSubscriptListener(ITunnelClient &tunnel, SubscriptListenerPtr listener);
-    int32_t SetDragWindowVisible(ITunnelClient &tunnel, bool visible, bool isForce);
+    int32_t SetDragWindowVisible(ITunnelClient &tunnel, bool visible, bool isForce,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     int32_t UpdateDragStyle(ITunnelClient &tunnel, DragCursorStyle style, int32_t eventId = -1);
     int32_t UpdateShadowPic(ITunnelClient &tunnel, const ShadowInfo &shadowInfo);
     int32_t GetDragTargetPid(ITunnelClient &tunnel);

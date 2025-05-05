@@ -1319,7 +1319,8 @@ int32_t DragManager::OnStopDrag(DragResult result, bool hasCustomAnimation, cons
     return HandleDragResult(result, hasCustomAnimation);
 }
 
-int32_t DragManager::OnSetDragWindowVisible(bool visible, bool isForce, bool isZoomInAndAlphaChanged)
+int32_t DragManager::OnSetDragWindowVisible(bool visible, bool isForce, bool isZoomInAndAlphaChanged,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     FI_HILOGI("Set drag window visibleion:%{public}s", visible ? "true" : "false");
     if (dragState_ == DragState::MOTION_DRAGGING) {
@@ -1344,7 +1345,7 @@ int32_t DragManager::OnSetDragWindowVisible(bool visible, bool isForce, bool isZ
 #endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     DRAG_DATA_MGR.SetDragWindowVisible(visible);
-    dragDrawing_.UpdateDragWindowState(visible, isZoomInAndAlphaChanged);
+    dragDrawing_.UpdateDragWindowState(visible, isZoomInAndAlphaChanged, rsTransaction);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
 #ifndef OHOS_BUILD_PC_PRODUCT
     if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE && visible) {
