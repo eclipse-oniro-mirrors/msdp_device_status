@@ -969,7 +969,7 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     FI_HILOGD("DragCallback, pointerAction:%{public}d", pointerAction);
 #ifdef OHOS_BUILD_ENABLE_ANCO
     bool isAncoDrag = pointerEvent->GetAncoDeal();
-    FI_HILOGD("DragCallback, isAncoDrag:%{public}d, isAncoDrag:%{public}d", pointerAction, isAncoDrag);
+    FI_HILOGD("DragCallback, pointerAction:%{public}d, isAncoDrag:%{public}d", pointerAction, isAncoDrag);
     if (isAncoDrag && IsAncoDragCallback(pointerEvent, pointerAction)) {
         FI_HILOGD("DragCallback, anco drag call back");
         return;
