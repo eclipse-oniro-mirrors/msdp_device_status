@@ -123,6 +123,7 @@ public:
     DragCursorStyle GetDragStyle() const override;
     void GetAllowDragState(bool &isAllowDrag) override;
     void DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    void DragUpCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction);
     int32_t OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnDragCancel(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -269,6 +270,10 @@ private:
     void ReportStartDragUEInfo(const std::string &packageName);
     void ReportStopDragUEInfo(const std::string &packageName);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#ifdef OHOS_BUILD_ENABLE_ANCO
+    bool IsAncoDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction);
+#endif // OHOS_BUILD_ENABLE_ANCO
+    void PullThrowDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 private:
     bool existVkListener_ { false };
     bool inHoveringState_ { true };

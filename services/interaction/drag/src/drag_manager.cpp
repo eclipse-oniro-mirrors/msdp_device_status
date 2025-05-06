@@ -879,6 +879,70 @@ void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     }
 }
 
+#ifdef OHOS_BUILD_ENABLE_ANCO
+bool DragManager::IsAncoDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction)
+{
+    CHKPF(pointerEvent);
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) &&
+        (dragData.pointerId == pointerEvent->GetPointerId()) &&
+        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+        OnDragMove(pointerEvent);
+        return true;
+    } else if (((pointerAction == MMI::PointerEvent::POINTER_ACTION_UP) &&
+        (dragData.pointerId == pointerEvent->GetPointerId()) &&
+        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) ||
+        ((pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) &&
+        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE)) ||
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL)) {
+        CHKPF(context_);
+        int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent] {
+            this->OnDragCancel(pointerEvent);
+            return RET_OK;
+        });
+        if (ret != RET_OK) {
+            FI_HILOGE("Post async task failed");
+        }
+        return true;
+    }
+    return false;
+}
+#endif // OHOS_BUILD_ENABLE_ANCO
+
+void DragManager::PullThrowDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    CHKPV(pointerEvent);
+    CHKPV(context_);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent] {
+        return this->OnPullThrow(pointerEvent);
+    });
+    if (ret != RET_OK) {
+        FI_HILOGE("Post async task failed");
+    }
+}
+
+void DragManager::DragUpCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction)
+{
+    CHKPV(pointerEvent);
+    throwState_ = ThrowState::NOT_THROW;
+    dragDrawing_.StopVSyncStation();
+    mouseDragMonitorDisplayX_ = -1;
+    mouseDragMonitorDisplayY_ = -1;
+    CHKPV(context_);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent] {
+        return this->OnDragUp(pointerEvent);
+    });
+    if (ret != RET_OK) {
+        FI_HILOGE("Post async task failed");
+    }
+    if (dragTimerId_ >= 0 && pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL) {
+        CHKPV(context_);
+        context_->GetTimerManager().RemoveTimer(dragTimerId_);
+        dragTimerId_ = -1;
+        FI_HILOGD("Remove timer");
+    }
+}
+
 void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
@@ -899,35 +963,21 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         return;
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_THROW) {
-        CHKPV(context_);
-        int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent] {
-            return this->OnPullThrow(pointerEvent);
-        });
-        if (ret != RET_OK) {
-            FI_HILOGE("Post async task failed");
-        }
+        PullThrowDragCallback(pointerEvent);
         return;
     }
     FI_HILOGD("DragCallback, pointerAction:%{public}d", pointerAction);
+#ifdef OHOS_BUILD_ENABLE_ANCO
+    bool isAncoDrag = pointerEvent->GetAncoDeal();
+    FI_HILOGD("DragCallback, isAncoDrag:%{public}d, isAncoDrag:%{public}d", pointerAction, isAncoDrag);
+    if (isAncoDrag && IsAncoDragCallback(pointerEvent, pointerAction)) {
+        FI_HILOGD("DragCallback, anco drag call back");
+        return;
+    }
+#endif // OHOS_BUILD_ENABLE_ANCO
     if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) ||
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL)) {
-        throwState_ = ThrowState::NOT_THROW;
-        dragDrawing_.StopVSyncStation();
-        mouseDragMonitorDisplayX_ = -1;
-        mouseDragMonitorDisplayY_ = -1;
-        CHKPV(context_);
-        int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent] {
-            return this->OnDragUp(pointerEvent);
-        });
-        if (ret != RET_OK) {
-            FI_HILOGE("Post async task failed");
-        }
-        if (dragTimerId_ >= 0 && pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL) {
-            CHKPV(context_);
-            context_->GetTimerManager().RemoveTimer(dragTimerId_);
-            dragTimerId_ = -1;
-            FI_HILOGD("Remove timer");
-        }
+        DragUpCallback(pointerEvent, pointerAction);
         return;
     }
     if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
