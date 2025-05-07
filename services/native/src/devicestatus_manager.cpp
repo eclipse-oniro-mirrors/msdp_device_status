@@ -56,7 +56,7 @@ void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wp
         }
     }
     if (manager_->notityListener_ != nullptr && remote == manager_->notityListener_->AsObject()) {
-        FI_HILOGI("the screenshot app died");
+        FI_HILOGI("the screenshot app has died");
         manager_->notityListener_ = nullptr;
     }
 }
