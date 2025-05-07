@@ -34,6 +34,7 @@ void DeviceStatusManager::DeviceStatusCallbackDeathRecipient::OnRemoteDied(const
 
 void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
+    std::lock_guard lock(mutex_);
     CHKPV(remote);
     FI_HILOGI("Recv death notice");
     if (manager_ == nullptr) {
@@ -55,7 +56,7 @@ void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wp
         }
     }
     if (manager_->notityListener_ != nullptr && remote == manager_->notityListener_->AsObject()) {
-        FI_HILOGI("jjy this screenshot app died");
+        FI_HILOGI("the screenshot app died");
         manager_->notityListener_ = nullptr;
     }
 }
