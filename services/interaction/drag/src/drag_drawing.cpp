@@ -179,9 +179,9 @@ constexpr int32_t TIMEOUT_MS { 500 };
 constexpr float MAX_SCREEN_WIDTH_SM { 600.0f };
 constexpr float MAX_SCREEN_WIDTH_MD { 840.0f };
 constexpr float MAX_SCREEN_WIDTH_LG { 1440.0f };
-constexpr int32_t SCALE_TYPE_FIRST = 2;
-constexpr int32_t SCALE_TYPE_SECOND = 3;
-constexpr int32_t SCALE_TYPE_THIRD = 4;
+constexpr float SCALE_TYPE_FIRST = 2.0;
+constexpr float SCALE_TYPE_SECOND = 3.0;
+constexpr float SCALE_TYPE_THIRD = 4.0;
 const std::string THREAD_NAME { "os_AnimationEventRunner" };
 const std::string SUPER_HUB_THREAD_NAME { "os_SuperHubEventRunner" };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -4229,11 +4229,11 @@ float DragDrawing::CalculateSMScale(int32_t pixelMapWidth, int32_t pixelMapHeigh
 {
     float scale = 1.0;
     if (g_dragDataForSuperHub.summarys.find("plain-text") != g_dragDataForSuperHub.summarys.end()) {
-        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide,
-                                            shortSide / SCALE_TYPE_FIRST);
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, static_cast<float>(shortSide),
+            static_cast<float>(shortSide) / SCALE_TYPE_FIRST);
     } else {
-        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide / SCALE_TYPE_FIRST,
-                                            shortSide / SCALE_TYPE_FIRST);
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight,
+            static_cast<float>(shortSide) / SCALE_TYPE_FIRST, static_cast<float>(shortSide) / SCALE_TYPE_FIRST);
     }
     return scale;
 }
@@ -4242,11 +4242,11 @@ float DragDrawing::CalculateMDScale(int32_t pixelMapWidth, int32_t pixelMapHeigh
 {
     float scale = 1.0;
     if (g_dragDataForSuperHub.summarys.find("plain-text") != g_dragDataForSuperHub.summarys.end()) {
-        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide / SCALE_TYPE_FIRST,
-                                            shortSide / SCALE_TYPE_THIRD);
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight,
+            static_cast<float>(shortSide) / SCALE_TYPE_FIRST, static_cast<float>(shortSide) / SCALE_TYPE_THIRD);
     } else {
-        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide / SCALE_TYPE_THIRD,
-                                            shortSide / SCALE_TYPE_THIRD);
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight,
+            static_cast<float>(shortSide) / SCALE_TYPE_THIRD, static_cast<float>(shortSide) / SCALE_TYPE_THIRD);
     }
     return scale;
 }
@@ -4256,11 +4256,11 @@ float DragDrawing::CalculateDefaultScale(int32_t pixelMapWidth, int32_t pixelMap
     float scale = 1.0;
     if (g_dragDataForSuperHub.summarys.find("plain-text") != g_dragDataForSuperHub.summarys.end()) {
         scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight,
-                                            shortSide * SCALE_TYPE_FIRST / SCALE_TYPE_SECOND,
-                                            shortSide / SCALE_TYPE_SECOND);
+            static_cast<float>(shortSide) * SCALE_TYPE_FIRST / SCALE_TYPE_SECOND,
+            static_cast<float>(shortSide) / SCALE_TYPE_SECOND);
     } else {
-        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight, shortSide / SCALE_TYPE_SECOND,
-                                            shortSide / SCALE_TYPE_SECOND);
+        scale = DragDrawing::CalculateScale(pixelMapWidth, pixelMapHeight,
+            static_cast<float>(shortSide) / SCALE_TYPE_SECOND, static_cast<float>(shortSide) / SCALE_TYPE_SECOND);
     }
     return scale;
 }
