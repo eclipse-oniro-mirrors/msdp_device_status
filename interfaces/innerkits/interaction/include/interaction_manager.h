@@ -312,6 +312,7 @@ public:
      * @since 10
      */
     int32_t GetExtraInfo(std::string &extraInfo);
+    int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
 #ifndef  OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Registers a listener for screen hot area of the mouse pointer.

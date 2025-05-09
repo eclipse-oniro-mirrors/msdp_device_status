@@ -600,6 +600,12 @@ void IntentionManager::SetDraggableStateAsync(bool state, int64_t downTime)
     CALL_DEBUG_ENTER;
     return drag_.SetDraggableStateAsync(*tunnel_, state, downTime);
 }
+
+int32_t IntentionManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
+{
+    CALL_DEBUG_ENTER;
+    return drag_.GetDragBundleInfo(*tunnel_, dragBundleInfo);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

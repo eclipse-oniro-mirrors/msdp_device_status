@@ -209,6 +209,10 @@ int32_t DragServer::GetParam(CallingContext &context, uint32_t id, MessageParcel
             FI_HILOGI("Get universal drag app state, from:%{public}d", context.pid);
             return GetAppDragSwitchState(context, data, reply);
         }
+        case DragRequestID::GET_DRAG_BUNDLE_INFO: {
+            FI_HILOGI("Get drag bundle info, from:%{public}d", context.pid);
+            return GetDragBundleInfo(context, data, reply);
+        }
         default: {
             FI_HILOGE("Unexpected request ID (%{public}u)", id);
             return RET_ERR;
@@ -675,6 +679,24 @@ int32_t DragServer::SetDraggableStateAsync(CallingContext &context, MessageParce
         return RET_OK;
     });
 #endif // OHOS_BUILD_UNIVERSAL_DRAG
+    return RET_OK;
+}
+
+int32_t DragServer::GetDragBundleInfo(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+{
+    DragBundleInfo dragBundleInfo {};
+
+    int32_t ret = env_->GetDragManager().GetDragBundleInfo(dragBundleInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("IDragManager::GetDragSummary fail, error:%{public}d", ret);
+        return ret;
+    }
+    GetDragBundleInfoReply dragBundleInfoReply { dragBundleInfo };
+
+    if (!dragBundleInfoReply.Marshalling(reply)) {
+        FI_HILOGE("GetDragBundleInfoReply::Marshalling fail");
+        return RET_ERR;
+    }
     return RET_OK;
 }
 } // namespace DeviceStatus

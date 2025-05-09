@@ -74,6 +74,9 @@ struct DragData {
     bool hasCanceledAnimation { false };
     bool hasCoordinateCorrected { false };
     std::map<std::string, int64_t> summarys;
+    std::string appCallee;
+    std::string appCaller;
+    bool isDragDelay { false };
 
     bool operator == (const DragData &other) const
     {
@@ -82,7 +85,8 @@ struct DragData {
                dragNum == other.dragNum && pointerId == other.pointerId && displayX == other.displayX &&
                displayY == other.displayY && displayId == other.displayId &&
                hasCanceledAnimation == other.hasCanceledAnimation &&
-               hasCoordinateCorrected == other.hasCoordinateCorrected && summarys == other.summarys;
+               hasCoordinateCorrected == other.hasCoordinateCorrected && summarys == other.summarys &&
+               appCallee == other.appCallee && appCaller == other.appCaller && isDragDelay == other.isDragDelay;
     }
 
     bool operator != (const DragData &other) const
@@ -218,6 +222,19 @@ enum class DragAction {
     INVALID = -1,
     MOVE = 0,
     COPY = 1
+};
+
+struct DragBundleInfo {
+    std::string bundleName;
+    bool isCrossDevice { false };
+};
+
+struct DragRadarPackageName {
+    std::string packageName;
+    std::string appCallee;
+    std::string appCaller;
+    std::string peerNetId;
+    int32_t dragNum { -1 };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
