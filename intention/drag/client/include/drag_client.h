@@ -80,6 +80,7 @@ public:
     int32_t SetDraggableState(ITunnelClient &tunnel, bool state);
     int32_t GetAppDragSwitchState(ITunnelClient &tunnel, bool &state);
     void SetDraggableStateAsync(ITunnelClient &tunnel, bool state, int64_t downTime);
+    int32_t GetDragBundleInfo(ITunnelClient &tunnel, DragBundleInfo &dragBundleInfo);
 
 private:
     mutable std::mutex mtx_;

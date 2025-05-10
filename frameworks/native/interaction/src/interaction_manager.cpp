@@ -291,6 +291,11 @@ int32_t InteractionManager::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::Pix
 {
     return INTER_MGR_IMPL.AddSelectedPixelMap(pixelMap, callback);
 }
+
+int32_t InteractionManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
+{
+    return INTER_MGR_IMPL.GetDragBundleInfo(dragBundleInfo);
+}
 #else
 int32_t InteractionManager::StartDrag(const DragData &dragData)
 {

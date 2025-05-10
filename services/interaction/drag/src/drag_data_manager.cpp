@@ -37,9 +37,10 @@ void DragDataManager::SetDragStyle(DragCursorStyle style)
     dragStyle_ = style;
 }
 
-void DragDataManager::Init(const DragData &dragData)
+void DragDataManager::Init(const DragData &dragData, const std::string &appCaller)
 {
     dragData_ = dragData;
+    dragData_.appCaller = appCaller;
     if (dragData.displayId < DEFAULT_DISPLAY_ID) {
         dragData_.displayId = DEFAULT_DISPLAY_ID;
         FI_HILOGW("Correct the value of displayId(%{public}d) to 0", dragData.displayId);

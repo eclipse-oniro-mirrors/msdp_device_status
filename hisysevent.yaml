@@ -227,7 +227,10 @@ DRAG_BEHAVIOR:
   LOCAL_NET_ID: {type: STRING, desc: local device network id}
   PEER_NET_ID: {type: STRING, desc: peer device network id}
   DRAG_SUMMARY: {type: STRING, desc: drag summary}
+  PACKAGE_NAME: {type: STRING, desc: package name}
+  APP_CALLEE: {type: STRING, desc: app callee}
   APP_CALLER: {type: STRING, desc: app caller}
+  DRAG_NUM: {type: INT32, desc: drag number}
 
 COOPERTATE_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Cooperate, preserve: false}
