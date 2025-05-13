@@ -228,6 +228,9 @@ private:
     void ReportStartDragUEInfo(const std::string &packageName);
     void ReportStopDragUEInfo(const std::string &packageName);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#ifdef OHOS_BUILD_ENABLE_ANCO
+    bool IsAncoDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction);
+#endif // OHOS_BUILD_ENABLE_ANCO
 private:
     int32_t timerId_ { -1 };
     int32_t mouseDragMonitorTimerId_ { -1 };

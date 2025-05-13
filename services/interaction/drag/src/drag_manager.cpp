@@ -679,6 +679,36 @@ int32_t DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> po
     return RET_OK;
 }
 
+#ifdef OHOS_BUILD_ENABLE_ANCO
+bool DragManager::IsAncoDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction)
+{
+    CHKPF(pointerEvent);
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) &&
+        (dragData.pointerId == pointerEvent->GetPointerId()) &&
+        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+        OnDragMove(pointerEvent);
+        return true;
+    } else if (((pointerAction == MMI::PointerEvent::POINTER_ACTION_UP) &&
+        (dragData.pointerId == pointerEvent->GetPointerId()) &&
+        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) ||
+        ((pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) &&
+        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE)) ||
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL)) {
+        CHKPF(context_);
+        int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent] {
+            this->OnDragCancel(pointerEvent);
+            return RET_OK;
+        });
+        if (ret != RET_OK) {
+            FI_HILOGE("Post async task failed");
+        }
+        return true;
+    }
+    return false;
+}
+#endif // OHOS_BUILD_ENABLE_ANCO
+
 void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
@@ -699,6 +729,14 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         return;
     }
     FI_HILOGD("DragCallback, pointerAction:%{public}d", pointerAction);
+#ifdef OHOS_BUILD_ENABLE_ANCO
+    bool isAncoDrag = pointerEvent->GetAncoDeal();
+    FI_HILOGD("DragCallback, pointerAction:%{public}d, isAncoDrag:%{public}d", pointerAction, isAncoDrag);
+    if (isAncoDrag && IsAncoDragCallback(pointerEvent, pointerAction)) {
+        FI_HILOGD("DragCallback, anco drag call back");
+        return;
+    }
+#endif // OHOS_BUILD_ENABLE_ANCO
     if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) ||
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL)) {
         dragDrawing_.StopVSyncStation();
