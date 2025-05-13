@@ -501,7 +501,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     needLongPressDragAnimation_ = true;
     isLongPressDrag_ = false;
     currentPointerEvent_ = nullptr;
-    inHoveringState_ = true;
+    inHoveringState_ = false;
     throwState_ = ThrowState::NOT_THROW;
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(dropResult.result);
@@ -589,6 +589,9 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style)
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
+    }
+    if (isHPR_ && inHoveringState_) {
+        return RET_OK;
     }
     if (OnUpdateDragStyle(style) != RET_OK) {
         FI_HILOGE("OnUpdateDragStyle dragStyle:%{public}s failed", GetDragStyleName(style).c_str());
@@ -806,7 +809,11 @@ int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent
         FI_HILOGI("SUCCESS: Screen=%{public}d, Direction=%{public}d, Angle=%{public}f, ThrowState=%{public}d",
                   currentScreen, throwDir, throwAngle, throwState_);
         dragDrawing_.PullThrowAnimation(TARGET_X, targetY, vx, vy, pointerEvent);
-        
+        inHoveringState_ = true;
+        if (OnUpdateDragStyle(DragCursorStyle::DEFAULT) != RET_OK) {
+            FI_HILOGE("pullthrow OnUpdateDragStyle failed");
+            return RET_ERR;
+        }
         int32_t repeatCount = 1;
         CHKPR(context_, RET_ERR);
         dragTimerId_ = context_->GetTimerManager().AddTimer(TIMER_TIMEOUT_MS, repeatCount, [this]() {
@@ -830,7 +837,6 @@ void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    dragDrawing_.PullThrowBreatheEndAnimation();
     CHKPV(context_);
     if (dragTimerId_ >= 0) {
         context_->GetTimerManager().RemoveTimer(dragTimerId_);
@@ -867,8 +873,9 @@ void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         OnDragCancel(pointerEvent);
         throwState_ = ThrowState::NOT_THROW;
     } else {
-        FI_HILOGD("inHoveringState_: %{public}d", inHoveringState_);
         inHoveringState_ = false;
+        dragDrawing_.PullThrowZoomOutAnimation();
+        FI_HILOGD("inHoveringState_: %{public}d", inHoveringState_);
         if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
             bool drawCursor = true;
             auto extraData = CreatePullThrowExtraData(true, drawCursor, pointerEvent);
@@ -2033,6 +2040,9 @@ void DragManager::UpdateDragStyleCross()
     FI_HILOGD("enter");
     auto dragStyle = DRAG_DATA_MGR.GetDragStyle();
     FI_HILOGI("OnUpdateDragStyle dragStyle:%{public}s", GetDragStyleName(dragStyle).c_str());
+    if (isHPR_ && inHoveringState_) {
+        return;
+    }
     if (OnUpdateDragStyle(DRAG_DATA_MGR.GetDragStyle()) != RET_OK) {
         FI_HILOGE("OnUpdateDragStyle failed");
     }
