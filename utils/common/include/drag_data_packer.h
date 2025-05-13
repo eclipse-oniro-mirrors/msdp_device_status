@@ -28,20 +28,6 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-enum SourceTool : int32_t {
-    UNKNOWN = 0,
-    FINGER = 1,
-    PEN = 2,
-    RUBBER = 3,
-    BRUSH = 4,
-    PENCIL = 5,
-    AIRBRUSH = 6,
-    MOUSE = 7,
-    LENS = 8,
-    TOUCHPAD = 9,
-    JOYSTICK = 10,
-};
-
 using SummaryMap = std::map<std::string, int64_t>;
 class DragDataPacker {
 public:
