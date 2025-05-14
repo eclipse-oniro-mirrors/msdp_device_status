@@ -344,6 +344,7 @@ napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback
     if (!result) {
         FI_HILOGE("notify metadataBinding event error by Create execution");
         delete asyncContext;
+        return nullptr;
     }
     return promise;
 }
@@ -426,6 +427,7 @@ napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info 
     if (!result) {
         FI_HILOGE("encode image error by Create execution");
         delete asyncContext;
+        return nullptr;
     }
     return promise;
 }
@@ -471,6 +473,7 @@ napi_value BoomerangNapi::DecodeImage(napi_env env, napi_callback_info info)
     if (!result) {
         FI_HILOGE("decode image error by Create execution");
         delete asyncContext;
+        return nullptr;
     }
     return promise;
 }
