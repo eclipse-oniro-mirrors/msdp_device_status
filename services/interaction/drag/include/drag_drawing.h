@@ -289,7 +289,9 @@ public:
     Rosen::Rotation GetRotation(Rosen::DisplayId displayId);
     void DestoryDisplayIdInMap(Rosen::DisplayId displayId);
     float CalculateWidthScale();
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     float CalculatePullThrowScale();
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     float GetMaxWidthScale(int32_t width, int32_t height);
     float CalculateScale(float width, float height, float widthLimit, float heightLimit);
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);

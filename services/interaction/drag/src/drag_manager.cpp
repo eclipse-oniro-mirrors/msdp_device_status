@@ -591,6 +591,7 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style)
         return RET_ERR;
     }
     if (isHPR_ && inHoveringState_) {
+        FI_HILOGD("isHPR and inHoveringState, dragstyle set to default");
         return RET_OK;
     }
     if (OnUpdateDragStyle(style) != RET_OK) {
@@ -2041,6 +2042,7 @@ void DragManager::UpdateDragStyleCross()
     auto dragStyle = DRAG_DATA_MGR.GetDragStyle();
     FI_HILOGI("OnUpdateDragStyle dragStyle:%{public}s", GetDragStyleName(dragStyle).c_str());
     if (isHPR_ && inHoveringState_) {
+        FI_HILOGD("isHPR and inHoveringState, dragstyle set to default");
         return;
     }
     if (OnUpdateDragStyle(DRAG_DATA_MGR.GetDragStyle()) != RET_OK) {

@@ -1002,11 +1002,11 @@ void DragDrawing::SetScaleAnimation()
     FI_HILOGI("enter");
     auto parentNode = g_drawingInfo.parentNode;
     CHKPV(parentNode);
-    Rosen::RSAnimationTimingProtocol SCALE_SLIP_TIMING_PROTOCOL(std::round(THROW_SLIP_TIME)); // animation time
-    Rosen::RSAnimationTimingCurve SCALE_CURVE = Rosen::RSAnimationTimingCurve::LINEAR;
+    Rosen::RSAnimationTimingProtocol scaleSlipTimingProtocol(std::round(THROW_SLIP_TIME)); // animation time
+    Rosen::RSAnimationTimingCurve scaleCurve = Rosen::RSAnimationTimingCurve::LINEAR;
 
-    SCALE_SLIP_TIMING_PROTOCOL.SetAutoReverse(false);
-    SCALE_SLIP_TIMING_PROTOCOL.SetRepeatCount(1);
+    scaleSlipTimingProtocol.SetAutoReverse(false);
+    scaleSlipTimingProtocol.SetRepeatCount(1);
     pullThrowScale_ = CalculatePullThrowScale();
     parentNode->SetScale(1.0f);
     if (!g_drawingInfo.multiSelectedNodes.empty()) {
@@ -1017,7 +1017,7 @@ void DragDrawing::SetScaleAnimation()
             multiSelectedNode->SetScale(1.0f);
         }
     }
-    Rosen::RSNode::Animate(SCALE_SLIP_TIMING_PROTOCOL, SCALE_CURVE, [&]() {
+    Rosen::RSNode::Animate(scaleSlipTimingProtocol, scaleCurve, [&]() {
         CHKPV(g_drawingInfo.parentNode);
         g_drawingInfo.parentNode->SetScale(pullThrowScale_);
         if (!g_drawingInfo.multiSelectedNodes.empty()) {
@@ -1101,10 +1101,10 @@ void DragDrawing::PullThrowZoomOutAnimation()
     FI_HILOGI("enter");
     auto parentNode = g_drawingInfo.parentNode;
     CHKPV(parentNode);
-    Rosen::RSAnimationTimingProtocol ZOOMOUT_PROTOCOL(std::round(ZOOMOUT_PULLTHROW)); // animation time
-    Rosen::RSAnimationTimingCurve ZOOMOUT_CURVE = Rosen::RSAnimationTimingCurve::LINEAR;
+    Rosen::RSAnimationTimingProtocol zoomOutProtocol(std::round(ZOOMOUT_PULLTHROW)); // animation time
+    Rosen::RSAnimationTimingCurve zoomOutCurve = Rosen::RSAnimationTimingCurve::LINEAR;
  
-    Rosen::RSNode::Animate(ZOOMOUT_PROTOCOL, ZOOMOUT_CURVE, [&]() {
+    Rosen::RSNode::Animate(zoomOutProtocol, zoomOutCurve, [&]() {
         CHKPV(g_drawingInfo.parentNode);
         g_drawingInfo.parentNode->SetScale(1.0f);
     },  [&]() {
