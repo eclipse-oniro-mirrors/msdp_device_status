@@ -136,6 +136,9 @@ constexpr float ZOOM_END_SCALE { 1.0f };
 constexpr float THROW_SLIP_TIME { 616.0f };
 constexpr float BREATHE_TIME { 600.0f };
 constexpr float BREATHE_REPEAT { 50 };
+constexpr float BREATHE_SCALE { 0.1f };
+constexpr float ZOOMOUT_PULLTHROW { 400.0f };
+constexpr float APP_WIDTH { 110 };
 constexpr uint32_t TRANSPARENT_COLOR_ARGB { 0x00000000 };
 constexpr int32_t DEFAULT_MOUSE_SIZE { 1 };
 constexpr int32_t DEFAULT_COLOR_VALUE { 0 };
@@ -961,6 +964,7 @@ void DragDrawing::PullThrowAnimation(double tx, double ty, float vx,
         if (pullThrowAnimationYCompleted_) {
             PullThrowBreatheAnimation();
             SetHovering(tx, ty, pointerEvent);
+            SetScaleAnimation();
         } else {
             pullThrowAnimationXCompleted_ = true;
         }
@@ -983,9 +987,49 @@ void DragDrawing::PullThrowAnimation(double tx, double ty, float vx,
         if (pullThrowAnimationXCompleted_) {
             PullThrowBreatheAnimation();
             SetHovering(tx, ty, pointerEvent);
+            SetScaleAnimation();
         } else {
             pullThrowAnimationYCompleted_ = true;
         }
+    });
+    Rosen::RSTransaction::FlushImplicitTransaction();
+    FI_HILOGI("leave");
+    return;
+}
+
+void DragDrawing::SetScaleAnimation()
+{
+    FI_HILOGI("enter");
+    auto parentNode = g_drawingInfo.parentNode;
+    CHKPV(parentNode);
+    Rosen::RSAnimationTimingProtocol scaleSlipTimingProtocol(std::round(THROW_SLIP_TIME)); // animation time
+    Rosen::RSAnimationTimingCurve scaleCurve = Rosen::RSAnimationTimingCurve::LINEAR;
+
+    scaleSlipTimingProtocol.SetAutoReverse(false);
+    scaleSlipTimingProtocol.SetRepeatCount(1);
+    pullThrowScale_ = CalculatePullThrowScale();
+    parentNode->SetScale(1.0f);
+    if (!g_drawingInfo.multiSelectedNodes.empty()) {
+        size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+        for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+            std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+            CHKPV(multiSelectedNode);
+            multiSelectedNode->SetScale(1.0f);
+        }
+    }
+    Rosen::RSNode::Animate(scaleSlipTimingProtocol, scaleCurve, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetScale(pullThrowScale_);
+        if (!g_drawingInfo.multiSelectedNodes.empty()) {
+            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
+            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
+                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
+                CHKPV(multiSelectedNode);
+                multiSelectedNode->SetScale(pullThrowScale_);
+            }
+        }
+    },  [&]() {
+        FI_HILOGI("pullthrow Scale end");
     });
     Rosen::RSTransaction::FlushImplicitTransaction();
     FI_HILOGI("leave");
@@ -1004,24 +1048,24 @@ void DragDrawing::PullThrowBreatheAnimation()
     BREATHE_TIMING_PROTOCOL.SetRepeatCount(BREATHE_REPEAT);
  
     // 执行动画
-    parentNode->SetScale(1.0f);
+    parentNode->SetScale(pullThrowScale_ - BREATHE_SCALE);
     if (!g_drawingInfo.multiSelectedNodes.empty()) {
         size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
         for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
             std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
             CHKPV(multiSelectedNode);
-            multiSelectedNode->SetScale(1.0f);
+            multiSelectedNode->SetScale(pullThrowScale_ - BREATHE_SCALE);
         }
     }
     Rosen::RSNode::Animate(BREATHE_TIMING_PROTOCOL, BREATHE_CURVE, [&]() {
         CHKPV(g_drawingInfo.parentNode);
-        g_drawingInfo.parentNode->SetScale(1.2f);
+        g_drawingInfo.parentNode->SetScale(pullThrowScale_ + BREATHE_SCALE);
         if (!g_drawingInfo.multiSelectedNodes.empty()) {
             size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
             for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
                 std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
                 CHKPV(multiSelectedNode);
-                multiSelectedNode->SetScale(1.2f);
+                multiSelectedNode->SetScale(pullThrowScale_ + BREATHE_SCALE);
             }
         }
     },  [&]() {
@@ -1039,14 +1083,33 @@ void DragDrawing::PullThrowBreatheEndAnimation()
     CHKPV(parentNode);
     Rosen::RSAnimationTimingProtocol BREATHE_TIMING_END_PROTOCOL(std::round(0.0f)); // animation time
     Rosen::RSAnimationTimingCurve BREATHE_CURVE = Rosen::RSAnimationTimingCurve::LINEAR;
- 
-    // 执行动画
+
     parentNode->SetScale(0.99f);
     Rosen::RSNode::Animate(BREATHE_TIMING_END_PROTOCOL, BREATHE_CURVE, [&]() {
         CHKPV(g_drawingInfo.parentNode);
         g_drawingInfo.parentNode->SetScale(1.0f);
     },  [&]() {
         FI_HILOGI("Breathe end Animation End");
+    });
+    Rosen::RSTransaction::FlushImplicitTransaction();
+    FI_HILOGI("leave");
+    return;
+}
+
+void DragDrawing::PullThrowZoomOutAnimation()
+{
+    FI_HILOGI("enter");
+    auto parentNode = g_drawingInfo.parentNode;
+    CHKPV(parentNode);
+    Rosen::RSAnimationTimingProtocol zoomOutProtocol(std::round(ZOOMOUT_PULLTHROW)); // animation time
+    Rosen::RSAnimationTimingCurve zoomOutCurve = Rosen::RSAnimationTimingCurve::LINEAR;
+ 
+    Rosen::RSNode::Animate(zoomOutProtocol, zoomOutCurve, [&]() {
+        CHKPV(g_drawingInfo.parentNode);
+        g_drawingInfo.parentNode->SetScale(1.0f);
+    },  [&]() {
+        FI_HILOGI("PullThrowZoomOutAnimation End");
+        PullThrowBreatheEndAnimation();
     });
     Rosen::RSTransaction::FlushImplicitTransaction();
     FI_HILOGI("leave");
@@ -4224,6 +4287,27 @@ float DragDrawing::CalculateWidthScale()
     float scale = GetMaxWidthScale(width, height);
     return scale;
 }
+
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+float DragDrawing::CalculatePullThrowScale()
+{
+    FI_HILOGI("enter");
+    auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
+    CHKPR(currentPixelMap, RET_ERR);
+    int32_t pixelMapWidth = currentPixelMap->GetWidth();
+    int32_t pixelMapHeight = currentPixelMap->GetHeight();
+
+    int32_t maxSide = std::max(pixelMapWidth, pixelMapHeight);
+    
+    FI_HILOGD("maxSide:%{public}d", maxSide);
+    float scale = DEFAULT_SCALING;
+    if (maxSide > APP_WIDTH) {
+        scale  = APP_WIDTH / maxSide;
+    }
+    FI_HILOGD("scale:%{public}f", scale);
+    return scale;
+}
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 float DragDrawing::CalculateSMScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide)
 {

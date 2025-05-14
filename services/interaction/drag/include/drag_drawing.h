@@ -289,6 +289,9 @@ public:
     Rosen::Rotation GetRotation(Rosen::DisplayId displayId);
     void DestoryDisplayIdInMap(Rosen::DisplayId displayId);
     float CalculateWidthScale();
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    float CalculatePullThrowScale();
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     float GetMaxWidthScale(int32_t width, int32_t height);
     float CalculateScale(float width, float height, float widthLimit, float heightLimit);
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
@@ -302,9 +305,11 @@ public:
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
     void PullThrowAnimation(double tx, double ty, float vx, float vy, std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void SetHovering(double tx, double ty, std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    void SetScaleAnimation();
     void PullThrowBreatheAnimation();
     void PullThrowBreatheEndAnimation();
-    
+    void PullThrowZoomOutAnimation();
+
 private:
     int32_t CheckDragData(const DragData &dragData);
     int32_t InitLayer();
@@ -426,6 +431,7 @@ private:
     void* dragExtHandler_ { nullptr };
     bool needRotatePixelMapXY_ { false };
     uint64_t screenId_ { 0 };
+    float pullThrowScale_ { 1.0 };
     std::map<Rosen::DisplayId, Rosen::Rotation> rotationMap_;
     ScreenSizeType currentScreenSize_ = ScreenSizeType::UNDEFINED;
     MMI::PointerStyle pointerStyle_;

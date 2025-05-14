@@ -276,7 +276,7 @@ private:
     void PullThrowDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 private:
     bool existVkListener_ { false };
-    bool inHoveringState_ { true };
+    bool inHoveringState_ { false };
     int32_t dragTimerId_ { -1 };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     PullThrowListener listener_;
