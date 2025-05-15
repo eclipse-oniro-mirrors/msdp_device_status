@@ -487,6 +487,26 @@ bool SetDraggableStateAsyncParam::Unmarshalling(MessageParcel &parcel)
 {
     return (parcel.ReadBool(state_) && parcel.ReadInt64(downTime_));
 }
+
+GetDragBundleInfoReply::GetDragBundleInfoReply(DragBundleInfo &dragBundleInfo)
+    : dragBundleInfo_(dragBundleInfo)
+{}
+
+bool GetDragBundleInfoReply::Marshalling(MessageParcel &parcel) const
+{
+    return (
+        parcel.WriteString(dragBundleInfo_.bundleName) &&
+        parcel.WriteBool(dragBundleInfo_.isCrossDevice)
+    );
+}
+
+bool GetDragBundleInfoReply::Unmarshalling(MessageParcel &parcel)
+{
+    return (
+        parcel.ReadString(dragBundleInfo_.bundleName) &&
+        parcel.ReadBool(dragBundleInfo_.isCrossDevice)
+    );
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

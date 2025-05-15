@@ -1615,6 +1615,70 @@ HWTEST_F(DragServerTest, DragServerTest56, TestSize.Level0)
     int32_t ret2 = g_dragServer->SetDraggableState(context, datas, reply);
     EXPECT_EQ(ret2, RET_OK);
 }
+
+/**
+ * @tc.name: DragServerTest57
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest57, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragBundleInfo(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest58
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest58, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    g_dragMgr.dragState_ = DragState::ERROR;
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragBundleInfo(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = false;
+    ret = g_dragServer->GetDragBundleInfo(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+
+    DragBundleInfo dragBundleInfo;
+    GetDragBundleInfoReply dragBundleInfoReply(dragBundleInfo);
+    ret = dragBundleInfoReply.Unmarshalling(reply);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(dragBundleInfoReply.dragBundleInfo_.isCrossDevice);
+
+    g_dragMgr.dragState_ = DragState::MOTION_DRAGGING;
+    g_dragMgr.isCrossDragging_ = true;
+    ret = g_dragServer->GetDragBundleInfo(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+
+    ret = dragBundleInfoReply.Unmarshalling(reply);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(dragBundleInfoReply.dragBundleInfo_.isCrossDevice);
+    
+    g_dragMgr.dragState_ = DragState::STOP;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

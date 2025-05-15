@@ -230,6 +230,7 @@ DRAG_BEHAVIOR:
   PACKAGE_NAME: {type: STRING, desc: package name}
   APP_CALLEE: {type: STRING, desc: app callee}
   APP_CALLER: {type: STRING, desc: app caller}
+  DRAG_NUM: {type: INT32, desc: drag number}
 
 COOPERTATE_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Cooperate, preserve: false}

@@ -107,7 +107,7 @@ public:
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t StopDrag(
         const DragDropResult &dropResult, const std::string &packageName = "",
-        int32_t pid = -1, bool isStopCooperate = false, const std::string &appCallee = "") override;
+        int32_t pid = -1, bool isStopCooperate = false, const DragRadarPackageName &inPackageName = {}) override;
     int32_t GetDragTargetPid() const override;
     int32_t GetUdKey(std::string &udKey) const override;
     void SendDragData(int32_t targetTid, const std::string &udKey);
@@ -167,6 +167,7 @@ public:
     int32_t GetExtraInfo(std::string &extraInfo) const override;
     int32_t AddPrivilege(int32_t tokenId) override;
     int32_t EraseMouseIcon() override;
+    int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const override;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) override;
     void SimulatePullCancelEvent() override;
@@ -323,6 +324,7 @@ private:
     std::string peerNetId_;
     bool isLongPressDrag_ { false };
     bool needLongPressDragAnimation_ { true };
+    DragRadarPackageName dragPackageName_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

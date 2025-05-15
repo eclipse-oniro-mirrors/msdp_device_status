@@ -81,6 +81,7 @@ public:
     int32_t EnterTextEditorArea(bool enable);
     int32_t AddPrivilege();
     int32_t EraseMouseIcon();
+    int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
 
 private:
     class DeviceStatusDeathRecipient : public IRemoteObject::DeathRecipient {

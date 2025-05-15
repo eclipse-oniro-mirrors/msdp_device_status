@@ -314,6 +314,14 @@ public:
      * @since 10
      */
     int32_t GetExtraInfo(std::string &extraInfo);
+
+    /**
+     * @brief Obtains the dragging source information.
+     * @param dragBundleInfo Output parameter, mainly to save the dragging source information.
+     * @return Returns <b>0</b> if the operation is successful; returns other values if the operation fails.
+     * @since 20
+     */
+    int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
 #ifndef  OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Registers a listener for screen hot area of the mouse pointer.
