@@ -2067,11 +2067,11 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
         CHKPV(mouseIconNode);
         g_drawingInfo.nodes.emplace_back(mouseIconNode);
         g_drawingInfo.rootNode->AddChild(mouseIconNode);
-        rsUiDirector_->SetRoot(g_drawingInfo.rootNode->GetId());
+        rsUiDirector_->SetRSRootNode(Rosen::RSBaseNode::ReinterpretCast<Rosen::RSRootNode>(g_drawingInfo.rootNode));
         return;
     }
 #endif // OHOS_BUILD_PC_PRODUCT
-    rsUiDirector_->SetRoot(g_drawingInfo.rootNode->GetId());
+    rsUiDirector_->SetRSRootNode(Rosen::RSBaseNode::ReinterpretCast<Rosen::RSRootNode>(g_drawingInfo.rootNode));
     FI_HILOGI("leave");
 }
 
