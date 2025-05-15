@@ -75,6 +75,9 @@ private:
     int32_t GetAppDragSwitchState(CallingContext &context, MessageParcel &data, MessageParcel &reply);
     int32_t SetDraggableStateAsync(CallingContext &context, MessageParcel &data);
     int32_t GetDragBundleInfo(CallingContext &context, MessageParcel &data, MessageParcel &reply);
+    int32_t EraseMouseIcon(CallingContext &context);
+    int32_t AddSubscriptListener(CallingContext &context);
+    int32_t RemoveSubscriptListener(CallingContext &context);
 
     IContext *env_ { nullptr };
 #ifdef OHOS_BUILD_UNIVERSAL_DRAG
