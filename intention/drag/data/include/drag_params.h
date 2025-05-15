@@ -58,6 +58,7 @@ enum DragRequestID : uint32_t {
     SET_DRAGGABLE_STATE,
     SET_DRAGABLE_STATE_ASYNC,
     GET_UNIVERSAL_DRAG_APP_STATE,
+    GET_DRAG_BUNDLE_INFO,
 };
 
 struct StartDragParam final : public ParamBase {
@@ -327,6 +328,16 @@ struct SetDraggableStateAsyncParam final : public ParamBase {
 
     bool state_ { false };
     int64_t downTime_ { -1 };
+};
+
+struct GetDragBundleInfoReply final : public ParamBase {
+    GetDragBundleInfoReply() = default;
+    explicit GetDragBundleInfoReply(DragBundleInfo &dragBundleInfo);
+
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    DragBundleInfo dragBundleInfo_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

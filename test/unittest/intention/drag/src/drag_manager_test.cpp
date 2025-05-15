@@ -1701,6 +1701,74 @@ HWTEST_F(DragManagerTest, DragManagerTest69, TestSize.Level0)
     int32_t ret = InteractionManager::GetInstance()->RotateDragWindowSync(nullptr);
     EXPECT_EQ(ret, RET_ERR);
 }
+
+/**
+ * @tc.name: DragManagerTest70
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest70, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragBundleInfo dragBundleInfo;
+    int32_t ret = InteractionManager::GetInstance()->GetDragBundleInfo(dragBundleInfo);
+    ASSERT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragManagerTest71
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest71, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    DragBundleInfo dragBundleInfo;
+    ret = InteractionManager::GetInstance()->GetDragBundleInfo(dragBundleInfo);
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
+}
+
+/**
+ * @tc.name: DragManagerTest72
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest72, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragBundleInfo dragBundleInfo;
+    GetDragBundleInfoReply dragBundleInfoReply(dragBundleInfo);
+    MessageParcel data;
+    bool ret = dragBundleInfoReply.Marshalling(data);
+    EXPECT_TRUE(ret);
+
+    ret = dragBundleInfoReply.Unmarshalling(data);
+    EXPECT_TRUE(ret);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

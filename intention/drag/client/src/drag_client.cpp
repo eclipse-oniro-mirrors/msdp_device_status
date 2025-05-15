@@ -627,6 +627,20 @@ void DragClient::OnDisconnected(ITunnelClient &tunnel)
     dragListeners_.clear();
     hasRegistered_ = false;
 }
+
+int32_t DragClient::GetDragBundleInfo(ITunnelClient &tunnel, DragBundleInfo &dragBundleInfo)
+{
+    DefaultParam param {};
+    GetDragBundleInfoReply reply {};
+
+    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_DRAG_BUNDLE_INFO, param, reply);
+    if (ret != RET_OK) {
+        FI_HILOGE("ITunnelClient::GetParam fail, ret = %{public}d", ret);
+        return ret;
+    }
+    dragBundleInfo = reply.dragBundleInfo_;
+    return RET_OK;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

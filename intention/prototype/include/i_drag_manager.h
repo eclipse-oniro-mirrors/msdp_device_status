@@ -51,7 +51,7 @@ public:
     virtual int32_t StartDrag(const DragData &dragData) = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     virtual int32_t StopDrag(const DragDropResult &dropResult, const std::string &packageName = "",
-        int32_t pid = -1, bool isStopCooperate = false,  const std::string &appCallee = "") = 0;
+        int32_t pid = -1, bool isStopCooperate = false,  const DragRadarPackageName &inPackageName = {}) = 0;
     virtual int32_t GetDragData(DragData &dragData) = 0;
     virtual int32_t GetDragTargetPid() const = 0;
     virtual int32_t GetUdKey(std::string &udKey) const = 0;
@@ -72,6 +72,7 @@ public:
     virtual OHOS::MMI::ExtraData GetExtraData(bool appended) const = 0;
     virtual bool GetControlCollaborationVisible() const = 0;
     virtual void SetControlCollaborationVisible(bool visible) = 0;
+    virtual int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const = 0;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual void RegisterStateChange(std::function<void(DragState)> callback) = 0;
     virtual void UnregisterStateChange() = 0;

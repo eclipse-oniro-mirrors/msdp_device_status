@@ -50,6 +50,10 @@ int32_t DragDataPacker::Marshalling(const DragData &dragData, Parcel &data, bool
         FI_HILOGE("Marshalling summary failed");
         return RET_ERR;
     }
+
+    if (!isCross && !data.WriteBool(dragData.isDragDelay)) {
+        FI_HILOGE("Marshalling isDragDelay failed");
+    }
     return RET_OK;
 }
 
@@ -76,6 +80,10 @@ int32_t DragDataPacker::UnMarshalling(Parcel &data, DragData &dragData, bool isC
     if (SummaryPacker::UnMarshalling(data, dragData.summarys) != RET_OK) {
         FI_HILOGE("Unmarshalling summary failed");
         return RET_ERR;
+    }
+
+    if (!isCross && !data.ReadBool(dragData.isDragDelay)) {
+        FI_HILOGE("Unmarshalling isDragDelay failed");
     }
     return RET_OK;
 }
