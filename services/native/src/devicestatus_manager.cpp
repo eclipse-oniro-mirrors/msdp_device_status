@@ -34,12 +34,12 @@ void DeviceStatusManager::DeviceStatusCallbackDeathRecipient::OnRemoteDied(const
 
 void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    std::lock_guard lock(mutex_);
     CHKPV(remote);
     FI_HILOGI("Recv death notice");
     if (manager_ == nullptr) {
         return;
     }
+    std::lock_guard lock(manager_->mutex_);
     for (auto& entry : manager_->boomerangListeners_) {
         auto& callbacks = entry.second;
         auto it = callbacks.begin();

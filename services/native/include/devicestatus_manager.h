@@ -49,7 +49,6 @@ public:
         virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
         virtual ~BoomerangCallbackDeathRecipient() = default;
     private:
-        std::mutex mutex_;
         DeviceStatusManager* manager_;
         friend class DeviceStatusManager;
     };
