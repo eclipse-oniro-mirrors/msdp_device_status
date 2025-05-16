@@ -1,12 +1,93 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragData;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragResult;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragVisible;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceablePreviewAnimation;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceablePreviewStyle;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableRotateWindow;
+interface OHOS.Msdp.DeviceStatus.IRemoteBoomerangCallback;
+interface OHOS.Msdp.DeviceStatus.IRemoteDevStaCallback;
+sequenceable OHOS.Media.PixelMap;
+ 
+interface OHOS.Msdp.IIntention {
+    // Socket
+    void Socket([in] String programName, [in] int moduleType, [out] FileDescriptor socketFd, [out] int tokenType);
+ 
+    // Cooperate
+    void EnableCooperate([in] int userData);
+    void DisableCooperate([in] int userData);
+    void StartCooperate([in] String remoteNetworkId, [in] int userData, [in] int startDeviceId, [in] boolean checkPermission);
+    void StopCooperate([in] int userData, [in] boolean isUnchained, [in] boolean checkPermission);
+    void RegisterCooperateListener();
+    void UnregisterCooperateListener();
+    void RegisterHotAreaListener([in] int userData, [in] boolean checkPermission);
+    void UnregisterHotAreaListener();
+    void RegisterMouseEventListener([in] String networkId);
+    void UnregisterMouseEventListener([in] String networkId);
+    void GetCooperateStateSync([in] String udid, [out] boolean state);
+    void GetCooperateStateAsync([in] String networkId, [in] int userData, [in] boolean isCheckPermission);
+    void SetDamplingCoefficient([in] unsigned int direction, [in] double coefficient);
+ 
+    // Drag
+    void StartDrag([in] SequenceableDragData sequenceableDragData);
+    void StopDrag([in] SequenceableDragResult sequenceableDragResult);
+    void AddDraglistener([in] boolean isJsCaller);
+    void RemoveDraglistener([in] boolean isJsCaller);
+    void AddSubscriptListener();
+    void RemoveSubscriptListener();
+    void SetDragWindowVisible([in] SequenceableDragVisible sequenceableDragVisible);
+    void UpdateDragStyle([in] int style, [in] int eventId);
+    void UpdateShadowPic([in] sharedptr<PixelMap> pixelMap, [in] int x, [in] int y);
+    void GetDragTargetPid([out] int targetPid);
+    void GetUdKey([out] String udKey);
+    void GetShadowOffset([out] int offsetX, [out] int offsetY, [out] int width, [out] int height);
+    void GetDragData([out] SequenceableDragData sequenceableDragData);
+    void UpdatePreviewStyle([in] SequenceablePreviewStyle sequenceablePreviewStyle);
+    void UpdatePreviewStyleWithAnimation([in] SequenceablePreviewAnimation sequenceablePreviewAnimation);
+    void RotateDragWindowSync([in] SequenceableRotateWindow sequenceableRotateWindow);
+    void SetDragWindowScreenId([in] unsigned long displayId, [in] unsigned long screenId);
+    void GetDragSummary([out] OrderedMap<String, long> summarys, [in] boolean isJsCaller);
+    void SetDragSwitchState([in] boolean enable, [in] boolean isJsCaller);
+    void SetAppDragSwitchState([in] boolean enable, [in] String pkgName, [in] boolean isJsCaller);
+    void GetDragState([out] int dragState);
+    void EnableUpperCenterMode([in] boolean enable);
+    void GetDragAction([out] int dragAction);
+    void GetExtraInfo([out] String extraInfo);
+    void AddPrivilege();
+    void EraseMouseIcon();
+    void SetMouseDragMonitorState([in] boolean state);
+    void SetDraggableState([in] boolean state);
+    void GetAppDragSwitchState([out] boolean state);
+    void SetDraggableStateAsync([in] boolean state, [in] long downTime);
+    void GetDragBundleInfo([out] String bundleName, [out] boolean isCrossDevice);
+ 
+    // Boomerang
+    void SubscribeCallback([in] int type, [in] String bundleName, [in] IRemoteBoomerangCallback subCallback);
+    void UnsubscribeCallback([in] int type, [in] String bundleName, [in] IRemoteBoomerangCallback unsubCallback);
+    void NotifyMetadataBindingEvent([in] String bundleName, [in] IRemoteBoomerangCallback notifyCallback);
+    void SubmitMetadata([in] String metadata);
+    void BoomerangEncodeImage([in] sharedptr<PixelMap> pixelMap, [in] String metadata,
+        [in] IRemoteBoomerangCallback encodeCallback);
+    void BoomerangDecodeImage([in] sharedptr<PixelMap> pixelMap, [in] IRemoteBoomerangCallback decodeCallback);
+ 
+    // Stationary
+    void SubscribeStationaryCallback([in] int type, [in] int event, [in] int latency,
+        [in] IRemoteDevStaCallback subCallback);
+    void UnsubscribeStationaryCallback([in] int type, [in] int event,
+        [in] IRemoteDevStaCallback unsubCallback);
+    void GetDeviceStatusData([in] int type, [out] int replyType, [out] int replyValue);
+}
