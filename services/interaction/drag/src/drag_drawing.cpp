@@ -1007,7 +1007,9 @@ void DragDrawing::SetScaleAnimation()
 
     scaleSlipTimingProtocol.SetAutoReverse(false);
     scaleSlipTimingProtocol.SetRepeatCount(1);
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     pullThrowScale_ = CalculatePullThrowScale();
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     parentNode->SetScale(1.0f);
     if (!g_drawingInfo.multiSelectedNodes.empty()) {
         size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
@@ -4293,7 +4295,10 @@ float DragDrawing::CalculatePullThrowScale()
 {
     FI_HILOGI("enter");
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
-    CHKPR(currentPixelMap, RET_ERR);
+    if (currentPixelMap == nullptr) {
+        FI_HILOGE("pixelMap is nullptr");
+        return DEFAULT_SCALING;
+    }
     int32_t pixelMapWidth = currentPixelMap->GetWidth();
     int32_t pixelMapHeight = currentPixelMap->GetHeight();
 
@@ -4303,6 +4308,9 @@ float DragDrawing::CalculatePullThrowScale()
     float scale = DEFAULT_SCALING;
     if (maxSide > APP_WIDTH) {
         scale  = APP_WIDTH / maxSide;
+    }
+    if (scale < BREATHE_SCALE) {
+        scale  = BREATHE_SCALE;
     }
     FI_HILOGD("scale:%{public}f", scale);
     return scale;
