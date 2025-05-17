@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,11 +20,11 @@
 #include "tokenid_kit.h"
 #include "accesstoken_kit.h"
 
+#include "boomerang_params.h"
 #include "default_params.h"
 #include "devicestatus_define.h"
 #include "devicestatus_dumper.h"
 #include "devicestatus_hisysevent.h"
-#include "boomerang_params.h"
 
 #undef LOG_TAG
 #define LOG_TAG "BoomerangServer"
@@ -162,8 +162,7 @@ int32_t BoomerangServer::Subscribe(CallingContext &context, MessageParcel &data)
     appInfo->type = param.type_;
     appInfo->boomerangCallback = param.callback_;
     DS_DUMPER->SaveBoomerangAppInfo(appInfo);
-    manager_.Subscribe(param.type_, param.bundleName_, param.callback_);
-    return RET_OK;
+    return manager_.Subscribe(param.type_, param.bundleName_, param.callback_);
 }
 
 int32_t BoomerangServer::Unsubscribe(CallingContext &context, MessageParcel &data)
@@ -181,8 +180,7 @@ int32_t BoomerangServer::Unsubscribe(CallingContext &context, MessageParcel &dat
     appInfo->type = param.type_;
     appInfo->boomerangCallback = param.callback_;
     DS_DUMPER->RemoveBoomerangAppInfo(appInfo);
-    manager_.Unsubscribe(param.type_, param.bundleName_, param.callback_);
-    return RET_OK;
+    return manager_.Unsubscribe(param.type_, param.bundleName_, param.callback_);
 }
 
 int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, MessageParcel &data)
@@ -224,8 +222,7 @@ int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, MessagePa
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
     appInfo->boomerangCallback = param.callback_;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    manager_.BoomerangEncodeImage(param.pixelMap_, param.metadata_, param.callback_);
-    return RET_OK;
+    return manager_.BoomerangEncodeImage(param.pixelMap_, param.metadata_, param.callback_);
 }
 
 int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, MessageParcel &data)
@@ -246,8 +243,7 @@ int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, MessagePa
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
     appInfo->boomerangCallback = param.callback_;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    manager_.BoomerangDecodeImage(param.pixelMap_, param.callback_);
-    return RET_OK;
+    return manager_.BoomerangDecodeImage(param.pixelMap_, param.callback_);
 }
 
 int32_t BoomerangServer::SubmitMetadata(CallingContext &context, MessageParcel &data)
@@ -257,8 +253,7 @@ int32_t BoomerangServer::SubmitMetadata(CallingContext &context, MessageParcel &
         FI_HILOGE("GetNotifyMetadataParam::Unmarshalling fail");
         return RET_ERR;
     }
-    manager_.SubmitMetadata(param.metadata_);
-    return RET_OK;
+    return manager_.SubmitMetadata(param.metadata_);
 }
 
 Data BoomerangServer::GetCache(CallingContext &context, const Type &type)
