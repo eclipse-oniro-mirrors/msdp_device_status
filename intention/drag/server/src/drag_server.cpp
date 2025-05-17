@@ -99,7 +99,7 @@ int32_t DragServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel
         }
         case DragRequestID::ADD_SUBSCRIPT_LISTENER: {
             FI_HILOGD("Add subscript listener, from:%{public}d", context.pid);
-            return env_->GetDragManager().AddSubscriptListener(context.pid);
+            return AddSubscriptListener(context);
         }
         default: {
             FI_HILOGE("Unexpected request ID (%{public}u)", id);
@@ -118,7 +118,7 @@ int32_t DragServer::RemoveWatch(CallingContext &context, uint32_t id, MessagePar
         }
         case DragRequestID::REMOVE_SUBSCRIPT_LISTENER: {
             FI_HILOGD("Remove subscript listener, from:%{public}d", context.pid);
-            return env_->GetDragManager().RemoveSubscriptListener(context.pid);
+            return RemoveSubscriptListener(context);
         }
         default: {
             FI_HILOGE("Unexpected request ID (%{public}u)", id);
@@ -241,7 +241,7 @@ int32_t DragServer::Control(CallingContext &context, uint32_t id, MessageParcel 
         }
         case DragRequestID::ERASE_MOUSE_ICON: {
             FI_HILOGI("Erase mouse, from:%{public}d", context.pid);
-            return env_->GetDragManager().EraseMouseIcon();
+            return EraseMouseIcon(context);
         }
         case DragRequestID::SET_MOUSE_DRAG_MONITOR_STATE: {
             FI_HILOGI("Set mouse drag monitor state, from:%{public}d", context.pid);
@@ -262,7 +262,7 @@ int32_t DragServer::AddListener(CallingContext &context, MessageParcel &data)
         return RET_ERR;
     }
 
-    if (param.isJsCaller_ && !IsSystemHAPCalling(context)) {
+    if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
@@ -279,7 +279,7 @@ int32_t DragServer::RemoveListener(CallingContext &context, MessageParcel &data)
         return RET_ERR;
     }
 
-    if (param.isJsCaller_ && !IsSystemHAPCalling(context)) {
+    if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
@@ -365,6 +365,11 @@ int32_t DragServer::UpdatePreviewAnimation(CallingContext &context, MessageParce
 
 int32_t DragServer::RotateDragWindowSync(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
+    if (!IsSystemServiceCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
+
     RotateDragWindowSyncParam param {};
 
     if (!param.Unmarshalling(data)) {
@@ -377,6 +382,11 @@ int32_t DragServer::RotateDragWindowSync(CallingContext &context, MessageParcel 
 
 int32_t DragServer::SetDragWindowScreenId(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
+    if (!IsSystemServiceCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
+
     SetDragWindowScreenIdParam param {};
 
     if (!param.Unmarshalling(data)) {
@@ -391,6 +401,11 @@ int32_t DragServer::SetDragWindowScreenId(CallingContext &context, MessageParcel
 int32_t DragServer::GetDragTargetPid(CallingContext &context, MessageParcel &data, MessageParcel &reply)
 {
     CHKPR(env_, RET_ERR);
+    if (!IsSystemServiceCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
+
     int32_t targetPid = env_->GetDragManager().GetDragTargetPid();
     GetDragTargetPidReply targetPidReply { targetPid };
 
@@ -441,6 +456,11 @@ int32_t DragServer::GetDragData(CallingContext &context, MessageParcel &data, Me
 {
     DragData dragData {};
     CHKPR(env_, RET_ERR);
+    if (!IsSystemServiceCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return RET_ERR;
+    }
+
     int32_t ret = env_->GetDragManager().GetDragData(dragData);
     if (ret != RET_OK) {
         FI_HILOGE("IDragManager::GetDragData fail, error:%{public}d", ret);
@@ -509,7 +529,7 @@ int32_t DragServer::SetDragSwitchState(CallingContext &context, MessageParcel &d
         FI_HILOGE("SetDragSwitchStateParam::Unmarshalling fail");
         return RET_ERR;
     }
-    if (param.isJsCaller_ && !IsSystemHAPCalling(context)) {
+    if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
@@ -527,7 +547,7 @@ int32_t DragServer::SetAppDragSwitchState(CallingContext &context, MessageParcel
         FI_HILOGE("SetAppDragSwitchStateParam::Unmarshalling fail");
         return RET_ERR;
     }
-    if (param.isJsCaller_ && !IsSystemHAPCalling(context)) {
+    if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
@@ -715,6 +735,39 @@ int32_t DragServer::GetDragBundleInfo(CallingContext &context, MessageParcel &da
         return RET_ERR;
     }
     return RET_OK;
+}
+
+int32_t DragServer::EraseMouseIcon(CallingContext &context)
+{
+    CHKPR(env_, RET_ERR);
+    if (!IsSystemServiceCalling(context)) {
+        FI_HILOGE("The caller is not system service");
+        return RET_ERR;
+    }
+
+    return env_->GetDragManager().EraseMouseIcon();
+}
+
+int32_t DragServer::AddSubscriptListener(CallingContext &context)
+{
+    CHKPR(env_, RET_ERR);
+    if (!IsSystemServiceCalling(context)) {
+        FI_HILOGE("The caller is not system service");
+        return RET_ERR;
+    }
+
+    return env_->GetDragManager().AddSubscriptListener(context.pid);
+}
+
+int32_t DragServer::RemoveSubscriptListener(CallingContext &context)
+{
+    CHKPR(env_, RET_ERR);
+    if (!IsSystemServiceCalling(context)) {
+        FI_HILOGE("The caller is not system service");
+        return RET_ERR;
+    }
+
+    return env_->GetDragManager().RemoveSubscriptListener(context.pid);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

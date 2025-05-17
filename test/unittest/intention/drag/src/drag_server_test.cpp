@@ -1486,7 +1486,7 @@ HWTEST_F(DragServerTest, DragClientTest50, TestSize.Level0)
     uint16_t displayId = 0;
     uint64_t screenId = 0;
     int32_t ret = g_dragClient.SetDragWindowScreenId(*g_tunnel, displayId, screenId);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
