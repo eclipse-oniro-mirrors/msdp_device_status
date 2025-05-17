@@ -369,6 +369,8 @@ napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info i
     return result;
 }
 
+++
+
 napi_value MotionNapi::Init(napi_env env, napi_value exports)
 {
     FI_HILOGD("Enter");
