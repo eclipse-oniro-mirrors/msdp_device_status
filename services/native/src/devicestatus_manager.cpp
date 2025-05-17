@@ -303,14 +303,11 @@ void DeviceStatusManager::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
     }
 }
 
-int32_t DeviceStatusManager::Subscribe(BoomerangType type, std::string bundleName,
+int32_t DeviceStatusManager::Subscribe(BoomerangType type, const std::string &bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
-    if (callback == nullptr) {
-        FI_HILOGE("Subscribe callback is null");
-        return RET_ERR;
-    }
+    CHKPR(callback, RET_ERR);
     if ((type <= BOOMERANG_TYPE_INVALID) || (type >= BOOMERANG_TYPE_MAX)) {
         FI_HILOGE("Subscribe boomerangType_:%{public}d is error", boomerangType_);
         return RET_ERR;
@@ -319,10 +316,7 @@ int32_t DeviceStatusManager::Subscribe(BoomerangType type, std::string bundleNam
     std::lock_guard lock(mutex_);
     std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp> listeners;
     auto object = callback->AsObject();
-    if (object == nullptr) {
-        FI_HILOGE("Subscribe callback AsObject error");
-        return RET_ERR;
-    }
+    CHKPR(object, RET_ERR);
     FI_HILOGI("boomerangListeners_.size:%{public}zu", boomerangListeners_.size());
     auto dtTypeIter = boomerangListeners_.find(bundleName);
     if (dtTypeIter == boomerangListeners_.end()) {
@@ -348,23 +342,17 @@ int32_t DeviceStatusManager::Subscribe(BoomerangType type, std::string bundleNam
     return RET_OK;
 }
  
-int32_t DeviceStatusManager::Unsubscribe(BoomerangType type, std::string bundleName,
+int32_t DeviceStatusManager::Unsubscribe(BoomerangType type, const std::string &bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
-    if (callback == nullptr) {
-        FI_HILOGE("unSubscribe callback is null");
-        return RET_ERR;
-    }
+    CHKPR(callback, RET_ERR);
     if ((type <= BOOMERANG_TYPE_INVALID) || (type >= BOOMERANG_TYPE_MAX)) {
         FI_HILOGE("Unsubscribe type_:%{public}d is error", type);
         return RET_ERR;
     }
     auto object = callback->AsObject();
-    if (object == nullptr) {
-        FI_HILOGE("unSubscribe callback AsObject error");
-        return RET_ERR;
-    }
+    CHKPR(object, RET_ERR);
     std::lock_guard lock(mutex_);
     auto dtTypeIter = boomerangListeners_.find(bundleName);
     if (dtTypeIter == boomerangListeners_.end()) {
@@ -385,17 +373,12 @@ int32_t DeviceStatusManager::Unsubscribe(BoomerangType type, std::string bundleN
     return RET_OK;
 }
  
-int32_t DeviceStatusManager::NotifyMedata(std::string bundleName, sptr<IRemoteBoomerangCallback> callback)
+int32_t DeviceStatusManager::NotifyMedata(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
-    if (callback == nullptr) {
-        FI_HILOGE("NotifyMedata callback is null");
-        return RET_ERR;
-    }
+    CHKPR(callback, RET_ERR);
     auto object = callback->AsObject();
-    if (object == nullptr) {
-        return RET_ERR;
-    }
+    CHKPR(object, RET_ERR);
     std::lock_guard lock(mutex_);
     auto iter = boomerangListeners_.find(bundleName);
     if (iter == boomerangListeners_.end()) {
@@ -410,12 +393,11 @@ int32_t DeviceStatusManager::NotifyMedata(std::string bundleName, sptr<IRemoteBo
 
     for (const auto &listener : callbacks) {
         if (listener == nullptr) {
-            FI_HILOGE("listener is nullptr");
-            return RET_ERR;
+            CHKPR(listener, RET_ERR);
         }
         BoomerangData data {};
         data.type = BoomerangType::BOOMERANG_TYPE_BOOMERANG;
-        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREEN_SHOT;
+        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREENSHOT;
         listener->OnScreenshotResult(data);
     }
     object->AddDeathRecipient(boomerangCBDeathRecipient_);
@@ -423,38 +405,27 @@ int32_t DeviceStatusManager::NotifyMedata(std::string bundleName, sptr<IRemoteBo
     return RET_OK;
 }
 
-int32_t DeviceStatusManager::SubmitMetadata(std::string metadata)
+int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard lock(mutex_);
-    if (notityListener_ == nullptr) {
-        FI_HILOGE("the NotifyMedata listener is null");
-        return RET_ERR;
-    }
+    CHKPR(notityListener_, RET_ERR);
     notityListener_->OnNotifyMetadata(metadata);
     return RET_OK;
 }
  
-int32_t DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
-    sptr<IRemoteBoomerangCallback> callback)
+int32_t DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
+    std::string metadata, sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
-    if (callback == nullptr) {
-        FI_HILOGE("EncodeImage callback is null");
-        return RET_ERR;
-    }
+    CHKPR(pixelMap, RET_ERR);
+    CHKPR(callback, RET_ERR);
     std::lock_guard lock(mutex_);
     std::shared_ptr<Media::PixelMap> encodePixelMap;
     std::shared_ptr<BoomerangAlgoImpl> algo = std::make_shared<BoomerangAlgoImpl>();
-    if (algo == nullptr) {
-        FI_HILOGE("Boomerang Algo init faild");
-        return RET_ERR;
-    }
-    algo->EncodeImage(pixelMap, matedata, encodePixelMap);
-    if (encodePixelMap == nullptr) {
-        FI_HILOGE("encode image is null");
-        return RET_ERR;
-    }
+    CHKPR(algo, RET_ERR);
+    algo->EncodeImage(pixelMap, metadata, encodePixelMap);
+    CHKPR(encodePixelMap, RET_ERR);
     callback->OnEncodeImageResult(encodePixelMap);
     return RET_OK;
 }
@@ -463,17 +434,12 @@ int32_t DeviceStatusManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMa
     sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
-    if (callback == nullptr) {
-        FI_HILOGE("DecodeImage callback is null");
-        return RET_ERR;
-    }
+    CHKPR(pixelMap, RET_ERR);
+    CHKPR(callback, RET_ERR);
     std::lock_guard lock(mutex_);
     std::string metadata;
     std::shared_ptr<BoomerangAlgoImpl> algo = std::make_shared<BoomerangAlgoImpl>();
-    if (algo == nullptr) {
-        FI_HILOGE("Boomerang Algo init faild");
-        return RET_ERR;
-    }
+    CHKPR(algo, RET_ERR);
     algo->DecodeImage(pixelMap, metadata);
     callback->OnNotifyMetadata(metadata);
     return RET_OK;

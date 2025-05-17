@@ -61,11 +61,11 @@ public:
     int32_t NotifyDeviceStatusChange(const Data &devicestatusData);
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
     void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
-    int32_t Subscribe(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
-    int32_t Unsubscribe(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
-    int32_t NotifyMedata(std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
-    int32_t SubmitMetadata(std::string metadata);
-    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
+    int32_t Subscribe(BoomerangType type, const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t Unsubscribe(BoomerangType type, const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t NotifyMedata(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t SubmitMetadata(const std::string &metadata);
+    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string metadata,
         sptr<IRemoteBoomerangCallback> callback);
     int32_t BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
     Data GetLatestDeviceStatusData(Type type);
