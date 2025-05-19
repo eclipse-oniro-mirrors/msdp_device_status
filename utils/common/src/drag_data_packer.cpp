@@ -25,6 +25,23 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+int32_t DragDataPacker::MarshallingSummarys2(const DragData &dragData, Parcel &data)
+{
+    if (SummaryPacker::Marshalling(dragData.summarys2, data) != RET_OK) {
+        FI_HILOGE("Marshalling summarys2 failed");
+    }
+
+    return RET_OK;
+}
+
+int32_t DragDataPacker::UnMarshallingSummarys2(Parcel &data, DragData &dragData)
+{
+    if (SummaryPacker::UnMarshalling(data, dragData.summarys2) != RET_OK) {
+        FI_HILOGE("UnMarshalling summarys2 failed");
+    }
+
+    return RET_OK;
+}
 
 int32_t DragDataPacker::Marshalling(const DragData &dragData, Parcel &data, bool isCross)
 {

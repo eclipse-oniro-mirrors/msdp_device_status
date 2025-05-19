@@ -40,7 +40,8 @@ bool StartDragParam::Marshalling(MessageParcel &parcel) const
 {
     return (
         (cDragDataPtr_ != nullptr) &&
-        (DragDataPacker::Marshalling(*cDragDataPtr_, parcel) == RET_OK)
+        (DragDataPacker::Marshalling(*cDragDataPtr_, parcel) == RET_OK) &&
+        (DragDataPacker::MarshallingSummarys2(*cDragDataPtr_, parcel) == RET_OK)
     );
 }
 
@@ -48,7 +49,8 @@ bool StartDragParam::Unmarshalling(MessageParcel &parcel)
 {
     return (
         (dragDataPtr_ != nullptr) &&
-        (DragDataPacker::UnMarshalling(parcel, *dragDataPtr_) == RET_OK)
+        (DragDataPacker::UnMarshalling(parcel, *dragDataPtr_) == RET_OK) &&
+        (DragDataPacker::UnMarshallingSummarys2(parcel, *dragDataPtr_) == RET_OK)
     );
 }
 
