@@ -165,6 +165,7 @@ int32_t BoomerangServer::Subscribe(CallingContext &context, MessageParcel &data)
     int32_t ret = manager_.Subscribe(param.type_, param.bundleName_, param.callback_);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang Subscribe failed");
+        return RET_ERR;
     }
     return RET_OK;
 }
@@ -187,6 +188,7 @@ int32_t BoomerangServer::Unsubscribe(CallingContext &context, MessageParcel &dat
     int32_t ret = manager_.Unsubscribe(param.type_, param.bundleName_, param.callback_);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang Unsubscribe failed");
+        return RET_ERR;
     }
     return RET_OK;
 }
@@ -212,6 +214,7 @@ int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, Mes
     int32_t ret = manager_.NotifyMedata(param.bundleName_, param.callback_);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang NotifyMetadataBindingEvent failed");
+        return RET_ERR;
     }
     return RET_OK;
 }
@@ -237,6 +240,7 @@ int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, MessagePa
     int32_t ret = manager_.BoomerangEncodeImage(param.pixelMap_, param.metadata_, param.callback_);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang EncodeImage failed");
+        return RET_ERR;
     }
     return RET_OK;
 }
@@ -262,6 +266,7 @@ int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, MessagePa
     int32_t ret = manager_.BoomerangDecodeImage(param.pixelMap_, param.callback_);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang DecodeImage failed");
+        return RET_ERR;
     }
     return RET_OK;
 }
@@ -276,6 +281,7 @@ int32_t BoomerangServer::SubmitMetadata(CallingContext &context, MessageParcel &
     int32_t ret = manager_.SubmitMetadata(param.metadata_);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang Submit Metadata failed");
+        return RET_ERR;
     }
     return RET_OK;
 }
