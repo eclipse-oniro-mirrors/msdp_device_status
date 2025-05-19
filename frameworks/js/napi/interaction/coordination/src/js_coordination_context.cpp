@@ -185,6 +185,8 @@ CooperateOptions JsCoordinationContext::GetCooperationsData(napi_env env, Cooper
     cooperateOptions.displayY = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayY", displayY);
     int32_t displayId = 0;
     cooperateOptions.displayId = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayId", displayId);
+    FI_HILOGI("Start cooperate,displayX:%{public}d,displayY:%{public}d,displayId:%{public}d",
+        cooperateOptions.displayX, cooperateOptions.displayY, cooperateOptions.displayId);
     return cooperateOptions;
 }
 

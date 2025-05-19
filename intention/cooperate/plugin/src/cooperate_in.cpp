@@ -347,7 +347,7 @@ void CooperateIn::Initial::OnRemoteStartWithOptions(Context &context, const Coop
 
     DSoftbusStopCooperate stopNotice {};
     context.dsoftbus_.StopCooperate(context.Peer(), stopNotice);
-
+    context.AdjustPointerPos(notice);
     context.OnRemoteStart(notice);
     context.inputEventBuilder_.Update(context);
     context.eventMgr_.RemoteStartWithOptionsFinish(notice);

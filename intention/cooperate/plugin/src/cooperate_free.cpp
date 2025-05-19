@@ -349,6 +349,7 @@ void CooperateFree::Initial::OnRemoteStartWithOptions(Context &context, const Co
     DSoftbusCooperateOptions notice = std::get<DSoftbusCooperateOptions>(event.event);
     context.OnRemoteStartCooperate(notice.extra);
     context.eventMgr_.RemoteStartWithOptions(notice);
+    context.AdjustPointerPos(notice);
     context.OnRemoteStart(notice);
     context.inputEventBuilder_.Enable(context);
     context.eventMgr_.RemoteStartWithOptionsFinish(notice);

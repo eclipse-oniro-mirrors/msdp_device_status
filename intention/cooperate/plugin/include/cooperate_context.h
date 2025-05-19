@@ -16,6 +16,8 @@
 #ifndef COOPERATE_CONTEXT_H
 #define COOPERATE_CONTEXT_H
 
+#include "display_info.h"
+#include "display_manager.h"
 #include "event_handler.h"
 #include "nocopyable.h"
 
@@ -85,7 +87,7 @@ public:
     void SetPointerSpeed(int32_t speed);
     int32_t GetTouchPadSpeed();
     void SetTouchPadSpeed(int32_t speed);
-
+    void AdjustPointerPos(DSoftbusCooperateOptions& dSoftbusCooperateOptions);
     bool IsAllowCooperate();
     void OnStartCooperate(StartCooperateData &data);
     void OnRemoteStartCooperate(RemoteStartCooperateData &data);
