@@ -270,6 +270,42 @@ void Context::OnRemoteStart(const DSoftbusCooperateWithOptionsFinished &event)
         event.cooperateOptions.displayX, event.cooperateOptions.displayY, event.cooperateOptions.displayId);
 }
 
+void Context::AdjustPointerPos(DSoftbusCooperateOptions& dSoftbusCooperateOptions)
+{
+    auto displayId = dSoftbusCooperateOptions.cooperateOptions.displayId;
+    auto& displayX = dSoftbusCooperateOptions.cooperateOptions.displayX;
+    auto& displayY = dSoftbusCooperateOptions.cooperateOptions.displayY;
+    FI_HILOGI("Start cooperate finish,displayX:%{public}d,displayY:%{public}d,displayId:%{public}d",
+        displayX, displayY, displayId);
+#ifndef OHOS_BUILD_PC_PRODUCT
+    auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+#else
+    sptr<Rosen::DisplayInfo> display =
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
+#endif // OHOS_BUILD_PC_PRODUCT
+    if (display == nullptr) {
+        FI_HILOGE("No default display");
+    }
+    Rectangle displayRect {
+        .width = display->GetWidth(),
+        .height = display->GetHeight(),
+    };
+    if (displayX <= 0) {
+        displayX = 0;
+    }
+    if (displayX >= displayRect.width) {
+        displayX = displayRect.width;
+    }
+    if (displayY <= 0) {
+        displayY = 0;
+    }
+    if (displayY >= displayRect.height) {
+        displayY = displayRect.height;
+    }
+    FI_HILOGI("adjust pointer position finish,displayX:%{public}d,displayY:%{public}d",
+        displayX, displayY);
+}
+
 void Context::RelayCooperate(const DSoftbusRelayCooperate &event)
 {
     remoteNetworkId_ = event.targetNetworkId;

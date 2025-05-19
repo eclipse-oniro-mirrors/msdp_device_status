@@ -245,6 +245,8 @@ int32_t Cooperate::StartWithOptions(int32_t pid, int32_t userData, const std::st
         .displayId = options.displayId,
         .errCode = std::make_shared<std::promise<int32_t>>(),
     };
+    FI_HILOGI("Server start cooperate,displayX:%{public}d,displayY:%{public}d,displayId:%{public}d",
+        event.displayX, event.displayY, event.displayId);
     auto errCode = event.errCode->get_future();
     auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::WITH_OPTIONS_START, event));
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
