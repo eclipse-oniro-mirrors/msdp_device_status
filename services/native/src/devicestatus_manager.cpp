@@ -397,7 +397,7 @@ int32_t DeviceStatusManager::NotifyMedata(const std::string &bundleName, sptr<IR
         }
         BoomerangData data {};
         data.type = BoomerangType::BOOMERANG_TYPE_BOOMERANG;
-        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREENSHOT;
+        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREEN_SHOT;
         listener->OnScreenshotResult(data);
     }
     object->AddDeathRecipient(boomerangCBDeathRecipient_);
