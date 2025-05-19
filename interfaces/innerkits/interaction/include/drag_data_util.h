@@ -27,6 +27,8 @@ class DragDataUtil {
 public:
     static int32_t Marshalling(const DragData &dragData, Parcel &data, bool isCross = true);
     static int32_t UnMarshalling(Parcel &data, DragData &dragData, bool isCross = true);
+    static int32_t MarshallingSummarys2(const DragData &dragData, Parcel &data);
+    static int32_t UnMarshallingSummarys2(Parcel &data, DragData &dragData);
 };
 } // namespace DeviceStatus
 } // namespace Msdp

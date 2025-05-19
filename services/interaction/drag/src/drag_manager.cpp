@@ -246,13 +246,19 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
         std::string str = udKey + "-" + std::to_string(recordSize) + ";";
         summarys += str;
     }
+
+    std::string summarys2;
+    for (const auto &[udKey, recordSize] : dragData.summarys2) {
+        std::string str = udKey + "-" + std::to_string(recordSize) + ";";
+        summarys2 += str;
+    }
     FI_HILOGI("SourceType:%{public}d, pointerId:%{public}d, displayId:%{public}d,"
         " displayX:%{private}d, displayY:%{private}d, dragNum:%{public}d,"
         " hasCanceledAnimation:%{public}d, udKey:%{public}s, hasCoordinateCorrected:%{public}d, summarys:%{public}s,"
-        " packageName:%{public}s, isDragDelay:%{public}d", dragData.sourceType, dragData.pointerId, dragData.displayId,
-        dragData.displayX, dragData.displayY, dragData.dragNum, dragData.hasCanceledAnimation,
-        GetAnonyString(dragData.udKey).c_str(), dragData.hasCoordinateCorrected, summarys.c_str(), packageName.c_str(),
-        dragData.isDragDelay);
+        " packageName:%{public}s, isDragDelay:%{public}d, summarys2:%{public}s,", dragData.sourceType,
+        dragData.pointerId, dragData.displayId, dragData.displayX, dragData.displayY, dragData.dragNum,
+        dragData.hasCanceledAnimation, GetAnonyString(dragData.udKey).c_str(), dragData.hasCoordinateCorrected,
+        summarys.c_str(), packageName.c_str(), dragData.isDragDelay, summarys2.c_str());
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -1818,7 +1824,12 @@ int32_t DragManager::GetDragSummary(std::map<std::string, int64_t> &summarys)
 {
     FI_HILOGI("enter");
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    summarys = dragData.summarys;
+    summarys = dragData.summarys2;
+    if (summarys.empty()) {
+        FI_HILOGD("Summarys2 is empty");
+        summarys = dragData.summarys;
+    }
+
     if (summarys.empty()) {
         FI_HILOGD("Summarys is empty");
     }

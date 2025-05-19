@@ -51,6 +51,8 @@
             "OHOS::Msdp::DeviceStatus::GetAnonyString(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
             "OHOS::Msdp::DeviceStatus::DragDataPacker::Marshalling(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&, bool)";
             "OHOS::Msdp::DeviceStatus::DragDataPacker::UnMarshalling(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&, bool)";
+            "OHOS::Msdp::DeviceStatus::DragDataPacker::MarshallingSummarys2(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&)";
+            "OHOS::Msdp::DeviceStatus::DragDataPacker::UnMarshallingSummarys2(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
             "OHOS::Msdp::DeviceStatus::DragDataPacker::CheckDragData(OHOS::Msdp::DeviceStatus::DragData const&)";
             "OHOS::Msdp::DeviceStatus::ShadowPacker::PackUpShadowInfo(OHOS::Msdp::DeviceStatus::ShadowInfo const&, OHOS::Parcel&, bool)";
             "OHOS::Msdp::DeviceStatus::ShadowPacker::UnPackShadowInfo(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::ShadowInfo&, bool)";

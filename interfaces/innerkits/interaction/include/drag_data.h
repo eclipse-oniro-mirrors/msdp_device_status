@@ -74,6 +74,7 @@ struct DragData {
     bool hasCoordinateCorrected { false };
     std::map<std::string, int64_t> summarys;
     bool isDragDelay { false };
+    std::map<std::string, int64_t> summarys2;
     std::string appCallee;
     std::string appCaller;
 
@@ -85,7 +86,8 @@ struct DragData {
                displayY == other.displayY && displayId == other.displayId &&
                hasCanceledAnimation == other.hasCanceledAnimation &&
                hasCoordinateCorrected == other.hasCoordinateCorrected && summarys == other.summarys &&
-               appCallee == other.appCallee && appCaller == other.appCaller && isDragDelay == other.isDragDelay;
+               appCallee == other.appCallee && appCaller == other.appCaller && isDragDelay == other.isDragDelay &&
+               summarys2 == other.summarys2;
     }
 
     bool operator != (const DragData &other) const

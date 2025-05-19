@@ -919,9 +919,10 @@ HWTEST_F(DragManagerTest, DragManagerTest26, TestSize.Level0)
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
-    summarys.clear();
-    ret = InteractionManager::GetInstance()->GetDragSummary(summarys);
+    std::map<std::string, int64_t> summarysRlt;
+    ret = InteractionManager::GetInstance()->GetDragSummary(summarysRlt);
     ASSERT_EQ(ret, RET_OK);
+    EXPECT_EQ(summarysRlt, summarys);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS,
         HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
@@ -1768,6 +1769,52 @@ HWTEST_F(DragManagerTest, DragManagerTest72, TestSize.Level0)
 
     ret = dragBundleInfoReply.Unmarshalling(data);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: DragManagerTest73
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest73, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    const std::string udType = "general.message";
+    constexpr int64_t recordSize = 20;
+    std::map<std::string, int64_t> summarys = { { udType, recordSize } };
+    dragData.value().summarys2 = summarys;
+
+    const std::string udType1 = "general1.message";
+    constexpr int64_t recordSize1 = 30;
+    std::map<std::string, int64_t> summarys1 = { { udType1, recordSize1 } };
+    dragData.value().summarys = summarys1;
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    std::map<std::string, int64_t> summarysRlt;
+    ret = InteractionManager::GetInstance()->GetDragSummary(summarysRlt);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_EQ(summarysRlt, summarys);
+    EXPECT_EQ(summarysRlt.size(), 1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
