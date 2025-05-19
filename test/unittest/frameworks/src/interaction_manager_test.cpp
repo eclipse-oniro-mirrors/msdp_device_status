@@ -3037,6 +3037,24 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002
     EXPECT_NE(ret, RET_OK);
     RemovePermission();
 }
+
+/**
+ * @tc.name: InteractionManagerTest_SetDraggableStateAsync
+ * @tc.desc: Check SetDraggableStateAsync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDraggableStateAsync, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
+    bool state = true;
+    int64_t downTime = 1;
+    int32_t ret = InteractionManager::GetInstance()->SetDraggableState(state);
+    EXPECT_EQ(ret, RET_OK);
+    ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime));
+    RemovePermission();
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
