@@ -215,6 +215,10 @@ int32_t DragServer::GetParam(CallingContext &context, uint32_t id, MessageParcel
             FI_HILOGI("Get drag bundle info, from:%{public}d", context.pid);
             return GetDragBundleInfo(context, data, reply);
         }
+        case DragRequestID::ENABLE_INTERNAL_DROP_ANIMATION: {
+            FI_HILOGI("Enable internal froml drap animation:%{public}d", context.pid);
+            return EnableInternalDropAnimation(context, data, reply);
+        }
         default: {
             FI_HILOGE("Unexpected request ID (%{public}u)", id);
             return RET_ERR;
@@ -735,6 +739,22 @@ int32_t DragServer::GetDragBundleInfo(CallingContext &context, MessageParcel &da
         return RET_ERR;
     }
     return RET_OK;
+}
+
+int32_t DragServer::EnableInternalDropAnimation(CallingContext &context,
+    MessageParcel &data, MessageParcel &reply)
+{
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    // 权限校验 非系统应用返回202
+    CHKPR(env_, RET_ERR);
+    EnableInternalDropAnimationParam param {};
+    if (!param.Unmarshalling(data)) {
+        FI_HILOGE("EnableInternalDropAnimation::Unmarshalling fail");
+        return RET_ERR; // 401?
+    }
+    return env_->GetDragManager().EnableInternalDropAnimation(param.animationInfo_);
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    return 801;
 }
 
 int32_t DragServer::EraseMouseIcon(CallingContext &context)

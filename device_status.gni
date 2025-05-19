@@ -27,6 +27,7 @@ declare_args() {
   device_status_sensor_enable = true
   device_status_memmgr_enable = false
   device_status_enable_universal_drag = false
+  device_status_enable_internal_drop_animation = false
   device_status_device_type = "default"
   device_status_motion_enable = false
 
@@ -128,6 +129,10 @@ if (is_arkui_x) {
 
 if (device_status_enable_universal_drag) {
   device_status_default_defines += [ "OHOS_BUILD_UNIVERSAL_DRAG" ]
+}
+
+if (device_status_enable_internal_drop_animation) {
+  device_status_default_defines += [ "OHOS_BUILD_INTERNAL_DROP_ANIMATION" ]
 }
 
 if (device_status_device_type == "pc") {

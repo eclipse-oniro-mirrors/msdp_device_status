@@ -82,6 +82,7 @@ public:
     int32_t GetAppDragSwitchState(ITunnelClient &tunnel, bool &state);
     void SetDraggableStateAsync(ITunnelClient &tunnel, bool state, int64_t downTime);
     int32_t GetDragBundleInfo(ITunnelClient &tunnel, DragBundleInfo &dragBundleInfo);
+    int32_t EnableInternalDropAnimation(ITunnelClient &tunnel, const std::string &animationInfo);
 
 private:
     mutable std::mutex mtx_;

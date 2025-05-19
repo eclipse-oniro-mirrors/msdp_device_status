@@ -45,6 +45,9 @@
 #else
 #include "i_drag_manager.h"
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+#include "drag_internal_animation_wrapper.h"
+#endif OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 namespace OHOS {
 namespace Msdp {
@@ -168,6 +171,10 @@ public:
     int32_t AddPrivilege(int32_t tokenId) override;
     int32_t EraseMouseIcon() override;
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const override;
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    int32_t EnableInternalDropAnimation(const std::string &animationInfo) const override;
+#endif OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) override;
     void SimulatePullCancelEvent() override;
@@ -275,6 +282,10 @@ private:
     bool IsAncoDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction);
 #endif // OHOS_BUILD_ENABLE_ANCO
     void PullThrowDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    int32_t PerformInternalDropAnimation(const std::string &animationInfo);
+    bool NeedPerformInternalDropAnimation();
+#endif OHOS_BUILD_INTERNAL_DROP_ANIMATION
 private:
     bool existVkListener_ { false };
     bool inHoveringState_ { false };
@@ -325,6 +336,9 @@ private:
     bool isLongPressDrag_ { false };
     bool needLongPressDragAnimation_ { true };
     DragRadarPackageName dragPackageName_;
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    DragInternalAnimationWrapper internalAnimationWrapper_;
+#endif OHOS_BUILD_INTERNAL_DROP_ANIMATION
 };
 } // namespace DeviceStatus
 } // namespace Msdp

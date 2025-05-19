@@ -610,6 +610,12 @@ int32_t IntentionManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
     CALL_DEBUG_ENTER;
     return drag_.GetDragBundleInfo(*tunnel_, dragBundleInfo);
 }
+
+int32_t IntentionManager::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    CALL_DEBUG_ENTER;
+    return drag_.EnableInternalDropAnimation(*tunnel_, animationInfo);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

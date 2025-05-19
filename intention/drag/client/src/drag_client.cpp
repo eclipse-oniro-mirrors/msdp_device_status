@@ -641,6 +641,17 @@ int32_t DragClient::GetDragBundleInfo(ITunnelClient &tunnel, DragBundleInfo &dra
     dragBundleInfo = reply.dragBundleInfo_;
     return RET_OK;
 }
+
+int32_t DragClient::EnableInternalDropAnimation(ITunnelClient &tunnel, const std::string &animationInfo)
+{
+    EnableInternalDropAnimationParam param {animationInfo};
+    DefaultReply reply {};
+    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::ENABLE_INTERNAL_DROP_ANIMATION, param, reply);
+    if (ret != RET_OK) {
+        FI_HILOGE("ITunnelClient::SetParam fail");
+    }
+    return ret;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

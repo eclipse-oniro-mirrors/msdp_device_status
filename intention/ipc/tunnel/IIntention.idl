@@ -74,7 +74,8 @@ interface OHOS.Msdp.IIntention {
     void GetAppDragSwitchState([out] boolean state);
     void SetDraggableStateAsync([in] boolean state, [in] long downTime);
     void GetDragBundleInfo([out] String bundleName, [out] boolean isCrossDevice);
- 
+    void EnableInternalDropAnimation([in] String animationInfo);
+
     // Boomerang
     void SubscribeCallback([in] int type, [in] String bundleName, [in] IRemoteBoomerangCallback subCallback);
     void UnsubscribeCallback([in] int type, [in] String bundleName, [in] IRemoteBoomerangCallback unsubCallback);

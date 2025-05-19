@@ -322,6 +322,15 @@ public:
      * @since 20
      */
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
+
+    /**
+     * @brief Enable the internal animation.
+     * @param animationInfo Indicates the internal drop animation's configuration.
+     * @return Returns <b>0</b> if the operation is successful; returns other values if the operation fails.
+     * @since 20
+     */
+    int32_t EnableInternalDropAnimation(const std::string &animationInfo);
+
 #ifndef  OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Registers a listener for screen hot area of the mouse pointer.

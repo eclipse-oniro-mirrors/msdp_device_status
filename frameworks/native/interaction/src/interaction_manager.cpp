@@ -297,6 +297,12 @@ int32_t InteractionManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
 {
     return INTER_MGR_IMPL.GetDragBundleInfo(dragBundleInfo);
 }
+
+int32_t InteractionManager::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    return INTER_MGR_IMPL.EnableInternalDropAnimation(animationInfo);
+}
+
 #else
 int32_t InteractionManager::StartDrag(const DragData &dragData)
 {

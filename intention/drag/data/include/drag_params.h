@@ -59,6 +59,7 @@ enum DragRequestID : uint32_t {
     SET_DRAGABLE_STATE_ASYNC,
     GET_UNIVERSAL_DRAG_APP_STATE,
     GET_DRAG_BUNDLE_INFO,
+    ENABLE_INTERNAL_DROP_ANIMATION,
 };
 
 struct StartDragParam final : public ParamBase {
@@ -339,6 +340,16 @@ struct GetDragBundleInfoReply final : public ParamBase {
 
     DragBundleInfo dragBundleInfo_;
 };
+
+struct EnableInternalDropAnimationParam final : public ParamBase {
+    EnableInternalDropAnimationParam() = default;
+    EnableInternalDropAnimationParam(const std::string &animationInfo);
+
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    std::string animationInfo_;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
