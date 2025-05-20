@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+// Implementation of client side of IPC.
+
 #ifndef INTENTION_CLIENT_H
 #define INTENTION_CLIENT_H
 
@@ -29,8 +31,10 @@ public:
     ~IntentionClient();
     DISALLOW_COPY_AND_MOVE(IntentionClient);
     static IntentionClient *GetInstance();
+    // Socket
     ErrCode Socket(const std::string& programName, int32_t moduleType, int& socketFd, int32_t& tokenType);
 
+    // Cooperate
     int32_t EnableCooperate(int32_t userData);
     int32_t DisableCooperate(int32_t userData);
     int32_t StartCooperate(const std::string& remoteNetworkId, int32_t userData, int32_t startDeviceId,
@@ -46,6 +50,7 @@ public:
     int32_t GetCooperateStateAsync(const std::string& networkId, int32_t userData, bool isCheckPermission);
     int32_t SetDamplingCoefficient(uint32_t direction, double coefficient);
 
+    // Drag
     int32_t StartDrag(const DragData &dragData);
     int32_t StopDrag(const DragDropResult &dropResult);
     int32_t AddDraglistener(bool isJsCaller);
@@ -79,6 +84,7 @@ public:
     int32_t SetDraggableStateAsync(bool state, int64_t downTime);
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
 
+    // Boomerang
     int32_t SubscribeCallback(int32_t type, const std::string& bundleName,
         const sptr<IRemoteBoomerangCallback>& subCallback);
     int32_t UnsubscribeCallback(int32_t type, const std::string& bundleName,
@@ -91,6 +97,7 @@ public:
     int32_t BoomerangDecodeImage(const std::shared_ptr<PixelMap>& pixelMap,
         const sptr<IRemoteBoomerangCallback>& decodeCallback);
 
+    // Stationary
     int32_t SubscribeStationaryCallback(int32_t type, int32_t event,
         int32_t latency, const sptr<IRemoteDevStaCallback> &subCallback);
     int32_t UnsubscribeStationaryCallback(int32_t type, int32_t event,
@@ -122,4 +129,4 @@ private:
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // INTENTION_C
+#endif // INTENTION_CLIENT
