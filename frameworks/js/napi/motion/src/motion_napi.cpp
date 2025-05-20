@@ -41,9 +41,14 @@ constexpr size_t MAX_ARG_STRING_LEN = 512;
 constexpr int32_t MOTION_TYPE_OPERATING_HAND = 3601;
 constexpr int32_t MOTION_TYPE_STAND = 3602;
 constexpr int32_t MOTION_TYPE_REMOTE_PHOTO = 3604;
+constexpr int32_t MOTION_TYPE_HOLDING_HAND_STATUS = 3605;
 constexpr int32_t BASE_HAND = 0;
 constexpr int32_t LEFT_HAND = 1;
 constexpr int32_t RIGHT_HAND = 2;
+constexpr int32_t NOT_HELD = 0;
+constexpr int32_t LEFT_HAND_HELD = 1;
+constexpr int32_t RIGHT_HAND_HELD = 2;
+constexpr int32_t BOTH_HAND_HELD = 3;
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES = { "string", "function" };
 const std::vector<std::string> EXPECTED_UNSUB_ONE_ARG_TYPES = { "string" };
 const std::vector<std::string> EXPECTED_UNSUB_TWO_ARG_TYPES = { "string", "function" };
@@ -51,6 +56,7 @@ const std::map<const std::string, int32_t> MOTION_TYPE_MAP = {
     { "operatingHandChanged", MOTION_TYPE_OPERATING_HAND },
     { "steadyStandingDetect", MOTION_TYPE_STAND },
     { "remotePhotoStandingDetect", MOTION_TYPE_REMOTE_PHOTO },
+    { "holdingHandStatus", MOTION_TYPE_HOLDING_HAND_STATUS },
 };
 MotionNapi *g_motionObj = nullptr;
 } // namespace
@@ -139,7 +145,7 @@ bool MotionNapi::SubscribeCallback(napi_env env, int32_t type)
             FI_HILOGE("failed to subscribe");
             ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
             return false;
-        } else if (ret == DEVICE_EXCEPTION) {
+        } else if (ret == DEVICE_EXCEPTION || ret == 11) {
             FI_HILOGE("failed to subscribe");
             ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
             return false;
@@ -176,7 +182,7 @@ bool MotionNapi::UnSubscribeCallback(napi_env env, int32_t type)
             FI_HILOGE("failed to unsubscribe");
             ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
             return false;
-        } else if (ret == DEVICE_EXCEPTION) {
+        } else if (ret == DEVICE_EXCEPTION || ret == 11) {
             FI_HILOGE("failed to unsubscribe");
             ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
             return false;
@@ -369,7 +375,44 @@ napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info i
     return result;
 }
 
-++
+napi_value MotionNapi::GetRecentHoldingHandStatus(napi_env env, napi_callback_info info)
+{
+    FI_HILOGD("Enter");
+    napi_value result = nullptr;
+    size_t argc = ARG_0;
+    napi_value jsThis;
+
+    napi_status status = napi_get_cb_info(env, info, &argc, NULL, &jsThis, nullptr);
+    if (status != napi_ok) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
+        return nullptr;
+    }
+
+#ifdef MOTION_ENABLE
+    MotionEvent motionEvent = g_motionClient.GetMotionData(MOTION_TYPE_HOLDING_HAND_STATUS);
+    if (motionEvent.status == -1) {
+        ThrowMotionErr(env, PERMISSION_EXCEPTION, "Invalid Type");
+        return nullptr;
+    }
+#endif
+
+    ConstructMotion(env, jsThis);
+#ifdef MOTION_ENABLE
+    if (g_motionObj == nullptr) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "Error invalid type");
+        return nullptr;
+    }
+    napi_status ret = napi_create_int32(env, static_cast<int32_t>(motionEvent.status), &result);
+    if (ret != napi_ok) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_create_int32 failed");
+        return nullptr;
+    }
+#else
+    ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+#endif
+    FI_HILOGD("Exit");
+    return result;
+}
 
 napi_value MotionNapi::Init(napi_env env, napi_value exports)
 {
@@ -378,11 +421,25 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("on", SubscribeMotion),
         DECLARE_NAPI_STATIC_FUNCTION("off", UnSubscribeMotion),
         DECLARE_NAPI_STATIC_FUNCTION("getRecentOperatingHandStatus", GetRecentOptHandStatus),
+        DECLARE_NAPI_STATIC_FUNCTION("getRecentHoldingHandStatus", GetRecentHoldingHandStatus),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
 
+    napi_value holdingHandStatus;
+    napi_status status = napi_create_object(env, &holdingHandStatus);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed create object");
+        return exports;
+    }
+
+    SetInt32Property(env, holdingHandStatus, NOT_HELD, "NOT_HELD");
+    SetInt32Property(env, holdingHandStatus, LEFT_HAND_HELD, "LEFT_HAND_HELD");
+    SetInt32Property(env, holdingHandStatus, RIGHT_HAND_HELD, "RIGHT_HAND_HELD");
+    SetInt32Property(env, holdingHandStatus, BOTH_HAND_HELD, "BOTH_HAND_HELD");
+    SetPropertyName(env, exports, "HoldingHandStatus", holdingHandStatus);
+
     napi_value operatingHandStatus;
-    napi_status status = napi_create_object(env, &operatingHandStatus);
+    status = napi_create_object(env, &operatingHandStatus);
     if (status != napi_ok) {
         FI_HILOGE("Failed create object");
         return exports;
