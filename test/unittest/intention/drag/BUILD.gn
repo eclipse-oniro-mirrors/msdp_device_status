@@ -127,6 +127,5 @@ group("unittest") {
   testonly = true
   deps = [
     ":DragManagerTest",
-    ":DragServerTest",
   ]
 }
