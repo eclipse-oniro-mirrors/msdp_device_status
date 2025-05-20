@@ -186,7 +186,7 @@ std::shared_ptr<Media::PixelMap> IntentionServiceTest::CreatePixelMap(int32_t wi
 }
 
 std::optional IntentionServiceTest::CreateDragData(int32_t sourceType,
-int32_t pointerId, int32_t dragNum, bool hasCoordinateCorrected, int32_t shadowNum)
+    int32_t pointerId, int32_t dragNum, bool hasCoordinateCorrected, int32_t shadowNum)
 {
     CALL_DEBUG_ENTER;
     DragData dragData;
@@ -374,7 +374,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterHotAreaListener001, 
     EXPECT_EQ(ret, RET_ERR);
 }
 
-/*
+/**
  * @tc.name: IntentionServiceTest8
  * @tc.desc: Test UnregisterHotAreaListener
  * @tc.type: FUNC
@@ -640,7 +640,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetShadowOffset001, TestSize
  * @tc.desc: Test GetDragData
  * @tc.type: FUNC
  * @tc.require:
- * */
+ */
 HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragData001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
@@ -714,7 +714,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragWindowScreenId001, Te
  * @tc.desc: Test GetDragSummary
  * @tc.type: FUNC
  * @tc.require:
-*/
+ */
 HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragSummary001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
@@ -729,7 +729,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragSummary001, TestSize.
  * @tc.desc: Test SetDragSwitchState
  * @tc.type: FUNC
  * @tc.require:
-*/
+ */
 HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragSwitchState001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
@@ -893,6 +893,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDraggableStateAsync001, T
     ErrCode ret = g_intentionServiceNullptr->SetDraggableStateAsync(state, downTime);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
