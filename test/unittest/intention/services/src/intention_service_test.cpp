@@ -151,38 +151,38 @@ void IntentionServiceTest::SetUp() {}
 
 void IntentionServiceTest::TearDown() {}
 
-std::shared_ptrMedia::PixelMap IntentionServiceTest::CreatePixelMap(int32_t width, int32_t height)
+std::shared_ptr<Media::PixelMap> IntentionServiceTest::CreatePixelMap(int32_t width, int32_t height)
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-    FI_HILOGE("invalid, height:%{public}d, width:%{public}d", height, width);
-    return nullptr;
-}
-Media::InitializationOptions opts;
-opts.size.width = width;
-opts.size.height = height;
-opts.pixelFormat = Media::PixelFormat::BGRA_8888;
-opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+        FI_HILOGE("invalid, height:%{public}d, width:%{public}d", height, width);
+        return nullptr;
+    }
+    Media::InitializationOptions opts;
+    opts.size.width = width;
+    opts.size.height = height;
+    opts.pixelFormat = Media::PixelFormat::BGRA_8888;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
 
-int32_t colorLen = width * height;
-uint32_t *pixelColors = new (std::nothrow) uint32_t[BUFF_SIZE];
-CHKPP(pixelColors);
-int32_t colorByteCount = colorLen * INT32_BYTE;
-errno_t ret = memset_s(pixelColors, BUFF_SIZE, DEFAULT_ICON_COLOR, colorByteCount);
-if (ret != EOK) {
-    FI_HILOGE("memset_s failed");
+    int32_t colorLen = width * height;
+    uint32_t *pixelColors = new (std::nothrow) uint32_t[BUFF_SIZE];
+    CHKPP(pixelColors);
+    int32_t colorByteCount = colorLen * INT32_BYTE;
+    errno_t ret = memset_s(pixelColors, BUFF_SIZE, DEFAULT_ICON_COLOR, colorByteCount);
+    if (ret != EOK) {
+        FI_HILOGE("memset_s failed");
+        delete[] pixelColors;
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(pixelColors, colorLen, opts);
+    if (pixelMap == nullptr) {
+        FI_HILOGE("Create pixelMap failed");
+        delete[] pixelColors;
+        return nullptr;
+    }
     delete[] pixelColors;
-    return nullptr;
-}
-std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(pixelColors, colorLen, opts);
-if (pixelMap == nullptr) {
-    FI_HILOGE("Create pixelMap failed");
-    delete[] pixelColors;
-    return nullptr;
-}
-delete[] pixelColors;
-return pixelMap;
+    return pixelMap;
 }
 
 std::optional IntentionServiceTest::CreateDragData(int32_t sourceType,
@@ -191,8 +191,8 @@ int32_t pointerId, int32_t dragNum, bool hasCoordinateCorrected, int32_t shadowN
     CALL_DEBUG_ENTER;
     DragData dragData;
     for (int32_t i = 0; i < shadowNum; i++) {
-            std::shared_ptrMedia::PixelMap pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
-            if (pixelMap == nullptr) {
+        std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+        if (pixelMap == nullptr) {
             FI_HILOGE("pixelMap nullptr");
             return std::nullopt;
         }
@@ -219,11 +219,11 @@ public:
     void OnDragEndMessage(const DragNotifyMsg &msg) override
     {
         FI_HILOGD("DisplayX:%{public}d, displayY:%{public}d, targetPid:%{public}d, result:%{public}d",
-        msg.displayX, msg.displayY, msg.targetPid, static_cast<int32_t>(msg.result));
+            msg.displayX, msg.displayY, msg.targetPid, static_cast<int32_t>(msg.result));
         if (function_ != nullptr) {
-        function_(msg);
-    }
-    FI_HILOGD("Test OnDragEndMessage");
+            function_(msg);
+        }
+        FI_HILOGD("Test OnDragEndMessage");
     }
 
     void OnHideIconMessage() override
@@ -287,6 +287,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_Socket001, TestSize.Level0)
     int32_t ret = g_intentionService->Socket(programName, CONNECT_MODULE_TYPE_FI_CLIENT, socketFd, tokenType);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest2
  * @tc.desc: Test EnableCooperate
@@ -314,12 +315,13 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_DisableCooperate001, TestSiz
     ErrCode ret = g_intentionService->DisableCooperate(userData);
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
+
 /**
  * @tc.name: IntentionServiceTest4
  * @tc.desc: Test StartCooperate
  * @tc.type: FUNC
  * @tc.require:
-*/
+ */
 HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartCooperate001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
@@ -330,6 +332,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartCooperate001, TestSize.
     ErrCode ret = g_intentionService->StartCooperate(remoteNetworkId, userData, startDeviceId, isCheckPermission);
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
+
 /**
  * @tc.name: IntentionServiceTest5
  * @tc.desc: Test RegisterCooperateListener
@@ -342,6 +345,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterCooperateListener001
     ErrCode ret = g_intentionService->RegisterCooperateListener();
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
+
 /**
  * @tc.name: IntentionServiceTest6
  * @tc.desc: Test UnregisterCooperateListener
@@ -354,6 +358,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterCooperateListener0
     ErrCode ret = g_intentionService->UnregisterCooperateListener();
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
+
 /**
  * @tc.name: IntentionServiceTest7
  * @tc.desc: Test RegisterHotAreaListener
@@ -368,6 +373,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterHotAreaListener001, 
     ErrCode ret = g_intentionServiceNullptr->RegisterHotAreaListener(userData, isCheckPermission);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /*
  * @tc.name: IntentionServiceTest8
  * @tc.desc: Test UnregisterHotAreaListener
@@ -380,6 +386,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterHotAreaListener001
     ErrCode ret = g_intentionServiceNullptr->UnregisterHotAreaListener();
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest9
  * @tc.desc: Test RegisterMouseEventListener
@@ -393,6 +400,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterMouseEventListener00
     ErrCode ret = g_intentionServiceNullptr->RegisterMouseEventListener(networkId);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest10
  * @tc.desc: Test UnregisterMouseEventListener
@@ -406,6 +414,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterMouseEventListener
     ErrCode ret = g_intentionServiceNullptr->UnregisterMouseEventListener(networkId);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest11
  * @tc.desc: Test GetCooperateStateSync
@@ -420,6 +429,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetCooperateStateSync001, Te
     ErrCode ret = g_intentionServiceNullptr->GetCooperateStateSync(udid, state);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest12
  * @tc.desc: Test GetCooperateStateAsync
@@ -435,6 +445,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetCooperateStateAsync001, T
     ErrCode ret = g_intentionServiceNullptr->GetCooperateStateAsync(networkId, userData, isCheckPermission);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest13
  * @tc.desc: Test SetDamplingCoefficient
@@ -449,6 +460,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDamplingCoefficient001, T
     ErrCode ret = g_intentionServiceNullptr->RegisterHotAreaListener(direction, coefficient);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest14
  * @tc.desc: Test StartDrag
@@ -463,6 +475,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartDrag001, TestSize.Level
     ErrCode ret = g_intentionServiceNullptr->StartDrag(sequenceableDragData);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest15
  * @tc.desc: Test StopDrag
@@ -477,6 +490,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_StopDrag001, TestSize.Level0
     ErrCode ret = g_intentionServiceNullptr->StopDrag(sequenceableDragResult);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest16
  * @tc.desc: Test AddDraglistener
@@ -490,6 +504,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_AddDraglistener001, TestSize
     ErrCode ret = g_intentionServiceNullptr->AddDraglistener(isJsCaller);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest17
  * @tc.desc: Test RemoveDraglistener
@@ -503,6 +518,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RemoveDraglistener001, TestS
     ErrCode ret = g_intentionServiceNullptr->RemoveDraglistener(isJsCaller);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest18
  * @tc.desc: Test AddSubscriptListener
@@ -515,6 +531,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_AddSubscriptListener001, Tes
     ErrCode ret = g_intentionServiceNullptr->AddSubscriptListener();
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest19
  * @tc.desc: Test RemoveSubscriptListener
@@ -527,6 +544,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RemoveSubscriptListener001, 
     ErrCode ret = g_intentionServiceNullptr->RemoveSubscriptListener();
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest20
  * @tc.desc: Test SetDragWindowVisible
@@ -541,6 +559,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragWindowVisible001, Tes
     ErrCode ret = g_intentionServiceNullptr->SetDragWindowVisible(sequenceableDragVisible);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest21
  * @tc.desc: Test UpdateDragStyle
@@ -555,6 +574,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdateDragStyle001, TestSize
     ErrCode ret = g_intentionServiceNullptr->UpdateDragStyle(style, eventId);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
 
  * @tc.name: IntentionServiceTest22
@@ -565,10 +585,11 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdateDragStyle001, TestSize
 HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdateShadowPic001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    std::shared_ptrMedia::PixelMap pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
     ErrCode ret = g_intentionServiceNullptr->UpdateShadowPic(pixelMap, 0, 0);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest23
  * @tc.desc: Test GetDragTargetPid
@@ -582,6 +603,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragTargetPid001, TestSiz
     ErrCode ret = g_intentionServiceNullptr->GetDragTargetPid(targetPid);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest24
  * @tc.desc: GetUdKey
@@ -595,6 +617,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetUdKey001, TestSize.Level0
     ErrCode ret = g_intentionServiceNullptr->GetUdKey(udKey);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest25
  * @tc.desc: Test GetShadowOffset
@@ -611,6 +634,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetShadowOffset001, TestSize
     ErrCode ret = g_intentionServiceNullptr->GetShadowOffset(offsetX, offsetY, width, height);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest26
  * @tc.desc: Test GetDragData
@@ -625,6 +649,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragData001, TestSize.Lev
     ErrCode ret = g_intentionServiceNullptr->GetDragData(sequenceableDragData);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest27
  * @tc.desc: Test UpdatePreviewStyle
@@ -639,6 +664,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdatePreviewStyle001, TestS
     ErrCode ret = g_intentionServiceNullptr->UpdatePreviewStyle(sequenceablePreviewStyle);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest28
  * @tc.desc: Test UpdatePreviewStyleWithAnimation
@@ -654,6 +680,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdatePreviewStyleWithAnimat
     ErrCode ret = g_intentionServiceNullptr->UpdatePreviewStyleWithAnimation(sequenceablePreviewAnimation);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest29
  * @tc.desc: Test RotateDragWindowSync
@@ -668,6 +695,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RotateDragWindowSync001, Tes
     ErrCode ret = g_intentionServiceNullptr->RotateDragWindowSync(sequenceableRotateWindow);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest30
  * @tc.desc: Test SetDragWindowScreenId
@@ -680,6 +708,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragWindowScreenId001, Te
     ErrCode ret = g_intentionServiceNullptr->SetDragWindowScreenId(0, 0);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest31
  * @tc.desc: Test GetDragSummary
@@ -694,6 +723,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragSummary001, TestSize.
     ErrCode ret = g_intentionServiceNullptr->GetDragSummary(summarys, isJsCaller);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest32
  * @tc.desc: Test SetDragSwitchState
@@ -708,6 +738,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragSwitchState001, TestS
     ErrCode ret = g_intentionServiceNullptr->SetDragSwitchState(enable, isJsCaller);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest33
  * @tc.desc: Test SetAppDragSwitchState
@@ -723,6 +754,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetAppDragSwitchState001, Te
     ErrCode ret = g_intentionServiceNullptr->SetAppDragSwitchState(enable, pkgName, isJsCaller);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest34
  * @tc.desc: Test GetDragState
@@ -736,6 +768,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragState001, TestSize.Le
     ErrCode ret = g_intentionServiceNullptr->GetDragState(dragState);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest35
  * @tc.desc: Test EnableUpperCenterMode
@@ -749,6 +782,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_EnableUpperCenterMode001, Te
     ErrCode ret = g_intentionServiceNullptr->EnableUpperCenterMode(enable);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest36
  * @tc.desc: Test GetDragAction
@@ -762,6 +796,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragAction001, TestSize.L
     ErrCode ret = g_intentionServiceNullptr->GetDragAction(dragAction);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest37
  * @tc.desc: Test GetExtraInfo
@@ -775,6 +810,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetExtraInfo001, TestSize.Le
     ErrCode ret = g_intentionServiceNullptr->GetExtraInfo(extraInfo);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest38
  * @tc.desc: Test AddPrivilege
@@ -787,6 +823,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_AddPrivilege001, TestSize.Le
     ErrCode ret = g_intentionServiceNullptr->AddPrivilege();
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest39
  * @tc.desc: Test EraseMouseIcon
@@ -799,6 +836,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_EraseMouseIcon001, TestSize.
     ErrCode ret = g_intentionServiceNullptr->EraseMouseIcon();
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest40
  * @tc.desc: Test SetMouseDragMonitorState
@@ -812,6 +850,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetMouseDragMonitorState001,
     ErrCode ret = g_intentionServiceNullptr->SetMouseDragMonitorState(state);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest41
  * @tc.desc: Test SetDraggableState
@@ -825,6 +864,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDraggableState001, TestSi
     ErrCode ret = g_intentionServiceNullptr->SetDraggableState(state);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest42
  * @tc.desc: Test GetAppDragSwitchState
@@ -838,6 +878,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetAppDragSwitchState001, Te
     ErrCode ret = g_intentionServiceNullptr->GetAppDragSwitchState(state);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest43
  * @tc.desc: Test SetDraggableStateAsync
