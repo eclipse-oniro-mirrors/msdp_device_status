@@ -129,4 +129,4 @@ private:
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // INTENTION_CLIENT
+#endif // INTENTION_CLIENT_H
