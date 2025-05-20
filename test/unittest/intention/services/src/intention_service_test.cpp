@@ -56,9 +56,9 @@ constexpr int32_t MAX_PIXEL_MAP_WIDTH { 600 };
 constexpr int32_t MAX_PIXEL_MAP_HEIGHT { 600 };
 constexpr bool HAS_CANCELED_ANIMATION { true };
 constexpr bool HAS_CUSTOM_ANIMATION { true };
-std::shared_ptr g_context { nullptr };
-std::shared_ptr g_intentionService { nullptr };
-std::shared_ptr g_intentionServiceNullptr { nullptr };
+std::shared_ptr<ContextService> g_context { nullptr };
+std::shared_ptr<IntentionService> g_intentionService { nullptr };
+std::shared_ptr<IntentionService> g_intentionServiceNullptr { nullptr };
 IContext *g_contextNullptr { nullptr };
 int32_t PERMISSION_EXCEPTION { 201 };
 } // namespace
@@ -76,18 +76,18 @@ int32_t MockDelegateTasks::PostAsyncTask(DTaskCallback callback)
 ContextService* ContextService::GetInstance()
 {
     static std::once_flag flag;
-    std::call_once(flag, & {
-        g_context = std::make_shared();
+    std::call_once(flag, [&]() {
+        g_context = std::make_shared<ContextService>();
     });
     return g_context.get();
 }
 
 ContextService::ContextService()
 {
-    ddm_ = std::make_unique();
-    input_ = std::make_unique();
-    pluginMgr_ = std::make_unique(this);
-    dsoftbus_ = std::make_unique();
+    ddm_ = std::make_unique<DDMAdapter>();
+    input_ = std::make_unique<InputAdapter>();
+    pluginMgr_ = std::make_unique<PluginManager>(this);
+    dsoftbus_ = std::make_unique<DSoftbusAdapter>();
 }
 
 IDelegateTasks& ContextService::GetDelegateTasks()
@@ -137,8 +137,8 @@ IDSoftbusAdapter& ContextService::GetDSoftbus()
 
 void IntentionServiceTest::SetUpTestCase()
 {
-    g_intentionService = std::make_shared(ContextService::GetInstance());
-    g_intentionServiceNullptr = std::make_shared(g_contextNullptr);
+    g_intentionService = std::make_shared<IntentionService>(ContextService::GetInstance());
+    g_intentionServiceNullptr = std::make_shared<IntentionService>(g_contextNullptr);
 }
 
 void IntentionServiceTest::TearDownTestCase()
@@ -185,7 +185,7 @@ std::shared_ptr<Media::PixelMap> IntentionServiceTest::CreatePixelMap(int32_t wi
     return pixelMap;
 }
 
-std::optional IntentionServiceTest::CreateDragData(int32_t sourceType,
+std::optional<DragData> IntentionServiceTest::CreateDragData(int32_t sourceType,
     int32_t pointerId, int32_t dragNum, bool hasCoordinateCorrected, int32_t shadowNum)
 {
     CALL_DEBUG_ENTER;
@@ -690,7 +690,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdatePreviewStyleWithAnimat
 HWTEST_F(IntentionServiceTest, IntentionServiceTest_RotateDragWindowSync001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    std::shared_ptrRosen::RSTransaction rsTransaction { nullptr };
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction { nullptr };
     SequenceableRotateWindow sequenceableRotateWindow(rsTransaction);
     ErrCode ret = g_intentionServiceNullptr->RotateDragWindowSync(sequenceableRotateWindow);
     EXPECT_EQ(ret, RET_ERR);
