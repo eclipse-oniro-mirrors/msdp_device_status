@@ -52,7 +52,7 @@ public:
     static napi_value SubscribeMotion(napi_env env, napi_callback_info info);
     static napi_value UnSubscribeMotion(napi_env env, napi_callback_info info);
     static napi_value GetRecentOptHandStatus(napi_env env, napi_callback_info info);
-    ++
+    static napi_value GetRecentHoldingHandStatus(napi_env env, napi_callback_info info);
 
 public:
 #ifdef MOTION_ENABLE
