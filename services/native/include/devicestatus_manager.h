@@ -20,10 +20,10 @@
 #include <map>
 
 #include "accesstoken_kit.h"
+#include "iremote_boomerang_callback.h"
 #include "boomerang_data.h"
 #include "devicestatus_msdp_client_impl.h"
 #include "iremote_dev_sta_callback.h"
-#include "iremote_boomerang_callback.h"
 #include "stationary_data.h"
 
 namespace OHOS {
@@ -61,11 +61,11 @@ public:
     int32_t NotifyDeviceStatusChange(const Data &devicestatusData);
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
     void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
-    int32_t Subscribe(BoomerangType type, const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
-    int32_t Unsubscribe(BoomerangType type, const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t Subscribe(int32_t type, const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t Unsubscribe(int32_t type, const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
     int32_t NotifyMedata(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
     int32_t SubmitMetadata(const std::string &metadata);
-    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string metadata,
+    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, const std::string &metadata,
         sptr<IRemoteBoomerangCallback> callback);
     int32_t BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
     Data GetLatestDeviceStatusData(Type type);

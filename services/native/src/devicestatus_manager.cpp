@@ -303,7 +303,7 @@ void DeviceStatusManager::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
     }
 }
 
-int32_t DeviceStatusManager::Subscribe(BoomerangType type, const std::string &bundleName,
+int32_t DeviceStatusManager::Subscribe(int32_t type, const std::string &bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
@@ -342,7 +342,7 @@ int32_t DeviceStatusManager::Subscribe(BoomerangType type, const std::string &bu
     return RET_OK;
 }
  
-int32_t DeviceStatusManager::Unsubscribe(BoomerangType type, const std::string &bundleName,
+int32_t DeviceStatusManager::Unsubscribe(int32_t type, const std::string &bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
@@ -397,7 +397,7 @@ int32_t DeviceStatusManager::NotifyMedata(const std::string &bundleName, sptr<IR
         }
         BoomerangData data {};
         data.type = BoomerangType::BOOMERANG_TYPE_BOOMERANG;
-        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREEN_SHOT;
+        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREENSHOT;
         listener->OnScreenshotResult(data);
     }
     object->AddDeathRecipient(boomerangCBDeathRecipient_);
@@ -415,7 +415,7 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
 }
  
 int32_t DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
-    std::string metadata, sptr<IRemoteBoomerangCallback> callback)
+    const std::string &metadata, sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
     CHKPR(pixelMap, RET_ERR);

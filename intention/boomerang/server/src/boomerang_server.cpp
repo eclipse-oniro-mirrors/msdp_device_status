@@ -77,8 +77,12 @@ int32_t BoomerangServer::SubscribeCallback(CallingContext &context, int32_t type
     appInfo->type = boomerangType;
     appInfo->boomerangCallback = subCallback;
     DS_DUMPER->SaveBoomerangAppInfo(appInfo);
-    manager_.Subscribe(boomerangType, bundleName, subCallback);
-    return RET_OK;
+    int32_t ret = manager_.Subscribe(type, bundleName, subCallback);
+    if (ret != RET_OK) {
+        FI_HILOGE("boomerang Subscribe failed");
+        DS_DUMPER->RemoveBoomerangAppInfo(appInfo);
+    }
+    return ret;
 }
 
 int32_t BoomerangServer::UnsubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
@@ -97,8 +101,12 @@ int32_t BoomerangServer::UnsubscribeCallback(CallingContext &context, int32_t ty
     appInfo->type = boomerangType;
     appInfo->boomerangCallback = unsubCallback;
     DS_DUMPER->RemoveBoomerangAppInfo(appInfo);
-    manager_.Unsubscribe(boomerangType, bundleName, unsubCallback);
-    return RET_OK;
+    int32_t ret = manager_.Unsubscribe(type, bundleName, unsubCallback);
+    if (ret != RET_OK) {
+        FI_HILOGE("boomerang Unsubscribe failed");
+        DS_DUMPER->SaveBoomerangAppInfo(appInfo);
+    }
+    return ret;
 }
 
 int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, const std::string& bundleName,
@@ -119,17 +127,11 @@ int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, con
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
     appInfo->boomerangCallback = notifyCallback;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    return manager_.NotifyMedata(bundleName, notifyCallback);
-}
-
-int32_t BoomerangServer::SubmitMetadata(CallingContext &context, const std::string& metaData)
-{
-    if (metaData.empty()) {
-        FI_HILOGE("The metaData is empty.");
-        return RET_ERR;
+    int32_t ret = manager_.NotifyMedata(bundleName, notifyCallback);
+    if (ret != RET_OK) {
+        FI_HILOGE("boomerang NotifyMetadataBindingEvent failed");
     }
-    manager_.SubmitMetadata(metaData);
-    return RET_OK;
+    return ret;
 }
 
 int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
@@ -150,8 +152,11 @@ int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, const std
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
     appInfo->boomerangCallback = encodeCallback;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    manager_.BoomerangEncodeImage(pixelMap, metaData, encodeCallback);
-    return RET_OK;
+    int32_t ret = manager_.BoomerangEncodeImage(pixelMap, metaData, encodeCallback);
+    if (ret != RET_OK) {
+        FI_HILOGE("boomerang EncodeImage failed");
+    }
+    return ret;
 }
 
 int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
@@ -172,8 +177,24 @@ int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, const std
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
     appInfo->boomerangCallback = decodeCallback;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    manager_.BoomerangDecodeImage(pixelMap, decodeCallback);
-    return RET_OK;
+    int32_t ret = manager_.BoomerangDecodeImage(pixelMap, decodeCallback);
+    if (ret != RET_OK) {
+        FI_HILOGE("boomerang DecodeImage failed");
+    }
+    return ret;
+}
+
+int32_t BoomerangServer::SubmitMetadata(CallingContext &context, const std::string& metaData)
+{
+    if (metaData.empty()) {
+        FI_HILOGE("The metaData is empty.");
+        return RET_ERR;
+    }
+    int32_t ret = manager_.SubmitMetadata(metaData);
+    if (ret != RET_OK) {
+        FI_HILOGE("boomerang submit metada failed");
+    }
+    return ret;
 }
 
 Data BoomerangServer::GetCache(CallingContext &context, const Type &type)
