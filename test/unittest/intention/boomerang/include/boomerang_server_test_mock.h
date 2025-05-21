@@ -26,7 +26,7 @@
 
 #include "message_parcel.h"
 #include "intention_identity.h"
-#include "iremote_boomerang_callback.h"
+#include "boomerang_callback.h"
 
 namespace OHOS {
 namespace Msdp {

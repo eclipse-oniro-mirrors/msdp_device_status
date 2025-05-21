@@ -26,8 +26,6 @@ ohos_unittest("BoomerangClientTest") {
 
   branch_protector_ret = "pac_ret"
 
-  public_configs = [ "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_public_config" ]
-
   module_out_path = module_output_path
   include_dirs = [
     "${device_status_interfaces_path}/innerkits/interaction/include",
@@ -41,6 +39,7 @@ ohos_unittest("BoomerangClientTest") {
   sources = [
     "${device_status_root_path}/intention/boomerang/client/src/boomerang_client.cpp",
     "src/boomerang_client_test.cpp",
+    "src/boomerang_client_test_mock.cpp",
   ]
 
   cflags = [
@@ -73,7 +72,6 @@ ohos_unittest("BoomerangClientTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
-    "graphic_2d:librender_service_client",
   ]
 }
 

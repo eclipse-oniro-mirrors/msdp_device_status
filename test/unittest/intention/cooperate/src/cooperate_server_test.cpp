@@ -35,7 +35,6 @@ namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
-int32_t g_userData { 1 };
 uint64_t g_tokenID { 0 };
 const std::string SYSTEM_BASIC { "system_basic" };
 const char* g_basics[] = { "ohos.permission.COOPERATE_MANAGER" };
@@ -129,8 +128,9 @@ HWTEST_F(CooperateServerTest, EnableTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->EnableCooperate(context, g_userData));
-    context_->GetPluginManager().UnloadCooperate();
+    MessageParcel datas;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Enable(context, datas, reply));
 }
 
 /**
@@ -148,8 +148,9 @@ HWTEST_F(CooperateServerTest, DisableTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->DisableCooperate(context, g_userData));
-    context_->GetPluginManager().UnloadCooperate();
+    MessageParcel datas;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Disable(context, datas, reply));
 }
 
 /**
@@ -167,20 +168,18 @@ HWTEST_F(CooperateServerTest, StartTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    std::string networkId = "networkId";
-    int32_t startDeviceId = 0;
-    bool isCheckPermission = true;
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperate(context, networkId, g_userData, startDeviceId, isCheckPermission));
-    context_->GetPluginManager().UnloadCooperate();
+    MessageParcel datas;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Start(context, datas, reply));
 }
 
 /**
- * @tc.name: StopCooperateTest1
+ * @tc.name: StopTest1
  * @tc.desc: Test func named stop
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, StopCooperateTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, StopTest1, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -189,19 +188,41 @@ HWTEST_F(CooperateServerTest, StopCooperateTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool isUnchained = true;
-    bool isCheckPermission = true;
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->StopCooperate(context, g_userData, isUnchained, isCheckPermission));
+    MessageParcel datas;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Stop(context, datas, reply));
+}
+
+/**
+ * @tc.name: EnableTest2
+ * @tc.desc: Test func named enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, EnableTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    DefaultParam  param { 1 };
+    ASSERT_TRUE(param.Marshalling(data));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Enable(context, data, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
- * @tc.name: RegisterCooperateListenerTest1
- * @tc.desc: Test func named stop
+ * @tc.name: AddWatchTest1
+ * @tc.desc: Test func named add watch
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, RegisterCooperateListenerTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, AddWatchTest1, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -210,17 +231,21 @@ HWTEST_F(CooperateServerTest, RegisterCooperateListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterCooperateListener(context));
+    MessageParcel data;
+    MessageParcel reply;
+    DefaultParam  param { 1 };
+    ASSERT_TRUE(param.Marshalling(data));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->AddWatch(context, CooperateRequestID::REGISTER_LISTENER, data, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
- * @tc.name: UnregisterCooperateListenerTest1
- * @tc.desc: Test func named stop
+ * @tc.name: DisableTest2
+ * @tc.desc: Test func named disable
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, UnregisterCooperateListenerTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, DisableTest2, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -229,17 +254,22 @@ HWTEST_F(CooperateServerTest, UnregisterCooperateListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterCooperateListener(context));
+    DefaultParam  param { 1 };
+    MessageParcel datas;
+    MessageParcel reply;
+    param.Marshalling(datas);
+    ASSERT_TRUE(param.Marshalling(datas));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Disable(context, datas, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
- * @tc.name: RegisterHotAreaListenerTest1
- * @tc.desc: Test func named stop
+ * @tc.name: AddWatchTest2
+ * @tc.desc: Test func named add watch
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, RegisterHotAreaListenerTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, AddWatchTest2, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -248,18 +278,20 @@ HWTEST_F(CooperateServerTest, RegisterHotAreaListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool isCheckPermission = true;
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterHotAreaListener(context, g_userData, isCheckPermission));
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->AddWatch(
+        context, CooperateRequestID::UNKNOWN_COOPERATE_ACTION, data, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
- * @tc.name: UnregisterHotAreaListenerTest1
- * @tc.desc: Test func named stop
+ * @tc.name: AddWatchTest3
+ * @tc.desc: Test func named add watch
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, UnregisterHotAreaListenerTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, AddWatchTest3, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -268,17 +300,20 @@ HWTEST_F(CooperateServerTest, UnregisterHotAreaListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterHotAreaListener(context));
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->AddWatch(
+        context, CooperateRequestID::REGISTER_HOTAREA_LISTENER, data, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
- * @tc.name: RegisterMouseEventListenerTest1
- * @tc.desc: Test func named stop
+ * @tc.name: AddWatchTest4
+ * @tc.desc: Test func named add watch
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, RegisterMouseEventListenerTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, AddWatchTest4, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -287,18 +322,23 @@ HWTEST_F(CooperateServerTest, RegisterMouseEventListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    std::string networkId = "networkId";
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterMouseEventListener(context, networkId));
+    MessageParcel data;
+    MessageParcel reply;
+    RegisterEventListenerParam  param { "networkId" };
+    param.Marshalling(data);
+    ASSERT_TRUE(param.Marshalling(data));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->AddWatch(
+        context, CooperateRequestID::REGISTER_EVENT_LISTENER, data, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
- * @tc.name: UnregisterMouseEventListenerTest1
- * @tc.desc: Test func named stop
+ * @tc.name: AddWatchTest5
+ * @tc.desc: Test func named add watch
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, UnregisterMouseEventListenerTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, AddWatchTest5, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -307,18 +347,20 @@ HWTEST_F(CooperateServerTest, UnregisterMouseEventListenerTest1, TestSize.Level0
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    std::string networkId = "networkId";
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterMouseEventListener(context, networkId));
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->AddWatch(
+        context, CooperateRequestID::REGISTER_EVENT_LISTENER, data, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
- * @tc.name: GetCooperateStateSyncTest1
- * @tc.desc: Test func named stop
+ * @tc.name: RemoveWatch1
+ * @tc.desc: Test func named remove watch
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, GetCooperateStateSyncTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, RemoveWatch1, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -327,19 +369,20 @@ HWTEST_F(CooperateServerTest, GetCooperateStateSyncTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    std::string udid = "udid";
-    bool state = true;
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateSync(context, udid, state));
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RemoveWatch(
+        context, CooperateRequestID::UNREGISTER_LISTENER, data, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
- * @tc.name: GetCooperateStateAsyncTest1
- * @tc.desc: Test func named stop
+ * @tc.name: RemoveWatch2
+ * @tc.desc: Test func named remove watch
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, GetCooperateStateAsyncTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, RemoveWatch2, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -348,19 +391,20 @@ HWTEST_F(CooperateServerTest, GetCooperateStateAsyncTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    std::string networkId = "networkId";
-    bool isCheckPermission = true;
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateAsync(context, networkId, g_userData, isCheckPermission));
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RemoveWatch(
+        context, CooperateRequestID::UNKNOWN_COOPERATE_ACTION, data, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
- * @tc.name: SetDamplingCoefficientTest1
- * @tc.desc: Test func named SetDamplingCoefficient
+ * @tc.name: RemoveWatch3
+ * @tc.desc: Test func named remove watch
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, SetDamplingCoefficientTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, RemoveWatch3, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -369,9 +413,373 @@ HWTEST_F(CooperateServerTest, SetDamplingCoefficientTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RemoveWatch(
+        context, CooperateRequestID::UNREGISTER_HOTAREA_LISTENER, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: RemoveWatch4
+ * @tc.desc: Test func named remove watch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, RemoveWatch4, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RemoveWatch(
+        context, CooperateRequestID::UNREGISTER_EVENT_LISTENER, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: RemoveWatch5
+ * @tc.desc: Test func named remove watch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, RemoveWatch5, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    UnregisterEventListenerParam param { "networkId" };
+    param.Marshalling(data);
+    ASSERT_TRUE(param.Marshalling(data));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RemoveWatch(
+        context, CooperateRequestID::UNREGISTER_EVENT_LISTENER, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: SetParam
+ * @tc.desc: Test func named set param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, SetParam, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(
+        cooperateServer_->SetParam(context, CooperateRequestID::SET_DAMPLING_COEFFICIENT, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: SetParam1
+ * @tc.desc: Test func named set param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, SetParam1, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetParam(
+        context, CooperateRequestID::REGISTER_LISTENER, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: SetParam2
+ * @tc.desc: Test func named set param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, SetParam2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    RemovePermission();
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
     uint32_t direction = 0;
     double coefficient = 0;
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetDamplingCoefficient(context, direction, coefficient));
+    SetDamplingCoefficientParam param { direction, coefficient };
+    ASSERT_TRUE(param.Marshalling(data));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetParam(
+        context, CooperateRequestID::SET_DAMPLING_COEFFICIENT, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+/**
+ * @tc.name: GetParam1
+ * @tc.desc: Test func named get param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, GetParam1, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    GetCooperateStateParam param {1, "networkId", true};
+    param.Marshalling(data);
+    ASSERT_TRUE(param.Marshalling(data));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetParam(
+        context, CooperateRequestID::GET_COOPERATE_STATE, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: GetParam2
+ * @tc.desc: Test func named get param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, GetParam2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    GetCooperateStateSyncParam param { "networkId" };
+    param.Marshalling(data);
+    ASSERT_TRUE(param.Marshalling(data));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetParam(
+        context, CooperateRequestID::GET_COOPERATE_STATE_SYNC, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: GetParam3
+ * @tc.desc: Test func named get param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, GetParam3, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetParam(
+        context, CooperateRequestID::GET_COOPERATE_STATE_SYNC, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: GetParam4
+ * @tc.desc: Test func named get param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, GetParam4, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetParam(
+        context, CooperateRequestID::SET_DAMPLING_COEFFICIENT, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: StopTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, StopTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    StopCooperateParam param {1, false, true};
+    MessageParcel data;
+    MessageParcel reply;
+    param.Marshalling(data);
+    ASSERT_TRUE(param.Marshalling(data));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Stop(context, data, reply));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: ControlTest1
+ * @tc.desc: Test func named control
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, ControlTest1, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Control(
+        context, CooperateRequestID::UNKNOWN_COOPERATE_ACTION, data, reply));
+}
+
+/**
+ * @tc.name: EnableTest3
+ * @tc.desc: Test func named enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, EnableTest3, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    RemovePermission();
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    cooperateServer_->Enable(context, datas, reply);
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Enable(context, datas, reply));
+}
+
+/**
+ * @tc.name: DisableTest3
+ * @tc.desc: Test func named Disable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, DisableTest3, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    RemovePermission();
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Disable(context, datas, reply));
+}
+
+/**
+ * @tc.name: StartTest2
+ * @tc.desc: Test func named enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, StartTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    RemovePermission();
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Start(context, datas, reply));
+}
+
+/**
+ * @tc.name: StopTest3
+ * @tc.desc: Test func named enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, StopTest3, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    RemovePermission();
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->Stop(context, datas, reply));
+}
+
+/**
+ * @tc.name: AddWatchTest6
+ * @tc.desc: Test func named enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, AddWatchTest6, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    RemovePermission();
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->AddWatch(context, REGISTER_LISTENER, datas, reply));
     context_->GetPluginManager().UnloadCooperate();
 }
 } // namespace DeviceStatus
