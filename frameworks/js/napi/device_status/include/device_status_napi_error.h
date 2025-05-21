@@ -33,8 +33,8 @@ const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {PARAM_EXCEPTION, "Params check failed."},
     {DEVICE_EXCEPTION, "The device does not support this API."},
     {SERVICE_EXCEPTION, "Service exception."},
-    {SUBSCRIBE_EXCEPTION, "Subscribe failed."},
-    {UNSUBSCRIBE_EXCEPTION, "UnSubscribe failed."}
+    {SUBSCRIBE_EXCEPTION, "Subscription failed."},
+    {UNSUBSCRIBE_EXCEPTION, "Unsubscription failed."}
 };
 
 napi_value CreateDeviceStatusNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage);
