@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef SOCKET_SERVER_H
-#define SOCKET_SERVER_H
+#ifndef BOOMERANG_CALLBACK_H
+#define BOOMERANG_CALLBACK_H
 
-#include "nocopyable.h"
+#include <iremote_broker.h>
+#include <iremote_object.h>
 
-#include "i_context.h"
-#include "i_plugin.h"
+#include "boomerang_data.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class SocketServer final {
+class IRemoteBoomerangCallback : public IRemoteBroker {
 public:
-    SocketServer(IContext *context);
-    ~SocketServer() = default;
-    DISALLOW_COPY_AND_MOVE(SocketServer);
-    int32_t Socket(CallingContext &context, const std::string& programName, int32_t moduleType,
-        int& socketFd, int32_t& tokenType);
-private:
-    IContext *context_ { nullptr };
+    enum {
+        SCREENSHOT = 0,
+        NOTIFY_METADATA = 1,
+        ENCODE_IMAGE = 2,
+    };
+
+    virtual void OnScreenshotResult(const BoomerangData& screentshotData) = 0;
+    virtual void OnNotifyMetadata(const std::string& metadata) = 0;
+    virtual void OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pixelMap) = 0;
+
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IRemoteBoomerangCallback");
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // SOCKET_SERVER_H
+#endif // BOOMERANG_CALLBACK_H

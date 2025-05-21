@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 
 #include "devicestatus_define.h"
 #include "intention_identity.h"
-#include "socket_params.h"
+#include "intention_client.h"
 #include "time_cost_chk.h"
 
 #undef LOG_TAG
@@ -30,10 +30,10 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 const std::string THREAD_NAME { "os_ClientEventHandler" };
+const int32_t INVALID_SOCKT { -1 };
 }
 
-SocketClient::SocketClient(std::shared_ptr<ITunnelClient> tunnel)
-    : tunnel_(tunnel)
+SocketClient::SocketClient()
 {
     auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
@@ -48,7 +48,7 @@ bool SocketClient::RegisterEvent(MessageId id, std::function<int32_t(const Strea
 
 void SocketClient::Start()
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     Reconnect();
 }
 
@@ -85,18 +85,15 @@ bool SocketClient::Connect()
 int32_t SocketClient::Socket()
 {
     CALL_DEBUG_ENTER;
-    std::shared_ptr<ITunnelClient> tunnel = tunnel_.lock();
-    CHKPR(tunnel, RET_ERR);
-    AllocSocketPairParam param { GetProgramName(), CONNECT_MODULE_TYPE_FI_CLIENT };
-    AllocSocketPairReply reply;
-
-    int32_t ret = tunnel->Control(Intention::SOCKET, SocketAction::SOCKET_ACTION_CONNECT, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::Control fail");
-        return -1;
+    auto programName = GetProgramName();
+    int32_t socketFd { -1 };
+    int32_t tokenType { -1 };
+    if (int32_t ret = INTENTION_CLIENT->Socket(programName, CONNECT_MODULE_TYPE_FI_CLIENT, socketFd, tokenType);
+        ret != RET_OK) {
+        FI_HILOGE("Socket fail");
+        return INVALID_SOCKT;
     }
-    FI_HILOGD("Connected to intention service (%{public}d)", reply.socketFd);
-    return reply.socketFd;
+    return socketFd;
 }
 
 void SocketClient::OnPacket(NetPacket &pkt)

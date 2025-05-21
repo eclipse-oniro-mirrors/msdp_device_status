@@ -62,7 +62,7 @@ ohos_fuzztest("MsdpDeviceManagerFuzzTest") {
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
     "${device_status_root_path}/intention/cooperate/plugin:intention_cooperate",
-    "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_client",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",

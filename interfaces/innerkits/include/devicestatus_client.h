@@ -25,7 +25,7 @@
 #include "drag_data.h"
 #include "i_coordination_listener.h"
 #include "i_devicestatus.h"
-#include "stationary_callback.h"
+#include "iremote_dev_sta_callback.h"
 #include "stationary_data.h"
 
 namespace OHOS {

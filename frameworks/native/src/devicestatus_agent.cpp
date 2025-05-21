@@ -17,7 +17,7 @@
 
 #include "devicestatus_define.h"
 #include "fi_log.h"
-#include "stationary_callback.h"
+#include "iremote_dev_sta_callback.h"
 #include "stationary_manager.h"
 
 #undef LOG_TAG

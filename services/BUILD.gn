@@ -76,6 +76,8 @@ external_deps_set = [
   "graphic_2d:librender_service_client",
   "graphic_2d:window_animation",
   "hilog:libhilog",
+  "hisysevent:libhisysevent",
+  "hitrace:hitrace_meter",
   "input:libmmi-client",
   "ipc:ipc_single",
   "image_framework:image_native",
@@ -134,7 +136,7 @@ ohos_shared_library("devicestatus_service") {
   if (device_status_intention_framework) {
     public_deps += [
       "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
-      "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_server",
+      "${device_status_root_path}/intention/ipc/tunnel:intention_server_stub",
       "${device_status_root_path}/intention/services/intention_service:intention_service",
     ]
   }
@@ -154,15 +156,6 @@ ohos_shared_library("devicestatus_service") {
   if (device_status_memmgr_enable) {
     defines += [ "MEMMGR_ENABLE" ]
     external_deps += [ "memmgr:memmgrclient" ]
-  }
-  if (device_status_hisysevent_enable) {
-    external_deps += [ "hisysevent:libhisysevent" ]
-    defines += [ "MSDP_HIVIEWDFX_HISYSEVENT_ENABLE" ]
-  }
-
-  if (device_status_hitrace_enable) {
-    external_deps += [ "hitrace:hitrace_meter" ]
-    defines += [ "MSDP_HIVIEWDFX_HITRACE_ENABLE" ]
   }
   if (device_status_motion_enable) {
     defines += [ "MOTION_ENABLE" ]
@@ -220,7 +213,7 @@ ohos_static_library("devicestatus_static_service") {
   if (device_status_intention_framework) {
     public_deps += [
       "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
-      "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_server",
+      "${device_status_root_path}/intention/ipc/tunnel:intention_server_stub",
       "${device_status_root_path}/intention/services/intention_service:intention_service",
     ]
   }
@@ -240,16 +233,6 @@ ohos_static_library("devicestatus_static_service") {
   if (device_status_motion_enable) {
     defines += [ "MOTION_ENABLE" ]
     external_deps += [ "motion:motion_interface_native" ]
-  }
-
-  if (device_status_hisysevent_enable) {
-    external_deps += [ "hisysevent:libhisysevent" ]
-    defines += [ "MSDP_HIVIEWDFX_HISYSEVENT_ENABLE" ]
-  }
-
-  if (device_status_hitrace_enable) {
-    external_deps += [ "hitrace:hitrace_meter" ]
-    defines += [ "MSDP_HIVIEWDFX_HITRACE_ENABLE" ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"

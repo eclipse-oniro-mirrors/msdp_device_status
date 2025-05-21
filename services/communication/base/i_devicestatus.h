@@ -20,7 +20,7 @@
 
 #include "drag_data.h"
 #include "msdp_ipc_interface_code.h"
-#include "stationary_callback.h"
+#include "iremote_dev_sta_callback.h"
 #include "stationary_data.h"
 
 namespace OHOS {

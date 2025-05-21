@@ -20,8 +20,7 @@
 
 #include "nocopyable.h"
 
-#include "i_tunnel_client.h"
-#include "stationary_callback.h"
+#include "iremote_dev_sta_callback.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -32,11 +31,11 @@ public:
     ~StationaryClient() = default;
     DISALLOW_COPY_AND_MOVE(StationaryClient);
 
-    int32_t SubscribeCallback(ITunnelClient &tunnel, Type type, ActivityEvent event,
+    int32_t SubscribeCallback(Type type, ActivityEvent event,
         ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
-    int32_t UnsubscribeCallback(ITunnelClient &tunnel, Type type, ActivityEvent event,
+    int32_t UnsubscribeCallback(Type type, ActivityEvent event,
         sptr<IRemoteDevStaCallback> callback);
-    Data GetDeviceStatusData(ITunnelClient &tunnel, Type type);
+    Data GetDeviceStatusData(Type type);
 
 private:
     std::mutex mtx_;

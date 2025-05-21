@@ -36,7 +36,7 @@ bool PrepareCooperateFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     DelayedSingleton<DeviceStatusService>::GetInstance()->OnRemoteRequest(
-        static_cast<uint32_t>(Msdp::DeviceInterfaceCode::PREPARE_COOPERATE), datas, reply, option);
+        static_cast<uint32_t>(Msdp::IIntentionIpcCode::COMMAND_ENABLE_COOPERATE), datas, reply, option);
     return true;
 }
 } // namespace OHOS

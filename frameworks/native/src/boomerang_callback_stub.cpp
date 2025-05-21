@@ -39,7 +39,7 @@ int32_t BoomerangCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
     }
 
     switch (code) {
-        case static_cast<int32_t>(IRemoteBoomerangCallback::SCREEN_SHOT): {
+        case static_cast<int32_t>(IRemoteBoomerangCallback::SCREENSHOT): {
             return OnScreenshotStub(data);
         }
         case static_cast<int32_t>(IRemoteBoomerangCallback::NOTIFY_METADATA): {

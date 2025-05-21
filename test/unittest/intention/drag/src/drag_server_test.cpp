@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 #include "interaction_manager.h"
 #include "ipc_skeleton.h"
 #include "singleton.h"
-
+#include "tunnel_client.h"
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
@@ -34,6 +34,9 @@ namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
+constexpr int32_t POINTER_ID { 0 };
+constexpr int32_t DRAG_NUM_ONE { 1 };
+constexpr int32_t SHADOW_NUM_ONE { 1 };
 constexpr int32_t PIXEL_MAP_WIDTH { 3 };
 constexpr int32_t PIXEL_MAP_HEIGHT { 3 };
 constexpr int32_t WINDOW_ID { -1 };
@@ -70,6 +73,7 @@ std::shared_ptr<DragServer> g_dragServer { nullptr };
 std::shared_ptr<DragServer> g_dragServerOne { nullptr };
 IContext *g_context { nullptr };
 IContext *g_contextOne { nullptr };
+std::shared_ptr<TunnelClient> g_tunnel { nullptr };
 Security::AccessToken::HapInfoParams g_testInfoParms = {
     .userID = 1,
     .bundleName = "drag_server_test",
@@ -83,6 +87,7 @@ Security::AccessToken::HapPolicyParams g_testPolicyPrams = {
     .permList = {},
     .permStateList = {}
 };
+int32_t PERMISSION_EXCEPTION { 202 };
 } // namespace
 
 ContextService::ContextService()
@@ -157,12 +162,14 @@ void DragServerTest::SetUp()
     g_context = ContextService::GetInstance();
     g_dragServer = std::make_shared<DragServer>(g_context);
     g_dragServerOne = std::make_shared<DragServer>(g_contextOne);
+    g_tunnel = std::make_shared<TunnelClient>();
 }
 
 void DragServerTest::TearDown()
 {
     g_dragServer = nullptr;
     g_context = nullptr;
+    g_tunnel = nullptr;
     g_dragServerOne = nullptr;
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
@@ -316,10 +323,15 @@ void DragServerTest::AssignToAnimation(PreviewAnimation &animation)
 HWTEST_F(DragServerTest, DragServerTest1, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    bool visible = false;
-    bool isForce = false;
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction { nullptr };
-    int32_t ret = g_dragServer->SetDragWindowVisible(visible, isForce, rsTransaction);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    int32_t ret = g_dragServer->Enable(context, datas, reply);
     EXPECT_EQ(ret, RET_ERR);
 }
 
@@ -338,9 +350,10 @@ HWTEST_F(DragServerTest, DragServerTest2, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    int32_t eventId = -1;
-    int32_t ret = g_dragServer->UpdateDragStyle(context, DragCursorStyle::DEFAULT, eventId);
-    EXPECT_EQ(ret, RET_OK);
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->Disable(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
@@ -352,8 +365,17 @@ HWTEST_F(DragServerTest, DragServerTest2, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest3, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    ShadowInfo shadowInfo {};
-    int32_t ret = g_dragServer->UpdateShadowPic(shadowInfo);
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->Start(context, datas, reply);
     EXPECT_EQ(ret, RET_ERR);
 }
 
@@ -366,10 +388,15 @@ HWTEST_F(DragServerTest, DragServerTest3, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest4, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    PreviewStyle previewStyleIn;
-    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
-    previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
-    int32_t ret = g_dragServer->UpdatePreviewStyle(previewStyleIn);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->Stop(context, datas, reply);
     EXPECT_EQ(ret, RET_ERR);
 }
 
@@ -382,15 +409,22 @@ HWTEST_F(DragServerTest, DragServerTest4, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest5, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    int32_t targetPid = -1;
     CallingContext context {
         .intention = g_intention,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    int32_t ret = g_dragServer->GetDragTargetPid(context, targetPid);
-    EXPECT_EQ(ret, RET_OK);
+    int32_t ret = -1;
+    MessageParcel reply;
+    MessageParcel datas;
+    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
+        DragRequestID::ADD_DRAG_LISTENER, DragRequestID::ADD_SUBSCRIPT_LISTENER};
+    for (const auto& dragRequestID : dragRequestIDs) {
+        GTEST_LOG_(INFO) << "dragRequestID: " << dragRequestID;
+        ret = g_dragServer->AddWatch(context, dragRequestID, datas, reply);
+        EXPECT_EQ(ret, RET_ERR);
+    }
 }
 
 /**
@@ -402,9 +436,22 @@ HWTEST_F(DragServerTest, DragServerTest5, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest6, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    std::string udKey { "Unified data key" };
-    int32_t ret = g_dragServer->GetUdKey(udKey);
-    EXPECT_EQ(ret, RET_ERR);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = -1;
+    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
+        DragRequestID::REMOVE_DRAG_LISTENER, DragRequestID::REMOVE_SUBSCRIPT_LISTENER};
+    for (const auto& dragRequestID : dragRequestIDs) {
+        GTEST_LOG_(INFO) << "dragRequestID: " << dragRequestID;
+        ret = g_dragServer->RemoveWatch(context, dragRequestID, datas, reply);
+        EXPECT_EQ(ret, RET_ERR);
+    }
 }
 
 /**
@@ -416,9 +463,24 @@ HWTEST_F(DragServerTest, DragServerTest6, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest7, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    ShadowOffset defaultShadowOffset = {};
-    int32_t ret = g_dragServer->GetShadowOffset(defaultShadowOffset);
-    EXPECT_EQ(ret, RET_ERR);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
+        DragRequestID::SET_DRAG_WINDOW_VISIBLE, DragRequestID::UPDATE_DRAG_STYLE,
+        DragRequestID::UPDATE_SHADOW_PIC, DragRequestID::UPDATE_PREVIEW_STYLE,
+        DragRequestID::UPDATE_PREVIEW_STYLE_WITH_ANIMATION, DragRequestID::SET_DRAG_WINDOW_SCREEN_ID,
+        DragRequestID::SET_DRAG_SWITCH_STATE, DragRequestID::SET_APP_DRAG_SWITCH_STATE,
+        DragRequestID::SET_DRAGGABLE_STATE, DragRequestID::SET_DRAGABLE_STATE_ASYNC};
+    for (const auto& dragRequestID : dragRequestIDs) {
+        GTEST_LOG_(INFO) << "dragRequestID: " << dragRequestID;
+        ASSERT_NO_FATAL_FAILURE(g_dragServer->SetParam(context, dragRequestID, datas, reply));
+    }
 }
 
 /**
@@ -430,15 +492,36 @@ HWTEST_F(DragServerTest, DragServerTest7, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest8, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DragData datas;
+    int32_t ret = -1;
     CallingContext context {
         .intention = g_intention,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    int32_t ret = g_dragServer->GetDragData(context, datas);
-    EXPECT_EQ(ret, RET_ERR);
+    MessageParcel reply;
+    MessageParcel datas;
+    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
+        DragRequestID::GET_DRAG_TARGET_PID, DragRequestID::GET_UDKEY,
+        DragRequestID::GET_SHADOW_OFFSET, DragRequestID::GET_DRAG_DATA,
+        DragRequestID::GET_DRAG_STATE, DragRequestID::GET_DRAG_SUMMARY,
+        DragRequestID::GET_DRAG_ACTION, DragRequestID::GET_EXTRA_INFO};
+    for (const auto& dragRequestID : dragRequestIDs) {
+        GTEST_LOG_(INFO) << "dragRequestID: " << dragRequestID;
+        if (dragRequestID == DragRequestID::UNKNOWN_DRAG_ACTION ||
+            dragRequestID == DragRequestID::GET_UDKEY ||
+            dragRequestID == DragRequestID::GET_SHADOW_OFFSET ||
+            dragRequestID == DragRequestID::GET_DRAG_SUMMARY ||
+            dragRequestID == DragRequestID::GET_DRAG_DATA ||
+            dragRequestID == DragRequestID::GET_DRAG_ACTION||
+            dragRequestID == DragRequestID::GET_EXTRA_INFO) {
+                ret = g_dragServer->GetParam(context, dragRequestID, datas, reply);
+                EXPECT_EQ(ret, RET_ERR);
+        } else {
+            ret = g_dragServer->GetParam(context, dragRequestID, datas, reply);
+            EXPECT_EQ(ret, RET_OK);
+        }
+    }
 }
 
 /**
@@ -450,9 +533,24 @@ HWTEST_F(DragServerTest, DragServerTest8, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest9, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DragState dragState;
-    int32_t ret = g_dragServer->GetDragState(dragState);
-    EXPECT_EQ(ret, RET_OK);
+    int32_t ret = -1;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
+        DragRequestID::ADD_PRIVILEGE, DragRequestID::ENTER_TEXT_EDITOR_AREA,
+        DragRequestID::ROTATE_DRAG_WINDOW_SYNC, DragRequestID::ERASE_MOUSE_ICON,
+        DragRequestID::SET_MOUSE_DRAG_MONITOR_STATE};
+    for (const auto& dragRequestID : dragRequestIDs) {
+        GTEST_LOG_(INFO) << "dragRequestID: " << dragRequestID;
+        ret = g_dragServer->Control(context, dragRequestID, datas, reply);
+        EXPECT_EQ(ret, RET_ERR);
+    }
 }
 
 /**
@@ -470,10 +568,10 @@ HWTEST_F(DragServerTest, DragServerTest10, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    std::map<std::string, int64_t> summarys;
-    bool isJsCaller = false;
-    int32_t ret = g_dragServer->GetDragSummary(context, summarys, isJsCaller);
-    EXPECT_EQ(ret, RET_OK);
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->SetDragWindowVisible(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
@@ -485,8 +583,15 @@ HWTEST_F(DragServerTest, DragServerTest10, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest11, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DragAction dragAction;
-    int32_t ret = g_dragServer->GetDragAction(dragAction);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->UpdateDragStyle(context, datas, reply);
     EXPECT_EQ(ret, RET_ERR);
 }
 
@@ -499,8 +604,15 @@ HWTEST_F(DragServerTest, DragServerTest11, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest12, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    std::string extraInfo { "Undefined extra info" };
-    int32_t ret = g_dragServer->GetExtraInfo(extraInfo);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->UpdateShadowPic(context, datas, reply);
     EXPECT_EQ(ret, RET_ERR);
 }
 
@@ -513,12 +625,16 @@ HWTEST_F(DragServerTest, DragServerTest12, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest13, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    bool ret = DRAG_DATA_MGR.GetDragWindowVisible();
-    EXPECT_FALSE(ret);
-    int32_t tid = DRAG_DATA_MGR.GetTargetTid();
-    EXPECT_NE(tid, READ_OK);
-    float dragOriginDpi = DRAG_DATA_MGR.GetDragOriginDpi();
-    EXPECT_TRUE(dragOriginDpi == 0.0f);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->UpdatePreviewStyle(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
@@ -530,10 +646,16 @@ HWTEST_F(DragServerTest, DragServerTest13, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest14, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DRAG_DATA_MGR.SetTextEditorAreaFlag(true);
-    DRAG_DATA_MGR.SetPixelMapLocation({1, 1});
-    bool ret = DRAG_DATA_MGR.GetCoordinateCorrected();
-    EXPECT_FALSE(ret);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->UpdatePreviewAnimation(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
@@ -545,11 +667,16 @@ HWTEST_F(DragServerTest, DragServerTest14, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest15, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DRAG_DATA_MGR.initialPixelMapLocation_ = {1, 1};
-    DRAG_DATA_MGR.SetInitialPixelMapLocation(DRAG_DATA_MGR.GetInitialPixelMapLocation());
-    DRAG_DATA_MGR.SetDragOriginDpi(1);
-    bool ret = DRAG_DATA_MGR.GetTextEditorAreaFlag();
-    EXPECT_TRUE(ret);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragTargetPid(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
 }
 
 /**
@@ -561,15 +688,20 @@ HWTEST_F(DragServerTest, DragServerTest15, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest16, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
     CallingContext context {
         .intention = g_intention,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    const std::shared_ptr<Rosen::RSTransaction> rsTransaction;
-    int32_t ret = g_dragServer->RotateDragWindowSync(context, rsTransaction);
-    EXPECT_EQ(ret, RET_ERR);
+    DRAG_DATA_MGR.Init(dragData.value());
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetUdKey(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+    DRAG_DATA_MGR.dragData_ = {};
 }
 
 /**
@@ -579,6 +711,725 @@ HWTEST_F(DragServerTest, DragServerTest16, TestSize.Level0)
  * @tc.require:
  */
 HWTEST_F(DragServerTest, DragServerTest17, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetShadowOffset(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest18
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest18, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragData(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest19
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest19, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragState(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: DragServerTest20
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest20, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragSummary(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest21
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest21, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragAction(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest22
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest22, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetExtraInfo(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest23
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest23, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->EnterTextEditorArea(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest24
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest24, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetUdKey(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest25
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest25, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    DRAG_DATA_MGR.Init(dragData.value());
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetShadowOffset(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+    DRAG_DATA_MGR.dragData_ = {};
+}
+
+/**
+ * @tc.name: DragServerTest26
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest26, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    DRAG_DATA_MGR.Init(dragData.value());
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetExtraInfo(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+    DRAG_DATA_MGR.dragData_ = {};
+}
+
+/**
+ * @tc.name: DragServerTest27
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest27, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    
+    MessageParcel reply;
+    MessageParcel datas;
+    g_dragMgr.dragState_ = DragState::START;
+    SetDragWindowVisibleParam param { true, true, nullptr };
+    int32_t ret = param.Marshalling(datas);
+    EXPECT_EQ(ret, READ_OK);
+    ret = g_dragServer->SetDragWindowVisible(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_  = DragState::STOP;
+    DRAG_DATA_MGR.dragData_ = {};
+}
+
+/**
+ * @tc.name: DragServerTest28
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest28, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
+    g_dragMgr.dragState_ = DragState::START;
+    StopDragParam param { dropResult };
+
+    int32_t ret = param.Marshalling(datas);
+    EXPECT_EQ(ret, READ_OK);
+    ret = g_dragServer->Stop(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest29
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest29, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
+    g_dragMgr.dragState_ = DragState::START;
+    StopDragParam param { dropResult };
+
+    int32_t ret = param.Marshalling(datas);
+    EXPECT_EQ(ret, READ_OK);
+    ret = g_dragServerOne->Stop(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest30
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest30, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    g_dragMgr.dragState_ = DragState::START;
+    UpdateDragStyleParam param { DragCursorStyle::COPY, -1 };
+    bool ret = param.Marshalling(datas);
+    EXPECT_EQ(ret, READ_OK);
+    ret = g_dragServer->UpdateDragStyle(context, datas, reply);
+    EXPECT_TRUE(ret);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest31
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest31, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    g_dragMgr.dragState_ = DragState::START;
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    ASSERT_NE(pixelMap, nullptr);
+    ShadowInfo shadowInfo = { pixelMap, 0, 0 };
+    std::string extraInfo;
+    UpdateShadowPicParam param { shadowInfo };
+    bool ret = param.Marshalling(datas);;
+    EXPECT_EQ(ret, READ_OK);
+    ret = g_dragServer->UpdateShadowPic(context, datas, reply);
+    EXPECT_TRUE(ret);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest32
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest32, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    g_dragMgr.dragState_ = DragState::START;
+    PreviewStyle previewStyleIn;
+    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
+    previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
+    UpdatePreviewStyleParam param { previewStyleIn };
+    bool ret = param.Marshalling(datas);;
+    EXPECT_EQ(ret, READ_OK);
+    ret = g_dragServer->UpdatePreviewStyle(context, datas, reply);
+    EXPECT_TRUE(ret);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest33
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest33, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    g_dragMgr.dragState_ = DragState::START;
+    PreviewStyle previewStyleIn;
+    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
+    previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
+    PreviewAnimation animationOut;
+    AssignToAnimation(animationOut);
+    UpdatePreviewAnimationParam param { previewStyleIn, animationOut };
+    bool ret = param.Marshalling(datas);;
+    EXPECT_EQ(ret, READ_OK);
+    ret = g_dragServer->UpdatePreviewAnimation(context, datas, reply);
+    EXPECT_FALSE(ret);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest34
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest34, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    MessageParcel reply;
+    g_dragMgr.dragState_ = DragState::START;
+    GetDragTargetPidReply targetPidReply { IPCSkeleton::GetCallingPid() };
+    bool ret = targetPidReply.Marshalling(datas);
+    EXPECT_EQ(ret, READ_OK);
+    ret = g_dragServer->GetDragTargetPid(context, datas, reply);
+    EXPECT_FALSE(ret);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest35
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest35, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    g_dragMgr.dragState_ = DragState::START;
+    MessageParcel reply;
+    MessageParcel datas;
+    DRAG_DATA_MGR.Init(dragData.value());
+    int32_t ret = g_dragServer->GetDragData(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+    DRAG_DATA_MGR.dragData_ = {};
+    ret = g_dragServer->GetDragData(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest36
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest36, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    g_dragMgr.dragState_ = DragState::ERROR;
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragState(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+    g_dragMgr.dragState_ = DragState::START;
+    ret = g_dragServer->GetDragState(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest37
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest37, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    g_dragMgr.dragState_ = DragState::ERROR;
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragAction(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+    g_dragMgr.dragState_ = DragState::START;
+    ret = g_dragServer->GetDragAction(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest38
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest38, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    DRAG_DATA_MGR.Init(dragData.value());
+    int32_t ret = g_dragServer->GetExtraInfo(context, datas, reply);
+    EXPECT_EQ(ret, RET_OK);
+    DRAG_DATA_MGR.dragData_ = {};
+    ret = g_dragServer->GetExtraInfo(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest39
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest39, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragServer->GetPackageName(IPCSkeleton::GetCallingTokenID());
+    g_dragServer->GetPackageName(-1);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    EnterTextEditorAreaParam param { true };
+    bool ret = param.Marshalling(datas);;
+    EXPECT_EQ(ret, READ_OK);
+    ret = g_dragServer->EnterTextEditorArea(context, datas, reply);
+    EXPECT_EQ(ret, READ_OK);
+}
+
+/**
+ * @tc.name: DragServerTest40
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest40, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool ret = DRAG_DATA_MGR.GetDragWindowVisible();
+    EXPECT_FALSE(ret);
+    int32_t tid = DRAG_DATA_MGR.GetTargetTid();
+    EXPECT_NE(tid, READ_OK);
+    float dragOriginDpi = DRAG_DATA_MGR.GetDragOriginDpi();
+    EXPECT_TRUE(dragOriginDpi == 0.0f);
+}
+
+/**
+ * @tc.name: DragServerTest42
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest42, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DRAG_DATA_MGR.SetTextEditorAreaFlag(true);
+    DRAG_DATA_MGR.SetPixelMapLocation({1, 1});
+    bool ret = DRAG_DATA_MGR.GetCoordinateCorrected();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DragServerTest43
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest43, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DRAG_DATA_MGR.initialPixelMapLocation_ = {1, 1};
+    DRAG_DATA_MGR.SetInitialPixelMapLocation(DRAG_DATA_MGR.GetInitialPixelMapLocation());
+    DRAG_DATA_MGR.SetDragOriginDpi(1);
+    bool ret = DRAG_DATA_MGR.GetTextEditorAreaFlag();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: DragServerTest44
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest44, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->Start(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest45
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest45, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    bool ret = g_dragServer->IsSystemServiceCalling(context);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: DragServerTest46
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest46, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->RotateDragWindowSync(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest47
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest47, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->SetDragWindowScreenId(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+    uint64_t displayId = 0;
+    uint64_t screenId = 0;
+    SetDragWindowScreenIdParam param { displayId, screenId };
+    bool ret1 = param.Marshalling(datas);
+    EXPECT_EQ(ret1, true);
+    int32_t ret2 = g_dragServer->SetDragWindowScreenId(context, datas, reply);
+    EXPECT_EQ(ret2, RET_OK);
+}
+
+/**
+ * @tc.name: DragServerTest48
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest48, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     uint64_t g_tokenId = NativeTokenGet();
@@ -598,12 +1449,12 @@ HWTEST_F(DragServerTest, DragServerTest17, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragServerTest18
+ * @tc.name: DragServerTest49
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest18, TestSize.Level0)
+HWTEST_F(DragServerTest, DragServerTest49, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     Security::AccessToken::AccessTokenIDEx tokenIdEx = {0};
@@ -624,322 +1475,145 @@ HWTEST_F(DragServerTest, DragServerTest18, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragClientTest19
+ * @tc.name: DragClientTest50
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragClientTest19, TestSize.Level0)
+HWTEST_F(DragServerTest, DragClientTest50, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
     uint16_t displayId = 0;
     uint64_t screenId = 0;
-    int32_t ret = g_dragServer->SetDragWindowScreenId(context, displayId, screenId);
+    int32_t ret = g_dragClient.SetDragWindowScreenId(*g_tunnel, displayId, screenId);
     EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
- * @tc.name: DragServerTest20
+ * @tc.name: DragClientTest51
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest20, TestSize.Level0)
+HWTEST_F(DragServerTest, DragClientTest51, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    bool state = true;
-    int32_t ret = g_dragServer->SetMouseDragMonitorState(state);
+    std::shared_ptr<StreamClient> g_streamClient { nullptr };
+    NetPacket packet(MessageId::DRAG_NOTIFY_RESULT);
+    int32_t ret = g_dragClient.OnNotifyHideIcon(*g_streamClient, packet);
     EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
- * @tc.name: DragServerTest21
+ * @tc.name: DragClientTest52
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest21, TestSize.Level0)
+HWTEST_F(DragServerTest, DragClientTest52, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    std::shared_ptr<StreamClient> g_streamClient { nullptr };
+    NetPacket packet(MessageId::DRAG_NOTIFY_RESULT);
+    auto dragEndHandler = [](const DragNotifyMsg& msg) {
+        FI_HILOGI("TEST");
+    };
+    g_dragClient.startDragListener_ = std::make_shared<TestStartDragListener>(dragEndHandler);
+    int32_t ret = g_dragClient.OnNotifyHideIcon(*g_streamClient, packet);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: DragClientTest53
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragClientTest53, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<StreamClient> g_streamClient { nullptr };
+    NetPacket packet(MessageId::DRAG_NOTIFY_RESULT);
+    int32_t ret = g_dragClient.OnDragStyleChangedMessage(*g_streamClient, packet);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest54
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest54, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel datas;
+    bool isJsCaller = -1;
+    RemoveDraglistenerParam param { isJsCaller };
+    bool ret = param.Marshalling(datas);
+    EXPECT_EQ(ret, true);
+    int32_t ret1 = g_dragServer->RemoveListener(context, datas);
+    EXPECT_EQ(ret1, PERMISSION_EXCEPTION);
+}
+
+/**
+ * @tc.name: DragServerTest55
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest55, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->SetMouseDragMonitorState(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
     bool state = true;
-    int32_t ret2 = g_dragServer->SetDraggableState(state);
+    SetMouseDragMonitorStateParam param { state };
+    bool ret1 = param.Marshalling(datas);
+    EXPECT_EQ(ret1, true);
+    int32_t ret2 = g_dragServer->SetMouseDragMonitorState(context, datas, reply);
+    EXPECT_EQ(ret2, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest56
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest56, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->SetDraggableState(context, datas, reply);
+    EXPECT_EQ(ret, RET_ERR);
+    bool state = true;
+    SetDraggableStateParam param { state };
+    bool ret1 = param.Marshalling(datas);
+    EXPECT_EQ(ret1, true);
+    int32_t ret2 = g_dragServer->SetDraggableState(context, datas, reply);
     EXPECT_EQ(ret2, RET_OK);
-}
-
-/**
- * @tc.name: DragServerTest22
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest22, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    DragData dragData;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    int32_t ret = g_dragServer->StartDrag(context, dragData);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: DragServerTest23
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest23, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
-    g_dragMgr.dragState_ = DragState::START;
-    int32_t ret = g_dragServer->StopDrag(context, dropResult);
-    EXPECT_EQ(ret, RET_OK);
-    g_dragMgr.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: DragServerTest24
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest24, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
-    g_dragMgr.dragState_ = DragState::START;
-    int32_t ret = g_dragServerOne->StopDrag(context, dropResult);
-    EXPECT_EQ(ret, RET_ERR);
-    g_dragMgr.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: DragServerTest25
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest25, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    bool isJsCaller = false;
-    int32_t ret = g_dragServer->AddDraglistener(context, isJsCaller);
-    EXPECT_EQ(ret, COMMON_NOT_SYSTEM_APP);
-}
-
-/**
- * @tc.name: DragServerTest26
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest26, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    bool isJsCaller = false;
-    int32_t ret = g_dragServer->RemoveDraglistener(context, isJsCaller);
-    EXPECT_EQ(ret, COMMON_NOT_SYSTEM_APP);
-}
-
-/**
- * @tc.name: DragServerTest27
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest27, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    int32_t ret = g_dragServer->AddSubscriptListener(context);
-    EXPECT_EQ(ret, COMMON_NOT_SYSTEM_APP);
-}
-
-/**
- * @tc.name: DragServerTest28
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest28, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    int32_t ret = g_dragServer->RemoveSubscriptListener(context);
-    EXPECT_EQ(ret, COMMON_NOT_SYSTEM_APP);
-}
-
-/**
- * @tc.name: DragServerTest29
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest29, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    bool state = false;
-    int64_t downTime = 1;
-    int32_t ret = g_dragServer->SetDraggableStateAsync(state, downTime);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: DragServerTest30
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest30, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    bool enable = false;
-    bool isJsCaller = false;
-    int32_t ret = g_dragServer->SetDragSwitchState(context, enable, isJsCaller);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: DragServerTest31
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest31, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    int32_t ret = g_dragServer->AddPrivilege(context);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: DragServerTest32
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest32, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    int32_t ret = g_dragServer->EraseMouseIcon(context);
-    EXPECT_EQ(ret, COMMON_NOT_SYSTEM_APP);
-}
-
-/**
- * @tc.name: DragServerTest33
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest33, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    bool enable = false;
-    std::string pkgName { "Undefined name" };
-    bool isJsCaller = false;
-    int32_t ret = g_dragServer->SetAppDragSwitchState(context, enable, pkgName, isJsCaller);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: DragServerTest34
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest34, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    bool enable = false;
-    int32_t ret = g_dragServer->EnableUpperCenterMode(enable);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: DragServerTest35
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest35, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    PreviewStyle previewStyleIn;
-    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
-    previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
-    PreviewAnimation animationOut;
-    AssignToAnimation(animationOut);
-    int32_t ret = g_dragServer->UpdatePreviewStyleWithAnimation(previewStyleIn, animationOut);
-    EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
@@ -951,8 +1625,15 @@ HWTEST_F(DragServerTest, DragServerTest35, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest57, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DragBundleInfo dragBundleInfo;
-    int32_t ret = g_dragServer->GetDragBundleInfo(dragBundleInfo);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragBundleInfo(context, datas, reply);
     EXPECT_EQ(ret, RET_ERR);
 }
 
@@ -965,23 +1646,36 @@ HWTEST_F(DragServerTest, DragServerTest57, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest58, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    DragBundleInfo dragBundleInfo;
-
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     g_dragMgr.dragState_ = DragState::ERROR;
-    int32_t ret = g_dragServer->GetDragBundleInfo(dragBundleInfo);
+    MessageParcel reply;
+    MessageParcel datas;
+    int32_t ret = g_dragServer->GetDragBundleInfo(context, datas, reply);
     EXPECT_EQ(ret, RET_ERR);
-
     g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = false;
-    ret = g_dragServer->GetDragBundleInfo(dragBundleInfo);
+    ret = g_dragServer->GetDragBundleInfo(context, datas, reply);
     EXPECT_EQ(ret, RET_OK);
-    EXPECT_FALSE(dragBundleInfo.isCrossDevice);
+
+    DragBundleInfo dragBundleInfo;
+    GetDragBundleInfoReply dragBundleInfoReply(dragBundleInfo);
+    ret = dragBundleInfoReply.Unmarshalling(reply);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(dragBundleInfoReply.dragBundleInfo_.isCrossDevice);
 
     g_dragMgr.dragState_ = DragState::MOTION_DRAGGING;
     g_dragMgr.isCrossDragging_ = true;
-    ret = g_dragServer->GetDragBundleInfo(dragBundleInfo);
+    ret = g_dragServer->GetDragBundleInfo(context, datas, reply);
     EXPECT_EQ(ret, RET_OK);
-    EXPECT_TRUE(dragBundleInfo.isCrossDevice);
+
+    ret = dragBundleInfoReply.Unmarshalling(reply);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(dragBundleInfoReply.dragBundleInfo_.isCrossDevice);
     
     g_dragMgr.dragState_ = DragState::STOP;
 }

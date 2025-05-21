@@ -31,7 +31,9 @@ ohos_source_set("intention_socket_server") {
 
   defines = device_status_default_defines
 
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+  ]
 
   sources = [
     "src/socket_params.cpp",
@@ -125,7 +127,10 @@ ohos_source_set("intention_socket_connection") {
 
   defines = device_status_default_defines
 
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/intention/ipc/tunnel/include"
+  ]
 
   sources = [
     "src/socket_client.cpp",
@@ -140,12 +145,15 @@ ohos_source_set("intention_socket_connection") {
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
   ]
 
   external_deps = [
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

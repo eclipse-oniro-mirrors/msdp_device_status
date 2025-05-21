@@ -22,7 +22,7 @@
 #include "message_option.h"
 #include "message_parcel.h"
 
-#include "boomerang_callback.h"
+#include "iremote_boomerang_callback.h"
 #include "stationary_data.h"
 
 namespace OHOS {

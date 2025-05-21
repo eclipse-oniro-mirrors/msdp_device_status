@@ -19,7 +19,7 @@
 #include <iremote_proxy.h>
 #include <nocopyable.h>
 
-#include "boomerang_callback.h"
+#include "iremote_boomerang_callback.h"
 #include "stationary_data.h"
 
 namespace OHOS {

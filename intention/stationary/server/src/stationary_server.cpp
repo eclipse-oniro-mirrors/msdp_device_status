@@ -14,12 +14,9 @@
  */
 
 #include "stationary_server.h"
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+
 #include "hisysevent.h"
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-#ifdef MSDP_HIVIEWDFX_HITRACE_ENABLE
 #include "hitrace_meter.h"
-#endif // MSDP_HIVIEWDFX_HITRACE_ENABLE
 
 #include "default_params.h"
 #include "devicestatus_define.h"
@@ -86,108 +83,49 @@ StationaryServer::StationaryServer()
 #endif
 }
 
-int32_t StationaryServer::Enable(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t StationaryServer::SubscribeStationaryCallback(CallingContext &context, int32_t type, int32_t event,
+    int32_t latency, const sptr<IRemoteDevStaCallback> &subCallback)
 {
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t StationaryServer::Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t StationaryServer::Start(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t StationaryServer::Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t StationaryServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    if (id != StationaryRequestID::SUBSCRIBE_STATIONARY) {
-        FI_HILOGE("Unexpected request ID (%{public}u)", id);
-        return RET_ERR;
-    }
-    SubscribeStationaryParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SubscribeStationaryParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    if (param.type_ == Type::TYPE_STAND) {
+    Type stationaryType = static_cast<Type>(type);
+    ActivityEvent stationaryEvent = static_cast<ActivityEvent>(event);
+    ReportLatencyNs stationaryLatency = static_cast<ReportLatencyNs>(latency);
+    if (stationaryType == Type::TYPE_STAND) {
 #ifdef MOTION_ENABLE
-        return SubscribeMotion(param.type_, param.callback_);
+        return SubscribeMotion(stationaryType, subCallback);
 #else
         return RET_NO_SUPPORT;
 #endif
     } else {
-        Subscribe(context, param.type_, param.event_, param.latency_, param.callback_);
+        Subscribe(context, stationaryType, stationaryEvent, stationaryLatency, subCallback);
     }
     return RET_OK;
 }
 
-int32_t StationaryServer::RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t StationaryServer::UnsubscribeStationaryCallback(CallingContext &context, int32_t type, int32_t event,
+    const sptr<IRemoteDevStaCallback> &unsubCallback)
 {
-    if (id != StationaryRequestID::UNSUBSCRIBE_STATIONARY) {
-        FI_HILOGE("Unexpected request ID (%{public}u)", id);
-        return RET_ERR;
-    }
-    UnsubscribeStationaryParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("UnsubscribeStationaryParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    if (param.type_ == Type::TYPE_STAND) {
+    Type stationaryType = static_cast<Type>(type);
+    ActivityEvent stationaryEvent = static_cast<ActivityEvent>(event);
+    if (stationaryType == Type::TYPE_STAND) {
 #ifdef MOTION_ENABLE
-        return UnsubscribeMotion(param.type_, param.callback_);
+        return UnsubscribeMotion(stationaryType, unsubCallback);
 #else
         return RET_NO_SUPPORT;
 #endif
     } else {
-        Unsubscribe(context, param.type_, param.event_, param.callback_);
+        Unsubscribe(context, stationaryType, stationaryEvent, unsubCallback);
     }
     return RET_OK;
 }
 
-int32_t StationaryServer::SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t StationaryServer::GetDeviceStatusData(CallingContext &context, int32_t type,
+    int32_t &replyType, int32_t &replyValue)
 {
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t StationaryServer::GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    if (id != StationaryRequestID::GET_STATIONARY_DATA) {
-        FI_HILOGE("Unexpected request ID (%{public}u)", id);
-        return RET_ERR;
-    }
-    GetStaionaryDataParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("GetStaionaryDataParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    GetStaionaryDataReply dataReply { GetCache(context, param.type_) };
-    if (!dataReply.Marshalling(reply)) {
-        FI_HILOGE("GetStaionaryDataReply::Marshalling fail");
-        return RET_ERR;
-    }
+    Type stationaryType = static_cast<Type>(type);
+    Data data = GetCache(context, stationaryType);
+    replyType = static_cast<int32_t>(data.type);
+    replyValue = static_cast<int32_t>(data.value);
     return RET_OK;
-}
-
-int32_t StationaryServer::Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
 }
 
 void StationaryServer::DumpDeviceStatusSubscriber(int32_t fd) const
@@ -225,13 +163,9 @@ void StationaryServer::Subscribe(CallingContext &context, Type type, ActivityEve
     appInfo->type = type;
     appInfo->callback = callback;
     DS_DUMPER->SaveAppInfo(appInfo);
-#ifdef MSDP_HIVIEWDFX_HITRACE_ENABLE
     StartTrace(HITRACE_TAG_MSDP, "serviceSubscribeStart");
-#endif // MSDP_HIVIEWDFX_HITRACE_ENABLE
     manager_.Subscribe(type, event, latency, callback);
-#ifdef MSDP_HIVIEWDFX_HITRACE_ENABLE
     FinishTrace(HITRACE_TAG_MSDP);
-#endif // MSDP_HIVIEWDFX_HITRACE_ENABLE
     ReportSensorSysEvent(context, type, true);
     WriteSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, type);
 }
@@ -248,13 +182,9 @@ void StationaryServer::Unsubscribe(CallingContext &context, Type type,
     appInfo->type = type;
     appInfo->callback = callback;
     DS_DUMPER->RemoveAppInfo(appInfo);
-#ifdef MSDP_HIVIEWDFX_HITRACE_ENABLE
     StartTrace(HITRACE_TAG_MSDP, "serviceUnSubscribeStart");
-#endif // MSDP_HIVIEWDFX_HITRACE_ENABLE
     manager_.Unsubscribe(type, event, callback);
-#ifdef MSDP_HIVIEWDFX_HITRACE_ENABLE
     FinishTrace(HITRACE_TAG_MSDP);
-#endif // MSDP_HIVIEWDFX_HITRACE_ENABLE
     ReportSensorSysEvent(context, type, false);
     WriteUnSubscribeHiSysEvent(appInfo->uid, appInfo->packageName, type);
 }
@@ -266,7 +196,6 @@ Data StationaryServer::GetCache(CallingContext &context, const Type &type)
 
 void StationaryServer::ReportSensorSysEvent(CallingContext &context, int32_t type, bool enable)
 {
-#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
     std::string packageName;
     manager_.GetPackageName(context.tokenId, packageName);
     int32_t ret = HiSysEventWrite(
@@ -279,7 +208,6 @@ void StationaryServer::ReportSensorSysEvent(CallingContext &context, int32_t typ
     if (ret != 0) {
         FI_HILOGE("HiviewDFX write failed, error:%{public}d", ret);
     }
-#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 }
 
 #ifdef MOTION_ENABLE

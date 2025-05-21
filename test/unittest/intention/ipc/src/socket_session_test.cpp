@@ -20,20 +20,18 @@
 
 #include "devicestatus_define.h"
 #include "i_context.h"
-#include "i_plugin.h"
 #include "socket_client.h"
 #include "socket_params.h"
 #include "socket_session_manager.h"
 #include "socket_server.h"
-#include "tunnel_client.h"
+
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
-constexpr size_t BUF_CMD_SIZE { 512 };
-std::shared_ptr<TunnelClient> g_tunnel {nullptr};
+constexpr size_t BUF_CMD_SIZE { 512 };;
 std::unique_ptr<SocketClient> g_client {nullptr};
 std::shared_ptr<SocketConnection> g_socket { nullptr };
 std::shared_ptr<SocketServer> g_socketServer { nullptr };
@@ -50,8 +48,7 @@ void SocketSessionTest::SetUpTestCase() {}
 
 void SocketSessionTest::SetUp()
 {
-    g_tunnel = std::make_shared<TunnelClient>();
-    g_client = std::make_unique<SocketClient>(g_tunnel);
+    g_client = std::make_unique<SocketClient>();
     g_socketServer = std::make_unique<SocketServer>(g_context);
     g_socketSessionManager = std::make_shared<SocketSessionManager>();
     int32_t moduleType = 1;
@@ -64,7 +61,6 @@ void SocketSessionTest::SetUp()
 }
 void SocketSessionTest::TearDown()
 {
-    g_tunnel = nullptr;
     g_client = nullptr;
     g_socket = nullptr;
     g_socketSessionManager = nullptr;
@@ -200,199 +196,13 @@ HWTEST_F(SocketSessionTest, SocketSessionTest8, TestSize.Level0)
     };
     MessageParcel datas;
     MessageParcel reply;
-    int32_t ret = g_socketServer->Enable(context, datas, reply);
+    auto programName = GetProgramName();
+    int32_t socketFd { -1 };
+    int32_t tokenType { -1 };
+    int32_t ret = g_socketServer->Socket(context, programName, CONNECT_MODULE_TYPE_FI_CLIENT, socketFd, tokenType);
     EXPECT_EQ(ret, RET_ERR);
 }
 
-/**
- * @tc.name: SocketSessionTest9
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest9, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    int32_t ret = g_socketServer->Disable(context, datas, reply);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: SocketSessionTest10
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest10, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    int32_t ret = g_socketServer->Start(context, datas, reply);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: SocketSessionTest11
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest11, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    int32_t ret = g_socketServer->Stop(context, datas, reply);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: SocketSessionTest12
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest12, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    int32_t ret = g_socketServer->AddWatch(context, 1, datas, reply);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: SocketSessionTest13
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest13, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    int32_t ret = g_socketServer->RemoveWatch(context, 1, datas, reply);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: SocketSessionTest14
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest14, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    int32_t ret = g_socketServer->SetParam(context, 1, datas, reply);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: SocketSessionTest15
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest15, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    int32_t ret = g_socketServer->GetParam(context, 1, datas, reply);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: SocketSessionTest16
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest16, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    int32_t ret = g_socketServer->Control(context, 1, datas, reply);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: SocketSessionTest17
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest17, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    int32_t ret = g_socketServer->Control(context, -1, datas, reply);
-    EXPECT_EQ(ret, RET_ERR);
-}
 
 /**
  * @tc.name: SocketSessionTest18
