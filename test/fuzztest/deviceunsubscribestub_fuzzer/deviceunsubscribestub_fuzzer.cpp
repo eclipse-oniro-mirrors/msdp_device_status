@@ -37,7 +37,7 @@ void DeviceStatusUnsubscribeFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     DelayedSingleton<DeviceStatusService>::GetInstance()->OnRemoteRequest(
-        static_cast<uint32_t>(Msdp::IIntentionIpcCode::COMMAND_REMOVE_SUBSCRIPT_LISTENER), datas, reply, option);
+        static_cast<uint32_t>(Msdp::DeviceInterfaceCode::DEVICESTATUS_UNSUBSCRIBE), datas, reply, option);
 }
 }
 

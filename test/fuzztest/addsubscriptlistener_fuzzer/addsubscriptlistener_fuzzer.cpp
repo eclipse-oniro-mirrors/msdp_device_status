@@ -40,7 +40,7 @@ bool AddSubscriptListenerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     DelayedSingleton<DeviceStatusService>::GetInstance()->OnRemoteRequest(
-        static_cast<uint32_t>(Msdp::IIntentionIpcCode::COMMAND_ADD_SUBSCRIPT_LISTENER), datas, reply, option);
+        static_cast<uint32_t>(Msdp::DeviceInterfaceCode::REGISTER_SUBSCRIPT_MONITOR), datas, reply, option);
     return true;
 }
 } // namespace OHOS

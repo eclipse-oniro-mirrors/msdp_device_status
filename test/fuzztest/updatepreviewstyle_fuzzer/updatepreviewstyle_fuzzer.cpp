@@ -56,7 +56,7 @@ bool UpdatePreviewStyleFuzzTest(const uint8_t* data, size_t size)
     MessageOption option;
     MessageParcel reply;
     DelayedSingleton<DeviceStatusService>::GetInstance()->OnRemoteRequest(
-        static_cast<uint32_t>(Msdp::IIntentionIpcCode::COMMAND_UPDATE_PREVIEW_STYLE), datas, reply, option);
+        static_cast<uint32_t>(Msdp::DeviceInterfaceCode::UPDATE_PREVIEW_STYLE), datas, reply, option);
     return true;
 }
 } // namespace OHOS

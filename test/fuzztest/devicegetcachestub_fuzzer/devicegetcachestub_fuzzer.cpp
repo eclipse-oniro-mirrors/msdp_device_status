@@ -37,7 +37,7 @@ void DeviceStatusGetCacheFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     DelayedSingleton<DeviceStatusService>::GetInstance()->OnRemoteRequest(
-        static_cast<uint32_t>(Msdp::IIntentionIpcCode::COMMAND_GET_DEVICE_STATUS_DATA), datas, reply, option);
+        static_cast<uint32_t>(Msdp::DeviceInterfaceCode::DEVICESTATUS_GETCACHE), datas, reply, option);
 }
 }
 
