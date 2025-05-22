@@ -146,6 +146,5 @@ group("unittest") {
   deps = [
     ":BoomerangClientTest",
     ":BoomerangServerTest",
-    ":BoomerangServerTest",
   ]
 }
