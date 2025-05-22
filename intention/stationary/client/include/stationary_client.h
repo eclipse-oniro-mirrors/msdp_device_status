@@ -21,6 +21,7 @@
 #include "nocopyable.h"
 
 #include "iremote_dev_sta_callback.h"
+#include "stationary_params.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -36,10 +37,12 @@ public:
     int32_t UnsubscribeCallback(Type type, ActivityEvent event,
         sptr<IRemoteDevStaCallback> callback);
     Data GetDeviceStatusData(Type type);
+    void OnConnected();
 
 private:
     std::mutex mtx_;
     std::map<Type, int32_t> typeMap_;
+    std::vector<SubscribeStationaryParam> subParams_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
