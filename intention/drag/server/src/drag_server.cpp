@@ -95,7 +95,7 @@ int32_t DragServer::RemoveDraglistener(CallingContext &context, bool isJsCaller)
 int32_t DragServer::AddSubscriptListener(CallingContext &context)
 {
     if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
+        FI_HILOGE("The caller is not system service calling");
         return COMMON_NOT_SYSTEM_APP;
     }
     FI_HILOGD("Add subscript listener, from:%{public}d", context.pid);
@@ -110,7 +110,7 @@ int32_t DragServer::AddSubscriptListener(CallingContext &context)
 int32_t DragServer::RemoveSubscriptListener(CallingContext &context)
 {
     if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
+        FI_HILOGE("The caller is not system service calling");
         return COMMON_NOT_SYSTEM_APP;
     }
     FI_HILOGD("Remove subscript listener, from:%{public}d", context.pid);
@@ -133,7 +133,7 @@ int32_t DragServer::SetDragWindowVisible(bool visible, bool isForce,
 int32_t DragServer::GetDragTargetPid(CallingContext &context, int32_t &targetPid)
 {
     if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
+        FI_HILOGE("The caller is not system service calling");
         return RET_ERR;
     }
     CHKPR(env_, RET_ERR);
@@ -186,7 +186,7 @@ int32_t DragServer::UpdateShadowPic(const ShadowInfo &shadowInfo)
 int32_t DragServer::GetDragData(CallingContext &context, DragData &dragData)
 {
     if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
+        FI_HILOGE("The caller is not system service calling");
         return RET_ERR;
     }
     CHKPR(env_, RET_ERR);
@@ -221,7 +221,7 @@ int32_t DragServer::RotateDragWindowSync(CallingContext &context,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
+        FI_HILOGE("The caller is not system service calling");
         return RET_ERR;
     }
     CHKPR(env_, RET_ERR);
@@ -235,7 +235,7 @@ int32_t DragServer::RotateDragWindowSync(CallingContext &context,
 int32_t DragServer::SetDragWindowScreenId(CallingContext &context, uint64_t displayId, uint64_t screenId)
 {
     if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
+        FI_HILOGE("The caller is not system service calling");
         return RET_ERR;
     }
     CHKPR(env_, RET_ERR);
@@ -246,7 +246,7 @@ int32_t DragServer::SetDragWindowScreenId(CallingContext &context, uint64_t disp
 int32_t DragServer::GetDragSummary(CallingContext &context, std::map<std::string, int64_t> &summarys, bool isJsCaller)
 {
     if (isJsCaller && !IsSystemHAPCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
+        FI_HILOGE("The caller is not system service calling");
         return COMMON_NOT_SYSTEM_APP;
     }
     CHKPR(env_, RET_ERR);
@@ -335,7 +335,7 @@ int32_t DragServer::AddPrivilege(CallingContext &context)
 int32_t DragServer::EraseMouseIcon(CallingContext &context)
 {
     if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
+        FI_HILOGE("The caller is not system service calling");
         return COMMON_NOT_SYSTEM_APP;
     }
     CHKPR(env_, RET_ERR);

@@ -29,8 +29,8 @@ public:
     SocketServer(IContext *context);
     ~SocketServer() = default;
     DISALLOW_COPY_AND_MOVE(SocketServer);
-    int32_t Socket(CallingContext &context, const std::string& programName, int32_t moduleType,
-        int& socketFd, int32_t& tokenType);
+    int32_t Socket(CallingContext &context, const std::string &programName, int32_t moduleType,
+        int &socketFd, int32_t &tokenType);
 private:
     IContext *context_ { nullptr };
 };
