@@ -35,10 +35,10 @@ const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {DEVICE_EXCEPTION, "The device does not support this API."},
     {SERVICE_EXCEPTION, "Service exception. Possible causes: 1. A system error, such as null pointer, "
         "container-related exception; 2. N-API invocation exception, invalid N-API status."},
-    {SUBSCRIBE_EXCEPTION, "Subscribe Failed. Possible causes: 1. Callback registration failure; "
+    {SUBSCRIBE_EXCEPTION, "Subscription failed. Possible causes: 1. Callback registration failure; "
         "2. Failed to bind native object to js wrapper; 3. N-API invocation exception, invalid N-API status; "
         "4. IPC request exception."},
-    {UNSUBSCRIBE_EXCEPTION, "Unsubscribe Failed. Possible causes: 1. Callback failure; "
+    {UNSUBSCRIBE_EXCEPTION, "Unsubscription failed. Possible causes: 1. Callback failure; "
         "2. N-API invocation exception, invalid N-API status; 3. IPC request exception."}
 };
 
