@@ -17,7 +17,7 @@
 #define BOOMERANG_PARAMS_H
 
 #include "intention_identity.h"
-#include "boomerang_callback.h"
+#include "iremote_boomerang_callback.h"
 
 namespace OHOS {
 namespace Msdp {

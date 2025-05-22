@@ -17,7 +17,7 @@
 #define STATIONARY_PARAMS_H
 
 #include "intention_identity.h"
-#include "stationary_callback.h"
+#include "iremote_dev_sta_callback.h"
 
 namespace OHOS {
 namespace Msdp {

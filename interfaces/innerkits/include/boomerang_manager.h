@@ -22,7 +22,7 @@
 #include "nocopyable.h"
 
 #include "devicestatus_common.h"
-#include "boomerang_callback.h"
+#include "iremote_boomerang_callback.h"
 #include "boomerang_data.h"
 
 namespace OHOS {

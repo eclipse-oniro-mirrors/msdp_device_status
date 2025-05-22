@@ -62,7 +62,7 @@ ohos_shared_library("intention_service") {
     "${device_status_root_path}/intention/cooperate/server:intention_cooperate_server",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_server",
-    "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_server",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_server_stub",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/stationary/server:intention_stationary_server",
     "${device_status_root_path}/utils/common:devicestatus_util",

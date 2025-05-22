@@ -35,25 +35,21 @@ namespace DeviceStatus {
 namespace {
 constexpr int32_t REPEAT_ONCE { 1 };
 constexpr int32_t DEFAULT_UNLOAD_COOLING_TIME_MS { 60000 };
-constexpr int32_t SYNC_TASK_TIMEOUT_DURATION { 2500 };
-constexpr int32_t WITHOPTIONS { 1 };
 }
 
 CooperateServer::CooperateServer(IContext *context)
     : context_(context)
-{}
+{
+    (void) context_;
+    (void) unloadTimerId_;
+}
 
-int32_t CooperateServer::Enable(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t CooperateServer::EnableCooperate(CallingContext &context, int32_t userData)
 {
     CALL_DEBUG_ENTER;
     if (int32_t ret = CheckPermission(context); ret != RET_OK) {
         FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
         return ret;
-    }
-    DefaultParam param;
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("DefaultParam::Unmarshalling fail");
-        return RET_ERR;
     }
     CHKPR(context_, RET_ERR);
     if (unloadTimerId_ >= 0) {
@@ -61,26 +57,21 @@ int32_t CooperateServer::Enable(CallingContext &context, MessageParcel &data, Me
     }
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
-    cooperate->Enable(context.tokenId, context.pid, param.userData);
+    cooperate->Enable(context.tokenId, context.pid, userData);
     return RET_OK;
 }
 
-int32_t CooperateServer::Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t CooperateServer::DisableCooperate(CallingContext &context, int32_t userData)
 {
     CALL_DEBUG_ENTER;
     if (int32_t ret = CheckPermission(context); ret != RET_OK) {
         FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
         return ret;
     }
-    DefaultParam param;
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("DefaultParam::Unmarshalling fail");
-        return RET_ERR;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
-    cooperate->Disable(context.pid, param.userData);
+    cooperate->Disable(context.pid, userData);
     unloadTimerId_ = context_->GetTimerManager().AddTimer(DEFAULT_UNLOAD_COOLING_TIME_MS, REPEAT_ONCE,
         []() {
             FI_HILOGI("Unload \'cooperate\' module");
@@ -91,48 +82,133 @@ int32_t CooperateServer::Disable(CallingContext &context, MessageParcel &data, M
     return RET_OK;
 }
 
-int32_t CooperateServer::Start(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t CooperateServer::StartCooperate(CallingContext &context, const std::string& remoteNetworkId,
+    int32_t userData, int32_t startDeviceId, bool checkPermission)
 {
     CALL_DEBUG_ENTER;
     if (int32_t ret = CheckPermission(context); ret != RET_OK) {
         FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
         return ret;
     }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->Start(context.pid, userData, remoteNetworkId, startDeviceId);
+}
 
-    StartCooperateParam param;
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("StartCooperateParam::Unmarshalling fail");
+int32_t CooperateServer::StopCooperate(CallingContext &context, int32_t userData, bool isUnchained,
+    bool checkPermission)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->Stop(context.pid, userData, isUnchained);
+}
+
+int32_t CooperateServer::RegisterCooperateListener(CallingContext &context)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->RegisterListener(context.pid);
+}
+
+int32_t CooperateServer::UnregisterCooperateListener(CallingContext &context)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->UnregisterListener(context.pid);
+}
+
+int32_t CooperateServer::RegisterHotAreaListener(CallingContext &context, int32_t userData, bool checkPermission)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->RegisterHotAreaListener(context.pid);
+}
+
+int32_t CooperateServer::UnregisterHotAreaListener(CallingContext &context)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->UnregisterHotAreaListener(context.pid);
+}
+
+int32_t CooperateServer::RegisterMouseEventListener(CallingContext &context, const std::string &networkId)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->RegisterEventListener(context.pid, networkId);
+}
+
+int32_t CooperateServer::UnregisterMouseEventListener(CallingContext &context, const std::string &networkId)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->UnregisterEventListener(context.pid, networkId);
+}
+
+int32_t CooperateServer::GetCooperateStateSync(CallingContext &context, const std::string &udid, bool &state)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    if (cooperate->GetCooperateState(udid, state) != RET_OK) {
+        FI_HILOGE("GetCooperateState failed");
         return RET_ERR;
     }
-    CHKPR(context_, RET_ERR);
-    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
-    CHKPR(cooperate, RET_ERR);
-    if (param.cooperateParamType == WITHOPTIONS) {
-        return cooperate->StartWithOptions(context.pid, param.userData, param.remoteNetworkId,
-            param.startDeviceId, param.options);
-    }
-    return cooperate->Start(context.pid, param.userData, param.remoteNetworkId, param.startDeviceId, context.uid);
+    FI_HILOGI("GetCooperateState for udId:%{public}s successfully, state:%{public}s",
+        Utility::Anonymize(udid).c_str(), state ? "true" : "false");
+    return RET_OK;
 }
 
-int32_t CooperateServer::Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
-    StopCooperateParam param;
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("StopCooperateParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    CHKPR(context_, RET_ERR);
-    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
-    CHKPR(cooperate, RET_ERR);
-    return cooperate->Stop(context.pid, param.userData, param.isUnchained);
-}
-
-int32_t CooperateServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t CooperateServer::GetCooperateStateAsync(CallingContext &context, const std::string &networkId,
+    int32_t userData, bool isCheckPermission)
 {
     CALL_DEBUG_ENTER;
     if (int32_t ret = CheckPermission(context); ret != RET_OK) {
@@ -142,29 +218,10 @@ int32_t CooperateServer::AddWatch(CallingContext &context, uint32_t id, MessageP
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
-    switch (id) {
-        case CooperateRequestID::REGISTER_LISTENER: {
-            return cooperate->RegisterListener(context.pid);
-        }
-        case CooperateRequestID::REGISTER_HOTAREA_LISTENER: {
-            return cooperate->RegisterHotAreaListener(context.pid);
-        }
-        case CooperateRequestID::REGISTER_EVENT_LISTENER: {
-            RegisterEventListenerParam param;
-            if (!param.Unmarshalling(data)) {
-                FI_HILOGE("RegisterEventListenerParam::Unmarshalling fail");
-                return RET_ERR;
-            }
-            return cooperate->RegisterEventListener(context.pid, param.networkId);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
+    return cooperate->GetCooperateState(context.pid, userData, networkId);
 }
 
-int32_t CooperateServer::RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t CooperateServer::SetDamplingCoefficient(CallingContext &context, uint32_t direction, double coefficient)
 {
     CALL_DEBUG_ENTER;
     if (int32_t ret = CheckPermission(context); ret != RET_OK) {
@@ -174,110 +231,8 @@ int32_t CooperateServer::RemoveWatch(CallingContext &context, uint32_t id, Messa
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
-    switch (id) {
-        case CooperateRequestID::UNREGISTER_LISTENER: {
-            return cooperate->UnregisterListener(context.pid);
-        }
-        case CooperateRequestID::UNREGISTER_HOTAREA_LISTENER: {
-            return cooperate->UnregisterHotAreaListener(context.pid);
-        }
-        case CooperateRequestID::UNREGISTER_EVENT_LISTENER: {
-            UnregisterEventListenerParam param;
-            if (!param.Unmarshalling(data)) {
-                FI_HILOGE("UnregisterEventListenerParam::Unmarshalling fail");
-                return RET_ERR;
-            }
-            return cooperate->UnregisterEventListener(context.pid, param.networkId);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
-}
-
-int32_t CooperateServer::SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
-    if (id != CooperateRequestID::SET_DAMPLING_COEFFICIENT) {
-        FI_HILOGE("Unexpected request (%{public}u)", id);
-        return RET_ERR;
-    }
-    SetDamplingCoefficientParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SetDamplingCoefficientParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    CHKPR(context_, RET_ERR);
-    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
-    CHKPR(cooperate, RET_ERR);
-    FI_HILOGI("SetDamplingCoefficient(0x%{public}x, %{public}.3f)", param.direction, param.coefficient);
-    return cooperate->SetDamplingCoefficient(param.direction, param.coefficient);
-}
-
-int32_t CooperateServer::GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
-    CHKPR(context_, RET_ERR);
-    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
-    CHKPR(cooperate, RET_ERR);
-    auto enterStamp = std::chrono::steady_clock::now();
-    auto checkParcelValid = [enterStamp] () {
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now() - enterStamp).count();
-            return duration < SYNC_TASK_TIMEOUT_DURATION;
-    };
-    switch (id) {
-        case CooperateRequestID::GET_COOPERATE_STATE: {
-            GetCooperateStateParam param;
-            if (!param.Unmarshalling(data)) {
-                FI_HILOGE("GetCooperateStateParam::Unmarshalling fail");
-                return RET_ERR;
-            }
-            return cooperate->GetCooperateState(context.pid, param.userData, param.networkId);
-        }
-        case CooperateRequestID::GET_COOPERATE_STATE_SYNC: {
-            GetCooperateStateSyncParam param;
-            if (!param.Unmarshalling(data)) {
-                FI_HILOGE("GetCooperateStateParam::Unmarshalling fail");
-                return RET_ERR;
-            }
-            bool state { false };
-            if (cooperate->GetCooperateState(param.udId, state) != RET_OK) {
-                FI_HILOGE("GetCooperateState failed");
-                return RET_ERR;
-            }
-            FI_HILOGI("GetCooperateState for udId:%{public}s successfully, state:%{public}s",
-                Utility::Anonymize(param.udId).c_str(), state ? "true" : "false");
-            if (!checkParcelValid()) {
-                FI_HILOGE("CheckParcelValid failed");
-                return RET_ERR;
-            }
-            if (!BooleanReply(state).Marshalling(reply)) {
-                FI_HILOGE("Marshalling state failed");
-                return RET_ERR;
-            }
-            return RET_OK;
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
-}
-
-int32_t CooperateServer::Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
+    FI_HILOGI("SetDamplingCoefficient(0x%{public}x, %{public}.3f)", direction, coefficient);
+    return cooperate->SetDamplingCoefficient(direction, coefficient);
 }
 
 bool CooperateServer::CheckCooperatePermission(CallingContext &context)

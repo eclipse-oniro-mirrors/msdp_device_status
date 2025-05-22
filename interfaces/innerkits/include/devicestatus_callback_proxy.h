@@ -19,7 +19,7 @@
 #include <iremote_proxy.h>
 #include <nocopyable.h>
 
-#include "stationary_callback.h"
+#include "iremote_dev_sta_callback.h"
 #include "stationary_data.h"
 
 namespace OHOS {

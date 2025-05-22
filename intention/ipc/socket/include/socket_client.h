@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include <map>
 #include <mutex>
 
-#include "i_tunnel_client.h"
 #include "net_packet.h"
 #include "devicestatus_proto.h"
 #include "socket_connection.h"
@@ -31,7 +30,7 @@ namespace DeviceStatus {
 typedef std::function<void()> ConnectCallback;
 class SocketClient final : public StreamClient {
 public:
-    SocketClient(std::shared_ptr<ITunnelClient> tunnel);
+    SocketClient();
     DISALLOW_COPY_AND_MOVE(SocketClient);
     ~SocketClient() = default;
 
@@ -49,7 +48,6 @@ private:
     void Reconnect();
     void OnMsgHandler(const StreamClient &client, NetPacket &pkt);
 
-    std::weak_ptr<ITunnelClient> tunnel_;
     mutable std::mutex lock_;
     std::map<MessageId, std::function<int32_t(const StreamClient&, NetPacket&)>> callbacks_;
     std::shared_ptr<SocketConnection> socket_ { nullptr };

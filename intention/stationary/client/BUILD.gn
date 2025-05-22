@@ -47,7 +47,7 @@ ohos_source_set("intention_stationary_client") {
     "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
-    "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_client",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/stationary/data:intention_stationary_data",
     "${device_status_root_path}/utils/common:devicestatus_util",
@@ -57,6 +57,7 @@ ohos_source_set("intention_stationary_client") {
   external_deps = [
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
   ]

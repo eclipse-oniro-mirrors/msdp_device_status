@@ -108,7 +108,7 @@
           "header": {
             "header_files": [
               "include/stationary_data.h",
-              "include/stationary_callback.h",
+              "include/iremote_dev_sta_callback.h",
               "include/stationary_manager.h",
               "interaction/include/coordination_message.h",
               "interaction/include/drag_data.h",

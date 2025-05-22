@@ -29,7 +29,7 @@
 #include "drag_data_packer.h"
 #include "preview_style_packer.h"
 #include "devicestatus_proto.h"
-#include "stationary_callback.h"
+#include "iremote_dev_sta_callback.h"
 #include "stationary_data.h"
 #include "include/util.h"
 #include "utility.h"

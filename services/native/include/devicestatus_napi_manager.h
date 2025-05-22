@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-typedef void (*EncodeImageFunc)(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content,
+typedef void (*EncodeImageFunc)(std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &content,
                                 std::shared_ptr<Media::PixelMap> &resultPixelMap);
 typedef void (*DecodeImageFunc)(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content);
 
@@ -31,7 +31,7 @@ class BoomerangAlgoManager {
 public:
     BoomerangAlgoManager() {};
     ~BoomerangAlgoManager();
-    static bool EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content,
+    static bool EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &content,
                             std::shared_ptr<Media::PixelMap> &resultPixelMap);
     static bool DecodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content);
 private:
@@ -42,7 +42,7 @@ private:
 
 class BoomerangAlgoImpl {
 public:
-    static void EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content,
+    static void EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &content,
                             std::shared_ptr<Media::PixelMap> &resultPixelMap);
     static void DecodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content);
 };
