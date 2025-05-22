@@ -64,10 +64,7 @@ void BoomerangServer::DumpCurrentDeviceStatus(int32_t fd)
 int32_t BoomerangServer::SubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& subCallback)
 {
-    if (subCallback == nullptr) {
-        FI_HILOGE("The subCallback is null.");
-        return RET_ERR;
-    }
+    CHKPR(subCallback, RET_ERR);
     BoomerangType boomerangType = static_cast<BoomerangType>(type);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
@@ -88,10 +85,7 @@ int32_t BoomerangServer::SubscribeCallback(CallingContext &context, int32_t type
 int32_t BoomerangServer::UnsubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& unsubCallback)
 {
-    if (unsubCallback == nullptr) {
-        FI_HILOGE("The unsubCallback is null.");
-        return RET_ERR;
-    }
+    CHKPR(unsubCallback, RET_ERR);
     BoomerangType boomerangType = static_cast<BoomerangType>(type);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
@@ -116,10 +110,7 @@ int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, con
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
-    if (notifyCallback == nullptr) {
-        FI_HILOGE("The notifyCallback is null.");
-        return RET_ERR;
-    }
+    CHKPR(notifyCallback, RET_ERR);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
     appInfo->pid = context.pid;
@@ -141,10 +132,7 @@ int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, const std
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
-    if (encodeCallback == nullptr) {
-        FI_HILOGE("The encodeCallback is null.");
-        return RET_ERR;
-    }
+    CHKPR(encodeCallback, RET_ERR);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
     appInfo->pid = context.pid;
@@ -166,10 +154,7 @@ int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, const std
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
-    if (decodeCallback == nullptr) {
-        FI_HILOGE("The decodeCallback is null.");
-        return RET_ERR;
-    }
+    CHKPR(decodeCallback, RET_ERR);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
     appInfo->pid = context.pid;

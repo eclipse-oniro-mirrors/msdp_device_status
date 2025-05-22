@@ -18,8 +18,8 @@
 #include "event_handler.h"
 
 #include "devicestatus_define.h"
-#include "intention_identity.h"
 #include "intention_client.h"
+#include "intention_identity.h"
 #include "time_cost_chk.h"
 
 #undef LOG_TAG

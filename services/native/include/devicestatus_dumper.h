@@ -28,8 +28,8 @@
 
 #include "accesstoken_kit.h"
 #include "iremote_boomerang_callback.h"
-#include "i_context.h"
 #include "iremote_dev_sta_callback.h"
+#include "i_context.h"
 #include "stationary_data.h"
 
 namespace OHOS {

@@ -82,8 +82,6 @@ int32_t CooperateClient::UnregisterListener(CooperateListenerPtr listener, bool 
 listenerLabel:
     if (isListeningProcess_ && devCooperateListener_.empty()) {
         isListeningProcess_ = false;
-        DefaultParam param;
-        DefaultReply reply;
         return INTENTION_CLIENT->UnregisterCooperateListener();
     }
     return RET_OK;

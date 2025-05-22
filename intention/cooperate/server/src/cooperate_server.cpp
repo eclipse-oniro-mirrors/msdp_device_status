@@ -162,7 +162,7 @@ int32_t CooperateServer::UnregisterHotAreaListener(CallingContext &context)
     return cooperate->UnregisterHotAreaListener(context.pid);
 }
 
-int32_t CooperateServer::RegisterMouseEventListener(CallingContext &context, const std::string& networkId)
+int32_t CooperateServer::RegisterMouseEventListener(CallingContext &context, const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     if (int32_t ret = CheckPermission(context); ret != RET_OK) {
@@ -175,7 +175,7 @@ int32_t CooperateServer::RegisterMouseEventListener(CallingContext &context, con
     return cooperate->RegisterEventListener(context.pid, networkId);
 }
 
-int32_t CooperateServer::UnregisterMouseEventListener(CallingContext &context, const std::string& networkId)
+int32_t CooperateServer::UnregisterMouseEventListener(CallingContext &context, const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
     if (int32_t ret = CheckPermission(context); ret != RET_OK) {
@@ -188,7 +188,7 @@ int32_t CooperateServer::UnregisterMouseEventListener(CallingContext &context, c
     return cooperate->UnregisterEventListener(context.pid, networkId);
 }
 
-int32_t CooperateServer::GetCooperateStateSync(CallingContext &context, const std::string& udid, bool& state)
+int32_t CooperateServer::GetCooperateStateSync(CallingContext &context, const std::string &udid, bool &state)
 {
     CALL_DEBUG_ENTER;
     if (int32_t ret = CheckPermission(context); ret != RET_OK) {
@@ -207,7 +207,7 @@ int32_t CooperateServer::GetCooperateStateSync(CallingContext &context, const st
     return RET_OK;
 }
 
-int32_t CooperateServer::GetCooperateStateAsync(CallingContext &context, const std::string& networkId,
+int32_t CooperateServer::GetCooperateStateAsync(CallingContext &context, const std::string &networkId,
     int32_t userData, bool isCheckPermission)
 {
     CALL_DEBUG_ENTER;

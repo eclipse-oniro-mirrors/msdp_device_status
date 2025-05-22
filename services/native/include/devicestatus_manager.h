@@ -20,9 +20,10 @@
 #include <map>
 
 #include "accesstoken_kit.h"
-#include "iremote_boomerang_callback.h"
+
 #include "boomerang_data.h"
 #include "devicestatus_msdp_client_impl.h"
+#include "iremote_boomerang_callback.h"
 #include "iremote_dev_sta_callback.h"
 #include "stationary_data.h"
 
