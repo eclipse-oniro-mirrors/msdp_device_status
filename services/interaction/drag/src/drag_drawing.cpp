@@ -4472,7 +4472,8 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
         }
         return;
     }
-    screenId_ = static_cast<uint64_t>(displayId);
+    screenId_ = display->GetScreenId();
+    FI_HILOGI("Get screen id:%{public}ld", screenId_);
 #ifdef OHOS_BUILD_PC_PRODUCT
     uint64_t rsScreenId = screenId_;
     if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {

@@ -1553,7 +1553,9 @@ int32_t DragManager::OnStartDrag()
         std::string displayName = display->GetName();
         isHicarOrSuperLauncher = ((displayName == "HiCar") || (displayName == "SuperLauncher"));
     }
-    dragDrawing_.SetScreenId(dragData.displayId);
+    uint64_t screenId = display->GetScreenId();
+    FI_HILOGI("Get screen id:%{public}ld", screenId);
+    dragDrawing_.SetScreenId(screenId);
     if (Rosen::DisplayManager::GetInstance().IsFoldable() && !isHicarOrSuperLauncher) {
         if (static_cast<uint64_t>(dragData.displayId) == displayId_) {
             dragDrawing_.SetScreenId(screenId_);
