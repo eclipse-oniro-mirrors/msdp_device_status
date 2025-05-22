@@ -18,15 +18,12 @@
 #include "singleton.h"
 
 #include "devicestatus_define.h"
-#include "i_tunnel_client.h"
-#include "i_plugin.h"
 #include "socket_client.h"
 #include "socket_session_manager.h"
 #include "socket_session.h"
 #include "socket_connection.h"
 #include "socket_params.h"
 #include "stream_client.h"
-#include "tunnel_client.h"
 
 #include "message_parcel.h"
 
@@ -81,8 +78,7 @@ bool SocketConnectionFuzzTest(const uint8_t* data, size_t size)
     };
     NetPacket packet(MessageId::COORDINATION_ADD_LISTENER);
     struct epoll_event ev{};
-    auto tunnel = std::make_shared<TunnelClient>();
-    auto client = std::make_unique<SocketClient>(tunnel);
+    auto client = std::make_unique<SocketClient>();
     client->Connect();
     client->Socket();
     MessageId msgId { MessageId::INVALID };
@@ -99,7 +95,6 @@ bool SocketConnectionFuzzTest(const uint8_t* data, size_t size)
     socketConnection.OnShutdown(fd);
     socketConnection.OnException(fd);
     Msdp::DeviceStatus::SocketConnection::Connect(socket, recv, onDisconnected);
-    tunnel = nullptr;
     client = nullptr;
     return true;
 }

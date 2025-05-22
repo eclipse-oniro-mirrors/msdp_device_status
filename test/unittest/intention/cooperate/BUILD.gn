@@ -39,7 +39,6 @@ ohos_unittest("CooperateClientTest") {
   sources = [
     "${device_status_root_path}/intention/cooperate/client/src/cooperate_client.cpp",
     "src/cooperate_client_test.cpp",
-    "src/cooperate_client_test_mock.cpp",
   ]
 
   cflags = [
@@ -48,6 +47,8 @@ ohos_unittest("CooperateClientTest") {
   ]
 
   configs = []
+
+  public_configs = [ "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_public_config" ]
 
   deps = [
     "${device_status_root_path}/intention/cooperate/data:intention_cooperate_data",
@@ -64,8 +65,8 @@ ohos_unittest("CooperateClientTest") {
     "c_utils:utils",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
-    "googletest:gmock_main",
     "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
@@ -355,7 +356,7 @@ ohos_unittest("InputEventBuilderTest") {
     "${device_status_root_path}/intention/cooperate/plugin:intention_cooperate",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
-    "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_client",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
     "${device_status_root_path}/intention/services/device_manager:intention_device_manager",
@@ -422,7 +423,7 @@ ohos_unittest("InputEventInterceptorTest") {
     "${device_status_root_path}/intention/cooperate/plugin:intention_cooperate",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
-    "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_client",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
     "${device_status_root_path}/intention/services/device_manager:intention_device_manager",
@@ -519,6 +520,7 @@ ohos_unittest("CooperateTest") {
 group("unittest") {
   testonly = true
   deps = [
+    ":CooperateClientTest",
     ":CooperatePluginTest",
     ":CooperateServerTest",
     ":CooperateTest",

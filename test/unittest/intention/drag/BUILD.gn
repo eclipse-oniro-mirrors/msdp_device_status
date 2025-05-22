@@ -44,7 +44,7 @@ ohos_unittest("DragManagerTest") {
     "${device_status_root_path}/intention/drag/client:intention_drag_client",
     "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
-    "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_client",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_utils_path}:devicestatus_util",
   ]
@@ -116,7 +116,6 @@ ohos_unittest("DragServerTest") {
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
-    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
@@ -127,5 +126,6 @@ group("unittest") {
   testonly = true
   deps = [
     ":DragManagerTest",
+    ":DragServerTest",
   ]
 }

@@ -41,7 +41,7 @@ bool GetShadowOffsetFuzzTest(const uint8_t* data, size_t size)
     MessageOption option;
     MessageParcel reply;
     DelayedSingleton<DeviceStatusService>::GetInstance()->OnRemoteRequest(
-        static_cast<uint32_t>(Msdp::DeviceInterfaceCode::GET_SHADOW_OFFSET), datas, reply, option);
+        static_cast<uint32_t>(Msdp::IIntentionIpcCode::COMMAND_GET_SHADOW_OFFSET), datas, reply, option);
     return true;
 }
 } // namespace OHOS
