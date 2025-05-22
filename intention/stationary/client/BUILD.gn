@@ -17,6 +17,7 @@ config("intention_stationary_client_public_config") {
   include_dirs = [
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
+    "${device_status_root_path}/intention/stationary/data/include"
   ]
 }
 
@@ -35,6 +36,7 @@ ohos_source_set("intention_stationary_client") {
   include_dirs = [
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
+    "${device_status_root_path}/intention/stationary/data/include"
   ]
 
   sources = [ "src/stationary_client.cpp" ]

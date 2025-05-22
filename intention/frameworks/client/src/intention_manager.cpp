@@ -109,11 +109,13 @@ void IntentionManager::InitMsgHandler()
 int32_t IntentionManager::SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
     sptr<IRemoteDevStaCallback> callback)
 {
+    InitClient();
     return stationary_.SubscribeCallback(type, event, latency, callback);
 }
 
 int32_t IntentionManager::UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback)
 {
+    InitClient();
     return stationary_.UnsubscribeCallback(type, event, callback);
 }
 
@@ -566,6 +568,7 @@ void IntentionManager::OnConnected()
 
     drag_.OnConnected();
     cooperate_.OnConnected();
+    stationary_.OnConnected();
 }
 
 void IntentionManager::OnDisconnected()
