@@ -29,6 +29,7 @@ deps_ex = [
   "hisysevent:libhisysevent",
   "hitrace:hitrace_meter",
   "hilog:libhilog",
+  "libxml2:libxml2",
   "input:libmmi-client",
   "image_framework:image_native",
   "safwk:system_ability_fwk",

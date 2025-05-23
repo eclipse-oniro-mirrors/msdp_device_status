@@ -46,6 +46,7 @@ ohos_source_set("intention_input_adapter") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "input:libmmi-client",
+    "c_utils:utils",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

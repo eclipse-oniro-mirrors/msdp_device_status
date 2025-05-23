@@ -75,6 +75,7 @@ external_deps_set = [
   "eventhandler:libeventhandler",
   "graphic_2d:librender_service_client",
   "graphic_2d:window_animation",
+  "graphic_2d:librender_service_base",
   "hilog:libhilog",
   "hisysevent:libhisysevent",
   "hitrace:hitrace_meter",
@@ -88,6 +89,7 @@ external_deps_set = [
   "samgr:samgr_proxy",
   "window_manager:libwm",
   "window_manager:libdm",
+  "common_event_service:cesfwk_innerkits",
 ]
 
 ohos_shared_library("devicestatus_service") {

@@ -54,6 +54,7 @@ ohos_source_set("sequenceable_types") {
   external_deps = [
     "c_utils:utils",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "image_framework:image_native",
   ]
 

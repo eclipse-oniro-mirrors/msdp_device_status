@@ -111,6 +111,7 @@ ohos_shared_library("devicestatus_client") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_native",

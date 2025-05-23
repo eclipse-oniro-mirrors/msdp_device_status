@@ -42,6 +42,7 @@ ohos_shared_library("devicestatus_mock") {
   deps = [ "${device_status_utils_path}:devicestatus_util" ]
 
   external_deps = [
+    "c_utils:utils",
     "cJSON:cjson_static",
     "hilog:libhilog",
   ]
