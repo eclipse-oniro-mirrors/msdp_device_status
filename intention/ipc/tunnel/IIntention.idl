@@ -13,6 +13,7 @@
  * limitations under the License.
  */
  
+ sequenceable OHOS.Msdp.DeviceStatus.SequenceableCooperateOptions;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragData;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragResult;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragVisible;
@@ -31,6 +32,8 @@ interface OHOS.Msdp.IIntention {
     void EnableCooperate([in] int userData);
     void DisableCooperate([in] int userData);
     void StartCooperate([in] String remoteNetworkId, [in] int userData, [in] int startDeviceId, [in] boolean checkPermission);
+    void StartCooperateWithOptions([in] String remoteNetworkId, [in] int userData, [in] int startDeviceId,
+        [in] boolean checkPermission, [in] SequenceableCooperateOptions options);
     void StopCooperate([in] int userData, [in] boolean isUnchained, [in] boolean checkPermission);
     void RegisterCooperateListener();
     void UnregisterCooperateListener();

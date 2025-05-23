@@ -250,16 +250,16 @@ int32_t CooperateClient::StartWithOptions(const std::string &remoteNetworkId,
 #ifdef ENABLE_PERFORMANCE_CHECK
     StartTrace(userData);
 #endif // ENABLE_PERFORMANCE_CHECK
-    // CooperateParamType paramType = CooperateParamType::WITHOPTIONS;
-    // if (auto ret = INTENTION_CLIENT->StartWithOptions(userData, remoteNetworkId, startDeviceId, false,
-    //     options, static_cast<int32_t>(paramType)); ret != RET_OK) {
-    //     FI_HILOGE("SetDamplingCoefficient failed, error:%{public}d", ret);
-    //     return ret;
-    // }
+    bool isCheckPermission = false;
+    int32_t ret = INTENTION_CLIENT->StartCooperateWithOptions(remoteNetworkId, userData,
+        startDeviceId, isCheckPermission, options);
+    if (ret != RET_OK) {
+        FI_HILOGE("Activate cooperate failed");
+        return ret;
+    }
     devCooperateEvent_.insert_or_assign(userData, event);
     return RET_OK;
 }
-
 
 int32_t CooperateClient::SetDamplingCoefficient(uint32_t direction, double coefficient)
 {
