@@ -96,6 +96,20 @@ int32_t CooperateServer::StartCooperate(CallingContext &context, const std::stri
     return cooperate->Start(context.pid, userData, remoteNetworkId, startDeviceId);
 }
 
+int32_t CooperateServer::StartCooperateWithOptions(CallingContext &context, const std::string& remoteNetworkId,
+    int32_t userData, int32_t startDeviceId, CooperateOptions options)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->StartWithOptions(context.pid, userData, remoteNetworkId, startDeviceId, options);
+}
+
 int32_t CooperateServer::StopCooperate(CallingContext &context, int32_t userData, bool isUnchained,
     bool checkPermission)
 {

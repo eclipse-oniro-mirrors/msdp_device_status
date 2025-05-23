@@ -34,6 +34,8 @@ public:
     int32_t DisableCooperate(CallingContext &context, int32_t userData);
     int32_t StartCooperate(CallingContext &context, const std::string& remoteNetworkId, int32_t userData,
         int32_t startDeviceId, bool checkPermission);
+    int32_t StartCooperateWithOptions(CallingContext &context, const std::string& remoteNetworkId,
+        int32_t userData, int32_t startDeviceId, CooperateOptions options);
     int32_t StopCooperate(CallingContext &context, int32_t userData, bool isUnchained, bool checkPermission);
     int32_t RegisterCooperateListener(CallingContext &context);
     int32_t UnregisterCooperateListener(CallingContext &context);

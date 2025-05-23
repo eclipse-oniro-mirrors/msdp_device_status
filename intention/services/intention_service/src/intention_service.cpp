@@ -113,6 +113,16 @@ ErrCode IntentionService::StartCooperate(const std::string& remoteNetworkId, int
     });
 }
 
+ErrCode IntentionService::StartCooperateWithOptions(const std::string& remoteNetworkId, int32_t userData,
+    int32_t startDeviceId, bool checkPermission, const SequenceableCooperateOptions& options)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([&] {
+        return cooperate_.StartCooperateWithOptions(context, remoteNetworkId, userData,
+            startDeviceId, options.options_);
+    });
+}
+
 ErrCode IntentionService::StopCooperate(int32_t userData, bool isUnchained, bool checkPermission)
 {
     CallingContext context = GetCallingContext();

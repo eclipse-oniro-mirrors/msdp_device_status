@@ -49,6 +49,8 @@ public:
     ErrCode DisableCooperate(int32_t userData) override;
     ErrCode StartCooperate(const std::string& remoteNetworkId, int32_t userData, int32_t startDeviceId,
         bool checkPermission) override;
+    ErrCode StartCooperateWithOptions(const std::string& remoteNetworkId, int32_t userData, int32_t startDeviceId,
+        bool checkPermission, const SequenceableCooperateOptions& options) override;
     ErrCode StopCooperate(int32_t userData, bool isUnchained, bool checkPermission) override;
     ErrCode RegisterCooperateListener() override;
     ErrCode UnregisterCooperateListener() override;
