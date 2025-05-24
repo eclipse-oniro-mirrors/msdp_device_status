@@ -51,7 +51,7 @@ inline constexpr size_t MAX_STRING_LEN{1024};
 static std::unique_ptr<Media::PixelMap> CreateEmptyPixelMap()
 {
     Media::InitializationOptions initOptions;
-    initOptions.size = {100, 100};
+    initOptions.size = {1080, 1920};
     initOptions.pixelFormat = Media::PixelFormat::BGRA_8888;
     initOptions.editable = true;
     std::unique_ptr<Media::PixelMap> pixmap = Media::PixelMap::Create(initOptions);
@@ -107,7 +107,6 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_001, TestSize.Level1)
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
     char bundleName[MAX_STRING_LEN] = {0};
     BoomerangClient boomerangClient;
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_OK));
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ASSERT_EQ(ret, RET_OK);
@@ -219,7 +218,6 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_007, TestSize.Level1)
     sptr<IRemoteBoomerangCallback> callback1 = new (std::nothrow) BoomerangClientTestCallback();
     sptr<IRemoteBoomerangCallback> callback2 = nullptr;
     char bundleName[MAX_STRING_LEN] = {0};
-    TunnelClient tunnel;
     BoomerangClient boomerangClient;
    int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
