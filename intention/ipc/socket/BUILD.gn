@@ -55,6 +55,7 @@ ohos_source_set("intention_socket_server") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "ipc:ipc_single",
     "window_manager:libdm",
   ]
 
@@ -154,6 +155,7 @@ ohos_source_set("intention_socket_connection") {
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
+    "ipc:ipc_single",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

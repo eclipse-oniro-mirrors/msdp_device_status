@@ -60,7 +60,8 @@ ohos_source_set("intention_cooperate_client") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "input:libmmi-client",
-    "image_framework:image_native"
+    "image_framework:image_native",
+    "ipc:ipc_single",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

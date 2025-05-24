@@ -51,6 +51,7 @@ ohos_source_set("intention_drag_data") {
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "image_framework:image_native",
+    "hilog:libhilog",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

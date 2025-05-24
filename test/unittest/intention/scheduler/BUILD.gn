@@ -80,6 +80,7 @@ ohos_unittest("TimerManagerTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
