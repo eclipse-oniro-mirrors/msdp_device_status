@@ -41,6 +41,7 @@ StationaryServer stationary_;
 int32_t TYPE_TYPE_STAND = 7;
 int32_t ACTIVITYEVENT_ENTER = 1;
 int32_t REPORTLATENCYNS_LATENCY_INVALID = -1;
+int32_t RET_NO_SUPPORT = 801;
 class StationaryServerTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -76,7 +77,7 @@ HWTEST_F(StationaryServerTest, SubscribeStationaryCallbackTest001, TestSize.Leve
     ASSERT_NE(callback, nullptr);
     int32_t ret = stationary_.SubscribeStationaryCallback(
         context_, TYPE_TYPE_STAND, ACTIVITYEVENT_ENTER, REPORTLATENCYNS_LATENCY_INVALID, callback);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, RET_NO_SUPPORT);
 }
 
 /**
@@ -91,7 +92,7 @@ HWTEST_F(StationaryServerTest, UnsubscribeStationaryCallbackTest001, TestSize.Le
     ASSERT_NE(callback, nullptr);
     int32_t ret = stationary_.UnsubscribeStationaryCallback(
         context_, TYPE_TYPE_STAND, REPORTLATENCYNS_LATENCY_INVALID, callback);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_NO_SUPPORT);
 }
 
 /**
