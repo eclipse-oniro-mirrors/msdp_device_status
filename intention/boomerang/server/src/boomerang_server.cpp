@@ -38,92 +38,6 @@ BoomerangServer::BoomerangServer()
     manager_.Init();
 }
 
-int32_t BoomerangServer::Enable(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t BoomerangServer::Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t BoomerangServer::Start(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t BoomerangServer::Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t BoomerangServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    switch (id) {
-        case BoomerangRequestID::ADD_BOOMERAMG_LISTENER: {
-            return Subscribe(context, data);
-        }
-        case BoomerangRequestID::NOTIFY_METADATA: {
-            return NotifyMetadataBindingEvent(context, data);
-        }
-        case BoomerangRequestID::ENCODE_IMAGE: {
-            return BoomerangEncodeImage(context, data);
-        }
-        case BoomerangRequestID::DECODE_IMAGE: {
-            return BoomerangDecodeImage(context, data);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
-}
-
-int32_t BoomerangServer::RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    switch (id) {
-        case BoomerangRequestID::REMOVE_BOOMERAMG_LISTENER: {
-            return Unsubscribe(context, data);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
-}
-
-int32_t BoomerangServer::SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    switch (id) {
-        case BoomerangRequestID::SUBMIT_METADATA: {
-            return SubmitMetadata(context, data);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
-    return RET_ERR;
-}
-
-int32_t BoomerangServer::GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_OK;
-}
-
-int32_t BoomerangServer::Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
 void BoomerangServer::DumpDeviceStatusSubscriber(int32_t fd) const
 {
     DS_DUMPER->DumpDeviceStatusSubscriber(fd);
@@ -147,143 +61,125 @@ void BoomerangServer::DumpCurrentDeviceStatus(int32_t fd)
     DS_DUMPER->DumpDeviceStatusCurrentStatus(fd, datas);
 }
 
-int32_t BoomerangServer::Subscribe(CallingContext &context, MessageParcel &data)
+int32_t BoomerangServer::SubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
+    const sptr<IRemoteBoomerangCallback>& subCallback)
 {
-    SubscribeBoomerangParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SubscribeStationaryParam::Unmarshalling fail");
-        return RET_ERR;
-    }
+    CHKPR(subCallback, RET_ERR);
+    BoomerangType boomerangType = static_cast<BoomerangType>(type);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
     appInfo->pid = context.pid;
     appInfo->tokenId = context.tokenId;
     manager_.GetPackageName(appInfo->tokenId, appInfo->packageName);
-    appInfo->type = param.type_;
-    appInfo->boomerangCallback = param.callback_;
+    appInfo->type = boomerangType;
+    appInfo->boomerangCallback = subCallback;
     DS_DUMPER->SaveBoomerangAppInfo(appInfo);
-    int32_t ret = manager_.Subscribe(param.type_, param.bundleName_, param.callback_);
+    int32_t ret = manager_.Subscribe(type, bundleName, subCallback);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang Subscribe failed");
-        return RET_ERR;
+        DS_DUMPER->RemoveBoomerangAppInfo(appInfo);
     }
-    return RET_OK;
+    return ret;
 }
 
-int32_t BoomerangServer::Unsubscribe(CallingContext &context, MessageParcel &data)
+int32_t BoomerangServer::UnsubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
+    const sptr<IRemoteBoomerangCallback>& unsubCallback)
 {
-    SubscribeBoomerangParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("UnsubscribeStationaryParam::Unmarshalling fail");
-        return RET_ERR;
-    }
+    CHKPR(unsubCallback, RET_ERR);
+    BoomerangType boomerangType = static_cast<BoomerangType>(type);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
     appInfo->pid = context.pid;
     appInfo->tokenId = context.tokenId;
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
-    appInfo->type = param.type_;
-    appInfo->boomerangCallback = param.callback_;
+    appInfo->type = boomerangType;
+    appInfo->boomerangCallback = unsubCallback;
     DS_DUMPER->RemoveBoomerangAppInfo(appInfo);
-    int32_t ret = manager_.Unsubscribe(param.type_, param.bundleName_, param.callback_);
+    int32_t ret = manager_.Unsubscribe(type, bundleName, unsubCallback);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang Unsubscribe failed");
-        return RET_ERR;
+        DS_DUMPER->SaveBoomerangAppInfo(appInfo);
     }
-    return RET_OK;
+    return ret;
 }
 
-int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, MessageParcel &data)
+int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, const std::string& bundleName,
+    const sptr<IRemoteBoomerangCallback>& notifyCallback)
 {
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
-    NotifyMetadataParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("GetNotifyMetadataParam::Unmarshalling fail");
-        return RET_ERR;
-    }
+    CHKPR(notifyCallback, RET_ERR);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
     appInfo->pid = context.pid;
     appInfo->tokenId = context.tokenId;
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
-    appInfo->boomerangCallback = param.callback_;
+    appInfo->boomerangCallback = notifyCallback;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    int32_t ret = manager_.NotifyMedata(param.bundleName_, param.callback_);
+    int32_t ret = manager_.NotifyMedata(bundleName, notifyCallback);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang NotifyMetadataBindingEvent failed");
-        return RET_ERR;
     }
-    return RET_OK;
+    return ret;
 }
 
-int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, MessageParcel &data)
+int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
+    const std::string& metaData, const sptr<IRemoteBoomerangCallback>& encodeCallback)
 {
-    EncodeImageParam param {};
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("GetNotifyMetadataParam::Unmarshalling fail");
-        return RET_ERR;
-    }
+    CHKPR(encodeCallback, RET_ERR);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
     appInfo->pid = context.pid;
     appInfo->tokenId = context.tokenId;
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
-    appInfo->boomerangCallback = param.callback_;
+    appInfo->boomerangCallback = encodeCallback;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    int32_t ret = manager_.BoomerangEncodeImage(param.pixelMap_, param.metadata_, param.callback_);
+    int32_t ret = manager_.BoomerangEncodeImage(pixelMap, metaData, encodeCallback);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang EncodeImage failed");
-        return RET_ERR;
     }
-    return RET_OK;
+    return ret;
 }
 
-int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, MessageParcel &data)
+int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
+    const sptr<IRemoteBoomerangCallback>& decodeCallback)
 {
-    DecodeImageParam param {};
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("GetNotifyMetadataParam::Unmarshalling fail");
-        return RET_ERR;
-    }
+    CHKPR(decodeCallback, RET_ERR);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
     appInfo->uid = context.uid;
     appInfo->pid = context.pid;
     appInfo->tokenId = context.tokenId;
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
-    appInfo->boomerangCallback = param.callback_;
+    appInfo->boomerangCallback = decodeCallback;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    int32_t ret = manager_.BoomerangDecodeImage(param.pixelMap_, param.callback_);
+    int32_t ret = manager_.BoomerangDecodeImage(pixelMap, decodeCallback);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang DecodeImage failed");
-        return RET_ERR;
     }
-    return RET_OK;
+    return ret;
 }
 
-int32_t BoomerangServer::SubmitMetadata(CallingContext &context, MessageParcel &data)
+int32_t BoomerangServer::SubmitMetadata(CallingContext &context, const std::string& metaData)
 {
-    MetadataParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("GetNotifyMetadataParam::Unmarshalling fail");
+    if (metaData.empty()) {
+        FI_HILOGE("The metaData is empty.");
         return RET_ERR;
     }
-    int32_t ret = manager_.SubmitMetadata(param.metadata_);
+    int32_t ret = manager_.SubmitMetadata(metaData);
     if (ret != RET_OK) {
-        FI_HILOGE("boomerang Submit Metadata failed");
-        return RET_ERR;
+        FI_HILOGE("boomerang submit metada failed");
     }
-    return RET_OK;
+    return ret;
 }
 
 Data BoomerangServer::GetCache(CallingContext &context, const Type &type)

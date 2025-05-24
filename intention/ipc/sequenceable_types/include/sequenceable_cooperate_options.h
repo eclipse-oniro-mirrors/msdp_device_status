@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef SOCKET_SERVER_H
-#define SOCKET_SERVER_H
-
+#ifndef SEQUENCEABLE_COOPERATE_OPTIONS_H
+#define SEQUENCEABLE_COOPERATE_OPTIONS_H
+ 
+#include <string>
+#include <unistd.h>
+ 
+#include "coordination_message.h"
 #include "nocopyable.h"
-
-#include "i_context.h"
-#include "i_plugin.h"
-
+#include "parcel.h"
+ 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class SocketServer final {
+ 
+class SequenceableCooperateOptions : public Parcelable {
 public:
-    SocketServer(IContext *context);
-    ~SocketServer() = default;
-    DISALLOW_COPY_AND_MOVE(SocketServer);
-    int32_t Socket(CallingContext &context, const std::string &programName, int32_t moduleType,
-        int &socketFd, int32_t &tokenType);
-private:
-    IContext *context_ { nullptr };
+    SequenceableCooperateOptions() = default;
+    explicit SequenceableCooperateOptions(const CooperateOptions &options) : options_(options) {}
+    virtual ~SequenceableCooperateOptions() = default;
+     
+    bool Marshalling(Parcel &parcel) const override;
+    static SequenceableCooperateOptions* Unmarshalling(Parcel &parcel);
+ 
+public:
+    CooperateOptions options_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // SOCKET_SERVER_H
+#endif // SEQUENCEABLE_COOPERATE_OPTIONS_H

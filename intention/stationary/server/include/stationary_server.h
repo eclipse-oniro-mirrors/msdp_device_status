@@ -54,21 +54,17 @@ struct DevStaCallbackCmp {
     }
 };
 #endif
-class StationaryServer final : public IPlugin {
+class StationaryServer {
 public:
     StationaryServer();
     ~StationaryServer() = default;
     DISALLOW_COPY_AND_MOVE(StationaryServer);
 
-    int32_t Enable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Start(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
+    int32_t SubscribeStationaryCallback(CallingContext &context, int32_t type, int32_t event,
+        int32_t latency, const sptr<IRemoteDevStaCallback> &subCallback);
+    int32_t UnsubscribeStationaryCallback(CallingContext &context, int32_t type, int32_t event,
+        const sptr<IRemoteDevStaCallback> &unsubCallback);
+    int32_t GetDeviceStatusData(CallingContext &context, int32_t type, int32_t &replyType, int32_t &replyValue);
 
     void DumpDeviceStatusSubscriber(int32_t fd) const;
     void DumpDeviceStatusChanges(int32_t fd) const;

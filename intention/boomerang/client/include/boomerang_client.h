@@ -20,8 +20,7 @@
 
 #include "nocopyable.h"
 
-#include "i_tunnel_client.h"
-#include "boomerang_callback.h"
+#include "iremote_boomerang_callback.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -32,17 +31,16 @@ public:
     ~BoomerangClient() = default;
     DISALLOW_COPY_AND_MOVE(BoomerangClient);
 
-    int32_t SubscribeCallback(ITunnelClient &tunnel, BoomerangType type, std::string bundleName,
-        sptr<IRemoteBoomerangCallback> callback);
-    int32_t UnsubscribeCallback(ITunnelClient &tunnel, BoomerangType type, std::string bundleName,
-        sptr<IRemoteBoomerangCallback> callback);
-    int32_t NotifyMetadataBindingEvent(ITunnelClient &tunnel, std::string bundleName,
-        sptr<IRemoteBoomerangCallback> callback);
-    int32_t SubmitMetadata(ITunnelClient &tunnel, std::string metadata);
-    int32_t BoomerangEncodeImage(ITunnelClient &tunnel, std::shared_ptr<Media::PixelMap> pixelMap,
-        std::string matedata, sptr<IRemoteBoomerangCallback> callback);
-    int32_t BoomerangDecodeImage(ITunnelClient &tunnel, std::shared_ptr<Media::PixelMap> pixelMap,
-        sptr<IRemoteBoomerangCallback> callback);
+    int32_t SubscribeCallback(BoomerangType type, const std::string& bundleName,
+        const sptr<IRemoteBoomerangCallback>& callback);
+    int32_t UnsubscribeCallback(BoomerangType type, const std::string& bundleName,
+        const sptr<IRemoteBoomerangCallback>& callback);
+    int32_t NotifyMetadataBindingEvent(const std::string& bundleName, const sptr<IRemoteBoomerangCallback>& callback);
+    int32_t SubmitMetadata(const std::string& metaData);
+    int32_t BoomerangEncodeImage(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        const std::string& metaData, const sptr<IRemoteBoomerangCallback>& callback);
+    int32_t BoomerangDecodeImage(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        const sptr<IRemoteBoomerangCallback>& callback);
 
 private:
     std::mutex mtx_;

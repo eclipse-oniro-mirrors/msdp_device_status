@@ -24,26 +24,34 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class CooperateServer final : public IPlugin {
+class CooperateServer final {
 public:
     CooperateServer(IContext *context);
     ~CooperateServer() = default;
     DISALLOW_COPY_AND_MOVE(CooperateServer);
 
-    int32_t Enable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Start(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
+    int32_t EnableCooperate(CallingContext &context, int32_t userData);
+    int32_t DisableCooperate(CallingContext &context, int32_t userData);
+    int32_t StartCooperate(CallingContext &context, const std::string& remoteNetworkId, int32_t userData,
+        int32_t startDeviceId, bool checkPermission);
+    int32_t StartCooperateWithOptions(CallingContext &context, const std::string& remoteNetworkId,
+        int32_t userData, int32_t startDeviceId, CooperateOptions options);
+    int32_t StopCooperate(CallingContext &context, int32_t userData, bool isUnchained, bool checkPermission);
+    int32_t RegisterCooperateListener(CallingContext &context);
+    int32_t UnregisterCooperateListener(CallingContext &context);
+    int32_t RegisterHotAreaListener(CallingContext &context, int32_t userData, bool checkPermission);
+    int32_t UnregisterHotAreaListener(CallingContext &context);
+    int32_t RegisterMouseEventListener(CallingContext &context, const std::string& networkId);
+    int32_t UnregisterMouseEventListener(CallingContext &context, const std::string& networkId);
+    int32_t GetCooperateStateSync(CallingContext &context, const std::string& udid, bool& state);
+    int32_t GetCooperateStateAsync(CallingContext &context, const std::string& networkId, int32_t userData,
+        bool isCheckPermission);
+    int32_t SetDamplingCoefficient(CallingContext &context, uint32_t direction, double coefficient);
+private:
     bool CheckCooperatePermission(CallingContext &context);
     bool IsSystemServiceCalling(CallingContext &context);
     bool IsSystemCalling(CallingContext &context);
     int32_t CheckPermission(CallingContext &context);
-
 private:
     IContext *context_ { nullptr };
     int32_t unloadTimerId_ { -1 };

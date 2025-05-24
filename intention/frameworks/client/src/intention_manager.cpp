@@ -35,7 +35,6 @@ const std::string SCREEN_ROTATION { "1" };
 
 IntentionManager::IntentionManager()
 {
-    tunnel_ = std::make_shared<TunnelClient>();
 }
 
 IntentionManager::~IntentionManager()
@@ -51,7 +50,7 @@ void IntentionManager::InitClient()
         if (client_ != nullptr) {
             return;
         }
-        client_ = std::make_unique<SocketClient>(tunnel_);
+        client_ = std::make_unique<SocketClient>();
         InitMsgHandler();
         client_->RegisterConnectedFunction([this] {
             this->OnConnected();
@@ -97,9 +96,6 @@ void IntentionManager::InitMsgHandler()
         }},
         {MessageId::DRAG_STYLE_LISTENER, [this](const StreamClient &client, NetPacket &pkt) {
             return this->drag_.OnDragStyleChangedMessage(client, pkt);
-        }},
-        {MessageId::ADD_SELECTED_PIXELMAP_RESULT, [this](const StreamClient &client, NetPacket &pkt) {
-            return this->drag_.OnAddSelectedPixelMapResult(client, pkt);
         }}
     };
     CHKPV(client_);
@@ -113,51 +109,53 @@ void IntentionManager::InitMsgHandler()
 int32_t IntentionManager::SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
     sptr<IRemoteDevStaCallback> callback)
 {
-    return stationary_.SubscribeCallback(*tunnel_, type, event, latency, callback);
+    InitClient();
+    return stationary_.SubscribeCallback(type, event, latency, callback);
 }
 
 int32_t IntentionManager::UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback)
 {
-    return stationary_.UnsubscribeCallback(*tunnel_, type, event, callback);
+    InitClient();
+    return stationary_.UnsubscribeCallback(type, event, callback);
 }
 
 int32_t IntentionManager::SubscribeCallback(BoomerangType type, std::string bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
-    return boomerang_.SubscribeCallback(*tunnel_, type, bundleName, callback);
+    return boomerang_.SubscribeCallback(type, bundleName, callback);
 }
  
 int32_t IntentionManager::UnsubscribeCallback(BoomerangType type, std::string bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
-    return boomerang_.UnsubscribeCallback(*tunnel_, type, bundleName, callback);
+    return boomerang_.UnsubscribeCallback(type, bundleName, callback);
 }
  
 int32_t IntentionManager::NotifyMetadataBindingEvent(std::string bundleName, sptr<IRemoteBoomerangCallback> callback)
 {
-    return boomerang_.NotifyMetadataBindingEvent(*tunnel_, bundleName, callback);
+    return boomerang_.NotifyMetadataBindingEvent(bundleName, callback);
 }
  
 int32_t IntentionManager::SubmitMetadata(std::string metadata)
 {
-    return boomerang_.SubmitMetadata(*tunnel_, metadata);
+    return boomerang_.SubmitMetadata(metadata);
 }
  
 int32_t IntentionManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
     sptr<IRemoteBoomerangCallback> callback)
 {
-    return boomerang_.BoomerangEncodeImage(*tunnel_, pixelMap, matedata, callback);
+    return boomerang_.BoomerangEncodeImage(pixelMap, matedata, callback);
 }
  
 int32_t IntentionManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
     sptr<IRemoteBoomerangCallback> callback)
 {
-    return boomerang_.BoomerangDecodeImage(*tunnel_, pixelMap, callback);
+    return boomerang_.BoomerangDecodeImage(pixelMap, callback);
 }
 
 Data IntentionManager::GetDeviceStatusData(const Type type)
 {
-    return stationary_.GetDeviceStatusData(*tunnel_, type);
+    return stationary_.GetDeviceStatusData(type);
 }
 
 int32_t IntentionManager::RegisterCoordinationListener(
@@ -166,7 +164,7 @@ int32_t IntentionManager::RegisterCoordinationListener(
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.RegisterListener(*tunnel_, listener, isCompatible);
+    return cooperate_.RegisterListener(listener, isCompatible);
 #else
     FI_HILOGW("Coordination does not support");
     (void)(listener);
@@ -180,7 +178,7 @@ int32_t IntentionManager::UnregisterCoordinationListener(
 {
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    return cooperate_.UnregisterListener(*tunnel_, listener, isCompatible);
+    return cooperate_.UnregisterListener(listener, isCompatible);
 #else
     FI_HILOGW("Coordination does not support");
     (void)(listener);
@@ -194,7 +192,7 @@ int32_t IntentionManager::PrepareCoordination(CooperateMsgInfoCallback callback,
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.Enable(*tunnel_, callback, isCompatible);
+    return cooperate_.Enable(callback, isCompatible);
 #else
     FI_HILOGW("Coordination does not support");
     (void)(callback);
@@ -208,7 +206,7 @@ int32_t IntentionManager::UnprepareCoordination(CooperateMsgInfoCallback callbac
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.Disable(*tunnel_, callback, isCompatible);
+    return cooperate_.Disable(callback, isCompatible);
 #else
     FI_HILOGW("Coordination does not support");
     (void)(callback);
@@ -223,7 +221,7 @@ int32_t IntentionManager::ActivateCoordination(const std::string &remoteNetworkI
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.Start(*tunnel_, remoteNetworkId, startDeviceId, callback, isCompatible);
+    return cooperate_.Start(remoteNetworkId, startDeviceId, callback, isCompatible);
 #else
     FI_HILOGW("Coordination does not support");
     (void)(remoteNetworkId);
@@ -240,7 +238,7 @@ int32_t IntentionManager::ActivateCooperateWithOptions(const std::string &remote
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.StartWithOptions(*tunnel_, remoteNetworkId, startDeviceId, callback, options);
+    return cooperate_.StartWithOptions(remoteNetworkId, startDeviceId, callback, options);
 #else
     FI_HILOGW("Coordination does not support");
     (void)(remoteNetworkId);
@@ -257,7 +255,7 @@ int32_t IntentionManager::DeactivateCoordination(bool isUnchained,
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.Stop(*tunnel_, isUnchained, callback, isCompatible);
+    return cooperate_.Stop(isUnchained, callback, isCompatible);
 #else
     FI_HILOGW("Coordination does not support");
     (void)(callback);
@@ -272,7 +270,7 @@ int32_t IntentionManager::GetCoordinationState(
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.GetCooperateState(*tunnel_, networkId, callback, isCompatible);
+    return cooperate_.GetCooperateState(networkId, callback, isCompatible);
 #else
     (void)(networkId);
     (void)(callback);
@@ -287,7 +285,7 @@ int32_t IntentionManager::GetCoordinationState(const std::string &udId, bool &st
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.GetCooperateState(*tunnel_, udId, state);
+    return cooperate_.GetCooperateState(udId, state);
 #else
     (void)(udId);
     (void)(state);
@@ -301,7 +299,7 @@ int32_t IntentionManager::RegisterEventListener(const std::string &networkId, st
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.RegisterEventListener(*tunnel_, networkId, listener);
+    return cooperate_.RegisterEventListener(networkId, listener);
 #else
     (void)(networkId);
     (void)(listener);
@@ -316,7 +314,7 @@ int32_t IntentionManager::UnregisterEventListener(const std::string &networkId,
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.UnregisterEventListener(*tunnel_, networkId, listener);
+    return cooperate_.UnregisterEventListener(networkId, listener);
 #else
     (void)(networkId);
     (void)(listener);
@@ -330,7 +328,7 @@ int32_t IntentionManager::SetDamplingCoefficient(uint32_t direction, double coef
     CALL_INFO_TRACE;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.SetDamplingCoefficient(*tunnel_, direction, coefficient);
+    return cooperate_.SetDamplingCoefficient(direction, coefficient);
 #else
     (void)(direction);
     (void)(coefficient);
@@ -342,101 +340,101 @@ int32_t IntentionManager::SetDamplingCoefficient(uint32_t direction, double coef
 int32_t IntentionManager::UpdateDragStyle(DragCursorStyle style, int32_t eventId)
 {
     CALL_DEBUG_ENTER;
-    return drag_.UpdateDragStyle(*tunnel_, style, eventId);
+    return drag_.UpdateDragStyle(style, eventId);
 }
 
 int32_t IntentionManager::StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener)
 {
     CALL_DEBUG_ENTER;
     InitClient();
-    return drag_.StartDrag(*tunnel_, dragData, listener);
+    return drag_.StartDrag(dragData, listener);
 }
 
 int32_t IntentionManager::StopDrag(const DragDropResult &dropResult)
 {
     CALL_DEBUG_ENTER;
-    return drag_.StopDrag(*tunnel_, dropResult);
+    return drag_.StopDrag(dropResult);
 }
 
 int32_t IntentionManager::GetDragTargetPid()
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetDragTargetPid(*tunnel_);
+    return drag_.GetDragTargetPid();
 }
 
 int32_t IntentionManager::GetUdKey(std::string &udKey)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetUdKey(*tunnel_, udKey);
+    return drag_.GetUdKey(udKey);
 }
 
 int32_t IntentionManager::AddDraglistener(DragListenerPtr listener, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
     InitClient();
-    return drag_.AddDraglistener(*tunnel_, listener, isJsCaller);
+    return drag_.AddDraglistener(listener, isJsCaller);
 }
 
 int32_t IntentionManager::RemoveDraglistener(DragListenerPtr listener, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
-    return drag_.RemoveDraglistener(*tunnel_, listener, isJsCaller);
+    return drag_.RemoveDraglistener(listener, isJsCaller);
 }
 
 int32_t IntentionManager::AddSubscriptListener(SubscriptListenerPtr listener)
 {
     CALL_DEBUG_ENTER;
     InitClient();
-    return drag_.AddSubscriptListener(*tunnel_, listener);
+    return drag_.AddSubscriptListener(listener);
 }
 
 int32_t IntentionManager::RemoveSubscriptListener(SubscriptListenerPtr listener)
 {
     CALL_DEBUG_ENTER;
-    return drag_.RemoveSubscriptListener(*tunnel_, listener);
+    return drag_.RemoveSubscriptListener(listener);
 }
 
 int32_t IntentionManager::SetDragWindowVisible(
     bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CALL_DEBUG_ENTER;
-    return drag_.SetDragWindowVisible(*tunnel_, visible, isForce, rsTransaction);
+    return drag_.SetDragWindowVisible(visible, isForce, rsTransaction);
 }
 
 int32_t IntentionManager::GetShadowOffset(ShadowOffset &shadowOffset)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetShadowOffset(*tunnel_, shadowOffset);
+    return drag_.GetShadowOffset(shadowOffset);
 }
 
 int32_t IntentionManager::UpdateShadowPic(const ShadowInfo &shadowInfo)
 {
     CALL_DEBUG_ENTER;
-    return drag_.UpdateShadowPic(*tunnel_, shadowInfo);
+    return drag_.UpdateShadowPic(shadowInfo);
 }
 
 int32_t IntentionManager::GetDragData(DragData &dragData)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetDragData(*tunnel_, dragData);
+    return drag_.GetDragData(dragData);
 }
 
 int32_t IntentionManager::GetDragState(DragState &dragState)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetDragState(*tunnel_, dragState);
+    return drag_.GetDragState(dragState);
 }
 
 int32_t IntentionManager::GetDragAction(DragAction &dragAction)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetDragAction(*tunnel_, dragAction);
+    return drag_.GetDragAction(dragAction);
 }
 
 int32_t IntentionManager::GetExtraInfo(std::string &extraInfo)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetExtraInfo(*tunnel_, extraInfo);
+    return drag_.GetExtraInfo(extraInfo);
 }
 
 int32_t IntentionManager::AddHotAreaListener(std::shared_ptr<IHotAreaListener> listener)
@@ -444,7 +442,7 @@ int32_t IntentionManager::AddHotAreaListener(std::shared_ptr<IHotAreaListener> l
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
-    return cooperate_.AddHotAreaListener(*tunnel_, listener);
+    return cooperate_.AddHotAreaListener(listener);
 #else
     FI_HILOGW("Coordination does not support");
     (void)(listener);
@@ -456,7 +454,7 @@ int32_t IntentionManager::RemoveHotAreaListener(std::shared_ptr<IHotAreaListener
 {
     CALL_DEBUG_ENTER;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    return cooperate_.RemoveHotAreaListener(*tunnel_, listener);
+    return cooperate_.RemoveHotAreaListener(listener);
 #else
     FI_HILOGW("Coordination does not support");
     (void)(listener);
@@ -467,14 +465,14 @@ int32_t IntentionManager::RemoveHotAreaListener(std::shared_ptr<IHotAreaListener
 int32_t IntentionManager::UpdatePreviewStyle(const PreviewStyle &previewStyle)
 {
     CALL_DEBUG_ENTER;
-    return drag_.UpdatePreviewStyle(*tunnel_, previewStyle);
+    return drag_.UpdatePreviewStyle(previewStyle);
 }
 
 int32_t IntentionManager::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle,
     const PreviewAnimation &animation)
 {
     CALL_DEBUG_ENTER;
-    return drag_.UpdatePreviewStyleWithAnimation(*tunnel_, previewStyle, animation);
+    return drag_.UpdatePreviewStyleWithAnimation(previewStyle, animation);
 }
 
 int32_t IntentionManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
@@ -487,7 +485,7 @@ int32_t IntentionManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTr
     if (Rosen::DisplayManager::GetInstance().IsFoldable()) {
         if ((foldRotatePolicys_.empty()) || (foldRotatePolicys_.size() < POLICY_VEC_SIZE)) {
             FI_HILOGE("foldRotatePolicys_ is invalid");
-            return drag_.RotateDragWindowSync(*tunnel_, rsTransaction);
+            return drag_.RotateDragWindowSync(rsTransaction);
         }
         Rosen::FoldStatus foldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
         if (IsSecondaryDevice()) {
@@ -513,102 +511,95 @@ int32_t IntentionManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTr
             }
         }
     }
-    return drag_.RotateDragWindowSync(*tunnel_, rsTransaction);
+    return drag_.RotateDragWindowSync(rsTransaction);
 }
 
 int32_t IntentionManager::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
 {
     CALL_DEBUG_ENTER;
-    return drag_.SetDragWindowScreenId(*tunnel_, displayId, screenId);
+    return drag_.SetDragWindowScreenId(displayId, screenId);
 }
 
 int32_t IntentionManager::GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetDragSummary(*tunnel_, summarys, isJsCaller);
+    return drag_.GetDragSummary(summarys, isJsCaller);
 }
 
 int32_t IntentionManager::SetDragSwitchState(bool enable, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
-    return drag_.SetDragSwitchState(*tunnel_, enable, isJsCaller);
+    return drag_.SetDragSwitchState(enable, isJsCaller);
 }
 
 int32_t IntentionManager::SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
-    return drag_.SetAppDragSwitchState(*tunnel_, enable, pkgName, isJsCaller);
+    return drag_.SetAppDragSwitchState(enable, pkgName, isJsCaller);
 }
 
 int32_t IntentionManager::EnterTextEditorArea(bool enable)
 {
     CALL_DEBUG_ENTER;
-    return drag_.EnableUpperCenterMode(*tunnel_, enable);
+    return drag_.EnableUpperCenterMode(enable);
 }
 
 int32_t IntentionManager::AddPrivilege()
 {
     CALL_DEBUG_ENTER;
-    return drag_.AddPrivilege(*tunnel_);
+    return drag_.AddPrivilege();
 }
 
 int32_t IntentionManager::EraseMouseIcon()
 {
     CALL_DEBUG_ENTER;
-    return drag_.EraseMouseIcon(*tunnel_);
+    return drag_.EraseMouseIcon();
 }
 
 int32_t IntentionManager::SetMouseDragMonitorState(bool state)
 {
     CALL_DEBUG_ENTER;
-    return drag_.SetMouseDragMonitorState(*tunnel_, state);
-}
-
-int32_t IntentionManager::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
-    std::function<void(bool)> callback)
-{
-    CALL_DEBUG_ENTER;
-    return drag_.AddSelectedPixelMap(*tunnel_, pixelMap, callback);
+    return drag_.SetMouseDragMonitorState(state);
 }
 
 void IntentionManager::OnConnected()
 {
     CALL_DEBUG_ENTER;
-    CHKPV(tunnel_);
-    drag_.OnConnected(*tunnel_);
-    cooperate_.OnConnected(*tunnel_);
+
+    drag_.OnConnected();
+    cooperate_.OnConnected();
+    stationary_.OnConnected();
 }
 
 void IntentionManager::OnDisconnected()
 {
     CALL_DEBUG_ENTER;
-    CHKPV(tunnel_);
-    drag_.OnDisconnected(*tunnel_);
-    cooperate_.OnDisconnected(*tunnel_);
+    drag_.OnDisconnected();
+    cooperate_.OnDisconnected();
 }
 
 int32_t IntentionManager::SetDraggableState(bool state)
 {
     CALL_DEBUG_ENTER;
-    return drag_.SetDraggableState(*tunnel_, state);
+    return drag_.SetDraggableState(state);
 }
 
 int32_t IntentionManager::GetAppDragSwitchState(bool &state)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetAppDragSwitchState(*tunnel_, state);
+    return drag_.GetAppDragSwitchState(state);
 }
 
 void IntentionManager::SetDraggableStateAsync(bool state, int64_t downTime)
 {
     CALL_DEBUG_ENTER;
-    return drag_.SetDraggableStateAsync(*tunnel_, state, downTime);
+    return drag_.SetDraggableStateAsync(state, downTime);
 }
 
 int32_t IntentionManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
 {
     CALL_DEBUG_ENTER;
-    return drag_.GetDragBundleInfo(*tunnel_, dragBundleInfo);
+    return drag_.GetDragBundleInfo(dragBundleInfo);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

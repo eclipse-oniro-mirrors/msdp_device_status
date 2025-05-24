@@ -18,6 +18,7 @@
 #include "default_params.h"
 #include "devicestatus_define.h"
 #include "boomerang_params.h"
+#include "intention_client.h"
 
 #undef LOG_TAG
 #define LOG_TAG "BoomerangClient"
@@ -26,73 +27,61 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-int32_t BoomerangClient::SubscribeCallback(ITunnelClient &tunnel, BoomerangType type, std::string bundleName,
-    sptr<IRemoteBoomerangCallback> callback)
+int32_t BoomerangClient::SubscribeCallback(BoomerangType type, const std::string& bundleName,
+    const sptr<IRemoteBoomerangCallback>& callback)
 {
-    SubscribeBoomerangParam param { type, bundleName, callback };
-    DefaultReply reply {};
-    int32_t ret = tunnel.AddWatch(Intention::BOOMERANG, BoomerangRequestID::ADD_BOOMERAMG_LISTENER, param, reply);
+    int32_t ret = INTENTION_CLIENT->SubscribeCallback(type, bundleName, callback);
     if (ret != RET_OK) {
         FI_HILOGE("SubscribeBoomerang fail, error:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t BoomerangClient::UnsubscribeCallback(ITunnelClient &tunnel, BoomerangType type, std::string bundleName,
-    sptr<IRemoteBoomerangCallback> callback)
+int32_t BoomerangClient::UnsubscribeCallback(BoomerangType type, const std::string& bundleName,
+    const sptr<IRemoteBoomerangCallback>& callback)
 {
-    SubscribeBoomerangParam param { type, bundleName, callback };
-    DefaultReply reply {};
-    int32_t ret = tunnel.RemoveWatch(Intention::BOOMERANG, BoomerangRequestID::REMOVE_BOOMERAMG_LISTENER, param, reply);
+    int32_t ret = INTENTION_CLIENT->UnsubscribeCallback(type, bundleName, callback);
     if (ret != RET_OK) {
         FI_HILOGE("UnsubscribeBoomerang fail, error:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t BoomerangClient::NotifyMetadataBindingEvent(ITunnelClient &tunnel, std::string bundleName,
-    sptr<IRemoteBoomerangCallback> callback)
+int32_t BoomerangClient::NotifyMetadataBindingEvent(const std::string& bundleName,
+    const sptr<IRemoteBoomerangCallback>& callback)
 {
-    NotifyMetadataParam param { bundleName, callback };
-    DefaultReply reply {};
-    int32_t ret = tunnel.AddWatch(Intention::BOOMERANG, BoomerangRequestID::NOTIFY_METADATA, param, reply);
+    int32_t ret = INTENTION_CLIENT->NotifyMetadataBindingEvent(bundleName, callback);
     if (ret != RET_OK) {
-        FI_HILOGE("UnsubscribeBoomerang fail, error:%{public}d", ret);
+        FI_HILOGE("NotifyMetadataBindingEvent fail, error:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t BoomerangClient::SubmitMetadata(ITunnelClient &tunnel, std::string metadata)
+int32_t BoomerangClient::SubmitMetadata(const std::string& metaData)
 {
-    MetadataParam param { metadata };
-    DefaultReply reply {};
-    int32_t ret = tunnel.SetParam(Intention::BOOMERANG, BoomerangRequestID::SUBMIT_METADATA, param, reply);
+    int32_t ret = INTENTION_CLIENT->SubmitMetadata(metaData);
     if (ret != RET_OK) {
-        FI_HILOGE("UnsubscribeBoomerang fail, error:%{public}d", ret);
+        FI_HILOGE("SubmitMetadata fail, error:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t BoomerangClient::BoomerangEncodeImage(ITunnelClient &tunnel, std::shared_ptr<Media::PixelMap> pixelMap,
-    std::string matedata, sptr<IRemoteBoomerangCallback> callback)
+int32_t BoomerangClient::BoomerangEncodeImage(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    const std::string& metaData, const sptr<IRemoteBoomerangCallback>& callback)
 {
-    EncodeImageParam param { pixelMap, matedata, callback };
-    DefaultReply reply {};
-    int32_t ret = tunnel.AddWatch(Intention::BOOMERANG, BoomerangRequestID::ENCODE_IMAGE, param, reply);
+    int32_t ret = INTENTION_CLIENT->BoomerangEncodeImage(pixelMap, metaData, callback);
     if (ret != RET_OK) {
         FI_HILOGE("BoomerangEncodeImage fail, error:%{public}d", ret);
     }
     return ret;
 }
 
-int32_t BoomerangClient::BoomerangDecodeImage(ITunnelClient &tunnel, std::shared_ptr<Media::PixelMap> pixelMap,
-    sptr<IRemoteBoomerangCallback> callback)
+int32_t BoomerangClient::BoomerangDecodeImage(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    const sptr<IRemoteBoomerangCallback>& callback)
 {
-    DecodeImageParam param { pixelMap, callback };
-    DefaultReply reply {};
-    int32_t ret = tunnel.AddWatch(Intention::BOOMERANG, BoomerangRequestID::DECODE_IMAGE, param, reply);
+    int32_t ret = INTENTION_CLIENT->BoomerangDecodeImage(pixelMap, callback);
     if (ret != RET_OK) {
-        FI_HILOGE("BoomerangEncodeImage fail, error:%{public}d", ret);
+        FI_HILOGE("BoomerangDecodeImage fail, error:%{public}d", ret);
     }
     return ret;
 }

@@ -144,6 +144,25 @@ int32_t IntentionClient::StartCooperate(const std::string& remoteNetworkId, int3
     return RET_OK;
 }
 
+int32_t IntentionClient::StartCooperateWithOptions(const std::string &remoteNetworkId,
+    int32_t userData, int32_t startDeviceId, bool checkPermission, const CooperateOptions &options)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("Can not connect to IntentionService");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    SequenceableCooperateOptions sequenceableCooperateOptions(options);
+    if (int32_t ret = devicestatusProxy_->StartCooperateWithOptions(remoteNetworkId, userData,
+        startDeviceId, checkPermission, sequenceableCooperateOptions); ret != RET_OK) {
+        FI_HILOGE("proxy::StartCooperate fail");
+        return ret;
+    }
+    return RET_OK;
+}
+
 int32_t IntentionClient::StopCooperate(int32_t userData, bool isUnchained, bool checkPermission)
 {
     CALL_DEBUG_ENTER;

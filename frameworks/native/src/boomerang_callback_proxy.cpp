@@ -46,7 +46,7 @@ void BoomerangCallbackProxy::OnScreenshotResult(const BoomerangData& screentshot
     WRITEINT32(data, static_cast<int32_t>(screentshotData.type));
     WRITEINT32(data, static_cast<int32_t>(screentshotData.status));
 
-    int32_t ret = remote->SendRequest(static_cast<int32_t>(IRemoteBoomerangCallback::SCREEN_SHOT),
+    int32_t ret = remote->SendRequest(static_cast<int32_t>(IRemoteBoomerangCallback::SCREENSHOT),
         data, reply, option);
     if (ret != RET_OK) {
         FI_HILOGE("SendRequest is failed, error code:%{public}d", ret);

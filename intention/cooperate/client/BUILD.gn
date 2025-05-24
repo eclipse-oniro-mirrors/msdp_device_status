@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -47,7 +47,7 @@ ohos_source_set("intention_cooperate_client") {
     "${device_status_root_path}/intention/cooperate/data:intention_cooperate_data",
     "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
-    "${device_status_root_path}/intention/ipc/tunnel:intention_tunnel_client",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
@@ -56,9 +56,11 @@ ohos_source_set("intention_cooperate_client") {
   external_deps = [
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "input:libmmi-client",
+    "image_framework:image_native"
   ]
 
   subsystem_name = "${device_status_subsystem_name}"
