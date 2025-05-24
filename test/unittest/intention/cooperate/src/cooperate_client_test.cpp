@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,13 +63,13 @@ void CooperateClientTest::TearDown()
 
 class CoordinationListenerTest : public ICoordinationListener {
 public:
-        CoordinationListenerTest() : ICoordinationListener() {}
-        void OnCoordinationMessage(const std::string &networkId, CoordinationMessage msg) override
-        {
-            FI_HILOGD("Register coordination listener test");
-            (void) networkId;
-        };
+    CoordinationListenerTest() : ICoordinationListener() {}
+    void OnCoordinationMessage(const std::string &networkId, CoordinationMessage msg) override
+    {
+        FI_HILOGD("Register coordination listener test");
+        (void) networkId;
     };
+};
 
 class TestEventListener final : public IEventListener {
 public:
@@ -95,15 +95,15 @@ public:
 };
 
 class StreamClientTest : public StreamClient {
-    public:
-        StreamClientTest() = default;
-        void Stop() override
-        {}
-        int32_t Socket() override
-        {
-            return RET_ERR;
-        }
-    };
+public:
+    StreamClientTest() = default;
+    void Stop() override
+    {}
+    int32_t Socket() override
+    {
+        return RET_ERR;
+    }
+};
 
 /**
  * @tc.name: CooperateClientTest_RegisterListener
