@@ -27,6 +27,7 @@
 #include "i_hotarea_listener.h"
 #include "i_event_listener.h"
 
+
 #undef LOG_TAG
 #define LOG_TAG "CooperateClientTest"
 

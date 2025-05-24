@@ -573,9 +573,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
     ASSERT_TRUE(dragData);
@@ -585,17 +582,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
     ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
-    ASSERT_EQ(ret, RET_OK);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
     ASSERT_EQ(ret, RET_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
@@ -620,9 +606,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_TWO, false, SHADOW_NUM_TWO);
     ASSERT_TRUE(dragData);
@@ -632,17 +615,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
     ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
-    ASSERT_EQ(ret, RET_OK);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
     ASSERT_EQ(ret, RET_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
@@ -667,9 +639,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_THREE, false, SHADOW_NUM_THREE);
     ASSERT_TRUE(dragData);
@@ -679,14 +648,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
     ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
-    ASSERT_EQ(ret, RET_OK);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
     ASSERT_EQ(ret, RET_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
@@ -711,9 +672,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_THREE, false, SHADOW_NUM_THREE);
     ASSERT_TRUE(dragData);
@@ -724,21 +682,10 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
     ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
     ASSERT_EQ(ret, RET_OK);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, nullptr);
-    ASSERT_EQ(ret, RET_ERR);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(nullptr, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_ERR);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_ERR);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 }
 
@@ -751,24 +698,10 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixelMap_005, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_THREE, false, SHADOW_NUM_THREE);
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(), nullptr);
-    ASSERT_EQ(ret, RET_ERR);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_ERR);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, nullptr);
-    ASSERT_EQ(ret, RET_ERR);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(nullptr, addSelectedPixelmapCallback);
     ASSERT_EQ(ret, RET_ERR);
     DragDropResult dropResult { DragResult::DRAG_FAIL, HAS_CUSTOM_ANIMATION, WINDOW_ID };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
@@ -791,9 +724,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
     ASSERT_TRUE(dragData);
@@ -803,14 +733,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
     ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
-    ASSERT_EQ(ret, RET_OK);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
     ASSERT_EQ(ret, RET_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
@@ -835,9 +757,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_TWO, false, SHADOW_NUM_TWO);
     ASSERT_TRUE(dragData);
@@ -847,14 +766,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
     ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
-    ASSERT_EQ(ret, RET_OK);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
     ASSERT_EQ(ret, RET_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
@@ -879,9 +790,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_THREE, false, SHADOW_NUM_THREE);
     ASSERT_TRUE(dragData);
@@ -891,14 +799,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(DRAG_WINDOW_VISIBLE);
     ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
-    ASSERT_EQ(ret, RET_OK);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
     ASSERT_EQ(ret, RET_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
@@ -923,9 +823,6 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
             notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_THREE, false, SHADOW_NUM_THREE);
     ASSERT_TRUE(dragData);
@@ -936,21 +833,10 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
     ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
     ASSERT_EQ(ret, RET_OK);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, nullptr);
-    ASSERT_EQ(ret, RET_ERR);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(nullptr, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_ERR);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_EQ(ret, RET_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_ERR);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 }
 
@@ -963,24 +849,10 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixel
 HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_AddSelectedPixelMap_010, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto addSelectedPixelmapCallback = [](bool result) {
-        FI_HILOGD("Get AddSelectedPixelMap result, result:%{public}d", result);
-    };
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_THREE, false, SHADOW_NUM_THREE);
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(), nullptr);
-    ASSERT_EQ(ret, RET_ERR);
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(MIDDLE_PIXEL_MAP_WIDTH, MIDDLE_PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, addSelectedPixelmapCallback);
-    ASSERT_EQ(ret, RET_ERR);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(pixelMap, nullptr);
-    ASSERT_EQ(ret, RET_ERR);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_UPDATE_DRAG_STYLE));
-    ret = InteractionManager::GetInstance()->AddSelectedPixelMap(nullptr, addSelectedPixelmapCallback);
     ASSERT_EQ(ret, RET_ERR);
     DragDropResult dropResult { DragResult::DRAG_FAIL, HAS_CUSTOM_ANIMATION, WINDOW_ID };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);

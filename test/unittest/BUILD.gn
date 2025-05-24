@@ -16,4 +16,13 @@ import("../../device_status.gni")
 group("device_status_unittest") {
   testonly = true
   deps = []
+
+  deps += [
+    "frameworks:unittest",
+    "interfaces:systemtest",
+    "intention:intention_test",
+    "libs:unittest",
+    "services:devicestatussrv_test",
+    "utils:UtilityTest",
+  ]
 }

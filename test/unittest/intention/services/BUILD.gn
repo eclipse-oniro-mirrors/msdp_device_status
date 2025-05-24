@@ -433,6 +433,7 @@ group("unittest") {
       ":EnumeratorTest",
       ":IntentionDeviceManagerTest",
       ":IntentionDumperTest",
+      ":IntentionServiceTest",
       ":MonitorTest",
     ]
   }

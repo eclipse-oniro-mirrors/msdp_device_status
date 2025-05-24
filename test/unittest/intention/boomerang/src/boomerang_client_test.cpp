@@ -23,16 +23,16 @@
 #include <gmock/gmock.h>
 
 #include "boomerang_callback_stub.h"
-#include "boomerang_client_test_mock.h"
 #include "boomerang_client.h"
-#include "boomerang_callback.h"
+#include "iremote_boomerang_callback.h"
 #include "boomerang_params.h"
 #include "default_params.h"
 #include "devicestatus_define.h"
 #include "devicestatus_errors.h"
 #include "i_hotarea_listener.h"
 #include "i_event_listener.h"
-#include "tunnel_client.h"
+#include "i_coordination_listener.h"
+
 
 #undef LOG_TAG
 #define LOG_TAG "BoomerangClientTest"
@@ -48,6 +48,16 @@ inline constexpr size_t MAX_STRING_LEN{1024};
 // const std::string SYSTEM_BASIC { "system_basic" };
 } // namespace
 
+static std::unique_ptr<Media::PixelMap> CreateEmptyPixelMap()
+{
+    Media::InitializationOptions initOptions;
+    initOptions.size = {1080, 1920};
+    initOptions.pixelFormat = Media::PixelFormat::BGRA_8888;
+    initOptions.editable = true;
+    std::unique_ptr<Media::PixelMap> pixmap = Media::PixelMap::Create(initOptions);
+    return pixmap;
+}
+
 class BoomerangClientTest : public testing::Test {
 public:
     void SetUp();
@@ -56,7 +66,7 @@ public:
     static void TearDownTestCase();
     class BoomerangClientTestCallback : public BoomerangCallbackStub {
     public:
-    void OnScreenshotResult(const BoomerangData& data);
+    // void OnScreenshotResult(const BoomerangData& data);
     private:
     BoomerangData data_;
     };
@@ -72,24 +82,6 @@ void BoomerangClientTest::TearDown()
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
-void BoomerangClientTest::BoomerangClientTestCallback::OnScreenshotResult(const BoomerangData& data)
-{
-    GTEST_LOG_(INFO) << "BoomerangClientTestCallback type: " << data.type;
-    GTEST_LOG_(INFO) << "BoomerangClientTestCallback status: " << data.status;
-    EXPECT_TRUE(data.type == BoomerangType::BOOMERANG_TYPE_BOOMERANG &&
-        data.status == BoomerangStatus::BOOMERANG_STATUS_NOT_SCREEN_SHOT)
-        << "BoomerangClientTestCallback failed";
-}
-
-class CoordinationListenerTest : public ICoordinationListener {
-public:
-        CoordinationListenerTest() : ICoordinationListener() {}
-        void OnCoordinationMessage(const std::string &networkId, CoordinationMessage msg) override
-        {
-            FI_HILOGD("Register coordination listener test");
-            (void) networkId;
-        };
-    };
 
 class TestEventListener final : public IEventListener {
 public:
@@ -113,18 +105,12 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    std::shared_ptr<CoordinationListenerTest> consumer =
-        std::make_shared<CoordinationListenerTest>();
     char bundleName[MAX_STRING_LEN] = {0};
-    TunnelClient tunnel;
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_OK));
     int32_t ret = boomerangClient.SubscribeCallback(
-        tunnel, BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
+        BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ASSERT_EQ(ret, RET_OK);
-    EXPECT_CALL(boomerangClientMock, RemoveWatch).WillRepeatedly(Return(RET_OK));
-    ret = boomerangClient.UnsubscribeCallback(tunnel, BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
+    ret = boomerangClient.UnsubscribeCallback(BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ASSERT_EQ(ret, RET_OK);
 }
 
@@ -138,16 +124,12 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_002, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    std::shared_ptr<CoordinationListenerTest> consumer =
-        std::make_shared<CoordinationListenerTest>();
     char bundleName[MAX_STRING_LEN] = {0};
-    TunnelClient tunnel;
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_OK));
-    int32_t ret = boomerangClient.NotifyMetadataBindingEvent(tunnel, bundleName, callback);
+    int32_t ret = boomerangClient.SubscribeCallback(
+        BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
+    ret = boomerangClient.NotifyMetadataBindingEvent(bundleName, callback);
     ASSERT_EQ(ret, RET_OK);
-    EXPECT_CALL(boomerangClientMock, RemoveWatch).WillRepeatedly(Return(RET_OK));
 }
 
 /**
@@ -159,19 +141,15 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_002, TestSize.Level1)
 HWTEST_F(BoomerangClientTest, BoomerangClientTest_003, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    TunnelClient tunnel;
-    std::string metadata;
+    std::string metadata = "test";
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
     char bundleName[MAX_STRING_LEN] = {0};
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_OK));
     int32_t ret = boomerangClient.SubscribeCallback(
-        tunnel, BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
+        BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ASSERT_EQ(ret, RET_OK);
-    ret = boomerangClient.SubmitMetadata(tunnel, metadata);
+    ret = boomerangClient.SubmitMetadata(metadata);
     ASSERT_EQ(ret, RET_OK);
-    EXPECT_CALL(boomerangClientMock, RemoveWatch).WillRepeatedly(Return(RET_OK));
 }
 
 /**
@@ -183,16 +161,12 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_003, TestSize.Level1)
 HWTEST_F(BoomerangClientTest, BoomerangClientTest_004, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    TunnelClient tunnel;
-    std::string metadata;
+    std::string metadata = "test";
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = std::shared_ptr<Media::PixelMap>();
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_OK));
-    int32_t ret = boomerangClient.BoomerangEncodeImage(tunnel, pixelMap, metadata, callback);
+    int32_t ret = boomerangClient.BoomerangEncodeImage(pixelMap, metadata, callback);
     ASSERT_EQ(ret, RET_OK);
-    EXPECT_CALL(boomerangClientMock, RemoveWatch).WillRepeatedly(Return(RET_OK));
 }
 
 /**
@@ -204,16 +178,12 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_004, TestSize.Level1)
 HWTEST_F(BoomerangClientTest, BoomerangClientTest_005, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    TunnelClient tunnel;
-    std::string metadata;
+    std::string metadata = "test";
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = std::shared_ptr<Media::PixelMap>();
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_OK));
-    int32_t ret = boomerangClient.BoomerangDecodeImage(tunnel, pixelMap, callback);
+    int32_t ret = boomerangClient.BoomerangDecodeImage(pixelMap, callback);
     ASSERT_EQ(ret, RET_OK);
-    EXPECT_CALL(boomerangClientMock, RemoveWatch).WillRepeatedly(Return(RET_OK));
 }
 
 /**
@@ -225,20 +195,15 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_005, TestSize.Level1)
 HWTEST_F(BoomerangClientTest, BoomerangClientTest_006, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    std::shared_ptr<CoordinationListenerTest> consumer =
-        std::make_shared<CoordinationListenerTest>();
+    sptr<IRemoteBoomerangCallback> callback1 = new (std::nothrow) BoomerangClientTestCallback();
+    sptr<IRemoteBoomerangCallback> callback2 = nullptr;
     char bundleName[MAX_STRING_LEN] = {0};
-    TunnelClient tunnel;
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_ERR));
     int32_t ret = boomerangClient.SubscribeCallback(
-        tunnel, BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
-    ASSERT_EQ(ret, RET_ERR);
-    EXPECT_CALL(boomerangClientMock, RemoveWatch).WillRepeatedly(Return(RET_ERR));
-    ret = boomerangClient.UnsubscribeCallback(tunnel, BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
-    ASSERT_EQ(ret, RET_ERR);
+        BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
+    ASSERT_EQ(ret, RET_OK);
+    ret = boomerangClient.UnsubscribeCallback(BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback2);
+    ASSERT_NE(ret, RET_OK);
 }
 
 /**
@@ -250,17 +215,15 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_006, TestSize.Level1)
 HWTEST_F(BoomerangClientTest, BoomerangClientTest_007, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    std::shared_ptr<CoordinationListenerTest> consumer =
-        std::make_shared<CoordinationListenerTest>();
+    sptr<IRemoteBoomerangCallback> callback1 = new (std::nothrow) BoomerangClientTestCallback();
+    sptr<IRemoteBoomerangCallback> callback2 = nullptr;
     char bundleName[MAX_STRING_LEN] = {0};
-    TunnelClient tunnel;
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_ERR));
-    int32_t ret = boomerangClient.NotifyMetadataBindingEvent(tunnel, bundleName, callback);
-    ASSERT_EQ(ret, RET_ERR);
-    EXPECT_CALL(boomerangClientMock, RemoveWatch).WillRepeatedly(Return(RET_ERR));
+   int32_t ret = boomerangClient.SubscribeCallback(
+        BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
+    ASSERT_EQ(ret, RET_OK);
+    ret = boomerangClient.NotifyMetadataBindingEvent(bundleName, callback2);
+    ASSERT_NE(ret, RET_OK);
 }
 
 /**
@@ -272,14 +235,15 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_007, TestSize.Level1)
 HWTEST_F(BoomerangClientTest, BoomerangClientTest_008, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    TunnelClient tunnel;
     std::string metadata;
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
-    EXPECT_CALL(boomerangClientMock, SetParam).WillOnce(Return(RET_ERR));
-    int32_t ret = boomerangClient.SubmitMetadata(tunnel, metadata);
+    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
+    char bundleName[MAX_STRING_LEN] = {0};
+    int32_t ret = boomerangClient.SubscribeCallback(
+        BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
+    ASSERT_EQ(ret, RET_OK);
+    ret = boomerangClient.SubmitMetadata(metadata);
     ASSERT_EQ(ret, RET_ERR);
-    EXPECT_CALL(boomerangClientMock, SetParam).WillRepeatedly(Return(RET_ERR));
 }
 
 /**
@@ -291,16 +255,12 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_008, TestSize.Level1)
 HWTEST_F(BoomerangClientTest, BoomerangClientTest_009, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    TunnelClient tunnel;
     std::string metadata;
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = std::shared_ptr<Media::PixelMap>();
-    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_ERR));
-    int32_t ret = boomerangClient.BoomerangEncodeImage(tunnel, pixelMap, metadata, callback);
-    ASSERT_EQ(ret, RET_ERR);
-    EXPECT_CALL(boomerangClientMock, RemoveWatch).WillRepeatedly(Return(RET_ERR));
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
+    sptr<IRemoteBoomerangCallback> callback = nullptr;
+    int32_t ret = boomerangClient.BoomerangEncodeImage(pixelMap, metadata, callback);
+    ASSERT_NE(ret, RET_OK);
 }
 
 /**
@@ -312,16 +272,12 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_009, TestSize.Level1)
 HWTEST_F(BoomerangClientTest, BoomerangClientTest_010, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    TunnelClient tunnel;
     std::string metadata;
     BoomerangClient boomerangClient;
-    NiceMock<BoomerangClientMock> boomerangClientMock;
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = std::shared_ptr<Media::PixelMap>();
-    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    EXPECT_CALL(boomerangClientMock, AddWatch).WillOnce(Return(RET_ERR));
-    int32_t ret = boomerangClient.BoomerangDecodeImage(tunnel, pixelMap, callback);
-    ASSERT_EQ(ret, RET_ERR);
-    EXPECT_CALL(boomerangClientMock, RemoveWatch).WillRepeatedly(Return(RET_ERR));
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
+    sptr<IRemoteBoomerangCallback> callback = nullptr;
+    int32_t ret = boomerangClient.BoomerangDecodeImage(pixelMap, callback);
+    ASSERT_NE(ret, RET_OK);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

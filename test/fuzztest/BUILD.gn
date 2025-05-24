@@ -16,4 +16,57 @@ import("../../device_status.gni")
 group("device_status_fuzztest") {
   testonly = true
   deps = []
+
+  deps += [
+    "adddraglistener_fuzzer:fuzztest",
+    "addhotarealistener_fuzzer:fuzztest",
+    "addprivilegestub_fuzzer:fuzztest",
+    "addsubscriptlistener_fuzzer:fuzztest",
+    "devicegetcachestub_fuzzer:fuzztest",
+    "devicestatusagent_fuzzer:fuzztest",
+    "devicestatusclient_fuzzer:fuzztest",
+    "devicesubscribestub_fuzzer:fuzztest",
+    "deviceunsubscribestub_fuzzer:fuzztest",
+    "dsoftbusadapter_fuzzer:fuzztest",
+    "entertexteditorarea_fuzzer:fuzztest",
+    "getdragaction_fuzzer:fuzztest",
+    "getdragdata_fuzzer:fuzztest",
+    "getdragstate_fuzzer:fuzztest",
+    "getdragsummary_fuzzer:fuzztest",
+    "getdragtargetpid_fuzzer:fuzztest",
+    "getextrainfo_fuzzer:fuzztest",
+    "getshadowoffset_fuzzer:fuzztest",
+    "getudkey_fuzzer:fuzztest",
+    "handleallocsocketfd_fuzzer:fuzztest",
+    "ipcsocket_fuzzer:fuzztest",
+    "msdpdevicemanager_fuzzer:fuzztest",
+    "removedraglistener_fuzzer:fuzztest",
+    "removehotarealistener_fuzzer:fuzztest",
+    "removesubscriptlistener_fuzzer:fuzztest",
+    "setdragwindowvisible_fuzzer:fuzztest",
+    "startdrag_fuzzer:fuzztest",
+    "stopdrag_fuzzer:fuzztest",
+    "unregistercoordinationlistener_fuzzer:fuzztest",
+    "updatedragstyle_fuzzer:fuzztest",
+    "updatepreviewstyle_fuzzer:fuzztest",
+    "updatepreviewstylewithanimationstub_fuzzer:fuzztest",
+    "updateshadowpic_fuzzer:fuzztest",
+  ]
+  if (device_status_interaction_coordination) {
+    deps += [
+      "activatecooperate_fuzzer:fuzztest",
+      "activatecoordination_fuzzer:fuzztest",
+      "deactivatecooperate_fuzzer:fuzztest",
+      "deactivatecoordination_fuzzer:fuzztest",
+      "getcooperatestate_fuzzer:fuzztest",
+      "getcoordinationstate_fuzzer:fuzztest",
+      "preparecooperate_fuzzer:fuzztest",
+      "preparecoordination_fuzzer:fuzztest",
+      "registercooperatemonitor_fuzzer:fuzztest",
+      "registercoordinationlistener_fuzzer:fuzztest",
+      "unpreparecooperate_fuzzer:fuzztest",
+      "unpreparecoordination_fuzzer:fuzztest",
+      "unregistercooperatemonitor_fuzzer:fuzztest",
+    ]
+  }
 }
