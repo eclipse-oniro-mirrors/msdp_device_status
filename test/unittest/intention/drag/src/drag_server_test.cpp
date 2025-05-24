@@ -513,8 +513,10 @@ HWTEST_F(DragServerTest, DragServerTest12, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest13, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    bool visible = true;
+    DRAG_DATA_MGR.SetDragWindowVisible(visible);
     bool ret = DRAG_DATA_MGR.GetDragWindowVisible();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
     int32_t tid = DRAG_DATA_MGR.GetTargetTid();
     EXPECT_NE(tid, READ_OK);
     float dragOriginDpi = DRAG_DATA_MGR.GetDragOriginDpi();
@@ -982,8 +984,59 @@ HWTEST_F(DragServerTest, DragServerTest58, TestSize.Level0)
     ret = g_dragServer->GetDragBundleInfo(dragBundleInfo);
     EXPECT_EQ(ret, RET_OK);
     EXPECT_TRUE(dragBundleInfo.isCrossDevice);
-    
+
     g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest59
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest59, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    PreviewStyle previewStyleIn;
+    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
+    previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
+    DRAG_DATA_MGR.SetPreviewStyle(previewStyleIn);
+    PreviewStyle previewStyleIn1;
+    previewStyleIn1 = DRAG_DATA_MGR.GetPreviewStyle();
+    EXPECT_EQ(previewStyleIn, previewStyleIn1);
+}
+
+/**
+ * @tc.name: DragServerTest60
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest60, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    ASSERT_NE(pixelMap, nullptr);
+    ShadowInfo shadowInfo = {  pixelMap, 1, 0 };
+    ShadowOffset shadowOffset;
+    DRAG_DATA_MGR.SetShadowInfos({shadowInfo});
+    int32_t ret = DRAG_DATA_MGR.GetShadowOffset(shadowOffset);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: DragServerTest61
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest61, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool visible = true;
+    DRAG_DATA_MGR.SetDragWindowVisible(visible);
+    bool ret = DRAG_DATA_MGR.GetDragWindowVisible();
+    EXPECT_TRUE(ret);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

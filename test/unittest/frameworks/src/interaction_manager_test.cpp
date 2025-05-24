@@ -3034,8 +3034,28 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002
     InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
     bool status = true;
     ret = InteractionManager::GetInstance()->GetAppDragSwitchState(status);
-    EXPECT_NE(ret, RET_OK);
+    EXPECT_EQ(ret, RET_OK);
     RemovePermission();
+}
+
+/**
+ * @tc.name: TestDragDataUtil
+ * @tc.desc: Pack up dragdata
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, TestDragDataUtil01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData({ TEST_PIXEL_MAP_WIDTH, TEST_PIXEL_MAP_HEIGHT },
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
+    ASSERT_TRUE(dragData);
+    Parcel parcel;
+    int32_t ret = DragDataUtil::MarshallingSummarys2(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    DragData dragDataFromParcel;
+    ret = DragDataUtil::UnMarshallingSummarys2(parcel, dragDataFromParcel);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
