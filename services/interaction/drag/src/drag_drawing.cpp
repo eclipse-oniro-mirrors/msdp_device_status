@@ -2246,7 +2246,7 @@ xmlNodePtr DragDrawing::UpdateRectNode(int32_t extendSvgWidth, xmlNodePtr curNod
             xmlChar* widthProp = xmlGetProp(curNode, BAD_CAST "width");
             oStrStream << widthProp;
             std::string srcRectWidth = oStrStream.str();
-            xmlFree(widthProp); 
+            xmlFree(widthProp);
             if (!IsNum(srcRectWidth)) {
                 FI_HILOGE("srcRectWidth is not digital, srcRectWidth:%{public}s", srcRectWidth.c_str());
                 return nullptr;
