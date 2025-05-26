@@ -22,6 +22,7 @@
 
 #include "i_tunnel_client.h"
 #include "stationary_callback.h"
+#include "stationary_params.h"
 
 namespace OHOS {
 namespace Msdp {
