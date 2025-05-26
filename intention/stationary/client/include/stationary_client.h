@@ -37,10 +37,12 @@ public:
     int32_t UnsubscribeCallback(ITunnelClient &tunnel, Type type, ActivityEvent event,
         sptr<IRemoteDevStaCallback> callback);
     Data GetDeviceStatusData(ITunnelClient &tunnel, Type type);
+    void OnConnected(ITunnelClient &tunnel);
 
 private:
     std::mutex mtx_;
     std::map<Type, int32_t> typeMap_;
+    std::vector<SubscribeStationaryParam> subParams_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
