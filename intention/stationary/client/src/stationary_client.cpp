@@ -36,6 +36,15 @@ int32_t StationaryClient::SubscribeCallback(ITunnelClient &tunnel, Type type, Ac
     if (ret != RET_OK) {
         FI_HILOGE("SubscribeStationary fail, error:%{public}d", ret);
     }
+    std::lock_guard lockGrd(mtx_);
+    auto iter = std::find_if(subParams_.begin(), subParams_.end(),
+        [type, event, latency, callback](const SubscribeStationaryParam &param) {
+            return param.type_ == type && param.event_ == event && param.callback_ == callback;
+        });
+    if (iter == subParams_.end()) {
+        subParams_.emplace_back(type, event, latency, callback);
+        FI_HILOGI("insert callback in subParams, type = %{public}d, size = %{public}zu", type, subParams_.size());
+    }
     return ret;
 }
 
@@ -48,6 +57,15 @@ int32_t StationaryClient::UnsubscribeCallback(ITunnelClient &tunnel, Type type, 
     int32_t ret = tunnel.RemoveWatch(Intention::STATIONARY, StationaryRequestID::UNSUBSCRIBE_STATIONARY, param, reply);
     if (ret != RET_OK) {
         FI_HILOGE("UnsubscribeStationary fail, error:%{public}d", ret);
+    }
+    std::lock_guard lockGrd(mtx_);
+    auto iter = std::find_if(subParams_.begin(), subParams_.end(),
+        [type, event, callback](const SubscribeStationaryParam &param) {
+            return param.type_ == type && param.event_ == event && param.callback_ == callback;
+        });
+    if (iter != subParams_.end()) {
+        subParams_.erase(iter);
+        FI_HILOGI("delete callback in subParams, type = %{public}d, size = %{public}zu", type, subParams_.size());
     }
     return ret;
 }
@@ -62,6 +80,24 @@ Data StationaryClient::GetDeviceStatusData(ITunnelClient &tunnel, Type type)
         FI_HILOGE("GetStationaryData fail, error:%{public}d", ret);
     }
     return reply.data_;
+}
+
+void StationaryClient::OnConnected(ITunnelClient &tunnel)
+{
+    std::lock_guard lockGrd(mtx_);
+    if (subParams_.empty()) {
+        FI_HILOGI("subParams is empty");
+        return;
+    }
+    int32_t ret = RET_OK;
+    DefaultReply reply {};
+    FI_HILOGI("subParams size = %{public}zu", subParams_.size());
+    for (auto &param : subParams_) {
+        ret = tunnel.AddWatch(Intention::STATIONARY, StationaryRequestID::SUBSCRIBE_STATIONARY, param, reply);
+        if (ret != RET_OK) {
+            FI_HILOGE("ResubscribeStationary fail, ret = %{public}d", ret);
+        }
+    }
 }
 } // namespace DeviceStatus
 } // namespace Msdp

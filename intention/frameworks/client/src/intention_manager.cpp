@@ -113,11 +113,13 @@ void IntentionManager::InitMsgHandler()
 int32_t IntentionManager::SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
     sptr<IRemoteDevStaCallback> callback)
 {
+    InitClient();
     return stationary_.SubscribeCallback(*tunnel_, type, event, latency, callback);
 }
 
 int32_t IntentionManager::UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback)
 {
+    InitClient();
     return stationary_.UnsubscribeCallback(*tunnel_, type, event, callback);
 }
 
@@ -575,6 +577,7 @@ void IntentionManager::OnConnected()
     CALL_DEBUG_ENTER;
     CHKPV(tunnel_);
     drag_.OnConnected(*tunnel_);
+    stationary_.OnConnected(*tunnel_);
 }
 
 void IntentionManager::OnDisconnected()
