@@ -67,13 +67,14 @@ ohos_unittest("BoomerangClientTest") {
     "eventhandler:libeventhandler",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
-    "graphic_2d:librender_service_client",
   ]
 }
 
