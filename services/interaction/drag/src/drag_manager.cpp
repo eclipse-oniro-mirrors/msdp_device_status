@@ -1549,10 +1549,12 @@ int32_t DragManager::OnStartDrag()
     bool isHicarOrSuperLauncher = false;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(dragData.displayId);
-    CHKPR(display, RET_ERR);
-    std::string displayName = display->GetName();
-    isHicarOrSuperLauncher = ((displayName == "HiCar") || (displayName == "SuperLauncher"));
-    uint64_t screenId = display->GetScreenId();
+    uint64_t screenId = 0;
+    if (display != nullptr) {
+        std::string displayName = display->GetName();
+        isHicarOrSuperLauncher = ((displayName == "HiCar") || (displayName == "SuperLauncher"));
+        screenId = display->GetScreenId();
+    }
     FI_HILOGI("Get screen id:%{public}llu", static_cast<unsigned long long>(screenId));
     dragDrawing_.SetScreenId(screenId);
     if (Rosen::DisplayManager::GetInstance().IsFoldable() && !isHicarOrSuperLauncher) {
