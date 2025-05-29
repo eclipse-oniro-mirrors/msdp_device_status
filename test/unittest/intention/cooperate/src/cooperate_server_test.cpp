@@ -170,7 +170,8 @@ HWTEST_F(CooperateServerTest, StartTest1, TestSize.Level0)
     std::string networkId = "networkId";
     int32_t startDeviceId = 0;
     bool isCheckPermission = true;
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperate(context, networkId, g_userData, startDeviceId, isCheckPermission));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperate(context,
+        networkId, g_userData, startDeviceId, isCheckPermission));
     context_->GetPluginManager().UnloadCooperate();
 }
 
@@ -350,7 +351,8 @@ HWTEST_F(CooperateServerTest, GetCooperateStateAsyncTest1, TestSize.Level0)
     };
     std::string networkId = "networkId";
     bool isCheckPermission = true;
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateAsync(context, networkId, g_userData, isCheckPermission));
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateAsync(context,
+        networkId, g_userData, isCheckPermission));
     context_->GetPluginManager().UnloadCooperate();
 }
 
