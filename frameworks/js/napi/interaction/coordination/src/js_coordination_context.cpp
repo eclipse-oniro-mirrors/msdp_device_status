@@ -179,13 +179,10 @@ napi_value JsCoordinationContext::ActivateCompatible(napi_env env, napi_callback
 CooperateOptions JsCoordinationContext::GetCooperationsData(napi_env env, CooperateOptions &cooperateOptions,
     napi_value optionsHandle)
 {
-    int32_t displayX = 0;
-    cooperateOptions.displayX = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayX", displayX);
-    int32_t displayY = 0;
-    cooperateOptions.displayY = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayY", displayY);
-    int32_t displayId = 0;
-    cooperateOptions.displayId = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayId", displayId);
-    FI_HILOGI("Start cooperate,displayX:%{public}d,displayY:%{public}d,displayId:%{public}d",
+    cooperateOptions.displayX = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayX");
+    cooperateOptions.displayY = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayY");
+    cooperateOptions.displayId = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayId");
+    FI_HILOGI("Start cooperate,displayX:%{private}d,displayY:%{private}d,displayId:%{public}d",
         cooperateOptions.displayX, cooperateOptions.displayY, cooperateOptions.displayId);
     return cooperateOptions;
 }

@@ -47,8 +47,6 @@ public:
     int32_t Disable(int32_t pid, int32_t userData) override;
     int32_t Start(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
         int32_t startDeviceId, const int32_t uid = 0) override;
-    int32_t StartWithOptions(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
-        int32_t startDeviceId, const CooperateOptions &options) override;
     int32_t Stop(int32_t pid, int32_t userData, bool isUnchained) override;
 
     int32_t GetCooperateState(int32_t pid, int32_t userData, const std::string &networkId) override;
@@ -56,6 +54,8 @@ public:
     int32_t Update(uint32_t mask, uint32_t flag) override;
     int32_t SetDamplingCoefficient(uint32_t direction, double coefficient) override;
     void Dump(int32_t fd) override;
+    int32_t StartWithOptions(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
+        int32_t startDeviceId, const CooperateOptions &options) override;
 
 private:
     void Loop();
