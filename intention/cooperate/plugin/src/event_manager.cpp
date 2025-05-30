@@ -120,7 +120,7 @@ void EventManager::StartCooperateWithOptions(const StartWithOptionsEvent &event)
     calls_[EventType::START] = eventInfo;
 }
 
-void EventManager::StartCooperateWithOptinsFinish(const DSoftbusCooperateWithOptionsFinished &event)
+void EventManager::StartCooperateWithOptionsFinish(const DSoftbusCooperateWithOptionsFinished &event)
 {
     std::shared_ptr<EventInfo> eventInfo = calls_[EventType::START];
     CHKPV(eventInfo);

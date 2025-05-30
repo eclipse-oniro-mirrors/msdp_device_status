@@ -90,7 +90,7 @@ public:
     void OnClientDied(const ClientDiedEvent &event);
     void RemoteStartWithOptions(const DSoftbusCooperateOptions &event);
     void RemoteStartWithOptionsFinish(const DSoftbusCooperateWithOptionsFinished &event);
-    void StartCooperateWithOptinsFinish(const DSoftbusCooperateWithOptionsFinished &event);
+    void StartCooperateWithOptionsFinish(const DSoftbusCooperateWithOptionsFinished &event);
     void StartCooperateWithOptions(const StartWithOptionsEvent &event);
     void ErrorNotAollowCooperateWhenMotionDragging(const NotAollowCooperateWhenMotionDragging &event);
 

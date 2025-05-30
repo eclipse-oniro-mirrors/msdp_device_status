@@ -240,11 +240,12 @@ void CooperateIn::Initial::OnRelayWithOptions(Context &context, const CooperateE
     StartWithOptionsEvent startEvent = std::get<StartWithOptionsEvent>(event.event);
     parent_.process_.StartCooperateWithOptions(context, startEvent);
     FI_HILOGI("[relay cooperate With Options] To '%{public}s'", Utility::Anonymize(parent_.process_.Peer()).c_str());
-    if (relay_ != nullptr) {
-        Switch(relay_);
-        relay_->OnProgressWithOptions(context, event);
+    if (relay_ == nullptr) {
+        FI_HILOGE("relay_ is nullptr");
+        return;
     }
-    FI_HILOGE("relay_ is nullptr");
+    Switch(relay_);
+    relay_->OnProgressWithOptions(context, event);
 }
 
 void CooperateIn::Initial::OnStartWithOptions(Context &context, const CooperateEvent &event)
@@ -252,12 +253,24 @@ void CooperateIn::Initial::OnStartWithOptions(Context &context, const CooperateE
     CALL_INFO_TRACE;
     StartWithOptionsEvent startEvent = std::get<StartWithOptionsEvent>(event.event);
     context.ResetPriv();
+    if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Not allow cooperate");
+        NotAollowCooperateWhenMotionDragging result {
+            .pid = startEvent.pid,
+            .userData = startEvent.userData,
+            .networkId = startEvent.remoteNetworkId,
+            .success = false,
+            .errCode = static_cast<int32_t>(CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING)
+        };
+        context.eventMgr_.ErrorNotAollowCooperateWhenMotionDragging(result);
+        return;
+    }
     if (context.IsLocal(startEvent.remoteNetworkId)) {
         DSoftbusCooperateWithOptionsFinished result {
             .success = false,
             .errCode = static_cast<int32_t>(CoordinationErrCode::UNEXPECTED_START_CALL)
         };
-        context.eventMgr_.StartCooperateWithOptinsFinish(result);
+        context.eventMgr_.StartCooperateWithOptionsFinish(result);
         return;
     }
     FI_HILOGI("[start] with options start cooperation(%{public}s, %{public}d)",
@@ -286,7 +299,7 @@ void CooperateIn::Initial::OnComeBackWithOptions(Context &context, const Coopera
         notice.success = false;
         notice.errCode = static_cast<int32_t>(CoordinationErrCode::SEND_PACKET_FAILED);
     }
-    context.eventMgr_.StartCooperateWithOptinsFinish(notice);
+    context.eventMgr_.StartCooperateWithOptionsFinish(notice);
     context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnBack();
@@ -337,7 +350,8 @@ void CooperateIn::Initial::OnRemoteStartWithOptions(Context &context, const Coop
 {
     CALL_INFO_TRACE;
     DSoftbusCooperateOptions notice = std::get<DSoftbusCooperateOptions>(event.event);
-
+    context.StorePeerPointerSpeed(notice.pointerSpeed);
+    context.StorePeerTouchPadSpeed(notice.touchPadSpeed);
     if (context.IsPeer(notice.networkId) || context.IsLocal(notice.networkId)) {
         return;
     }
@@ -572,7 +586,8 @@ void CooperateIn::RelayConfirmation::OnRemoteStartWithOptions(Context &context, 
 {
     CALL_INFO_TRACE;
     DSoftbusCooperateOptions notice = std::get<DSoftbusCooperateOptions>(event.event);
-
+    context.StorePeerPointerSpeed(notice.pointerSpeed);
+    context.StorePeerTouchPadSpeed(notice.touchPadSpeed);
     if (context.IsPeer(notice.networkId) || context.IsLocal(notice.networkId)) {
         return;
     }
@@ -707,6 +722,7 @@ void CooperateIn::RelayConfirmation::OnResponseWithOptions(Context &context, con
         Proceed(context, event);
     } else {
         OnResetWithOptionsNotifyMessage(context, event);
+        parent_.StopCooperate(context, event);
     }
 }
 
@@ -744,8 +760,7 @@ void CooperateIn::RelayConfirmation::OnNormalWithOptions(Context &context, const
     context.OnStartCooperate(notice.extra);
     context.dsoftbus_.StartCooperateWithOptions(parent_.process_.Peer(), notice);
 
-    context.eventMgr_.StartCooperateWithOptinsFinish(notice);
-    context.inputDevMgr_.RemoveVirtualInputDevice(context.Peer());
+    context.eventMgr_.StartCooperateWithOptionsFinish(notice);
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
     context.OnRelayCooperation(parent_.process_.Peer(), context.NormalizedCursorPosition());
 }
@@ -800,10 +815,7 @@ void CooperateIn::RelayConfirmation::OnProgressWithOptions(Context &context, con
         .touchPadSpeed = context.GetTouchPadSpeed(),
     };
     context.dsoftbus_.RelayCooperateWithOptions(context.Peer(), notice);
-    StartWithOptionsEvent startEvent = std::get<StartWithOptionsEvent>(event.event);
-    startWithOptionsEvent_.displayX = startEvent.displayX;
-    startWithOptionsEvent_.displayY = startEvent.displayY;
-    startWithOptionsEvent_.displayId = startEvent.displayId;
+    startWithOptionsEvent_ = std::get<StartWithOptionsEvent>(event.event);
     timerId_ = parent_.env_->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE,
         [sender = context.Sender(), remoteNetworkId = context.Peer()]() mutable {
             auto ret = sender.Send(CooperateEvent(
@@ -843,7 +855,7 @@ void CooperateIn::RelayConfirmation::OnResetWithOptionsNotifyMessage(Context &co
     DSoftbusCooperateWithOptionsFinished result {
         .success = false
     };
-    context.eventMgr_.StartCooperateWithOptinsFinish(result);
+    context.eventMgr_.StartCooperateWithOptionsFinish(result);
     Reset(context, event);
 }
 

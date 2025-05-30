@@ -20,10 +20,9 @@ namespace Msdp {
 namespace DeviceStatus {
 
 StartCooperateParam::StartCooperateParam(int32_t userData, const std::string &remoteNetworkId,
-                                         int32_t startDeviceId, bool checkPermission, const CooperateOptions &options,
-                                         int32_t cooperateParamType)
+                                         int32_t startDeviceId, bool checkPermission, const CooperateOptions &options)
     : remoteNetworkId(remoteNetworkId), userData(userData), startDeviceId(startDeviceId),
-      checkPermission(checkPermission), options(options), cooperateParamType(cooperateParamType)
+    checkPermission(checkPermission), options(options)
 {}
 
 bool StartCooperateParam::Marshalling(MessageParcel &parcel) const
@@ -35,8 +34,7 @@ bool StartCooperateParam::Marshalling(MessageParcel &parcel) const
         parcel.WriteBool(checkPermission) &&
         parcel.WriteInt32(options.displayX) &&
         parcel.WriteInt32(options.displayY) &&
-        parcel.WriteInt32(options.displayId) &&
-        parcel.WriteInt32(cooperateParamType)
+        parcel.WriteInt32(options.displayId)
     );
 }
 
@@ -49,8 +47,7 @@ bool StartCooperateParam::Unmarshalling(MessageParcel &parcel)
         parcel.ReadBool(checkPermission) &&
         parcel.ReadInt32(options.displayX) &&
         parcel.ReadInt32(options.displayY) &&
-        parcel.ReadInt32(options.displayId) &&
-        parcel.ReadInt32(cooperateParamType)
+        parcel.ReadInt32(options.displayId)
     );
 }
 

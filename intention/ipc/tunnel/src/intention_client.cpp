@@ -157,7 +157,7 @@ int32_t IntentionClient::StartCooperateWithOptions(const std::string &remoteNetw
     SequenceableCooperateOptions sequenceableCooperateOptions(options);
     if (int32_t ret = devicestatusProxy_->StartCooperateWithOptions(remoteNetworkId, userData,
         startDeviceId, checkPermission, sequenceableCooperateOptions); ret != RET_OK) {
-        FI_HILOGE("proxy::StartCooperate fail");
+        FI_HILOGE("proxy::StartCooperateWithOptions fail");
         return ret;
     }
     return RET_OK;
