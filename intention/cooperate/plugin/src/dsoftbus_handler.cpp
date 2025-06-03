@@ -188,11 +188,35 @@ int32_t DSoftbusHandler::StartCooperateWithOptions(const std::string &networkId,
         << event.touchPadSpeed;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
+        CooperateRadarInfo radarInfo {
+            .funcName = __FUNCTION__,
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_SERIALIZE_INSTRUCTION),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::SERIALIZE_INSTRUCTION_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         return RET_ERR;
     }
     int32_t ret = env_->GetDSoftbus().SendPacket(networkId, packet);
     if (ret != RET_OK) {
         OnCommunicationFailure(networkId);
+        CooperateRadarInfo radarInfo {
+            .funcName = __FUNCTION__,
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_SEND_INSTRUCTION_TO_REMOTE),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::SEND_INSTRUCTION_TO_REMOTE_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(event.originNetworkId.c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(networkId.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     }
     return ret;
 }
