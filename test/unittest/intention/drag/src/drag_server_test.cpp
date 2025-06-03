@@ -643,7 +643,7 @@ HWTEST_F(DragServerTest, DragClientTest19, TestSize.Level0)
     uint16_t displayId = 0;
     uint64_t screenId = 0;
     int32_t ret = g_dragServer->SetDragWindowScreenId(context, displayId, screenId);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, COMMON_NOT_SYSTEM_APP);
 }
 
 /**
