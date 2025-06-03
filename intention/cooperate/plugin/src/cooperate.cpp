@@ -263,6 +263,9 @@ int32_t Cooperate::StartWithOptions(int32_t pid, int32_t userData, const std::st
         event.displayX, event.displayY, event.displayId);
     auto errCode = event.errCode->get_future();
     auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::WITH_OPTIONS_START, event));
+    if (ret != Channel<CooperateEvent>::NO_ERROR) {
+        FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+    }
     if (ret != RET_OK) {
         radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CALLING_COOPERATE);
         radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
