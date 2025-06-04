@@ -33,6 +33,7 @@ namespace {
 auto &g_motionClient = MotionClient::GetInstance();
 constexpr int32_t PERMISSION_DENIED = 201;
 static constexpr uint8_t ARG_1 = 1;
+constexpr int32_t HOLDING_HAND_FEATURE_DISABLE = 11;
 #endif
 static constexpr uint8_t ARG_0 = 0;
 static constexpr uint8_t ARG_2 = 2;
@@ -41,9 +42,17 @@ constexpr size_t MAX_ARG_STRING_LEN = 512;
 constexpr int32_t MOTION_TYPE_OPERATING_HAND = 3601;
 constexpr int32_t MOTION_TYPE_STAND = 3602;
 constexpr int32_t MOTION_TYPE_REMOTE_PHOTO = 3604;
+constexpr int32_t MOTION_TYPE_HOLDING_HAND_STATUS = 3605;
 constexpr int32_t BASE_HAND = 0;
 constexpr int32_t LEFT_HAND = 1;
 constexpr int32_t RIGHT_HAND = 2;
+enum HoldPostureStatus : int32_t {
+    NOT_HELD = 0,
+    LEFT_HAND_HELD,
+    RIGHT_HAND_HELD,
+    BOTH_HAND_HELD,
+    UNKNOWN = 16,
+};
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES = { "string", "function" };
 const std::vector<std::string> EXPECTED_UNSUB_ONE_ARG_TYPES = { "string" };
 const std::vector<std::string> EXPECTED_UNSUB_TWO_ARG_TYPES = { "string", "function" };
@@ -51,6 +60,7 @@ const std::map<const std::string, int32_t> MOTION_TYPE_MAP = {
     { "operatingHandChanged", MOTION_TYPE_OPERATING_HAND },
     { "steadyStandingDetect", MOTION_TYPE_STAND },
     { "remotePhotoStandingDetect", MOTION_TYPE_REMOTE_PHOTO },
+    { "holdingHandStatus", MOTION_TYPE_HOLDING_HAND_STATUS },
 };
 MotionNapi *g_motionObj = nullptr;
 } // namespace
@@ -139,7 +149,7 @@ bool MotionNapi::SubscribeCallback(napi_env env, int32_t type)
             FI_HILOGE("failed to subscribe");
             ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
             return false;
-        } else if (ret == DEVICE_EXCEPTION) {
+        } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
             FI_HILOGE("failed to subscribe");
             ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
             return false;
@@ -176,7 +186,7 @@ bool MotionNapi::UnSubscribeCallback(napi_env env, int32_t type)
             FI_HILOGE("failed to unsubscribe");
             ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
             return false;
-        } else if (ret == DEVICE_EXCEPTION) {
+        } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
             FI_HILOGE("failed to unsubscribe");
             ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
             return false;
@@ -390,8 +400,26 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
     SetInt32Property(env, operatingHandStatus, LEFT_HAND, "LEFT_HAND_OPERATED");
     SetInt32Property(env, operatingHandStatus, RIGHT_HAND, "RIGHT_HAND_OPERATED");
     SetPropertyName(env, exports, "OperatingHandStatus", operatingHandStatus);
+    DefineHoldingHandStatus(env, exports);
     FI_HILOGD("Exit");
     return exports;
+}
+
+void MotionNapi::DefineHoldingHandStatus(napi_env env, napi_value exports)
+{
+    napi_value holdingHandStatus;
+    napi_status status = napi_create_object(env, &holdingHandStatus);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed create object");
+        return;
+    }
+
+    SetInt32Property(env, holdingHandStatus, HoldPostureStatus::UNKNOWN, "UNKNOWN");
+    SetInt32Property(env, holdingHandStatus, HoldPostureStatus::NOT_HELD, "NOT_HELD");
+    SetInt32Property(env, holdingHandStatus, HoldPostureStatus::LEFT_HAND_HELD, "LEFT_HAND_HELD");
+    SetInt32Property(env, holdingHandStatus, HoldPostureStatus::RIGHT_HAND_HELD, "RIGHT_HAND_HELD");
+    SetInt32Property(env, holdingHandStatus, HoldPostureStatus::BOTH_HAND_HELD, "BOTH_HAND_HELD");
+    SetPropertyName(env, exports, "HoldingHandStatus", holdingHandStatus);
 }
 
 void MotionNapi::SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName)
