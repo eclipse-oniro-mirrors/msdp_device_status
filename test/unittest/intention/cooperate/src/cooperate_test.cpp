@@ -359,7 +359,7 @@ HWTEST_F(CooperateTest, CooperateTest8, TestSize.Level0)
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
         EXPECT_EQ(!ret, RET_OK);
-    }  
+    }
 }
 } // namespace DeviceStatus
 } // namespace Msdp
