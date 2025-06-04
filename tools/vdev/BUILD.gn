@@ -43,6 +43,7 @@ ohos_source_set("devicestatus_vdev") {
     "input:libmmi-client",
     "json:nlohmann_json_static",
     "window_manager:libdm",
+    "ipc:ipc_single",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

@@ -22,6 +22,7 @@ deps_ex = [
   "access_token:libaccesstoken_sdk",
   "cJSON:cjson",
   "c_utils:utils",
+  "common_event_service:cesfwk_innerkits",
   "data_share:datashare_consumer",
   "graphic_2d:libcomposer",
   "graphic_2d:window_animation",
@@ -31,7 +32,9 @@ deps_ex = [
   "hilog:libhilog",
   "input:libmmi-client",
   "image_framework:image_native",
+  "libxml2:libxml2",
   "safwk:system_ability_fwk",
+  "samgr:samgr_proxy",
   "window_manager:libwm",
   "window_manager:libdm",
 ]

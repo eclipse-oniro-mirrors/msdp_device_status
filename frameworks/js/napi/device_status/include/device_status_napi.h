@@ -24,7 +24,7 @@
 
 #include "devicestatus_callback_stub.h"
 #include "device_status_napi_event.h"
-#include "stationary_callback.h"
+#include "iremote_dev_sta_callback.h"
 #include "stationary_data.h"
 
 namespace OHOS {

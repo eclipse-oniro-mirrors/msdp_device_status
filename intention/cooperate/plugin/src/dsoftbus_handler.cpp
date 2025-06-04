@@ -183,9 +183,9 @@ int32_t DSoftbusHandler::StartCooperateWithOptions(const std::string &networkId,
 {
     CALL_INFO_TRACE;
     NetPacket packet(MessageId::DSOFTBUS_COOPERATE_WITH_OPTIONS);
-    packet << event.originNetworkId << event.cooperateOptions.displayX
-        << event.cooperateOptions.displayY << event.cooperateOptions.displayId
-        << event.success << event.extra.priv;
+    packet << event.originNetworkId << event.cooperateOptions.displayX << event.cooperateOptions.displayY
+        << event.cooperateOptions.displayId << event.success << event.extra.priv << event.pointerSpeed
+        << event.touchPadSpeed;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         return RET_ERR;
@@ -466,6 +466,14 @@ void DSoftbusHandler::OnStartCooperateWithOptions(const std::string &networkId, 
     if (packet.ChkRWError()) {
         event.extra.priv = 0;
     }
+    packet >> event.pointerSpeed;
+    if (packet.ChkRWError()) {
+        event.pointerSpeed = -1;
+    }
+    packet >> event.touchPadSpeed;
+    if (packet.ChkRWError()) {
+        event.touchPadSpeed = -1;
+    }
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_COOPERATE_WITH_OPTIONS,
         event));
@@ -499,7 +507,8 @@ void DSoftbusHandler::OnComeBackWithOptions(const std::string &networkId, NetPac
         .networkId = networkId,
         .success = true,
     };
-    packet >> event.originNetworkId >> event.cooperateOptions.displayX  >> event.cooperateOptions.displayY;
+    packet >> event.originNetworkId >> event.cooperateOptions.displayX  >>
+        event.cooperateOptions.displayY >> event.cooperateOptions.displayId;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to read data packet");
         return;

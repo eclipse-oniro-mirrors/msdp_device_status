@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,22 +24,13 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class SocketServer final : public IPlugin {
+class SocketServer final {
 public:
     SocketServer(IContext *context);
     ~SocketServer() = default;
     DISALLOW_COPY_AND_MOVE(SocketServer);
-
-    int32_t Enable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Start(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-
+    int32_t Socket(CallingContext &context, const std::string &programName, int32_t moduleType,
+        int &socketFd, int32_t &tokenType);
 private:
     IContext *context_ { nullptr };
 };

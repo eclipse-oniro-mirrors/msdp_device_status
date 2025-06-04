@@ -19,6 +19,7 @@
 #include "drag_params.h"
 #include "devicestatus_define.h"
 #include "devicestatus_proto.h"
+#include "intention_client.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DragClient"
@@ -27,8 +28,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-int32_t DragClient::StartDrag(ITunnelClient &tunnel,
-    const DragData &dragData, std::shared_ptr<IStartDragListener> listener)
+int32_t DragClient::StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener)
 {
     CALL_DEBUG_ENTER;
     CHKPR(listener, RET_ERR);
@@ -57,30 +57,79 @@ int32_t DragClient::StartDrag(ITunnelClient &tunnel,
         std::lock_guard<std::mutex> guard(mtx_);
         startDragListener_ = listener;
     }
-    StartDragParam param { dragData };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.Start(Intention::DRAG, param, reply);
+    int32_t ret = INTENTION_CLIENT->StartDrag(dragData);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::Start fail");
+        FI_HILOGE("StartDrag fail");
     }
     return ret;
 }
 
-int32_t DragClient::StopDrag(ITunnelClient &tunnel, const DragDropResult &dropResult)
+int32_t DragClient::GetDragState(DragState &dragState)
 {
     CALL_DEBUG_ENTER;
-    StopDragParam param { dropResult };
-    DefaultReply reply;
-
-    int32_t ret = tunnel.Stop(Intention::DRAG, param, reply);
+    int32_t ret = INTENTION_CLIENT->GetDragState(dragState);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::Start fail");
+        FI_HILOGE("GetDragState fail");
     }
     return ret;
 }
 
-int32_t DragClient::AddDraglistener(ITunnelClient &tunnel, DragListenerPtr listener, bool isJsCaller)
+int32_t DragClient::StopDrag(const DragDropResult &dropResult)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->StopDrag(dropResult);
+    if (ret != RET_OK) {
+        FI_HILOGE("StopDrag fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->EnableInternalDropAnimation(animationInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("EnableInternalDropAnimation fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::UpdateDragStyle(DragCursorStyle style, int32_t eventId)
+{
+    CALL_DEBUG_ENTER;
+    if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
+        FI_HILOGE("Invalid style:%{public}d", static_cast<int32_t>(style));
+        return RET_ERR;
+    }
+    int32_t ret = INTENTION_CLIENT->UpdateDragStyle(style, eventId);
+    if (ret != RET_OK) {
+        FI_HILOGE("UpdateDragStyle fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::GetDragTargetPid()
+{
+    CALL_DEBUG_ENTER;
+    int32_t targetPid = -1;
+    int32_t ret = INTENTION_CLIENT->GetDragTargetPid(targetPid);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetDragTargetPid fail");
+    }
+    return targetPid;
+}
+
+int32_t DragClient::GetUdKey(std::string &udKey)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->GetUdKey(udKey);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetUdKey fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::AddDraglistener(DragListenerPtr listener, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
     CHKPR(listener, RET_ERR);
@@ -89,13 +138,10 @@ int32_t DragClient::AddDraglistener(ITunnelClient &tunnel, DragListenerPtr liste
         return RET_OK;
     }
     if (!hasRegistered_) {
-        AddDraglistenerParam param { isJsCaller };
-        DefaultReply reply {};
         FI_HILOGI("Start drag listening");
-
-        int32_t ret = tunnel.AddWatch(Intention::DRAG, DragRequestID::ADD_DRAG_LISTENER, param, reply);
+        int32_t ret = INTENTION_CLIENT->AddDraglistener(isJsCaller);
         if (ret != RET_OK) {
-            FI_HILOGE("ITunnelClient::AddWatch fail");
+            FI_HILOGE("AddDraglistener fail");
             return ret;
         }
         hasRegistered_ = true;
@@ -104,7 +150,7 @@ int32_t DragClient::AddDraglistener(ITunnelClient &tunnel, DragListenerPtr liste
     return RET_OK;
 }
 
-int32_t DragClient::RemoveDraglistener(ITunnelClient &tunnel, DragListenerPtr listener, bool isJsCaller)
+int32_t DragClient::RemoveDraglistener(DragListenerPtr listener, bool isJsCaller)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
@@ -115,34 +161,28 @@ int32_t DragClient::RemoveDraglistener(ITunnelClient &tunnel, DragListenerPtr li
     }
     if (hasRegistered_ && dragListeners_.empty()) {
         hasRegistered_ = false;
-        RemoveDraglistenerParam param { isJsCaller };
-        DefaultReply reply {};
         FI_HILOGI("Stop drag listening");
-
-        int32_t ret = tunnel.RemoveWatch(Intention::DRAG, DragRequestID::REMOVE_DRAG_LISTENER, param, reply);
+        int32_t ret = INTENTION_CLIENT->RemoveDraglistener(isJsCaller);
         if (ret != RET_OK) {
-            FI_HILOGE("ITunnelClient::RemoveWatch fail");
+            FI_HILOGE("RemoveDraglistener fail");
             return ret;
         }
     }
     return RET_OK;
 }
-
-int32_t DragClient::AddSubscriptListener(ITunnelClient &tunnel, SubscriptListenerPtr listener)
+int32_t DragClient::AddSubscriptListener(SubscriptListenerPtr listener)
 {
+    CALL_DEBUG_ENTER;
     CHKPR(listener, RET_ERR);
     std::lock_guard<std::mutex> guard(mtx_);
     if (subscriptListeners_.find(listener) != subscriptListeners_.end()) {
         return RET_OK;
     }
     if (!hasSubscriptRegistered_) {
-        DefaultParam param {};
-        DefaultReply reply {};
         FI_HILOGI("Start subscript listening");
-
-        int32_t ret = tunnel.AddWatch(Intention::DRAG, DragRequestID::ADD_SUBSCRIPT_LISTENER, param, reply);
+        int32_t ret = INTENTION_CLIENT->AddSubscriptListener();
         if (ret != RET_OK) {
-            FI_HILOGE("ITunnelClient::AddWatch fail");
+            FI_HILOGE("AddSubscriptListener fail");
             return ret;
         }
         hasSubscriptRegistered_ = true;
@@ -151,8 +191,9 @@ int32_t DragClient::AddSubscriptListener(ITunnelClient &tunnel, SubscriptListene
     return RET_OK;
 }
 
-int32_t DragClient::RemoveSubscriptListener(ITunnelClient &tunnel, SubscriptListenerPtr listener)
+int32_t DragClient::RemoveSubscriptListener(SubscriptListenerPtr listener)
 {
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
     if (listener == nullptr) {
         subscriptListeners_.clear();
@@ -161,49 +202,38 @@ int32_t DragClient::RemoveSubscriptListener(ITunnelClient &tunnel, SubscriptList
     }
     if (hasSubscriptRegistered_ && subscriptListeners_.empty()) {
         hasSubscriptRegistered_ = false;
-        DefaultParam param {};
-        DefaultReply reply {};
         FI_HILOGI("Stop subscript listening");
-
-        int32_t ret = tunnel.RemoveWatch(Intention::DRAG, DragRequestID::REMOVE_SUBSCRIPT_LISTENER, param, reply);
+        int32_t ret = INTENTION_CLIENT->RemoveSubscriptListener();
         if (ret != RET_OK) {
-            FI_HILOGE("ITunnelClient::RemoveWatch fail");
+            FI_HILOGE("RemoveSubscriptListener fail");
             return ret;
         }
     }
     return RET_OK;
 }
 
-int32_t DragClient::SetDragWindowVisible(
-    ITunnelClient &tunnel, bool visible, bool isForce, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+int32_t DragClient::SetDragWindowVisible(bool visible, bool isForce,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    SetDragWindowVisibleParam param { visible, isForce, rsTransaction };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_DRAG_WINDOW_VISIBLE, param, reply);
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->SetDragWindowVisible(visible, isForce, rsTransaction);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
+        FI_HILOGE("SetDragWindowVisible fail");
     }
     return ret;
 }
 
-int32_t DragClient::UpdateDragStyle(ITunnelClient &tunnel, DragCursorStyle style, int32_t eventId)
+int32_t DragClient::GetShadowOffset(ShadowOffset &shadowOffset)
 {
-    if ((style < DragCursorStyle::DEFAULT) || (style > DragCursorStyle::MOVE)) {
-        FI_HILOGE("Invalid style:%{public}d", static_cast<int32_t>(style));
-        return RET_ERR;
-    }
-    UpdateDragStyleParam param { style, eventId };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::UPDATE_DRAG_STYLE, param, reply);
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->GetShadowOffset(shadowOffset);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
+        FI_HILOGE("GetShadowOffset fail");
     }
     return ret;
 }
 
-int32_t DragClient::UpdateShadowPic(ITunnelClient &tunnel, const ShadowInfo &shadowInfo)
+int32_t DragClient::UpdateShadowPic(const ShadowInfo &shadowInfo)
 {
     CALL_DEBUG_ENTER;
     CHKPR(shadowInfo.pixelMap, RET_ERR);
@@ -214,284 +244,187 @@ int32_t DragClient::UpdateShadowPic(ITunnelClient &tunnel, const ShadowInfo &sha
             shadowInfo.x, shadowInfo.y);
         return RET_ERR;
     }
-    UpdateShadowPicParam param { shadowInfo };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::UPDATE_SHADOW_PIC, param, reply);
+    int32_t ret = INTENTION_CLIENT->UpdateShadowPic(shadowInfo);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
+        FI_HILOGE("UpdateShadowPic fail");
     }
     return ret;
 }
 
-int32_t DragClient::GetDragTargetPid(ITunnelClient &tunnel)
+int32_t DragClient::GetDragData(DragData &dragData)
 {
     CALL_DEBUG_ENTER;
-    DefaultParam param {};
-    GetDragTargetPidReply reply {};
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_DRAG_TARGET_PID, param, reply);
+    int32_t ret = INTENTION_CLIENT->GetDragData(dragData);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail");
-        return -1;
+        FI_HILOGE("GetDragData fail");
     }
-    return reply.targetPid_;
+    return ret;
 }
 
-int32_t DragClient::GetUdKey(ITunnelClient &tunnel, std::string &udKey)
-{
-    DefaultParam param {};
-    GetUdKeyReply reply {};
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_UDKEY, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail");
-        return ret;
-    }
-    udKey = reply.udKey_;
-    FI_HILOGI("UdKey:%{public}s", reply.udKey_.c_str());
-    return RET_OK;
-}
-
-int32_t DragClient::GetShadowOffset(ITunnelClient &tunnel, ShadowOffset &shadowOffset)
-{
-    DefaultParam param {};
-    GetShadowOffsetReply reply {};
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_SHADOW_OFFSET, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail");
-        return ret;
-    }
-    shadowOffset = reply.shadowOffset_;
-    return RET_OK;
-}
-
-int32_t DragClient::GetDragData(ITunnelClient &tunnel, DragData &dragData)
+int32_t DragClient::UpdatePreviewStyle(const PreviewStyle &previewStyle)
 {
     CALL_DEBUG_ENTER;
-    DefaultParam param {};
-    GetDragDataReply reply { dragData };
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_DRAG_DATA, param, reply);
+    int32_t ret = INTENTION_CLIENT->UpdatePreviewStyle(previewStyle);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail");
+        FI_HILOGE("UpdatePreviewStyle fail");
     }
     return ret;
 }
 
-int32_t DragClient::UpdatePreviewStyle(ITunnelClient &tunnel, const PreviewStyle &previewStyle)
-{
-    UpdatePreviewStyleParam param { previewStyle };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::UPDATE_PREVIEW_STYLE, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::UpdatePreviewStyleWithAnimation(ITunnelClient &tunnel,
-    const PreviewStyle &previewStyle, const PreviewAnimation &animation)
-{
-    UpdatePreviewAnimationParam param { previewStyle, animation };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::UPDATE_PREVIEW_STYLE_WITH_ANIMATION, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::RotateDragWindowSync(ITunnelClient &tunnel,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
-{
-    RotateDragWindowSyncParam param { rsTransaction };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.Control(Intention::DRAG, DragRequestID::ROTATE_DRAG_WINDOW_SYNC, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::Control fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::SetDragWindowScreenId(ITunnelClient &tunnel, uint64_t displayId, uint64_t screenId)
-{
-    SetDragWindowScreenIdParam param { displayId, screenId };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_DRAG_WINDOW_SCREEN_ID, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::GetDragSummary(ITunnelClient &tunnel, std::map<std::string, int64_t> &summary,
-    bool isJsCaller)
-{
-    GetDragSummaryParam param { isJsCaller };
-    GetDragSummaryReply reply {};
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_DRAG_SUMMARY, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail");
-        return ret;
-    }
-    summary.swap(reply.summary_);
-    return RET_OK;
-}
-
-int32_t DragClient::SetDragSwitchState(ITunnelClient &tunnel, bool enable, bool isJsCaller)
-{
-    SetDragSwitchStateParam param { enable, isJsCaller };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_DRAG_SWITCH_STATE, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail, %{public}d", ret);
-    }
-    return ret;
-}
-
-int32_t DragClient::SetAppDragSwitchState(ITunnelClient &tunnel, bool enable, const std::string &pkgName,
-    bool isJsCaller)
-{
-    SetAppDragSwitchStateParam param { enable, pkgName, isJsCaller };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_APP_DRAG_SWITCH_STATE, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail, %{public}d", ret);
-    }
-    return ret;
-}
-
-int32_t DragClient::GetDragState(ITunnelClient &tunnel, DragState &dragState)
-{
-    DefaultParam param {};
-    GetDragStateReply reply {};
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_DRAG_STATE, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail");
-        return ret;
-    }
-    dragState = reply.dragState_;
-    return RET_OK;
-}
-
-int32_t DragClient::EnableUpperCenterMode(ITunnelClient &tunnel, bool enable)
-{
-    EnterTextEditorAreaParam param { enable };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.Control(Intention::DRAG, DragRequestID::ENTER_TEXT_EDITOR_AREA, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::Control fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::GetDragAction(ITunnelClient &tunnel, DragAction &dragAction)
-{
-    DefaultParam param {};
-    GetDragActionReply reply {};
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_DRAG_ACTION, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail");
-        return ret;
-    }
-    dragAction = reply.dragAction_;
-    return RET_OK;
-}
-
-int32_t DragClient::GetExtraInfo(ITunnelClient &tunnel, std::string &extraInfo)
-{
-    DefaultParam param {};
-    GetExtraInfoReply reply {};
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_EXTRA_INFO, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail");
-        return ret;
-    }
-    extraInfo = std::move(reply.extraInfo_);
-    return RET_OK;
-}
-
-int32_t DragClient::AddPrivilege(ITunnelClient &tunnel)
-{
-    DefaultParam param {};
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.Control(Intention::DRAG, DragRequestID::ADD_PRIVILEGE, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::Control fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::EraseMouseIcon(ITunnelClient &tunnel)
-{
-    DefaultParam param {};
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.Control(Intention::DRAG, DragRequestID::ERASE_MOUSE_ICON, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::Control fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::SetMouseDragMonitorState(ITunnelClient &tunnel, bool state)
-{
-    SetMouseDragMonitorStateParam param { state };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.Control(Intention::DRAG, DragRequestID::SET_MOUSE_DRAG_MONITOR_STATE, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::Control fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::AddSelectedPixelMap(ITunnelClient &tunnel, std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
-    std::function<void(bool)> callback)
+int32_t DragClient::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation)
 {
     CALL_DEBUG_ENTER;
-    CHKPR(pixelMap, RET_ERR);
-    CHKPR(callback, RET_ERR);
-    std::lock_guard<std::mutex> guard(mtx_);
-    addSelectedPixelMapCallback_ = callback;
-    AddSelectedPixelMapParam param { pixelMap };
-    DefaultReply reply {};
-
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::ADD_SELECTED_PIXELMAP, param, reply);
+    int32_t ret = INTENTION_CLIENT->UpdatePreviewStyleWithAnimation(previewStyle, animation);
     if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
+        FI_HILOGE("UpdatePreviewStyleWithAnimation fail");
     }
     return ret;
 }
 
-int32_t DragClient::OnAddSelectedPixelMapResult(const StreamClient &client, NetPacket &pkt)
+int32_t DragClient::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CALL_DEBUG_ENTER;
-    bool result = false;
-
-    pkt >> result;
-    if (pkt.ChkRWError()) {
-        FI_HILOGE("Packet read addSelectedPixelMap msg failed");
-        return RET_ERR;
+    int32_t ret = INTENTION_CLIENT->RotateDragWindowSync(rsTransaction);
+    if (ret != RET_OK) {
+        FI_HILOGE("RotateDragWindowSync fail");
     }
-    std::lock_guard<std::mutex> guard(mtx_);
-    CHKPR(addSelectedPixelMapCallback_, RET_ERR);
-    addSelectedPixelMapCallback_(result);
-    return RET_OK;
+    return ret;
+}
+
+int32_t DragClient::GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->GetDragSummary(summarys, isJsCaller);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetDragSummary fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::SetDragSwitchState(bool enable, bool isJsCaller)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->SetDragSwitchState(enable, isJsCaller);
+    if (ret != RET_OK) {
+        FI_HILOGE("SetDragSwitchState fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->SetAppDragSwitchState(enable, pkgName, isJsCaller);
+    if (ret != RET_OK) {
+        FI_HILOGE("SetAppDragSwitchState fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::GetDragAction(DragAction &dragAction)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->GetDragAction(dragAction);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetDragAction fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::GetExtraInfo(std::string &extraInfo)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->GetExtraInfo(extraInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetExtraInfo fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::AddPrivilege()
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->AddPrivilege();
+    if (ret != RET_OK) {
+        FI_HILOGE("AddPrivilege fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::EraseMouseIcon()
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->EraseMouseIcon();
+    if (ret != RET_OK) {
+        FI_HILOGE("EraseMouseIcon fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->SetDragWindowScreenId(displayId, screenId);
+    if (ret != RET_OK) {
+        FI_HILOGE("SetDragWindowScreenId fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::SetMouseDragMonitorState(bool state)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->SetMouseDragMonitorState(state);
+    if (ret != RET_OK) {
+        FI_HILOGE("SetMouseDragMonitorState fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::SetDraggableState(bool state)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->SetDraggableState(state);
+    if (ret != RET_OK) {
+        FI_HILOGE("SetDraggableState fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::GetAppDragSwitchState(bool &state)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->GetAppDragSwitchState(state);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetAppDragSwitchState fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::EnableUpperCenterMode(bool enable)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->EnableUpperCenterMode(enable);
+    if (ret != RET_OK) {
+        FI_HILOGE("EnableUpperCenterMode fail");
+    }
+    return ret;
+}
+
+void DragClient::SetDraggableStateAsync(bool state, int64_t downTime)
+{
+    CALL_DEBUG_ENTER;
+    INTENTION_CLIENT->SetDraggableStateAsync(state, downTime);
+}
+
+int32_t DragClient::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->GetDragBundleInfo(dragBundleInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetDragBundleInfo fail");
+    }
+    return ret;
 }
 
 int32_t DragClient::OnNotifyResult(const StreamClient &client, NetPacket &pkt)
@@ -523,51 +456,6 @@ int32_t DragClient::OnNotifyResult(const StreamClient &client, NetPacket &pkt)
     return RET_OK;
 }
 
-int32_t DragClient::OnNotifyHideIcon(const StreamClient& client, NetPacket& pkt)
-{
-    CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mtx_);
-    CHKPR(startDragListener_, RET_ERR);
-    startDragListener_->OnHideIconMessage();
-    return RET_OK;
-}
-
-int32_t DragClient::SetDraggableState(ITunnelClient &tunnel, bool state)
-{
-    SetDraggableStateParam param {state};
-    DefaultReply reply {};
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_DRAGGABLE_STATE, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::GetAppDragSwitchState(ITunnelClient &tunnel, bool &state)
-{
-    DefaultParam param {};
-    GetUniversalDragAppStateReply reply {};
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_UNIVERSAL_DRAG_APP_STATE, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail");
-        return ret;
-    }
-
-    state = reply.state_;
-    return RET_OK;
-}
-
-void DragClient::SetDraggableStateAsync(ITunnelClient &tunnel, bool state, int64_t downTime)
-{
-    SetDraggableStateAsyncParam param {state, downTime};
-    DefaultReply reply {};
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::SET_DRAGABLE_STATE_ASYNC, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
-    }
-}
-
 int32_t DragClient::OnStateChangedMessage(const StreamClient &client, NetPacket &pkt)
 {
     CALL_DEBUG_ENTER;
@@ -581,6 +469,15 @@ int32_t DragClient::OnStateChangedMessage(const StreamClient &client, NetPacket 
     for (const auto &listener : dragListeners_) {
         listener->OnDragMessage(static_cast<DragState>(state));
     }
+    return RET_OK;
+}
+
+int32_t DragClient::OnNotifyHideIcon(const StreamClient &client, NetPacket &pkt)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    CHKPR(startDragListener_, RET_ERR);
+    startDragListener_->OnHideIconMessage();
     return RET_OK;
 }
 
@@ -600,7 +497,7 @@ int32_t DragClient::OnDragStyleChangedMessage(const StreamClient &client, NetPac
     return RET_OK;
 }
 
-void DragClient::OnConnected(ITunnelClient &tunnel)
+void DragClient::OnConnected()
 {
     CALL_INFO_TRACE;
     if (connectedDragListeners_.empty()) {
@@ -608,14 +505,14 @@ void DragClient::OnConnected(ITunnelClient &tunnel)
         return;
     }
     for (const auto &listener : connectedDragListeners_) {
-        if (AddDraglistener(tunnel, listener) != RET_OK) {
+        if (AddDraglistener(listener) != RET_OK) {
             FI_HILOGW("AddDraglistener failed");
         }
     }
     connectedDragListeners_.clear();
 }
 
-void DragClient::OnDisconnected(ITunnelClient &tunnel)
+void DragClient::OnDisconnected()
 {
     CALL_INFO_TRACE;
     std::lock_guard<std::mutex> guard(mtx_);
@@ -626,31 +523,6 @@ void DragClient::OnDisconnected(ITunnelClient &tunnel)
     connectedDragListeners_ = dragListeners_;
     dragListeners_.clear();
     hasRegistered_ = false;
-}
-
-int32_t DragClient::GetDragBundleInfo(ITunnelClient &tunnel, DragBundleInfo &dragBundleInfo)
-{
-    DefaultParam param {};
-    GetDragBundleInfoReply reply {};
-
-    int32_t ret = tunnel.GetParam(Intention::DRAG, DragRequestID::GET_DRAG_BUNDLE_INFO, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::GetParam fail, ret = %{public}d", ret);
-        return ret;
-    }
-    dragBundleInfo = reply.dragBundleInfo_;
-    return RET_OK;
-}
-
-int32_t DragClient::EnableInternalDropAnimation(ITunnelClient &tunnel, const std::string &animationInfo)
-{
-    EnableInternalDropAnimationParam param {animationInfo};
-    DefaultReply reply {};
-    int32_t ret = tunnel.SetParam(Intention::DRAG, DragRequestID::ENABLE_INTERNAL_DROP_ANIMATION, param, reply);
-    if (ret != RET_OK) {
-        FI_HILOGE("ITunnelClient::SetParam fail");
-    }
-    return ret;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

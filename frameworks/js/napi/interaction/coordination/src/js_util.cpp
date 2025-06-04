@@ -177,20 +177,20 @@ bool JsUtil::IsSameHandle(napi_env env, napi_value handle, napi_ref ref)
     return isEqual;
 }
 
-int32_t JsUtil::GetNamePropertyInt32(const napi_env& env, const napi_value& object,
-    const std::string& name, int32_t& ret)
+int32_t JsUtil::GetNamePropertyInt32(const napi_env& env, const napi_value& object, const std::string& name)
 {
     napi_value napiValue = {};
     CHKRF(napi_get_named_property(env, object, name.c_str(), &napiValue), GET_NAMED_PROPERTY);
     napi_valuetype tmpType = napi_undefined;
     if (napi_typeof(env, napiValue, &tmpType) != napi_ok) {
         FI_HILOGE("Call napi_typeof failed");
-        return false;
+        return RET_ERR;
     }
     if (tmpType != napi_number) {
         FI_HILOGE("The value is not number");
-        return false;
+        return RET_ERR;
     }
+    int32_t ret = 0;
     CHKRF(napi_get_value_int32(env, napiValue, &ret), GET_VALUE_INT32);
     return ret;
 }

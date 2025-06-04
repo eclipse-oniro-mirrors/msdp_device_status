@@ -44,28 +44,8 @@ DragServer::DragServer(IContext *env)
 #endif // OHOS_BUILD_UNIVERSAL_DRAG
 }
 
-int32_t DragServer::Enable(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::StartDrag(CallingContext &context, const DragData &dragData)
 {
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t DragServer::Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    return RET_ERR;
-}
-
-int32_t DragServer::Start(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    DragData dragData {};
-    StartDragParam param { dragData };
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("Failed to unmarshalling param");
-        return RET_ERR;
-    }
     CHKPR(env_, RET_ERR);
     auto session = env_->GetSocketSessionManager().FindSessionByPid(context.pid);
     CHKPR(session, RET_ERR);
@@ -73,552 +53,362 @@ int32_t DragServer::Start(CallingContext &context, MessageParcel &data, MessageP
     return env_->GetDragManager().StartDrag(dragData, context.pid);
 }
 
-int32_t DragServer::Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::StopDrag(CallingContext &context, const DragDropResult &dropResult)
 {
-    CALL_DEBUG_ENTER;
-    StopDragParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("Failed to unmarshalling param");
-        return RET_ERR;
-    }
 #ifdef OHOS_BUILD_UNIVERSAL_DRAG
     universalDragWrapper_.StopLongPressDrag();
 #endif // OHOS_BUILD_UNIVERSAL_DRAG
     CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().StopDrag(param.dropResult_, GetPackageName(context.tokenId), context.pid);
+    return env_->GetDragManager().StopDrag(dropResult, GetPackageName(context.tokenId), context.pid);
 }
 
-int32_t DragServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::EnableInternalDropAnimation(CallingContext &context, const std::string &animationInfo)
 {
-    CALL_DEBUG_ENTER;
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
     CHKPR(env_, RET_ERR);
-    switch (id) {
-        case DragRequestID::ADD_DRAG_LISTENER: {
-            return AddListener(context, data);
-        }
-        case DragRequestID::ADD_SUBSCRIPT_LISTENER: {
-            FI_HILOGD("Add subscript listener, from:%{public}d", context.pid);
-            return AddSubscriptListener(context);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
+    return env_->GetDragManager().EnableInternalDropAnimation(animationInfo);
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    return 801;
 }
 
-int32_t DragServer::RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::AddDraglistener(CallingContext &context, bool isJsCaller)
 {
-    CALL_DEBUG_ENTER;
-    CHKPR(env_, RET_ERR);
-    switch (id) {
-        case DragRequestID::REMOVE_DRAG_LISTENER: {
-            return RemoveListener(context, data);
-        }
-        case DragRequestID::REMOVE_SUBSCRIPT_LISTENER: {
-            FI_HILOGD("Remove subscript listener, from:%{public}d", context.pid);
-            return RemoveSubscriptListener(context);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
-}
-
-int32_t DragServer::SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    switch (id) {
-        case DragRequestID::SET_DRAG_WINDOW_VISIBLE: {
-            return SetDragWindowVisible(context, data, reply);
-        }
-        case DragRequestID::UPDATE_DRAG_STYLE: {
-            return UpdateDragStyle(context, data, reply);
-        }
-        case DragRequestID::UPDATE_SHADOW_PIC: {
-            return UpdateShadowPic(context, data, reply);
-        }
-        case DragRequestID::UPDATE_PREVIEW_STYLE: {
-            return UpdatePreviewStyle(context, data, reply);
-        }
-        case DragRequestID::UPDATE_PREVIEW_STYLE_WITH_ANIMATION: {
-            return UpdatePreviewAnimation(context, data, reply);
-        }
-        case DragRequestID::SET_DRAG_WINDOW_SCREEN_ID: {
-            return SetDragWindowScreenId(context, data, reply);
-        }
-        case DragRequestID::ADD_SELECTED_PIXELMAP: {
-            return AddSelectedPixelMap(context, data, reply);
-        }
-        case DragRequestID::SET_DRAG_SWITCH_STATE: {
-            return SetDragSwitchState(context, data, reply);
-        }
-        case DragRequestID::SET_APP_DRAG_SWITCH_STATE: {
-            return SetAppDragSwitchState(context, data, reply);
-        }
-        case DragRequestID::SET_DRAGGABLE_STATE: {
-            return SetDraggableState(context, data, reply);
-        }
-        case DragRequestID::SET_DRAGABLE_STATE_ASYNC: {
-            return SetDraggableStateAsync(context, data);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
-}
-
-int32_t DragServer::GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    switch (id) {
-        case DragRequestID::GET_DRAG_TARGET_PID: {
-            FI_HILOGI("Get drag target pid, from:%{public}d", context.pid);
-            return GetDragTargetPid(context, data, reply);
-        }
-        case DragRequestID::GET_UDKEY: {
-            FI_HILOGI("Get udkey, from:%{public}d", context.pid);
-            return GetUdKey(context, data, reply);
-        }
-        case DragRequestID::GET_SHADOW_OFFSET: {
-            FI_HILOGD("Get shadow offset, from:%{public}d", context.pid);
-            return GetShadowOffset(context, data, reply);
-        }
-        case DragRequestID::GET_DRAG_DATA: {
-            FI_HILOGD("Get drag data, from:%{public}d", context.pid);
-            return GetDragData(context, data, reply);
-        }
-        case DragRequestID::GET_DRAG_STATE: {
-            FI_HILOGD("Get drag state, from:%{public}d", context.pid);
-            return GetDragState(context, data, reply);
-        }
-        case DragRequestID::GET_DRAG_SUMMARY: {
-            FI_HILOGD("Get drag summary, from:%{public}d", context.pid);
-            return GetDragSummary(context, data, reply);
-        }
-        case DragRequestID::GET_DRAG_ACTION: {
-            FI_HILOGI("Get drag action, from:%{public}d", context.pid);
-            return GetDragAction(context, data, reply);
-        }
-        case DragRequestID::GET_EXTRA_INFO: {
-            FI_HILOGI("Get extra info, from:%{public}d", context.pid);
-            return GetExtraInfo(context, data, reply);
-        }
-        case DragRequestID::GET_UNIVERSAL_DRAG_APP_STATE: {
-            FI_HILOGI("Get universal drag app state, from:%{public}d", context.pid);
-            return GetAppDragSwitchState(context, data, reply);
-        }
-        case DragRequestID::GET_DRAG_BUNDLE_INFO: {
-            FI_HILOGI("Get drag bundle info, from:%{public}d", context.pid);
-            return GetDragBundleInfo(context, data, reply);
-        }
-        case DragRequestID::ENABLE_INTERNAL_DROP_ANIMATION: {
-            FI_HILOGI("Enable internal froml drap animation:%{public}d", context.pid);
-            return EnableInternalDropAnimation(context, data, reply);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
-}
-
-int32_t DragServer::Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
-{
-    CALL_DEBUG_ENTER;
-    CHKPR(env_, RET_ERR);
-    switch (id) {
-        case DragRequestID::ADD_PRIVILEGE: {
-            FI_HILOGI("Add privilege, from:%{public}d", context.pid);
-            return env_->GetDragManager().AddPrivilege(context.tokenId);
-        }
-        case DragRequestID::ENTER_TEXT_EDITOR_AREA: {
-            FI_HILOGI("Enter text editor area, from:%{public}d", context.pid);
-            return EnterTextEditorArea(context, data, reply);
-        }
-        case DragRequestID::ROTATE_DRAG_WINDOW_SYNC: {
-            FI_HILOGI("Rotate drag window sync, from:%{public}d", context.pid);
-            return RotateDragWindowSync(context, data, reply);
-        }
-        case DragRequestID::ERASE_MOUSE_ICON: {
-            FI_HILOGI("Erase mouse, from:%{public}d", context.pid);
-            return EraseMouseIcon(context);
-        }
-        case DragRequestID::SET_MOUSE_DRAG_MONITOR_STATE: {
-            FI_HILOGI("Set mouse drag monitor state, from:%{public}d", context.pid);
-            return SetMouseDragMonitorState(context, data, reply);
-        }
-        default: {
-            FI_HILOGE("Unexpected request ID (%{public}u)", id);
-            return RET_ERR;
-        }
-    }
-}
-
-int32_t DragServer::AddListener(CallingContext &context, MessageParcel &data)
-{
-    AddDraglistenerParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("AddDraglistenerParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
     FI_HILOGI("Add drag listener, from:%{public}d", context.pid);
     CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().AddListener(context.pid);
+    if (int32_t ret = env_->GetDragManager().AddListener(context.pid); ret != RET_OK) {
+        FI_HILOGE("IDragManager::AddListener fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
 }
 
-int32_t DragServer::RemoveListener(CallingContext &context, MessageParcel &data)
+int32_t DragServer::RemoveDraglistener(CallingContext &context, bool isJsCaller)
 {
-    RemoveDraglistenerParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("RemoveDraglistenerParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
     FI_HILOGD("Remove drag listener, from:%{public}d", context.pid);
     CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().RemoveListener(context.pid);
-}
-
-int32_t DragServer::SetDragWindowVisible(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    SetDragWindowVisibleParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SetDragWindowVisibleParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    FI_HILOGI("SetDragWindowVisible(%{public}d, %{public}d)", param.visible_, param.isForce_);
-    CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().OnSetDragWindowVisible(param.visible_, param.isForce_, false, param.rsTransaction_);
-}
-
-int32_t DragServer::UpdateDragStyle(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    UpdateDragStyleParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("UpdateDragStyleParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    FI_HILOGI("UpdateDragStyle(%{public}d)", static_cast<int32_t>(param.cursorStyle_));
-    CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().UpdateDragStyle(param.cursorStyle_, context.pid, context.tokenId, param.eventId_);
-}
-
-int32_t DragServer::UpdateShadowPic(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    UpdateShadowPicParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("UpdateShadowPicParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    FI_HILOGD("Updata shadow pic");
-    CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().UpdateShadowPic(param.shadowInfo_);
-}
-
-int32_t DragServer::AddSelectedPixelMap(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    AddSelectedPixelMapParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("AddSelectedPixelMap::Unmarshalling fail");
-        return RET_ERR;
-    }
-    CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().AddSelectedPixelMap(param.pixelMap_);
-}
-
-int32_t DragServer::UpdatePreviewStyle(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    UpdatePreviewStyleParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("UpdatePreviewStyleParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().UpdatePreviewStyle(param.previewStyle_);
-}
-
-int32_t DragServer::UpdatePreviewAnimation(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    UpdatePreviewAnimationParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("UpdatePreviewAnimationParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().UpdatePreviewStyleWithAnimation(param.previewStyle_, param.previewAnimation_);
-}
-
-int32_t DragServer::RotateDragWindowSync(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return RET_ERR;
-    }
-
-    RotateDragWindowSyncParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("RotateDragWindowSync::Unmarshalling fail");
-        return RET_ERR;
-    }
-    CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().RotateDragWindowSync(param.rsTransaction_);
-}
-
-int32_t DragServer::SetDragWindowScreenId(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return RET_ERR;
-    }
-
-    SetDragWindowScreenIdParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SetDragWindowScreenId::Unmarshalling fail");
-        return RET_ERR;
-    }
-    CHKPR(env_, RET_ERR);
-    env_->GetDragManager().SetDragWindowScreenId(param.displayId_, param.screenId_);
-    return RET_OK;
-}
-
-int32_t DragServer::GetDragTargetPid(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CHKPR(env_, RET_ERR);
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return RET_ERR;
-    }
-
-    int32_t targetPid = env_->GetDragManager().GetDragTargetPid();
-    GetDragTargetPidReply targetPidReply { targetPid };
-
-    if (!targetPidReply.Marshalling(reply)) {
-        FI_HILOGE("GetDragTargetPidReply::Marshalling fail");
-        return RET_ERR;
+    if (int32_t ret = env_->GetDragManager().RemoveListener(context.pid); ret != RET_OK) {
+        FI_HILOGE("IDragManager::RemoveListener fail, error:%{public}d", ret);
+        return ret;
     }
     return RET_OK;
 }
 
-int32_t DragServer::GetUdKey(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::AddSubscriptListener(CallingContext &context)
 {
-    std::string udKey;
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    FI_HILOGD("Add subscript listener, from:%{public}d", context.pid);
     CHKPR(env_, RET_ERR);
-    int32_t ret = env_->GetDragManager().GetUdKey(udKey);
-    if (ret != RET_OK) {
+    if (int32_t ret = env_->GetDragManager().AddSubscriptListener(context.pid); ret != RET_OK) {
+        FI_HILOGE("IDragManager::AddSubscriptListener fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t DragServer::RemoveSubscriptListener(CallingContext &context)
+{
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    FI_HILOGD("Remove subscript listener, from:%{public}d", context.pid);
+    CHKPR(env_, RET_ERR);
+     if (int32_t ret = env_->GetDragManager().RemoveSubscriptListener(context.pid); ret != RET_OK) {
+        FI_HILOGE("IDragManager::RemoveSubscriptListener fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t DragServer::SetDragWindowVisible(bool visible, bool isForce,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    FI_HILOGI("SetDragWindowVisible(%{public}d, %{public}d)", visible, isForce);
+    CHKPR(env_, RET_ERR);
+    return env_->GetDragManager().OnSetDragWindowVisible(visible, isForce, false, rsTransaction);
+}
+
+int32_t DragServer::GetDragTargetPid(CallingContext &context, int32_t &targetPid)
+{
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    CHKPR(env_, RET_ERR);
+    targetPid = env_->GetDragManager().GetDragTargetPid();
+    return RET_OK;
+}
+
+int32_t DragServer::GetUdKey(std::string &udKey)
+{
+    CHKPR(env_, RET_ERR);
+    if (int32_t ret = env_->GetDragManager().GetUdKey(udKey); ret != RET_OK) {
         FI_HILOGE("IDragManager::GetUdKey fail, error:%{public}d", ret);
         return ret;
     }
-    GetUdKeyReply udKeyReply { std::move(udKey) };
-
-    if (!udKeyReply.Marshalling(reply)) {
-        FI_HILOGE("GetUdKeyReply::Marshalling fail");
-        return RET_ERR;
-    }
     return RET_OK;
 }
 
-int32_t DragServer::GetShadowOffset(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::GetShadowOffset(ShadowOffset &shadowOffset)
 {
-    ShadowOffset shadowOffset {};
     CHKPR(env_, RET_ERR);
-    int32_t ret = env_->GetDragManager().OnGetShadowOffset(shadowOffset);
-    if (ret != RET_OK) {
-        FI_HILOGE("IDragManager::GetShadowOffset fail, error:%{public}d", ret);
+    if (int32_t ret = env_->GetDragManager().OnGetShadowOffset(shadowOffset); ret != RET_OK) {
+        FI_HILOGE("IDragManager::OnGetShadowOffset fail, error:%{public}d", ret);
         return ret;
     }
-    GetShadowOffsetReply shadowOffsetReply { shadowOffset };
+    return RET_OK;
+}
 
-    if (!shadowOffsetReply.Marshalling(reply)) {
-        FI_HILOGE("GetShadowOffsetReply::Marshalling fail");
-        return RET_ERR;
+int32_t DragServer::UpdateDragStyle(CallingContext &context, DragCursorStyle style, int32_t eventId)
+{
+    CHKPR(env_, RET_ERR);
+    int32_t ret = env_->GetDragManager().UpdateDragStyle(style, context.pid, context.tokenId, eventId);
+    if (ret != RET_OK) {
+        FI_HILOGE("IDragManager::UpdateDragStyle fail, error:%{public}d", ret);
+        return ret;
     }
     return RET_OK;
 }
 
-int32_t DragServer::GetDragData(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::UpdateShadowPic(const ShadowInfo &shadowInfo)
 {
-    DragData dragData {};
     CHKPR(env_, RET_ERR);
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return RET_ERR;
-    }
-
-    int32_t ret = env_->GetDragManager().GetDragData(dragData);
+    int32_t ret = env_->GetDragManager().UpdateShadowPic(shadowInfo);
     if (ret != RET_OK) {
+        FI_HILOGE("IDragManager::UpdateShadowPic fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t DragServer::GetDragData(CallingContext &context, DragData &dragData)
+{
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    CHKPR(env_, RET_ERR);
+    if (int32_t ret = env_->GetDragManager().GetDragData(dragData); ret != RET_OK) {
         FI_HILOGE("IDragManager::GetDragData fail, error:%{public}d", ret);
         return ret;
     }
-    GetDragDataReply dragDataReply { static_cast<const DragData&>(dragData) };
+    return RET_OK;
+}
 
-    if (!dragDataReply.Marshalling(reply)) {
-        FI_HILOGE("GetDragDataReply::Marshalling fail");
-        return RET_ERR;
+int32_t DragServer::UpdatePreviewStyle(const PreviewStyle &previewStyle)
+{
+    CHKPR(env_, RET_ERR);
+    if (int32_t ret = env_->GetDragManager().UpdatePreviewStyle(previewStyle); ret != RET_OK) {
+        FI_HILOGE("IDragManager::UpdatePreviewStyle fail, error:%{public}d", ret);
+        return ret;
     }
     return RET_OK;
 }
 
-int32_t DragServer::GetDragState(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation)
 {
-    DragState dragState {};
     CHKPR(env_, RET_ERR);
-    int32_t ret = env_->GetDragManager().GetDragState(dragState);
-    if (ret != RET_OK) {
+    if (int32_t ret = env_->GetDragManager().UpdatePreviewStyleWithAnimation(previewStyle, animation); ret != RET_OK) {
+        FI_HILOGE("IDragManager::UpdatePreviewStyleWithAnimation fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t DragServer::RotateDragWindowSync(CallingContext &context,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    CHKPR(env_, RET_ERR);
+    if (int32_t ret = env_->GetDragManager().RotateDragWindowSync(rsTransaction); ret != RET_OK) {
+        FI_HILOGE("IDragManager::RotateDragWindowSync fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t DragServer::SetDragWindowScreenId(CallingContext &context, uint64_t displayId, uint64_t screenId)
+{
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    CHKPR(env_, RET_ERR);
+    env_->GetDragManager().SetDragWindowScreenId(displayId, screenId);
+    return RET_OK;
+}
+
+int32_t DragServer::GetDragSummary(CallingContext &context, std::map<std::string, int64_t> &summarys, bool isJsCaller)
+{
+    if (isJsCaller && !IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    CHKPR(env_, RET_ERR);
+    if (int32_t ret = env_->GetDragManager().GetDragSummary(summarys); ret != RET_OK) {
+        FI_HILOGE("IDragManager::GetDragSummary fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t DragServer::SetDragSwitchState(CallingContext &context, bool enable, bool isJsCaller)
+{
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    universalDragWrapper_.SetDragSwitchState(enable);
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+    return RET_OK;
+}
+
+int32_t DragServer::SetAppDragSwitchState(
+    CallingContext &context, bool enable, const std::string &pkgName, bool isJsCaller)
+{
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    universalDragWrapper_.SetAppDragSwitchState(enable, pkgName);
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+    return RET_OK;
+}
+
+int32_t DragServer::GetDragState(DragState &dragState)
+{
+    CHKPR(env_, RET_ERR);
+    if (int32_t ret = env_->GetDragManager().GetDragState(dragState); ret != RET_OK) {
         FI_HILOGE("IDragManager::GetDragState fail, error:%{public}d", ret);
         return ret;
     }
-    GetDragStateReply dragStateReply { dragState };
-
-    if (!dragStateReply.Marshalling(reply)) {
-        FI_HILOGE("GetDragStateReply::Marshalling fail");
-        return RET_ERR;
-    }
     return RET_OK;
 }
 
-int32_t DragServer::GetDragSummary(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::EnableUpperCenterMode(bool enable)
 {
-    GetDragSummaryParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("GetDragSummary::Unmarshalling fail");
-        return RET_ERR;
-    }
-    if (param.isJsCaller_ && !IsSystemHAPCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return COMMON_NOT_SYSTEM_APP;
-    }
-    std::map<std::string, int64_t> summaries;
     CHKPR(env_, RET_ERR);
-    int32_t ret = env_->GetDragManager().GetDragSummary(summaries);
-    if (ret != RET_OK) {
-        FI_HILOGE("IDragManager::GetDragSummary fail, error:%{public}d", ret);
+    if (int32_t ret = env_->GetDragManager().EnterTextEditorArea(enable); ret != RET_OK) {
+        FI_HILOGE("IDragManager::EnableUpperCenterMode fail, error:%{public}d", ret);
         return ret;
     }
-    GetDragSummaryReply summaryReply { std::move(summaries) };
-
-    if (!summaryReply.Marshalling(reply)) {
-        FI_HILOGE("GetDragSummaryReply::Marshalling fail");
-        return RET_ERR;
-    }
     return RET_OK;
 }
 
-int32_t DragServer::SetDragSwitchState(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::GetDragAction(DragAction &dragAction)
 {
-    SetDragSwitchStateParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SetDragSwitchStateParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    if (!IsSystemHAPCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return COMMON_NOT_SYSTEM_APP;
-    }
-#ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    universalDragWrapper_.SetDragSwitchState(param.enable_);
-#endif // OHOS_BUILD_UNIVERSAL_DRAG
-    return RET_OK;
-}
-
-int32_t DragServer::SetAppDragSwitchState(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    SetAppDragSwitchStateParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SetAppDragSwitchStateParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-    if (!IsSystemHAPCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return COMMON_NOT_SYSTEM_APP;
-    }
-#ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    universalDragWrapper_.SetAppDragSwitchState(param.pkgName_, param.enable_);
-#endif // OHOS_BUILD_UNIVERSAL_DRAG
-    return RET_OK;
-}
-
-int32_t DragServer::GetDragAction(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    DragAction dragAction {};
     CHKPR(env_, RET_ERR);
-    int32_t ret = env_->GetDragManager().GetDragAction(dragAction);
-    if (ret != RET_OK) {
-        FI_HILOGE("IDragManager::GetDragSummary fail, error:%{public}d", ret);
+    if (int32_t ret = env_->GetDragManager().GetDragAction(dragAction); ret != RET_OK) {
+        FI_HILOGE("IDragManager::GetDragAction fail, error:%{public}d", ret);
         return ret;
     }
-    GetDragActionReply dragActionReply { dragAction };
-
-    if (!dragActionReply.Marshalling(reply)) {
-        FI_HILOGE("GetDragActionReply::Marshalling fail");
-        return RET_ERR;
-    }
     return RET_OK;
 }
 
-int32_t DragServer::GetExtraInfo(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::GetExtraInfo(std::string &extraInfo)
 {
-    std::string extraInfo;
     CHKPR(env_, RET_ERR);
-    int32_t ret = env_->GetDragManager().GetExtraInfo(extraInfo);
-    if (ret != RET_OK) {
+    if (int32_t ret = env_->GetDragManager().GetExtraInfo(extraInfo); ret != RET_OK) {
         FI_HILOGE("IDragManager::GetExtraInfo fail, error:%{public}d", ret);
         return ret;
     }
-    GetExtraInfoReply extraInfoReply { std::move(extraInfo) };
+    return RET_OK;
+}
 
-    if (!extraInfoReply.Marshalling(reply)) {
-        FI_HILOGE("GetExtraInfoReply::Marshalling fail");
-        return RET_ERR;
+int32_t DragServer::AddPrivilege(CallingContext &context)
+{
+    CHKPR(env_, RET_ERR);
+    if (int32_t ret = env_->GetDragManager().AddPrivilege(context.tokenId); ret != RET_OK) {
+        FI_HILOGE("IDragManager::AddPrivilege fail, error:%{public}d", ret);
+        return ret;
     }
     return RET_OK;
 }
 
-int32_t DragServer::EnterTextEditorArea(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::EraseMouseIcon(CallingContext &context)
 {
-    EnterTextEditorAreaParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("EnterTextEditorAreaParam::Unmarshalling fail");
-        return RET_ERR;
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
     }
     CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().EnterTextEditorArea(param.state);
+    if (int32_t ret = env_->GetDragManager().EraseMouseIcon(); ret != RET_OK) {
+        FI_HILOGE("IDragManager::EraseMouseIcon fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
 }
 
-int32_t DragServer::SetMouseDragMonitorState(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+int32_t DragServer::SetMouseDragMonitorState(bool state)
 {
-    SetMouseDragMonitorStateParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SetMouseDragMonitorStateParam::Unmarshalling fail");
-        return RET_ERR;
-    }
     CHKPR(env_, RET_ERR);
-    return env_->GetDragManager().SetMouseDragMonitorState(param.state);
+    if (int32_t ret = env_->GetDragManager().SetMouseDragMonitorState(state); ret != RET_OK) {
+        FI_HILOGE("IDragManager::SetMouseDragMonitorState fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t DragServer::SetDraggableState(bool state)
+{
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    universalDragWrapper_.SetDragableState(state);
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+    return RET_OK;
+}
+
+int32_t DragServer::GetAppDragSwitchState(bool &state)
+{
+    state = false;
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    if (int32_t ret = universalDragWrapper_.GetAppDragSwitchState(state); ret != RET_OK) {
+        FI_HILOGE("IDragManager::GetAppDragSwitchState fail, error:%{public}d", ret);
+        return ret;
+    }
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+    return RET_OK;
+}
+
+int32_t DragServer::SetDraggableStateAsync(bool state, int64_t downTime)
+{
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    CHKPR(env_, RET_ERR);
+    env_->GetDelegateTasks().PostAsyncTask([this, state, downTime] {
+        this->universalDragWrapper_.SetDraggableStateAsync(state, downTime);
+        return RET_OK;
+    });
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+    return RET_OK;
+}
+
+int32_t DragServer::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
+{
+    CHKPR(env_, RET_ERR);
+    if (int32_t ret = env_->GetDragManager().GetDragBundleInfo(dragBundleInfo); ret != RET_OK) {
+        FI_HILOGE("IDragManager::GetDragBundleInfo fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
 }
 
 std::string DragServer::GetPackageName(Security::AccessToken::AccessTokenID tokenId)
@@ -670,124 +460,6 @@ bool DragServer::IsSystemHAPCalling(CallingContext &context)
         return true;
     }
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
-}
-
-int32_t DragServer::SetDraggableState(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    SetDraggableStateParam param {};
-
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SetDraggableStateParam::Unmarshalling fail");
-        return RET_ERR;
-    }
-#ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    universalDragWrapper_.SetDragableState(param.state_);
-#endif // OHOS_BUILD_UNIVERSAL_DRAG
-    return RET_OK;
-}
-
-int32_t DragServer::GetAppDragSwitchState(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-#ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    bool state = false;
-    int32_t ret = universalDragWrapper_.GetAppDragSwitchState(GetPackageName(context.tokenId), state);
-    if (ret != RET_OK) {
-        FI_HILOGE("universalDragWrapper GetAppDragSwitchState fail, error:%{public}d", ret);
-        return ret;
-    }
-    GetUniversalDragAppStateReply getUniversalDragAppStateReply { state };
-
-    if (!getUniversalDragAppStateReply.Marshalling(reply)) {
-        FI_HILOGE("GetUniversalDragAppStateReply::Marshalling fail");
-        return RET_ERR;
-    }
-#endif // OHOS_BUILD_UNIVERSAL_DRAG
-    return RET_OK;
-}
-
-int32_t DragServer::SetDraggableStateAsync(CallingContext &context, MessageParcel &data)
-{
-#ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    CHKPR(env_, RET_ERR);
-    SetDraggableStateAsyncParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("SetDraggableStateAsync::Unmarshalling fail");
-        return RET_ERR;
-    }
-    env_->GetDelegateTasks().PostAsyncTask([this, param] {
-        this->universalDragWrapper_.SetDraggableStateAsync(param.state_, param.downTime_);
-        return RET_OK;
-    });
-#endif // OHOS_BUILD_UNIVERSAL_DRAG
-    return RET_OK;
-}
-
-int32_t DragServer::GetDragBundleInfo(CallingContext &context, MessageParcel &data, MessageParcel &reply)
-{
-    CHKPR(env_, RET_ERR);
-    DragBundleInfo dragBundleInfo {};
-
-    int32_t ret = env_->GetDragManager().GetDragBundleInfo(dragBundleInfo);
-    if (ret != RET_OK) {
-        FI_HILOGE("IDragManager::GetDragSummary fail, error:%{public}d", ret);
-        return ret;
-    }
-    GetDragBundleInfoReply dragBundleInfoReply { dragBundleInfo };
-
-    if (!dragBundleInfoReply.Marshalling(reply)) {
-        FI_HILOGE("GetDragBundleInfoReply::Marshalling fail");
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
-int32_t DragServer::EnableInternalDropAnimation(CallingContext &context,
-    MessageParcel &data, MessageParcel &reply)
-{
-#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
-    // 权限校验 非系统应用返回202
-    CHKPR(env_, RET_ERR);
-    EnableInternalDropAnimationParam param {};
-    if (!param.Unmarshalling(data)) {
-        FI_HILOGE("EnableInternalDropAnimation::Unmarshalling fail");
-        return RET_ERR; // 401?
-    }
-    return env_->GetDragManager().EnableInternalDropAnimation(param.animationInfo_);
-#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
-    return 801;
-}
-
-int32_t DragServer::EraseMouseIcon(CallingContext &context)
-{
-    CHKPR(env_, RET_ERR);
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service");
-        return RET_ERR;
-    }
-
-    return env_->GetDragManager().EraseMouseIcon();
-}
-
-int32_t DragServer::AddSubscriptListener(CallingContext &context)
-{
-    CHKPR(env_, RET_ERR);
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service");
-        return RET_ERR;
-    }
-
-    return env_->GetDragManager().AddSubscriptListener(context.pid);
-}
-
-int32_t DragServer::RemoveSubscriptListener(CallingContext &context)
-{
-    CHKPR(env_, RET_ERR);
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service");
-        return RET_ERR;
-    }
-
-    return env_->GetDragManager().RemoveSubscriptListener(context.pid);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

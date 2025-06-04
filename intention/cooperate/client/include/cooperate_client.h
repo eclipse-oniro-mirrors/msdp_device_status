@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,6 @@
 #include "i_coordination_listener.h"
 #include "i_event_listener.h"
 #include "i_hotarea_listener.h"
-#include "i_tunnel_client.h"
 #include "net_packet.h"
 #include "socket_client.h"
 #include "stream_client.h"
@@ -60,41 +59,31 @@ public:
     ~CooperateClient() = default;
     DISALLOW_COPY_AND_MOVE(CooperateClient);
 
-    int32_t RegisterListener(ITunnelClient &tunnel,
-        CooperateListenerPtr listener, bool isCheckPermission = false);
-    int32_t UnregisterListener(ITunnelClient &tunnel,
-        CooperateListenerPtr listener, bool isCheckPermission = false);
-    int32_t Enable(ITunnelClient &tunnel,
+    int32_t RegisterListener(CooperateListenerPtr listener, bool isCheckPermission = false);
+    int32_t UnregisterListener(CooperateListenerPtr listener, bool isCheckPermission = false);
+    int32_t Enable(CooperateMessageCallback callback, bool isCheckPermission = false);
+    int32_t Disable(CooperateMessageCallback callback, bool isCheckPermission = false);
+    int32_t Start(const std::string &remoteNetworkId, int32_t startDeviceId,
         CooperateMessageCallback callback, bool isCheckPermission = false);
-    int32_t Disable(ITunnelClient &tunnel,
-        CooperateMessageCallback callback, bool isCheckPermission = false);
-    int32_t Start(ITunnelClient &tunnel,
-        const std::string &remoteNetworkId, int32_t startDeviceId,
-        CooperateMessageCallback callback, bool isCheckPermission = false);
-    int32_t StartWithOptions(ITunnelClient &tunnel, const std::string &remoteNetworkId,
+    int32_t StartWithOptions(const std::string &remoteNetworkId,
         int32_t startDeviceId, CooperateMessageCallback callback, const CooperateOptions &options);
-    int32_t Stop(ITunnelClient &tunnel,
-        bool isUnchained, CooperateMessageCallback callback,
+    int32_t Stop(bool isUnchained, CooperateMessageCallback callback, bool isCheckPermission = false);
+    int32_t GetCooperateState(const std::string &networkId, CooperateStateCallback callback,
         bool isCheckPermission = false);
-    int32_t GetCooperateState(ITunnelClient &tunnel,
-        const std::string &networkId, CooperateStateCallback callback,
-        bool isCheckPermission = false);
-    int32_t GetCooperateState(ITunnelClient &tunnel, const std::string &udId, bool &state);
-    int32_t RegisterEventListener(ITunnelClient &tunnel, const std::string &networkId,
-        MouseLocationListenerPtr listener);
-    int32_t UnregisterEventListener(ITunnelClient &tunnel, const std::string &networkId,
-        MouseLocationListenerPtr listener = nullptr);
-    int32_t SetDamplingCoefficient(ITunnelClient &tunnel, uint32_t direction, double coefficient);
-    int32_t AddHotAreaListener(ITunnelClient &tunnel, HotAreaListenerPtr listener);
-    int32_t RemoveHotAreaListener(ITunnelClient &tunnel, HotAreaListenerPtr listener = nullptr);
+    int32_t GetCooperateState(const std::string &udId, bool &state);
+    int32_t RegisterEventListener(const std::string &networkId, MouseLocationListenerPtr listener);
+    int32_t UnregisterEventListener(const std::string &networkId, MouseLocationListenerPtr listener = nullptr);
+    int32_t SetDamplingCoefficient(uint32_t direction, double coefficient);
+    int32_t AddHotAreaListener(HotAreaListenerPtr listener);
+    int32_t RemoveHotAreaListener(HotAreaListenerPtr listener = nullptr);
 
     int32_t OnCoordinationListener(const StreamClient &client, NetPacket &pkt);
     int32_t OnCoordinationMessage(const StreamClient &client, NetPacket &pkt);
     int32_t OnCoordinationState(const StreamClient &client, NetPacket &pkt);
     int32_t OnHotAreaListener(const StreamClient &client, NetPacket &pkt);
     int32_t OnMouseLocationListener(const StreamClient &client, NetPacket &pkt);
-    void OnConnected(ITunnelClient &tunnel);
-    void OnDisconnected(ITunnelClient &tunnel);
+    void OnConnected();
+    void OnDisconnected();
 
 private:
     int32_t GenerateRequestID();

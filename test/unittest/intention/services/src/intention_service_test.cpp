@@ -37,19 +37,14 @@ namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
-constexpr int32_t POINTER_ID { 0 };
-constexpr int32_t DRAG_NUM_ONE { 1 };
-constexpr int32_t SHADOW_NUM_ONE { 1 };
 constexpr int32_t PIXEL_MAP_WIDTH { 3 };
 constexpr int32_t PIXEL_MAP_HEIGHT { 3 };
 constexpr int32_t WINDOW_ID { -1 };
-constexpr int32_t READ_OK { 1 };
 constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
 const std::string FILTER_INFO { "Undefined filter info" };
 const std::string UD_KEY { "Unified data key" };
 const std::string EXTRA_INFO { "Undefined extra info" };
 const std::string CURVE_NAME { "cubic-bezier" };
-constexpr int32_t FOREGROUND_COLOR_IN { 0x33FF0000 };
 constexpr int32_t DISPLAY_ID { 0 };
 constexpr int32_t DISPLAY_X { 50 };
 constexpr int32_t DISPLAY_Y { 50 };
@@ -61,7 +56,6 @@ constexpr int32_t MAX_PIXEL_MAP_WIDTH { 600 };
 constexpr int32_t MAX_PIXEL_MAP_HEIGHT { 600 };
 constexpr bool HAS_CANCELED_ANIMATION { true };
 constexpr bool HAS_CUSTOM_ANIMATION { true };
-Intention g_intention { Intention::DRAG };
 std::shared_ptr<ContextService> g_context { nullptr };
 std::shared_ptr<IntentionService> g_intentionService { nullptr };
 std::shared_ptr<IntentionService> g_intentionServiceNullptr { nullptr };
@@ -280,851 +274,623 @@ void IntentionServiceTest::AssignToAnimation(PreviewAnimation &animation)
 
 /**
  * @tc.name: IntentionServiceTest_1
- * @tc.desc: Test Enable
+ * @tc.desc: Test Socket
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable001, TestSize.Level0)
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Socket001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    int32_t ret = g_intentionService->Enable(g_intention, dataParcel, replyParcel);
+    auto programName = GetProgramName();
+    int32_t socketFd { -1 };
+    int32_t tokenType { -1 };
+    int32_t ret = g_intentionService->Socket(programName, CONNECT_MODULE_TYPE_FI_CLIENT, socketFd, tokenType);
     EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
  * @tc.name: IntentionServiceTest2
- * @tc.desc: Test Disable
+ * @tc.desc: Test EnableCooperate
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Disable001, TestSize.Level0)
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_EnableCooperate001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->Disable(g_intention, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest3
- * @tc.desc: Test Start
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Start001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-
-    int32_t ret = g_intentionService->Start(g_intention, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_Stop001
- * @tc.desc: Test Stop
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Stop001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->Stop(g_intention, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_Stop002
- * @tc.desc: Test Stop
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Stop002, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
-    env->dragMgr_.dragState_ = DragState::START;
-    StopDragParam param { dropResult };
-
-    int32_t ret = param.Marshalling(dataParcel);
-    EXPECT_EQ(ret, READ_OK);
-    ret = g_intentionService->Stop(g_intention, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest_Stop003
- * @tc.desc: Test Stop
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Stop003, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
-    env->dragMgr_.dragState_ = DragState::START;
-    StopDragParam param { dropResult };
-
-    int32_t ret = param.Marshalling(dataParcel);
-    EXPECT_EQ(ret, READ_OK);
-    ret = g_intentionServiceNullptr->Stop(g_intention, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest5
- * @tc.desc: Test AddWatch
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_AddWatch001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    int32_t ret = RET_ERR;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
-        DragRequestID::ADD_DRAG_LISTENER, DragRequestID::ADD_SUBSCRIPT_LISTENER};
-    for (const auto& dragRequestID : dragRequestIDs) {
-        ret = g_intentionService->AddWatch(g_intention, dragRequestID, dataParcel, replyParcel);
-        EXPECT_EQ(ret, RET_ERR);
-    }
-}
-
-/**
- * @tc.name: IntentionServiceTest6
- * @tc.desc: Test RemoveWatch
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_RemoveWatch001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = RET_ERR;
-    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
-        DragRequestID::ADD_DRAG_LISTENER, DragRequestID::ADD_SUBSCRIPT_LISTENER};
-    for (const auto& dragRequestID : dragRequestIDs) {
-        ret = g_intentionService->RemoveWatch(g_intention, dragRequestID, dataParcel, replyParcel);
-        EXPECT_EQ(ret, RET_ERR);
-    }
-}
-
-/**
- * @tc.name: IntentionServiceTest_Control001
- * @tc.desc: Test Control
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Control001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    int32_t ret = RET_ERR;
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
-        DragRequestID::ADD_PRIVILEGE, DragRequestID::ENTER_TEXT_EDITOR_AREA};
-    for (const auto& dragRequestID : dragRequestIDs) {
-        ret = g_intentionService->Control(g_intention, dragRequestID, dataParcel, replyParcel);
-        EXPECT_EQ(ret, RET_ERR);
-    }
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam001
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = RET_ERR;
-    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
-        DragRequestID::SET_DRAG_WINDOW_VISIBLE, DragRequestID::UPDATE_DRAG_STYLE,
-        DragRequestID::UPDATE_SHADOW_PIC, DragRequestID::UPDATE_PREVIEW_STYLE,
-        DragRequestID::UPDATE_PREVIEW_STYLE_WITH_ANIMATION};
-    for (const auto& dragRequestID : dragRequestIDs) {
-        ret = g_intentionService->SetParam(g_intention, dragRequestID, dataParcel, replyParcel);
-        EXPECT_EQ(ret, RET_ERR);
-    }
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam002
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam002, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->SetParam(g_intention, DragRequestID::SET_DRAG_WINDOW_VISIBLE,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam003
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam003, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->SetParam(g_intention, DragRequestID::UPDATE_DRAG_STYLE,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam004
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam004, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->SetParam(g_intention, DragRequestID::UPDATE_SHADOW_PIC,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam005
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam005, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->SetParam(g_intention, DragRequestID::UPDATE_PREVIEW_STYLE,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam006
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam006, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->SetParam(g_intention, DragRequestID::UPDATE_PREVIEW_STYLE_WITH_ANIMATION,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam007
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam007, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->SetParam(g_intention, DragRequestID::ENTER_TEXT_EDITOR_AREA,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam008
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam008, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    env->dragMgr_.dragState_ = DragState::START;
-    SetDragWindowVisibleParam param { true, true, nullptr };
-    int32_t ret = param.Marshalling(dataParcel);
-    EXPECT_EQ(ret, READ_OK);
-    ret = g_intentionService->SetParam(Intention::DRAG, DragRequestID::SET_DRAG_WINDOW_VISIBLE,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-    env->dragMgr_.dragState_ = DragState::STOP;
-    DRAG_DATA_MGR.dragData_ = {};
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam009
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam009, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    env->dragMgr_.dragState_ = DragState::START;
-    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
-    ASSERT_NE(pixelMap, nullptr);
-    ShadowInfo shadowInfo = { pixelMap, 0, 0 };
-    std::string extraInfo;
-    UpdateShadowPicParam param { shadowInfo };
-    bool ret = param.Marshalling(dataParcel);;
-    EXPECT_EQ(ret, READ_OK);
-    ret = g_intentionService->SetParam(g_intention, DragRequestID::UPDATE_SHADOW_PIC,
-        dataParcel, replyParcel);
-    EXPECT_TRUE(ret);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam010
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam010, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    env->dragMgr_.dragState_ = DragState::START;
-    PreviewStyle previewStyleIn;
-    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
-    previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
-    UpdatePreviewStyleParam param { previewStyleIn };
-    bool ret = param.Marshalling(dataParcel);;
-    EXPECT_EQ(ret, READ_OK);
-    ret = g_intentionService->SetParam(g_intention, DragRequestID::UPDATE_PREVIEW_STYLE,
-        dataParcel, replyParcel);
-    EXPECT_TRUE(ret);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam011
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam011, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    env->dragMgr_.dragState_ = DragState::START;
-    PreviewStyle previewStyleIn;
-    previewStyleIn.types = { PreviewType::FOREGROUND_COLOR };
-    previewStyleIn.foregroundColor = FOREGROUND_COLOR_IN;
-    PreviewAnimation animationOut;
-    AssignToAnimation(animationOut);
-    UpdatePreviewAnimationParam param { previewStyleIn, animationOut };
-    bool ret = param.Marshalling(dataParcel);;
-    EXPECT_EQ(ret, READ_OK);
-    ret = g_intentionService->SetParam(Intention::DRAG, DragRequestID::UPDATE_PREVIEW_STYLE_WITH_ANIMATION,
-        dataParcel, replyParcel);
-    EXPECT_FALSE(ret);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest_SetParam012
- * @tc.desc: Test SetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetParam012, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    EnterTextEditorAreaParam param { true };
-    bool ret = param.Marshalling(dataParcel);;
-    EXPECT_EQ(ret, READ_OK);
-    ret = g_intentionService->SetParam(g_intention, DragRequestID::ENTER_TEXT_EDITOR_AREA, dataParcel, replyParcel);
-    EXPECT_EQ(ret, READ_OK);
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam001
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    int32_t ret = RET_ERR;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    std::vector<DragRequestID> dragRequestIDs = {DragRequestID::UNKNOWN_DRAG_ACTION,
-        DragRequestID::GET_DRAG_TARGET_PID, DragRequestID::GET_UDKEY,
-        DragRequestID::GET_SHADOW_OFFSET, DragRequestID::GET_DRAG_DATA,
-        DragRequestID::GET_DRAG_STATE, DragRequestID::GET_DRAG_SUMMARY,
-        DragRequestID::GET_DRAG_ACTION, DragRequestID::GET_EXTRA_INFO};
-    for (const auto& dragRequestID : dragRequestIDs) {
-        if (dragRequestID == DragRequestID::UNKNOWN_DRAG_ACTION ||
-            dragRequestID == DragRequestID::GET_UDKEY ||
-            dragRequestID == DragRequestID::GET_DRAG_DATA ||
-            dragRequestID == DragRequestID::GET_DRAG_SUMMARY ||
-            dragRequestID == DragRequestID::GET_DRAG_ACTION||
-            dragRequestID == DragRequestID::GET_EXTRA_INFO) {
-                ret = g_intentionService->GetParam(Intention::DRAG, dragRequestID, dataParcel, replyParcel);
-                if (ret == RET_OK) {
-                    GTEST_LOG_(INFO) << "dragRequestID: " << dragRequestID;
-                }
-                EXPECT_EQ(ret, RET_ERR);
-        } else {
-            ret = g_intentionService->GetParam(Intention::DRAG, dragRequestID, dataParcel, replyParcel);
-            EXPECT_EQ(ret, RET_OK);
-        }
-    }
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam002
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam002, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_TARGET_PID,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam003
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam003, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
-    DRAG_DATA_MGR.Init(dragData.value());
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_UDKEY,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-    DRAG_DATA_MGR.dragData_ = {};
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam004
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam004, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(g_intention, DragRequestID::GET_SHADOW_OFFSET,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam005
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam005, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(g_intention, DragRequestID::GET_DRAG_DATA,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam006
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam006, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_STATE,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam007
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam007, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_SUMMARY,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam008
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam008, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(g_intention, DragRequestID::GET_DRAG_ACTION,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam009
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam009, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(g_intention, DragRequestID::GET_EXTRA_INFO, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam010
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam010, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(g_intention, DragRequestID::GET_UDKEY, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam011
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam011, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
-    DRAG_DATA_MGR.Init(dragData.value());
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_SHADOW_OFFSET,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-    DRAG_DATA_MGR.dragData_ = {};
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam012
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam012, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
-    DRAG_DATA_MGR.Init(dragData.value());
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_EXTRA_INFO,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-    DRAG_DATA_MGR.dragData_ = {};
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam013
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam013, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    env->dragMgr_.dragState_ = DragState::START;
-    UpdateDragStyleParam param { DragCursorStyle::COPY, -1 };
-    bool ret = param.Marshalling(dataParcel);
-    EXPECT_EQ(ret, READ_OK);
-    ret = g_intentionService->GetParam(g_intention, DragRequestID::UPDATE_DRAG_STYLE, dataParcel, replyParcel);
-    EXPECT_TRUE(ret);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam014
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam014, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    env->dragMgr_.dragState_ = DragState::START;
-    GetDragTargetPidReply targetPidReply { IPCSkeleton::GetCallingPid() };
-    bool ret = targetPidReply.Marshalling(dataParcel);
-    EXPECT_EQ(ret, READ_OK);
-    ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_TARGET_PID, dataParcel, replyParcel);
-    EXPECT_FALSE(ret);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam015
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam015, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
-    env->dragMgr_.dragState_ = DragState::START;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    DRAG_DATA_MGR.Init(dragData.value());
-    int32_t ret = g_intentionService->GetParam(g_intention, DragRequestID::GET_DRAG_DATA, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-    DRAG_DATA_MGR.dragData_ = {};
-    ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_DATA, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam016
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam016, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    env->dragMgr_.dragState_ = DragState::ERROR;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_STATE,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-    env->dragMgr_.dragState_ = DragState::START;
-    ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_STATE, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam017
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam017, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    env->dragMgr_.dragState_ = DragState::ERROR;
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_ACTION,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-    env->dragMgr_.dragState_ = DragState::START;
-    ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_DRAG_ACTION, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-    env->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: IntentionServiceTest_GetParam018
- * @tc.desc: Test GetParam
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetParam018, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
-    ASSERT_NE(env, nullptr);
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
-    MessageParcel replyParcel;
-    MessageParcel dataParcel;
-    DRAG_DATA_MGR.Init(dragData.value());
-    int32_t ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_EXTRA_INFO,
-        dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_OK);
-    DRAG_DATA_MGR.dragData_ = {};
-    ret = g_intentionService->GetParam(Intention::DRAG, DragRequestID::GET_EXTRA_INFO, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
- 
-/**
- * @tc.name: IntentionServiceTest_002
- * @tc.desc: Test Enable
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable002, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    int32_t ret = g_intentionService->Enable(Intention::SOCKET, dataParcel, replyParcel);
-    EXPECT_EQ(ret, RET_ERR);
-}
- 
-/**
- * @tc.name: IntentionServiceTest_003
- * @tc.desc: Test Enable
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable003, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    int32_t ret = g_intentionService->Enable(Intention::COOPERATE, dataParcel, replyParcel);
+    int32_t userData = 0;
+    ErrCode ret = g_intentionService->EnableCooperate(userData);
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
 /**
- * @tc.name: IntentionServiceTest_004
- * @tc.desc: Test Enable
+ * @tc.name: IntentionServiceTest3
+ * @tc.desc: Test DisableCooperate
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable004, TestSize.Level0)
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_DisableCooperate001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    int32_t ret = g_intentionService->Enable(Intention::BOOMERANG, dataParcel, replyParcel);
+    int32_t userData = 0;
+    ErrCode ret = g_intentionService->DisableCooperate(userData);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
+}
+
+/**
+ * @tc.name: IntentionServiceTest4
+ * @tc.desc: Test StartCooperate
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartCooperate001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string remoteNetworkId = "networkId";
+    int32_t userData = 0;
+    int32_t startDeviceId = 0;
+    bool isCheckPermission = true;
+    ErrCode ret = g_intentionService->StartCooperate(remoteNetworkId, userData, startDeviceId, isCheckPermission);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
+}
+
+/**
+ * @tc.name: IntentionServiceTest5
+ * @tc.desc: Test RegisterCooperateListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterCooperateListener001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ErrCode ret = g_intentionService->RegisterCooperateListener();
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
+}
+
+/**
+ * @tc.name: IntentionServiceTest6
+ * @tc.desc: Test UnregisterCooperateListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterCooperateListener001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ErrCode ret = g_intentionService->UnregisterCooperateListener();
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
+}
+
+/**
+ * @tc.name: IntentionServiceTest7
+ * @tc.desc: Test RegisterHotAreaListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterHotAreaListener001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t userData = 0;
+    bool isCheckPermission = true;
+    ErrCode ret = g_intentionServiceNullptr->RegisterHotAreaListener(userData, isCheckPermission);
     EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
- * @tc.name: IntentionServiceTest_005
- * @tc.desc: Test Enable
+ * @tc.name: IntentionServiceTest8
+ * @tc.desc: Test UnregisterHotAreaListener
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable005, TestSize.Level0)
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterHotAreaListener001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    int32_t ret = g_intentionService->Enable(Intention::UNKNOWN_INTENTION, dataParcel, replyParcel);
+    ErrCode ret = g_intentionServiceNullptr->UnregisterHotAreaListener();
     EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
- * @tc.name: IntentionServiceTest_006
- * @tc.desc: Test Enable
+ * @tc.name: IntentionServiceTest9
+ * @tc.desc: Test RegisterMouseEventListener
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Enable006, TestSize.Level0)
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterMouseEventListener001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    int32_t ret = g_intentionService->Enable(Intention::STATIONARY, dataParcel, replyParcel);
+    std::string networkId = "networkId";
+    ErrCode ret = g_intentionServiceNullptr->RegisterMouseEventListener(networkId);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest10
+ * @tc.desc: Test UnregisterMouseEventListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterMouseEventListener001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string networkId = "networkId";
+    ErrCode ret = g_intentionServiceNullptr->UnregisterMouseEventListener(networkId);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest11
+ * @tc.desc: Test GetCooperateStateSync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetCooperateStateSync001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string udid = "udid";
+    bool state = true;
+    ErrCode ret = g_intentionServiceNullptr->GetCooperateStateSync(udid, state);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest12
+ * @tc.desc: Test GetCooperateStateAsync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetCooperateStateAsync001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string networkId = "networkId";
+    int32_t userData = 0;
+    bool isCheckPermission = true;
+    ErrCode ret = g_intentionServiceNullptr->GetCooperateStateAsync(networkId, userData, isCheckPermission);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest13
+ * @tc.desc: Test SetDamplingCoefficient
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDamplingCoefficient001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint32_t direction = 0;
+    double coefficient = 0;
+    ErrCode ret = g_intentionServiceNullptr->RegisterHotAreaListener(direction, coefficient);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest14
+ * @tc.desc: Test StartDrag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartDrag001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    SequenceableDragData sequenceableDragData(dragData);
+    ErrCode ret = g_intentionServiceNullptr->StartDrag(sequenceableDragData);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest15
+ * @tc.desc: Test StopDrag
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_StopDrag001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
+    SequenceableDragResult sequenceableDragResult(dropResult);
+    ErrCode ret = g_intentionServiceNullptr->StopDrag(sequenceableDragResult);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest16
+ * @tc.desc: Test AddDraglistener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_AddDraglistener001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool isJsCaller = true;
+    ErrCode ret = g_intentionServiceNullptr->AddDraglistener(isJsCaller);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest17
+ * @tc.desc: Test RemoveDraglistener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_RemoveDraglistener001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool isJsCaller = true;
+    ErrCode ret = g_intentionServiceNullptr->RemoveDraglistener(isJsCaller);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest18
+ * @tc.desc: Test AddSubscriptListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_AddSubscriptListener001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ErrCode ret = g_intentionServiceNullptr->AddSubscriptListener();
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest19
+ * @tc.desc: Test RemoveSubscriptListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_RemoveSubscriptListener001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ErrCode ret = g_intentionServiceNullptr->RemoveSubscriptListener();
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest20
+ * @tc.desc: Test SetDragWindowVisible
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragWindowVisible001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragVisibleParam dragVisibleParam;
+    SequenceableDragVisible sequenceableDragVisible(dragVisibleParam);
+    ErrCode ret = g_intentionServiceNullptr->SetDragWindowVisible(sequenceableDragVisible);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest21
+ * @tc.desc: Test UpdateDragStyle
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdateDragStyle001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t style = 0;
+    int32_t eventId = 0;
+    ErrCode ret = g_intentionServiceNullptr->UpdateDragStyle(style, eventId);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+
+ * @tc.name: IntentionServiceTest22
+ * @tc.desc: Test UpdateShadowPic
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdateShadowPic001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    ErrCode ret = g_intentionServiceNullptr->UpdateShadowPic(pixelMap, 0, 0);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest23
+ * @tc.desc: Test GetDragTargetPid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragTargetPid001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t targetPid = 0;
+    ErrCode ret = g_intentionServiceNullptr->GetDragTargetPid(targetPid);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest24
+ * @tc.desc: GetUdKey
+ * @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetUdKey001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string udKey = "udkey";
+    ErrCode ret = g_intentionServiceNullptr->GetUdKey(udKey);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest25
+ * @tc.desc: Test GetShadowOffset
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetShadowOffset001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t offsetX = 1;
+    int32_t offsetY = 1;
+    int32_t width = 1;
+    int32_t height = 1;
+    ErrCode ret = g_intentionServiceNullptr->GetShadowOffset(offsetX, offsetY, width, height);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest26
+ * @tc.desc: Test GetDragData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragData001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    SequenceableDragData sequenceableDragData(dragData);
+    ErrCode ret = g_intentionServiceNullptr->GetDragData(sequenceableDragData);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest27
+ * @tc.desc: Test UpdatePreviewStyle
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdatePreviewStyle001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    PreviewStyle previewStyle;
+    SequenceablePreviewStyle sequenceablePreviewStyle(previewStyle);
+    ErrCode ret = g_intentionServiceNullptr->UpdatePreviewStyle(sequenceablePreviewStyle);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest28
+ * @tc.desc: Test UpdatePreviewStyleWithAnimation
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdatePreviewStyleWithAnimation001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    PreviewStyle previewStyle;
+    PreviewAnimation previewAnimation;
+    SequenceablePreviewAnimation sequenceablePreviewAnimation(previewStyle, previewAnimation);
+    ErrCode ret = g_intentionServiceNullptr->UpdatePreviewStyleWithAnimation(sequenceablePreviewAnimation);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest29
+ * @tc.desc: Test RotateDragWindowSync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_RotateDragWindowSync001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction { nullptr };
+    SequenceableRotateWindow sequenceableRotateWindow(rsTransaction);
+    ErrCode ret = g_intentionServiceNullptr->RotateDragWindowSync(sequenceableRotateWindow);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest30
+ * @tc.desc: Test SetDragWindowScreenId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragWindowScreenId001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ErrCode ret = g_intentionServiceNullptr->SetDragWindowScreenId(0, 0);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest31
+ * @tc.desc: Test GetDragSummary
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragSummary001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::map<std::string, int64_t> summarys;
+    bool isJsCaller = true;
+    ErrCode ret = g_intentionServiceNullptr->GetDragSummary(summarys, isJsCaller);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest32
+ * @tc.desc: Test SetDragSwitchState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragSwitchState001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool enable = true;
+    bool isJsCaller = true;
+    ErrCode ret = g_intentionServiceNullptr->SetDragSwitchState(enable, isJsCaller);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest33
+ * @tc.desc: Test SetAppDragSwitchState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetAppDragSwitchState001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool enable = true;
+    std::string pkgName = "pkg";
+    bool isJsCaller = true;
+    ErrCode ret = g_intentionServiceNullptr->SetAppDragSwitchState(enable, pkgName, isJsCaller);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest34
+ * @tc.desc: Test GetDragState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragState001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t dragState = 0;
+    ErrCode ret = g_intentionServiceNullptr->GetDragState(dragState);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest35
+ * @tc.desc: Test EnableUpperCenterMode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_EnableUpperCenterMode001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool enable = true;
+    ErrCode ret = g_intentionServiceNullptr->EnableUpperCenterMode(enable);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest36
+ * @tc.desc: Test GetDragAction
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragAction001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t dragAction = 0;
+    ErrCode ret = g_intentionServiceNullptr->GetDragAction(dragAction);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest37
+ * @tc.desc: Test GetExtraInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetExtraInfo001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string extraInfo = "extraInfo";
+    ErrCode ret = g_intentionServiceNullptr->GetExtraInfo(extraInfo);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest38
+ * @tc.desc: Test AddPrivilege
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_AddPrivilege001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ErrCode ret = g_intentionServiceNullptr->AddPrivilege();
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest39
+ * @tc.desc: Test EraseMouseIcon
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_EraseMouseIcon001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ErrCode ret = g_intentionServiceNullptr->EraseMouseIcon();
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest40
+ * @tc.desc: Test SetMouseDragMonitorState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetMouseDragMonitorState001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool state = true;
+    ErrCode ret = g_intentionServiceNullptr->SetMouseDragMonitorState(state);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest41
+ * @tc.desc: Test SetDraggableState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDraggableState001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool state = true;
+    ErrCode ret = g_intentionServiceNullptr->SetDraggableState(state);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest42
+ * @tc.desc: Test GetAppDragSwitchState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetAppDragSwitchState001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool state = true;
+    ErrCode ret = g_intentionServiceNullptr->GetAppDragSwitchState(state);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest43
+ * @tc.desc: Test SetDraggableStateAsync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDraggableStateAsync001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool state = true;
+    int64_t downTime = 6;
+    ErrCode ret = g_intentionServiceNullptr->SetDraggableStateAsync(state, downTime);
     EXPECT_EQ(ret, RET_ERR);
 }
 

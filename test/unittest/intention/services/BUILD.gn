@@ -94,6 +94,7 @@ ohos_unittest("IntentionServiceTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
@@ -282,6 +283,7 @@ ohos_unittest("IntentionDeviceManagerTest") {
     "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
@@ -349,6 +351,8 @@ ohos_unittest("IntentionDumperTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "samgr:samgr_proxy",
+    "libxml2:libxml2",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
   ]
@@ -415,8 +419,10 @@ ohos_unittest("BoomerangDumperTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "libxml2:libxml2",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
+    "samgr:samgr_proxy",
   ]
 }
 group("unittest") {

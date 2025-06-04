@@ -20,12 +20,13 @@
 
 #include <set>
 
+#include "transaction/rs_transaction.h"
+
 #include "i_drag_listener.h"
+#include "i_hotarea_listener.h"
 #include "i_subscript_listener.h"
-#include "i_tunnel_client.h"
 #include "i_start_drag_listener.h"
 #include "socket_client.h"
-#include "transaction/rs_transaction.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -35,54 +36,45 @@ public:
     DragClient() = default;
     ~DragClient() = default;
     DISALLOW_COPY_AND_MOVE(DragClient);
-
-    int32_t StartDrag(ITunnelClient &tunnel, const DragData &dragData, std::shared_ptr<IStartDragListener> listener);
-    int32_t StopDrag(ITunnelClient &tunnel, const DragDropResult &dropResult);
-    int32_t AddDraglistener(ITunnelClient &tunnel, DragListenerPtr listener, bool isJsCaller = false);
-    int32_t RemoveDraglistener(ITunnelClient &tunnel, DragListenerPtr listener, bool isJsCaller = false);
-    int32_t AddSubscriptListener(ITunnelClient &tunnel, SubscriptListenerPtr listener);
-    int32_t RemoveSubscriptListener(ITunnelClient &tunnel, SubscriptListenerPtr listener);
-    int32_t SetDragWindowVisible(ITunnelClient &tunnel, bool visible, bool isForce,
+    int32_t StartDrag(const DragData &dragData, std::shared_ptr<IStartDragListener> listener);
+    int32_t StopDrag(const DragDropResult &dropResult);
+    int32_t AddDraglistener(DragListenerPtr listener, bool isJsCaller = false);
+    int32_t RemoveDraglistener(DragListenerPtr listener, bool isJsCaller = false);
+    int32_t AddSubscriptListener(SubscriptListenerPtr listener);
+    int32_t RemoveSubscriptListener(SubscriptListenerPtr listener);
+    int32_t SetDragWindowVisible(bool visible, bool isForce,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    int32_t UpdateDragStyle(ITunnelClient &tunnel, DragCursorStyle style, int32_t eventId = -1);
-    int32_t UpdateShadowPic(ITunnelClient &tunnel, const ShadowInfo &shadowInfo);
-    int32_t GetDragTargetPid(ITunnelClient &tunnel);
-    int32_t GetUdKey(ITunnelClient &tunnel, std::string &udKey);
-    int32_t GetShadowOffset(ITunnelClient &tunnel, ShadowOffset &shadowOffset);
-    int32_t GetDragData(ITunnelClient &tunnel, DragData &dragData);
-    int32_t UpdatePreviewStyle(ITunnelClient &tunnel, const PreviewStyle &previewStyle);
-    int32_t UpdatePreviewStyleWithAnimation(ITunnelClient &tunnel,
-        const PreviewStyle &previewStyle, const PreviewAnimation &animation);
-    int32_t RotateDragWindowSync(ITunnelClient &tunnel,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    int32_t SetDragWindowScreenId(ITunnelClient &tunnel, uint64_t displayId, uint64_t screenId);
-    int32_t GetDragSummary(ITunnelClient &tunnel, std::map<std::string, int64_t> &summary,
-        bool isJsCaller = false);
-    int32_t SetDragSwitchState(ITunnelClient &tunnel, bool enable, bool isJsCaller = false);
-    int32_t SetAppDragSwitchState(ITunnelClient &tunnel, bool enable, const std::string &pkgName,
-        bool isJsCaller = false);
-    int32_t GetDragState(ITunnelClient &tunnel, DragState &dragState);
-    int32_t EnableUpperCenterMode(ITunnelClient &tunnel, bool enable);
-    int32_t GetDragAction(ITunnelClient &tunnel, DragAction &dragAction);
-    int32_t GetExtraInfo(ITunnelClient &tunnel, std::string &extraInfo);
-    int32_t AddPrivilege(ITunnelClient &tunnel);
-    int32_t EraseMouseIcon(ITunnelClient &tunnel);
-    int32_t AddSelectedPixelMap(ITunnelClient &tunnel, std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
-        std::function<void(bool)> callback);
-    int32_t SetMouseDragMonitorState(ITunnelClient &tunnel, bool state);
-
+    int32_t UpdateDragStyle(DragCursorStyle style, int32_t eventId = -1);
+    int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
+    int32_t GetDragTargetPid();
+    int32_t GetUdKey(std::string &udKey);
+    int32_t GetShadowOffset(ShadowOffset &shadowOffset);
+    int32_t GetDragData(DragData &dragData);
+    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
+    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
+    int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
+    int32_t GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller = false);
+    int32_t SetDragSwitchState(bool enable, bool isJsCaller = false);
+    int32_t SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller = false);
+    int32_t GetDragState(DragState &dragState);
+    int32_t EnableUpperCenterMode(bool enable);
+    int32_t GetDragAction(DragAction &dragAction);
+    int32_t GetExtraInfo(std::string &extraInfo);
+    int32_t AddPrivilege();
+    int32_t EraseMouseIcon();
+    int32_t SetMouseDragMonitorState(bool state);
     int32_t OnNotifyResult(const StreamClient &client, NetPacket &pkt);
-    int32_t OnNotifyHideIcon(const StreamClient& client, NetPacket& pkt);
+    int32_t OnNotifyHideIcon(const StreamClient &client, NetPacket &pkt);
     int32_t OnStateChangedMessage(const StreamClient &client, NetPacket &pkt);
     int32_t OnDragStyleChangedMessage(const StreamClient &client, NetPacket &pkt);
-    int32_t OnAddSelectedPixelMapResult(const StreamClient &client, NetPacket &pkt);
-    void OnConnected(ITunnelClient &tunnel);
-    void OnDisconnected(ITunnelClient &tunnel);
-    int32_t SetDraggableState(ITunnelClient &tunnel, bool state);
-    int32_t GetAppDragSwitchState(ITunnelClient &tunnel, bool &state);
-    void SetDraggableStateAsync(ITunnelClient &tunnel, bool state, int64_t downTime);
-    int32_t GetDragBundleInfo(ITunnelClient &tunnel, DragBundleInfo &dragBundleInfo);
-    int32_t EnableInternalDropAnimation(ITunnelClient &tunnel, const std::string &animationInfo);
+    int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
+    int32_t SetDraggableState(bool state);
+    int32_t GetAppDragSwitchState(bool &state);
+    void SetDraggableStateAsync(bool state, int64_t downTime);
+    int32_t EnableInternalDropAnimation(const std::string &animationInfo);
+    void OnConnected();
+    void OnDisconnected();
 
 private:
     mutable std::mutex mtx_;
@@ -92,7 +84,6 @@ private:
     std::set<DragListenerPtr> dragListeners_;
     std::set<DragListenerPtr> connectedDragListeners_;
     std::set<SubscriptListenerPtr> subscriptListeners_;
-    std::function<void(bool)> addSelectedPixelMapCallback_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

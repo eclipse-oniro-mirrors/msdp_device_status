@@ -85,7 +85,7 @@ void SocketSessionManager::AppStateObserver::OnProcessDied(const AppExecFwk::Pro
 int32_t SocketSessionManager::AllocSocketFd(const std::string& programName, int32_t moduleType, int32_t tokenType,
                                             int32_t uid, int32_t pid, int32_t& clientFd)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     int32_t sockFds[2] { -1, -1 };
 
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sockFds) != 0) {
@@ -159,6 +159,7 @@ void SocketSessionManager::Dispatch(const struct epoll_event &ev)
 
 void SocketSessionManager::DispatchOne()
 {
+    CALL_INFO_TRACE;
     struct epoll_event evs[MAX_EPOLL_EVENTS];
     std::lock_guard<std::recursive_mutex> guard(mutex_);
     int32_t cnt = epollMgr_.WaitTimeout(evs, MAX_EPOLL_EVENTS, 0);
@@ -290,7 +291,7 @@ void SocketSessionManager::DumpSession(const std::string &title) const
 
 bool SocketSessionManager::AddSession(std::shared_ptr<SocketSession> session)
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard<std::recursive_mutex> guard(mutex_);
     CHKPF(session);
     if (sessions_.size() >= MAX_SESSION_ALARM) {

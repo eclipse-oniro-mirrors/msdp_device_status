@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,35 +26,29 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class BoomerangServer final : public IPlugin {
+class BoomerangServer {
 public:
     BoomerangServer();
     ~BoomerangServer() = default;
     DISALLOW_COPY_AND_MOVE(BoomerangServer);
-
-    int32_t Enable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Start(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-
     bool IsSystemServiceCalling(CallingContext &context);
     bool IsSystemHAPCalling(CallingContext &context);
     void DumpDeviceStatusSubscriber(int32_t fd) const;
     void DumpDeviceStatusChanges(int32_t fd) const;
     void DumpCurrentDeviceStatus(int32_t fd);
+    int32_t SubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
+        const sptr<IRemoteBoomerangCallback>& subCallback);
+    int32_t UnsubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
+        const sptr<IRemoteBoomerangCallback>& unsubCallback);
+    int32_t NotifyMetadataBindingEvent(CallingContext &context, const std::string& bundleName,
+        const sptr<IRemoteBoomerangCallback>& notifyCallback);
+    int32_t SubmitMetadata(CallingContext &context, const std::string& metaData);
+    int32_t BoomerangEncodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
+        const std::string& metaData, const sptr<IRemoteBoomerangCallback>& encodeCallback);
+    int32_t BoomerangDecodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
+        const sptr<IRemoteBoomerangCallback>& decodeCallback);
 
 private:
-    int32_t Subscribe(CallingContext &context, MessageParcel &data);
-    int32_t Unsubscribe(CallingContext &context, MessageParcel &data);
-    int32_t NotifyMetadataBindingEvent(CallingContext &context, MessageParcel &data);
-    int32_t SubmitMetadata(CallingContext &context, MessageParcel &data);
-    int32_t BoomerangEncodeImage(CallingContext &context, MessageParcel &data);
-    int32_t BoomerangDecodeImage(CallingContext &context, MessageParcel &data);
     Data GetCache(CallingContext &context, const Type &type);
     void ReportSensorSysEvent(CallingContext &context, int32_t type, bool enable);
 

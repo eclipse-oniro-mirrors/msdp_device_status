@@ -2175,8 +2175,10 @@ int32_t DragDrawing::UpdateSvgNodeInfo(xmlNodePtr curNode, int32_t extendSvgWidt
         return RET_ERR;
     }
     std::ostringstream oStrStream;
-    oStrStream << xmlGetProp(curNode, BAD_CAST "width");
+    xmlChar* widthProp = xmlGetProp(curNode, BAD_CAST "width");
+    oStrStream << widthProp;
     std::string srcSvgWidth = oStrStream.str();
+    xmlFree(widthProp);
     if (srcSvgWidth.length() < STRING_PX_LENGTH) {
         FI_HILOGE("Svg width invalid, srcSvgWidth:%{public}s", srcSvgWidth.c_str());
         return RET_ERR;
@@ -2191,9 +2193,11 @@ int32_t DragDrawing::UpdateSvgNodeInfo(xmlNodePtr curNode, int32_t extendSvgWidt
     tgtSvgWidth.append("px");
     xmlSetProp(curNode, BAD_CAST "width", BAD_CAST tgtSvgWidth.c_str());
     oStrStream.str("");
-    oStrStream << xmlGetProp(curNode, BAD_CAST "viewBox");
+    xmlChar* viewBoxProp = xmlGetProp(curNode, BAD_CAST "viewBox");
+    oStrStream << viewBoxProp;
     std::string srcViewBox = oStrStream.str();
     std::istringstream iStrStream(srcViewBox);
+    xmlFree(viewBoxProp);
     std::string tmpString;
     std::string tgtViewBox;
     int32_t i = 0;
@@ -2239,8 +2243,10 @@ xmlNodePtr DragDrawing::UpdateRectNode(int32_t extendSvgWidth, xmlNodePtr curNod
     while (curNode != nullptr) {
         if (!xmlStrcmp(curNode->name, BAD_CAST "rect")) {
             std::ostringstream oStrStream;
-            oStrStream << xmlGetProp(curNode, BAD_CAST "width");
+            xmlChar* widthProp = xmlGetProp(curNode, BAD_CAST "width");
+            oStrStream << widthProp;
             std::string srcRectWidth = oStrStream.str();
+            xmlFree(widthProp);
             if (!IsNum(srcRectWidth)) {
                 FI_HILOGE("srcRectWidth is not digital, srcRectWidth:%{public}s", srcRectWidth.c_str());
                 return nullptr;
@@ -4472,7 +4478,8 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
         }
         return;
     }
-    screenId_ = static_cast<uint64_t>(displayId);
+    screenId_ = display->GetScreenId();
+    FI_HILOGI("Get screen id:%{public}llu", static_cast<unsigned long long>(screenId_));
 #ifdef OHOS_BUILD_PC_PRODUCT
     uint64_t rsScreenId = screenId_;
     if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {

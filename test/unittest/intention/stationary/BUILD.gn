@@ -45,6 +45,7 @@ ohos_unittest("StationaryServerTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "input:libmmi-client",
+    "ipc:ipc_single",
     "window_manager:libdm",
   ]
 

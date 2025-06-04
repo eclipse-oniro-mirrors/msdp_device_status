@@ -28,59 +28,51 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DragServer final : public IPlugin {
+class DragServer final {
 public:
     DragServer(IContext *env);
     ~DragServer() = default;
     DISALLOW_COPY_AND_MOVE(DragServer);
 
-    int32_t Enable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Start(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
-    int32_t AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t GetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    int32_t Control(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
-    bool IsSystemServiceCalling(CallingContext &context);
-    bool IsSystemHAPCalling(CallingContext &context);
-    int32_t SetDraggableState(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-
-private:
-    int32_t SetDragWindowVisible(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t UpdateDragStyle(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t UpdateShadowPic(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t UpdatePreviewStyle(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t UpdatePreviewAnimation(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t RotateDragWindowSync(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t GetDragTargetPid(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t GetUdKey(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t GetShadowOffset(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t GetDragData(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t GetDragState(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    __attribute__((no_sanitize("cfi"))) int32_t GetDragSummary(CallingContext &context,
-        MessageParcel &data, MessageParcel &reply);
-    int32_t SetDragSwitchState(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t SetAppDragSwitchState(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t GetDragAction(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t GetExtraInfo(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t EnterTextEditorArea(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t SetDragWindowScreenId(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    std::string GetPackageName(Security::AccessToken::AccessTokenID tokenId);
-    int32_t AddSelectedPixelMap(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t RemoveListener(CallingContext &context, MessageParcel &data);
-    int32_t AddListener(CallingContext &context, MessageParcel &data);
-    int32_t SetMouseDragMonitorState(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t GetAppDragSwitchState(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t SetDraggableStateAsync(CallingContext &context, MessageParcel &data);
-    int32_t GetDragBundleInfo(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-    int32_t EnableInternalDropAnimation(CallingContext &context, MessageParcel &data, MessageParcel &reply);
-
-    int32_t EraseMouseIcon(CallingContext &context);
+    int32_t StartDrag(CallingContext &context, const DragData &dragData);
+    int32_t StopDrag(CallingContext &context, const DragDropResult &dropResult);
+    int32_t EnableInternalDropAnimation(CallingContext &context, const std::string &animationInfo);
+    int32_t AddDraglistener(CallingContext &context, bool isJsCaller);
+    int32_t RemoveDraglistener(CallingContext &context, bool isJsCaller);
+    int32_t UpdateDragStyle(CallingContext &context, DragCursorStyle style, int32_t eventId);
+    int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
     int32_t AddSubscriptListener(CallingContext &context);
     int32_t RemoveSubscriptListener(CallingContext &context);
+    int32_t SetDragWindowVisible(bool visible, bool isForce,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
+    int32_t GetDragTargetPid(CallingContext &context, int32_t &targetPid);
+    int32_t GetUdKey(std::string &udKey);
+    int32_t GetShadowOffset(ShadowOffset &shadowOffset);
+    int32_t GetDragData(CallingContext &context, DragData &dragData);
+    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
+    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
+    int32_t RotateDragWindowSync(CallingContext &context, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
+    int32_t SetDragWindowScreenId(CallingContext &context, uint64_t displayId, uint64_t screenId);
+    int32_t GetDragSummary(CallingContext &context, std::map<std::string, int64_t> &summarys, bool isJsCaller);
+    int32_t SetDragSwitchState(CallingContext &context, bool enable, bool isJsCaller);
+    int32_t SetAppDragSwitchState(CallingContext &context, bool enable, const std::string &pkgName, bool isJsCaller);
+    int32_t GetDragState(DragState &dragState);
+    int32_t EnableUpperCenterMode(bool enable);
+    int32_t GetDragAction(DragAction &dragAction);
+    int32_t GetExtraInfo(std::string &extraInfo);
+    int32_t AddPrivilege(CallingContext &context);
+    int32_t EraseMouseIcon(CallingContext &context);
+    int32_t SetMouseDragMonitorState(bool state);
+    int32_t SetDraggableState(bool state);
+    int32_t GetAppDragSwitchState(bool &state);
+    int32_t SetDraggableStateAsync(bool state, int64_t downTime);
+    int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
 
+private:
+    std::string GetPackageName(Security::AccessToken::AccessTokenID tokenId);
+    bool IsSystemServiceCalling(CallingContext &context);
+    bool IsSystemHAPCalling(CallingContext &context);
+private:
     IContext *env_ { nullptr };
 #ifdef OHOS_BUILD_UNIVERSAL_DRAG
     UniversalDragWrapper universalDragWrapper_;

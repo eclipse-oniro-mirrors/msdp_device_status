@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ DecodeImageFunc BoomerangAlgoManager::boomerangAlgoDecodeImageHandle_ = nullptr;
 
 const std::string BOOMERANG_ALGO_SO_PATH = "system/lib64/libmsdp_boomerang_algo.z.so";
 
-bool BoomerangAlgoManager::EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content,
+bool BoomerangAlgoManager::EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &content,
                                        std::shared_ptr<Media::PixelMap> &resultPixelMap)
 {
     FI_HILOGI("Boomerang Algo Encode Load");
@@ -102,7 +102,7 @@ BoomerangAlgoManager::~BoomerangAlgoManager()
     boomerangAlgoDecodeImageHandle_ = nullptr;
 }
 
-void BoomerangAlgoImpl::EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content,
+void BoomerangAlgoImpl::EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &content,
                                     std::shared_ptr<Media::PixelMap> &resultPixelMap)
 {
     FI_HILOGI("Boomerang Enter BoomerangAlgoImpl Encode Image");

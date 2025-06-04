@@ -38,9 +38,9 @@ struct StartCooperateData {
 using RemoteStartCooperateData = StartCooperateData;
 
 struct CooperateOptions {
-    int32_t displayX;
-    int32_t displayY;
-    int32_t displayId;
+    int32_t displayX { -1 };
+    int32_t displayY { -1 };
+    int32_t displayId { -1 };
 };
 using NormalizedCooperateOptions = CooperateOptions;
 
@@ -80,7 +80,7 @@ public:
         const std::string &remoteNetworkId, int32_t startDeviceId, int32_t uid = 0) = 0;
     virtual int32_t Stop(int32_t pid, int32_t userData, bool isUnchained) = 0;
     virtual int32_t StartWithOptions(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
-        int32_t startDeviceId, const NormalizedCooperateOptions &CooperateOptions) = 0;
+        int32_t startDeviceId, const NormalizedCooperateOptions &cooperateOptions) = 0;
 
     virtual int32_t GetCooperateState(int32_t pid, int32_t userData, const std::string &networkId) = 0;
     virtual int32_t Update(uint32_t mask, uint32_t flag) = 0;

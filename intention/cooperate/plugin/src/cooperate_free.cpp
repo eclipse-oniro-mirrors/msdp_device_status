@@ -262,14 +262,24 @@ void CooperateFree::Initial::OnStartWithOptions(Context &context, const Cooperat
 {
     CALL_INFO_TRACE;
     StartWithOptionsEvent notice = std::get<StartWithOptionsEvent>(event.event);
-    FI_HILOGI("[start cooperation With Options] With \'%{public}s\'",
-        Utility::Anonymize(notice.remoteNetworkId).c_str());
+    FI_HILOGI("[start With] With \'%{public}s\'", Utility::Anonymize(notice.remoteNetworkId).c_str());
     context.StartCooperateWithOptions(notice);
     context.eventMgr_.StartCooperateWithOptions(notice);
+    if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Not allow cooperate");
+        NotAollowCooperateWhenMotionDragging result {
+            .pid = notice.pid,
+            .userData = notice.userData,
+            .networkId = notice.remoteNetworkId,
+            .success = false,
+            .errCode = static_cast<int32_t>(CoordinationErrCode::NOT_AOLLOW_COOPERATE_WHEN_MOTION_DRAGGING)
+        };
+        context.eventMgr_.ErrorNotAollowCooperateWhenMotionDragging(result);
+        return;
+    }
     int32_t ret = context.dsoftbus_.OpenSession(context.Peer());
     if (ret != RET_OK) {
-        FI_HILOGE("[start cooperation] Failed to connect to \'%{public}s\'",
-            Utility::Anonymize(context.Peer()).c_str());
+        FI_HILOGE("[start cooperation] Failed to connect\'%{public}s\'", Utility::Anonymize(context.Peer()).c_str());
         int32_t errNum = (ret == RET_ERR ? static_cast<int32_t>(CoordinationErrCode::OPEN_SESSION_FAILED) : ret);
         DSoftbusStartCooperateFinished failNotice {
             .success = false,
@@ -282,11 +292,13 @@ void CooperateFree::Initial::OnStartWithOptions(Context &context, const Cooperat
         .originNetworkId = context.Local(),
         .success = true,
         .cooperateOptions = {notice.displayX, notice.displayY, notice.displayId},
+        .pointerSpeed = context.GetPointerSpeed(),
+        .touchPadSpeed = context.GetTouchPadSpeed(),
     };
     context.OnStartCooperate(startNotice.extra);
     context.dsoftbus_.StartCooperateWithOptions(context.Peer(), startNotice);
     context.inputEventInterceptor_.Enable(context);
-    context.eventMgr_.StartCooperateWithOptinsFinish(startNotice);
+    context.eventMgr_.StartCooperateWithOptionsFinish(startNotice);
     FI_HILOGI("[start cooperation] Cooperation with \'%{public}s\' established",
         Utility::Anonymize(context.Peer()).c_str());
     TransiteTo(context, CooperateState::COOPERATE_STATE_OUT);
@@ -347,6 +359,8 @@ void CooperateFree::Initial::OnRemoteStartWithOptions(Context &context, const Co
 {
     CALL_INFO_TRACE;
     DSoftbusCooperateOptions notice = std::get<DSoftbusCooperateOptions>(event.event);
+    context.StorePeerPointerSpeed(notice.pointerSpeed);
+    context.StorePeerTouchPadSpeed(notice.touchPadSpeed);
     context.OnRemoteStartCooperate(notice.extra);
     context.eventMgr_.RemoteStartWithOptions(notice);
     context.AdjustPointerPos(notice);
@@ -358,6 +372,9 @@ void CooperateFree::Initial::OnRemoteStartWithOptions(Context &context, const Co
         Utility::Anonymize(context.Peer()).c_str());
     TransiteTo(context, CooperateState::COOPERATE_STATE_IN);
     context.OnTransitionIn();
+    if (!context.NeedFreezeCursor()) {
+        parent_.SimulateShowPointerEvent();
+    }
 }
 
 void CooperateFree::Initial::OnPointerEvent(Context &context, const CooperateEvent &event)
