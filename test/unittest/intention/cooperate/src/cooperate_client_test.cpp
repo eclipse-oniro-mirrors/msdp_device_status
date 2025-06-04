@@ -219,6 +219,28 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_Start_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CooperateClientTest_Start_001
+ * @tc.desc: Start
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateClientTest, CooperateClientTest_StartWithOptions_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateClient cooperateClient;
+    std::string remoteNetworkId = "networkid";
+    int32_t startDeviceId = 0;
+    CooperateOptions options {
+            .displayX = 500,
+            .displayY = 500,
+            .displayId = 1
+    };
+    CooperateClient::CooperateMessageCallback callback;
+    int32_t ret = cooperateClient.StartWithOptions(remoteNetworkId, startDeviceId, callback, options);
+    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+}
+
+/**
  * @tc.name: CooperateClientTest_Stop_001
  * @tc.desc: Stop
  * @tc.type: FUNC

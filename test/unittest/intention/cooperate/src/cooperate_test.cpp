@@ -333,6 +333,34 @@ HWTEST_F(CooperateTest, CooperateTest7, TestSize.Level0)
         EXPECT_EQ(!ret, RET_OK);
     }
 }
+
+/**
+ * @tc.name: CooperateTest8
+ * @tc.desc: cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateTest, CooperateTest8, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t ret = RET_ERR;
+    if (g_cooperate != nullptr) {
+        CooperateOptions withOptions;
+        withOptions.displayX = 500;
+        withOptions.displayY = 500;
+        withOptions.displayId = 1;
+        int32_t pid = IPCSkeleton::GetCallingPid();
+        int32_t userData = 1;
+        int32_t startDeviceId = 0;
+        const std::string &remoteNetworkId = "test";
+        ret = g_cooperate->StartWithOptions(pid, userData, remoteNetworkId,
+        startDeviceId, withOptions);
+        EXPECT_EQ(ret, RET_OK);
+    } else {
+        GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
+        EXPECT_EQ(!ret, RET_OK);
+    }
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

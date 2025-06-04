@@ -357,12 +357,36 @@ void StateMachine::StartCooperateWithOptions(Context &context, const CooperateEv
     if (!env_->GetDDM().CheckSameAccountToLocal(withOptionsEvent.remoteNetworkId)) {
         FI_HILOGE("CheckSameAccountToLocal failed");
         withOptionsEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
+        CooperateRadarInfo radarInfo {
+            .funcName =  __FUNCTION__,
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_SAME_ACCOUNT),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_SAME_ACCOUNT_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(withOptionsEvent.remoteNetworkId.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         return;
     }
     UpdateApplicationStateObserver(withOptionsEvent.pid);
     if (!context.IsAllowCooperate()) {
         FI_HILOGI("Not allow cooperate");
         withOptionsEvent.errCode->set_value(COMMON_NOT_ALLOWED_DISTRIBUTED);
+        CooperateRadarInfo radarInfo {
+            .funcName = __FUNCTION__,
+            .bizState = static_cast<int32_t> (BizState::STATE_END),
+            .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_ALLOW_COOPERATE),
+            .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL),
+            .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+            .errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_ALLOW_COOPERATE_FAILED),
+            .hostName = "",
+            .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+            .peerNetId = Utility::DFXRadarAnonymize(withOptionsEvent.remoteNetworkId.c_str())
+        };
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
         return;
     }
     withOptionsEvent.errCode->set_value(RET_OK);
@@ -571,7 +595,28 @@ void StateMachine::OnRemoteStartWithOptions(Context &context, const CooperateEve
 {
     CALL_DEBUG_ENTER;
     DSoftbusCooperateOptions startEvent = std::get<DSoftbusCooperateOptions>(event.event);
-    if (!env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId) || !isCooperateEnable_) {
+    CooperateRadarInfo radarInfo {
+        .funcName =  __FUNCTION__,
+        .bizState = static_cast<int32_t> (BizState::STATE_END),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_PASSIVE),
+        .hostName = "",
+        .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
+        .peerNetId = Utility::DFXRadarAnonymize(startEvent.originNetworkId.c_str())
+    };
+    bool checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId);
+    if (!checkSameAccount) {
+        radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT);
+        radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
+        radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CHECK_SAME_ACCOUNT_FAILED);
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
+    if (!isCooperateEnable_) {
+        radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_PEER_SWITCH);
+        radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
+        radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_PEER_SWITCH_FAILED);
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
+    if (!checkSameAccount || !isCooperateEnable_) {
         FI_HILOGE("CheckSameAccountToLocal failed, switch is : %{public}d, unchain", isCooperateEnable_);
         CooperateEvent stopEvent(
             CooperateEventType::STOP,

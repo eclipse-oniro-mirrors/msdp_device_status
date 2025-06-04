@@ -176,6 +176,33 @@ HWTEST_F(CooperateServerTest, StartTest1, TestSize.Level0)
 }
 
 /**
+ * @tc.name: StartWithOptionsTest1
+ * @tc.desc: Test func named start
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, StartWithOptionsTest1, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    std::string networkId = "networkId";
+    int32_t startDeviceId = 0;
+    CooperateOptions options {
+            .displayX = 500,
+            .displayY = 500,
+            .displayId = 1
+    };
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperateWithOptions(context,
+        networkId, g_userData, startDeviceId, options));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
  * @tc.name: StopCooperateTest1
  * @tc.desc: Test func named stop
  * @tc.type: FUNC
