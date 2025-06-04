@@ -334,6 +334,30 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartCooperate001, TestSize.
 }
 
 /**
+ * @tc.name: IntentionServiceTest_StartCooperateWithOptions001
+ * @tc.desc: Test StartCooperate
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartCooperateWithOptions001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string remoteNetworkId = "networkId";
+    int32_t userData = 0;
+    int32_t startDeviceId = 0;
+    bool isCheckPermission = true;
+    CooperateOptions options {
+            .displayX = 500,
+            .displayY = 500,
+            .displayId = 1
+    };
+    SequenceableCooperateOptions sequenceableCooperateOptions(options);
+    ErrCode ret = g_intentionService->StartCooperateWithOptions(remoteNetworkId, userData, startDeviceId,
+        isCheckPermission, sequenceableCooperateOptions);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
+}
+
+/**
  * @tc.name: IntentionServiceTest5
  * @tc.desc: Test RegisterCooperateListener
  * @tc.type: FUNC
