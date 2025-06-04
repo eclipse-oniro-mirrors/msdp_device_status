@@ -1008,7 +1008,7 @@ HWTEST_F(DragServerTest, DragServerTest59, TestSize.Level0)
 
 /**
  * @tc.name: DragServerTest60
- * @tc.desc: Drag Drawing
+ * @tc.desc: Drag Drawingx`
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1017,7 +1017,7 @@ HWTEST_F(DragServerTest, DragServerTest60, TestSize.Level0)
     CALL_TEST_DEBUG;
     std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
     ASSERT_NE(pixelMap, nullptr);
-    ShadowInfo shadowInfo = {  pixelMap, 1, 0 };
+    ShadowInfo shadowInfo = { pixelMap, 1, 0 };
     ShadowOffset shadowOffset;
     DRAG_DATA_MGR.SetShadowInfos({shadowInfo});
     int32_t ret = DRAG_DATA_MGR.GetShadowOffset(shadowOffset);
@@ -1026,7 +1026,7 @@ HWTEST_F(DragServerTest, DragServerTest60, TestSize.Level0)
 
 /**
  * @tc.name: DragServerTest61
- * @tc.desc: Drag Drawing
+ * @tc.desc: Drag Drawingx`
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1037,6 +1037,26 @@ HWTEST_F(DragServerTest, DragServerTest61, TestSize.Level0)
     DRAG_DATA_MGR.SetDragWindowVisible(visible);
     bool ret = DRAG_DATA_MGR.GetDragWindowVisible();
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: DragServerTest62
+ * @tc.desc: Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest62, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    dragData.displayX = DISPLAY_X;
+    dragData.displayY = DISPLAY_Y;
+    DRAG_DATA_MGR.Init(dragData);
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::DEFAULT);
+    EXPECT_TRUE(DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::DEFAULT);
+    int32_t eventId = 1;
+    DRAG_DATA_MGR.SetEventId(eventId);
+    EXPECT_TRUE(DRAG_DATA_MGR.GetEventId() == eventId);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
