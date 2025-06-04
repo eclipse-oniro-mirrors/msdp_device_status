@@ -33,6 +33,7 @@ namespace {
 auto &g_motionClient = MotionClient::GetInstance();
 constexpr int32_t PERMISSION_DENIED = 201;
 static constexpr uint8_t ARG_1 = 1;
+constexpr int32_t HOLDING_HAND_FEATURE_DISABLE = 11;
 #endif
 static constexpr uint8_t ARG_0 = 0;
 static constexpr uint8_t ARG_2 = 2;
@@ -45,7 +46,6 @@ constexpr int32_t MOTION_TYPE_HOLDING_HAND_STATUS = 3605;
 constexpr int32_t BASE_HAND = 0;
 constexpr int32_t LEFT_HAND = 1;
 constexpr int32_t RIGHT_HAND = 2;
-constexpr int32_t HOLDING_HAND_FEATURE_DISABLE = 11;
 enum HoldPostureStatus : int32_t {
     NOT_HELD = 0,
     LEFT_HAND_HELD,
