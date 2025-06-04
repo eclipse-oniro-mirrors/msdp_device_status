@@ -33,7 +33,8 @@
       "device_status_memmgr_enable",
       "device_status_device_type",
       "device_status_enable_universal_drag",
-      "device_status_motion_enable"
+      "device_status_motion_enable",
+      "device_status_enable_internal_drop_animation"
     ],
     "adapted_system_type": [ "standard" ],
     "rom": "2048KB",

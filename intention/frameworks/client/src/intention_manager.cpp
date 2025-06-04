@@ -605,7 +605,7 @@ int32_t IntentionManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
 int32_t IntentionManager::EnableInternalDropAnimation(const std::string &animationInfo)
 {
     CALL_DEBUG_ENTER;
-    return drag_.EnableInternalDropAnimation(*tunnel_, animationInfo);
+    return drag_.EnableInternalDropAnimation(animationInfo);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -72,7 +72,7 @@ int32_t DragServer::EnableInternalDropAnimation(CallingContext &context, const s
     CHKPR(env_, RET_ERR);
     return env_->GetDragManager().EnableInternalDropAnimation(animationInfo);
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
-    return 801;
+    return COMMON_CAPABILITY_NOT_SUPPORT;
 }
 
 int32_t DragServer::AddDraglistener(CallingContext &context, bool isJsCaller)

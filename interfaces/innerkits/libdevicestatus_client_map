@@ -83,7 +83,7 @@
             "OHOS::Msdp::DeviceStatus::InteractionManager::SetDraggableStateAsync(bool, long)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::SetDraggableStateAsync(bool, long long)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragBundleInfo(OHOS::Msdp::DeviceStatus::DragBundleInfo&)";
-            "OHOS::Msdp::DeviceStatus::InteractionManager::EnableInternalDropAnimation(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::EnableInternalDropAnimation(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::GetInstance()";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::SubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::UnsubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";

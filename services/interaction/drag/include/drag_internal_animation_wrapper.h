@@ -24,22 +24,20 @@ namespace DeviceStatus {
 
 typedef int32_t (*EnableInternalDropAnimationFunc)(const char *);
 typedef int32_t (*PerformInternalDropAnimationFunc)(void);
-typedef bool (*NeedPerformInternalDropAnimationFunc)(void);
 
 class DragInternalAnimationWrapper {
 public:
-    DragInternalAnimationWrapper(IContext *env)  : env_(env) {}
+    DragInternalAnimationWrapper() = default;
     ~DragInternalAnimationWrapper();
     int32_t EnableInternalDropAnimation(const std::string &animationInfo);
-    bool NeedPerformInternalDropAnimation();
     int32_t PerformInternalDropAnimation();
  
 private:
-    IContext* env_ { nullptr };
+    bool Init();
+
     void* dragInternalAnimationHandle_ { nullptr };
     EnableInternalDropAnimationFunc enableInternalDropAnimationHandle_ { nullptr };
     PerformInternalDropAnimationFunc performInternalDropAnimationHandle_ { nullptr };
-    NeedPerformInternalDropAnimationFunc needPerformInternalDropAnimationHandle_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

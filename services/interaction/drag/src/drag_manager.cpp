@@ -537,6 +537,11 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
         ReportStopDragUEInfo(packageName);
     }
     dragOutSession_ = nullptr;
+
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    enableInternalDropAnimation_ = false;
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     peerNetId_ = "";
     FI_HILOGI("leave");
@@ -1847,15 +1852,7 @@ int32_t DragManager::HandleDragResult(DragResult result, bool hasCustomAnimation
         case DragResult::DRAG_SUCCESS: {
             if (!hasCustomAnimation) {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
-                if (NeedPerformInternalDropAnimation()) {
-                    PerformInternalDropAnimation();
-                } else {
-                    dragDrawing_.OnDragSuccess(context_);
-                }
-#else
                 dragDrawing_.OnDragSuccess(context_);
-#endif OHOS_BUILD_INTERNAL_DROP_ANIMATION
 #else
                 dragDrawing_.OnDragSuccess();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
@@ -1869,15 +1866,7 @@ int32_t DragManager::HandleDragResult(DragResult result, bool hasCustomAnimation
         case DragResult::DRAG_CANCEL: {
             if (!hasCustomAnimation) {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
-                if (NeedPerformInternalDropAnimation()) {
-                    PerformInternalDropAnimation();
-                } else {
-                    dragDrawing_.OnDragFail(context_, isLongPressDrag_);
-                }
-#else
                 dragDrawing_.OnDragFail(context_, isLongPressDrag_);
-#endif OHOS_BUILD_INTERNAL_DROP_ANIMATION
 #else
                 dragDrawing_.OnDragFail();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
@@ -2250,20 +2239,22 @@ int32_t DragManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
 int32_t DragManager::EnableInternalDropAnimation(const std::string &animationInfo)
 {
-    // todo 1、调用代码解析，解析成功返回0，失败则返回401
-    return internalAnimationWrapper_.EnableInternalDropAnimation(animationInfo);
+    FI_HILOGI("enter");
+    int32_t ret = internalAnimationWrapper_.EnableInternalDropAnimation(animationInfo);
+    if (ret != RET_OK) {
+        FI_HILOGD("EnableInternalDropAnimation failed, ret:%{public}d", ret);
+        return ret;
+    }
+    enableInternalDropAnimation_ = true;
+    return RET_OK;
 }
 
-// 执行动效
 int32_t DragManager::PerformInternalDropAnimation(const std::string &animationInfo)
 {
-    return internalAnimationWrapper_.EnableInternalDropAnimation(animationInfo);
-}
-
-// 是否需要执行动效执行动效
-bool DragManager::NeedPerformInternalDropAnimation()
-{
-    return internalAnimationWrapper_.NeedPerformInternalDropAnimation();
+    if (enableInternalDropAnimation_) {
+        enableInternalDropAnimation_ = false;
+    }
+    return internalAnimationWrapper_.PerformInternalDropAnimation();
 }
 #endif OHOS_BUILD_INTERNAL_DROP_ANIMATION
 

@@ -30,6 +30,15 @@ namespace {
 const std::string DRAG_INTERNAL_ANIMATION_SO_PATH = "system/lib64/libdrag_internal_animation.z.so";
 }
 
+DragInternalAnimationWrapper::~DragInternalAnimationWrapper()
+{
+    FI_HILOGI("Enter");
+    if (dragInternalAnimationHandle_ != nullptr) {
+        dlclose(dragInternalAnimationHandle_);
+        dragInternalAnimationHandle_ = nullptr;
+    }
+}
+
 bool DragInternalAnimationWrapper::Init()
 {
     FI_HILOGI("Enter");
@@ -53,10 +62,10 @@ int32_t DragInternalAnimationWrapper::EnableInternalDropAnimation(const std::str
     }
     if (enableInternalDropAnimationHandle_ == nullptr) {
         enableInternalDropAnimationHandle_ =
-            reinterpret_cast<EnableInternalDropAnimationFunc>(dlsym(universalDragHandle_, "EnableInternalDropAnimation"));
+            reinterpret_cast<EnableInternalDropAnimationFunc>(dlsym(dragInternalAnimationHandle_, "EnableInternalDropAnimation"));
         char *error = nullptr;
         if ((error = dlerror()) != nullptr) {
-            FI_HILOGE("Symbol RmoveUniversalDrag error: %{public}s", error);
+            FI_HILOGE("Symbol enableInternalDropAnimation error: %{public}s", error);
             return RET_ERR;
         }
     }
@@ -64,33 +73,10 @@ int32_t DragInternalAnimationWrapper::EnableInternalDropAnimation(const std::str
         FI_HILOGE("Symbol enableInternalDropAnimationHandle is null");
         return RET_ERR;
     }
-    return enableInternalDropAnimationHandle_(animationInfo);
+    return enableInternalDropAnimationHandle_(animationInfo.c_str());
 }
 
-bool DragInternalAnimationWrapper::NeedPerformInternalDropAnimation();
-{
-    CALL_DEBUG_ENTER;
-    if ((dragInternalAnimationHandle_ == nullptr) && (!Init())) {
-        FI_HILOGE("Init internal animation handle fail");
-        return false;
-    }
-    if (NeedPerformInternalDropAnimationHandle_ == nullptr) {
-        NeedPerformInternalDropAnimationHandle_ =
-            reinterpret_cast<NeedPerformInternalDropAnimationFunc>(dlsym(universalDragHandle_, "NeedPerformInternalDropAnimation"));
-        char *error = nullptr;
-        if ((error = dlerror()) != nullptr) {
-            FI_HILOGE("Symbol NeedPerformInternalDropAnimationHandle error: %{public}s", error);
-            return false;
-        }
-    }
-    if (NeedPerformInternalDropAnimationHandle_ == nullptr) {
-        FI_HILOGE("Symbol NeedPerformInternalDropAnimationHandle is null");
-        return false;
-    }
-    return NeedPerformInternalDropAnimationHandle_();
-}
-
-int32_t PerformInternalDropAnimation()
+int32_t DragInternalAnimationWrapper::PerformInternalDropAnimation()
 {
     CALL_DEBUG_ENTER;
     if ((dragInternalAnimationHandle_ == nullptr) && (!Init())) {
@@ -99,7 +85,7 @@ int32_t PerformInternalDropAnimation()
     }
     if (performInternalDropAnimationHandle_ == nullptr) {
         performInternalDropAnimationHandle_ =
-            reinterpret_cast<PerformInternalDropAnimationFunc>(dlsym(universalDragHandle_, "PerformInternalDropAnimation"));
+            reinterpret_cast<PerformInternalDropAnimationFunc>(dlsym(dragInternalAnimationHandle_, "PerformInternalDropAnimation"));
         char *error = nullptr;
         if ((error = dlerror()) != nullptr) {
             FI_HILOGE("Symbol performInternalDropAnimationHandle error: %{public}s", error);

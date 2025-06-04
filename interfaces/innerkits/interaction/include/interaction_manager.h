@@ -326,7 +326,11 @@ public:
     /**
      * @brief Enable the internal animation.
      * @param animationInfo Indicates the internal drop animation's configuration.
-     * @return Returns <b>0</b> if the operation is successful; returns other values if the operation fails.
+     * @return 0 - Success.
+     *         202 - Called by no-system application
+     *         401 - Parameter error.
+     *         801 - Capability not support
+     *         -1  - Other error.
      * @since 20
      */
     int32_t EnableInternalDropAnimation(const std::string &animationInfo);

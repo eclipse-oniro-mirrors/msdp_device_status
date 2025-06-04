@@ -55,6 +55,7 @@ public:
     // Drag
     int32_t StartDrag(const DragData &dragData);
     int32_t StopDrag(const DragDropResult &dropResult);
+    int32_t EnableInternalDropAnimation(const std::string &animationInfo);
     int32_t AddDraglistener(bool isJsCaller);
     int32_t RemoveDraglistener(bool isJsCaller);
     int32_t AddSubscriptListener();
