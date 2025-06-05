@@ -3083,12 +3083,28 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDraggableStateAsync, 
  * @tc.require:
  */
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimation, TestSize.Level1)
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimation01, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::string animationInfo = "{\"targetPos\": [8, 8]}";
     int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
     EXPECT_EQ(ret, RET_OK);
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
+/**
+ * @tc.name: InteractionManagerTest_EnableInternalDropAnimation
+ * @tc.desc: Check EnableInternalDropAnimation
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimation02, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::string animationInfo = "{}";
+    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
+    EXPECT_EQ(ret, COMMON_PARAMETER_ERROR);
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus
