@@ -204,6 +204,7 @@ ohos_unittest("CooperatePluginTest") {
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
     "data_share:datashare_consumer",
@@ -375,6 +376,7 @@ ohos_unittest("InputEventBuilderTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
     "data_share:datashare_consumer",
@@ -444,6 +446,7 @@ ohos_unittest("InputEventInterceptorTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
     "data_share:datashare_consumer",
@@ -506,6 +509,7 @@ ohos_unittest("CooperateTest") {
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
     "data_share:datashare_consumer",

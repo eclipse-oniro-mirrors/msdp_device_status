@@ -48,6 +48,7 @@ interface OHOS.Msdp.IIntention {
     // Drag
     void StartDrag([in] SequenceableDragData sequenceableDragData);
     void StopDrag([in] SequenceableDragResult sequenceableDragResult);
+    void EnableInternalDropAnimation([in] String animationInfo);
     void AddDraglistener([in] boolean isJsCaller);
     void RemoveDraglistener([in] boolean isJsCaller);
     void AddSubscriptListener();
@@ -77,7 +78,7 @@ interface OHOS.Msdp.IIntention {
     void GetAppDragSwitchState([out] boolean state);
     void SetDraggableStateAsync([in] boolean state, [in] long downTime);
     void GetDragBundleInfo([out] String bundleName, [out] boolean isCrossDevice);
- 
+
     // Boomerang
     void SubscribeCallback([in] int type, [in] String bundleName, [in] IRemoteBoomerangCallback subCallback);
     void UnsubscribeCallback([in] int type, [in] String bundleName, [in] IRemoteBoomerangCallback unsubCallback);

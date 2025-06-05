@@ -72,7 +72,7 @@ public:
     int32_t SetDraggableState(bool state);
     int32_t GetAppDragSwitchState(bool &state);
     void SetDraggableStateAsync(bool state, int64_t downTime);
-
+    int32_t EnableInternalDropAnimation(const std::string &animationInfo);
     void OnConnected();
     void OnDisconnected();
 

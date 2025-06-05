@@ -367,6 +367,23 @@ int32_t IntentionClient::StopDrag(const DragDropResult &dropResult)
     return RET_OK;
 }
 
+int32_t IntentionClient::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("Can not connect to IntentionService");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    int32_t ret = devicestatusProxy_->EnableInternalDropAnimation(animationInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy::EnableInternalDropAnimation fail");
+        return ret;
+    }
+    return RET_OK;
+}
+
 int32_t IntentionClient::AddDraglistener(bool isJsCaller)
 {
     if (Connect() != RET_OK) {

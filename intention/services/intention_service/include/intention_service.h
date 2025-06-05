@@ -65,6 +65,7 @@ public:
     // Drag
     ErrCode StartDrag(const SequenceableDragData &sequenceableDragData) override;
     ErrCode StopDrag(const SequenceableDragResult &sequenceableDragResult) override;
+    ErrCode EnableInternalDropAnimation(const std::string &animationInfo) override;
     ErrCode AddDraglistener(bool isJsCaller) override;
     ErrCode RemoveDraglistener(bool isJsCaller) override;
     ErrCode SetDragWindowVisible(const SequenceableDragVisible &sequenceableDragVisible) override;

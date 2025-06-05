@@ -537,6 +537,11 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
         ReportStopDragUEInfo(packageName);
     }
     dragOutSession_ = nullptr;
+
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    enableInternalDropAnimation_ = false;
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     peerNetId_ = "";
     FI_HILOGI("leave");
@@ -2230,6 +2235,28 @@ int32_t DragManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const
         dragBundleInfo.bundleName.c_str(), dragBundleInfo.isCrossDevice);
     return RET_OK;
 }
+
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+int32_t DragManager::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    FI_HILOGI("enter");
+    int32_t ret = internalAnimationWrapper_.EnableInternalDropAnimation(animationInfo);
+    if (ret != RET_OK) {
+        FI_HILOGD("EnableInternalDropAnimation failed, ret:%{public}d", ret);
+        return ret;
+    }
+    enableInternalDropAnimation_ = true;
+    return RET_OK;
+}
+
+int32_t DragManager::PerformInternalDropAnimation(const std::string &animationInfo)
+{
+    if (enableInternalDropAnimation_) {
+        enableInternalDropAnimation_ = false;
+    }
+    return internalAnimationWrapper_.PerformInternalDropAnimation();
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 int32_t DragManager::RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation)
 {

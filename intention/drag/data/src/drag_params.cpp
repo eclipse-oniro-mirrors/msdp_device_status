@@ -490,6 +490,21 @@ bool SetDraggableStateAsyncParam::Unmarshalling(MessageParcel &parcel)
     return (parcel.ReadBool(state_) && parcel.ReadInt64(downTime_));
 }
 
+EnableInternalDropAnimationParam::EnableInternalDropAnimationParam(const std::string &animationInfo)
+{
+    animationInfo_ = animationInfo;
+}
+
+bool EnableInternalDropAnimationParam::Marshalling(MessageParcel &parcel) const
+{
+    return parcel.WriteString(animationInfo_);
+}
+
+bool EnableInternalDropAnimationParam::Unmarshalling(MessageParcel &parcel)
+{
+    return parcel.ReadString(animationInfo_);
+}
+
 GetDragBundleInfoReply::GetDragBundleInfoReply(DragBundleInfo &dragBundleInfo)
     : dragBundleInfo_(dragBundleInfo)
 {}

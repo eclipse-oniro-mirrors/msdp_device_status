@@ -84,6 +84,16 @@ int32_t DragClient::StopDrag(const DragDropResult &dropResult)
     return ret;
 }
 
+int32_t DragClient::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->EnableInternalDropAnimation(animationInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("EnableInternalDropAnimation fail, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t DragClient::UpdateDragStyle(DragCursorStyle style, int32_t eventId)
 {
     CALL_DEBUG_ENTER;

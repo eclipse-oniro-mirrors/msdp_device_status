@@ -73,6 +73,10 @@ public:
     virtual bool GetControlCollaborationVisible() const = 0;
     virtual void SetControlCollaborationVisible(bool visible) = 0;
     virtual int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const = 0;
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    virtual int32_t EnableInternalDropAnimation(const std::string &animationInfo) = 0;
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual void RegisterStateChange(std::function<void(DragState)> callback) = 0;
     virtual void UnregisterStateChange() = 0;

@@ -36,6 +36,7 @@ public:
 
     int32_t StartDrag(CallingContext &context, const DragData &dragData);
     int32_t StopDrag(CallingContext &context, const DragDropResult &dropResult);
+    int32_t EnableInternalDropAnimation(CallingContext &context, const std::string &animationInfo);
     int32_t AddDraglistener(CallingContext &context, bool isJsCaller);
     int32_t RemoveDraglistener(CallingContext &context, bool isJsCaller);
     int32_t UpdateDragStyle(CallingContext &context, DragCursorStyle style, int32_t eventId);

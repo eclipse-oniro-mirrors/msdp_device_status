@@ -62,6 +62,19 @@ int32_t DragServer::StopDrag(CallingContext &context, const DragDropResult &drop
     return env_->GetDragManager().StopDrag(dropResult, GetPackageName(context.tokenId), context.pid);
 }
 
+int32_t DragServer::EnableInternalDropAnimation(CallingContext &context, const std::string &animationInfo)
+{
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    CHKPR(env_, RET_ERR);
+    return env_->GetDragManager().EnableInternalDropAnimation(animationInfo);
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    return COMMON_CAPABILITY_NOT_SUPPORT;
+}
+
 int32_t DragServer::AddDraglistener(CallingContext &context, bool isJsCaller)
 {
     if (!IsSystemHAPCalling(context)) {
