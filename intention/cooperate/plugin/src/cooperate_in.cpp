@@ -206,10 +206,12 @@ void CooperateIn::Initial::OnComeBack(Context &context, const CooperateEvent &ev
     CALL_INFO_TRACE;
     context.inputEventBuilder_.Disable();
     FI_HILOGI("[come back] To \'%{public}s\'", Utility::Anonymize(context.Peer()).c_str());
+    StartCooperateEvent startEvent = std::get<StartCooperateEvent>(event.event);
     DSoftbusComeBack notice {
         .originNetworkId = context.Local(),
         .success = true,
         .cursorPos = context.NormalizedCursorPosition(),
+        .uid = startEvent.uid
     };
     context.OnStartCooperate(notice.extra);
     if (context.dsoftbus_.ComeBack(context.Peer(), notice) != RET_OK) {
@@ -731,11 +733,12 @@ void CooperateIn::RelayConfirmation::OnNormal(Context &context, const CooperateE
     FI_HILOGI("[relay cooperate] Cooperation with \'%{public}s\' established",
         Utility::Anonymize(parent_.process_.Peer()).c_str());
     context.inputEventBuilder_.Disable();
-
+    DSoftbusRelayCooperateFinished noticeFinished = std::get<DSoftbusRelayCooperateFinished>(event.event);
     DSoftbusStartCooperate notice {
         .originNetworkId = context.Peer(),
         .success = true,
         .cursorPos = context.NormalizedCursorPosition(),
+        .uid = noticeFinished.uid,
     };
     context.OnStartCooperate(notice.extra);
     context.dsoftbus_.StartCooperate(parent_.process_.Peer(), notice);
@@ -775,12 +778,13 @@ void CooperateIn::RelayConfirmation::OnProgress(Context &context, const Cooperat
         OnResetWithNotifyMessage(context, event);
         return;
     }
-
+    StartCooperateEvent startEvent = std::get<StartCooperateEvent>(event.event);
     FI_HILOGI("[relay cooperate] Notify origin(\'%{public}s\')", Utility::Anonymize(context.Peer()).c_str());
     DSoftbusRelayCooperate notice {
         .targetNetworkId = parent_.process_.Peer(),
         .pointerSpeed = context.GetPointerSpeed(),
         .touchPadSpeed = context.GetTouchPadSpeed(),
+        .uid = startEvent.uid,
     };
     context.dsoftbus_.RelayCooperate(context.Peer(), notice);
     timerId_ = parent_.env_->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE,
