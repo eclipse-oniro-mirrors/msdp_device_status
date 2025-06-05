@@ -3087,7 +3087,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimat
 {
     CALL_TEST_DEBUG;
     std::string animationInfo = "{\"targetPos\": [8, 8]}";
-    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation();
+    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
     EXPECT_EQ(ret, RET_OK);
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
