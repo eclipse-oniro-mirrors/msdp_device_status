@@ -219,7 +219,7 @@ ErrCode IntentionService::StopDrag(const SequenceableDragResult &sequenceableDra
     });
 }
 
-ErrCode EnableInternalDropAnimation(const std::string &animationInfo)
+ErrCode IntentionService::EnableInternalDropAnimation(const std::string &animationInfo)
 {
     CallingContext context = GetCallingContext();
     return PostSyncTask([&] {

@@ -349,7 +349,7 @@ struct EnableInternalDropAnimationParam final : public ParamBase {
     bool Unmarshalling(MessageParcel &parcel) override;
 
     std::string animationInfo_;
-}
+};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
