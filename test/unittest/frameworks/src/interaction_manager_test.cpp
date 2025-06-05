@@ -3077,7 +3077,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDraggableStateAsync, 
 }
 
 /**
- * @tc.name: InteractionManagerTest_EnableInternalDropAnimation
+ * @tc.name: InteractionManagerTest_EnableInternalDropAnimation01
  * @tc.desc: Check EnableInternalDropAnimation
  * @tc.type: FUNC
  * @tc.require:
@@ -3093,7 +3093,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimat
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 /**
- * @tc.name: InteractionManagerTest_EnableInternalDropAnimation
+ * @tc.name: InteractionManagerTest_EnableInternalDropAnimation02
  * @tc.desc: Check EnableInternalDropAnimation
  * @tc.type: FUNC
  * @tc.require:
