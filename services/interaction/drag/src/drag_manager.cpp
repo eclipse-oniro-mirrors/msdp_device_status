@@ -2256,7 +2256,7 @@ int32_t DragManager::PerformInternalDropAnimation(const std::string &animationIn
     }
     return internalAnimationWrapper_.PerformInternalDropAnimation();
 }
-#endif OHOS_BUILD_INTERNAL_DROP_ANIMATION
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 int32_t DragManager::RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation)
 {
