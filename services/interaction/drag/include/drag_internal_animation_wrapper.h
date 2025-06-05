@@ -13,8 +13,8 @@
  * limitations under the License.
  */
  
- #ifndef DRAG_INTERNAL_ANIMATION
- #define DRAG_INTERNAL_ANIMATION
+#ifndef DRAG_INTERNAL_ANIMATION
+#define DRAG_INTERNAL_ANIMATION
   
 #include "i_context.h"
 

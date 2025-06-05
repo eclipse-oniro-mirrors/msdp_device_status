@@ -62,7 +62,8 @@ int32_t DragInternalAnimationWrapper::EnableInternalDropAnimation(const std::str
     }
     if (enableInternalDropAnimationHandle_ == nullptr) {
         enableInternalDropAnimationHandle_ =
-            reinterpret_cast<EnableInternalDropAnimationFunc>(dlsym(dragInternalAnimationHandle_, "EnableInternalDropAnimation"));
+            reinterpret_cast<EnableInternalDropAnimationFunc>(dlsym(dragInternalAnimationHandle_,
+            "EnableInternalDropAnimation"));
         char *error = nullptr;
         if ((error = dlerror()) != nullptr) {
             FI_HILOGE("Symbol enableInternalDropAnimation error: %{public}s", error);
@@ -85,7 +86,8 @@ int32_t DragInternalAnimationWrapper::PerformInternalDropAnimation()
     }
     if (performInternalDropAnimationHandle_ == nullptr) {
         performInternalDropAnimationHandle_ =
-            reinterpret_cast<PerformInternalDropAnimationFunc>(dlsym(dragInternalAnimationHandle_, "PerformInternalDropAnimation"));
+            reinterpret_cast<PerformInternalDropAnimationFunc>(dlsym(dragInternalAnimationHandle_,
+            "PerformInternalDropAnimation"));
         char *error = nullptr;
         if ((error = dlerror()) != nullptr) {
             FI_HILOGE("Symbol performInternalDropAnimationHandle error: %{public}s", error);
