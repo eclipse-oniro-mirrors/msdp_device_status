@@ -3075,6 +3075,22 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDraggableStateAsync, 
     ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime));
     RemovePermission();
 }
+
+/**
+ * @tc.name: InteractionManagerTest_EnableInternalDropAnimation
+ * @tc.desc: Check EnableInternalDropAnimation
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimation, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::string animationInfo = "{\"targetPos\": [8, 8]}";
+    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation();
+    EXPECT_EQ(ret, RET_OK);
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
