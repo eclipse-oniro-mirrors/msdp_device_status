@@ -1015,14 +1015,18 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     }
     int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
     if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
-        (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW) && (lastDisplayId_ != targetDisplayId)) {
-        FI_HILOGI("Interface for processing extended screen access");
-        CHKPV(context_);
-        int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent, targetDisplayId] {
-            return this->DealPullInWindowEvent(pointerEvent, targetDisplayId);
-        });
-        if (ret != RET_OK) {
-            FI_HILOGE("Post async task failed");
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW)) {
+        if (lastDisplayId_ == -1) {
+            lastDisplayId_ = targetDisplayId;
+        } else if (lastDisplayId_ != targetDisplayId) {
+            FI_HILOGI("Interface for processing extended screen access");
+            CHKPV(context_);
+            int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent, targetDisplayId] {
+                return this->DealPullInWindowEvent(pointerEvent, targetDisplayId);
+            });
+            if (ret != RET_OK) {
+                FI_HILOGE("Post async task failed");
+            }
         }
     }
     FI_HILOGD("Unknown action, sourceType:%{public}d, pointerId:%{public}d, pointerAction:%{public}d",
@@ -2249,7 +2253,7 @@ int32_t DragManager::EnableInternalDropAnimation(const std::string &animationInf
     return RET_OK;
 }
 
-int32_t DragManager::PerformInternalDropAnimation(const std::string &animationInfo)
+int32_t DragManager::PerformInternalDropAnimation()
 {
     if (enableInternalDropAnimation_) {
         enableInternalDropAnimation_ = false;

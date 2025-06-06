@@ -53,7 +53,7 @@ bool DragInternalAnimationWrapper::Init()
     return true;
 }
 
-int32_t DragInternalAnimationWrapper::EnableInternalDropAnimation(const std::string &animationInfo);
+int32_t DragInternalAnimationWrapper::EnableInternalDropAnimation(const std::string &animationInfo)
 {
     FI_HILOGI("Enter");
     if ((dragInternalAnimationHandle_ == nullptr) && (!Init())) {
