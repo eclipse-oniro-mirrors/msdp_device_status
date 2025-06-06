@@ -414,11 +414,11 @@ void MotionNapi::DefineHoldingHandStatus(napi_env env, napi_value exports)
         return;
     }
 
-    SetInt32Property(env, holdingHandStatus, HoldPostureStatus::UNKNOWN, "UNKNOWN");
+    SetInt32Property(env, holdingHandStatus, HoldPostureStatus::UNKNOWN, "UNKNOWN_STATUS");
     SetInt32Property(env, holdingHandStatus, HoldPostureStatus::NOT_HELD, "NOT_HELD");
     SetInt32Property(env, holdingHandStatus, HoldPostureStatus::LEFT_HAND_HELD, "LEFT_HAND_HELD");
     SetInt32Property(env, holdingHandStatus, HoldPostureStatus::RIGHT_HAND_HELD, "RIGHT_HAND_HELD");
-    SetInt32Property(env, holdingHandStatus, HoldPostureStatus::BOTH_HAND_HELD, "BOTH_HAND_HELD");
+    SetInt32Property(env, holdingHandStatus, HoldPostureStatus::BOTH_HAND_HELD, "BOTH_HANDS_HELD");
     SetPropertyName(env, exports, "HoldingHandStatus", holdingHandStatus);
 }
 
