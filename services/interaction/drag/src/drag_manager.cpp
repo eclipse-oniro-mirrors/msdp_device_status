@@ -71,6 +71,7 @@ const std::string DEVICE_TYPE_HPR {"HPR"};
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 const std::string PRODUCT_TYPE = OHOS::system::GetParameter("const.build.product", "HYM");
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#ifdef OHOS_ENABLE_PULLTHROW
 // 屏幕坐标常量
 constexpr int32_t UP_SCREEN_MAX_Y { 1608 };       // 上屏最大 Y 坐标
 constexpr int32_t DOWN_SCREEN_MIN_Y { 1690 };     // 下屏最小 Y 坐标
@@ -89,6 +90,7 @@ constexpr double ANGLE_LEFT_MIN { 135.0 };        // 左方角度范围最小值
 constexpr double ANGLE_LEFT_MAX { 225.0 };        // 左方角度范围最大值
 constexpr double FULL_CIRCLE_DEGREES = { 360.0 };
 constexpr double ANGLE_EPSILON {1e-9};
+#endif // OHOS_ENABLE_PULLTHROW
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
 constexpr int32_t DRAG_PRIORITY { 500 };
 #endif // OHOS_DRAG_ENABLE_INTERCEPTOR
@@ -101,11 +103,11 @@ DragManager &DragManager::GetInstance()
     return instance;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+#ifdef OHOS_ENABLE_PULLTHROW
 DragManager::DragManager() : listener_(this) {}
 #else
 DragManager::DragManager() {}
-#endif // OHOS_BUILD_ENABLE_ARKUI_X
+#endif // OHOS_ENABLE_PULLTHROW
 DragManager::~DragManager()
 {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -513,8 +515,10 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     needLongPressDragAnimation_ = true;
     isLongPressDrag_ = false;
     currentPointerEvent_ = nullptr;
+#ifdef OHOS_ENABLE_PULLTHROW
     inHoveringState_ = false;
     throwState_ = ThrowState::NOT_THROW;
+#endif // OHOS_ENABLE_PULLTHROW
     DRAG_DATA_MGR.ResetDragData();
     dragResult_ = static_cast<DragResult>(dropResult.result);
     appCallee_ = dragRadarPackageName.appCallee;
@@ -608,10 +612,12 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style)
         FI_HILOGE("Invalid style:%{public}d", style);
         return RET_ERR;
     }
+#ifdef OHOS_ENABLE_PULLTHROW
     if (isHPR_ && inHoveringState_) {
         FI_HILOGD("isHPR and inHoveringState, dragstyle set to default");
         return RET_OK;
     }
+#endif // OHOS_ENABLE_PULLTHROW
     if (OnUpdateDragStyle(style) != RET_OK) {
         FI_HILOGE("OnUpdateDragStyle dragStyle:%{public}s failed", GetDragStyleName(style).c_str());
         return RET_ERR;
@@ -733,6 +739,7 @@ int32_t DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> po
     return RET_OK;
 }
 
+#ifdef OHOS_ENABLE_PULLTHROW
 double DragManager::NormalizeThrowAngle(double angle)
 {
     return (angle < ANGLE_EPSILON) ? angle + FULL_CIRCLE_DEGREES : angle;
@@ -904,6 +911,7 @@ void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         }
     }
 }
+#endif // OHOS_ENABLE_PULLTHROW
 
 #ifdef OHOS_BUILD_ENABLE_ANCO
 bool DragManager::IsAncoDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction)
@@ -935,6 +943,7 @@ bool DragManager::IsAncoDragCallback(std::shared_ptr<MMI::PointerEvent> pointerE
 }
 #endif // OHOS_BUILD_ENABLE_ANCO
 
+#ifdef OHOS_ENABLE_PULLTHROW
 void DragManager::PullThrowDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
@@ -946,11 +955,14 @@ void DragManager::PullThrowDragCallback(std::shared_ptr<MMI::PointerEvent> point
         FI_HILOGE("Post async task failed");
     }
 }
+#endif // OHOS_ENABLE_PULLTHROW
 
 void DragManager::DragUpCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction)
 {
     CHKPV(pointerEvent);
+#ifdef OHOS_ENABLE_PULLTHROW
     throwState_ = ThrowState::NOT_THROW;
+#endif // OHOS_ENABLE_PULLTHROW
     dragDrawing_.StopVSyncStation();
     mouseDragMonitorDisplayX_ = -1;
     mouseDragMonitorDisplayY_ = -1;
@@ -961,19 +973,23 @@ void DragManager::DragUpCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent
     if (ret != RET_OK) {
         FI_HILOGE("Post async task failed");
     }
+#ifdef OHOS_ENABLE_PULLTHROW
     if (dragTimerId_ >= 0 && pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL) {
         CHKPV(context_);
         context_->GetTimerManager().RemoveTimer(dragTimerId_);
         dragTimerId_ = -1;
         FI_HILOGD("Remove timer");
     }
+#endif // OHOS_ENABLE_PULLTHROW
 }
 
 void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
+#ifdef OHOS_ENABLE_PULLTHROW
     currentPointerEvent_ = pointerEvent;
+#endif // OHOS_ENABLE_PULLTHROW
     if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) && mouseDragMonitorState_) {
         MMI::PointerEvent::PointerItem pointerItem;
@@ -988,10 +1004,12 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         OnDragMove(pointerEvent);
         return;
     }
+#ifdef OHOS_ENABLE_PULLTHROW
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_THROW) {
         PullThrowDragCallback(pointerEvent);
         return;
     }
+#endif // OHOS_ENABLE_PULLTHROW
     FI_HILOGD("DragCallback, pointerAction:%{public}d", pointerAction);
 #ifdef OHOS_BUILD_ENABLE_ANCO
     bool isAncoDrag = pointerEvent->GetAncoDeal();
@@ -1006,6 +1024,7 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         DragUpCallback(pointerEvent, pointerAction);
         return;
     }
+#ifdef OHOS_ENABLE_PULLTHROW
     if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) &&
         throwState_ != ThrowState::NOT_THROW &&
@@ -1013,6 +1032,7 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         InPullThrow(pointerEvent);
         return;
     }
+#endif // OHOS_ENABLE_PULLTHROW
     int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
     if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW) && (lastDisplayId_ != targetDisplayId)) {
@@ -1365,6 +1385,7 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor)
     return extraData;
 }
 
+#ifdef OHOS_ENABLE_PULLTHROW
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 MMI::ExtraData DragManager::CreatePullThrowExtraData(bool appended, bool drawCursor,
     std::shared_ptr<MMI::PointerEvent> pointerEvent)
@@ -1389,6 +1410,7 @@ MMI::ExtraData DragManager::CreatePullThrowExtraData(bool appended, bool drawCur
     return extraData;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#endif // OHOS_ENABLE_PULLTHROW
 
 int32_t DragManager::InitDataManager(const DragData &dragData, const std::string &appCaller)
 {
@@ -2066,10 +2088,12 @@ void DragManager::UpdateDragStyleCross()
     FI_HILOGD("enter");
     auto dragStyle = DRAG_DATA_MGR.GetDragStyle();
     FI_HILOGI("OnUpdateDragStyle dragStyle:%{public}s", GetDragStyleName(dragStyle).c_str());
+#ifdef OHOS_ENABLE_PULLTHROW
     if (isHPR_ && inHoveringState_) {
         FI_HILOGD("isHPR and inHoveringState, dragstyle set to default");
         return;
     }
+#endif // OHOS_ENABLE_PULLTHROW
     if (OnUpdateDragStyle(DRAG_DATA_MGR.GetDragStyle()) != RET_OK) {
         FI_HILOGE("OnUpdateDragStyle failed");
     }

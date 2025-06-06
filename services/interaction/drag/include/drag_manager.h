@@ -52,6 +52,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+#ifdef OHOS_ENABLE_PULLTHROW
 enum class ThrowDirection : int32_t {
     UP = 1,
     DOWN,
@@ -70,6 +71,7 @@ enum class ThrowState : int32_t {
     IN_DOWNSCREEN = 1,
     IN_UPSCREEN = 2
 };
+#endif // OHOS_ENABLE_PULLTHROW
 class DragManager : public IDragManager,
                     public IdFactory<int32_t> {
 public:
@@ -80,6 +82,7 @@ public:
     DISALLOW_COPY_AND_MOVE(DragManager);
     ~DragManager();
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_ { nullptr };
+#ifdef OHOS_ENABLE_PULLTHROW
     ThrowDirection GetThrowDirection(double angle);
     ScreenId GetScreenId(int32_t displayY);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -94,6 +97,7 @@ public:
     double NormalizeThrowAngle(double angle);
     int32_t OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+#endif // OHOS_ENABLE_PULLTHROW
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t Init(IContext* context);
     void OnSessionLost(SocketSessionPtr session);
@@ -218,7 +222,9 @@ public:
     void AddDragDestroy(std::function<void()> cb) override;
     void SetSVGFilePath(const std::string &filePath) override;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#ifdef OHOS_ENABLE_PULLTHROW
     ThrowState throwState_ { ThrowState::NOT_THROW };
+#endif // OHOS_ENABLE_PULLTHROW
 private:
     void PrintDragData(const DragData &dragData, const std::string &packageName = "");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -281,16 +287,22 @@ private:
 #ifdef OHOS_BUILD_ENABLE_ANCO
     bool IsAncoDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t pointerAction);
 #endif // OHOS_BUILD_ENABLE_ANCO
+#ifdef OHOS_ENABLE_PULLTHROW
     void PullThrowDragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+#endif // OHOS_ENABLE_PULLTHROW
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
     int32_t PerformInternalDropAnimation();
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 private:
+#ifdef OHOS_ENABLE_PULLTHROW
     bool existVkListener_ { false };
     bool inHoveringState_ { false };
     int32_t dragTimerId_ { -1 };
+#endif // OHOS_ENABLE_PULLTHROW
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+#ifdef OHOS_ENABLE_PULLTHROW
     PullThrowListener listener_;
+#endif // OHOS_ENABLE_PULLTHROW
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     std::atomic_bool isHPR_ { false };
     int32_t timerId_ { -1 };

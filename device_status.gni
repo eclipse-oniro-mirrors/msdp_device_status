@@ -30,6 +30,7 @@ declare_args() {
   device_status_enable_internal_drop_animation = false
   device_status_device_type = "default"
   device_status_motion_enable = false
+  device_status_pullthrow_enable = false
 
   # origin variables sets
   if (!is_arkui_x) {
@@ -137,4 +138,8 @@ if (device_status_enable_internal_drop_animation) {
 
 if (device_status_device_type == "pc") {
   device_status_default_defines += [ "OHOS_BUILD_PC_PRODUCT" ]
+}
+
+if (device_status_pullthrow_enable) {
+  device_status_default_defines += [ "OHOS_ENABLE_PULLTHROW" ]
 }
