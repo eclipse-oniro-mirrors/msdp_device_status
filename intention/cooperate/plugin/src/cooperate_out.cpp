@@ -376,6 +376,7 @@ void CooperateOut::Initial::OnRelay(Context &context, const CooperateEvent &even
     }
     DSoftbusRelayCooperateFinished resp {
         .targetNetworkId = notice.targetNetworkId,
+        .uid = notice.uid,
     };
 
     int32_t ret = context.dsoftbus_.OpenSession(notice.targetNetworkId);
@@ -404,6 +405,7 @@ void CooperateOut::Initial::OnRelayWithOptions(Context &context, const Cooperate
     }
     DSoftbusRelayCooperateFinished resp {
         .targetNetworkId = notice.targetNetworkId,
+        .uid = notice.uid,
     };
 
     int32_t ret = context.dsoftbus_.OpenSession(notice.targetNetworkId);

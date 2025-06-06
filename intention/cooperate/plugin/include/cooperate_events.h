@@ -218,6 +218,7 @@ struct DSoftbusRelayCooperate {
     bool normal;
     int32_t pointerSpeed { -1 };
     int32_t touchPadSpeed { -1 };
+    int32_t uid { 0 };
 };
 
 struct DSoftbusSubscribeMouseLocation {

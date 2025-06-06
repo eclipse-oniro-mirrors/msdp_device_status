@@ -236,7 +236,7 @@ int32_t DSoftbusHandler::ComeBack(const std::string &networkId, const DSoftbusCo
 {
     CALL_INFO_TRACE;
     NetPacket packet(MessageId::DSOFTBUS_COME_BACK);
-    packet << event.originNetworkId << event.cursorPos.x << event.cursorPos.y << event.extra.priv;
+    packet << event.originNetworkId << event.cursorPos.x << event.cursorPos.y << event.extra.priv << event.uid;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         return RET_ERR;
@@ -269,7 +269,7 @@ int32_t DSoftbusHandler::RelayCooperate(const std::string &networkId, const DSof
 {
     CALL_INFO_TRACE;
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE);
-    packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed;
+    packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed << event.uid;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         return RET_ERR;
@@ -285,7 +285,7 @@ int32_t DSoftbusHandler::RelayCooperateFinish(const std::string &networkId, cons
 {
     CALL_INFO_TRACE;
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE_FINISHED);
-    packet << event.targetNetworkId << event.normal;
+    packet << event.targetNetworkId << event.normal << event.uid;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         return RET_ERR;
@@ -536,6 +536,10 @@ void DSoftbusHandler::OnComeBack(const std::string &networkId, NetPacket &packet
     if (packet.ChkRWError()) {
         event.extra.priv = 0;
     }
+    packet >> event.uid;
+    if (packet.ChkRWError()) {
+        event.uid = 0;
+    }
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_COME_BACK,
         event));
@@ -585,6 +589,11 @@ void DSoftbusHandler::OnRelayCooperate(const std::string &networkId, NetPacket &
         event.touchPadSpeed = -1;
     }
     FI_HILOGI("Cur touchPadSpeed:%{public}d", event.touchPadSpeed);
+    packet >> event.uid;
+    if (packet.ChkRWError()) {
+        event.uid = 0;
+    }
+    FI_HILOGI("Cur uid:%{public}d", event.uid);
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_RELAY_COOPERATE,
         event));
@@ -600,6 +609,11 @@ void DSoftbusHandler::OnRelayCooperateFinish(const std::string &networkId, NetPa
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to read data packet");
         return;
+    }
+    packet >> event.uid;
+    if (packet.ChkRWError()) {
+        event.uid = 0;
+        FI_HILOGD("Cur uid:%{public}d", event.uid);
     }
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_RELAY_COOPERATE_FINISHED,

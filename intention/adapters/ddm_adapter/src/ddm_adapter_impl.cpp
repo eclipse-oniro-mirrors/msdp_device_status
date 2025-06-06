@@ -129,15 +129,15 @@ bool DDMAdapterImpl::CheckSameAccountToLocal(const std::string &networkId, const
     CALL_INFO_TRACE;
     int32_t appUserId = -1;
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, appUserId);
-    FI_HILOGI("GetOsAccountLocalIdFromUid uid:%{public}d, localId:%{public}d", uid, appUserId);
+    FI_HILOGI("GetOsAccountLocalIdFromUid uid:%{private}d, localId:%{private}d", uid, appUserId);
     bool isForegroundUser = false;
     int32_t res = OHOS::AccountSA::OsAccountManager::IsOsAccountForeground(appUserId, isForegroundUser);
     if (res != ERR_OK) {
-        FI_HILOGI("app userId %{public}d is not Foreground, ret:%{public}d", appUserId, res);
+        FI_HILOGE("app userId %{private}d is not Foreground, ret:%{public}d", appUserId, res);
         return false;
     }
     if (!isForegroundUser) {
-        FI_HILOGI("app userId is not Foreground");
+        FI_HILOGE("app userId is not Foreground");
         return false;
     }
     isForegroundUser = false;
