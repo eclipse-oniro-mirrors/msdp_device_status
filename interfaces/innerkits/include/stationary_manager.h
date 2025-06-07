@@ -67,6 +67,14 @@ public:
      * @since 9
      */
     Data GetDeviceStatusData(const Type type);
+
+    /**
+     * @brief sync obtain device posture data
+     * @param data Indicates posture data which returned by service
+     * @return Returns retcode
+     * @since 20
+     */
+     int32_t GetDevicePostureDataSync(DevicePostureData &data);
 private:
     StationaryManager() = default;
     DISALLOW_COPY_AND_MOVE(StationaryManager);

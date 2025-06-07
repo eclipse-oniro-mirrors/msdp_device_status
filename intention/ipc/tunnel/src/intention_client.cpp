@@ -973,6 +973,25 @@ int32_t IntentionClient::GetDeviceStatusData(int32_t type, int32_t &replyType, i
     return RET_OK;
 }
 
+int32_t IntentionClient::GetDevicePostureDataSync(DevicePostureData &postureData)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("cannot get device status data");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    SequenceablePostureData seqData(postureData);
+    int32_t ret = devicestatusProxy_->GetDevicePostureDataSync(seqData);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy::GetDevicePostureDataSync fail");
+        return ret;
+    }
+    postureData = seqData.GetPostureData();
+    return RET_OK;
+}
+
 void IntentionClient::ResetProxy(const wptr<IRemoteObject> &remote)
 {
     CALL_DEBUG_ENTER;

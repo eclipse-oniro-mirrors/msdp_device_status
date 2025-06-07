@@ -21,6 +21,7 @@
 
 #include "delegate_tasks.h"
 #include "device_manager.h"
+#include "devicestatus_callback_stub.h"
 #include "devicestatus_define.h"
 #include "devicestatus_delayed_sp_singleton.h"
 #include "drag_manager.h"
@@ -68,6 +69,13 @@ private:
     std::unique_ptr<IPluginManager> pluginMgr_ { nullptr };
     std::unique_ptr<IDSoftbusAdapter> dsoftbus_ { nullptr };
     sptr<IntentionService> intention_ { nullptr };
+};
+
+class TestDevStaCallback : public DeviceStatusCallbackStub {
+public:
+    TestDevStaCallback() = default;
+    virtual ~TestDevStaCallback() = default;
+    void OnDeviceStatusChanged(const Data &devicestatusData) {}
 };
 
 class IntentionServiceTest : public testing::Test {

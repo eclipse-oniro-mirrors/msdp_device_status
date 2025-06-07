@@ -144,10 +144,12 @@ ohos_shared_library("devicestatus_service") {
   }
 
   defines = []
+  external_deps = external_deps_set
   if (device_status_sensor_enable) {
     defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+    external_deps += [ "sensor:sensor_interface_native" ]
   }
-  external_deps = external_deps_set
+  
   if (device_status_intention_framework) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   } else {
@@ -201,8 +203,10 @@ ohos_static_library("devicestatus_static_service") {
   }
 
   defines = []
+  external_deps = external_deps_set
   if (device_status_sensor_enable) {
     defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+    external_deps += [ "sensor:sensor_interface_native" ]
   }
 
   public_deps = [
@@ -220,7 +224,6 @@ ohos_static_library("devicestatus_static_service") {
     ]
   }
 
-  external_deps = external_deps_set
   if (device_status_intention_framework) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   } else {

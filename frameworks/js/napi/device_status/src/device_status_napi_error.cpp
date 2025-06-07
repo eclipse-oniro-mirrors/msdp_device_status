@@ -58,6 +58,18 @@ void ThrowDeviceStatusErr(const napi_env &env, int32_t errCode, const std::strin
     napi_value error = CreateDeviceStatusNapiError(env, errCode, msg.value());
     napi_throw(env, error);
 }
+
+void ThrowDeviceStatusErrByPromise(const napi_env &env, int32_t errCode, const std::string &printMsg,
+    napi_value &value)
+{
+    FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", printMsg.c_str(), errCode);
+    std::optional<std::string> msg = GetDeviceStatusErrMsg(errCode);
+    if (!msg) {
+        FI_HILOGE("errCode:%{public}d is invalid", errCode);
+        return;
+    }
+    value = CreateDeviceStatusNapiError(env, errCode, msg.value());
+}
 } // namespace DeviceStatusV1
 } // namespace Msdp
 } // namespace OHOS

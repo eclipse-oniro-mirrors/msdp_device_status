@@ -15,6 +15,11 @@
 
 #include "stationary_server.h"
 
+#include <chrono>
+#include <cmath>
+#include <condition_variable>
+#include <tokenid_kit.h>
+
 #include "hisysevent.h"
 #include "hitrace_meter.h"
 
@@ -24,6 +29,9 @@
 #include "devicestatus_hisysevent.h"
 #include "stationary_data.h"
 #include "stationary_params.h"
+#include "sensor_agent.h"
+#include "sensor_agent_type.h"
+#include "sensor_manager.h"
 
 #undef LOG_TAG
 #define LOG_TAG "StationaryServer"
@@ -42,10 +50,34 @@ std::map<Type, int32_t> MOTION_TYPE_MAP {
 std::map<int32_t, Type> DEVICE_STATUS_TYPE_MAP {
     { MOTION_TYPE_STAND, Type::TYPE_STAND },
 };
-#else
-constexpr int32_t RET_NO_SUPPORT = 801;
 #endif
+constexpr int32_t RET_NO_SUPPORT = 801;
+constexpr int32_t RET_NO_SYSTEM_API = 202;
+constexpr int32_t SENSOR_SAMPLING_INTERVAL = 10000000;
+constexpr int32_t WAIT_SENSOR_DATA_TIMEOUT_MS = 200;
+constexpr int32_t ROTATION_MAT_LEN = 3;
+constexpr int32_t MAT_IDX_0 = 0;
+constexpr int32_t MAT_IDX_1 = 1;
+constexpr int32_t MAT_IDX_2 = 2;
+constexpr float PI = 3.141592653589846;
+constexpr float EPSILON_FLOAT = 1e-6;
+std::optional<RotationVectorData> cacheRotVecData_;
+std::mutex g_mtx_;
+std::condition_variable g_cv_;
 } // namespace
+
+static void OnReceivedData(SensorEvent *event)
+{
+    if (event == nullptr) {
+        return;
+    }
+    if (event->sensorTypeId == SENSOR_TYPE_ID_ROTATION_VECTOR) {
+        std::unique_lock lockGrd(g_mtx_);
+        RotationVectorData *data = reinterpret_cast<RotationVectorData *>(event->data);
+        cacheRotVecData_ = std::make_optional(*data);
+        g_cv_.notify_all();
+    }
+}
 
 #ifdef MOTION_ENABLE
 void MotionCallback::OnMotionChanged(const MotionEvent &motionEvent)
@@ -126,6 +158,95 @@ int32_t StationaryServer::GetDeviceStatusData(CallingContext &context, int32_t t
     replyType = static_cast<int32_t>(data.type);
     replyValue = static_cast<int32_t>(data.value);
     return RET_OK;
+}
+
+int32_t StationaryServer::GetDevicePostureDataSync(CallingContext &context, DevicePostureData &data)
+{
+    if (!IsSystemCalling(context)) {
+        return RET_NO_SYSTEM_API;
+    }
+#ifndef DEVICE_STATUS_SENSOR_ENABLE
+    return RET_NO_SUPPORT;
+#else
+    if (!SensorManager::IsSupportedSensor(SENSOR_TYPE_ID_ROTATION_VECTOR)) {
+        FI_HILOGE("rotation vector sensor is not supported");
+        return RET_NO_SUPPORT;
+    }
+    // 订阅sensor获取四元数
+    SensorManager sensorManager(SENSOR_TYPE_ID_ROTATION_VECTOR, SENSOR_SAMPLING_INTERVAL);
+    sensorManager.SetCallback(&OnReceivedData);
+    sensorManager.StartSensor();
+    std::unique_lock lockGrd(g_mtx_);
+    g_cv_.wait_for(lockGrd, std::chrono::milliseconds(WAIT_SENSOR_DATA_TIMEOUT_MS));
+    sensorManager.StopSensor();
+    // 数据转换
+    if (cacheRotVecData_ == std::nullopt) {
+        return RET_ERR;
+    }
+    TransQuaternionsToZXYRot(cacheRotVecData_.value(), data);
+    FI_HILOGI("roll %{public}f, pitch %{public}f, yaw %{public}f", data.rollRad, data.pitchRad, data.yawRad);
+    return RET_OK;
+#endif
+}
+
+#ifdef DEVICE_STATUS_SENSOR_ENABLE
+void StationaryServer::TransQuaternionsToZXYRot(RotationVectorData quaternions, DevicePostureData &data)
+{
+    // 四元数表示法： w+xi+yj+zk
+    float x = quaternions.x;
+    float y = quaternions.y;
+    float z = quaternions.z;
+    float w = quaternions.w;
+    FI_HILOGI("x:%{public}f, y:%{public}f, z:%{public}f, w:%{public}f", x, y, z, w);
+    // 计算旋转矩阵
+    std::vector<std::vector<float>> rotationMat(ROTATION_MAT_LEN, std::vector<float>(ROTATION_MAT_LEN, 0.0F));
+    rotationMat[MAT_IDX_0][MAT_IDX_0] = 1 - 2 * y * y - 2 * z * z;
+    rotationMat[MAT_IDX_0][MAT_IDX_1] = 2 * x * y - 2 * w * z;
+    rotationMat[MAT_IDX_0][MAT_IDX_2] = 2 * x * z + 2 * w * y;
+    rotationMat[MAT_IDX_1][MAT_IDX_0] = 2 * x * y + 2 * w * z;
+    rotationMat[MAT_IDX_1][MAT_IDX_1] = 1 - 2 * x * x - 2 * z * z;
+    rotationMat[MAT_IDX_1][MAT_IDX_2] = 2 * y * z - 2 * w * x;
+    rotationMat[MAT_IDX_2][MAT_IDX_0] = 2 * x * z - 2 * w * y;
+    rotationMat[MAT_IDX_2][MAT_IDX_1] = 2 * y * z + 2 * w * x;
+    rotationMat[MAT_IDX_2][MAT_IDX_2] = 1 - 2 * x * x - 2 * y * y;
+    auto transFunc = [](const float angle) -> float {
+        float ret = angle;
+        if (angle < 0) {
+            ret = angle + 2 * PI;
+        }
+        return ret;
+    };
+    auto pitch = transFunc(std::atan2(-rotationMat[MAT_IDX_2][MAT_IDX_0], rotationMat[MAT_IDX_2][MAT_IDX_2]));
+    auto yaw = transFunc(std::atan2(-rotationMat[MAT_IDX_0][MAT_IDX_1], rotationMat[MAT_IDX_1][MAT_IDX_1]));
+    float roll = 0.0F;
+    if (std::cos(pitch) >= EPSILON_FLOAT) {
+        roll = transFunc(std::atan2(rotationMat[MAT_IDX_2][MAT_IDX_1], rotationMat[MAT_IDX_2][MAT_IDX_2] / std::cos(pitch)));
+    } else {
+        roll = transFunc(std::atan2(rotationMat[MAT_IDX_2][MAT_IDX_1], -rotationMat[MAT_IDX_2][MAT_IDX_0] / std::sin(pitch)));
+    }
+    data.rollRad = roll;
+    data.yawRad = yaw;
+    data.pitchRad = pitch;
+}
+#endif
+
+bool StationaryServer::IsSystemCalling(CallingContext &context)
+{
+    if (IsSystemServiceCalling(context)) {
+        return true;
+    }
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
+}
+
+bool StationaryServer::IsSystemServiceCalling(CallingContext &context)
+{
+    auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    if ((flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) ||
+        (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL)) {
+        FI_HILOGI("system service calling, flag:%{public}u", flag);
+        return true;
+    }
+    return false;
 }
 
 void StationaryServer::DumpDeviceStatusSubscriber(int32_t fd) const

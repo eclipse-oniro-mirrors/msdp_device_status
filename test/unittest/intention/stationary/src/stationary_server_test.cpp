@@ -42,6 +42,7 @@ int32_t TYPE_TYPE_STAND = 7;
 int32_t ACTIVITYEVENT_ENTER = 1;
 int32_t REPORTLATENCYNS_LATENCY_INVALID = -1;
 int32_t RET_NO_SUPPORT = 801;
+constexpr float DOUBLEPIMAX = 6.3F;
 class StationaryServerTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -107,6 +108,21 @@ HWTEST_F(StationaryServerTest, GetDeviceStatusDataTest001, TestSize.Level0)
     int32_t replyValue;
     int32_t ret = stationary_.GetDeviceStatusData(context_, TYPE_TYPE_STAND, replyType, replyValue);
     EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: GetDevicePosureDataSyncTest001
+ * @tc.desc: Test func named GetDevicePosureDataSyncTest001
+ * @tc.type: FUNC
+ */
+HWTEST_F(StationaryServerTest, GetDevicePosureDataSyncTest001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DevicePostureData data;
+    int32_t ret = stationary_.GetDevicePostureDataSync(context_, data);
+    EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
+    EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
+        data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -81,6 +81,16 @@ Data StationaryClient::GetDeviceStatusData(Type type)
     return reply;
 }
 
+int32_t StationaryClient::GetDevicePostureDataSync(DevicePostureData &data)
+{
+    int32_t ret = INTENTION_CLIENT->GetDevicePostureDataSync(data);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetDevicePostureData failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return ret;
+}
+
 void StationaryClient::OnConnected()
 {
     std::lock_guard lockGrd(mtx_);

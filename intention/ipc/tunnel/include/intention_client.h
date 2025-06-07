@@ -106,6 +106,7 @@ public:
     int32_t UnsubscribeStationaryCallback(int32_t type, int32_t event,
         const sptr<IRemoteDevStaCallback> &unsubCallback);
     int32_t GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue);
+    int32_t GetDevicePostureDataSync(DevicePostureData &postureData);
 
 private:
     class DeathRecipient : public IRemoteObject::DeathRecipient {

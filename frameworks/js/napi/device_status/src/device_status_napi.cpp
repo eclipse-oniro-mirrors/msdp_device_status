@@ -21,6 +21,8 @@
 #include "device_status_napi_error.h"
 #include "fi_log.h"
 #include "stationary_manager.h"
+#include "napi_constants.h"
+#include "util_napi.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DeviceStatusV1Napi"
@@ -296,12 +298,115 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
     return result;
 }
 
+napi_value DeviceStatusNapi::GetDeviceRotationRadian(napi_env env, napi_callback_info info)
+{
+    FI_HILOGD("Enter");
+    size_t argc = ARG_0;
+    napi_value jsThis;
+
+    napi_status status = napi_get_cb_info(env, info, &argc, NULL, &jsThis, nullptr);
+    if (status != napi_ok) {
+        ThrowDeviceStatusErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
+        return nullptr;
+    }
+    // init devicestatus obj
+    {
+        std::lock_guard<std::mutex> guard(g_mutex);
+        if (!ConstructDeviceStatus(env, jsThis)) {
+            ThrowDeviceStatusErr(env, SERVICE_EXCEPTION, "Failed to get g_deviceStatusObj");
+            return nullptr;
+        }
+    }
+    napi_value promise = nullptr;
+    napi_deferred deferred = nullptr;
+    status = napi_create_promise(env, &deferred, &promise);
+    if (status != napi_ok) {
+        ThrowDeviceStatusErr(env, SERVICE_EXCEPTION, "Failed to create promise");
+        return nullptr;
+    }
+    AsyncContext* asyncContext = new (std::nothrow) AsyncContext();
+    CHKPP(asyncContext);
+    asyncContext->env = env;
+    asyncContext->deferred = deferred;
+    bool result = GetPostureDataExecution(asyncContext);
+    if (!result) {
+        FI_HILOGE("get posture data execution failed");
+        delete asyncContext;
+        return nullptr;
+    }
+    return promise;
+}
+
+bool DeviceStatusNapi::GetPostureDataExecution(AsyncContext *asyncContext)
+{
+    CHKPF(asyncContext);
+    CHKPF(asyncContext->env);
+    CHKPF(asyncContext->deferred);
+    napi_value resource = nullptr;
+    std::string funcName = "getDeviceRotationRadian";
+    napi_create_string_utf8(asyncContext->env, "getDeviceRotationRadian", funcName.size(), &resource);
+    CHKRF(napi_create_async_work(asyncContext->env, nullptr, resource, GetPostureDataExecutionCB,
+        GetPostureDataCompleteCB, static_cast<void*>(asyncContext), &asyncContext->work), "CREATE_ASYNC_WORK");
+    CHKRF(napi_queue_async_work_with_qos(asyncContext->env, asyncContext->work, napi_qos_default), "QUEUE_ASYNC_WORK");
+    FI_HILOGI("exec get posture data succ");
+    return true;
+}
+
+void DeviceStatusNapi::GetPostureDataExecutionCB(napi_env env, void* data)
+{
+    CHKPV(data);
+    CHKPV(env);
+    std::lock_guard lockGuard(g_mutex);
+    AsyncContext* execAsyncContext = static_cast<AsyncContext*>(data);
+    execAsyncContext->result = DeviceStatus::StationaryManager::
+        GetInstance()->GetDevicePostureDataSync(execAsyncContext->postureData);
+}
+
+void DeviceStatusNapi::GetPostureDataCompleteCB(napi_env env, napi_status status, void* data)
+{
+    CHKPV(data);
+    CHKPV(env);
+    std::lock_guard lockGrd(g_mutex);
+    AsyncContext* completeAsyncContext = static_cast<AsyncContext*>(data);
+    CHKPV(completeAsyncContext->deferred);
+    napi_value errVal = nullptr;
+    napi_value rotObj = nullptr;
+    napi_status retStatus = napi_create_object(env, &rotObj);
+    if (retStatus != napi_ok) {
+        FI_HILOGE("failed to create rotObj");
+        return;
+    }
+    SetValueDouble(env, "x", completeAsyncContext->postureData.rollRad, rotObj);
+    SetValueDouble(env, "y", completeAsyncContext->postureData.pitchRad, rotObj);
+    SetValueDouble(env, "z", completeAsyncContext->postureData.yawRad, rotObj);
+    if (completeAsyncContext->result != RET_OK) {
+        if (completeAsyncContext->result == NO_SYSTEM_API || completeAsyncContext->result == DEVICE_EXCEPTION) {
+            ThrowDeviceStatusErrByPromise(env, completeAsyncContext->result, "nosystem api or device not support", errVal);
+        } else {
+            ThrowDeviceStatusErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
+        }
+        retStatus = napi_reject_deferred(env, completeAsyncContext->deferred, errVal);
+    } else {
+        retStatus = napi_resolve_deferred(env, completeAsyncContext->deferred, rotObj);
+    }
+    if (retStatus != napi_ok) {
+        FI_HILOGE("napi pack deferred err, result = %{public}d, status = %{public}d", completeAsyncContext->result,
+            retStatus);
+    }
+    FI_HILOGI("roll %{public}f, pitch %{public}f, yaw %{public}f", completeAsyncContext->postureData.rollRad,
+        completeAsyncContext->postureData.pitchRad, completeAsyncContext->postureData.yawRad);
+    napi_delete_async_work(env, completeAsyncContext->work);
+    delete completeAsyncContext;
+    completeAsyncContext = nullptr;
+}
+
 napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
 {
     FI_HILOGD("Enter");
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_FUNCTION("on", SubscribeDeviceStatus),
         DECLARE_NAPI_STATIC_FUNCTION("off", UnsubscribeDeviceStatus),
+        DECLARE_NAPI_STATIC_FUNCTION("getDeviceRotationRadian", GetDeviceRotationRadian),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
 
@@ -337,6 +442,23 @@ void DeviceStatusNapi::SetPropertyName(napi_env env, napi_value targetObj, const
         FI_HILOGE("Failed to set the name property");
         return;
     }
+}
+
+void DeviceStatusNapi::SetValueDouble(napi_env env, const std::string &fieldStr, const double &floatValue,
+    napi_value &result)
+{
+    napi_value value = nullptr;
+    napi_status status = napi_create_double(env, floatValue, &value);
+    if (status != napi_ok) {
+        FI_HILOGE("failed to create float");
+        return;
+    }
+    status = napi_set_named_property(env, result, fieldStr.c_str(), value);
+    if (status != napi_ok) {
+        FI_HILOGE("set nameproperity failed");
+        return;
+    }
+    return;
 }
 
 bool DeviceStatusNapi::ValidateArgsType(napi_env env, napi_value *args, size_t argc,

@@ -19,6 +19,10 @@
 #include "devicestatus_define.h"
 #include "stationary_manager.h"
 
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 #undef LOG_TAG
 #define LOG_TAG "DeviceStatusClientTest"
 
@@ -26,9 +30,18 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
+using namespace Security::AccessToken;
+namespace {
+constexpr float DOUBLEPIMAX = 6.3F;
+constexpr int32_t RET_NO_SUPPORT = 801;
+}
 
 class DeviceStatusClientTest : public testing::Test {
 public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
     class DeviceStatusClientTestCallback : public DeviceStatusCallbackStub {
     public:
         DeviceStatusClientTestCallback() {};
@@ -36,6 +49,29 @@ public:
         virtual void OnDeviceStatusChanged(const Data& devicestatusData);
     };
 };
+
+void DeviceStatusClientTest::SetUp() {}
+
+void DeviceStatusClientTest::TearDown() {}
+
+void DeviceStatusClientTest::SetUpTestCase()
+{
+    TokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 0,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = nullptr,
+        .acls = nullptr,
+        .processName = "DeviceStatusClientTest",
+        .aplStr = "system_core",
+    };
+    uint64_t tokenId = GetAccessTokenId(&infoInstance);
+    ASSERT_EQ(SetSelfTokenID(tokenId), 0);
+    AccessTokenKit::ReloadNativeTokenInfo();
+}
+
+void DeviceStatusClientTest::TearDownTestCase() {}
 
 void DeviceStatusClientTest::DeviceStatusClientTestCallback::OnDeviceStatusChanged(const
     Data& devicestatusData)
@@ -126,6 +162,30 @@ HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest001, TestSize.Level0)
     type = static_cast<Type>(10);
     data = stationaryMgr->GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == type && data.value >= invalidValue && data.value <= exitValue);
+}
+
+/**
+ * @tc.name: GetDevicePostureDataSync001
+ * @tc.desc: test GetDevicePostureDataSync in proxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusClientTest, GetDevicePostureDataSyncTest001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto stationaryMgr = StationaryManager::GetInstance();
+    DevicePostureData data;
+    int32_t ret = stationaryMgr->GetDevicePostureDataSync(data);
+    EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
+    EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
+        data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
+    ret = stationaryMgr->GetDevicePostureDataSync(data);
+    EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
+    EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
+        data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
+    ret = stationaryMgr->GetDevicePostureDataSync(data);
+    EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
+    EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
+        data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

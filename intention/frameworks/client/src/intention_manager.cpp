@@ -119,6 +119,11 @@ int32_t IntentionManager::UnsubscribeCallback(Type type, ActivityEvent event, sp
     return stationary_.UnsubscribeCallback(type, event, callback);
 }
 
+int32_t IntentionManager::GetDevicePostureDataSync(DevicePostureData &data)
+{
+    return stationary_.GetDevicePostureDataSync(data);
+}
+
 int32_t IntentionManager::SubscribeCallback(BoomerangType type, std::string bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
