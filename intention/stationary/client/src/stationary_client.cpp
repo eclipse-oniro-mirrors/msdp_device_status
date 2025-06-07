@@ -15,7 +15,6 @@
 
 #include "stationary_client.h"
 
-#include "default_params.h"
 #include "devicestatus_define.h"
 #include "stationary_params.h"
 #include "intention_client.h"

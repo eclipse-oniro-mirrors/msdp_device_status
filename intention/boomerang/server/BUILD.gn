@@ -47,8 +47,6 @@ ohos_source_set("intention_boomerang_server") {
   defines = device_status_default_defines
 
   deps = [
-    "${device_status_root_path}/intention/boomerang/data:intention_boomerang_data",
-    "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",

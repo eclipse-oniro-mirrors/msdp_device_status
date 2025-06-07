@@ -15,9 +15,7 @@
 
 #include "boomerang_client.h"
 
-#include "default_params.h"
 #include "devicestatus_define.h"
-#include "boomerang_params.h"
 #include "intention_client.h"
 
 #undef LOG_TAG

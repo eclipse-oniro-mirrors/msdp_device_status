@@ -20,8 +20,6 @@
 #include <tokenid_kit.h>
 
 #include "accesstoken_kit.h"
-#include "cooperate_params.h"
-#include "default_params.h"
 #include "devicestatus_define.h"
 #include "ipc_skeleton.h"
 #include "utility.h"

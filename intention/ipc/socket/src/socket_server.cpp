@@ -18,7 +18,6 @@
 #include "accesstoken_kit.h"
 
 #include "devicestatus_define.h"
-#include "socket_params.h"
 
 #undef LOG_TAG
 #define LOG_TAG "SocketServer"

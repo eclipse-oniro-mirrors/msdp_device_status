@@ -21,7 +21,6 @@
 #include "devicestatus_define.h"
 #include "i_context.h"
 #include "socket_client.h"
-#include "socket_params.h"
 #include "socket_session_manager.h"
 #include "socket_server.h"
 
@@ -117,66 +116,6 @@ HWTEST_F(SocketSessionTest, SocketSessionTest3, TestSize.Level0)
     EXPECT_TRUE(ret);
     g_client->Reconnect();
     g_client->OnDisconnected();
-}
-
-/**
- * @tc.name: SocketSessionTest4
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest4, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel data;
-    AllocSocketPairParam param;
-    bool ret = param.Unmarshalling(data);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: SocketSessionTest5
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest5, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel data;
-    AllocSocketPairParam param;
-    bool ret = param.Marshalling(data);
-    EXPECT_TRUE(ret);
-}
-
-/**
- * @tc.name: SocketSessionTest6
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest6, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel data;
-    AllocSocketPairReply replyData(1, 1);
-    bool ret = replyData.Marshalling(data);
-    EXPECT_TRUE(ret);
-}
-
-/**
- * @tc.name: SocketSessionTest7
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest7, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    MessageParcel data;
-    AllocSocketPairReply replyData(1, 1);
-    bool ret = replyData.Unmarshalling(data);
-    EXPECT_FALSE(ret);
 }
 
 /**

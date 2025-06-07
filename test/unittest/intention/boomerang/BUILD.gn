@@ -52,8 +52,6 @@ ohos_unittest("BoomerangClientTest") {
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "${device_status_root_path}/intention/boomerang/data:intention_boomerang_data",
-    "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/utils/common:devicestatus_util",
@@ -109,7 +107,6 @@ ohos_unittest("BoomerangServerTest") {
 
   sources = [
     "src/boomerang_server_test.cpp",
-    "src/boomerang_server_test_mock.cpp",
   ]
 
   deps = [
