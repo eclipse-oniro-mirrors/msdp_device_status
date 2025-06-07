@@ -33,6 +33,8 @@ SocketSessionManager socketSessionMgr_;
 InputEventBuilder *builder_ = {nullptr};
 auto env_ = ContextService::GetInstance();
 const std::string networkId_ = "1234";
+constexpr int32_t LOC_INPUT_DEVICE_ID { 32 };
+constexpr int32_t MIN_VIRTUAL_INPUT_DEVICE_ID { 1000 };
 } // namespace
 
 ContextService::ContextService()
@@ -667,6 +669,59 @@ HWTEST_F(InputEventBuilderTest, ResetPressedEventsTest004, TestSize.Level1)
     ASSERT_EQ(ret, true);
     env_->GetDragManager().SetDragState(DragState::MOTION_DRAGGING);
     builder_->ResetPressedEvents();
+}
+
+/**
+ * @tc.name: TagRemoteEvent_keyEvent_001
+ * @tc.desc: Test TagRemoteEvent_keyEvent_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventBuilderTest, TagRemoteEvent_keyEvent_001, TestSize.Level1)
+{
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    int64_t time = GetMillisTime();
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_A);
+    keyEvent->SetActionTime(time);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    MMI::KeyEvent::KeyItem item1;
+    item1.SetPressed(true);
+    item1.SetKeyCode(MMI::KeyEvent::KEYCODE_A);
+    item1.SetDownTime(time);
+    keyEvent->AddKeyItem(item1);
+    int32_t deviceId = LOC_INPUT_DEVICE_ID;
+    int32_t locVirDeviceId = -(deviceId + 1);
+    keyEvent->SetDeviceId(deviceId);
+    // builder_->remote2VirtualIds_[1] = 100;
+    builder_->TagRemoteEvent(keyEvent);
+    ASSERT_EQ(keyEvent->GetDeviceId(), locVirDeviceId);
+}
+
+/**
+ * @tc.name: TagRemoteEvent_keyEvent_002
+ * @tc.desc: Test TagRemoteEvent_keyEvent_002
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventBuilderTest, TagRemoteEvent_keyEvent_002, TestSize.Level1)
+{
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    int64_t time = GetMillisTime();
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_A);
+    keyEvent->SetActionTime(time);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    MMI::KeyEvent::KeyItem item1;
+    item1.SetPressed(true);
+    item1.SetKeyCode(MMI::KeyEvent::KEYCODE_A);
+    item1.SetDownTime(time);
+    keyEvent->AddKeyItem(item1);
+    int32_t deviceId = LOC_INPUT_DEVICE_ID;
+    int32_t locVirDeviceId = deviceId + MIN_VIRTUAL_INPUT_DEVICE_ID;
+    keyEvent->SetDeviceId(deviceId);
+    builder_->remote2VirtualIds_[deviceId] = locVirDeviceId;
+    builder_->TagRemoteEvent(keyEvent);
+    ASSERT_EQ(keyEvent->GetDeviceId(), locVirDeviceId);
+    builder_->remote2VirtualIds_.erase(deviceId);
 }
 } // namespace Cooperate
 } // namespace DeviceStatus
