@@ -40,9 +40,7 @@ ohos_unittest("DragManagerTest") {
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_root_path}/intention/cooperate/client:intention_cooperate_client",
-    "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/drag/client:intention_drag_client",
-    "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
     "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/intention/prototype:intention_prototype",
@@ -88,9 +86,7 @@ ohos_unittest("DragServerTest") {
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
-    "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/drag/client:intention_drag_client",
-    "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
     "${device_status_root_path}/intention/prototype:intention_prototype",

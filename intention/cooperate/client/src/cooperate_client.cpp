@@ -21,8 +21,6 @@
 #include <numeric>
 #endif // ENABLE_PERFORMANCE_CHECK
 
-#include "cooperate_params.h"
-#include "default_params.h"
 #include "devicestatus_define.h"
 #include "intention_client.h"
 #include "utility.h"

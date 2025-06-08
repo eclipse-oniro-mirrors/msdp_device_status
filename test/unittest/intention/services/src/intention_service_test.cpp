@@ -18,7 +18,6 @@
 
 #include "ddm_adapter.h"
 #include "drag_data_manager.h"
-#include "drag_params.h"
 #include "drag_server.h"
 #include "dsoftbus_adapter.h"
 #include "fi_log.h"
@@ -566,21 +565,6 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RemoveSubscriptListener001, 
 {
     CALL_TEST_DEBUG;
     ErrCode ret = g_intentionServiceNullptr->RemoveSubscriptListener();
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest20
- * @tc.desc: Test SetDragWindowVisible
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragWindowVisible001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    DragVisibleParam dragVisibleParam;
-    SequenceableDragVisible sequenceableDragVisible(dragVisibleParam);
-    ErrCode ret = g_intentionServiceNullptr->SetDragWindowVisible(sequenceableDragVisible);
     EXPECT_EQ(ret, RET_ERR);
 }
 

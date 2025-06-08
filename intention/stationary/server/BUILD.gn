@@ -55,7 +55,6 @@ ohos_source_set("intention_stationary_server") {
   defines = device_status_default_defines
 
   deps = [
-    "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/stationary/data:intention_stationary_data",
     "${device_status_root_path}/utils/common:devicestatus_util",

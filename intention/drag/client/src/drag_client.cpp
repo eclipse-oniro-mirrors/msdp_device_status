@@ -15,8 +15,6 @@
 
 #include "drag_client.h"
 
-#include "default_params.h"
-#include "drag_params.h"
 #include "devicestatus_define.h"
 #include "devicestatus_proto.h"
 #include "intention_client.h"

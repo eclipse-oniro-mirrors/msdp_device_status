@@ -15,7 +15,6 @@
 #include "cooperate_test.h"
 
 #include "cooperate.h"
-#include "cooperate_params.h"
 #include "ddm_adapter.h"
 #include "input_adapter.h"
 #include "i_cooperate.h"
@@ -323,9 +322,9 @@ HWTEST_F(CooperateTest, CooperateTest7, TestSize.Level0)
     int32_t ret = RET_ERR;
     if (g_cooperate != nullptr) {
         g_cooperate->Dump(1);
-        GetCooperateStateSyncParam param;
+        std::string udId { "default" };
         bool state { false };
-        int32_t ret = g_cooperate->GetCooperateState(param.udId, state);
+        int32_t ret = g_cooperate->GetCooperateState(udId, state);
         EXPECT_EQ(ret, RET_OK);
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     } else {

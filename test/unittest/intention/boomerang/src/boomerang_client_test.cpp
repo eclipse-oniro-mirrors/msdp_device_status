@@ -25,8 +25,6 @@
 #include "boomerang_callback_stub.h"
 #include "boomerang_client.h"
 #include "iremote_boomerang_callback.h"
-#include "boomerang_params.h"
-#include "default_params.h"
 #include "devicestatus_define.h"
 #include "devicestatus_errors.h"
 #include "i_hotarea_listener.h"

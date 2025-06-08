@@ -19,9 +19,7 @@
 #include "gtest/gtest.h"
 #include "ipc_skeleton.h"
 
-#include "cooperate_params.h"
 #include "cooperate_server.h"
-#include "default_params.h"
 #include "fi_log.h"
 #include "nativetoken_kit.h"
 #include "test_context.h"

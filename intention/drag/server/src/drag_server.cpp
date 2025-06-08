@@ -18,7 +18,6 @@
 #include "tokenid_kit.h"
 
 #include "accesstoken_kit.h"
-#include "drag_params.h"
 #include "devicestatus_define.h"
 
 #undef LOG_TAG

@@ -59,8 +59,6 @@ ohos_unittest("IntentionServiceTest") {
 
   deps = [
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
-    "${device_status_root_path}/intention/data:intention_data",
-    "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
@@ -320,8 +318,6 @@ ohos_unittest("IntentionDumperTest") {
 
   deps = [
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
-    "${device_status_root_path}/intention/data:intention_data",
-    "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
@@ -390,8 +386,6 @@ ohos_unittest("BoomerangDumperTest") {
 
   deps = [
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
-    "${device_status_root_path}/intention/data:intention_data",
-    "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",

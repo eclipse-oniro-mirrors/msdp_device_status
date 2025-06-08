@@ -19,10 +19,7 @@
 #include "ipc_skeleton.h"
 
 #include "boomerang_callback_stub.h"
-#include "boomerang_server_test_mock.h"
-#include "boomerang_params.h"
 #include "boomerang_server.h"
-#include "default_params.h"
 #include "devicestatus_callback_stub.h"
 #include "devicestatus_define.h"
 #include "devicestatus_dumper.h"

@@ -18,7 +18,6 @@
 #include "ddm_adapter.h"
 #include "devicestatus_service.h"
 #include "drag_data_manager.h"
-#include "drag_params.h"
 #include "drag_server.h"
 #include "interaction_manager.h"
 #include "ipc_skeleton.h"

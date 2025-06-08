@@ -18,7 +18,6 @@
 #include "hisysevent.h"
 #include "hitrace_meter.h"
 
-#include "default_params.h"
 #include "devicestatus_define.h"
 #include "devicestatus_dumper.h"
 #include "devicestatus_hisysevent.h"
