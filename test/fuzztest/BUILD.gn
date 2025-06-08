@@ -51,6 +51,7 @@ group("device_status_fuzztest") {
     "updatepreviewstyle_fuzzer:fuzztest",
     "updatepreviewstylewithanimationstub_fuzzer:fuzztest",
     "updateshadowpic_fuzzer:fuzztest",
+    "intentionclient_fuzzer:fuzztest",
   ]
   if (device_status_interaction_coordination) {
     deps += [
