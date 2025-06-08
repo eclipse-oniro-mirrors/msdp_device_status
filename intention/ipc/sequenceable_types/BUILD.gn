@@ -43,8 +43,8 @@ ohos_source_set("sequenceable_types") {
     "src/sequenceable_drag_result.cpp",
     "src/sequenceable_drag_visible.cpp",
     "src/sequenceable_posture_data.cpp",
-    "src/sequenceable_preview_style.cpp",
     "src/sequenceable_preview_animation.cpp",
+    "src/sequenceable_preview_style.cpp",
     "src/sequenceable_rotate_window.cpp",
   ]
 
