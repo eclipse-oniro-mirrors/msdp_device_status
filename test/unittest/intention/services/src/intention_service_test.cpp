@@ -150,7 +150,8 @@ void IntentionServiceTest::TearDownTestCase()
     g_intentionServiceNullptr = nullptr;
 }
 
-void IntentionServiceTest::SetUp() {
+void IntentionServiceTest::SetUp()
+{
     stationaryCallback_ = new (std::nothrow) TestDevStaCallback();
 }
 

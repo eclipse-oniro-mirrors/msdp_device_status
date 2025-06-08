@@ -381,7 +381,8 @@ void DeviceStatusNapi::GetPostureDataCompleteCB(napi_env env, napi_status status
     SetValueDouble(env, "z", completeAsyncContext->postureData.yawRad, rotObj);
     if (completeAsyncContext->result != RET_OK) {
         if (completeAsyncContext->result == NO_SYSTEM_API || completeAsyncContext->result == DEVICE_EXCEPTION) {
-            ThrowDeviceStatusErrByPromise(env, completeAsyncContext->result, "nosystem api or device not support", errVal);
+            ThrowDeviceStatusErrByPromise(env, completeAsyncContext->result, "nosystem api or device not support",
+                errVal);
         } else {
             ThrowDeviceStatusErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
         }

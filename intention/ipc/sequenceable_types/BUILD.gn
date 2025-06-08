@@ -50,9 +50,7 @@ ohos_source_set("sequenceable_types") {
 
   public_configs = [ ":sequenceable_types_public_config" ]
 
-  deps = [
-    "${device_status_root_path}/utils/common:devicestatus_util",
-  ]
+  deps = [ "${device_status_root_path}/utils/common:devicestatus_util" ]
 
   external_deps = [
     "c_utils:utils",

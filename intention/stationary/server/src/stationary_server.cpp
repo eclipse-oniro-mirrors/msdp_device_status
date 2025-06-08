@@ -59,11 +59,12 @@ constexpr int32_t ROTATION_MAT_LEN = 3;
 constexpr int32_t MAT_IDX_0 = 0;
 constexpr int32_t MAT_IDX_1 = 1;
 constexpr int32_t MAT_IDX_2 = 2;
+constexpr float DOUBLE_FACTOR = 2.0F;
 constexpr float PI = 3.141592653589846;
 constexpr float EPSILON_FLOAT = 1e-6;
 std::optional<RotationVectorData> cacheRotVecData_;
-std::mutex g_mtx_;
-std::condition_variable g_cv_;
+std::mutex g_mtx;
+std::condition_variable g_cv;
 } // namespace
 
 static void OnReceivedData(SensorEvent *event)
@@ -72,10 +73,10 @@ static void OnReceivedData(SensorEvent *event)
         return;
     }
     if (event->sensorTypeId == SENSOR_TYPE_ID_ROTATION_VECTOR) {
-        std::unique_lock lockGrd(g_mtx_);
+        std::unique_lock lockGrd(g_mtx);
         RotationVectorData *data = reinterpret_cast<RotationVectorData *>(event->data);
         cacheRotVecData_ = std::make_optional(*data);
-        g_cv_.notify_all();
+        g_cv.notify_all();
     }
 }
 
@@ -176,8 +177,8 @@ int32_t StationaryServer::GetDevicePostureDataSync(CallingContext &context, Devi
     SensorManager sensorManager(SENSOR_TYPE_ID_ROTATION_VECTOR, SENSOR_SAMPLING_INTERVAL);
     sensorManager.SetCallback(&OnReceivedData);
     sensorManager.StartSensor();
-    std::unique_lock lockGrd(g_mtx_);
-    g_cv_.wait_for(lockGrd, std::chrono::milliseconds(WAIT_SENSOR_DATA_TIMEOUT_MS));
+    std::unique_lock lockGrd(g_mtx);
+    g_cv.wait_for(lockGrd, std::chrono::milliseconds(WAIT_SENSOR_DATA_TIMEOUT_MS));
     sensorManager.StopSensor();
     // 数据转换
     if (cacheRotVecData_ == std::nullopt) {
@@ -200,15 +201,15 @@ void StationaryServer::TransQuaternionsToZXYRot(RotationVectorData quaternions, 
     FI_HILOGI("x:%{public}f, y:%{public}f, z:%{public}f, w:%{public}f", x, y, z, w);
     // 计算旋转矩阵
     std::vector<std::vector<float>> rotationMat(ROTATION_MAT_LEN, std::vector<float>(ROTATION_MAT_LEN, 0.0F));
-    rotationMat[MAT_IDX_0][MAT_IDX_0] = 1 - 2 * y * y - 2 * z * z;
-    rotationMat[MAT_IDX_0][MAT_IDX_1] = 2 * x * y - 2 * w * z;
-    rotationMat[MAT_IDX_0][MAT_IDX_2] = 2 * x * z + 2 * w * y;
-    rotationMat[MAT_IDX_1][MAT_IDX_0] = 2 * x * y + 2 * w * z;
-    rotationMat[MAT_IDX_1][MAT_IDX_1] = 1 - 2 * x * x - 2 * z * z;
-    rotationMat[MAT_IDX_1][MAT_IDX_2] = 2 * y * z - 2 * w * x;
-    rotationMat[MAT_IDX_2][MAT_IDX_0] = 2 * x * z - 2 * w * y;
-    rotationMat[MAT_IDX_2][MAT_IDX_1] = 2 * y * z + 2 * w * x;
-    rotationMat[MAT_IDX_2][MAT_IDX_2] = 1 - 2 * x * x - 2 * y * y;
+    rotationMat[MAT_IDX_0][MAT_IDX_0] = 1 - DOUBLE_FACTOR * y * y - DOUBLE_FACTOR * z * z;
+    rotationMat[MAT_IDX_0][MAT_IDX_1] = DOUBLE_FACTOR * x * y - DOUBLE_FACTOR * w * z;
+    rotationMat[MAT_IDX_0][MAT_IDX_2] = DOUBLE_FACTOR * x * z + DOUBLE_FACTOR * w * y;
+    rotationMat[MAT_IDX_1][MAT_IDX_0] = DOUBLE_FACTOR * x * y + DOUBLE_FACTOR * w * z;
+    rotationMat[MAT_IDX_1][MAT_IDX_1] = 1 - DOUBLE_FACTOR * x * x - DOUBLE_FACTOR * z * z;
+    rotationMat[MAT_IDX_1][MAT_IDX_2] = DOUBLE_FACTOR * y * z - DOUBLE_FACTOR * w * x;
+    rotationMat[MAT_IDX_2][MAT_IDX_0] = DOUBLE_FACTOR * x * z - DOUBLE_FACTOR * w * y;
+    rotationMat[MAT_IDX_2][MAT_IDX_1] = DOUBLE_FACTOR * y * z + DOUBLE_FACTOR * w * x;
+    rotationMat[MAT_IDX_2][MAT_IDX_2] = 1 - DOUBLE_FACTOR * x * x - DOUBLE_FACTOR * y * y;
     auto transFunc = [](const float angle) -> float {
         float ret = angle;
         if (angle < 0) {
@@ -220,9 +221,11 @@ void StationaryServer::TransQuaternionsToZXYRot(RotationVectorData quaternions, 
     auto yaw = transFunc(std::atan2(-rotationMat[MAT_IDX_0][MAT_IDX_1], rotationMat[MAT_IDX_1][MAT_IDX_1]));
     float roll = 0.0F;
     if (std::cos(pitch) >= EPSILON_FLOAT) {
-        roll = transFunc(std::atan2(rotationMat[MAT_IDX_2][MAT_IDX_1], rotationMat[MAT_IDX_2][MAT_IDX_2] / std::cos(pitch)));
+        roll = transFunc(std::atan2(rotationMat[MAT_IDX_2][MAT_IDX_1],
+            rotationMat[MAT_IDX_2][MAT_IDX_2] / std::cos(pitch)));
     } else {
-        roll = transFunc(std::atan2(rotationMat[MAT_IDX_2][MAT_IDX_1], -rotationMat[MAT_IDX_2][MAT_IDX_0] / std::sin(pitch)));
+        roll = transFunc(std::atan2(rotationMat[MAT_IDX_2][MAT_IDX_1],
+            -rotationMat[MAT_IDX_2][MAT_IDX_0] / std::sin(pitch)));
     }
     data.rollRad = roll;
     data.yawRad = yaw;

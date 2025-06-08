@@ -74,7 +74,7 @@ public:
      * @return Returns retcode
      * @since 20
      */
-     int32_t GetDevicePostureDataSync(DevicePostureData &data);
+    int32_t GetDevicePostureDataSync(DevicePostureData &data);
 private:
     StationaryManager() = default;
     DISALLOW_COPY_AND_MOVE(StationaryManager);
