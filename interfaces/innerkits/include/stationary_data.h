@@ -94,6 +94,12 @@ struct Data {
     }
 };
 
+struct DevicePostureData {
+    float rollRad = 0.0F;
+    float pitchRad = 0.0F;
+    float yawRad = 0.0F;
+};
+
 typedef struct DeviceStatusJsonData {
     int32_t type { -1 };
     std::string json;

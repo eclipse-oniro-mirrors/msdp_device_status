@@ -16,6 +16,8 @@
 #ifndef STATIONARY_SERVER_H
 #define STATIONARY_SERVER_H
 
+#include <optional>
+
 #include "nocopyable.h"
 
 #include "devicestatus_manager.h"
@@ -24,6 +26,11 @@
 #include "motion_callback_stub.h"
 #endif
 #include "i_plugin.h"
+
+#ifdef DEVICE_STATUS_SENSOR_ENABLE
+#include "sensor_agent.h"
+#include "sensor_agent_type.h"
+#endif
 
 namespace OHOS {
 namespace Msdp {
@@ -65,6 +72,7 @@ public:
     int32_t UnsubscribeStationaryCallback(CallingContext &context, int32_t type, int32_t event,
         const sptr<IRemoteDevStaCallback> &unsubCallback);
     int32_t GetDeviceStatusData(CallingContext &context, int32_t type, int32_t &replyType, int32_t &replyValue);
+    int32_t GetDevicePostureDataSync(CallingContext &context, DevicePostureData &data);
 
     void DumpDeviceStatusSubscriber(int32_t fd) const;
     void DumpDeviceStatusChanges(int32_t fd) const;
@@ -75,6 +83,8 @@ private:
         ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
     void Unsubscribe(CallingContext &context, Type type, ActivityEvent event,
         sptr<IRemoteDevStaCallback> callback);
+    bool IsSystemCalling(CallingContext &context);
+    bool IsSystemServiceCalling(CallingContext &context);
 #ifdef MOTION_ENABLE
     int32_t SubscribeMotion(Type type, sptr<IRemoteDevStaCallback> callback);
     int32_t UnsubscribeMotion(Type type, sptr<IRemoteDevStaCallback> callback);
@@ -83,6 +93,9 @@ private:
 #endif
     Data GetCache(CallingContext &context, const Type &type);
     void ReportSensorSysEvent(CallingContext &context, int32_t type, bool enable);
+#ifdef DEVICE_STATUS_SENSOR_ENABLE
+    void TransQuaternionsToZXYRot(RotationVectorData quaternions, DevicePostureData &data);
+#endif
 
 #ifdef MOTION_ENABLE
     std::map<Type, std::set<sptr<IRemoteDevStaCallback>, DevStaCallbackCmp>> deviceStatusMotionCallbacks_;

@@ -33,7 +33,8 @@ ohos_source_set("sequenceable_types") {
 
   include_dirs = [
     "include",
-    "${device_status_root_path}/interfaces/innerkits/interaction/include"
+    "${device_status_root_path}/interfaces/innerkits/include",
+    "${device_status_root_path}/interfaces/innerkits/interaction/include",
   ]
 
   sources = [
@@ -41,16 +42,15 @@ ohos_source_set("sequenceable_types") {
     "src/sequenceable_drag_data.cpp",
     "src/sequenceable_drag_result.cpp",
     "src/sequenceable_drag_visible.cpp",
-    "src/sequenceable_preview_style.cpp",
+    "src/sequenceable_posture_data.cpp",
     "src/sequenceable_preview_animation.cpp",
-    "src/sequenceable_rotate_window.cpp"
+    "src/sequenceable_preview_style.cpp",
+    "src/sequenceable_rotate_window.cpp",
   ]
 
   public_configs = [ ":sequenceable_types_public_config" ]
 
-  deps = [
-    "${device_status_root_path}/utils/common:devicestatus_util",
-  ]
+  deps = [ "${device_status_root_path}/utils/common:devicestatus_util" ]
 
   external_deps = [
     "c_utils:utils",

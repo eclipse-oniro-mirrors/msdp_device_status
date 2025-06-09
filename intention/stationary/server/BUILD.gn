@@ -48,6 +48,7 @@ ohos_source_set("intention_stationary_server") {
     "${device_status_root_path}/services/native/src/devicestatus_msdp_client_impl.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_napi_manager.cpp",
     "src/stationary_server.cpp",
+    "src/sensor_manager.cpp",
   ]
 
   public_configs = [ ":intention_stationary_server_public_config" ]
@@ -83,6 +84,11 @@ ohos_source_set("intention_stationary_server") {
   if (device_status_motion_enable) {
     defines += [ "MOTION_ENABLE" ]
     external_deps += [ "motion:motion_interface_native" ]
+  }
+
+  if (device_status_sensor_enable) {
+    defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+    external_deps += [ "sensor:sensor_interface_native" ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"

@@ -554,6 +554,20 @@ ErrCode IntentionService::GetDeviceStatusData(int32_t type, int32_t &replyType, 
        return stationary_.GetDeviceStatusData(context, type, replyType, replyValue);
     });
 }
+
+ErrCode IntentionService::GetDevicePostureDataSync(SequenceablePostureData &data)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &data] {
+        DevicePostureData rawPostureData;
+        int32_t ret = stationary_.GetDevicePostureDataSync(context, rawPostureData);
+        if (ret != RET_OK) {
+            return ret;
+        }
+        data.SetPostureData(rawPostureData);
+        return RET_OK;
+    });
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

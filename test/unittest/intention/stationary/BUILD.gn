@@ -54,6 +54,11 @@ ohos_unittest("StationaryServerTest") {
     defines += [ "MOTION_ENABLE" ]
     external_deps += [ "motion:motion_interface_native" ]
   }
+
+  if (device_status_sensor_enable) {
+    defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+    external_deps += [ "sensor:sensor_interface_native" ]
+  }
 }
 
 group("unittest") {

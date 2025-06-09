@@ -115,6 +115,7 @@ public:
     ErrCode UnsubscribeStationaryCallback(int32_t type, int32_t event,
         const sptr<IRemoteDevStaCallback> &unsubCallback) override;
     ErrCode GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue) override;
+    ErrCode GetDevicePostureDataSync(SequenceablePostureData &data) override;
 
 private:
     CallingContext GetCallingContext();
