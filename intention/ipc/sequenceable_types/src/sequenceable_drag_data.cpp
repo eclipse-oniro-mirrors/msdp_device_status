@@ -18,6 +18,9 @@
 #include "devicestatus_define.h"
 #include "drag_data_packer.h"
 
+#undef LOG_TAG
+#define LOG_TAG "SequenceableDragData"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -26,6 +29,10 @@ bool SequenceableDragData::Marshalling(Parcel &parcel) const
 {
     if (DragDataPacker::Marshalling(dragData_, parcel) != RET_OK) {
         return false;
+    }
+
+    if (DragDataPacker::MarshallingSummarys2(dragData_, parcel) != RET_OK) {
+        FI_HILOGE("Marshalling Summarys2 failed");
     }
     return true;
 }
@@ -37,6 +44,10 @@ SequenceableDragData* SequenceableDragData::Unmarshalling(Parcel &parcel)
     if (DragDataPacker::UnMarshalling(parcel, sequenceDragData->dragData_) != RET_OK) {
         delete sequenceDragData;
         return nullptr;
+    }
+
+    if (DragDataPacker::UnMarshallingSummarys2(parcel, sequenceDragData->dragData_) != RET_OK) {
+        FI_HILOGE("UnMarshallingSummarys2 Summarys2 failed");
     }
     return sequenceDragData;
 }
