@@ -342,6 +342,50 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest013, TestSize.Level1)
     CALL_TEST_DEBUG;
     ASSERT_NO_FATAL_FAILURE(boomerang_.DumpCurrentDeviceStatus(FD));
 }
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest014
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest014, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NO_FATAL_FAILURE(boomerang_.DumpDeviceStatusSubscriber(FD));
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest015
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest015, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NO_FATAL_FAILURE(boomerang_.DumpDeviceStatusChanges(FD));
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest16
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest16, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    boomerang_.ReportSensorSysEvent(context, 2, true);
+    Data data = boomerang_.GetCache(context, Type::TYPE_STILL);
+    EXPECT_EQ(data.status, Status::STATUS_INVALID);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
