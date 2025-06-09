@@ -32,7 +32,7 @@ bool SequenceableDragData::Marshalling(Parcel &parcel) const
     }
 
     if (DragDataPacker::MarshallingSummarys2(dragData_, parcel) != RET_OK) {
-        FI_HILOGE("Marshalling Summarys2 failed");
+        FI_HILOGE("Marshalling summarys2 failed");
     }
     return true;
 }
@@ -47,7 +47,7 @@ SequenceableDragData* SequenceableDragData::Unmarshalling(Parcel &parcel)
     }
 
     if (DragDataPacker::UnMarshallingSummarys2(parcel, sequenceDragData->dragData_) != RET_OK) {
-        FI_HILOGE("UnMarshallingSummarys2 Summarys2 failed");
+        FI_HILOGE("UnMarshalling summarys2 failed");
     }
     return sequenceDragData;
 }
