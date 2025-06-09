@@ -93,6 +93,7 @@
             "OHOS::Msdp::DeviceStatus::BoomerangManager::BoomerangEncodeImage(std::__h::shared_ptr<OHOS::Media::PixelMap>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::BoomerangDecodeImage(std::__h::shared_ptr<OHOS::Media::PixelMap>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
             "VTT for OHOS::Msdp::DeviceStatus::BoomerangCallbackStub";
+            "vtable for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub";
             "OHOS::Msdp::DeviceStatus::BoomerangCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
         };
     local:
