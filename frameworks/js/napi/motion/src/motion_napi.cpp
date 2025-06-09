@@ -60,7 +60,7 @@ const std::map<const std::string, int32_t> MOTION_TYPE_MAP = {
     { "operatingHandChanged", MOTION_TYPE_OPERATING_HAND },
     { "steadyStandingDetect", MOTION_TYPE_STAND },
     { "remotePhotoStandingDetect", MOTION_TYPE_REMOTE_PHOTO },
-    { "holdingHandStatus", MOTION_TYPE_HOLDING_HAND_STATUS },
+    { "holdingHandChanged", MOTION_TYPE_HOLDING_HAND_STATUS },
 };
 MotionNapi *g_motionObj = nullptr;
 } // namespace
