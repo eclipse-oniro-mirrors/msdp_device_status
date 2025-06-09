@@ -1110,14 +1110,6 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         dragDrawing_.UpdateDragWindowDisplay(targetDisplayId);
         dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
         lastDisplayId_ = targetDisplayId;
-    } else {
-        if (throwState_ == ThrowState::NOT_THROW) {
-            FI_HILOGD("Drag move ThrowState::NOT_THROW");
-            dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
-        } else {
-            FI_HILOGD("Drag move other ThrowState");
-            dragDrawing_.OnPullThrowDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
-        }
     }
 }
 
