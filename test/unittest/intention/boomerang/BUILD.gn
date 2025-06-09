@@ -109,6 +109,11 @@ ohos_unittest("BoomerangServerTest") {
     "src/boomerang_server_test.cpp",
   ]
 
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
   deps = [
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/common:devicestatus_util",
