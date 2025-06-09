@@ -56,9 +56,12 @@ if (!is_arkui_x) {
       "src/drag_smooth_processor.cpp",
       "src/drag_vsync_station.cpp",
       "src/event_hub.cpp",
-      "src/pull_throw_listener.cpp",
       "src/state_change_notify.cpp",
     ]
+
+    if (device_status_pullthrow_enable) {
+      sources += ["src/pull_throw_listener.cpp"]
+    }
 
     if (device_status_enable_internal_drop_animation) {
       sources += ["src/drag_internal_animation_wrapper.cpp"]

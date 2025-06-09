@@ -121,10 +121,12 @@ public:
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual int32_t SetMouseDragMonitorState(bool state) = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#ifdef OHOS_ENABLE_PULLTHROW
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual bool RegisterPullThrowListener() = 0;
     virtual bool RegisterVKListener() = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#endif // OHOS_ENABLE_PULLTHROW
 };
 } // namespace DeviceStatus
 } // namespace Msdp

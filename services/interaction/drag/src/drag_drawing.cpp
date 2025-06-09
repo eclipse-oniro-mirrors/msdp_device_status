@@ -133,12 +133,14 @@ constexpr float ROTATION_270 { 270.0f };
 constexpr float ZOOM_IN_SCALE { 1.03f };
 constexpr float ZOOM_OUT_SCALE { 0.9f };
 constexpr float ZOOM_END_SCALE { 1.0f };
+#ifdef OHOS_ENABLE_PULLTHROW
 constexpr float THROW_SLIP_TIME { 616.0f };
 constexpr float BREATHE_TIME { 600.0f };
 constexpr float BREATHE_REPEAT { 50 };
 constexpr float BREATHE_SCALE { 0.1f };
 constexpr float ZOOMOUT_PULLTHROW { 400.0f };
 constexpr float APP_WIDTH { 110 };
+#endif // OHOS_ENABLE_PULLTHROW
 constexpr uint32_t TRANSPARENT_COLOR_ARGB { 0x00000000 };
 constexpr int32_t DEFAULT_MOUSE_SIZE { 1 };
 constexpr int32_t DEFAULT_COLOR_VALUE { 0 };
@@ -914,6 +916,7 @@ void DragDrawing::LongPressDragAlphaAnimation()
     },  []() { FI_HILOGD("AlphaChanged end"); });
 }
 
+#ifdef OHOS_ENABLE_PULLTHROW
 void DragDrawing::SetHovering(double tx, double ty, std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     FI_HILOGI("enter");
@@ -1117,6 +1120,7 @@ void DragDrawing::PullThrowZoomOutAnimation()
     FI_HILOGI("leave");
     return;
 }
+#endif // OHOS_ENABLE_PULLTHROW
 
 void DragDrawing::LongPressDragZoomInAnimation()
 {
@@ -1773,6 +1777,7 @@ void DragDrawing::OnDragMove(int32_t displayId, int32_t displayX, int32_t displa
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
+#ifdef OHOS_ENABLE_PULLTHROW
 void DragDrawing::OnPullThrowDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime)
 {
     FI_HILOGD("enter");
@@ -1793,6 +1798,7 @@ void DragDrawing::OnPullThrowDragMove(int32_t displayId, int32_t displayX, int32
     }
     UpdateDragPosition(displayId, displayX, displayY);
 }
+#endif // OHOS_ENABLE_PULLTHROW
 
 int32_t DragDrawing::DrawStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode,
     std::shared_ptr<Media::PixelMap> stylePixelMap)
@@ -4296,6 +4302,7 @@ float DragDrawing::CalculateWidthScale()
     return scale;
 }
 
+#ifdef OHOS_ENABLE_PULLTHROW
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 float DragDrawing::CalculatePullThrowScale()
 {
@@ -4322,6 +4329,7 @@ float DragDrawing::CalculatePullThrowScale()
     return scale;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#endif // OHOS_ENABLE_PULLTHROW
 
 float DragDrawing::CalculateSMScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide)
 {

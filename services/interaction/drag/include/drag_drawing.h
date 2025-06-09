@@ -266,7 +266,9 @@ public:
     void SetSVGFilePath(const std::string &filePath);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void OnDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime);
+#ifdef OHOS_ENABLE_PULLTHROW
     void OnPullThrowDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime);
+#endif // OHOS_ENABLE_PULLTHROW
     void EraseMouseIcon();
     void DestroyDragWindow();
     void UpdateDrawingState();
@@ -289,9 +291,11 @@ public:
     Rosen::Rotation GetRotation(Rosen::DisplayId displayId);
     void DestoryDisplayIdInMap(Rosen::DisplayId displayId);
     float CalculateWidthScale();
+#ifdef OHOS_ENABLE_PULLTHROW
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     float CalculatePullThrowScale();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#endif // OHOS_ENABLE_PULLTHROW
     float GetMaxWidthScale(int32_t width, int32_t height);
     float CalculateScale(float width, float height, float widthLimit, float heightLimit);
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
@@ -303,13 +307,14 @@ public:
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
     void LongPressDragZoomOutAnimation();
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
+#ifdef OHOS_ENABLE_PULLTHROW
     void PullThrowAnimation(double tx, double ty, float vx, float vy, std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void SetHovering(double tx, double ty, std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void SetScaleAnimation();
     void PullThrowBreatheAnimation();
     void PullThrowBreatheEndAnimation();
     void PullThrowZoomOutAnimation();
-
+#endif // OHOS_ENABLE_PULLTHROW
 private:
     int32_t CheckDragData(const DragData &dragData);
     int32_t InitLayer();
@@ -431,7 +436,9 @@ private:
     void* dragExtHandler_ { nullptr };
     bool needRotatePixelMapXY_ { false };
     uint64_t screenId_ { 0 };
+#ifdef OHOS_ENABLE_PULLTHROW
     float pullThrowScale_ { 1.0 };
+#endif // OHOS_ENABLE_PULLTHROW
     std::map<Rosen::DisplayId, Rosen::Rotation> rotationMap_;
     ScreenSizeType currentScreenSize_ = ScreenSizeType::UNDEFINED;
     MMI::PointerStyle pointerStyle_;
@@ -443,10 +450,12 @@ private:
     DragState dragState_ { DragState::STOP };
     int32_t timerId_ { -1 };
     std::shared_mutex receiverMutex_;
+#ifdef OHOS_ENABLE_PULLTHROW
     bool pullThrowAnimationXCompleted_  { false };
     bool pullThrowAnimationYCompleted_ { false };
     std::mutex animationMutex_;
     std::condition_variable animationCV_;
+#endif // OHOS_ENABLE_PULLTHROW
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<OHOS::Rosen::Window> window_ { nullptr };
     std::function<void()> callback_ { nullptr };
