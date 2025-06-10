@@ -35,6 +35,7 @@ using namespace testing::ext;
 namespace {
 int32_t g_userData { 1 };
 uint64_t g_tokenID { 0 };
+uint64_t g_tokenID1 { 5 };
 const std::string SYSTEM_BASIC { "system_basic" };
 const char* g_basics[] = { "ohos.permission.COOPERATE_MANAGER" };
 } // namespace
@@ -132,6 +133,25 @@ HWTEST_F(CooperateServerTest, EnableTest1, TestSize.Level0)
 }
 
 /**
+ * @tc.name: EnableTest2
+ * @tc.desc: Test func named enable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, EnableTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->EnableCooperate(context, g_userData));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
  * @tc.name: DisableTest1
  * @tc.desc: Test func named disable
  * @tc.type: FUNC
@@ -143,6 +163,25 @@ HWTEST_F(CooperateServerTest, DisableTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->DisableCooperate(context, g_userData));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: DisableTest2
+ * @tc.desc: Test func named disable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, DisableTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
@@ -173,13 +212,37 @@ HWTEST_F(CooperateServerTest, StartTest1, TestSize.Level0)
     context_->GetPluginManager().UnloadCooperate();
 }
 
+
 /**
- * @tc.name: StartWithOptionsTest1
+ * @tc.name: StartTest2
  * @tc.desc: Test func named start
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, StartWithOptionsTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, StartTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    std::string networkId = "networkId";
+    int32_t startDeviceId = 0;
+    bool isCheckPermission = true;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperate(context,
+        networkId, g_userData, startDeviceId, isCheckPermission));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: StartCooperateWithOptionstTest1
+ * @tc.desc: Test func named StartCooperateWithOptions
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, StartCooperateWithOptionsTest1, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -188,15 +251,34 @@ HWTEST_F(CooperateServerTest, StartWithOptionsTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    std::string networkId = "networkId";
+    std::string remoteNetworkId = "networkId";
     int32_t startDeviceId = 0;
-    CooperateOptions options {
-            .displayX = 500,
-            .displayY = 500,
-            .displayId = 1
-    };
+    CooperateOptions options;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperateWithOptions(context,
-        networkId, g_userData, startDeviceId, options));
+        remoteNetworkId, g_userData, startDeviceId, options));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: StartCooperateWithOptionstTest2
+ * @tc.desc: Test func named StartCooperateWithOptions
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, StartCooperateWithOptionsTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    std::string remoteNetworkId = "networkId";
+    int32_t startDeviceId = 0;
+    CooperateOptions options;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperateWithOptions(context,
+        remoteNetworkId, g_userData, startDeviceId, options));
     context_->GetPluginManager().UnloadCooperate();
 }
 
@@ -212,6 +294,27 @@ HWTEST_F(CooperateServerTest, StopCooperateTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    bool isUnchained = true;
+    bool isCheckPermission = true;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->StopCooperate(context, g_userData, isUnchained, isCheckPermission));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: StopCooperateTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, StopCooperateTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
@@ -241,6 +344,24 @@ HWTEST_F(CooperateServerTest, RegisterCooperateListenerTest1, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RegisterCooperateListenerTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, RegisterCooperateListenerTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterCooperateListener(context));
+    context_->GetPluginManager().UnloadCooperate();
+}
+/**
  * @tc.name: UnregisterCooperateListenerTest1
  * @tc.desc: Test func named stop
  * @tc.type: FUNC
@@ -252,6 +373,25 @@ HWTEST_F(CooperateServerTest, UnregisterCooperateListenerTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterCooperateListener(context));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: UnregisterCooperateListenerTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, UnregisterCooperateListenerTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
@@ -280,6 +420,26 @@ HWTEST_F(CooperateServerTest, RegisterHotAreaListenerTest1, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RegisterHotAreaListenerTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, RegisterHotAreaListenerTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    bool isCheckPermission = true;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterHotAreaListener(context, g_userData, isCheckPermission));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
  * @tc.name: UnregisterHotAreaListenerTest1
  * @tc.desc: Test func named stop
  * @tc.type: FUNC
@@ -299,6 +459,25 @@ HWTEST_F(CooperateServerTest, UnregisterHotAreaListenerTest1, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UnregisterHotAreaListenerTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, UnregisterHotAreaListenerTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterHotAreaListener(context));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
  * @tc.name: RegisterMouseEventListenerTest1
  * @tc.desc: Test func named stop
  * @tc.type: FUNC
@@ -310,6 +489,26 @@ HWTEST_F(CooperateServerTest, RegisterMouseEventListenerTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    std::string networkId = "networkId";
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterMouseEventListener(context, networkId));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: RegisterMouseEventListenerTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, RegisterMouseEventListenerTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
@@ -339,6 +538,26 @@ HWTEST_F(CooperateServerTest, UnregisterMouseEventListenerTest1, TestSize.Level0
 }
 
 /**
+ * @tc.name: UnregisterMouseEventListenerTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, UnregisterMouseEventListenerTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    std::string networkId = "networkId";
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterMouseEventListener(context, networkId));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
  * @tc.name: GetCooperateStateSyncTest1
  * @tc.desc: Test func named stop
  * @tc.type: FUNC
@@ -350,6 +569,27 @@ HWTEST_F(CooperateServerTest, GetCooperateStateSyncTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    std::string udid = "udid";
+    bool state = true;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateSync(context, udid, state));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: GetCooperateStateSyncTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, GetCooperateStateSyncTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
@@ -382,6 +622,28 @@ HWTEST_F(CooperateServerTest, GetCooperateStateAsyncTest1, TestSize.Level0)
 }
 
 /**
+ * @tc.name: GetCooperateStateAsyncTest2
+ * @tc.desc: Test func named stop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, GetCooperateStateAsyncTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    std::string networkId = "networkId";
+    bool isCheckPermission = true;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateAsync(context,
+        networkId, g_userData, isCheckPermission));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
  * @tc.name: SetDamplingCoefficientTest1
  * @tc.desc: Test func named SetDamplingCoefficient
  * @tc.type: FUNC
@@ -393,6 +655,27 @@ HWTEST_F(CooperateServerTest, SetDamplingCoefficientTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    uint32_t direction = 0;
+    double coefficient = 0;
+    ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetDamplingCoefficient(context, direction, coefficient));
+    context_->GetPluginManager().UnloadCooperate();
+}
+
+/**
+ * @tc.name: SetDamplingCoefficientTest2
+ * @tc.desc: Test func named SetDamplingCoefficient
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateServerTest, SetDamplingCoefficientTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = intention_,
+        .tokenId = g_tokenID1,
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };

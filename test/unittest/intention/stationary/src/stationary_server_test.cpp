@@ -124,6 +124,64 @@ HWTEST_F(StationaryServerTest, GetDevicePosureDataSyncTest001, TestSize.Level0)
     EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
         data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
 }
+
+/**
+ * @tc.name: GetDeviceStatusDataTest001
+ * @tc.desc: Test func named getDeviceStatusData
+ * @tc.type: FUNC
+ */
+HWTEST_F(StationaryServerTest, GetDeviceStatusDataTest001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t replyType;
+    int32_t replyValue;
+    int32_t ret = stationary_.GetDeviceStatusData(context_, TYPE_TYPE_STAND, replyType, replyValue);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: GetStaionaryDataParamTest001
+ * @tc.desc: Test func named GetStaionaryDataParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(StationaryServerTest, GetStaionaryDataParamTest001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    GetStaionaryDataParam param;
+    MessageParcel parcel;
+    bool ret = param.Marshalling(parcel);
+    EXPECT_EQ(ret, true);
+    ret = param.Unmarshalling(parcel);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: DumpCurrentDeviceStatusTest001
+ * @tc.desc: Test func named DumpCurrentDeviceStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(StationaryServerTest, DumpCurrentDeviceStatus001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t fd = 1;
+    ASSERT_NO_FATAL_FAILURE(stationary_.DumpCurrentDeviceStatus(fd));
+}
+
+/**
+ * @tc.name: SubscribeTest001
+ * @tc.desc: Test func named Subscribe
+ * @tc.type: FUNC
+ */
+HWTEST_F(StationaryServerTest, Subscribe001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    sptr<IRemoteDevStaCallback> callback = new (std::nothrow) StationaryServerTestCallback();
+    ASSERT_NE(callback, nullptr);
+    ActivityEvent stationaryEvent = static_cast<ActivityEvent>(ACTIVITYEVENT_ENTER);
+    ReportLatencyNs stationaryLatency = static_cast<ReportLatencyNs>(REPORTLATENCYNS_LATENCY_INVALID);
+    ASSERT_NO_FATAL_FAILURE(stationary_.Subscribe(
+        context_, TYPE_INVALID, stationaryEvent, stationaryLatency, callback));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
