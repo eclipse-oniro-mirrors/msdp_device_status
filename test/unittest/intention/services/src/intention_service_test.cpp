@@ -307,6 +307,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_EnableCooperate001, TestSize
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
+
 /**
  * @tc.name: IntentionServiceTest3
  * @tc.desc: Test DisableCooperate
@@ -320,7 +321,6 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_DisableCooperate001, TestSiz
     ErrCode ret = g_intentionService->DisableCooperate(userData);
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
-
 /**
  * @tc.name: IntentionServiceTest4
  * @tc.desc: Test StartCooperate
@@ -402,7 +402,6 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterHotAreaListener001, 
     ErrCode ret = g_intentionServiceNullptr->RegisterHotAreaListener(userData, isCheckPermission);
     EXPECT_EQ(ret, RET_ERR);
 }
-
 /**
  * @tc.name: IntentionServiceTest8
  * @tc.desc: Test UnregisterHotAreaListener
@@ -575,6 +574,21 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RemoveSubscriptListener001, 
 }
 
 /**
+ * @tc.name: IntentionServiceTest20
+ * @tc.desc: Test SetDragWindowVisible
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragWindowVisible001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragVisibleParam dragVisibleParam;
+    SequenceableDragVisible sequenceableDragVisible(dragVisibleParam);
+    ErrCode ret = g_intentionServiceNullptr->SetDragWindowVisible(sequenceableDragVisible);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
  * @tc.name: IntentionServiceTest21
  * @tc.desc: Test UpdateDragStyle
  * @tc.type: FUNC
@@ -590,7 +604,6 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdateDragStyle001, TestSize
 }
 
 /**
-
  * @tc.name: IntentionServiceTest22
  * @tc.desc: Test UpdateShadowPic
  * @tc.type: FUNC
@@ -623,7 +636,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragTargetPid001, TestSiz
  * @tc.desc: GetUdKey
  * @tc.type: FUNC
  * @tc.require:
-*/
+ */
 HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetUdKey001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
@@ -910,7 +923,24 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDraggableStateAsync001, T
 
 /**
  * @tc.name: IntentionServiceTest44
+ * @tc.desc: Test GetDragBundleInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragBundleInfo001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string bundleName = {"name"};
+    bool state = true;
+    ErrCode ret = g_intentionServiceNullptr->GetDragBundleInfo(bundleName, state);
+    EXPECT_EQ(ret, RET_ERR);
+    ret = g_intentionServiceNullptr->GetDragBundleInfo(bundleName, state);
+    EXPECT_EQ(ret, RET_ERR);
+}
+/**
+ * @tc.name: IntentionServiceTest45
  * @tc.desc: Test SubscribeStationaryCallback
+ * @tc.desc: Test GetDragBundleInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -925,7 +955,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SubscribeStationary001, Test
 }
 
 /**
- * @tc.name: IntentionServiceTest45
+ * @tc.name: IntentionServiceTest46
  * @tc.desc: Test UnsubscribeStationaryCallback
  * @tc.type: FUNC
  * @tc.require:
@@ -940,7 +970,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnsubscribeStationary001, Te
 }
 
 /**
- * @tc.name: IntentionServiceTest46
+ * @tc.name: IntentionServiceTest47
  * @tc.desc: Test GetDeviceStatusData
  * @tc.type: FUNC
  * @tc.require:
@@ -956,7 +986,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDeviceStatusData001, Test
 }
 
 /**
- * @tc.name: IntentionServiceTest47
+ * @tc.name: IntentionServiceTest48
  * @tc.desc: Test GetDevicePostureDataSync
  * @tc.type: FUNC
  * @tc.require:
