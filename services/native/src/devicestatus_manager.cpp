@@ -373,7 +373,7 @@ int32_t DeviceStatusManager::Unsubscribe(int32_t type, const std::string &bundle
     return RET_OK;
 }
  
-int32_t DeviceStatusManager::NotifyMedata(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback)
+int32_t DeviceStatusManager::NotifyMetadata(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback)
 {
     CALL_DEBUG_ENTER;
     CHKPR(callback, RET_ERR);

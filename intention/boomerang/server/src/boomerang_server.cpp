@@ -116,7 +116,7 @@ int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, con
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
     appInfo->boomerangCallback = notifyCallback;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    int32_t ret = manager_.NotifyMedata(bundleName, notifyCallback);
+    int32_t ret = manager_.NotifyMetadata(bundleName, notifyCallback);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang NotifyMetadataBindingEvent failed");
     }

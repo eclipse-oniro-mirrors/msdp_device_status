@@ -64,7 +64,7 @@ public:
     void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
     int32_t Subscribe(int32_t type, const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
     int32_t Unsubscribe(int32_t type, const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
-    int32_t NotifyMedata(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t NotifyMetadata(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
     int32_t SubmitMetadata(const std::string &metadata);
     int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, const std::string &metadata,
         sptr<IRemoteBoomerangCallback> callback);
