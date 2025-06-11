@@ -33,20 +33,6 @@ struct Summary {
 }
 
 @!sts_inject("""
-    function on(type: string, cb: Object) {
-      switch(type) {
-        case "drag": return registerListener(cb as (info: DragState) => void, cb);
-        default: throw new Error(`Unknown type: ${type}`);
-      }
-    }
-    function off(type: string, cb?: Object) {
-      switch(type) {
-        case "drag": return unRegisterListener(cb);
-        default: throw new Error(`Unknown type: ${type}`);
-      }
-    }
-""")
-@!sts_inject("""
     function on(type: 'drag', callback: (info: DragState) => void) {
         return registerListener(callback, callback);
       }
