@@ -2027,12 +2027,14 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent040, TestSize.Level1)
 HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent041, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    bool normal = false;
     CooperateEvent event(
         CooperateEventType::DSOFTBUS_COME_BACK,
-        DSoftbusRelayCooperate {
-            .networkId = REMOTE_NETWORKID,
-            .normal = normal,
+        StartCooperateEvent{
+            .pid = IPCSkeleton::GetCallingPid(),
+            .userData = 1,
+            .remoteNetworkId = "test",
+            .startDeviceId = 1,
+            .errCode = std::make_shared<std::promise<int32_t>>(),
         });
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);

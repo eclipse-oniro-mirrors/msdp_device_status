@@ -167,6 +167,7 @@ ohos_unittest("DragClientTest") {
     "access_token:libtokensetproc_shared",
     "cJSON:cjson",
     "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
     "data_share:datashare_consumer",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
