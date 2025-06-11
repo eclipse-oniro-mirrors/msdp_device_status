@@ -121,6 +121,7 @@ private:
     std::shared_ptr<MMI::KeyEvent> keyEvent_;
     std::shared_mutex lock_;
     std::unordered_map<int32_t, int32_t> remote2VirtualIds_;
+    void TagRemoteEvent(std::shared_ptr<MMI::KeyEvent> KeyEvent);
     void TagRemoteEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnNotifyCrossDrag(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 };

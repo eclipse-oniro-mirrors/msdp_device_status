@@ -262,6 +262,7 @@ void InputEventBuilder::OnKeyEvent(Msdp::NetPacket &packet)
         FI_HILOGE("Failed to deserialize key event");
         return;
     }
+    TagRemoteEvent(keyEvent_);
     FI_HILOGD("KeyEvent(No:%{public}d,Key:%{private}d,Action:%{public}d)",
         keyEvent_->GetId(), keyEvent_->GetKeyCode(), keyEvent_->GetKeyAction());
     keyEvent_->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
@@ -380,6 +381,16 @@ void InputEventBuilder::TagRemoteEvent(std::shared_ptr<MMI::PointerEvent> pointe
         pointerEvent->SetDeviceId(remote2VirtualIds_[deviceId]);
     } else {
         pointerEvent->SetDeviceId((deviceId >= 0) ? -(deviceId + 1) : deviceId);
+    }
+}
+
+void InputEventBuilder::TagRemoteEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
+{
+    std::shared_lock<std::shared_mutex> lock(lock_);
+    if (auto deviceId = keyEvent->GetDeviceId(); remote2VirtualIds_.find(deviceId) != remote2VirtualIds_.end()) {
+        keyEvent->SetDeviceId(remote2VirtualIds_[deviceId]);
+    } else {
+        keyEvent->SetDeviceId((deviceId >= 0) ? -(deviceId + 1) : deviceId);
     }
 }
 
