@@ -72,7 +72,8 @@
         "wifi",
         "power_manager",
         "resource_schedule_service",
-        "motion"
+        "motion",
+        "runtime_core"
       ],
       "third_party": [
         "libuv",
@@ -88,7 +89,8 @@
           "//base/msdp/device_status/frameworks/js/napi:stationary",
           "//base/msdp/device_status/frameworks/js/napi/interaction:interaction_jsapi_group",
           "//base/msdp/device_status/frameworks/js/napi/motion:motion_napi",
-          "//base/msdp/device_status/frameworks/js/napi/boomerang:metadatabinding_napi"
+          "//base/msdp/device_status/frameworks/js/napi/boomerang:metadatabinding_napi",
+          "//base/msdp/device_status/frameworks/ets/drag:dragInteraction"
         ],
         "service_group":[
           "//base/msdp/device_status/libs:devicestatus_algo",
@@ -136,6 +138,9 @@
             ],
             "header_base": "//base/msdp/device_status/intention"
           }
+        },
+        {
+          "name": "//base/msdp/device_status/frameworks/ets/drag:drag_taihe"
         }
       ],
       "test": [
