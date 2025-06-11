@@ -2170,6 +2170,16 @@ void DragDrawing::RemoveModifier()
         dragStyleNode->RemoveModifier(drawSVGModifier_);
         drawSVGModifier_ = nullptr;
     }
+
+    if (drawStyleChangeModifier_ != nullptr) {
+        dragStyleNode->RemoveModifier(drawStyleChangeModifier_);
+        drawStyleChangeModifier_ = nullptr;
+    }
+
+    if (drawStyleScaleModifier_ != nullptr) {
+        dragStyleNode->RemoveModifier(drawStyleScaleModifier_);
+        drawStyleScaleModifier_ = nullptr;
+    }
     FI_HILOGD("leave");
 }
 
