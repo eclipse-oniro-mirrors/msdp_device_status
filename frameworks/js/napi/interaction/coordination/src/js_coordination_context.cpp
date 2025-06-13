@@ -213,8 +213,9 @@ napi_value JsCoordinationContext::ActivateCooperateWithOptions(napi_env env, nap
     CHKRP(napi_get_value_int32(env, argv[1], &startDeviceId), GET_VALUE_INT32);
 
     if (!UtilNapi::TypeOf(env, argv[ARGV_TWO], napi_object)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "cooperateOptions", "object");
-        return nullptr;
+        FI_HILOGI("CooperateOptions is not assigned，call ActivateCooperate.");
+        bool isCompatible = true;
+        return jsCoordinationMgr->Activate(env, remoteNetworkId, startDeviceId, isCompatible);
     }
 
     CooperateOptions cooperateOptions = GetCooperationsData(env, cooperateOptions, argv[2]);
