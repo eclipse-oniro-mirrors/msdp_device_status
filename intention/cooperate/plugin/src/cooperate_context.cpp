@@ -580,6 +580,22 @@ void Context::ResetCursorPosition()
     StopCooperateSetCursorPosition(defaultCursorPos);
 }
 
+void Context::SetVirtualTrackpadDeviceId(int32_t deviceId)
+{
+    VirtualTrackpadDeviceId_ = deviceId;
+    FI_HILOGI("Cur vir track pad:%{public}d", deviceId);
+}
+
+int32_t Context::GetVirtualTrackpadDeviceId()
+{
+    return VirtualTrackpadDeviceId_;
+}
+
+void Context::ResetVirtualTrackpadDeviceId()
+{
+    VirtualTrackpadDeviceId_ = -1;
+}
+
 #ifdef ENABLE_PERFORMANCE_CHECK
 void Context::StartTrace(const std::string &name)
 {

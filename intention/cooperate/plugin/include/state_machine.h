@@ -100,6 +100,8 @@ private:
     void RemoveMonitor(Context &context);
     void RemoveWatches(Context &context);
     void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
+    bool CheckIsVirtualTrackpad(int32_t deviceId);
+    void ResetCooperate(Context &context);
 
     IContext *env_ { nullptr };
     std::map<CooperateEventType, std::function<void(Context&, const CooperateEvent&)>> handlers_;

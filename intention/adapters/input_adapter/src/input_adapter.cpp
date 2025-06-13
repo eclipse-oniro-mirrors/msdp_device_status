@@ -27,6 +27,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 const std::string VIRTUAL_TRACK_PAD_NAME { "VirtualTrackpad" }; // defined in multimodalinput
+const std::string CHANGED_TYPE { "change" };
 }
 
 int32_t InputAdapter::AddMonitor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> callback)
@@ -223,6 +224,30 @@ bool InputAdapter::HasLocalPointerDevice()
         return isLocalPointerDevice;
     });
 }
+
+int32_t InputAdapter::RegisterDevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback)
+{
+    CALL_INFO_TRACE;
+    CHKPR(devAddedCallback, RET_ERR);
+    CHKPR(devRemovedCallback, RET_ERR);
+    auto devListener = std::make_shared<DevListener>(devAddedCallback, devRemovedCallback);
+    int32_t res = MMI::InputManager::GetInstance()->RegisterDevListener(CHANGED_TYPE, devListener);
+    if (res != 0) {
+        FI_HILOGE("Register device listener failed");
+    }
+    return res;
+}
+
+int32_t InputAdapter::UnregisterDevListener()
+{
+    CALL_INFO_TRACE;
+    int32_t res = MMI::InputManager::GetInstance()->UnregisterDevListener(CHANGED_TYPE);
+    if (res != 0) {
+        FI_HILOGE("Register device listener failed");
+    }
+    return res;
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

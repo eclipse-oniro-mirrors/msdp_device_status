@@ -20,11 +20,16 @@
 
 #include "i_input_adapter.h"
 
+#include "i_input_device_listener.h"
 #include "i_input_event_consumer.h"
 #include "i_input_event_filter.h"
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+
+namespace {
+using MMIDevListener = std::function<void(int32_t, const std::string&)>;
+}
 class InputAdapter final : public IInputAdapter {
 public:
     InputAdapter() = default;
@@ -59,6 +64,8 @@ public:
     int32_t GetTouchPadSpeed(int32_t &speed) override;
     int32_t SetTouchPadSpeed(int32_t speed) override;
     bool HasLocalPointerDevice() override;
+    int32_t RegisterDevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback) override;
+    int32_t UnregisterDevListener() override;
 private:
     bool IsLocalPointerDevice(std::shared_ptr<MMI::InputDevice> device);
     bool IsVirtualTrackpad(std::shared_ptr<MMI::InputDevice> device);
@@ -81,6 +88,29 @@ public:
 
 private:
     std::function<bool(std::shared_ptr<MMI::PointerEvent>)> filter_;
+};
+
+class DevListener : public MMI::IInputDeviceListener {
+    public:
+    DevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback)
+        : devAddedCallback_(devAddedCallback), devRemovedCallback_(devRemovedCallback) {}
+    
+        void OnDeviceAdded(int32_t deviceId, const std::string &type) override
+        {
+            if (devAddedCallback_ != nullptr) {
+                devAddedCallback_(deviceId, type);
+            }
+        }
+    
+        void OnDeviceRemoved(int32_t deviceId, const std::string &type) override
+        {
+            if (devRemovedCallback_ != nullptr) {
+                devRemovedCallback_(deviceId, type);
+            }
+        }
+    private:
+        MMIDevListener devAddedCallback_;
+        MMIDevListener devRemovedCallback_;
 };
 
 class InterceptorConsumer : public MMI::IInputEventConsumer {

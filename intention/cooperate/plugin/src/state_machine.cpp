@@ -36,6 +36,11 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+
+namespace {
+using MMIDevListener = std::function<void(int32_t, const std::string&)>;
+const std::string VIRTUAL_TRACK_PAD_NAME { "VirtualTrackpad" };
+}
 namespace Cooperate {
 
 StateMachine::AppStateObserver::AppStateObserver(Channel<CooperateEvent>::Sender sender, int32_t clientPid)
@@ -280,6 +285,22 @@ void StateMachine::EnableCooperate(Context &context, const CooperateEvent &event
     context.commonEvent_.AddObserver(observer_);
     AddSessionObserver(context, enableEvent);
     AddMonitor(context);
+    auto devAddedCallback = [this, &context](int32_t deviceId, const std::string &type) {
+        FI_HILOGI("Device added");
+        bool isVirtualtrackpad = this->CheckIsVirtualTrackpad(deviceId);
+        if (isVirtualtrackpad) {
+            context.SetVirtualTrackpadDeviceId(deviceId);
+        }
+    };
+    auto devRemovedCallback = [this, &context](int32_t deviceId, const std::string &type) {
+        FI_HILOGI("Device removed, deviceId %{public}d", deviceId);
+        if (deviceId == context.GetVirtualTrackpadDeviceId()) {
+            ResetCooperate(context);
+            context.ResetVirtualTrackpadDeviceId();
+        }
+    };
+    CHKPV(env_);
+    env_->GetInput().RegisterDevListener(devAddedCallback, devRemovedCallback);
     isCooperateEnable_ = true;
     Transfer(context, event);
 }
@@ -294,6 +315,8 @@ void StateMachine::DisableCooperate(Context &context, const CooperateEvent &even
     context.inputDevMgr_.RemoveAllVirtualInputDevice();
     RemoveSessionObserver(context, disableEvent);
     RemoveMonitor(context);
+    env_->GetInput().UnregisterDevListener();
+    context.ResetVirtualTrackpadDeviceId();
     isCooperateEnable_ = false;
     Transfer(context, event);
 }
@@ -842,6 +865,35 @@ bool StateMachine::IsCooperateEnable()
 {
     return isCooperateEnable_;
 }
+
+void StateMachine::ResetCooperate(Context &context)
+{
+    CALL_INFO_TRACE;
+    auto ret = context.Sender().Send(CooperateEvent(
+        CooperateEventType::STOP_ABOUT_VIRTUALTRACKPAD,
+        StopCooperateEvent {}));
+    if (ret != Channel<CooperateEvent>::NO_ERROR) {
+        FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+    }
+}
+
+bool StateMachine::CheckIsVirtualTrackpad(int32_t deviceId)
+{
+    CALL_INFO_TRACE;
+    bool isLocalPointerDevice = false;
+    MMI::InputManager::GetInstance()->GetDevice(deviceId, [&isLocalPointerDevice, this] (
+        std::shared_ptr<MMI::InputDevice> device) -> bool {
+            CHKPR(device, false);
+            if (device->GetName() == VIRTUAL_TRACK_PAD_NAME) {
+                isLocalPointerDevice = true;
+                FI_HILOGI("Has virtualTrackpad");
+                return isLocalPointerDevice;
+            }
+            return isLocalPointerDevice;
+        });
+    return isLocalPointerDevice;
+}
+
 } // namespace Cooperate
 } // namespace DeviceStatus
 } // namespace Msdp

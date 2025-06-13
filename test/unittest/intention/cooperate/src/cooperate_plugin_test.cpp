@@ -568,6 +568,9 @@ HWTEST_F(CooperatePluginTest, CooperatePluginTest13, TestSize.Level1)
     g_context->Enable();
     g_context->Disable();
     g_context->StopEventHandler();
+    g_context->SetVirtualTrackpadDeviceId(1);
+    g_context->GetVirtualTrackpadDeviceId();
+    g_context->ResetVirtualTrackpadDeviceId();
 }
 
 /**
@@ -2510,6 +2513,29 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent054, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StateMachineTest_OnEvent
+ * @tc.desc: Test OnRelay in the CooperateOut class
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent055, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::STOP_ABOUT_VIRTUALTRACKPAD,
+        InputPointerEvent {});
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateOut stateOut(*g_stateMachine, env);
+    ASSERT_NE(stateOut.initial_, nullptr);
+    stateOut.initial_->OnStopAboutVirtualTrackpad(cooperateContext, event);
+    bool ret = g_context->mouseLocation_.HasLocalListener();
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: inputDevcieMgr_test056
  * @tc.desc: Test cooperate plugin
  * @tc.type: FUNC
@@ -3481,6 +3507,40 @@ HWTEST_F(CooperatePluginTest, StateMachineTest_OnEvent097, TestSize.Level1)
     ASSERT_NE(relay, nullptr);
     relay->OnStartWithOptions(cooperateContext, event);
     bool ret = g_context->mouseLocation_.HasLocalListener();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: StateMachineTest_ResetCooperate
+ * @tc.desc: cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, StateMachineTest_ResetCooperate001, TestSize.Level1)
+{
+    auto env = ContextService::GetInstance();
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    g_stateMachine->ResetCooperate(cooperateContext);
+    bool ret = g_context->mouseLocation_.HasLocalListener();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: StateMachineTest_CheckIsVirtualTrackpad
+ * @tc.desc: cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperatePluginTest, StateMachineTest_CheckIsVirtualTrackpad001, TestSize.Level1)
+{
+    auto env = ContextService::GetInstance();
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    int32_t g_deviceId = 1;
+    bool ret = g_stateMachine->CheckIsVirtualTrackpad(g_deviceId);
+    EXPECT_FALSE(ret);
+    ret = g_context->mouseLocation_.HasLocalListener();
     EXPECT_FALSE(ret);
 }
 

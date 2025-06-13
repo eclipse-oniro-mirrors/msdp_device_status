@@ -62,6 +62,8 @@ public:
     int32_t GetTouchPadSpeed(int32_t &speed) override;
     int32_t SetTouchPadSpeed(int32_t speed) override;
     bool HasLocalPointerDevice() override;
+    int32_t RegisterDevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback) override;
+    int32_t UnregisterDevListener() override;
 };
 
 class MockPluginManager : public IPluginManager {
