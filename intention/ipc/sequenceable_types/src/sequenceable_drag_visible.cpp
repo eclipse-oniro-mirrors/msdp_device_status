@@ -43,7 +43,7 @@ SequenceableDragVisible* SequenceableDragVisible::Unmarshalling(Parcel &parcel)
     }
     std::shared_ptr<Rosen::RSTransaction> rsTransaction(parcel.ReadParcelable<Rosen::RSTransaction>());
     if (rsTransaction != nullptr) {
-       sequenceableDragVisible->dragVisibleParam_.rsTransaction = rsTransaction;
+        sequenceableDragVisible->dragVisibleParam_.rsTransaction = rsTransaction;
     }
     return sequenceableDragVisible;
 }

@@ -66,7 +66,6 @@ public:
     static void TearDownTestCase();
     class BoomerangClientTestCallback : public BoomerangCallbackStub {
     public:
-    // void OnScreenshotResult(const BoomerangData& data);
     private:
     BoomerangData data_;
     };
@@ -219,7 +218,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_007, TestSize.Level1)
     sptr<IRemoteBoomerangCallback> callback2 = nullptr;
     char bundleName[MAX_STRING_LEN] = {0};
     BoomerangClient boomerangClient;
-   int32_t ret = boomerangClient.SubscribeCallback(
+    int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
     ASSERT_EQ(ret, RET_OK);
     ret = boomerangClient.NotifyMetadataBindingEvent(bundleName, callback2);
