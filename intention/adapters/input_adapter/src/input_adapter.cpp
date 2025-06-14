@@ -233,7 +233,7 @@ int32_t InputAdapter::RegisterDevListener(MMIDevListener devAddedCallback, MMIDe
     auto devListener = std::make_shared<DevListener>(devAddedCallback, devRemovedCallback);
     int32_t res = MMI::InputManager::GetInstance()->RegisterDevListener(CHANGED_TYPE, devListener);
     if (res != 0) {
-        FI_HILOGE("Register device listener failed");
+        FI_HILOGE("Register device listener failed, res:%{public}d", res);
     }
     return res;
 }
@@ -243,7 +243,7 @@ int32_t InputAdapter::UnregisterDevListener()
     CALL_INFO_TRACE;
     int32_t res = MMI::InputManager::GetInstance()->UnregisterDevListener(CHANGED_TYPE);
     if (res != 0) {
-        FI_HILOGE("Register device listener failed");
+        FI_HILOGE("Unregister device listener failed, res:%{public}d", res);
     }
     return res;
 }

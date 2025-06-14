@@ -38,7 +38,6 @@ namespace Msdp {
 namespace DeviceStatus {
 
 namespace {
-using MMIDevListener = std::function<void(int32_t, const std::string&)>;
 const std::string VIRTUAL_TRACK_PAD_NAME { "VirtualTrackpad" };
 }
 namespace Cooperate {

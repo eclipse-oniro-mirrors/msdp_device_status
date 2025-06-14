@@ -211,17 +211,15 @@ napi_value JsCoordinationContext::ActivateCooperateWithOptions(napi_env env, nap
     CHKRP(napi_get_value_string_utf8(env, argv[0], remoteNetworkId, sizeof(remoteNetworkId), &length),
         GET_VALUE_STRING_UTF8);
     CHKRP(napi_get_value_int32(env, argv[1], &startDeviceId), GET_VALUE_INT32);
-
-    if (!UtilNapi::TypeOf(env, argv[ARGV_TWO], napi_object)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "cooperateOptions", "object");
-        return nullptr;
-    }
-
-    CooperateOptions cooperateOptions = GetCooperationsData(env, cooperateOptions, argv[2]);
     JsCoordinationContext *jsDev = JsCoordinationContext::GetInstance(env);
     CHKPP(jsDev);
     std::shared_ptr<JsCoordinationManager> jsCoordinationMgr = jsDev->GetJsCoordinationMgr();
     CHKPP(jsCoordinationMgr);
+    if (!UtilNapi::TypeOf(env, argv[ARGV_TWO], napi_object)) {
+        FI_HILOGI("CooperateOptions is not assigned, call ActivateCooperate");
+        return jsCoordinationMgr->Activate(env, remoteNetworkId, startDeviceId, true);
+    }
+    CooperateOptions cooperateOptions = GetCooperationsData(env, cooperateOptions, argv[2]);
     return jsCoordinationMgr->ActivateCooperateWithOptions(env, remoteNetworkId, startDeviceId, cooperateOptions);
 }
 
