@@ -166,6 +166,10 @@ CooperateOut::Initial::Initial(CooperateOut &parent)
         [this](Context &context, const CooperateEvent &event) {
             this->OnRelayWithOptions(context, event);
     });
+    AddHandler(CooperateEventType::STOP_ABOUT_VIRTUALTRACKPAD,
+        [this](Context &context, const CooperateEvent &event) {
+            this->OnStopAboutVirtualTrackpad(context, event);
+    });
 }
 
 void CooperateOut::Initial::OnDisable(Context &context, const CooperateEvent &event)
@@ -429,7 +433,13 @@ void CooperateOut::Initial::OnRelayWithOptions(Context &context, const Cooperate
 void CooperateOut::Initial::OnHotplug(Context &context, const CooperateEvent &event)
 {
     InputHotplugEvent notice = std::get<InputHotplugEvent>(event.event);
-    if (notice.deviceId != context.StartDeviceId()) {
+    if (context.GetVirtualTrackpadDeviceId() > 0) {
+        return;
+    } else if ((context.GetVirtualTrackpadDeviceId() <= 0) &&
+        !(parent_.env_->GetDeviceManager().HasLocalPointerDevice())) {
+            FI_HILOGI("Cur device not exist pointer device");
+            parent_.StopCooperate(context, event);
+    } else if (notice.deviceId != context.StartDeviceId()) {
         return;
     }
     FI_HILOGI("Stop cooperation on unplug of dedicated pointer");
@@ -476,6 +486,16 @@ void CooperateOut::Initial::OnSoftbusSessionClosed(Context &context, const Coope
     FI_HILOGI("[dsoftbus session closed] Disconnected with \'%{public}s\'",
         Utility::Anonymize(notice.networkId).c_str());
     parent_.StopCooperate(context, event);
+}
+
+void CooperateOut::Initial::OnStopAboutVirtualTrackpad(Context &context, const CooperateEvent &event)
+{
+    CALL_INFO_TRACE;
+    CHKPV(parent_.env_);
+    bool hasLocalPointerDevice =  parent_.env_->GetDeviceManager().HasLocalPointerDevice();
+    if (!hasLocalPointerDevice) {
+        parent_.StopCooperate(context, event);
+    }
 }
 
 void CooperateOut::Initial::OnProgress(Context &context, const CooperateEvent &event)

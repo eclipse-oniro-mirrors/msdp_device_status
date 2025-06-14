@@ -61,6 +61,7 @@ private:
         void OnStartWithOptions(Context &context, const CooperateEvent &event);
         void OnComeBackWithOptions(Context &context, const CooperateEvent &event);
         void OnRelayWithOptions(Context &context, const CooperateEvent &event);
+        void OnStopAboutVirtualTrackpad(Context &context, const CooperateEvent &event);
 
         CooperateOut &parent_;
     };

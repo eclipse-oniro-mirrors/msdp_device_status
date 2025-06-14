@@ -422,6 +422,47 @@ HWTEST_F(InputAdapterTest, TestOnInputEvent1, TestSize.Level1)
     ASSERT_NO_FATAL_FAILURE(interceptorConsumer1.OnInputEvent(keyEvent));
     RemovePermission();
 }
+
+/**
+ * @tc.name: TestRegisterDevListener1
+ * @tc.desc: Test RegisterDevListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputAdapterTest, RegisterDevListener1, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    SetPermission();
+    std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
+    int32_t ret = inputAdapter->RegisterDevListener(nullptr, nullptr);
+    ASSERT_EQ(ret, RET_ERR);
+    inputAdapter->UnregisterDevListener();
+    RemovePermission();
+}
+ 
+/**
+ * @tc.name: TestRegisterDevListener2
+ * @tc.desc: Test RegisterDevListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputAdapterTest, RegisterDevListener2, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    SetPermission();
+    std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
+    auto devAddedCallback = [this](int32_t deviceId, const std::string &type) {
+        FI_HILOGI("Device added");
+    };
+    auto devRemovedCallback = [this](int32_t deviceId, const std::string &type) {
+        FI_HILOGI("Device removed");
+    };
+    int32_t ret = inputAdapter->RegisterDevListener(devAddedCallback, devRemovedCallback);
+    ASSERT_EQ(ret, RET_OK);
+    inputAdapter->UnregisterDevListener();
+    RemovePermission();
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

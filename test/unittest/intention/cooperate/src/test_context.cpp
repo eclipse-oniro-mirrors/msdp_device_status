@@ -139,6 +139,16 @@ bool MockInputAdapter::HasLocalPointerDevice()
     return true;
 }
 
+int32_t MockInputAdapter::RegisterDevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback)
+{
+    return RET_OK;
+}
+
+int32_t MockInputAdapter::UnregisterDevListener()
+{
+    return RET_OK;
+}
+
 MockPluginManager::MockPluginManager(IContext *context)
 {
     pluginMgr_ = std::make_unique<PluginManager>(context);

@@ -26,6 +26,10 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+
+namespace {
+using MMIDevListener = std::function<void(int32_t, const std::string&)>;
+}
 class IInputAdapter {
 public:
     IInputAdapter() = default;
@@ -59,6 +63,8 @@ public:
     virtual int32_t GetTouchPadSpeed(int32_t &speed) = 0;
     virtual int32_t SetTouchPadSpeed(int32_t speed) = 0;
     virtual bool HasLocalPointerDevice() = 0;
+    virtual int32_t RegisterDevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback) = 0;
+    virtual int32_t UnregisterDevListener() = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
