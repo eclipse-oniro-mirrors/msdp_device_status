@@ -3831,7 +3831,7 @@ DragDrawing::~DragDrawing()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
-void DrawSVGModifier::Draw(Rosen::RSDrawingContext& context) const
+void DrawSVGModifier::Draw(RSDrawingContext& context) const
 {
     FI_HILOGD("enter");
     CHKPV(stylePixelMap_);
@@ -3911,7 +3911,7 @@ void DrawPixelMapModifier::SetDragShadow(std::shared_ptr<Rosen::RSCanvasNode> pi
     }
 }
 
-void DrawPixelMapModifier::Draw(Rosen::RSDrawingContext &context) const
+void DrawPixelMapModifier::Draw(RSDrawingContext &context) const
 {
     FI_HILOGD("enter");
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
@@ -3957,7 +3957,7 @@ void DrawPixelMapModifier::Draw(Rosen::RSDrawingContext &context) const
     FI_HILOGD("leave");
 }
 
-void DrawMouseIconModifier::Draw(Rosen::RSDrawingContext &context) const
+void DrawMouseIconModifier::Draw(RSDrawingContext &context) const
 {
     FI_HILOGD("enter");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -4054,7 +4054,7 @@ void DrawMouseIconModifier::OnDraw(std::shared_ptr<Media::PixelMap> pixelMap) co
     FI_HILOGD("leave");
 }
 
-void DrawDynamicEffectModifier::Draw(Rosen::RSDrawingContext &context) const
+void DrawDynamicEffectModifier::Draw(RSDrawingContext &context) const
 {
     FI_HILOGD("enter");
     CHKPV(alpha_);
@@ -4071,7 +4071,7 @@ void DrawDynamicEffectModifier::SetAlpha(float alpha)
     FI_HILOGD("enter");
     if (alpha_ == nullptr) {
         alpha_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(alpha);
-        Rosen::RSModifier::AttachProperty(alpha_);
+        RSModifier::AttachProperty(alpha_);
         return;
     }
     alpha_->Set(alpha);
@@ -4083,14 +4083,14 @@ void DrawDynamicEffectModifier::SetScale(float scale)
     FI_HILOGD("enter");
     if (scale_ == nullptr) {
         scale_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(scale);
-        Rosen::RSModifier::AttachProperty(scale_);
+        RSModifier::AttachProperty(scale_);
         return;
     }
     scale_->Set(scale);
     FI_HILOGD("leave");
 }
 
-void DrawStyleChangeModifier::Draw(Rosen::RSDrawingContext &context) const
+void DrawStyleChangeModifier::Draw(RSDrawingContext &context) const
 {
     FI_HILOGD("enter");
     if (!CheckNodesValid()) {
@@ -4140,14 +4140,14 @@ void DrawStyleChangeModifier::SetScale(float scale)
     FI_HILOGD("enter");
     if (scale_ == nullptr) {
         scale_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(scale);
-        Rosen::RSModifier::AttachProperty(scale_);
+        RSModifier::AttachProperty(scale_);
     } else {
         scale_->Set(scale);
     }
     FI_HILOGD("leave");
 }
 
-void DrawStyleScaleModifier::Draw(Rosen::RSDrawingContext &context) const
+void DrawStyleScaleModifier::Draw(RSDrawingContext &context) const
 {
     FI_HILOGD("enter");
     if (!CheckNodesValid()) {
@@ -4170,14 +4170,14 @@ void DrawStyleScaleModifier::SetScale(float scale)
     FI_HILOGD("enter");
     if (scale_ == nullptr) {
         scale_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(scale);
-        Rosen::RSModifier::AttachProperty(scale_);
+        RSModifier::AttachProperty(scale_);
     } else {
         scale_->Set(scale);
     }
     FI_HILOGD("leave");
 }
 
-void DrawDragStopModifier::Draw(Rosen::RSDrawingContext &context) const
+void DrawDragStopModifier::Draw(RSDrawingContext &context) const
 {
     FI_HILOGD("enter");
     CHKPV(alpha_);
@@ -4216,7 +4216,7 @@ void DrawDragStopModifier::SetAlpha(float alpha)
     FI_HILOGD("enter");
     if (alpha_ == nullptr) {
         alpha_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(alpha);
-        Rosen::RSModifier::AttachProperty(alpha_);
+        RSModifier::AttachProperty(alpha_);
     } else {
         alpha_->Set(alpha);
     }
@@ -4228,7 +4228,7 @@ void DrawDragStopModifier::SetScale(float scale)
     FI_HILOGD("enter");
     if (scale_ == nullptr) {
         scale_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(scale);
-        Rosen::RSModifier::AttachProperty(scale_);
+        RSModifier::AttachProperty(scale_);
     } else {
         scale_->Set(scale);
     }
@@ -4240,7 +4240,7 @@ void DrawDragStopModifier::SetStyleScale(float scale)
     FI_HILOGD("enter");
     if (styleScale_ == nullptr) {
         styleScale_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(scale);
-        Rosen::RSModifier::AttachProperty(styleScale_);
+        RSModifier::AttachProperty(styleScale_);
     } else {
         styleScale_->Set(scale);
     }
@@ -4252,7 +4252,7 @@ void DrawDragStopModifier::SetStyleAlpha(float alpha)
     FI_HILOGD("enter");
     if (styleAlpha_ == nullptr) {
         styleAlpha_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(alpha);
-        Rosen::RSModifier::AttachProperty(styleAlpha_);
+        RSModifier::AttachProperty(styleAlpha_);
     } else {
         styleAlpha_->Set(alpha);
     }
