@@ -25,8 +25,14 @@
 #include "json_parser.h"
 #include "libxml/tree.h"
 #include "libxml/parser.h"
+
+#if defined(MODIFIER_NG)
+#include "modifier_ng/custom/rs_content_style_modifier.h"
+#else
 #include "modifier/rs_extended_modifier.h"
 #include "modifier/rs_modifier.h"
+#endif
+
 #include "vsync_receiver.h"
 
 #include "drag_data.h"
@@ -48,31 +54,42 @@ struct DrawingInfo;
 class DragDrawing;
 using DragStartExtFunc = void (*)(DragData &dragData);
 using DragNotifyExtFunc = void (*)(DragEventInfo &dragEventInfo);
-class DrawSVGModifier : public Rosen::RSContentStyleModifier {
+
+#if defined(MODIFIER_NG)
+using RSContentStyleModifier = Rosen::ModifierNG::RSContentStyleModifier;
+using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
+using RSModifier = Rosen::ModifierNG::RSModifier;
+#else
+using RSContentStyleModifier = Rosen::RSContentStyleModifier;
+using RSDrawingContext = Rosen::RSDrawingContext;
+using RSModifier = Rosen::RSModifier;
+#endif
+
+class DrawSVGModifier : public RSContentStyleModifier {
 public:
     explicit DrawSVGModifier(std::shared_ptr<Media::PixelMap> stylePixelMap) : stylePixelMap_(stylePixelMap) {}
     ~DrawSVGModifier() = default;
-    void Draw(Rosen::RSDrawingContext& context) const override;
+    void Draw(RSDrawingContext& context) const override;
 
 private:
     std::shared_ptr<Media::PixelMap> stylePixelMap_ { nullptr };
 };
 
-class DrawPixelMapModifier : public Rosen::RSContentStyleModifier {
+class DrawPixelMapModifier : public RSContentStyleModifier {
 public:
     DrawPixelMapModifier() = default;
     ~DrawPixelMapModifier() = default;
     void SetDragShadow(std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode) const;
     void SetTextDragShadow(std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode) const;
     Rosen::SHADOW_COLOR_STRATEGY ConvertShadowColorStrategy(int32_t shadowColorStrategy) const;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
 };
 
-class DrawMouseIconModifier : public Rosen::RSContentStyleModifier {
+class DrawMouseIconModifier : public RSContentStyleModifier {
 public:
     explicit DrawMouseIconModifier(MMI::PointerStyle pointerStyle) : pointerStyle_(pointerStyle) {}
     ~DrawMouseIconModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
 
 private:
     void OnDraw(std::shared_ptr<Media::PixelMap> pixelMap) const;
@@ -82,11 +99,11 @@ private:
     MMI::PointerStyle pointerStyle_;
 };
 
-class DrawDynamicEffectModifier : public Rosen::RSContentStyleModifier {
+class DrawDynamicEffectModifier : public RSContentStyleModifier {
 public:
     DrawDynamicEffectModifier() = default;
     ~DrawDynamicEffectModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
     void SetAlpha(float alpha);
     void SetScale(float scale);
 
@@ -95,11 +112,11 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> scale_ { nullptr };
 };
 
-class DrawDragStopModifier : public Rosen::RSContentStyleModifier {
+class DrawDragStopModifier : public RSContentStyleModifier {
 public:
     DrawDragStopModifier() = default;
     ~DrawDragStopModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
     void SetAlpha(float alpha);
     void SetScale(float scale);
     void SetStyleScale(float scale);
@@ -112,12 +129,12 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> styleAlpha_ { nullptr };
 };
 
-class DrawStyleChangeModifier : public Rosen::RSContentStyleModifier {
+class DrawStyleChangeModifier : public RSContentStyleModifier {
 public:
     DrawStyleChangeModifier() = default;
     explicit DrawStyleChangeModifier(std::shared_ptr<Media::PixelMap> stylePixelMap) : stylePixelMap_(stylePixelMap) {}
     ~DrawStyleChangeModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
     void SetScale(float scale);
 
 private:
@@ -125,11 +142,11 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> scale_ { nullptr };
 };
 
-class DrawStyleScaleModifier : public Rosen::RSContentStyleModifier {
+class DrawStyleScaleModifier : public RSContentStyleModifier {
 public:
     DrawStyleScaleModifier() = default;
     ~DrawStyleScaleModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
     void SetScale(float scale);
 
 private:
