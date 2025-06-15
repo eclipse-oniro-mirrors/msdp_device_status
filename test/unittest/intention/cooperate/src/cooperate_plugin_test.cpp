@@ -195,7 +195,7 @@ void CooperatePluginTest::SetUp()
     int32_t tokenType = 1;
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
-    int32_t sockFds[2] { 0, -1 };
+    int32_t sockFds[2] { -1, -1 };
     g_session = std::make_shared<SocketSession>("test", moduleType, tokenType, sockFds[0], uid, pid);
 }
 
