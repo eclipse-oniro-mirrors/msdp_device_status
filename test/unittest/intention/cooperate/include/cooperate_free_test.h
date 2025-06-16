@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef COOPERATE_FREE_TEST_H
+#define COOPERATE_FREE_TEST_H
+
 #include "cooperate_free_test.h"
 
 #include "cooperate_context.h"
