@@ -3537,7 +3537,8 @@ void DragDrawing::DoEndAnimation()
         int32_t repeatCount = 1;
         g_drawingInfo.timerId = g_drawingInfo.context->GetTimerManager().AddTimer(TIMEOUT_MS, repeatCount, [this]() {
             FI_HILOGW("Timeout, automatically reset animation flag");
-            ResetAnimationFlag(true);
+            CHKPV(handler_);
+            handler_->PostTask(std::bind(&DragDrawing::ResetAnimationFlag, this, true));
         });
     }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
