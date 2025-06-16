@@ -13,50 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef ACCESSIBILITY_MANAGER_H
-#define ACCESSIBILITY_MANAGER_H
+#ifndef SURFACE_CAPTURE_CALLBACK_H
+#define SURFACE_CAPTURE_CALLBACK_H
 
-#include <vector>
+#include <memory>
 
-#include <functional>
-#include "nocopyable.h"
-#include "singleton.h"
+#include "pixel_map.h"
+#include "transaction/rs_render_service_client.h"
+
+#include "devicestatus_manager.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-enum AccessibilityStatu {
-    ABILITY_INVALID_STATU,
-    ON_ABILITY_CONNECTED = 1,
-    ON_ABILITY_SCROLLED_EVENT,
-    ON_ABILITY_DISCONNECTED,
-};
-
-using AccessibilityCallback = std::function<void(int32_t)>;
-
-struct DragElementInfo {
-    int64_t rsNodeId { -1 };
-    int32_t leftTopX { -1 };
-    int32_t leftTopY { -1 };
-    int32_t targetWindowId { -1 };
-    std::string componentType;
-    std::string content;
-    int64_t accessibilityId { -1};
-    void Dump();
-};
-
-class AccessibilityManager final {
-    DECLARE_SINGLETON(AccessibilityManager);
+class BoomerangSurfaceCaptureCallback : public OHOS::Rosen::SurfaceCaptureCallback {
 public:
-    DISALLOW_MOVE(AccessibilityManager);
+    void SetContent(DeviceStatusManager *deviceStatusManager)
+    {
+        deviceStatusManager_ = deviceStatusManager;
+    }
+    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelmap) override;
 
-    void AccessibilityConnect(AccessibilityCallback callback);
-    void AccessibilityDisconnect();
-    int32_t FindElementInfo(const int32_t windowId, DragElementInfo &info);
+private:
+    DeviceStatusManager *deviceStatusManager_ { nullptr };
 };
-
-#define ACCESSIBILITY_MANAGER OHOS::Singleton<AccessibilityManager>::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // ACCESSIBILITY_MANAGER_H
+#endif // SURFACE_CAPTURE_CALLBACK_H
