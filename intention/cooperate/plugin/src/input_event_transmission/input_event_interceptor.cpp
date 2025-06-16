@@ -109,7 +109,7 @@ void InputEventInterceptor::HeartBeatSend()
 {
     CALL_DEBUG_ENTER;
     CHKPV(env_);
-    heartTimer_ = env_->GetTimerManager().AddTimer(INTERVAL_MS, REPEAT_MAX, [this]() {
+    heartTimer_ = env_->GetTimerManager().AddTimerAsync(INTERVAL_MS, REPEAT_MAX, [this]() {
         NetPacket packet(MessageId::DSOFTBUS_HEART_BEAT_PACKET);
         if (InputEventSerialization::HeartBeatMarshalling(packet) != RET_OK) {
             FI_HILOGE("Failed to serialize packet");
@@ -127,15 +127,15 @@ void InputEventInterceptor::Disable()
         env_->GetInput().RemoveInterceptor(interceptorId_);
         interceptorId_ = -1;
     }
-    if ((pointerEventTimer_ >= 0) && (env_->GetTimerManager().IsExist(pointerEventTimer_))) {
-        env_->GetTimerManager().RemoveTimer(pointerEventTimer_);
+    if ((pointerEventTimer_ >= 0)) {
+        env_->GetTimerManager().RemoveTimerAsync(pointerEventTimer_);
         pointerEventTimer_ = -1;
     }
     if (heartTimer_ < 0) {
         FI_HILOGE("Invalid heartTimer_");
         return;
     }
-    if (env_->GetTimerManager().RemoveTimer(heartTimer_) != RET_OK) {
+    if (env_->GetTimerManager().RemoveTimerAsync(heartTimer_) != RET_OK) {
         FI_HILOGE("Failed to RemoveTimer");
     }
     heartTimer_ = -1;
@@ -154,8 +154,8 @@ void InputEventInterceptor::OnPointerEvent(std::shared_ptr<MMI::PointerEvent> po
         TurnOffChannelScan();
     }
     RefreshActivity();
-    if ((pointerEventTimer_ >= 0) && (env_->GetTimerManager().IsExist(pointerEventTimer_))) {
-        env_->GetTimerManager().RemoveTimer(pointerEventTimer_);
+    if ((pointerEventTimer_ >= 0)) {
+        env_->GetTimerManager().RemoveTimerAsync(pointerEventTimer_);
         pointerEventTimer_ = -1;
     }
     if (auto pointerAction = pointerEvent->GetPointerAction();
@@ -180,7 +180,7 @@ void InputEventInterceptor::OnPointerEvent(std::shared_ptr<MMI::PointerEvent> po
     FI_HILOGD("PointerEvent(No:%{public}d,Source:%{public}s,Action:%{public}s)",
         pointerEvent->GetId(), pointerEvent->DumpSourceType(), pointerEvent->DumpPointerAction());
     env_->GetDSoftbus().SendPacket(remoteNetworkId_, packet);
-    pointerEventTimer_ = env_->GetTimerManager().AddTimer(POINTER_EVENT_TIMEOUT, REPEAT_ONCE, [this]() {
+    pointerEventTimer_ = env_->GetTimerManager().AddTimerAsync(POINTER_EVENT_TIMEOUT, REPEAT_ONCE, [this]() {
         TurnOnChannelScan();
         pointerEventTimer_ = -1;
     });
