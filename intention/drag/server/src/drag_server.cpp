@@ -115,7 +115,7 @@ int32_t DragServer::RemoveSubscriptListener(CallingContext &context)
     }
     FI_HILOGD("Remove subscript listener, from:%{public}d", context.pid);
     CHKPR(env_, RET_ERR);
-     if (int32_t ret = env_->GetDragManager().RemoveSubscriptListener(context.pid); ret != RET_OK) {
+    if (int32_t ret = env_->GetDragManager().RemoveSubscriptListener(context.pid); ret != RET_OK) {
         FI_HILOGE("IDragManager::RemoveSubscriptListener fail, error:%{public}d", ret);
         return ret;
     }

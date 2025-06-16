@@ -39,7 +39,7 @@ using namespace testing;
 namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 const std::string SYSTEM_BASIC { "system_basic" };
-int32_t PERMISSION_EXCEPTION { 201 };
+int32_t g_permissionException { 201 };
 } // namespace
 
 class CooperateClientTest : public testing::Test {
@@ -119,7 +119,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_RegisterListener, TestSize.Lev
     bool isCheckPermission = true;
     CooperateClient cooperateClient;
     int32_t ret = cooperateClient.RegisterListener(consumer, isCheckPermission);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
     ret = cooperateClient.UnregisterListener(consumer, isCheckPermission);
     ASSERT_EQ(ret, RET_OK);
     cooperateClient.isListeningProcess_ = true;
@@ -146,7 +146,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_UnregisterListener, TestSize.L
     std::shared_ptr<CoordinationListenerTest> consumer = nullptr;
     cooperateClient.isListeningProcess_ = true;
     int32_t ret = cooperateClient.UnregisterListener(consumer, isCheckPermission);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
     cooperateClient.isListeningProcess_ = false;
     ret = cooperateClient.UnregisterListener(consumer, isCheckPermission);
     ASSERT_EQ(ret, RET_OK);
@@ -181,7 +181,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_Enable_001, TestSize.Level1)
     bool isCheckPermission = true;
     CooperateClient::CooperateMessageCallback callback;
     int32_t ret = cooperateClient.Enable(callback, isCheckPermission);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
 }
 
 /**
@@ -197,7 +197,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_Disable_001, TestSize.Level1)
     bool isCheckPermission = true;
     CooperateClient::CooperateMessageCallback callback;
     int32_t ret = cooperateClient.Disable(callback, isCheckPermission);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
 }
 
 /**
@@ -215,7 +215,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_Start_001, TestSize.Level1)
     bool isCheckPermission = true;
     CooperateClient::CooperateMessageCallback callback;
     int32_t ret = cooperateClient.Start(remoteNetworkId, startDeviceId, callback, isCheckPermission);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
 }
 
 /**
@@ -233,7 +233,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_Stop_001, TestSize.Level1)
     bool isCheckPermission = true;
     CooperateClient::CooperateMessageCallback callback;
     int32_t ret = cooperateClient.Stop(isUnchained, callback, isCheckPermission);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
 }
 
 /**
@@ -250,7 +250,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_GetCooperateState_001, TestSiz
     bool isCheckPermission = true;
     CooperateClient::CooperateStateCallback callback;
     int32_t ret = cooperateClient.GetCooperateState(networkId, callback, isCheckPermission);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
 }
 
 /**
@@ -282,12 +282,12 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_RegisterEventListener_001, Tes
     CooperateClient cooperateClient;
     std::string networkId = "networkId";
     int32_t ret = cooperateClient.RegisterEventListener(networkId, listenerPtr);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
     ret = cooperateClient.RegisterEventListener(networkId, listenerPtr);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
     networkId = "networkId2";
     ret = cooperateClient.RegisterEventListener(networkId, listenerPtr);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
 }
 
 /**
@@ -305,7 +305,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_UnregisterEventListener_001, T
     int32_t ret = cooperateClient.UnregisterEventListener(networkId, listenerPtr);
     ASSERT_EQ(ret, RET_ERR);
     ret = cooperateClient.RegisterEventListener(networkId, listenerPtr);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
     ret = cooperateClient.UnregisterEventListener(networkId, listenerPtr);
     ASSERT_EQ(ret, RET_ERR);
 }
@@ -323,7 +323,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_SetDamplingCoefficient_002, Te
     uint32_t direction = 0;
     double coefficient = 0;
     int32_t ret = cooperateClient.SetDamplingCoefficient(direction, coefficient);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
 }
 
 /**
@@ -340,7 +340,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_AddHotAreaListener_001, TestSi
     int32_t ret = cooperateClient.RemoveHotAreaListener(listenerPtr);
     ASSERT_EQ(ret, RET_ERR);
     ret = cooperateClient.AddHotAreaListener(listenerPtr);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
     ret = cooperateClient.RemoveHotAreaListener(listenerPtr);
     ASSERT_EQ(ret, RET_ERR);
 }
@@ -413,7 +413,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_OnMouseLocationListener_002, T
     bool isCheckPermission = true;
     CooperateClient cooperateClient;
     int32_t ret = cooperateClient.RegisterListener(consumer, isCheckPermission);
-    ASSERT_EQ(ret, PERMISSION_EXCEPTION);
+    ASSERT_EQ(ret, g_permissionException);
     std::string networkId = "networkId";
     MessageId msgId = MessageId::COORDINATION_ADD_LISTENER;
     NetPacket pkt(msgId);
