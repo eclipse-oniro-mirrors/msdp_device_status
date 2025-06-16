@@ -14,6 +14,8 @@
  */
 
 #include "boomerang_surfacecapture_callback.h"
+
+#include "devicestatus_define.h"
 #include "fi_log.h"
 
 #undef LOG_TAG
@@ -24,14 +26,8 @@ namespace Msdp {
 namespace DeviceStatus {
 void BoomerangSurfaceCaptureCallback::OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelmap)
 {
-    if (pixelmap == nullptr) {
-        FI_HILOGE("OnSurfaceCapture pixelmap is nullptr");
-        return;
-    }
-    if (deviceStatusManager_ == nullptr) {
-        FI_HILOGI("dragManager_ is nullptr");
-        return;
-    }
+    CHKPV(pixelmap);
+    CHKPV(deviceStatusManager_);
     deviceStatusManager_->OnSurfaceCapture(pixelmap);
 }
 } // namespace DeviceStatus

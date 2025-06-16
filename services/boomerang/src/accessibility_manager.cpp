@@ -67,15 +67,16 @@ void MockAccessibleAbilityListener::OnAbilityDisconnected()
     if (ret != 0) {
         FI_HILOGE("AccessibilityManager Disconnect faild");
     }
+    CHKPV(callback_);
     callback_(ON_ABILITY_DISCONNECTED);
 }
 
 void MockAccessibleAbilityListener::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo &eventInfo)
 {
-    FI_HILOGE("OnAccessibilityEvent GetWindowChangeTypes:%{public}d", eventInfo.GetWindowChangeTypes());
+    CALL_DEBUG_ENTER;
     CHKPV(callback_);
     if (eventInfo.GetEventType() == Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT) {
-        FI_HILOGE("MockAccessibleAbilityListener TYPE_VIEW_SCROLLED_EVENT");
+        FI_HILOGD("trigger view scrolled");
         callback_(ON_ABILITY_SCROLLED_EVENT);
     }
 }
@@ -91,7 +92,7 @@ AccessibilityManager::~AccessibilityManager() = default;
 
 void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
 {
-    FI_HILOGE("AccessibilityConnect enter");
+    CALL_DEBUG_ENTER;
     std::shared_ptr<Accessibility::AccessibleAbilityListener> listener =
         std::make_shared<MockAccessibleAbilityListener>(callback);
     auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->RegisterAbilityListener(listener);
@@ -110,7 +111,7 @@ void AccessibilityManager::AccessibilityDisconnect()
 
 int32_t AccessibilityManager::FindElementInfo(const int32_t windowId, DragElementInfo &info)
 {
-    FI_HILOGE("find elementInfo enter");
+    CALL_DEBUG_ENTER;
     Accessibility::AccessibilityWindowInfo windowInfo;
     int32_t ret = Accessibility::AccessibilityUITestAbility::GetInstance()->GetWindow(windowId, windowInfo);
     if (ret != RET_OK) {
@@ -125,7 +126,6 @@ int32_t AccessibilityManager::FindElementInfo(const int32_t windowId, DragElemen
     }
 
     size_t elementInfosSize = elementInfos.size();
-    FI_HILOGE("elementInfos size:%{public}zu", elementInfosSize);
     double maxArea = 0.0;
     Accessibility::AccessibilityElementInfo imageElementInfo;
     for (size_t i = 0; i < elementInfosSize; ++i) {
