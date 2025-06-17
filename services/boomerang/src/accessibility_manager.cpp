@@ -56,7 +56,7 @@ private:
 
 void AccessibleAbilityListenerImpl::OnAbilityConnected()
 {
-    FI_HILOGE("Accessibility has Connect");
+    FI_HILOGE("Accessibility is connected");
     CHKPV(callback_);
     callback_(ON_ABILITY_CONNECTED);
 }
@@ -96,10 +96,14 @@ void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
     std::shared_ptr<Accessibility::AccessibleAbilityListener> listener =
         std::make_shared<AccessibleAbilityListenerImpl>(callback);
     auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->RegisterAbilityListener(listener);
-
+    if (ret != 0) {
+        FI_HILOGE("Accessibility register ablity listener failed");
+        return;
+    }
     ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Connect();
     if (ret != 0) {
         FI_HILOGE("Accessibility Connect failed");
+        return;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_SLEEP_TIME));
 }
