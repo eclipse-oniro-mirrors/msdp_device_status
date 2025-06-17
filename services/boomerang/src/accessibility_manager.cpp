@@ -34,16 +34,16 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-    int32_t THREAD_SLEEP_TIME = 3000;
+    constexpr int32_t THREAD_SLEEP_TIME = 3000;
 }
 
-class MockAccessibleAbilityListener : public Accessibility::AccessibleAbilityListener {
+class AccessibleAbilityListenerImpl : public Accessibility::AccessibleAbilityListener {
 public:
-    explicit MockAccessibleAbilityListener(AccessibilityCallback callback)
+    explicit AccessibleAbilityListenerImpl(AccessibilityCallback callback)
     {
         callback_ = callback;
     }
-    ~MockAccessibleAbilityListener() = default;
+    ~AccessibleAbilityListenerImpl() = default;
 
     void OnAbilityConnected() override;
     void OnAbilityDisconnected() override;
@@ -54,14 +54,14 @@ private:
     AccessibilityCallback callback_;
 };
 
-void MockAccessibleAbilityListener::OnAbilityConnected()
+void AccessibleAbilityListenerImpl::OnAbilityConnected()
 {
-    FI_HILOGE("MockAccessibleAbilityListener AccessibilityConnect");
+    FI_HILOGE("Accessibility has Connect");
     CHKPV(callback_);
     callback_(ON_ABILITY_CONNECTED);
 }
 
-void MockAccessibleAbilityListener::OnAbilityDisconnected()
+void AccessibleAbilityListenerImpl::OnAbilityDisconnected()
 {
     auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Disconnect();
     if (ret != 0) {
@@ -71,7 +71,7 @@ void MockAccessibleAbilityListener::OnAbilityDisconnected()
     callback_(ON_ABILITY_DISCONNECTED);
 }
 
-void MockAccessibleAbilityListener::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo &eventInfo)
+void AccessibleAbilityListenerImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo &eventInfo)
 {
     CALL_DEBUG_ENTER;
     CHKPV(callback_);
@@ -81,7 +81,7 @@ void MockAccessibleAbilityListener::OnAccessibilityEvent(const Accessibility::Ac
     }
 }
 
-bool MockAccessibleAbilityListener::OnKeyPressEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent)
+bool AccessibleAbilityListenerImpl::OnKeyPressEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent)
 {
     return true;
 }
@@ -94,12 +94,12 @@ void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
 {
     CALL_DEBUG_ENTER;
     std::shared_ptr<Accessibility::AccessibleAbilityListener> listener =
-        std::make_shared<MockAccessibleAbilityListener>(callback);
+        std::make_shared<AccessibleAbilityListenerImpl>(callback);
     auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->RegisterAbilityListener(listener);
 
     ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Connect();
     if (ret != 0) {
-        FI_HILOGE("AccessibilityManager AccessibilityConnect faild");
+        FI_HILOGE("Accessibility Connect failed");
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_SLEEP_TIME));
 }
@@ -115,13 +115,13 @@ int32_t AccessibilityManager::FindElementInfo(const int32_t windowId, DragElemen
     Accessibility::AccessibilityWindowInfo windowInfo;
     int32_t ret = Accessibility::AccessibilityUITestAbility::GetInstance()->GetWindow(windowId, windowInfo);
     if (ret != RET_OK) {
-        FI_HILOGE("Accessibility::GetWindow failed,ret:%{public}d,windowId:%{public}d", ret, windowId);
+        FI_HILOGE("Accessibility::GetWindow failed,ret:%{public}d,windowId is:%{public}d", ret, windowId);
         return RET_ERR;
     }
     std::vector<Accessibility::AccessibilityElementInfo> elementInfos;
     ret = Accessibility::AccessibilityUITestAbility::GetInstance()->GetRootBatch(elementInfos);
     if (ret != RET_OK || elementInfos.empty()) {
-        FI_HILOGE("GetRootByWindowBatch failed, ret:%{public}d, windowId:%{public}d", ret, windowId);
+        FI_HILOGE("GetRootByWindowBatch failed, ret:%{public}d, windowId is:%{public}d", ret, windowId);
         return RET_ERR;
     }
 
@@ -133,11 +133,11 @@ int32_t AccessibilityManager::FindElementInfo(const int32_t windowId, DragElemen
         if (componentType != "RenderNode" && componentType != "Image") {
             continue;
         }
-        Accessibility::Rect rect = elementInfos[i].GetRectInScreen();
-        int32_t leftTopX = rect.GetLeftTopXScreenPostion();
-        int32_t leftTopY = rect.GetLeftTopYScreenPostion();
-        int32_t rightBottomX = rect.GetRightBottomXScreenPostion();
-        int32_t rightBottomY = rect.GetRightBottomYScreenPostion();
+        Accessibility::Rect screenRect = elementInfos[i].GetRectInScreen();
+        int32_t leftTopX = screenRect.GetLeftTopXScreenPostion();
+        int32_t leftTopY = screenRect.GetLeftTopYScreenPostion();
+        int32_t rightBottomX = screenRect.GetRightBottomXScreenPostion();
+        int32_t rightBottomY = screenRect.GetRightBottomYScreenPostion();
         double area = (rightBottomX - leftTopX) * (rightBottomY - leftTopY);
         if (area > maxArea) {
             FI_HILOGI("componentType:%{public}s, leftTopX:%{public}d, leftTopY:%{public}d",
@@ -153,7 +153,7 @@ int32_t AccessibilityManager::FindElementInfo(const int32_t windowId, DragElemen
     info.componentType = imageElementInfo.GetComponentType();
     info.leftTopX = imageElementInfo.GetRectInScreen().GetLeftTopXScreenPostion();
     info.leftTopY = imageElementInfo.GetRectInScreen().GetLeftTopYScreenPostion();
-    FI_HILOGE("find elementInfo end");
+    FI_HILOGD("find elementInfo success");
     return RET_OK;
 }
 } // namespace DeviceStatus
