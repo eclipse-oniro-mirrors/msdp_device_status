@@ -66,6 +66,7 @@ void AccessibleAbilityListenerImpl::OnAbilityDisconnected()
     auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Disconnect();
     if (ret != 0) {
         FI_HILOGE("AccessibilityManager Disconnect faild");
+        return;
     }
     CHKPV(callback_);
     callback_(ON_ABILITY_DISCONNECTED);

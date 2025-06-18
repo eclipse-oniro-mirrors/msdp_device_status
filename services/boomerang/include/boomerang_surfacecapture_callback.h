@@ -20,7 +20,6 @@
 
 #include "pixel_map.h"
 #include "transaction/rs_render_service_client.h"
-
 #include "devicestatus_manager.h"
 
 namespace OHOS {
