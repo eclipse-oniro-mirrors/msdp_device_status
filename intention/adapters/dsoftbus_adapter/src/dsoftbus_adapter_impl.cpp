@@ -52,6 +52,8 @@ constexpr int32_t INVALID_SOCKET { -1 };
 constexpr int32_t HEART_BEAT_INTERVAL_MS { 64 };
 constexpr int32_t HEART_BEAT_SIZE_BYTE { 28 }; // Ensure size of heartBeat packet is 64Bytes.
 const std::string HEART_BEAT_THREAD_NAME { "OS_Cooperate_Heart_Beat" };
+const char* PARAM_KEY_OS_TYPE = "OS_TYPE";
+constexpr int32_t OS_TYPE_OH { 10 };
 }
 
 std::mutex DSoftbusAdapterImpl::mutex_;
@@ -278,6 +280,10 @@ void DSoftbusAdapterImpl::OnBind(int32_t socket, PeerSocketInfo info)
     std::unique_lock<std::shared_mutex> lock(lock_);
     std::string networkId = info.networkId;
     FI_HILOGI("Bind session(%{public}d, %{public}s)", socket, Utility::Anonymize(networkId).c_str());
+    if (!CheckDeviceOsType(networkId)) {
+        FI_HILOGE("Refuse bind");
+        ::Shutdown(socket);
+    }
     if (auto iter = sessions_.find(networkId); iter != sessions_.cend()) {
         if (iter->second.socket_ == socket) {
             FI_HILOGI("(%{public}d, %{public}s) has bound", iter->second.socket_,
@@ -654,6 +660,38 @@ bool DSoftbusAdapterImpl::GetHeartBeatState(const std::string &networkId)
         return heartBeatStates_[networkId];
     }
     return false;
+}
+
+bool DSoftbusAdapterImpl::CheckDeviceOsType(const std::string &networkId)
+{
+    CALL_INFO_TRACE;
+    DistributedHardware::DmDeviceInfo deviceInfo;
+    int32_t res = D_DEV_MGR.GetDeviceInfo(FI_PKG_NAME, networkId, deviceInfo);
+    if (res != ERR_OK) {
+        FI_HILOGE("Get device failed, res:%{public}d", res);
+        return false;
+    }
+    if (deviceInfo.extraData.empty()) {
+        FI_HILOGE("Deviceinfo extradata is empty");
+        return false;
+    }
+    JsonParser extraData;
+    extraData.json = cJSON_Parse(deviceInfo.extraData.c_str());
+    if (!cJSON_IsObject(extraData.json)) {
+        FI_HILOGE("extraData is not json object");
+        return false;
+    }
+    cJSON *osType = cJSON_GetObjectItemCaseSensitive(extraData.json, PARAM_KEY_OS_TYPE);
+    if (cJSON_IsNumber(osType)) {
+        if (osType->valueint != OS_TYPE_OH) {
+            FI_HILOGE("Ostype:%{public}d", osType->valueint);
+            return false;
+        }
+    } else {
+        FI_HILOGE("get ostype error, extraData:%{public}s", deviceInfo.extraData.c_str());
+        return false;
+    }
+    return true;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

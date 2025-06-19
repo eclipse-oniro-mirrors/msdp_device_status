@@ -47,6 +47,7 @@ ohos_source_set("intention_dsoftbus_adapter") {
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "dsoftbus:softbus_client",
