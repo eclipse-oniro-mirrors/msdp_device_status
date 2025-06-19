@@ -43,12 +43,12 @@ struct DragInternalInfo {
     float scale { -1.0f };
     int32_t pixelMapX { -1 };
     int32_t pixelMapY { -1 };
-	int32_t displayWidth { -1 };
+    int32_t displayWidth { -1 };
     uint32_t argb { 0 };
     std::shared_ptr<Rosen::RSNode> rootNode { nullptr };
     std::shared_ptr<Rosen::RSNode> parentNode { nullptr };
-	std::shared_ptr<Rosen::RSNode> curvesMaskNode { nullptr };
-	std::shared_ptr<Rosen::RSNode> lightNode { nullptr };
+    std::shared_ptr<Rosen::RSNode> curvesMaskNode { nullptr };
+    std::shared_ptr<Rosen::RSNode> lightNode { nullptr };
     std::shared_ptr<Media::PixelMap> currentPixelMap { nullptr };
     std::vector<std::shared_ptr<Rosen::RSCanvasNode>> nodes;
 };

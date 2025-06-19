@@ -135,7 +135,8 @@ IDSoftbusAdapter& ContextService::GetDSoftbus()
 
 void DragManagerTest::SetUpTestCase() {}
 
-void DragManagerTest::SetUp() {
+void DragManagerTest::SetUp()
+{
     g_context = ContextService::GetInstance();
     g_dragMgr.Init(g_context);
 }

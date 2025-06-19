@@ -61,6 +61,8 @@ ohos_unittest("DragManagerTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "libxml2:libxml2",
+    "samgr:samgr_proxy",
     "window_manager:libdm",
   ]
 }
