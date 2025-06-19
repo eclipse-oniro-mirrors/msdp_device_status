@@ -77,7 +77,7 @@ int32_t DragInternalAnimationWrapper::EnableInternalDropAnimation(const std::str
     return enableInternalDropAnimationHandle_(animationInfo.c_str());
 }
 
-int32_t DragInternalAnimationWrapper::PerformInternalDropAnimation()
+int32_t DragInternalAnimationWrapper::PerformInternalDropAnimation(IContext* env)
 {
     CALL_DEBUG_ENTER;
     if ((dragInternalAnimationHandle_ == nullptr) && (!Init())) {
@@ -99,7 +99,7 @@ int32_t DragInternalAnimationWrapper::PerformInternalDropAnimation()
         FI_HILOGE("Symbol performInternalDropAnimationHandle is null");
         return RET_ERR;
     }
-    return performInternalDropAnimationHandle_();
+    return performInternalDropAnimationHandle_(env);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
