@@ -159,7 +159,7 @@ bool MotionNapi::SubscribeCallback(napi_env env, int32_t type)
             return false;
         }
     }
-    return false;
+    return true;
 }
 
 bool MotionNapi::UnSubscribeCallback(napi_env env, int32_t type)
@@ -320,9 +320,16 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
     }
 
 #ifdef MOTION_ENABLE
-    if (!g_motionObj->RemoveCallback(type)) {
-        ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
-        return nullptr;
+    if (argc != ARG_2) {
+        if (!g_motionObj->RemoveAllCallback(type)) {
+            ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
+            return nullptr;
+        }
+    } else {
+        if (!g_motionObj->RemoveCallback(type, args[ARG_1])) {
+            ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
+            return nullptr;
+        }
     }
 
     if (!UnSubscribeCallback(env, type)) {
