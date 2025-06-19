@@ -22,6 +22,7 @@
 
 #include "event_handler.h"
 #include "nocopyable.h"
+#include "json_parser.h"
 #include "socket.h"
 
 #include "circle_stream_buffer.h"
@@ -114,6 +115,7 @@ private:
     int32_t KeepHeartBeating(const std::string &networkId);
     void UpdateHeartBeatState(const std::string &networkId, bool state);
     bool GetHeartBeatState(const std::string &networkId);
+    bool CheckDeviceOsType(const std::string &networkId);
 
     /*
     These four interfaces followed only read members, use shared_lock to avoid dead lock.
