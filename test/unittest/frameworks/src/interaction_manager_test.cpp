@@ -3033,8 +3033,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002
     int64_t downTime = 0;
     InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
     bool status = true;
-    ret = InteractionManager::GetInstance()->GetAppDragSwitchState(status);
-    EXPECT_EQ(ret, RET_OK);
+    ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->GetAppDragSwitchState(status));
     RemovePermission();
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COOPERATE_PLUGIN_TEST_H
-#define COOPERATE_PLUGIN_TEST_H
+#ifndef MOUSE_LOCATION_TEST_H
+#define MOUSE_LOCATION_TEST_H
 
 #include <gtest/gtest.h>
 
@@ -58,7 +58,7 @@ public:
     DeviceManager devMgr_;
 };
 
-class CooperatePluginTest : public testing::Test {
+class MouseLocationTest : public testing::Test {
 public:
     static void SetUpTestCase();
     void SetUp();
@@ -73,4 +73,4 @@ public:
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // COOPERATE_PLUGIN_TEST_H
+#endif // MOUSE_LOCATION_TEST_H
