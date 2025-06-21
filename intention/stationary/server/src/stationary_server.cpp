@@ -106,7 +106,6 @@ void RemoteDevStaCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> 
 
 StationaryServer::StationaryServer()
 {
-    manager_.Init();
 #ifdef MOTION_ENABLE
     auto deathRecipientCB = [this](const wptr<IRemoteObject> &remote) {
         this->StationaryServerDeathRecipient(remote);

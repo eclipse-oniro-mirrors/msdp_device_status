@@ -43,10 +43,13 @@ ohos_unittest("StationaryServerTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
   ]
 
   defines = []

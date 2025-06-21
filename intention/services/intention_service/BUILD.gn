@@ -78,7 +78,9 @@ ohos_shared_library("intention_service") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
   ]
 
   if (device_status_motion_enable) {

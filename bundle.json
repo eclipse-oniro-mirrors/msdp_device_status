@@ -43,7 +43,9 @@
     "deps": {
       "components": [
         "ability_runtime",
+        "accessibility",
         "access_token",
+        "ace_engine",
         "cJSON",
         "hicollie",
         "hilog",

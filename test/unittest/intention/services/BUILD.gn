@@ -97,6 +97,7 @@ ohos_unittest("IntentionServiceTest") {
     "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
   ]
 
@@ -360,6 +361,7 @@ ohos_unittest("IntentionDumperTest") {
     "samgr:samgr_proxy",
     "libxml2:libxml2",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
   ]
 }
@@ -427,6 +429,7 @@ ohos_unittest("BoomerangDumperTest") {
     "input:libmmi-client",
     "libxml2:libxml2",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
     "samgr:samgr_proxy",
   ]

@@ -35,6 +35,7 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm",
+  "window_manager:libwm",
 ]
 
 ###############################fuzztest#################################

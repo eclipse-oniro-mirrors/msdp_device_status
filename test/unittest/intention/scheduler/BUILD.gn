@@ -85,6 +85,7 @@ ohos_unittest("TimerManagerTest") {
     "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
   ]
 }
