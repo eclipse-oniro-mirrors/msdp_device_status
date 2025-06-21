@@ -85,8 +85,7 @@ void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t 
                 if (value == AccessibilityStatus::ON_ABILITY_CONNECTED) {
                     manager_->isAccessbilityInit = true;
                     FI_HILOGI("Accessibility service has connect");
-                }
-                if (value == AccessibilityStatus::ON_ABILITY_SCROLLED_EVENT) {
+                } else if (value == AccessibilityStatus::ON_ABILITY_SCROLLED_EVENT) {
                     manager_->handlerPageScrollerEnvent();
                 }
             });
