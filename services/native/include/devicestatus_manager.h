@@ -63,7 +63,7 @@ public:
 
     class AccessibilityStatusChange : public SystemAbilityStatusChangeStub {
     public:
-        AccessibilityStatusChange(DeviceStatusManager* deviceStatusManager) : manager_(deviceStatusManager) {}
+        explicit AccessibilityStatusChange(DeviceStatusManager* deviceStatusManager) : manager_(deviceStatusManager) {}
         ~AccessibilityStatusChange() = default;
         void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
         void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -134,7 +134,7 @@ private:
     int32_t boomerangType_ { -1 };
     int32_t event_ { -1 };
     int32_t arrs_[argSize_] {};
-    std::atomic<bool> g_lastEnable_ { true };
+    std::atomic<bool> g_lastEnable { true };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
