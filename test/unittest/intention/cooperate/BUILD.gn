@@ -200,6 +200,7 @@ ohos_unittest("InputEventSerializationTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
   ]
 }
@@ -250,6 +251,7 @@ ohos_unittest("InputEventSamplerTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
   ]
 }
@@ -320,6 +322,7 @@ ohos_unittest("InputEventBuilderTest") {
     "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
   ]
 }
@@ -390,6 +393,7 @@ ohos_unittest("InputEventInterceptorTest") {
     "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
   ]
 }

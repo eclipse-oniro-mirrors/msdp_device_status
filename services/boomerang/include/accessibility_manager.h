@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-enum AccessibilityStatu {
+enum AccessibilityStatus {
     ABILITY_INVALID_STATU,
     ON_ABILITY_CONNECTED = 1,
     ON_ABILITY_SCROLLED_EVENT,

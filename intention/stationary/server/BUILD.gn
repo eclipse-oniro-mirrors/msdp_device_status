@@ -18,6 +18,7 @@ config("intention_stationary_server_public_config") {
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
     "${device_status_root_path}/libs/interface",
+    "${device_status_root_path}/services/boomerang/include",
     "${device_status_root_path}/services/native/include",
   ]
 }
@@ -38,10 +39,13 @@ ohos_source_set("intention_stationary_server") {
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
     "${device_status_root_path}/libs/interface",
+    "${device_status_root_path}/services/boomerang/include",
     "${device_status_root_path}/services/native/include",
   ]
 
   sources = [
+    "${device_status_root_path}/services/boomerang/src/accessibility_manager.cpp",
+    "${device_status_root_path}/services/boomerang/src/boomerang_surfacecapture_callback.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_dumper.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_hisysevent.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_manager.cpp",
@@ -63,12 +67,17 @@ ohos_source_set("intention_stationary_server") {
   ]
 
   external_deps = [
+    "accessibility:accessibility_common",
+    "accessibility:accessibleability",
+    "accessibility:accessibilityclient",
     "access_token:libaccesstoken_sdk",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
+    "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
   ]
 
   if (device_status_hisysevent_enable) {

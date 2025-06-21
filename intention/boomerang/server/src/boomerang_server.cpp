@@ -33,7 +33,6 @@ namespace DeviceStatus {
 
 BoomerangServer::BoomerangServer()
 {
-    manager_.Init();
 }
 
 void BoomerangServer::DumpDeviceStatusSubscriber(int32_t fd) const
