@@ -35,8 +35,8 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
     constexpr int32_t IMAGE_PAIR_LIST_MAX_LENGTH = 100;
-    std::mutex g_screenShotMutex_;
-    const std::string BUNDLENAME = "com.tencent.wechat";
+    std::mutex g_screenShotMutex;
+    const std::string BUNDLE_NAME = "com.tencent.wechat";
     DeviceStatusManager* g_deviceManager { nullptr };
 }
 
@@ -527,7 +527,7 @@ int32_t DeviceStatusManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMa
     CHKPR(callback, RET_ERR);
     std::lock_guard lock(mutex_);
     std::string metadata;
-    std::shared_ptr<BoomerangAlgoImpl> algo = std::make_shared<BoomerangAlgoImpl>();
+    auto algo = std::make_shared<BoomerangAlgoImpl>();
     CHKPR(algo, RET_ERR);
     algo->DecodeImage(pixelMap, metadata);
     callback->OnNotifyMetadata(metadata);
@@ -599,7 +599,7 @@ int32_t DeviceStatusManager::GetFocuseWindowId(int32_t &windowId, std::string &b
             windowId = winInfo->GetWindowId();
             bundleName =  winInfo->GetBundleName();
             FI_HILOGD("get focuse windowId, ret=%{public}d, bundleName:%{public}s",
-                windowId, bundleName.c_str());
+                winInfo->GetWindowId(), winInfo->GetBundleName().c_str());
             return RET_OK;
         }
     }
@@ -608,7 +608,7 @@ int32_t DeviceStatusManager::GetFocuseWindowId(int32_t &windowId, std::string &b
 
 void showImagesCallback(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> imagePairList)
 {
-    std::unique_lock<std::mutex> lock(g_screenShotMutex_);
+    std::unique_lock<std::mutex> lock(g_screenShotMutex);
     int32_t maxArea = 0;
     std::shared_ptr<Media::PixelMap> encodeImage;
     for (size_t index = 0; index < imagePairList.size(); index++) {
@@ -633,7 +633,7 @@ void showImagesCallback(std::vector<std::pair<int32_t, std::shared_ptr<Media::Pi
     CHKPV(encodeImage);
 
     std::string metadata;
-    std::shared_ptr<BoomerangAlgoImpl> algo = std::make_shared<BoomerangAlgoImpl>();
+    auto algo = std::make_shared<BoomerangAlgoImpl>();
     CHKPV(algo);
     algo->DecodeImage(encodeImage, metadata);
     FI_HILOGI("jjy Boomerang Algo decode image result:%{public}s", metadata.c_str());
@@ -649,7 +649,7 @@ void DeviceStatusManager::handlerPageScrollerEnvent()
         FI_HILOGE("get the focuse widowId faild, result=%{public}d", result);
         return;
     }
-    if (g_lastEnable || bundleName != BUNDLENAME) {
+    if (g_lastEnable || bundleName != BUNDLE_NAME) {
         FI_HILOGD("The current status bar is in display mode or does not belong to the whitelist application");
         return;
     }

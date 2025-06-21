@@ -57,7 +57,7 @@ public:
         virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
         virtual ~BoomerangCallbackDeathRecipient() = default;
     private:
-        DeviceStatusManager* manager_;
+        DeviceStatusManager* manager_ { nullptr };;
         friend class DeviceStatusManager;
     };
 
@@ -68,7 +68,7 @@ public:
         void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
         void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     private:
-        DeviceStatusManager* manager_;
+        DeviceStatusManager* manager_ { nullptr };
         friend class DeviceStatusManager;
     };
 
