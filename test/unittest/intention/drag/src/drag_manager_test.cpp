@@ -1676,6 +1676,25 @@ HWTEST_F(DragManagerTest, DragManagerTest83, TestSize.Level0)
     int32_t ret = g_dragMgr.HandleDragResult(result, hasCustomAnimation);
     EXPECT_EQ(ret, RET_OK);
 }
+
+/**
+ * @tc.name: DragManagerTest84
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest84, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragResult result = DragResult::DRAG_SUCCESS;
+    bool hasCustomAnimation = false;
+    DragData dragData;
+    dragData.dragNum = 0;
+    DRAG_DATA_MGR.Init(dragData);
+    g_dragMgr.enableInternalDropAnimation_ = false;
+    int32_t ret = g_dragMgr.HandleDragResult(result, hasCustomAnimation);
+    EXPECT_EQ(ret, RET_OK);
+}
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus
 } // namespace Msdp
