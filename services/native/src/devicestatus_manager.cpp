@@ -112,11 +112,11 @@ void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t 
 void DeviceStatusManager::AccessibilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId,
     const std::string &deviceId)
 {
-    CHKPV(manager_);
     if (systemAbilityId == ACCESSIBILITY_MANAGER_SERVICE_ID) {
         FI_HILOGE("the accessibility service died");
     } else if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
-        manager_->g_lastEnable = true;
+        CHKPV(g_deviceManager);
+        g_deviceManager->g_lastEnable = true;
     }
 }
 
@@ -635,7 +635,7 @@ void showImagesCallback(std::vector<std::pair<int32_t, std::shared_ptr<Media::Pi
     auto algo = std::make_shared<BoomerangAlgoImpl>();
     CHKPV(algo);
     algo->DecodeImage(encodeImage, metadata);
-    FI_HILOGI("jjy Boomerang Algo decode image result:%{public}s", metadata.c_str());
+    FI_HILOGI("Boomerang Algo decode image result:%{public}s", metadata.c_str());
 }
 
 void DeviceStatusManager::handlerPageScrollerEnvent()
@@ -648,7 +648,8 @@ void DeviceStatusManager::handlerPageScrollerEnvent()
         FI_HILOGE("get the focuse widowId faild, result=%{public}d", result);
         return;
     }
-    if (g_lastEnable || bundleName != BUNDLE_NAME) {
+    CHKPV(g_deviceManager);
+    if (g_deviceManager->g_lastEnable || bundleName != BUNDLE_NAME) {
         FI_HILOGD("The current status bar is in display mode or does not belong to the whitelist application");
         return;
     }
