@@ -45,6 +45,7 @@
         "ipc",
         "safwk",
         "samgr",
+        "bundle_framework",
         "c_utils",
         "common_event_service",
         "napi",
@@ -90,6 +91,7 @@
           "//base/msdp/device_status/frameworks/js/napi/interaction:interaction_jsapi_group",
           "//base/msdp/device_status/frameworks/js/napi/motion:motion_napi",
           "//base/msdp/device_status/frameworks/js/napi/boomerang:metadatabinding_napi",
+          "//base/msdp/device_status/frameworks/js/napi/room_location:roomlocation_napi",
           "//base/msdp/device_status/frameworks/ets/drag:dragInteraction"
         ],
         "service_group":[
