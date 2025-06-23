@@ -814,6 +814,10 @@ void DragDrawing::DestroyDragWindow()
         g_drawingInfo.nodes.clear();
         g_drawingInfo.nodes.shrink_to_fit();
     }
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    g_drawingInfo.curvesMaskNode = nullptr;
+    g_drawingInfo.lightNode = nullptr;
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
     if (g_drawingInfo.parentNode != nullptr) {
         g_drawingInfo.parentNode->ClearChildren();
         g_drawingInfo.parentNode.reset();
@@ -1121,6 +1125,28 @@ void DragDrawing::PullThrowZoomOutAnimation()
     return;
 }
 #endif // OHOS_ENABLE_PULLTHROW
+
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+void DragDrawing::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
+{
+    FI_HILOGI("enter");
+    dragInternalInfo.positionX = g_drawingInfo.x;
+    dragInternalInfo.positionY = g_drawingInfo.y;
+    dragInternalInfo.scale = GetScaling();
+    dragInternalInfo.pixelMapX = g_drawingInfo.pixelMapX;
+    dragInternalInfo.pixelMapY = g_drawingInfo.pixelMapY;
+    dragInternalInfo.displayWidth = displayWidth_;
+    dragInternalInfo.argb = g_drawingInfo.filterInfo.argb;
+    dragInternalInfo.rootNode = g_drawingInfo.rootNode;
+    dragInternalInfo.parentNode = g_drawingInfo.parentNode;
+    dragInternalInfo.curvesMaskNode = g_drawingInfo.curvesMaskNode;
+    dragInternalInfo.lightNode = g_drawingInfo.lightNode;
+    dragInternalInfo.currentPixelMap = AccessGlobalPixelMapLocked();
+    dragInternalInfo.nodes = g_drawingInfo.nodes;
+    FI_HILOGI("leave");
+    return;
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 void DragDrawing::LongPressDragZoomInAnimation()
 {
@@ -2011,6 +2037,7 @@ int32_t DragDrawing::InitLayer()
             return RET_ERR;
         }
     }
+    displayWidth_ = display->GetWidth();
     int32_t rootNodeSize = std::max(display->GetWidth(), display->GetHeight());
     InitCanvas(rootNodeSize, rootNodeSize);
     FI_HILOGI("Root node size:%{public}d, display Width:%{public}d, display height:%{public}d",
@@ -3551,6 +3578,7 @@ void DragDrawing::ResetParameter()
     FI_HILOGI("enter");
     g_drawingInfo.startNum = START_TIME;
     g_drawingInfo.needDestroyDragWindow = false;
+    displayWidth_ = -1;
     needRotatePixelMapXY_ = false;
     hasRunningStopAnimation_ = false;
     needMultiSelectedAnimation_ = true;

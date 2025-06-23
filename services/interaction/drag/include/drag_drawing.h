@@ -238,6 +238,10 @@ struct DrawingInfo {
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode { nullptr };
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     std::shared_ptr<Media::PixelMap> stylePixelMap { nullptr };
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    std::shared_ptr<Rosen::RSNode> curvesMaskNode { nullptr };
+    std::shared_ptr<Rosen::RSNode> lightNode { nullptr };
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     IContext* context { nullptr };
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
@@ -324,6 +328,7 @@ public:
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
     void LongPressDragZoomOutAnimation();
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
+    void ResetAnimationParameter();
 #ifdef OHOS_ENABLE_PULLTHROW
     void PullThrowAnimation(double tx, double ty, float vx, float vy, std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void SetHovering(double tx, double ty, std::shared_ptr<MMI::PointerEvent> pointerEvent);
@@ -332,6 +337,10 @@ public:
     void PullThrowBreatheEndAnimation();
     void PullThrowZoomOutAnimation();
 #endif // OHOS_ENABLE_PULLTHROW
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    void GetDragDrawingInfo(DragInternalInfo &dragInternalInfo);
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
 private:
     int32_t CheckDragData(const DragData &dragData);
     int32_t InitLayer();
@@ -393,7 +402,6 @@ private:
     void UpdateAnimationProtocol(Rosen::RSAnimationTimingProtocol protocol);
     void RotateDisplayXY(int32_t &displayX, int32_t &displayY);
     void RotatePixelMapXY();
-    void ResetAnimationParameter();
     void ResetAnimationFlag(bool isForce = false);
     void DoEndAnimation();
     void ResetParameter();
@@ -432,6 +440,7 @@ private:
 
 private:
     bool needMultiSelectedAnimation_ { true };
+    int32_t displayWidth_ { -1 };
     int64_t interruptNum_ { -1 };
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ { nullptr };
     std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };
@@ -479,7 +488,7 @@ private:
     std::string svgFilePath_;
     int64_t actionTime_ { 0 };
 #else
-    IContext* context_ { nullptr} ;
+    IContext* context_ { nullptr };
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 };
 } // namespace DeviceStatus

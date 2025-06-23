@@ -24,6 +24,9 @@
 #include "transaction/rs_transaction.h"
 
 #include "drag_data.h"
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+#include "drag_data_util.h"
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "stream_session.h"
 #else
@@ -75,6 +78,9 @@ public:
     virtual int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const = 0;
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
     virtual int32_t EnableInternalDropAnimation(const std::string &animationInfo) = 0;
+    virtual void GetDragDrawingInfo(DragInternalInfo &dragInternalInfo) = 0;
+    virtual void ResetDragState() = 0;
+    virtual void ResetAnimationParameter() = 0;
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
