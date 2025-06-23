@@ -648,6 +648,7 @@ void DeviceStatusManager::handlerPageScrollerEnvent()
         FI_HILOGE("get the focuse widowId faild, result=%{public}d", result);
         return;
     }
+    CHKPV(g_deviceManager);
     if (g_deviceManager->g_lastEnable || bundleName != BUNDLE_NAME) {
         FI_HILOGD("The current status bar is in display mode or does not belong to the whitelist application");
         return;
