@@ -80,7 +80,8 @@
         "power_manager",
         "resource_schedule_service",
         "motion",
-        "data_share"
+        "data_share",
+        "rust_libc"
       ],
       "third_party": [
         "libuv",
