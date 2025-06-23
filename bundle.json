@@ -97,7 +97,8 @@
           "//base/msdp/device_status/frameworks/js/napi/interaction:interaction_jsapi_group",
           "//base/msdp/device_status/frameworks/js/napi/motion:motion_napi",
           "//base/msdp/device_status/frameworks/js/napi/boomerang:metadatabinding_napi",
-          "//base/msdp/device_status/frameworks/js/napi/device_status:devicestatus_napi"
+          "//base/msdp/device_status/frameworks/js/napi/device_status:devicestatus_napi",
+          "//base/msdp/device_status/frameworks/js/napi/underage_model:userstatus_napi"
         ],
         "service_group":[
           "//base/msdp/device_status/libs:devicestatus_algo",
