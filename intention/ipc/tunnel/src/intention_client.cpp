@@ -670,6 +670,24 @@ int32_t IntentionClient::GetDragState(DragState &dragState)
     return RET_OK;
 }
 
+int32_t IntentionClient::IsDragStart(bool &isStart)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("Can not connect to IntentionService");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    auto ret = devicestatusProxy_->IsDragStart(isStart);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy::IsDragStart fail, ret =  %{public}d", ret);
+        return ret;
+    }
+
+    return RET_OK;
+}
+
 int32_t IntentionClient::SubscribeCallback(int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& subCallback)
 {

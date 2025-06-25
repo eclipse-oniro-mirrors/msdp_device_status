@@ -187,6 +187,8 @@ void FuzzIntentionClientDrag(const uint8_t *rawData, size_t size)
     INTENTION_CLIENT->SetDraggableStateAsync(boolean, integer32);
     Msdp::DeviceStatus::DragBundleInfo dragBundleInfo;
     INTENTION_CLIENT->GetDragBundleInfo(dragBundleInfo);
+    bool isStart = false;
+    INTENTION_CLIENT->IsDragStart(isStart);
 }
 
 void FuzzIntentionClientBoomerang(const uint8_t *rawData, size_t size)

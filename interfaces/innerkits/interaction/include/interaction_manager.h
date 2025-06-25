@@ -335,6 +335,14 @@ public:
      */
     int32_t EnableInternalDropAnimation(const std::string &animationInfo);
 
+    /**
+     * @brief Determine whether the current dragging state is DragState::START.
+     * @return true - The current dragging state is DragState::START.
+     *         false - The current dragging state is not DragState::START.
+     * @since 20
+     */
+    bool IsDragStart();
+
 #ifndef  OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Registers a listener for screen hot area of the mouse pointer.

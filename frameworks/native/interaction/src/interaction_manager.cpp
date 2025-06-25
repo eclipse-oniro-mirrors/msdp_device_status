@@ -297,6 +297,11 @@ int32_t InteractionManager::EnableInternalDropAnimation(const std::string &anima
     return INTER_MGR_IMPL.EnableInternalDropAnimation(animationInfo);
 }
 
+bool InteractionManager::IsDragStart()
+{
+    return INTER_MGR_IMPL.IsDragStart();
+}
+
 #else
 int32_t InteractionManager::StartDrag(const DragData &dragData)
 {

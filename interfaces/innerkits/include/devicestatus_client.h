@@ -83,6 +83,7 @@ public:
     int32_t EraseMouseIcon();
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
     int32_t EnableInternalDropAnimation(const std::string &animationInfo);
+    bool IsDragStart();
 
 private:
     class DeviceStatusDeathRecipient : public IRemoteObject::DeathRecipient {

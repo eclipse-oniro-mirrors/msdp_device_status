@@ -399,6 +399,12 @@ ErrCode GetDragBundleInfo(std::string &bundleName, bool &state) override
     return 0;
 }
 
+ErrCode IsDragStart(bool &isStart) override
+{
+    (void)isStart;
+    return 0;
+}
+
 // Boomerang
 ErrCode SubscribeCallback(int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& subCallback) override
