@@ -684,7 +684,6 @@ int32_t IntentionClient::IsDragStart(bool &isStart)
         FI_HILOGE("proxy::IsDragStart fail, ret =  %{public}d", ret);
         return ret;
     }
-
     return RET_OK;
 }
 

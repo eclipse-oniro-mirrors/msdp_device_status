@@ -2285,12 +2285,12 @@ int32_t DragManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const
 bool DragManager::IsDragStart() const
 {
     FI_HILOGD("enter");
-    if (GetDragState() == DragState::START) {
+    if (dragState_ == DragState::START) {
         FI_HILOGD("the drag state is DragState::START");
         return true;
     }
 
-    FI_HILOGD("the drag state is not DragState::START");
+    FI_HILOGD("the drag state is not DragState::START, it is %{public}d", static_cast<int32_t>(dragState_));
     return false;
 }
 
