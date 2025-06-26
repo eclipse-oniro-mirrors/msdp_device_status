@@ -97,6 +97,7 @@ private:
     void TurnOnChannelScan();
     int32_t SetWifiScene(unsigned int scene);
     bool UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    bool UpdateKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent);
     bool IsActive(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void ResetPressedEvents();
     double GetDamplingCoefficient(DamplingDirection direction) const;
