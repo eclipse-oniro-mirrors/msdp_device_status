@@ -399,6 +399,18 @@ HWTEST_F(DragClientTest, DragClientTest7, TestSize.Level0)
     CALL_TEST_DEBUG;
     ASSERT_NO_FATAL_FAILURE(g_dragClient.OnDisconnected());
 }
+
+/**
+ * @tc.name: DragClientTest8
+ * @tc.desc: DragClient
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragClientTest, DragClientTest8, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_EQ(g_dragClient.IsDragStart(), false);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

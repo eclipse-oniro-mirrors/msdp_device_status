@@ -522,6 +522,18 @@ void DragClient::OnDisconnected()
     dragListeners_.clear();
     hasRegistered_ = false;
 }
+
+bool DragClient::IsDragStart()
+{
+    CALL_DEBUG_ENTER;
+    bool isStart = false;
+    int32_t ret = INTENTION_CLIENT->IsDragStart(isStart);
+    if (ret != RET_OK) {
+        FI_HILOGE("IsDragStart fail, ret = %{public}d", ret);
+        isStart = false;
+    }
+    return isStart;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

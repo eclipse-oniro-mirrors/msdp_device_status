@@ -612,6 +612,12 @@ int32_t IntentionManager::EnableInternalDropAnimation(const std::string &animati
     CALL_DEBUG_ENTER;
     return drag_.EnableInternalDropAnimation(animationInfo);
 }
+
+bool IntentionManager::IsDragStart()
+{
+    CALL_DEBUG_ENTER;
+    return drag_.IsDragStart();
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

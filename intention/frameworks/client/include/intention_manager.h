@@ -104,6 +104,7 @@ public:
     void SetDraggableStateAsync(bool state, int64_t downTime);
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
     int32_t EnableInternalDropAnimation(const std::string &animationInfo);
+    bool IsDragStart();
 
 private:
     void InitClient();

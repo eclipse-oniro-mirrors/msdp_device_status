@@ -2282,6 +2282,18 @@ int32_t DragManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const
     return RET_OK;
 }
 
+bool DragManager::IsDragStart() const
+{
+    FI_HILOGD("enter");
+    if (dragState_ == DragState::START) {
+        FI_HILOGD("the drag state is DragState::START");
+        return true;
+    }
+
+    FI_HILOGD("the drag state is not DragState::START, it is %{public}d", static_cast<int32_t>(dragState_));
+    return false;
+}
+
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
 int32_t DragManager::EnableInternalDropAnimation(const std::string &animationInfo)
 {
