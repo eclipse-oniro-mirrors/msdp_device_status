@@ -64,6 +64,7 @@ ohos_shared_library("devicestatus_client") {
     "${device_status_frameworks_path}/native/src/fd_listener.cpp",
     "${device_status_frameworks_path}/native/src/stationary_manager.cpp",
     "${device_status_root_path}/services/communication/client/src/devicestatus_srv_proxy.cpp",
+    "${device_status_frameworks_path}/native/src/on_screen_manager.cpp",
   ]
 
   if (device_status_intention_framework) {
@@ -94,6 +95,7 @@ ohos_shared_library("devicestatus_client") {
       "${device_status_root_path}/intention/ipc/tunnel:intention_client",
       "${device_status_root_path}/intention/prototype:intention_prototype",
       "${device_status_root_path}/intention/stationary/client:intention_stationary_client",
+      "${device_status_root_path}/intention/on_screen/client:intention_on_screen_client",
     ]
   }
 

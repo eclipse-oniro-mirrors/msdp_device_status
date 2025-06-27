@@ -568,6 +568,29 @@ ErrCode IntentionService::GetDevicePostureDataSync(SequenceablePostureData &data
         return RET_OK;
     });
 }
+
+ErrCode IntentionService::GetPageContent(const OnScreen::SequenceableContentOption &option,
+    OnScreen::PageContent &pageContent)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &option, &pageContent] {
+        OnScreen::PageContent rawPageContent;
+        int32_t ret = onScreen_.GetPageContent(context, option, rawPageContent);
+        if (ret != RET_OK) {
+            return ret;
+        }
+        pageContent.pageContent_ = rawPageContent;
+        return RET_OK;
+    });
+}
+
+ErrCode IntentionService::SendControlEvent(const OnScreen::ControlEvent &event)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &event] {
+        return onScreen_.SendControlEvent(context, event);
+    });
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

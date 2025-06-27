@@ -108,6 +108,10 @@ public:
     int32_t GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue);
     int32_t GetDevicePostureDataSync(DevicePostureData &postureData);
 
+    // OnScreen
+    int32_t GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent);
+    int32_t SendControlEvent(const OnScreen::ControlEvent& event);
+
 private:
     class DeathRecipient : public IRemoteObject::DeathRecipient {
     public:

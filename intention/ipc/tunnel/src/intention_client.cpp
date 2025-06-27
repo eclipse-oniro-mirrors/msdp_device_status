@@ -992,6 +992,44 @@ int32_t IntentionClient::GetDevicePostureDataSync(DevicePostureData &postureData
     return RET_OK;
 }
 
+int32_t IntentionClient::GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    OnScreen::SequenceableContentOption seqOption(option);
+    OnScreen::SequenceablePageContent seqPageContent(pageContent);
+    int32_t ret = devicestatusProxy_->GetPageContent(seqOption, seqPageContent);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy::GetPageContent fail");
+        return ret;
+    }
+    pageContent = seqPageContent.pageContent_;
+    return RET_OK;
+}
+
+int32_t SendControlEvent(const OnScreen::ControlEvent& event)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    OnScreen::ControlEvent seqEvent(event);
+    int32_t ret = devicestatusProxy_->SendControlEvent(event);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy::SendControlEvent fail");
+        return ret;
+    }
+    return RET_OK;
+}
+
 void IntentionClient::ResetProxy(const wptr<IRemoteObject> &remote)
 {
     CALL_DEBUG_ENTER;

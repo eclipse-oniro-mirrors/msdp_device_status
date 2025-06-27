@@ -110,6 +110,14 @@ using TimeStamp = std::chrono::high_resolution_clock::time_point;
         } \
     } while (0)
 
+#define CHK_RET_PRINT_AND_RET(ret, res) \
+    do { \
+        if ((ret) != RET_OK) { \
+            FI_HILOGE("%{public}s failed, ret = (%{public}d)", #res, #ret); \
+            return ret; \
+        } \
+    } while (0)
+
 #define CHK_PID_AND_TID() \
     do { \
         FI_HILOGD("%{public}s, (%{public}d), pid:%{public}d, threadId:%{public}" PRIu64, \
