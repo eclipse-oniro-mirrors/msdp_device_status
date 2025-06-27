@@ -27,14 +27,14 @@ namespace DeviceStatus {
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
 constexpr int32_t PARAM_EXCEPTION { 401 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
-constexpr int32_t SERVICE_EXCEPTION { 33500001 };
-constexpr int32_t SUBSCRIBE_EXCEPTION { 33500002 };
-constexpr int32_t UNSUBSCRIBE_EXCEPTION { 33500003 };
+constexpr int32_t SERVICE_EXCEPTION { 33900001 };
+constexpr int32_t SUBSCRIBE_EXCEPTION { 33900002 };
+constexpr int32_t UNSUBSCRIBE_EXCEPTION { 33900003 };
 
 napi_value CreateUnderageModelNapiError(const napi_env &env, int32_t errorCode, const std::string &errorMsg);
 std::optional<std::string> GetUnderageModelErrMsg(int32_t errorCode);
 void ThrowUnderageModelErr(const napi_env &env, int32_t errorCode, const std::string &printMsg);
 } // namespace DeviceStatus
 } // namespace Msdp
-} // namespae OHOS
+} // namespace OHOS
 #endif // UNDERAGE_MODEL_NAPI_ERROR_H
