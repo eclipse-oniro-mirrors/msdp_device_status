@@ -34,7 +34,7 @@ namespace {
 constexpr uint32_t INVALID_TYPE = 0;
 constexpr uint32_t UNDERAGE_MODEL_TYPE_KID = 16;
 constexpr size_t MAX_ARG_STRING_LEN = 512;
-constexpr uint32_t MAX_ERROR_CODE = 1000;
+constexpr int32_t MAX_ERROR_CODE = 1000;
 constexpr uint32_t UNSUBSCRIBE_ONE_PARA = 1;
 constexpr uint32_t UNSUBSCRIBE_TWO_PARA = 2;
 std::mutex g_mutex; // mutex:Subscribe/Unsubscribe/OnListener
@@ -124,7 +124,7 @@ bool UnderageModelNapi::SubscribeCallback(napi_env env, uint32_t type)
             }
         }
         auto listener = std::make_shared<UnderageModelListener>(env);
-        uint32_t ret = std::abs(g_registerListenerFunc(type, listener));
+        int32_t ret = std::abs(g_registerListenerFunc(type, listener));
         if (ret < MAX_ERROR_CODE) {
             FI_HILOGE("RegisterListener failed, ret:%{public}d", ret);
             return false;
