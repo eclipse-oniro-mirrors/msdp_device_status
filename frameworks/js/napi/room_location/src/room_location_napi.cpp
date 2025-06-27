@@ -369,6 +369,7 @@ napi_value RoomLocationNapi::SetDeviceInfos(napi_env env, napi_callback_info inf
         return nullptr;
     }
 
+    std::lock_guard<std::mutex> guard(g_mutex);
     if (!ConstructRoomLocation(env, jsThis)) {
         ThrowErr(env, SETINOFS_EXCEPTION, "Failed to get g_RoomLocationNapi");
         return nullptr;
@@ -662,6 +663,11 @@ napi_value RoomLocationNapi::GetRoomLocationResult(napi_env env, napi_callback_i
     napi_status status = napi_get_cb_info(env, info, &argc, NULL, &jsThis, nullptr);
     if (status != napi_ok) {
         ThrowErr(env, GETRES_EXCEPTION, "napi_get_cb_info failed");
+        return nullptr;
+    }
+    std::lock_guard<std::mutex> guard(g_mutex);
+    if (!ConstructRoomLocation(env, jsThis)) {
+        ThrowErr(env, GETRES_EXCEPTION, "Failed to get g_RoomLocationNapi");
         return nullptr;
     }
     if (g_RoomLocationNapi->g_roomLocationHandle == nullptr && !LoadLibrary()) {
