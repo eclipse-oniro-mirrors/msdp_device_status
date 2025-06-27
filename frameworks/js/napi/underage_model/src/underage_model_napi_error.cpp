@@ -74,4 +74,4 @@ void ThrowUnderageModelErr(const napi_env &env, int32_t errorCode, const std::st
 }
 } // namespace DeviceStatus
 } // namespace Msdp
-} // namespae OHOS
+} // namespace OHOS
