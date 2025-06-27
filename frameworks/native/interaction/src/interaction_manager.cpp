@@ -414,6 +414,11 @@ void InteractionManager::SetSVGFilePath(const std::string &filePath)
 {
     DRAG_MANAGER.SetSVGFilePath(filePath);
 }
+
+bool InteractionManager::IsDragStart()
+{
+    return DRAG_MANAGER.IsDragStart();
+}
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 } // namespace DeviceStatus
 } // namespace Msdp
