@@ -440,6 +440,118 @@ HWTEST_F(CooperateContextTest, CooperateContextTest012, TestSize.Level1)
     };
     ASSERT_NO_FATAL_FAILURE(g_context->OnRemoteStart(result));
 }
+
+/**
+ * @tc.name: CooperateContextTest13
+ * @tc.desc: cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateContextTest, CooperateContextTest013, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    EnableCooperateEvent enableCooperateEvent{1, 1, 1};
+    RegisterListenerEvent registerListenerEvent{IPCSkeleton::GetCallingPid(), 1};
+    g_context->EnableCooperate(enableCooperateEvent);
+    g_context->DisableCooperate(registerListenerEvent);
+    StartCooperateEvent event {
+        .pid = IPCSkeleton::GetCallingPid(),
+        .userData = 1,
+        .remoteNetworkId = "test",
+        .startDeviceId = 1,
+        .errCode = std::make_shared<std::promise<int32_t>>(),
+        .uid = 20020135,
+    };
+    g_context->StartCooperate(event);
+    InputPointerEvent inputPointerEvent{
+        .deviceId = 1,
+        .pointerAction = 1,
+        .sourceType = 1,
+        .position = Coordinate {
+            .x = 1,
+            .y = 1,
+        }
+    };
+    g_context->OnPointerEvent(inputPointerEvent);
+    DSoftbusStartCooperateFinished failNotice {
+        .success = false,
+        .originNetworkId = "test",
+    };
+    g_context->RemoteStartSuccess(failNotice);
+    DSoftbusRelayCooperate dSoftbusRelayCooperate {
+        .networkId = "test",
+        .targetNetworkId = "test1",
+        .uid = 20020135,
+    };
+    g_context->RelayCooperate(dSoftbusRelayCooperate);
+    g_context->observers_.clear();
+    g_context->OnTransitionOut();
+    g_context->CloseDistributedFileConnection("test");
+    g_context->OnTransitionIn();
+    g_context->OnResetCooperation();
+    g_context->OnBack();
+    g_context->OnRelayCooperation("test", NormalizedCoordinate());
+    bool ret = g_context->IsAllowCooperate();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: CooperateContextTest14
+ * @tc.desc: cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateContextTest, CooperateContextTest014, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<ICooperateObserver> observer = std::make_shared<CooperateObserver>();
+    g_context->AddObserver(observer);
+    EnableCooperateEvent enableCooperateEvent{1, 1, 1};
+    RegisterListenerEvent registerListenerEvent{IPCSkeleton::GetCallingPid(), 1};
+    g_context->EnableCooperate(enableCooperateEvent);
+    g_context->DisableCooperate(registerListenerEvent);
+    StartCooperateEvent event {IPCSkeleton::GetCallingPid(), 1, "test", 1,
+        std::make_shared<std::promise<int32_t>>(), 20020135,
+    };
+    g_context->StartCooperate(event);
+    InputPointerEvent inputPointerEvent{1, 1, 1, Coordinate {1, 1}};
+    g_context->OnPointerEvent(inputPointerEvent);
+    DSoftbusStartCooperateFinished failNotice {
+        .success = false, .originNetworkId = "test",
+    };
+    g_context->RemoteStartSuccess(failNotice);
+    DSoftbusRelayCooperate dSoftbusRelayCooperate {
+        .networkId = "test", .targetNetworkId = "test1",
+    };
+    g_context->RelayCooperate(dSoftbusRelayCooperate);
+    g_context->UpdateCursorPosition();
+    g_context->ResetCursorPosition();
+    #ifdef ENABLE_PERFORMANCE_CHECK
+    g_context->StartTrace("test");
+    g_context->StartTrace("test");
+    g_context->FinishTrace("test");
+    #endif // ENABLE_PERFORMANCE_CHECK
+    bool ret = g_context->IsAllowCooperate();
+    EXPECT_TRUE(ret);
+    Coordinate coordinate{1, 1};
+    g_context->SetCursorPosition(coordinate);
+    g_context->OnTransitionOut();
+    g_context->OnTransitionIn();
+    g_context->OnBack();
+    g_context->OnRelayCooperation("test", NormalizedCoordinate());
+    g_context->CloseDistributedFileConnection("test");
+    g_context->OnResetCooperation();
+    g_context->RemoveObserver(observer);
+    ret = g_context->StartEventHandler();
+    EXPECT_EQ(ret, RET_OK);
+    g_context->OnTransitionOut();
+    g_context->OnTransitionIn();
+    g_context->OnBack();
+    g_context->OnRelayCooperation("test", NormalizedCoordinate());
+    g_context->CloseDistributedFileConnection("test");
+    g_context->OnResetCooperation();
+    g_context->StopEventHandler();
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
