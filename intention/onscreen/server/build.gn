@@ -38,10 +38,10 @@ ohos_source_set("intention_on_screen_server") {
   ]
 
   sources = [
-    "src/on_screen_server.cpp
+    "src/on_screen_server.cpp"
   ]
 
-  public_configs = [ ":intention_stationary_server_public_config" ]
+  public_configs = [ ":intention_on_screen_server_public_config" ]
 
   defines = device_status_default_defines
 
