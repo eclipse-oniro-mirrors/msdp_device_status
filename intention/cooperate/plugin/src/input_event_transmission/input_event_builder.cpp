@@ -262,6 +262,7 @@ void InputEventBuilder::OnKeyEvent(Msdp::NetPacket &packet)
         FI_HILOGE("Failed to deserialize key event");
         return;
     }
+    UpdateKeyEvent(keyEvent_);
     TagRemoteEvent(keyEvent_);
     FI_HILOGD("KeyEvent(No:%{public}d,Key:%{private}d,Action:%{public}d)",
         keyEvent_->GetId(), keyEvent_->GetKeyCode(), keyEvent_->GetKeyAction());
@@ -372,6 +373,13 @@ bool InputEventBuilder::DampPointerMotion(std::shared_ptr<MMI::PointerEvent> poi
     }
     pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), item);
     return true;
+}
+
+void InputEventBuilder::UpdateKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
+{
+    int64_t time = Utility::GetSysClockTime();
+    keyEvent->SetActionTime(time);
+    keyEvent->SetActionStartTime(time);
 }
 
 void InputEventBuilder::TagRemoteEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)

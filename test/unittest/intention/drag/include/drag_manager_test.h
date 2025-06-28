@@ -18,11 +18,40 @@
 
 #include <gtest/gtest.h>
 
+#include "ddm_adapter.h"
+#include "delegate_tasks.h"
+#include "device_manager.h"
 #include "drag_client.h"
+#include "drag_data_manager.h"
+#include "drag_data_util.h"
+#include "drag_manager.h"
+#include "i_context.h"
+#include "socket_session_manager.h"
+#include "timer_manager.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+class ContextService final : public IContext {
+    ContextService();
+    ~ContextService();
+    DISALLOW_COPY_AND_MOVE(ContextService);
+public:
+    IDelegateTasks& GetDelegateTasks() override;
+    IDeviceManager& GetDeviceManager() override;
+    ITimerManager& GetTimerManager() override;
+    IDragManager& GetDragManager() override;
+    IDDMAdapter& GetDDM() override;
+    IPluginManager& GetPluginManager() override;
+    ISocketSessionManager& GetSocketSessionManager() override;
+    IInputAdapter& GetInput() override;
+    IDSoftbusAdapter& GetDSoftbus() override;
+    static ContextService* GetInstance();
+
+private:
+    std::unique_ptr<IDDMAdapter> ddm_;
+};
+
 class DragManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();

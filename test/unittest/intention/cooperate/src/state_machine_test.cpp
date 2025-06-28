@@ -1525,6 +1525,194 @@ HWTEST_F(StateMachineTest, stateMachine_test099, TestSize.Level0)
     g_stateMachine->isCooperateEnable_ = true;
     ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnRemoteStartWithOptions(cooperateContext, event));
 }
+
+/**
+ * @tc.name: stateMachine_test100
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(StateMachineTest, stateMachine_test100, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
+    CooperateEvent startEvent (
+        CooperateEventType::DSOFTBUS_START_COOPERATE,
+        DSoftbusStartCooperate {
+            .networkId = LOCAL_NETWORKID,
+            .uid = 20020135,
+    });
+    ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnRemoteStart(cooperateContext, startEvent));
+}
+
+/**
+ * @tc.name: stateMachine_test101
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(StateMachineTest, stateMachine_test101, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
+    CooperateEvent startEvent (
+        CooperateEventType::DSOFTBUS_START_COOPERATE,
+        DSoftbusStartCooperate {
+            .networkId = LOCAL_NETWORKID,
+            .uid = 20020135,
+    });
+    g_stateMachine->isCooperateEnable_ = true;
+    ASSERT_NO_FATAL_FAILURE(g_stateMachine->OnRemoteStart(cooperateContext, startEvent));
+}
+
+/**
+ * @tc.name: StateMachineTest_OnEvent
+ * @tc.desc: cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(StateMachineTest, StateMachineTest_OnEvent038, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t userData = 0;
+    std::string remoteNetworkId("");
+    int32_t startDeviceId = 1;
+    bool isUnchained = true;
+    CooperateEvent startEvent(
+        CooperateEventType::START,
+        StartCooperateEvent{
+        .pid = pid,
+        .userData = userData,
+        .remoteNetworkId = remoteNetworkId,
+        .startDeviceId = startDeviceId,
+        .errCode = std::make_shared<std::promise<int32_t>>(),
+        .uid = 20020135,
+    });
+    auto env = ContextService::GetInstance();
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    g_stateMachine->OnEvent(cooperateContext, startEvent);
+    CooperateEvent stopEvent(
+        CooperateEventType::STOP,
+        StopCooperateEvent {
+            .pid = pid,
+            .userData = userData,
+            .isUnchained = isUnchained,
+        });
+    g_stateMachine->OnEvent(cooperateContext, stopEvent);
+    bool ret = g_context->mouseLocation_.HasLocalListener();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: StateMachineTest_OnEvent
+ * @tc.desc: cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(StateMachineTest, StateMachineTest_OnEvent039, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t userData = 0;
+    std::string remoteNetworkId("");
+    int32_t startDeviceId = 1;
+    bool isUnchained = true;
+    CooperateEvent startEvent(
+        CooperateEventType::START,
+        StartCooperateEvent{
+        .pid = pid,
+        .userData = userData,
+        .remoteNetworkId = remoteNetworkId,
+        .startDeviceId = startDeviceId,
+        .errCode = std::make_shared<std::promise<int32_t>>(),
+        .uid = 20020135,
+    });
+    CooperateEvent stopEvent(
+        CooperateEventType::STOP,
+        StopCooperateEvent {
+            .pid = pid,
+            .userData = userData,
+            .isUnchained = isUnchained,
+        });
+    auto env = ContextService::GetInstance();
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    g_stateMachine->current_ = CooperateState::COOPERATE_STATE_IN;
+    g_stateMachine->OnEvent(cooperateContext, startEvent);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_stateMachine->OnEvent(cooperateContext, stopEvent);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    CooperateEvent startRemoteEvent(
+        CooperateEventType::START,
+        StartCooperateEvent{
+        .pid = pid,
+        .userData = userData,
+        .remoteNetworkId = "remoteNetworkId",
+        .startDeviceId = startDeviceId,
+        .errCode = std::make_shared<std::promise<int32_t>>(),
+        .uid = 20020135,
+    });
+    CooperateEvent stopRemoteEvent = stopEvent;
+    g_stateMachine->current_ = CooperateState::COOPERATE_STATE_OUT;
+    g_stateMachine->OnEvent(cooperateContext, startRemoteEvent);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_stateMachine->OnEvent(cooperateContext, stopRemoteEvent);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    EXPECT_FALSE(g_context->mouseLocation_.HasLocalListener());
+}
+
+/**
+ * @tc.name: StateMachineTest_OnEvent
+ * @tc.desc: Test OnReset interface
+ * @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(StateMachineTest, StateMachineTest_OnEvent040, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t userData = 0;
+    auto env = ContextService::GetInstance();
+    Context cooperateContext(env);
+    cooperateContext.Enable();
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    g_stateMachine->current_ = CooperateState::COOPERATE_STATE_IN;
+    std::string remoteNetworkId("");
+    int32_t startDeviceId = 1;
+    bool isUnchained = true;
+    CooperateEvent startEvent(
+        CooperateEventType::START,
+        StartCooperateEvent{
+        .pid = pid,
+        .userData = userData,
+        .remoteNetworkId = remoteNetworkId,
+        .startDeviceId = startDeviceId,
+        .errCode = std::make_shared<std::promise<int32_t>>(),
+        .uid = 20020135,
+    });
+    CooperateEvent stopEvent(
+        CooperateEventType::STOP,
+        StopCooperateEvent {
+            .pid = pid,
+            .userData = userData,
+            .isUnchained = isUnchained,
+        });
+    g_stateMachine->OnEvent(cooperateContext, startEvent);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_stateMachine->OnEvent(cooperateContext, stopEvent);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    cooperateContext.Disable();
+    bool ret = g_context->mouseLocation_.HasLocalListener();
+    EXPECT_FALSE(ret);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

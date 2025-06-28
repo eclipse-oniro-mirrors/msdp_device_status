@@ -302,7 +302,7 @@ std::shared_ptr<MMI::InputDevice> InputDeviceMgr::Transform(std::shared_ptr<IDev
     CHKPP(device);
     auto inputDevice = std::make_shared<MMI::InputDevice>();
     inputDevice->SetId(device->GetId());
-    inputDevice->SetName(device->GetName());
+    inputDevice->SetName(device->GetName() + std::to_string(device->GetId()));
     inputDevice->SetBus(device->GetBus());
     inputDevice->SetVersion(device->GetVersion());
     inputDevice->SetProduct(device->GetProduct());

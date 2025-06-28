@@ -18,6 +18,11 @@
 
 #include "parcel.h"
 
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+#include "ui/rs_canvas_node.h"
+#include "ui/rs_node.h"
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
 #include "drag_data.h"
 
 namespace OHOS {
@@ -30,6 +35,24 @@ public:
     static int32_t MarshallingSummarys2(const DragData &dragData, Parcel &data);
     static int32_t UnMarshallingSummarys2(Parcel &data, DragData &dragData);
 };
+
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+struct DragInternalInfo {
+    float positionX { -1.0f };
+    float positionY { -1.0f };
+    float scale { -1.0f };
+    int32_t pixelMapX { -1 };
+    int32_t pixelMapY { -1 };
+    int32_t displayWidth { -1 };
+    uint32_t argb { 0 };
+    std::shared_ptr<Rosen::RSNode> rootNode { nullptr };
+    std::shared_ptr<Rosen::RSNode> parentNode { nullptr };
+    std::shared_ptr<Rosen::RSNode> curvesMaskNode { nullptr };
+    std::shared_ptr<Rosen::RSNode> lightNode { nullptr };
+    std::shared_ptr<Media::PixelMap> currentPixelMap { nullptr };
+    std::vector<std::shared_ptr<Rosen::RSCanvasNode>> nodes;
+};
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

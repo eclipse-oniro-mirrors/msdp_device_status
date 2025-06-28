@@ -175,8 +175,12 @@ public:
     int32_t AddPrivilege(int32_t tokenId) override;
     int32_t EraseMouseIcon() override;
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const override;
+    bool IsDragStart() const override;
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
     int32_t EnableInternalDropAnimation(const std::string &animationInfo) override;
+    void GetDragDrawingInfo(DragInternalInfo &dragInternalInfo) override;
+    void ResetDragState() override;
+    void ResetAnimationParameter() override;
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -227,6 +231,7 @@ public:
 #endif // OHOS_ENABLE_PULLTHROW
 private:
     void PrintDragData(const DragData &dragData, const std::string &packageName = "");
+    int32_t HandleDragSuccess(bool hasCustomAnimation);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t AddDragEventHandler(int32_t sourceType);
     int32_t AddPointerEventHandler(uint32_t deviceTags);
@@ -348,7 +353,7 @@ private:
     bool needLongPressDragAnimation_ { true };
     DragRadarPackageName dragPackageName_;
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
-    std::atomic_bool enableInternalDropAnimation_ {false};
+    std::atomic_bool enableInternalDropAnimation_ { false };
     DragInternalAnimationWrapper internalAnimationWrapper_;
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 };

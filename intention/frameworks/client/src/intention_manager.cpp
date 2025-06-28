@@ -613,6 +613,12 @@ int32_t IntentionManager::EnableInternalDropAnimation(const std::string &animati
     return drag_.EnableInternalDropAnimation(animationInfo);
 }
 
+bool IntentionManager::IsDragStart()
+{
+    CALL_DEBUG_ENTER;
+    return drag_.IsDragStart();
+}
+
 int32_t IntentionManager::GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent)
 {
     CALL_DEBUG_ENTER;

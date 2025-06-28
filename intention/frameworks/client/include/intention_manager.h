@@ -105,6 +105,7 @@ public:
     void SetDraggableStateAsync(bool state, int64_t downTime);
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
     int32_t EnableInternalDropAnimation(const std::string &animationInfo);
+    bool IsDragStart();
     int32_t GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent);
     int32_t SendControlEvent(const OnScreen::ControlEvent& event);
 

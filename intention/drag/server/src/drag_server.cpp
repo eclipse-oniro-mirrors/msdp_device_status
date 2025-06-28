@@ -294,9 +294,14 @@ int32_t DragServer::SetAppDragSwitchState(
     return RET_OK;
 }
 
-int32_t DragServer::GetDragState(DragState &dragState)
+int32_t DragServer::GetDragState(CallingContext &context, DragState &dragState)
 {
     CHKPR(env_, RET_ERR);
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+
     if (int32_t ret = env_->GetDragManager().GetDragState(dragState); ret != RET_OK) {
         FI_HILOGE("IDragManager::GetDragState fail, error:%{public}d", ret);
         return ret;
@@ -459,6 +464,13 @@ bool DragServer::IsSystemHAPCalling(CallingContext &context)
         return true;
     }
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
+}
+
+int32_t DragServer::IsDragStart(bool &isStart)
+{
+    CHKPR(env_, RET_ERR);
+    isStart = env_->GetDragManager().IsDragStart();
+    return RET_OK;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

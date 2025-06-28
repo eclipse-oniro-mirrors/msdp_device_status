@@ -432,6 +432,39 @@ HWTEST_F(CooperateFreeTest, CooperateFreeTest006, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+/**
+ * @tc.name: CooperateFreeTest003
+ * @tc.desc: Test cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest007, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DSOFTBUS_INPUT_DEV_SYNC,
+        StartCooperateEvent {
+        .pid = IPCSkeleton::GetCallingPid(),
+        .userData = 1,
+        .remoteNetworkId = "test",
+        .startDeviceId = 1,
+        .errCode = std::make_shared<std::promise<int32_t>>(),
+        .uid = 20020135,
+    });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
+    Cooperate::CooperateFree stateIn(*g_stateMachine, env);
+    ASSERT_NE(stateIn.initial_, nullptr);
+    auto relay = std::make_shared<Cooperate::CooperateFree::Initial>(stateIn);
+    ASSERT_NE(relay, nullptr);
+    relay->OnStart(cooperateContext, event);
+    Cooperate::CooperateOut stateOut(*g_stateMachine, env);
+    ASSERT_NE(stateOut.initial_, nullptr);
+    bool ret = g_context->mouseLocation_.HasLocalListener();
+    EXPECT_FALSE(ret);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
