@@ -120,8 +120,9 @@ public:
     ErrCode GetDevicePostureDataSync(SequenceablePostureData &data) override;
 
     // OnScreen
-    ErrCode GetPageContent(const OnScreen::SequenceableContentOption &option, OnScreen::PageContent &pageContent);
-    ErrCode SendControlEvent(const OnScreen::ControlEvent &event);
+    ErrCode GetPageContent(const OnScreen::SequenceableContentOption &contentOption,
+        OnScreen::SequenceablePageContent &pageContent) override;
+    ErrCode SendControlEvent(const OnScreen::SequenceableControlEvent &event) override;
 
 private:
     CallingContext GetCallingContext();

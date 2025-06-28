@@ -13,7 +13,7 @@
  * limitations under the License.
  */
  
- sequenceable OHOS.Msdp.DeviceStatus.SequenceableCooperateOptions;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableCooperateOptions;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragData;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragResult;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragVisible;
@@ -102,6 +102,6 @@ interface OHOS.Msdp.IIntention {
     void GetDevicePostureDataSync([out] SequenceablePostureData postureData);
 
     // OnScreen
-    void GetPageContent([in] SequenceableContentOption option, [out] SequenceablePageContent pageContent);
+    void GetPageContent([in] SequenceableContentOption contentOption, [out] SequenceablePageContent pageContent);
     void SendControlEvent([in] SequenceableControlEvent event);
 }

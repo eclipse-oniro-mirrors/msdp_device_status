@@ -32,7 +32,7 @@ public:
 
     int32_t GetPageContent(const ContentOption& option, PageContent& pageContent);
     int32_t SendControlEvent(const ControlEvent& event);
-}
+};
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

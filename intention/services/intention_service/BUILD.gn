@@ -22,6 +22,7 @@ config("intention_service_config") {
     "${device_status_root_path}/interfaces/innerkits/interaction/include",
     "${device_status_root_path}/intention/prototype/include",
     "${device_status_root_path}/intention/boomerang/server/include",
+    "${device_status_root_path}/intention/onscreen/server/include",
   ]
 }
 
@@ -67,11 +68,13 @@ ohos_shared_library("intention_service") {
     "${device_status_root_path}/intention/stationary/server:intention_stationary_server",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
-    "${device_status_root_path}/intention/on_screen/intention_on_screen_server"
+    "${device_status_root_path}/intention/onscreen/server:intention_on_screen_server"
   ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "graphic_2d:librender_service_base",
@@ -79,6 +82,7 @@ ohos_shared_library("intention_service") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",

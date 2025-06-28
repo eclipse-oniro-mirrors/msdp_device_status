@@ -52,14 +52,12 @@ ohos_source_set("intention_on_screen_server") {
   ]
 
   external_deps = [
-    "accessibility:accessibility_common",
-    "accessibility:accessibleability",
-    "accessibility:accessibilityclient",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "image_framework:image_native",
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
     "window_manager:libwm",

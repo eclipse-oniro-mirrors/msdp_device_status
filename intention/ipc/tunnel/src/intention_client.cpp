@@ -1029,7 +1029,7 @@ int32_t IntentionClient::GetPageContent(const OnScreen::ContentOption& option, O
     return RET_OK;
 }
 
-int32_t SendControlEvent(const OnScreen::ControlEvent& event)
+int32_t IntentionClient::SendControlEvent(const OnScreen::ControlEvent& event)
 {
     CALL_DEBUG_ENTER;
     if (Connect() != RET_OK) {
@@ -1038,8 +1038,8 @@ int32_t SendControlEvent(const OnScreen::ControlEvent& event)
     }
     std::lock_guard lock(mutex_);
     CHKPR(devicestatusProxy_, RET_ERR);
-    OnScreen::ControlEvent seqEvent(event);
-    int32_t ret = devicestatusProxy_->SendControlEvent(event);
+    OnScreen::SequenceableControlEvent seqEvent(event);
+    int32_t ret = devicestatusProxy_->SendControlEvent(seqEvent);
     if (ret != RET_OK) {
         FI_HILOGE("proxy::SendControlEvent fail");
         return ret;

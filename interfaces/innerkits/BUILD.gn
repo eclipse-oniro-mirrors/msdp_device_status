@@ -27,6 +27,7 @@ config("devicestatus_public_config") {
     "${device_status_root_path}/utils/ipc/include",
     "${device_status_root_path}/services/communication/base/",
     "${device_status_root_path}/services/communication/client/include",
+    "${device_status_root_path}/intention/onscreen/client:intention_on_screen_client",
   ]
 
   if (device_status_intention_framework) {

@@ -15,7 +15,7 @@
 
 #include "sequenceable_page_content.h"
 
-#include "devicestaus_common.h"
+#include "devicestatus_common.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -34,9 +34,9 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     WRITESTRING(parcel, pageContent_.content, false);
     WRITESTRING(parcel, pageContent_.links, false);
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.paragraphs.size()), false);
-    for (auto i = 0; i < pageContent_.paragraphs.size(); i++) {
+    for (size_t i = 0; i < pageContent_.paragraphs.size(); i++) {
         WRITEINT32(parcel, pageContent_.paragraphs[i].hookId, false);
-        WRITESTRING(parcel, PageContent_.paragraphs[i].text, false);
+        WRITESTRING(parcel, pageContent_.paragraphs[i].text, false);
     }
     if (!parcel.WriteParcelable(pageContent_.screenshot.get())) {
         FI_HILOGE("screenshot marshalling failed");
@@ -75,11 +75,12 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
         Paragraph para;
         WRITEINT32(parcel, para.hookId, false);
         WRITESTRING(parcel, para.text, false);
-        pageContent_.push_back(para);
+        pageContent_.paragraphs.push_back(para);
     }
     // 这个可能有问题
-    if (!parcel.ReadParcelable(pageContent_screenshot.get())) {
-        FI_HILOGE("screenshot marshalling failed");
+    pageContent_.screenshot.reset(parcel.ReadParcelable<Media::PixelMap>());
+    if (pageContent_.screenshot == nullptr) {
+        FI_HILOGE("unmarshalling screenshot failed");
         return false;
     }
     return true;

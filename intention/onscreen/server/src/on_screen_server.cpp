@@ -23,6 +23,7 @@
 
 #include "devicestatus_define.h"
 #include "if_system_ability_manager.h"
+#include "iservice_registry.h"
 #include "os_account_manager.h"
 #include "system_ability_definition.h"
 
@@ -45,7 +46,7 @@ void *g_getPageInfoFunc = nullptr;
 int32_t OnScreenServer::GetPageContent(CallingContext &context, const ContentOption &option, PageContent &pageContent)
 {
     Rosen::WindowInfoOption windowInfoOption;
-    option.windowInfoFilterOption =
+    windowInfoOption.windowInfoFilterOption =
         (Rosen::WindowInfoFilterOption::VISIBLE | Rosen::WindowInfoFilterOption::EXCLUDE_SYSTEM);
     std::vector<sptr<Rosen::WindowInfo>> windowInfos;
     // ListWindowInfo
@@ -57,10 +58,10 @@ int32_t OnScreenServer::GetPageContent(CallingContext &context, const ContentOpt
     // find window id
     auto iter = std::find_if(windowInfos.begin(), windowInfos.end(), [&option](const sptr<Rosen::WindowInfo> &windowInfo) {
         // filter floating window
-        if (windowInfo.windowMetaInfo.windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING) {
+        if (windowInfo->windowMetaInfo.windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING) {
             return false;
         }
-        return option.windowId == windowInfo.windowMetaInfo.windowId;
+        return option.windowId == windowInfo->windowMetaInfo.windowId;
     });
     if (iter == windowInfos.end()) {
         FI_HILOGE("windowid is not exist");
@@ -128,6 +129,7 @@ int32_t OnScreenServer::UnloadHAExpandClient()
     }
     g_haExpandClientHandle = nullptr;
     g_getPageInfoFunc = nullptr;
+    return RET_OK;
 }
 
 int32_t OnScreenServer::ConnectBundleMgr()
@@ -154,7 +156,7 @@ int32_t OnScreenServer::ConnectBundleMgr()
     return RET_OK;
 }
 
-int32_t OnScreenServer::ResetBundleMgr()
+void OnScreenServer::ResetBundleMgr()
 {
     FI_HILOGW("bundleMgrProxy_ reset");
     bundleMgrProxy_ = nullptr;

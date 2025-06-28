@@ -577,13 +577,13 @@ ErrCode IntentionService::GetDevicePostureDataSync(SequenceablePostureData &data
     });
 }
 
-ErrCode IntentionService::GetPageContent(const OnScreen::SequenceableContentOption &option,
-    OnScreen::PageContent &pageContent)
+ErrCode IntentionService::GetPageContent(const OnScreen::SequenceableContentOption &contentOption,
+    OnScreen::SequenceablePageContent &pageContent)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([this, &context, &option, &pageContent] {
+    return PostSyncTask([this, &context, &contentOption, &pageContent] {
         OnScreen::PageContent rawPageContent;
-        int32_t ret = onScreen_.GetPageContent(context, option, rawPageContent);
+        int32_t ret = onScreen_.GetPageContent(context, contentOption.option_, rawPageContent);
         if (ret != RET_OK) {
             return ret;
         }
@@ -592,11 +592,11 @@ ErrCode IntentionService::GetPageContent(const OnScreen::SequenceableContentOpti
     });
 }
 
-ErrCode IntentionService::SendControlEvent(const OnScreen::ControlEvent &event)
+ErrCode IntentionService::SendControlEvent(const OnScreen::SequenceableControlEvent &event)
 {
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, &event] {
-        return onScreen_.SendControlEvent(context, event);
+        return onScreen_.SendControlEvent(context, event.controlEvent_);
     });
 }
 } // namespace DeviceStatus

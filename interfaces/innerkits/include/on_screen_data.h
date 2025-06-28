@@ -25,12 +25,12 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
-enum Scenario {
+enum class Scenario {
     UNKNOWN = 0,
     ARTICLE = 1,
 };
 
-enum EventType {
+enum class EventType {
     UNKNOWN = 0,
     SCROLL_TO_HOOK,
 };
@@ -79,7 +79,7 @@ struct PageContent {
 
 struct ControlEvent {
     int32_t windowId = 0;
-    EventType eventType = EventType::SCROLL_TO_HOOK;
+    EventType eventType = EventType::UNKNOWN;
     int32_t hookId = 0;
 };
 } // namespace OnScreen

@@ -15,7 +15,7 @@
 
 #include "sequenceable_control_event.h"
 
-#include "devicestaus_common.h"
+#include "devicestatus_common.h"
 
 namespace OHOS {
 namespace Msdp {

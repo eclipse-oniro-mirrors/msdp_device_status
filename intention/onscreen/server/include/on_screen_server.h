@@ -17,6 +17,7 @@
 #define ON_SCREEN_SERVER_H
 
 #include "bundle_mgr_interface.h"
+#include "i_plugin.h"
 #include "on_screen_data.h"
 #include "window_manager.h"
 
@@ -36,7 +37,7 @@ private:
     int32_t LoadHAExpandClient();
     int32_t UnloadHAExpandClient();
     int32_t ConnectBundleMgr();
-    int32_t ResetBundleMgr();
+    void ResetBundleMgr();
     int32_t ConstructPageContent(const ContentOption &option, const sptr<Rosen::WindowInfo> windowInfo,
         PageContent &pageContent);
     int32_t GetAppInfo(const sptr<Rosen::WindowInfo> windowInfo, AppInfo &appinfo);
@@ -45,7 +46,7 @@ private:
     int32_t GetParagraphs(const std::string pageInfo, PageContent &pageContent);
 
     sptr<AppExecFwk::IBundleMgr> bundleMgrProxy_ = nullptr;
-}
+};
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

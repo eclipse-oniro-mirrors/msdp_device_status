@@ -28,9 +28,9 @@ public:
     SequenceablePageContent() = default;
     explicit SequenceablePageContent(const PageContent &content)
         : pageContent_(content) {}
-    virtual ~SequenceablePostureData() = default;
+    virtual ~SequenceablePageContent() = default;
     bool Marshalling(Parcel &parcel) const override;
-    static SequenceablePostureData* Unmarshalling(Parcel &parcel);
+    static SequenceablePageContent* Unmarshalling(Parcel &parcel);
     bool ReadFromParcel(Parcel &parcel);
     PageContent pageContent_;
 };
