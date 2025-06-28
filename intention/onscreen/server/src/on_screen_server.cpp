@@ -176,7 +176,7 @@ int32_t OnScreenServer::ConstructPageContent(const ContentOption &option, const 
     CHK_RET_PRINT_AND_RET(GetAppInfo(windowInfo, pageContent.appInfo), "GetAppInfo");
     // PageInfo Get
     std::string pageInfo;
-    CHK_RET_PRINT_AND_RET(GetPageInfo(WINDOW_NAME, OPTION, pageInfo), "GetPageInfo");
+    CHK_RET_PRINT_AND_RET(GetPageInfo(std::to_string(pageContent.winId), OPTION, pageInfo), "GetPageInfo");
     // ContentUnderstand
     if (option.contentUnderstand) {
         CHK_RET_PRINT_AND_RET(ContentUnderstand(pageInfo, pageContent), "ContentUnderstand");
