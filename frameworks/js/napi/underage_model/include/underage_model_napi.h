@@ -21,7 +21,6 @@
 #include <array>
 
 #include "iunderage_model_listener.h"
-#include "underage_model_napi.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -35,7 +34,7 @@ class UnderageModelListener : public UserStatusAwareness::IUnderageModelListener
 public:
     explicit UnderageModelListener(napi_env env) : env_(env) {}
     ~UnderageModelListener() {};
-    void OnUnderageModelListener(uint32_t eventType, int32_t result, float confidence) const;
+    void OnUnderageModelListener(uint32_t eventType, int32_t result, float confidence) const override;
 
 private:
     napi_env env_;
@@ -54,6 +53,7 @@ protected:
     std::map<uint32_t, std::shared_ptr<UserStatusAwareness::IUnderageModelListener>> callbacks_;
 
 private:
+    static bool LoadLibrary();
     static uint32_t GetUnderageModelType(const std::string &type);
     static bool SubscribeCallback(napi_env env, uint32_t type);
     static bool UnsubscribeCallback(napi_env env, uint32_t type);
@@ -65,7 +65,11 @@ private:
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
 
 private:
-    napi_env env_;
+    napi_env env_ { nullptr };
+    void* g_userStatusHandle { nullptr };
+    RegisterListenerFunc g_registerListenerFunc { nullptr };
+    SubscribeFunc g_subscribeFunc { nullptr };
+    UnsubscribeFunc g_unsubscribeFunc { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -23,7 +23,7 @@ class IUnderageModelListener {
 public:
     IUnderageModelListener() = default;
     virtual ~IUnderageModelListener() = default;
-    virtual void OnUnderageModelListener(uint32_t eventType, int32_t result, float confidence) const;
+    virtual void OnUnderageModelListener(uint32_t eventType, int32_t result, float confidence) const = 0;
 };
 } // namespace UserStatusAwareness
 } // namespace Msdp
