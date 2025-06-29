@@ -55,6 +55,7 @@ ohos_systemtest("DeviceStatusClientTest") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libwm"
   ]
 }
 

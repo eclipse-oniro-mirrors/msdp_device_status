@@ -14,10 +14,14 @@
  */
 
 #include <gtest/gtest.h>
+#include <vector>
 
 #include "devicestatus_callback_stub.h"
 #include "devicestatus_define.h"
+#include "on_screen_data.h"
+#include "on_screen_manager.h"
 #include "stationary_manager.h"
+#include "window_manager.h"
 
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
@@ -186,6 +190,37 @@ HWTEST_F(DeviceStatusClientTest, GetDevicePostureDataSyncTest001, TestSize.Level
     EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
     EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
         data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
+}
+
+/**
+ * @tc.name: GetPageContent001
+ * @tc.desc: test GetPageContent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusClientTest, GetPageContent001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::ContentOption option;
+    option.contentUnderstand = true;
+    option.pageLink = true;
+    option.textOnly = true;
+    option.longTextSplit = true;
+    option.elementHook = true;
+    option.screenshot = true;
+    Rosen::WindowInfoOption windowInfoOption;
+    windowInfoOption.windowInfoFilterOption = 
+        (Rosen::WindowInfoFilterOption::VISIBLE | Rosen::WindowInfoFilterOption::EXCLUDE_SYSTEM);
+    std::vector<sptr<Rosen::WindowInfo>> windowInfos;
+    Rosen::WindowManager::GetInstance().ListWindowInfo(windowInfoOption, windowInfos);
+    for (const auto &windowInfo : windowInfos) {
+        option.windowId = windowInfo->windowMetaInfo.windowId;
+        OnScreen::PageContent pageContent;
+        int32_t ret = OnScreen::OnScreenManager::GetInstance()->GetPageContent(option, pageContent);
+        std::cout << pageContent.winId << ", " << pageContent.appInfo.name << ", " << pageContent.appInfo.bundleName
+            << ", " << pageContent.appInfo.iconPath << ", " << pageContent.title << ", " << pageContent.content << ", "
+            << pageContent.paragraphs.size() << std::endl;
+        EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
+    }
 }
 } // namespace DeviceStatus
 } // namespace Msdp

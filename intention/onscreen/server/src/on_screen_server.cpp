@@ -17,8 +17,6 @@
 
 #include <algorithm>
 #include <dlfcn.h>
-// TODO rm
-#include <fstream>
 #include <vector>
 
 #include "devicestatus_define.h"
@@ -26,6 +24,9 @@
 #include "iservice_registry.h"
 #include "os_account_manager.h"
 #include "system_ability_definition.h"
+
+#undef LOG_TAG
+#define LOG_TAG "OnScreenServer"
 
 namespace OHOS {
 namespace Msdp {
@@ -134,7 +135,7 @@ int32_t OnScreenServer::UnloadHAExpandClient()
 
 int32_t OnScreenServer::ConnectBundleMgr()
 {
-    if (bundleMgrProxy_ == nullptr) {
+    if (bundleMgrProxy_ != nullptr) {
         return RET_OK;
     }
     sptr<ISystemAbilityManager> systemAbilityManager =

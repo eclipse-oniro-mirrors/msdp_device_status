@@ -96,6 +96,9 @@
             "VTT for OHOS::Msdp::DeviceStatus::BoomerangCallbackStub";
             "vtable for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub";
             "OHOS::Msdp::DeviceStatus::BoomerangCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::GetInstance()";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::GetPageContent(OHOS::Msdp::DeviceStatus::OnScreen::ContentOption const&, OHOS::Msdp::DeviceStatus::OnScreen::PageContent&)";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::SendControlEvent(OHOS::Msdp::DeviceStatus::OnScreen::ControlEvent const&)";
         };
     local:
         *;

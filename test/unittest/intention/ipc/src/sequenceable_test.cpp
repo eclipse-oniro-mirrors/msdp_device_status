@@ -147,6 +147,72 @@ HWTEST_F(SequencableTest, SequencableTest6, TestSize.Level1)
     EXPECT_TRUE(ret);
     ASSERT_NO_FATAL_FAILURE(sequenceablePreviewAnimation.Unmarshalling(parcel));
 }
+
+/**
+ * @tc.name: SequencableTest7
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest7, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    SequenceablePostureData postureData;
+    bool ret = postureData.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(postureData.Unmarshalling(parcel));
+}
+
+/**
+ * @tc.name: SequencableTest8
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest8, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceableContentOption option;
+    bool ret = option.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(option.Unmarshalling(parcel));
+}
+
+/**
+ * @tc.name: SequencableTest9
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest9, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceablePageContent pageContent;
+    OnScreen::Paragraph para;
+    pageContent.pageContent_.paragraphs.push_back(para);
+    bool ret = pageContent.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(pageContent.Unmarshalling(parcel));
+}
+
+/**
+ * @tc.name: SequencableTest10
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest10, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceableControlEvent event;
+    bool ret = event.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(event.Unmarshalling(parcel));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
