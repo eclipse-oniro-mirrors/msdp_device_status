@@ -38,7 +38,6 @@ const char *GET_PAGE_INFO_FUNC = "_ZN4OHOS7HaCloud17HaClientExpandApi11GetPageIn
     "basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_RS8_";
 const char *OPTION = "{\"pageInfoOption\":6, \"behaviorOption\":0, \"callbackOption\":0,"
     "\"recallOption\":{\"treeWhiteList\":[], \"snapshotBlackList\":[]}}";
-const char *WINDOW_NAME = "focus";
 }
 
 void *g_haExpandClientHandle = nullptr;

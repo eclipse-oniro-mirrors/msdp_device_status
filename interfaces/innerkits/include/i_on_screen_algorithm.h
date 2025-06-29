@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef I_ON_SCREEN_ALGORITHM
-#define I_ON_SCREEN_ALGORITHM
+#ifndef I_ON_SCREEN_ALGORITHM_H
+#define I_ON_SCREEN_ALGORITHM_H
 
 #include "on_screen_data.h"
 
