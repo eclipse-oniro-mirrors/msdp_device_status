@@ -43,17 +43,21 @@ const std::array<napi_valuetype, 1> EXPECTED_UNSUB_ONE_ARG_TYPES = { napi_string
 const std::array<napi_valuetype, 2> EXPECTED_UNSUB_TWO_ARG_TYPES = { napi_string, napi_function };
 const std::string USER_AGE_GROUP_DETECTED = "userAgeGroupDetected";
 const std::string USER_STATUS_CLIENT_SO_PATH = "libuser_status_client.z.so";
+void* g_userStatusHandle = nullptr;
 const std::string_view REGISTER_LISTENER_FUNC_NAME = { "RegisterListener" };
 const std::string_view SUBSCRIBE_FUNC_NAME = { "Subscribe" };
 const std::string_view UNSUBSCRIBE_FUNC_NAME = { "Unsubscribe" };
+RegisterListenerFunc g_registerListenerFunc = nullptr;
+SubscribeFunc g_subscribeFunc = nullptr;
+UnsubscribeFunc g_unsubscribeFunc = nullptr;
 UnderageModelNapi *g_underageModelObj = nullptr;
 };
 
-bool UnderageModelNapi::LoadLibrary()
+static bool LoadLibrary()
 {
-    if (g_underageModelObj->g_userStatusHandle == nullptr) {
-        g_underageModelObj->g_userStatusHandle = dlopen(USER_STATUS_CLIENT_SO_PATH.c_str(), RTLD_LAZY);
-        if (g_underageModelObj->g_userStatusHandle == nullptr) {
+    if (g_userStatusHandle == nullptr) {
+        g_userStatusHandle = dlopen(USER_STATUS_CLIENT_SO_PATH.c_str(), RTLD_LAZY);
+        if (g_userStatusHandle == nullptr) {
             FI_HILOGE("Load failed, path is %{private}s, error after: %{public}s",
                 USER_STATUS_CLIENT_SO_PATH.c_str(), dlerror());
             return false;
@@ -111,16 +115,16 @@ bool UnderageModelNapi::SubscribeCallback(napi_env env, uint32_t type)
     auto iter = g_underageModelObj->callbacks_.find(type);
     if (iter == g_underageModelObj->callbacks_.end()) {
         FI_HILOGD("Find no callback, to create");
-        if (g_underageModelObj->g_registerListenerFunc == nullptr) {
-            g_underageModelObj->g_registerListenerFunc = reinterpret_cast<RegisterListenerFunc>(
-                dlsym(g_underageModelObj->g_userStatusHandle, REGISTER_LISTENER_FUNC_NAME.data()));
-            if (g_underageModelObj->g_registerListenerFunc == nullptr) {
+        if (g_registerListenerFunc == nullptr) {
+            g_registerListenerFunc = reinterpret_cast<RegisterListenerFunc>(dlsym(g_userStatusHandle,
+                REGISTER_LISTENER_FUNC_NAME.data()));
+            if (g_registerListenerFunc == nullptr) {
                 FI_HILOGE("RegisterListener find symbol failed, error: %{public}s", dlerror());
                 return false;
             }
         }
         auto listener = std::make_shared<UnderageModelListener>(env);
-        int32_t ret = std::abs(g_underageModelObj->g_registerListenerFunc(type, listener));
+        int32_t ret = std::abs(g_registerListenerFunc(type, listener));
         if (ret < MAX_ERROR_CODE) {
             FI_HILOGE("RegisterListener failed, ret:%{public}d", ret);
             return false;
@@ -136,44 +140,37 @@ bool UnderageModelNapi::UnsubscribeCallback(napi_env env, uint32_t type)
         ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "g_underageModelObj is nullptr");
         return false;
     }
-    if (!g_underageModelObj->CheckEvents(type)) {
+    if (g_underageModelObj->CheckEvents(type)) {
         auto iter = g_underageModelObj->callbacks_.find(type);
         if (iter == g_underageModelObj->callbacks_.end()) {
-            FI_HILOGE("Failed to find callback, %{public}d", type);
-            ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Find type failed");
+            FI_HILOGE("Failed to find callback");
+            ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
             return false;
         }
-        if (g_underageModelObj->g_unsubscribeFunc == nullptr) {
-            g_underageModelObj->g_unsubscribeFunc = reinterpret_cast<UnsubscribeFunc>(
-                dlsym(g_underageModelObj->g_userStatusHandle, UNSUBSCRIBE_FUNC_NAME.data()));
-            if (g_underageModelObj->g_unsubscribeFunc == nullptr) {
+        if (g_unsubscribeFunc == nullptr) {
+            g_unsubscribeFunc = reinterpret_cast<UnsubscribeFunc>(dlsym(g_userStatusHandle,
+                UNSUBSCRIBE_FUNC_NAME.data()));
+            if (g_unsubscribeFunc == nullptr) {
                 FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
-                ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Find symbol failed");
                 return false;
             }
         }
-        auto ret = g_underageModelObj->g_unsubscribeFunc(type);
-        if (ret == RET_OK) {
-            g_underageModelObj->callbacks_.erase(iter);
-            return true;
-        }
-        FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
+        g_unsubscribeFunc(type);
+        g_underageModelObj->callbacks_.erase(iter);
     }
-    ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
-    return false;
+    return true;
 }
 
 bool UnderageModelNapi::Subscribe(uint32_t type)
 {
-    if (g_underageModelObj->g_subscribeFunc == nullptr) {
-        g_underageModelObj->g_subscribeFunc = reinterpret_cast<SubscribeFunc>(
-            dlsym(g_underageModelObj->g_userStatusHandle, SUBSCRIBE_FUNC_NAME.data()));
-        if (g_underageModelObj->g_subscribeFunc == nullptr) {
+    if (g_subscribeFunc == nullptr) {
+        g_subscribeFunc = reinterpret_cast<SubscribeFunc>(dlsym(g_userStatusHandle, SUBSCRIBE_FUNC_NAME.data()));
+        if (g_subscribeFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s", SUBSCRIBE_FUNC_NAME.data(), dlerror());
             return false;
         }
     }
-    int32_t ret = g_underageModelObj->g_subscribeFunc(type);
+    int32_t ret = g_subscribeFunc(type);
     if (ret != RET_OK) {
         FI_HILOGE("Subscribe failed, ret: %{public}d", ret);
         return false;
@@ -212,7 +209,7 @@ napi_value UnderageModelNapi::SubscribeUnderageModel(napi_env env, napi_callback
             ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Failed to get g_underageModelObj");
             return nullptr;
         }
-        if (g_underageModelObj->g_userStatusHandle == nullptr && !LoadLibrary()) {
+        if (g_userStatusHandle == nullptr && !LoadLibrary()) {
             ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
             return nullptr;
         }
@@ -270,7 +267,7 @@ napi_value UnderageModelNapi::UnsubscribeUnderageModel(napi_env env, napi_callba
     }
     {
         std::lock_guard<std::mutex> guard(g_mutex);
-        if (g_underageModelObj->g_userStatusHandle == nullptr && !LoadLibrary()) {
+        if (g_userStatusHandle == nullptr && !LoadLibrary()) {
             ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
             return nullptr;
         }
@@ -370,6 +367,12 @@ napi_value UnderageModelNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("off", UnsubscribeUnderageModel),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
+    napi_value napiStatus;
+    napi_status status = napi_create_object(env, &napiStatus);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed create object");
+        return exports;
+    }
     FI_HILOGD("Exit");
     return exports;
 }
@@ -400,7 +403,7 @@ static napi_module g_module = {
     .nm_filename = "multimodalAwareness.userStatus",
     .nm_register_func = UnderageModelInit,
     .nm_modname = "multimodalAwareness.userStatus",
-    .nm_priv = (static_cast<void *>(0)),
+    .nm_priv = (static_cast<void *>(nullptr)),
     .reserved = { nullptr }
 };
 

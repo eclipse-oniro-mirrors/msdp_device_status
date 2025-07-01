@@ -44,24 +44,7 @@ UnderageModelNapiEvent::UnderageModelNapiEvent(napi_env env, napi_value thisVar)
 
 UnderageModelNapiEvent::~UnderageModelNapiEvent()
 {
-    {
-        std::lock_guard<std::mutex> lock(eventsMutex_);
-        for (auto& eventPair : events_) {
-            if (env_ == nullptr) {
-                FI_HILOGW("env_ is nullptr");
-                break;
-            }
-            if (eventPair.second == nullptr || eventPair.second->onHandlerRef == nullptr) {
-                continue;
-            }
-            napi_status status = napi_delete_reference(env_, eventPair.second->onHandlerRef);
-            if (status != napi_ok) {
-                FI_HILOGW("Failed to napi_delete_reference");
-            }
-            eventPair.second->onHandlerRef = nullptr;
-        }
-        events_.clear();
-    }
+    events_.clear();
     if (env_ != nullptr && thisVarRef_ != nullptr) {
         napi_delete_reference(env_, thisVarRef_);
     }
@@ -70,7 +53,6 @@ UnderageModelNapiEvent::~UnderageModelNapiEvent()
 bool UnderageModelNapiEvent::AddCallback(uint32_t eventType, napi_value handler)
 {
     FI_HILOGD("Enter");
-    std::lock_guard<std::mutex> lock(eventsMutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
         FI_HILOGD("found event:%{public}d", eventType);
@@ -104,7 +86,6 @@ bool UnderageModelNapiEvent::AddCallback(uint32_t eventType, napi_value handler)
 bool UnderageModelNapiEvent::RemoveCallback(uint32_t eventType)
 {
     FI_HILOGD("Enter, event:%{public}d", eventType);
-    std::lock_guard<std::mutex> lock(eventsMutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
         FI_HILOGE("EventType %{public}d not found", eventType);
@@ -138,7 +119,6 @@ bool UnderageModelNapiEvent::InsertRef(std::shared_ptr<UnderageModelEventListene
         if (status != napi_ok) {
             FI_HILOGE("napi_delete_reference failed");
         }
-        listener->onHandlerRef = nullptr;
         return false;
     }
     if (IsSameValue(env_, handler, onHandler)) {
@@ -157,23 +137,20 @@ bool UnderageModelNapiEvent::InsertRef(std::shared_ptr<UnderageModelEventListene
 
 void UnderageModelNapiEvent::OnEventChanged(uint32_t eventType, int32_t result, float confidence)
 {
+    auto typeIter = events_.find(eventType);
+    if (typeIter == events_.end()) {
+        FI_HILOGE("eventType: %{public}d not found", eventType);
+        return;
+    }
+    if (typeIter->second == nullptr || typeIter->second->onHandlerRef == nullptr) {
+        FI_HILOGE("listener or onHandlerRef is nullptr.");
+        return;
+    }
     napi_value handler = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(eventsMutex_);
-        auto typeIter = events_.find(eventType);
-        if (typeIter == events_.end()) {
-            FI_HILOGE("eventType: %{public}d not found", eventType);
-            return;
-        }
-        if (typeIter->second == nullptr || typeIter->second->onHandlerRef == nullptr) {
-            FI_HILOGE("listener or onHandlerRef is nullptr.");
-            return;
-        }
-        napi_status ret = napi_get_reference_value(env_, typeIter->second->onHandlerRef, &handler);
-        if (ret != napi_ok) {
-            FI_HILOGE("napi_get_reference_value for %{public}d failed, status: %{public}d", eventType, ret);
-            return;
-        }
+    napi_status ret = napi_get_reference_value(env_, typeIter->second->onHandlerRef, &handler);
+    if (ret != napi_ok) {
+        FI_HILOGE("napi_get_reference_value for %{public}d failed, status: %{public}d", eventType, ret);
+        return;
     }
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env_, &scope);
@@ -208,16 +185,15 @@ bool UnderageModelNapiEvent::IsSameValue(const napi_env &env, const napi_value &
     return result;
 }
 
-bool UnderageModelNapiEvent::CheckEvents(uint32_t eventType)
+bool UnderageModelNapiEvent::CheckEvents(int32_t eventType)
 {
     FI_HILOGD("Enter");
-    std::lock_guard<std::mutex> lock(eventsMutex_);
     auto typeIter = events_.find(eventType);
     if (typeIter == events_.end()) {
         FI_HILOGD("eventType %{public}d not find", eventType);
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

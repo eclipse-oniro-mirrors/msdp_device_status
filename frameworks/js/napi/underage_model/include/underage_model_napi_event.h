@@ -19,7 +19,6 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <set>
 #include <string>
 
@@ -35,9 +34,10 @@ struct UnderageModelEventListener {
 class UnderageModelNapiEvent {
 public:
     UnderageModelNapiEvent(napi_env env, napi_value thisVar);
+    UnderageModelNapiEvent() = default;
     virtual ~UnderageModelNapiEvent();
     bool AddCallback(uint32_t eventType, napi_value handler);
-    bool CheckEvents(uint32_t eventType);
+    bool CheckEvents(int32_t eventType);
     bool RemoveCallback(uint32_t eventType);
     virtual void OnEventChanged(uint32_t eventType, int32_t result, float confidence);
 
@@ -46,10 +46,9 @@ private:
     bool IsSameValue(const napi_env &env, const napi_value &lhs, const napi_value &rhs);
 
 private:
-    napi_env env_ { nullptr };
-    napi_ref thisVarRef_ { nullptr };
+    napi_env env_;
+    napi_ref thisVarRef_;
     std::map<uint32_t, std::shared_ptr<UnderageModelEventListener>> events_;
-    std::mutex eventsMutex_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
