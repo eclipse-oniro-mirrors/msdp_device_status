@@ -25,9 +25,7 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, pageContent_.winId, false);
     // appinfo
-    WRITESTRING(parcel, pageContent_.appInfo.name, false);
-    WRITESTRING(parcel, pageContent_.appInfo.bundleName, false);
-    WRITESTRING(parcel, pageContent_.appInfo.iconPath, false);
+    WRITESTRING(parcel, pageContent_.bundleName, false);
     // appinfo end
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
     WRITESTRING(parcel, pageContent_.title, false);
@@ -37,10 +35,6 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     for (size_t i = 0; i < pageContent_.paragraphs.size(); i++) {
         WRITEINT32(parcel, pageContent_.paragraphs[i].hookId, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].text, false);
-    }
-    if (pageContent_.screenshot != nullptr && (!pageContent_.screenshot->Marshalling(parcel))) {
-        FI_HILOGE("screenshot marshalling failed");
-        return false;
     }
     return true;
 }
@@ -58,28 +52,22 @@ SequenceablePageContent* SequenceablePageContent::Unmarshalling(Parcel &parcel)
 
 bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
 {
-    WRITEINT32(parcel, pageContent_.winId, false);
+    READINT32(parcel, pageContent_.winId, false);
     // appinfo
-    WRITESTRING(parcel, pageContent_.appInfo.name, false);
-    WRITESTRING(parcel, pageContent_.appInfo.bundleName, false);
-    WRITESTRING(parcel, pageContent_.appInfo.iconPath, false);
+    READSTRING(parcel, pageContent_.bundleName, false);
     // appinfo end
-    WRITEINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
-    WRITESTRING(parcel, pageContent_.title, false);
-    WRITESTRING(parcel, pageContent_.content, false);
-    WRITESTRING(parcel, pageContent_.links, false);
+    READINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
+    READSTRING(parcel, pageContent_.title, false);
+    READSTRING(parcel, pageContent_.content, false);
+    READSTRING(parcel, pageContent_.links, false);
     int32_t paragraphSize = 0;
-    WRITEINT32(parcel, paragraphSize, false);
+    READINT32(parcel, paragraphSize, false);
     std::vector<Paragraph>().swap(pageContent_.paragraphs);
     for (int32_t i = 0; i < paragraphSize; i++) {
         Paragraph para;
-        WRITEINT32(parcel, para.hookId, false);
-        WRITESTRING(parcel, para.text, false);
+        READINT32(parcel, para.hookId, false);
+        READSTRING(parcel, para.text, false);
         pageContent_.paragraphs.push_back(para);
-    }
-    pageContent_.screenshot = std::shared_ptr<Media::PixelMap>(Media::PixelMap::Unmarshalling(parcel));
-    if (pageContent_.screenshot == nullptr) {
-        FI_HILOGW("unmarshalling screenshot unmarshalling nullptr");
     }
     return true;
 }

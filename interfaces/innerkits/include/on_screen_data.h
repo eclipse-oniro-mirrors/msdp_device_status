@@ -36,7 +36,7 @@ enum class EventType {
 };
 
 struct ContentOption {
-    int32_t windowId = 0;
+    int32_t windowId = -1;
     // 是否进行内容理解
     bool contentUnderstand = false;
     // 是否采集页面链接
@@ -47,14 +47,6 @@ struct ContentOption {
     bool longTextSplit = false;
     // 是否提供hook点
     bool elementHook = false;
-    // 是否采集页面截图
-    bool screenshot = false;
-};
-
-struct AppInfo {
-    std::string name;
-    std::string bundleName;
-    std::string iconPath;
 };
 
 struct Paragraph {
@@ -63,8 +55,8 @@ struct Paragraph {
 };
 
 struct PageContent {
-    int32_t winId = 0;
-    AppInfo appInfo;
+    int32_t winId = -1;
+    std::string bundleName;
     // content understand = true
     Scenario scenario = Scenario::UNKNOWN;
     std::string title;
@@ -73,14 +65,19 @@ struct PageContent {
     std::string links;
     // text only = true
     std::vector<Paragraph> paragraphs;
-    // screenshot = true
-    std::shared_ptr<Media::PixelMap> screenshot;
 };
 
 struct ControlEvent {
     int32_t windowId = 0;
     EventType eventType = EventType::UNKNOWN;
     int32_t hookId = 0;
+};
+
+struct OnScreenCallingContext {
+    uint64_t fullTokenId = 0;
+    uint32_t tokenId = 0;
+    int32_t uid = -1;
+    int32_t pid = -1;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

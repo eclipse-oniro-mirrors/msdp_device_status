@@ -69,7 +69,13 @@ int32_t OnScreenServer::GetPageContent(CallingContext &context, const ContentOpt
     if (handle_.pAlgorithm == nullptr) {
         return RET_NO_SUPPORT;
     }
-    ret = handle_.pAlgorithm->GetPageContent(option, pageContent);
+    OnScreenCallingContext onScreenContext {
+        .fullTokenId = context.fullTokenId,
+        .tokenId = context.tokenId,
+        .uid = context.uid,
+        .pid = context.pid,
+    };
+    ret = handle_.pAlgorithm->GetPageContent(onScreenContext, option, pageContent);
     if (ret != RET_OK) {
         FI_HILOGE("failed to get page content, err=%{public}d", ret);
         return ret;
@@ -92,7 +98,13 @@ int32_t OnScreenServer::SendControlEvent(CallingContext &context, const ControlE
     if (handle_.pAlgorithm == nullptr) {
         return RET_NO_SUPPORT;
     }
-    ret = handle_.pAlgorithm->SendControlEvent(event);
+    OnScreenCallingContext onScreenContext {
+        .fullTokenId = context.fullTokenId,
+        .tokenId = context.tokenId,
+        .uid = context.uid,
+        .pid = context.pid,
+    };
+    ret = handle_.pAlgorithm->SendControlEvent(onScreenContext, event);
     if (ret != RET_OK) {
         FI_HILOGE("failed to send control event, err=%{public}d", ret);
         return ret;
