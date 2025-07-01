@@ -24,9 +24,7 @@ namespace OnScreen {
 bool SequenceablePageContent::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, pageContent_.winId, false);
-    // appinfo
     WRITESTRING(parcel, pageContent_.bundleName, false);
-    // appinfo end
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
     WRITESTRING(parcel, pageContent_.title, false);
     WRITESTRING(parcel, pageContent_.content, false);
@@ -53,9 +51,7 @@ SequenceablePageContent* SequenceablePageContent::Unmarshalling(Parcel &parcel)
 bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
 {
     READINT32(parcel, pageContent_.winId, false);
-    // appinfo
     READSTRING(parcel, pageContent_.bundleName, false);
-    // appinfo end
     READINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
     READSTRING(parcel, pageContent_.title, false);
     READSTRING(parcel, pageContent_.content, false);
