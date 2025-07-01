@@ -38,7 +38,7 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
         WRITEINT32(parcel, pageContent_.paragraphs[i].hookId, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].text, false);
     }
-    if (!pageContent_.screenshot->Marshalling(parcel)) {
+    if (pageContent_.screenshot != nullptr && (!pageContent_.screenshot->Marshalling(parcel))) {
         FI_HILOGE("screenshot marshalling failed");
         return false;
     }
@@ -79,8 +79,7 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     }
     pageContent_.screenshot = std::shared_ptr<Media::PixelMap>(Media::PixelMap::Unmarshalling(parcel));
     if (pageContent_.screenshot == nullptr) {
-        FI_HILOGE("unmarshalling screenshot failed");
-        return false;
+        FI_HILOGW("unmarshalling screenshot unmarshalling nullptr");
     }
     return true;
 }
