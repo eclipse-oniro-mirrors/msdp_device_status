@@ -29,7 +29,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
 namespace {
-const char *LIB_ON_SCREEN_ALGO_PATH = "libon_screen.z.so";
+const char *LIB_ON_SCREEN_ALGO_PATH = "/system/lib64/libon_screen.z.so";
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.ON_SCREEN_GET_CONTENT";
 const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.ON_SCREEN_CONTROL";
 constexpr int32_t RET_NO_SUPPORT = 801;
