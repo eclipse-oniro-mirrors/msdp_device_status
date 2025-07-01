@@ -52,7 +52,12 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
 {
     READINT32(parcel, pageContent_.winId, false);
     READSTRING(parcel, pageContent_.bundleName, false);
-    READINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
+    int32_t scenario = 0;
+    READINT32(parcel, scenario, false);
+    if (scenario < 0 || scenario >= static_cast<int32_t>(Scenario::END)) {
+        return false;
+    }
+    pageContent_.scenario = static_cast<Scenario>(scenario);
     READSTRING(parcel, pageContent_.title, false);
     READSTRING(parcel, pageContent_.content, false);
     READSTRING(parcel, pageContent_.links, false);

@@ -27,12 +27,14 @@ namespace DeviceStatus {
 namespace OnScreen {
 enum class Scenario {
     UNKNOWN = 0,
-    ARTICLE = 1,
+    ARTICLE,
+    END,
 };
 
 enum class EventType {
     UNKNOWN = 0,
     SCROLL_TO_HOOK,
+    END,
 };
 
 struct ContentOption {

@@ -46,7 +46,7 @@ bool SequenceableControlEvent::ReadFromParcel(Parcel &parcel)
     READINT32(parcel, controlEvent_.windowId, false);
     READINT32(parcel, eventType, false);
     READINT32(parcel, controlEvent_.hookId, false);
-    if (eventType < 0 || eventType > static_cast<int32_t>(EventType::SCROLL_TO_HOOK)) {
+    if (eventType < 0 || eventType >= static_cast<int32_t>(EventType::END)) {
         return false;
     }
     controlEvent_.eventType = static_cast<EventType>(eventType);
