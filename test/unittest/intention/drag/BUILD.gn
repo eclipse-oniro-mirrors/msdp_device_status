@@ -64,6 +64,7 @@ ohos_unittest("DragManagerTest") {
     "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "common_event_service:cesfwk_innerkits",
   ]
 }
 
