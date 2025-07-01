@@ -28,10 +28,10 @@ public:
     virtual ~IOnScreenAlgorithm() = default;
 
     virtual int32_t GetPageContent(const ContentOption &option, PageContent &pageContent) = 0;
-    virtual int32_t SetControlEvent(const ControlEvent &event) = 0;
+    virtual int32_t SendControlEvent(const ControlEvent &event) = 0;
 };
-
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+#endif // I_ON_SCREEN_ALGORITHM_H

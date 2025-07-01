@@ -16,36 +16,36 @@
 #ifndef ON_SCREEN_SERVER_H
 #define ON_SCREEN_SERVER_H
 
-#include "bundle_mgr_interface.h"
 #include "i_plugin.h"
 #include "on_screen_data.h"
-#include "window_manager.h"
+#include "i_on_screen_algorithm.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
-// TODO deathrepcient for bundlemgr
+struct OnScreenAlgorithmHandle {
+    OnScreenAlgorithmHandle() : handle(nullptr), pAlgorithm(nullptr), create(nullptr), destroy(nullptr) {}
+    ~OnScreenAlgorithmHandle();
+    void Clear();
+    void* handle = nullptr;
+    IOnScreenAlgorithm* pAlgorithm = nullptr;
+    IOnScreenAlgorithm* (*create)();
+    void (*destroy)(const IOnScreenAlgorithm*);
+};
+
 class OnScreenServer {
 public:
     OnScreenServer() = default;
-    virtual ~OnScreenServer() = default;
+    virtual ~OnScreenServer();
     int32_t GetPageContent(CallingContext &context, const ContentOption &option, PageContent &pageContent);
     int32_t SendControlEvent(CallingContext &context, const ControlEvent &event);
 private:
-    int32_t GetPageInfo(const std::string &window, const std::string &option, std::string &pageInfo);
-    int32_t LoadHAExpandClient();
-    int32_t UnloadHAExpandClient();
-    int32_t ConnectBundleMgr();
-    void ResetBundleMgr();
-    int32_t ConstructPageContent(const ContentOption &option, const sptr<Rosen::WindowInfo> windowInfo,
-        PageContent &pageContent);
-    int32_t GetAppInfo(const sptr<Rosen::WindowInfo> windowInfo, AppInfo &appinfo);
-    int32_t ContentUnderstand(const std::string pageInfo, PageContent &pageContent);
-    int32_t GetPageLink(const std::string pageInfo, PageContent &pageContent);
-    int32_t GetParagraphs(const std::string pageInfo, PageContent &pageContent);
+    int32_t LoadAlgoLib();
+    int32_t UnloadAlgoLib();
+    int32_t CheckPermission(CallingContext &context, const std::string &permission);
 
-    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy_ = nullptr;
+    OnScreenAlgorithmHandle handle_;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus
