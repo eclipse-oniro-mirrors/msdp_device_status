@@ -86,6 +86,9 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_SUBSCRIBE_STATIONARY_CALLBACK,
     IIntentionIpcCode::COMMAND_UNSUBSCRIBE_STATIONARY_CALLBACK,
     IIntentionIpcCode::COMMAND_GET_DEVICE_STATUS_DATA,
+    IIntentionIpcCode::COMMAND_GET_DEVICE_POSTURE_DATA_SYNC,
+    IIntentionIpcCode::COMMAND_GET_PAGE_CONTENT,
+    IIntentionIpcCode::COMMAND_SEND_CONTROL_EVENT,
 };
 
 class IntentionServiceMock : public IntentionStub {
@@ -482,9 +485,24 @@ ErrCode GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValu
     (void)replyValue;
     return 0;
 }
+
 ErrCode GetDevicePostureDataSync(SequenceablePostureData &data) override
 {
     (void)data;
+    return 0;
+}
+
+ErrCode GetPageContent(const DeviceStatus::OnScreen::SequenceableContentOption &option,
+    DeviceStatus::OnScreen::SequenceablePageContent &pageContent) override
+{
+    (void)option;
+    (void)pageContent;
+    return 0;
+}
+
+ErrCode SendControlEvent(const DeviceStatus::OnScreen::ControlEvent &event) override
+{
+    (void)event;
     return 0;
 }
 };
