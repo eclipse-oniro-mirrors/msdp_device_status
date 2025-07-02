@@ -49,7 +49,6 @@ struct ContentOption {
 
 struct Paragraph {
     uint64_t elementId;
-    std::string title;
     std::string text;
 };
 

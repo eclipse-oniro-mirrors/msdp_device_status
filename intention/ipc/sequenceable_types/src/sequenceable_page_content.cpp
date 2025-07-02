@@ -21,6 +21,10 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
+namespace {
+constexpr int32_t MAX_PARA_LEN = 10000;
+}
+
 bool SequenceablePageContent::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, pageContent_.windowId, false);
@@ -32,7 +36,6 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.paragraphs.size()), false);
     for (size_t i = 0; i < pageContent_.paragraphs.size(); i++) {
         WRITEUINT64(parcel, pageContent_.paragraphs[i].elementId, false);
-        WRITESTRING(parcel, pageContent_.paragraphs[i].title, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].text, false);
     }
     return true;
@@ -65,10 +68,13 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     int32_t paragraphSize = 0;
     READINT32(parcel, paragraphSize, false);
     std::vector<Paragraph>().swap(pageContent_.paragraphs);
+    if (paragraphSize > MAX_PARA_LEN || paragraphSize < 0) {
+        FI_HILOGE("paragraphSize is invaild");
+        return false;
+    }
     for (int32_t i = 0; i < paragraphSize; i++) {
         Paragraph para;
         READUINT64(parcel, para.elementId, false);
-        READSTRING(parcel, para.title, false);
         READSTRING(parcel, para.text, false);
         pageContent_.paragraphs.push_back(para);
     }
