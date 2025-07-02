@@ -124,9 +124,7 @@
               "interaction/include/i_coordination_listener.h",
               "interaction/include/i_drag_listener.h",
               "interaction/include/i_start_drag_listener.h",
-              "interaction/include/interaction_manager.h",
-              "include/on_screen_data.h",
-              "include/on_screen_manager.h"
+              "interaction/include/interaction_manager.h"
             ],
             "header_base": "//base/msdp/device_status/interfaces/innerkits"
           }
