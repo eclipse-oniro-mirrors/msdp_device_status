@@ -23,7 +23,7 @@ namespace DeviceStatus {
 namespace OnScreen {
 bool SequenceablePageContent::Marshalling(Parcel &parcel) const
 {
-    WRITEINT32(parcel, pageContent_.winId, false);
+    WRITEINT32(parcel, pageContent_.windowId, false);
     WRITESTRING(parcel, pageContent_.bundleName, false);
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
     WRITESTRING(parcel, pageContent_.title, false);
@@ -31,7 +31,8 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     WRITESTRING(parcel, pageContent_.links, false);
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.paragraphs.size()), false);
     for (size_t i = 0; i < pageContent_.paragraphs.size(); i++) {
-        WRITEINT32(parcel, pageContent_.paragraphs[i].hookId, false);
+        WRITEUINT64(parcel, pageContent_.paragraphs[i].elementId, false);
+        WRITESTRING(parcel, pageContent_.paragraphs[i].title, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].text, false);
     }
     return true;
@@ -50,7 +51,7 @@ SequenceablePageContent* SequenceablePageContent::Unmarshalling(Parcel &parcel)
 
 bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
 {
-    READINT32(parcel, pageContent_.winId, false);
+    READINT32(parcel, pageContent_.windowId, false);
     READSTRING(parcel, pageContent_.bundleName, false);
     int32_t scenario = 0;
     READINT32(parcel, scenario, false);
@@ -66,7 +67,8 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     std::vector<Paragraph>().swap(pageContent_.paragraphs);
     for (int32_t i = 0; i < paragraphSize; i++) {
         Paragraph para;
-        READINT32(parcel, para.hookId, false);
+        READUINT64(parcel, para.elementId, false);
+        READSTRING(parcel, para.title, false);
         READSTRING(parcel, para.text, false);
         pageContent_.paragraphs.push_back(para);
     }
