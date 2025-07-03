@@ -29,7 +29,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 struct UnderageModelEventListener {
-    napi_ref onHandlerRef { nullptr };
+    std::set<napi_ref> onRefSets;
 };
 
 class UnderageModelNapiEvent {
@@ -38,8 +38,10 @@ public:
     virtual ~UnderageModelNapiEvent();
     bool AddCallback(uint32_t eventType, napi_value handler);
     bool CheckEvents(uint32_t eventType);
-    bool RemoveCallback(uint32_t eventType);
+    bool RemoveAllCallback(uint32_t eventType);
+    bool RemoveCallback(uint32_t eventType, napi_value handler);
     virtual void OnEventChanged(uint32_t eventType, int32_t result, float confidence);
+    void ConvertUserAgeGroup(napi_value handler, int32_t result, float confidence);
 
 private:
     bool InsertRef(std::shared_ptr<UnderageModelEventListener> listener, const napi_value &handler);

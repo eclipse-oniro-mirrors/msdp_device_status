@@ -21,6 +21,7 @@
 
 #include "devicestatus_define.h"
 #include "fi_log.h"
+#include "napi_constants.h"
 #include "underage_model_napi_error.h"
 #include "util_napi_error.h"
 
@@ -37,6 +38,8 @@ constexpr size_t MAX_ARG_STRING_LEN = 512;
 constexpr int32_t MAX_ERROR_CODE = 1000;
 constexpr uint32_t UNSUBSCRIBE_ONE_PARA = 1;
 constexpr uint32_t UNSUBSCRIBE_TWO_PARA = 2;
+constexpr int32_t OTHERS = 0;
+constexpr int32_t CHILD = 1;
 std::mutex g_mutex; // mutex:Subscribe/Unsubscribe/OnListener
 const std::array<napi_valuetype, 2> EXPECTED_SUB_ARG_TYPES = { napi_string, napi_function };
 const std::array<napi_valuetype, 1> EXPECTED_UNSUB_ONE_ARG_TYPES = { napi_string };
@@ -247,7 +250,6 @@ napi_value UnderageModelNapi::UnsubscribeUnderageModel(napi_env env, napi_callba
         ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "napi_get_cb_info is failed");
         return nullptr;
     }
-
     bool validateArgsRes = false;
     if (argc == UNSUBSCRIBE_ONE_PARA) {
         validateArgsRes = ValidateArgsType(env, args, argc, EXPECTED_UNSUB_ONE_ARG_TYPES);
@@ -274,7 +276,7 @@ napi_value UnderageModelNapi::UnsubscribeUnderageModel(napi_env env, napi_callba
             ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
             return nullptr;
         }
-        if (!g_underageModelObj->RemoveCallback(type)) {
+        if (!RemoveCallbackArgs(type, argc, args)) {
             ThrowUnderageModelErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
             return nullptr;
         }
@@ -284,6 +286,17 @@ napi_value UnderageModelNapi::UnsubscribeUnderageModel(napi_env env, napi_callba
     }
     napi_get_undefined(env, &result);
     return result;
+}
+
+bool UnderageModelNapi::RemoveCallbackArgs(uint32_t type, size_t argc, napi_value args[])
+{
+    auto removeRet = false;
+    if (argc != UNSUBSCRIBE_TWO_PARA) {
+        removeRet = g_underageModelObj->RemoveAllCallback(type);
+    } else {
+        removeRet = g_underageModelObj->RemoveCallback(type, args[1]);
+    }
+    return removeRet;
 }
 
 bool UnderageModelNapi::ConstructUnderageModel(napi_env env, napi_value jsThis) __attribute__((no_sanitize("cfi")))
@@ -311,6 +324,23 @@ bool UnderageModelNapi::ConstructUnderageModel(napi_env env, napi_value jsThis) 
             return false;
         }
     }
+    return true;
+}
+
+bool UnderageModelNapi::CreateUserAgeGroup(napi_env env, napi_value exports)
+{
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    CHKPF(scope);
+    napi_value userAgeGroup;
+    CHKRF_SCOPE(env, napi_create_object(env, &userAgeGroup), CREATE_OBJECT, scope);
+    napi_value prop = nullptr;
+    CHKRF_SCOPE(env, napi_create_int32(env, OTHERS, &prop), CREATE_INT32, scope);
+    CHKRF_SCOPE(env, napi_set_named_property(env, userAgeGroup, "OTHERS", prop), SET_NAMED_PROPERTY, scope);
+    CHKRF_SCOPE(env, napi_create_int32(env, CHILD, &prop), CREATE_INT32, scope);
+    CHKRF_SCOPE(env, napi_set_named_property(env, userAgeGroup, "CHILD", prop), SET_NAMED_PROPERTY, scope);
+    CHKRF_SCOPE(env, napi_set_named_property(env, exports, "UserAgeGroup", userAgeGroup), SET_NAMED_PROPERTY, scope);
+    napi_close_handle_scope(env, scope);
     return true;
 }
 
@@ -370,6 +400,9 @@ napi_value UnderageModelNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("off", UnsubscribeUnderageModel),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
+    if (!CreateUserAgeGroup(env, exports)) {
+        FI_HILOGE("Failed create UserAgeGroup");
+    }
     FI_HILOGD("Exit");
     return exports;
 }
