@@ -45,6 +45,7 @@ public:
 private:
     int32_t LoadAlgoLib();
     int32_t UnloadAlgoLib();
+    int32_t ConnectAlgoLib();
     int32_t CheckPermission(CallingContext &context, const std::string &permission);
 
     OnScreenAlgorithmHandle handle_;
