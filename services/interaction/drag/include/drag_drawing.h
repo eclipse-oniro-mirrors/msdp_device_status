@@ -431,6 +431,8 @@ private:
     void* dragExtHandler_ { nullptr };
     bool needRotatePixelMapXY_ { false };
     uint64_t screenId_ { 0 };
+    int32_t displayWidth_ { 0 };
+    int32_t displayHeight_ { 0 };
     float pullThrowScale_ { 1.0 };
     std::map<Rosen::DisplayId, Rosen::Rotation> rotationMap_;
     ScreenSizeType currentScreenSize_ = ScreenSizeType::UNDEFINED;
