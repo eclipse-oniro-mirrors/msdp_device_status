@@ -25,8 +25,7 @@ bool SequenceableControlEvent::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, controlEvent_.windowId, false);
     WRITEINT32(parcel, static_cast<int32_t>(controlEvent_.eventType), false);
-    WRITEUINT64(parcel, controlEvent_.elementId, false);
-    WRITEINT32(parcel, controlEvent_.offset, false);
+    WRITEUINT64(parcel, controlEvent_.hookId, false);
     return true;
 }
 
@@ -46,8 +45,7 @@ bool SequenceableControlEvent::ReadFromParcel(Parcel &parcel)
     int32_t eventType = 0;
     READINT32(parcel, controlEvent_.windowId, false);
     READINT32(parcel, eventType, false);
-    READUINT64(parcel, controlEvent_.elementId, false);
-    READINT32(parcel, controlEvent_.offset, false);
+    READUINT64(parcel, controlEvent_.hookId, false);
     if (eventType < 0 || eventType >= static_cast<int32_t>(EventType::END)) {
         return false;
     }

@@ -33,7 +33,7 @@ enum class Scenario {
 
 enum class EventType {
     UNKNOWN = 0,
-    SCROLL_TO_ELEMENT,
+    SCROLL_TO_HOOK,
     END,
 };
 
@@ -45,15 +45,19 @@ struct ContentOption {
     bool pageLink = false;
     // 是否只采集文本
     bool textOnly = false;
+    // 是否拆解长文本
+    bool longTextSplit = false;
 };
 
 struct Paragraph {
-    uint64_t elementId;
+    uint64_t hookId;
+    std::string title;
     std::string text;
 };
 
 struct PageContent {
     int32_t windowId = -1;
+    uint64_t sessionId = 0;
     std::string bundleName;
     // content understand = true
     Scenario scenario = Scenario::UNKNOWN;
@@ -68,8 +72,7 @@ struct PageContent {
 struct ControlEvent {
     int32_t windowId = 0;
     EventType eventType = EventType::UNKNOWN;
-    uint64_t elementId = 0;
-    int32_t offset = 0;
+    uint64_t hookId = 0;
 };
 
 struct OnScreenCallingContext {

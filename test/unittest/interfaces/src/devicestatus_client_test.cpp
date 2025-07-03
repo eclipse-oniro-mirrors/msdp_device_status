@@ -203,11 +203,13 @@ HWTEST_F(DeviceStatusClientTest, GetPageContent001, TestSize.Level0)
     option.contentUnderstand = true;
     option.pageLink = true;
     option.textOnly = true;
+    option.longTextSplit = true;
     OnScreen::PageContent pageContent;
-    int32_t ret = OnScreen::OnScreenManager::GetInstance()->GetPageContent(option, pageContent);
+    int32_t ret = OnScreen::OnScreenManager::GetInstance().GetPageContent(option, pageContent);
     std::cout << pageContent.windowId << ", " << pageContent.bundleName << ", "
         << pageContent.title << ", " << pageContent.content << ", "
         << pageContent.paragraphs.size() << ", " << ret << std::endl;
+    EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

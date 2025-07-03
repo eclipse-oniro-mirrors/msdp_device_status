@@ -26,11 +26,11 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
-OnScreenManager *OnScreenManager::instance_ = new (std::nothrow) OnScreenManager();
 
-OnScreenManager *OnScreenManager::GetInstance()
+OnScreenManager& OnScreenManager::GetInstance()
 {
-    return instance_;
+    static OnScreenManager instance;
+    return instance;
 }
 
 int32_t OnScreenManager::GetPageContent(const ContentOption& option, PageContent& pageContent)

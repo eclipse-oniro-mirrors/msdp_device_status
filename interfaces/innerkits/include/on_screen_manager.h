@@ -35,7 +35,7 @@ public:
      * @return Returns a <b>OnScreenManager</b> instance.
      * @since 20
      */
-    static OnScreenManager *GetInstance();
+    static OnScreenManager &GetInstance();
 
     /**
      * @brief Get page content.
@@ -56,7 +56,6 @@ public:
 private:
     OnScreenManager() = default;
     DISALLOW_COPY_AND_MOVE(OnScreenManager);
-    static OnScreenManager *instance_;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus
