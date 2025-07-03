@@ -208,7 +208,7 @@ bool UnderageModelNapiEvent::InsertRef(std::shared_ptr<UnderageModelEventListene
                 ++item;
                 continue;
             }
-            item == listener->onRefSets.erase(item);
+            item = listener->onRefSets.erase(item);
             continue;
         }
         if (IsSameValue(env_, handler, onHandler)) {
