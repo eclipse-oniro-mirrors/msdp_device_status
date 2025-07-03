@@ -54,19 +54,17 @@ OnScreenServer::~OnScreenServer()
     UnloadAlgoLib();
 }
 
-int32_t OnScreenServer::GetPageContent(CallingContext &context, const ContentOption &option, PageContent &pageContent)
+int32_t OnScreenServer::GetPageContent(const CallingContext &context, const ContentOption &option,
+    PageContent &pageContent)
 {
+    std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
     if (CheckPermission(context, PERMISSION_GET_PAGE_CONTENT) != RET_OK) {
+        FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_GET_PAGE_CONTENT);
         return RET_NO_PERMISSION;
     }
-    if (handle_.pAlgorithm == nullptr) {
-        ret = LoadAlgoLib();
-        if (ret != RET_OK) {
-            return RET_NO_SUPPORT;
-        }
-    }
-    if (handle_.pAlgorithm == nullptr) {
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
         return RET_NO_SUPPORT;
     }
     OnScreenCallingContext onScreenContext {
@@ -83,19 +81,16 @@ int32_t OnScreenServer::GetPageContent(CallingContext &context, const ContentOpt
     return RET_OK;
 }
 
-int32_t OnScreenServer::SendControlEvent(CallingContext &context, const ControlEvent &event)
+int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const ControlEvent &event)
 {
+    std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
     if (CheckPermission(context, PERMISSION_SEND_CONTROL_EVENT) != RET_OK) {
+        FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_SEND_CONTROL_EVENT);
         return RET_NO_PERMISSION;
     }
-    if (handle_.pAlgorithm == nullptr) {
-        ret = LoadAlgoLib();
-        if (ret != RET_OK) {
-            return RET_NO_SUPPORT;
-        }
-    }
-    if (handle_.pAlgorithm == nullptr) {
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
         return RET_NO_SUPPORT;
     }
     OnScreenCallingContext onScreenContext {
@@ -110,6 +105,11 @@ int32_t OnScreenServer::SendControlEvent(CallingContext &context, const ControlE
         return ret;
     }
     return RET_OK;
+}
+
+int32_t OnScreenServer::ConnectAlgoLib()
+{
+    return handle_.pAlgorithm == nullptr ? LoadAlgoLib() : RET_OK;
 }
 
 int32_t OnScreenServer::LoadAlgoLib()
@@ -131,8 +131,12 @@ int32_t OnScreenServer::LoadAlgoLib()
         return RET_ERR;
     }
     if (handle_.pAlgorithm == nullptr) {
-        FI_HILOGI("get object");
+        FI_HILOGI("get on screen algo object");
         handle_.pAlgorithm = handle_.create();
+        if (handle_.pAlgorithm == nullptr) {
+            FI_HILOGE("create on screen algo object failed");
+            return RET_ERR;
+        }
     }
     return RET_OK;
 }

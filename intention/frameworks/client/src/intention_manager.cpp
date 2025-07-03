@@ -622,13 +622,13 @@ bool IntentionManager::IsDragStart()
 int32_t IntentionManager::GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent)
 {
     CALL_DEBUG_ENTER;
-    return onscreen_.GetPageContent(option, pageContent);
+    return onScreen_.GetPageContent(option, pageContent);
 }
 
 int32_t IntentionManager::SendControlEvent(const OnScreen::ControlEvent& event)
 {
     CALL_DEBUG_ENTER;
-    return onscreen_.SendControlEvent(event);
+    return onScreen_.SendControlEvent(event);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

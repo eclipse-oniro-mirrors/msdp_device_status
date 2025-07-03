@@ -119,7 +119,7 @@ private:
     DragClient drag_;
     StationaryClient stationary_;
     BoomerangClient boomerang_;
-    OnScreen::OnScreenClient onscreen_;
+    OnScreen::OnScreenClient onScreen_;
     bool isScreenRotation_ { false };
     std::vector<std::string> foldRotatePolicys_ {};
 };

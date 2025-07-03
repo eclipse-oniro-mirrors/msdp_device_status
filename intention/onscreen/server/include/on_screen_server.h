@@ -16,9 +16,11 @@
 #ifndef ON_SCREEN_SERVER_H
 #define ON_SCREEN_SERVER_H
 
+#include <mutex>
+
+#include "i_on_screen_algorithm.h"
 #include "i_plugin.h"
 #include "on_screen_data.h"
-#include "i_on_screen_algorithm.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -38,14 +40,15 @@ class OnScreenServer {
 public:
     OnScreenServer() = default;
     virtual ~OnScreenServer();
-    int32_t GetPageContent(CallingContext &context, const ContentOption &option, PageContent &pageContent);
-    int32_t SendControlEvent(CallingContext &context, const ControlEvent &event);
+    int32_t GetPageContent(const CallingContext &context, const ContentOption &option, PageContent &pageContent);
+    int32_t SendControlEvent(const CallingContext &context, const ControlEvent &event);
 private:
     int32_t LoadAlgoLib();
     int32_t UnloadAlgoLib();
     int32_t CheckPermission(CallingContext &context, const std::string &permission);
 
     OnScreenAlgorithmHandle handle_;
+    std::mutex mtx_;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

@@ -50,7 +50,7 @@ struct ContentOption {
 };
 
 struct Paragraph {
-    uint64_t hookId;
+    uint64_t hookId = 0;
     std::string title;
     std::string text;
 };
