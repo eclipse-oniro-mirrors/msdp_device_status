@@ -176,7 +176,7 @@ bool UnderageModelNapiEvent::RemoveCallback(uint32_t eventType, napi_value handl
             if (status != napi_ok) {
                 FI_HILOGE("napi_delete_reference failed");
             }
-            iter->second->onRefSets.erase(it++);
+            it = iter->second->onRefSets.erase(it);
             break;
         }
         ++it;
@@ -208,7 +208,7 @@ bool UnderageModelNapiEvent::InsertRef(std::shared_ptr<UnderageModelEventListene
                 ++item;
                 continue;
             }
-            listener->onRefSets.erase(item++);
+            item == listener->onRefSets.erase(item);
             continue;
         }
         if (IsSameValue(env_, handler, onHandler)) {
@@ -300,10 +300,7 @@ bool UnderageModelNapiEvent::CheckEvents(uint32_t eventType)
         FI_HILOGD("eventType %{public}d not find", eventType);
         return false;
     }
-    if (typeIter->second->onRefSets.empty()) {
-        return false;
-    }
-    return true;
+    return !typeIter->second->onRefSets.empty();
 }
 } // namespace DeviceStatus
 } // namespace Msdp
