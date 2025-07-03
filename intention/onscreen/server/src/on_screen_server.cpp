@@ -73,6 +73,7 @@ int32_t OnScreenServer::GetPageContent(const CallingContext &context, const Cont
         .uid = context.uid,
         .pid = context.pid,
     };
+    FI_HILOGI("get page content invoke algo lib");
     ret = handle_.pAlgorithm->GetPageContent(onScreenContext, option, pageContent);
     if (ret != RET_OK) {
         FI_HILOGE("failed to get page content, err=%{public}d", ret);
@@ -99,6 +100,7 @@ int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const Co
         .uid = context.uid,
         .pid = context.pid,
     };
+    FI_HILOGI("send control event invoke algo lib");
     ret = handle_.pAlgorithm->SendControlEvent(onScreenContext, event);
     if (ret != RET_OK) {
         FI_HILOGE("failed to send control event, err=%{public}d", ret);
@@ -152,7 +154,7 @@ int32_t OnScreenServer::UnloadAlgoLib()
     return RET_OK;
 }
 
-int32_t OnScreenServer::CheckPermission(CallingContext &context, const std::string &permission)
+int32_t OnScreenServer::CheckPermission(const CallingContext &context, const std::string &permission)
 {
     return RET_OK;
 }
