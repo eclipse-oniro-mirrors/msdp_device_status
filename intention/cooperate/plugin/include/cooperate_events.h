@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -204,6 +204,7 @@ struct DSoftbusCooperateOptions {
     int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
     int32_t pointerSpeed { -1 };
     int32_t touchPadSpeed { -1 };
+    int32_t uid { 0 };
 };
 
 using DSoftbusStartCooperateFinished = DSoftbusStartCooperate;

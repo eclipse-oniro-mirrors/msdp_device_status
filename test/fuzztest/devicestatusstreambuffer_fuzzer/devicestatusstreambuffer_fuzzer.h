@@ -13,19 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef IUNDERAGE_MODEL_LISTENER_H
-#define IUNDERAGE_MODEL_LISTENER_H
+#ifndef DEVICESTATUSSTREAMBUFFER_FUZZER_H
+#define DEVICESTATUSSTREAMBUFFER_FUZZER_H
 
-namespace OHOS {
-namespace Msdp {
-namespace UserStatusAwareness {
-class IUnderageModelListener {
-public:
-    IUnderageModelListener() = default;
-    virtual ~IUnderageModelListener() = default;
-    virtual void OnUnderageModelListener(uint32_t eventType, int32_t result, float confidence) const = 0;
-};
-} // namespace UserStatusAwareness
-} // namespace Msdp
-} // namespace OHOS
-#endif // IUNDERAGE_MODEL_LISTENER_H
+#define FUZZ_PROJECT_NAME "devicestatusstreambuffer_fuzzer"
+
+#endif // DEVICESTATUSSTREAMBUFFER_FUZZER_H
