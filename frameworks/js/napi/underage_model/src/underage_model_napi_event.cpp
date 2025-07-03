@@ -62,8 +62,6 @@ UnderageModelNapiEvent::~UnderageModelNapiEvent()
                 napi_status status = napi_delete_reference(env_, *it);
                 if (status != napi_ok) {
                     FI_HILOGE("napi_delete_reference failed");
-                    ++it;
-                    continue;
                 }
                 it = iter.second->onRefSets.erase(it);
             }
@@ -137,8 +135,6 @@ bool UnderageModelNapiEvent::RemoveAllCallback(uint32_t eventType)
         napi_status status = napi_delete_reference(env_, *it);
         if (status != napi_ok) {
             FI_HILOGE("napi_delete_reference failed");
-            ++it;
-            continue;
         }
         it = iter->second->onRefSets.erase(it);
     }
@@ -179,8 +175,6 @@ bool UnderageModelNapiEvent::RemoveCallback(uint32_t eventType, napi_value handl
             status = napi_delete_reference(env_, *it);
             if (status != napi_ok) {
                 FI_HILOGE("napi_delete_reference failed");
-                ++it;
-                continue;
             }
             iter->second->onRefSets.erase(it++);
             break;
@@ -257,7 +251,7 @@ void UnderageModelNapiEvent::OnEventChanged(uint32_t eventType, int32_t result, 
         napi_status ret = napi_get_reference_value(env_, item, &handler);
         if (ret != napi_ok) {
             FI_HILOGE("napi_get_reference_value for %{public}d failed, status: %{public}d", eventType, ret);
-            return;
+            continue;
         }
         ConvertUserAgeGroup(handler, result, confidence);
     }
