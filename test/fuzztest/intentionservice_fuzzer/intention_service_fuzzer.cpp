@@ -86,6 +86,8 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_SUBSCRIBE_STATIONARY_CALLBACK,
     IIntentionIpcCode::COMMAND_UNSUBSCRIBE_STATIONARY_CALLBACK,
     IIntentionIpcCode::COMMAND_GET_DEVICE_STATUS_DATA,
+    IIntentionIpcCode::COMMAND_START_COOPERATE_WITH_OPTIONS,
+    IIntentionIpcCode::COMMAND_ENABLE_INTERNAL_DROP_ANIMATION,
 };
 
 class IntentionServiceMock : public IntentionStub {
