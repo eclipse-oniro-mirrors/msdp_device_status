@@ -38,11 +38,12 @@ public:
 
     void AddBoardObserver(std::shared_ptr<IBoardObserver> observer) override;
     void RemoveBoardObserver(std::shared_ptr<IBoardObserver> observer) override;
-    bool CheckSameAccountToLocal(const std::string &networkId, const int32_t uid = 0) override;
+    bool CheckSameAccountToLocal(const std::string &networkId) override;
+    bool CheckSameAccountToLocalWithUid(const std::string &networkId,
+        const int32_t uid = 0) override;
 
 private:
     int32_t GetTrustedDeviceList(std::vector<DistributedHardware::DmDeviceInfo> &deviceList);
-    bool CheckIsSameAccount(const std::string &networkId);
 private:
     class Observer final {
     public:
