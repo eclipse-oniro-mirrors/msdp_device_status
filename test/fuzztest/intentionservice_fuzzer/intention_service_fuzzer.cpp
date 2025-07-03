@@ -500,7 +500,7 @@ ErrCode GetPageContent(const DeviceStatus::OnScreen::SequenceableContentOption &
     return 0;
 }
 
-ErrCode SendControlEvent(const DeviceStatus::OnScreen::ControlEvent &event) override
+ErrCode SendControlEvent(const DeviceStatus::OnScreen::SequenceableControlEvent &event) override
 {
     (void)event;
     return 0;
