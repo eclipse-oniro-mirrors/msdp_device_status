@@ -3595,7 +3595,6 @@ int32_t DragDrawing::DoRotateDragWindow(float rotation,
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-        rotation = GetRotation(0);
 #ifndef OHOS_BUILD_PC_PRODUCT
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
