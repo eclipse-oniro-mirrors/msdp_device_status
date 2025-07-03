@@ -41,7 +41,8 @@ public:
     virtual void AddBoardObserver(std::shared_ptr<IBoardObserver> observer) = 0;
     virtual void RemoveBoardObserver(std::shared_ptr<IBoardObserver> observer) = 0;
     virtual bool CheckSameAccountToLocal(const std::string &networkId) = 0;
-    virtual bool CheckSameAccountToLocal(const std::string &networkId, const int32_t uid = 0) = 0;
+    virtual bool CheckSameAccountToLocalWithUid(const std::string &networkId,
+        const int32_t uid = 0) = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
