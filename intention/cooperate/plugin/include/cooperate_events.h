@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,8 @@ enum class CooperateEventType {
     DSOFTBUS_COME_BACK_WITH_OPTIONS,
     DSOFTBUS_COOPERATE_WITH_OPTIONS,
     DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS,
-    DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS_FINISHED
+    DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS_FINISHED,
+    STOP_ABOUT_VIRTUALTRACKPAD
 };
 
 struct Rectangle {
@@ -201,6 +202,9 @@ struct DSoftbusCooperateOptions {
     NormalizedCooperateOptions cooperateOptions;
     StartCooperateData extra;
     int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
+    int32_t pointerSpeed { -1 };
+    int32_t touchPadSpeed { -1 };
+    int32_t uid { 0 };
 };
 
 using DSoftbusStartCooperateFinished = DSoftbusStartCooperate;
@@ -216,6 +220,7 @@ struct DSoftbusRelayCooperate {
     bool normal;
     int32_t pointerSpeed { -1 };
     int32_t touchPadSpeed { -1 };
+    int32_t uid { 0 };
 };
 
 struct DSoftbusSubscribeMouseLocation {

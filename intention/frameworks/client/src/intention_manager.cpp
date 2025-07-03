@@ -119,6 +119,11 @@ int32_t IntentionManager::UnsubscribeCallback(Type type, ActivityEvent event, sp
     return stationary_.UnsubscribeCallback(type, event, callback);
 }
 
+int32_t IntentionManager::GetDevicePostureDataSync(DevicePostureData &data)
+{
+    return stationary_.GetDevicePostureDataSync(data);
+}
+
 int32_t IntentionManager::SubscribeCallback(BoomerangType type, std::string bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
@@ -600,6 +605,18 @@ int32_t IntentionManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
 {
     CALL_DEBUG_ENTER;
     return drag_.GetDragBundleInfo(dragBundleInfo);
+}
+
+int32_t IntentionManager::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    CALL_DEBUG_ENTER;
+    return drag_.EnableInternalDropAnimation(animationInfo);
+}
+
+bool IntentionManager::IsDragStart()
+{
+    CALL_DEBUG_ENTER;
+    return drag_.IsDragStart();
 }
 } // namespace DeviceStatus
 } // namespace Msdp

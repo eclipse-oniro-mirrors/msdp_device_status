@@ -60,6 +60,7 @@ ohos_unittest("device_status_algorithm_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
   ]
   defines = []
   if (device_status_sensor_enable) {

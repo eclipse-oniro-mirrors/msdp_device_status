@@ -22,6 +22,7 @@
             "OHOS::Msdp::DeviceStatus::StationaryManager::SubscribeCallback(OHOS::Msdp::DeviceStatus::Type, OHOS::Msdp::DeviceStatus::ActivityEvent, OHOS::Msdp::DeviceStatus::ReportLatencyNs, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteDevStaCallback>)";
             "OHOS::Msdp::DeviceStatus::StationaryManager::UnsubscribeCallback(OHOS::Msdp::DeviceStatus::Type, OHOS::Msdp::DeviceStatus::ActivityEvent, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteDevStaCallback>)";
             "OHOS::Msdp::DeviceStatus::StationaryManager::GetDeviceStatusData(OHOS::Msdp::DeviceStatus::Type)";
+            "OHOS::Msdp::DeviceStatus::StationaryManager::GetDevicePostureDataSync(OHOS::Msdp::DeviceStatus::DevicePostureData&)";
             "VTT for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub";
             "OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetInstance()";
@@ -83,6 +84,8 @@
             "OHOS::Msdp::DeviceStatus::InteractionManager::SetDraggableStateAsync(bool, long)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::SetDraggableStateAsync(bool, long long)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragBundleInfo(OHOS::Msdp::DeviceStatus::DragBundleInfo&)";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::EnableInternalDropAnimation(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::IsDragStart()";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::GetInstance()";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::SubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::UnsubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
@@ -91,6 +94,7 @@
             "OHOS::Msdp::DeviceStatus::BoomerangManager::BoomerangEncodeImage(std::__h::shared_ptr<OHOS::Media::PixelMap>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::BoomerangDecodeImage(std::__h::shared_ptr<OHOS::Media::PixelMap>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
             "VTT for OHOS::Msdp::DeviceStatus::BoomerangCallbackStub";
+            "vtable for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub";
             "OHOS::Msdp::DeviceStatus::BoomerangCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
         };
     local:

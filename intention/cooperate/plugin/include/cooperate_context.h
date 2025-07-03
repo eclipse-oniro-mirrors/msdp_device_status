@@ -87,6 +87,9 @@ public:
     void SetPointerSpeed(int32_t speed);
     int32_t GetTouchPadSpeed();
     void SetTouchPadSpeed(int32_t speed);
+    void SetVirtualTrackpadDeviceId(int32_t deviceId);
+    int32_t GetVirtualTrackpadDeviceId();
+    void ResetVirtualTrackpadDeviceId();
     void AdjustPointerPos(DSoftbusCooperateOptions& dSoftbusCooperateOptions);
     bool IsAllowCooperate();
     void OnStartCooperate(StartCooperateData &data);
@@ -147,6 +150,7 @@ private:
     int32_t originPointerSpeed_ { -1 };
     int32_t peerTouchPadSpeed_ { -1 };
     int32_t originTouchPadSpeed_ { -1 };
+    int32_t VirtualTrackpadDeviceId_ { -1 };
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     std::shared_ptr<IBoardObserver> boardObserver_;
     std::shared_ptr<IDeviceObserver> hotplugObserver_;

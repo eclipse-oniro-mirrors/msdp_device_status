@@ -291,6 +291,17 @@ int32_t InteractionManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo)
 {
     return INTER_MGR_IMPL.GetDragBundleInfo(dragBundleInfo);
 }
+
+int32_t InteractionManager::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    return INTER_MGR_IMPL.EnableInternalDropAnimation(animationInfo);
+}
+
+bool InteractionManager::IsDragStart()
+{
+    return INTER_MGR_IMPL.IsDragStart();
+}
+
 #else
 int32_t InteractionManager::StartDrag(const DragData &dragData)
 {
@@ -402,6 +413,11 @@ void InteractionManager::RegisterDragWindow(std::function<void()> cb)
 void InteractionManager::SetSVGFilePath(const std::string &filePath)
 {
     DRAG_MANAGER.SetSVGFilePath(filePath);
+}
+
+bool InteractionManager::IsDragStart()
+{
+    return DRAG_MANAGER.IsDragStart();
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 } // namespace DeviceStatus

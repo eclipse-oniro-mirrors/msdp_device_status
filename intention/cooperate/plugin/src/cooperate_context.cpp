@@ -275,7 +275,7 @@ void Context::AdjustPointerPos(DSoftbusCooperateOptions& dSoftbusCooperateOption
     auto displayId = dSoftbusCooperateOptions.cooperateOptions.displayId;
     auto& displayX = dSoftbusCooperateOptions.cooperateOptions.displayX;
     auto& displayY = dSoftbusCooperateOptions.cooperateOptions.displayY;
-    FI_HILOGI("Start cooperate finish,displayX:%{public}d,displayY:%{public}d,displayId:%{public}d",
+    FI_HILOGI("Start cooperate finish,displayX:%{private}d,displayY:%{private}d,displayId:%{public}d",
         displayX, displayY, displayId);
 #ifndef OHOS_BUILD_PC_PRODUCT
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
@@ -285,6 +285,7 @@ void Context::AdjustPointerPos(DSoftbusCooperateOptions& dSoftbusCooperateOption
 #endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGE("No default display");
+        return;
     }
     Rectangle displayRect {
         .width = display->GetWidth(),
@@ -294,15 +295,15 @@ void Context::AdjustPointerPos(DSoftbusCooperateOptions& dSoftbusCooperateOption
         displayX = 0;
     }
     if (displayX >= displayRect.width) {
-        displayX = displayRect.width;
+        displayX = displayRect.width - 1;
     }
     if (displayY <= 0) {
         displayY = 0;
     }
     if (displayY >= displayRect.height) {
-        displayY = displayRect.height;
+        displayY = displayRect.height - 1;
     }
-    FI_HILOGI("adjust pointer position finish,displayX:%{public}d,displayY:%{public}d",
+    FI_HILOGI("adjust pointer position finish,displayX:%{private}d,displayY:%{private}d",
         displayX, displayY);
 }
 
@@ -577,6 +578,22 @@ void Context::ResetCursorPosition()
         .y = 50,
     };
     StopCooperateSetCursorPosition(defaultCursorPos);
+}
+
+void Context::SetVirtualTrackpadDeviceId(int32_t deviceId)
+{
+    VirtualTrackpadDeviceId_ = deviceId;
+    FI_HILOGI("Cur vir track pad:%{public}d", deviceId);
+}
+
+int32_t Context::GetVirtualTrackpadDeviceId()
+{
+    return VirtualTrackpadDeviceId_;
+}
+
+void Context::ResetVirtualTrackpadDeviceId()
+{
+    VirtualTrackpadDeviceId_ = -1;
 }
 
 #ifdef ENABLE_PERFORMANCE_CHECK

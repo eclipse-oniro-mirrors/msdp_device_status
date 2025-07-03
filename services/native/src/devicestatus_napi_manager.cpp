@@ -14,8 +14,9 @@
  */
  
 #include "devicestatus_napi_manager.h"
-#include <dlfcn.h>
+
 #include <cstdlib>
+#include <dlfcn.h>
 #include "fi_log.h"
 
 #undef LOG_TAG

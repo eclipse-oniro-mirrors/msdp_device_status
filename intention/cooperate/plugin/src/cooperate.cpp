@@ -230,6 +230,20 @@ int32_t Cooperate::StartWithOptions(int32_t pid, int32_t userData, const std::st
     int32_t startDeviceId, const CooperateOptions &options)
 {
     CALL_DEBUG_ENTER;
+    CooperateRadarInfo radarInfo {
+        .funcName =  __FUNCTION__,
+        .bizState = static_cast<int32_t> (BizState::STATE_END),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+        .hostName = "",
+        .localNetId = Utility::DFXRadarAnonymize(context_.Local().c_str()),
+        .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId.c_str())
+    };
+    if (!sm_.IsCooperateEnable()) {
+        radarInfo.bizStage =  static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_LOCAL_SWITCH);
+        radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
+        radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_LOCAL_SWITCH_FAILED);
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    }
 #ifdef ENABLE_PERFORMANCE_CHECK
     std::ostringstream ss;
     ss << "start_cooperation_with_" << Utility::Anonymize(remoteNetworkId).c_str();
@@ -245,13 +259,23 @@ int32_t Cooperate::StartWithOptions(int32_t pid, int32_t userData, const std::st
         .displayId = options.displayId,
         .errCode = std::make_shared<std::promise<int32_t>>(),
     };
-    FI_HILOGI("Server start cooperate,displayX:%{public}d,displayY:%{public}d,displayId:%{public}d",
+    FI_HILOGI("Server start cooperate,displayX:%{private}d,displayY:%{private}d,displayId:%{public}d",
         event.displayX, event.displayY, event.displayId);
     auto errCode = event.errCode->get_future();
     auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::WITH_OPTIONS_START, event));
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
     }
+    if (ret != RET_OK) {
+        radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CALLING_COOPERATE);
+        radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
+        radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_FAILED);
+        CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+    };
+    radarInfo.bizState = static_cast<int32_t> (BizState::STATE_BEGIN),
+    radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS),
+    radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CALLING_COOPERATE_SUCCESS),
+    CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     return errCode.get();
 }
 

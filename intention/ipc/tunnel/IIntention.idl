@@ -20,6 +20,7 @@ sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragVisible;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceablePreviewAnimation;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceablePreviewStyle;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableRotateWindow;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceablePostureData;
 interface OHOS.Msdp.DeviceStatus.IRemoteBoomerangCallback;
 interface OHOS.Msdp.DeviceStatus.IRemoteDevStaCallback;
 sequenceable OHOS.Media.PixelMap;
@@ -48,6 +49,7 @@ interface OHOS.Msdp.IIntention {
     // Drag
     void StartDrag([in] SequenceableDragData sequenceableDragData);
     void StopDrag([in] SequenceableDragResult sequenceableDragResult);
+    void EnableInternalDropAnimation([in] String animationInfo);
     void AddDraglistener([in] boolean isJsCaller);
     void RemoveDraglistener([in] boolean isJsCaller);
     void AddSubscriptListener();
@@ -77,7 +79,8 @@ interface OHOS.Msdp.IIntention {
     void GetAppDragSwitchState([out] boolean state);
     void SetDraggableStateAsync([in] boolean state, [in] long downTime);
     void GetDragBundleInfo([out] String bundleName, [out] boolean isCrossDevice);
- 
+    void IsDragStart([out] boolean isStart);
+
     // Boomerang
     void SubscribeCallback([in] int type, [in] String bundleName, [in] IRemoteBoomerangCallback subCallback);
     void UnsubscribeCallback([in] int type, [in] String bundleName, [in] IRemoteBoomerangCallback unsubCallback);
@@ -93,4 +96,5 @@ interface OHOS.Msdp.IIntention {
     void UnsubscribeStationaryCallback([in] int type, [in] int event,
         [in] IRemoteDevStaCallback unsubCallback);
     void GetDeviceStatusData([in] int type, [out] int replyType, [out] int replyValue);
+    void GetDevicePostureDataSync([out] SequenceablePostureData postureData);
 }

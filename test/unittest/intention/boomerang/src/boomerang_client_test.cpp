@@ -25,8 +25,6 @@
 #include "boomerang_callback_stub.h"
 #include "boomerang_client.h"
 #include "iremote_boomerang_callback.h"
-#include "boomerang_params.h"
-#include "default_params.h"
 #include "devicestatus_define.h"
 #include "devicestatus_errors.h"
 #include "i_hotarea_listener.h"
@@ -45,7 +43,6 @@ using namespace testing;
 namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 inline constexpr size_t MAX_STRING_LEN{1024};
-// const std::string SYSTEM_BASIC { "system_basic" };
 } // namespace
 
 static std::unique_ptr<Media::PixelMap> CreateEmptyPixelMap()
@@ -66,7 +63,6 @@ public:
     static void TearDownTestCase();
     class BoomerangClientTestCallback : public BoomerangCallbackStub {
     public:
-    // void OnScreenshotResult(const BoomerangData& data);
     private:
     BoomerangData data_;
     };

@@ -25,8 +25,14 @@
 #include "json_parser.h"
 #include "libxml/tree.h"
 #include "libxml/parser.h"
+
+#if defined(MODIFIER_NG)
+#include "modifier_ng/custom/rs_content_style_modifier.h"
+#else
 #include "modifier/rs_extended_modifier.h"
 #include "modifier/rs_modifier.h"
+#endif
+
 #include "vsync_receiver.h"
 
 #include "drag_data.h"
@@ -48,31 +54,42 @@ struct DrawingInfo;
 class DragDrawing;
 using DragStartExtFunc = void (*)(DragData &dragData);
 using DragNotifyExtFunc = void (*)(DragEventInfo &dragEventInfo);
-class DrawSVGModifier : public Rosen::RSContentStyleModifier {
+
+#if defined(MODIFIER_NG)
+using RSContentStyleModifier = Rosen::ModifierNG::RSContentStyleModifier;
+using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
+using RSModifier = Rosen::ModifierNG::RSModifier;
+#else
+using RSContentStyleModifier = Rosen::RSContentStyleModifier;
+using RSDrawingContext = Rosen::RSDrawingContext;
+using RSModifier = Rosen::RSModifier;
+#endif
+
+class DrawSVGModifier : public RSContentStyleModifier {
 public:
     explicit DrawSVGModifier(std::shared_ptr<Media::PixelMap> stylePixelMap) : stylePixelMap_(stylePixelMap) {}
     ~DrawSVGModifier() = default;
-    void Draw(Rosen::RSDrawingContext& context) const override;
+    void Draw(RSDrawingContext& context) const override;
 
 private:
     std::shared_ptr<Media::PixelMap> stylePixelMap_ { nullptr };
 };
 
-class DrawPixelMapModifier : public Rosen::RSContentStyleModifier {
+class DrawPixelMapModifier : public RSContentStyleModifier {
 public:
     DrawPixelMapModifier() = default;
     ~DrawPixelMapModifier() = default;
     void SetDragShadow(std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode) const;
     void SetTextDragShadow(std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode) const;
     Rosen::SHADOW_COLOR_STRATEGY ConvertShadowColorStrategy(int32_t shadowColorStrategy) const;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
 };
 
-class DrawMouseIconModifier : public Rosen::RSContentStyleModifier {
+class DrawMouseIconModifier : public RSContentStyleModifier {
 public:
     explicit DrawMouseIconModifier(MMI::PointerStyle pointerStyle) : pointerStyle_(pointerStyle) {}
     ~DrawMouseIconModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
 
 private:
     void OnDraw(std::shared_ptr<Media::PixelMap> pixelMap) const;
@@ -82,11 +99,11 @@ private:
     MMI::PointerStyle pointerStyle_;
 };
 
-class DrawDynamicEffectModifier : public Rosen::RSContentStyleModifier {
+class DrawDynamicEffectModifier : public RSContentStyleModifier {
 public:
     DrawDynamicEffectModifier() = default;
     ~DrawDynamicEffectModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
     void SetAlpha(float alpha);
     void SetScale(float scale);
 
@@ -95,11 +112,11 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> scale_ { nullptr };
 };
 
-class DrawDragStopModifier : public Rosen::RSContentStyleModifier {
+class DrawDragStopModifier : public RSContentStyleModifier {
 public:
     DrawDragStopModifier() = default;
     ~DrawDragStopModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
     void SetAlpha(float alpha);
     void SetScale(float scale);
     void SetStyleScale(float scale);
@@ -112,12 +129,12 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> styleAlpha_ { nullptr };
 };
 
-class DrawStyleChangeModifier : public Rosen::RSContentStyleModifier {
+class DrawStyleChangeModifier : public RSContentStyleModifier {
 public:
     DrawStyleChangeModifier() = default;
     explicit DrawStyleChangeModifier(std::shared_ptr<Media::PixelMap> stylePixelMap) : stylePixelMap_(stylePixelMap) {}
     ~DrawStyleChangeModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
     void SetScale(float scale);
 
 private:
@@ -125,11 +142,11 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> scale_ { nullptr };
 };
 
-class DrawStyleScaleModifier : public Rosen::RSContentStyleModifier {
+class DrawStyleScaleModifier : public RSContentStyleModifier {
 public:
     DrawStyleScaleModifier() = default;
     ~DrawStyleScaleModifier() = default;
-    void Draw(Rosen::RSDrawingContext &context) const override;
+    void Draw(RSDrawingContext &context) const override;
     void SetScale(float scale);
 
 private:
@@ -221,6 +238,10 @@ struct DrawingInfo {
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode { nullptr };
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     std::shared_ptr<Media::PixelMap> stylePixelMap { nullptr };
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    std::shared_ptr<Rosen::RSNode> curvesMaskNode { nullptr };
+    std::shared_ptr<Rosen::RSNode> lightNode { nullptr };
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     IContext* context { nullptr };
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
@@ -266,7 +287,9 @@ public:
     void SetSVGFilePath(const std::string &filePath);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void OnDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime);
+#ifdef OHOS_ENABLE_PULLTHROW
     void OnPullThrowDragMove(int32_t displayId, int32_t displayX, int32_t displayY, int64_t actionTime);
+#endif // OHOS_ENABLE_PULLTHROW
     void EraseMouseIcon();
     void DestroyDragWindow();
     void UpdateDrawingState();
@@ -289,9 +312,11 @@ public:
     Rosen::Rotation GetRotation(Rosen::DisplayId displayId);
     void DestoryDisplayIdInMap(Rosen::DisplayId displayId);
     float CalculateWidthScale();
+#ifdef OHOS_ENABLE_PULLTHROW
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     float CalculatePullThrowScale();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#endif // OHOS_ENABLE_PULLTHROW
     float GetMaxWidthScale(int32_t width, int32_t height);
     float CalculateScale(float width, float height, float widthLimit, float heightLimit);
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
@@ -303,12 +328,18 @@ public:
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
     void LongPressDragZoomOutAnimation();
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
+    void ResetAnimationParameter();
+#ifdef OHOS_ENABLE_PULLTHROW
     void PullThrowAnimation(double tx, double ty, float vx, float vy, std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void SetHovering(double tx, double ty, std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void SetScaleAnimation();
     void PullThrowBreatheAnimation();
     void PullThrowBreatheEndAnimation();
     void PullThrowZoomOutAnimation();
+#endif // OHOS_ENABLE_PULLTHROW
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    void GetDragDrawingInfo(DragInternalInfo &dragInternalInfo);
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 private:
     int32_t CheckDragData(const DragData &dragData);
@@ -371,7 +402,6 @@ private:
     void UpdateAnimationProtocol(Rosen::RSAnimationTimingProtocol protocol);
     void RotateDisplayXY(int32_t &displayX, int32_t &displayY);
     void RotatePixelMapXY();
-    void ResetAnimationParameter();
     void ResetAnimationFlag(bool isForce = false);
     void DoEndAnimation();
     void ResetParameter();
@@ -410,6 +440,7 @@ private:
 
 private:
     bool needMultiSelectedAnimation_ { true };
+    int32_t displayWidth_ { -1 };
     int64_t interruptNum_ { -1 };
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ { nullptr };
     std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };
@@ -433,7 +464,9 @@ private:
     uint64_t screenId_ { 0 };
     int32_t displayWidth_ { 0 };
     int32_t displayHeight_ { 0 };
+#ifdef OHOS_ENABLE_PULLTHROW
     float pullThrowScale_ { 1.0 };
+#endif // OHOS_ENABLE_PULLTHROW
     std::map<Rosen::DisplayId, Rosen::Rotation> rotationMap_;
     ScreenSizeType currentScreenSize_ = ScreenSizeType::UNDEFINED;
     MMI::PointerStyle pointerStyle_;
@@ -445,17 +478,19 @@ private:
     DragState dragState_ { DragState::STOP };
     int32_t timerId_ { -1 };
     std::shared_mutex receiverMutex_;
+#ifdef OHOS_ENABLE_PULLTHROW
     bool pullThrowAnimationXCompleted_  { false };
     bool pullThrowAnimationYCompleted_ { false };
     std::mutex animationMutex_;
     std::condition_variable animationCV_;
+#endif // OHOS_ENABLE_PULLTHROW
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<OHOS::Rosen::Window> window_ { nullptr };
     std::function<void()> callback_ { nullptr };
     std::string svgFilePath_;
     int64_t actionTime_ { 0 };
 #else
-    IContext* context_ { nullptr} ;
+    IContext* context_ { nullptr };
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 };
 } // namespace DeviceStatus

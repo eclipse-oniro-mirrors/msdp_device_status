@@ -15,6 +15,7 @@ import("../device_status.gni")
 
 config("devicestatus_services_private_config") {
   include_dirs = [
+    "boomerang/include",
     "delegate_task/include",
     "native/include",
     "${device_status_utils_path}/include",
@@ -39,6 +40,7 @@ config("devicestatus_services_private_config") {
 
 config("devicestatus_services_public_config") {
   include_dirs = [
+    "boomerang/include",
     "delegate_task/include",
     "native/include",
     "interaction/drag/include",
@@ -66,9 +68,13 @@ sources_set = [
 ]
 
 external_deps_set = [
+  "accessibility:accessibility_common",
+  "accessibility:accessibleability",
+  "accessibility:accessibilityclient",
   "ability_runtime:app_manager",
   "access_token:libaccesstoken_sdk",
   "access_token:libtokenid_sdk",
+  "ace_engine:ui_session",
   "cJSON:cjson",
   "data_share:datashare_consumer",
   "c_utils:utils",
@@ -144,10 +150,12 @@ ohos_shared_library("devicestatus_service") {
   }
 
   defines = []
+  external_deps = external_deps_set
   if (device_status_sensor_enable) {
     defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+    external_deps += [ "sensor:sensor_interface_native" ]
   }
-  external_deps = external_deps_set
+  
   if (device_status_intention_framework) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   } else {
@@ -201,8 +209,10 @@ ohos_static_library("devicestatus_static_service") {
   }
 
   defines = []
+  external_deps = external_deps_set
   if (device_status_sensor_enable) {
     defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+    external_deps += [ "sensor:sensor_interface_native" ]
   }
 
   public_deps = [
@@ -220,7 +230,6 @@ ohos_static_library("devicestatus_static_service") {
     ]
   }
 
-  external_deps = external_deps_set
   if (device_status_intention_framework) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   } else {

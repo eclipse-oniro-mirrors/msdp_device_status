@@ -180,6 +180,7 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     displayChangeEventListener_ = sptr<DisplayChangeEventListener>::MakeSptr(context_);
     CHKPV(displayChangeEventListener_);
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(displayChangeEventListener_);
+#ifdef OHOS_ENABLE_PULLTHROW
     isHPR_ = HPR_PRODUCT_TYPE == DEVICE_TYPE_HPR;
     if (isHPR_) {
         FI_HILOGI("device hpr checkok");
@@ -188,6 +189,7 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
             return;
         }
     }
+#endif // OHOS_ENABLE_PULLTHROW
 }
 
 void DisplayAbilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)

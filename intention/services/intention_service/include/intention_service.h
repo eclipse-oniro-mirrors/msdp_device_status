@@ -65,6 +65,7 @@ public:
     // Drag
     ErrCode StartDrag(const SequenceableDragData &sequenceableDragData) override;
     ErrCode StopDrag(const SequenceableDragResult &sequenceableDragResult) override;
+    ErrCode EnableInternalDropAnimation(const std::string &animationInfo) override;
     ErrCode AddDraglistener(bool isJsCaller) override;
     ErrCode RemoveDraglistener(bool isJsCaller) override;
     ErrCode SetDragWindowVisible(const SequenceableDragVisible &sequenceableDragVisible) override;
@@ -94,6 +95,7 @@ public:
     ErrCode GetAppDragSwitchState(bool& state) override;
     ErrCode SetDraggableStateAsync(bool state, int64_t downTime) override;
     ErrCode GetDragBundleInfo(std::string &bundleName, bool &state) override;
+    ErrCode IsDragStart(bool &isStart) override;
 
     // Boomerang
     ErrCode SubscribeCallback(int32_t type, const std::string& bundleName,
@@ -114,6 +116,7 @@ public:
     ErrCode UnsubscribeStationaryCallback(int32_t type, int32_t event,
         const sptr<IRemoteDevStaCallback> &unsubCallback) override;
     ErrCode GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue) override;
+    ErrCode GetDevicePostureDataSync(SequenceablePostureData &data) override;
 
 private:
     CallingContext GetCallingContext();

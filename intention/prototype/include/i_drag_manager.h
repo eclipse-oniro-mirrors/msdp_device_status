@@ -24,6 +24,9 @@
 #include "transaction/rs_transaction.h"
 
 #include "drag_data.h"
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+#include "drag_data_util.h"
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "stream_session.h"
 #else
@@ -73,6 +76,14 @@ public:
     virtual bool GetControlCollaborationVisible() const = 0;
     virtual void SetControlCollaborationVisible(bool visible) = 0;
     virtual int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const = 0;
+    virtual bool IsDragStart() const = 0;
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    virtual int32_t EnableInternalDropAnimation(const std::string &animationInfo) = 0;
+    virtual void GetDragDrawingInfo(DragInternalInfo &dragInternalInfo) = 0;
+    virtual void ResetDragState() = 0;
+    virtual void ResetAnimationParameter() = 0;
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual void RegisterStateChange(std::function<void(DragState)> callback) = 0;
     virtual void UnregisterStateChange() = 0;
@@ -117,10 +128,12 @@ public:
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual int32_t SetMouseDragMonitorState(bool state) = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#ifdef OHOS_ENABLE_PULLTHROW
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     virtual bool RegisterPullThrowListener() = 0;
     virtual bool RegisterVKListener() = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+#endif // OHOS_ENABLE_PULLTHROW
 };
 } // namespace DeviceStatus
 } // namespace Msdp

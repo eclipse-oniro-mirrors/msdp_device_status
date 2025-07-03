@@ -22,7 +22,6 @@
 #include "socket_session_manager.h"
 #include "socket_session.h"
 #include "socket_connection.h"
-#include "socket_params.h"
 #include "stream_client.h"
 
 #include "message_parcel.h"
@@ -99,23 +98,6 @@ bool SocketConnectionFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool SocketParamsFuzzTest(const uint8_t* data, size_t size)
-{
-    MessageParcel datas;
-    if (!datas.WriteInterfaceToken(FORMMGR_INTERFACE_TOKEN) ||
-        !datas.WriteBuffer(data, size) || !datas.RewindRead(0)) {
-        return false;
-    }
-    AllocSocketPairParam allocSocketPairParam("testProgramName", 1);
-    AllocSocketPairReply allocSocketPairReply(1, 1);
-    
-    allocSocketPairParam.Marshalling(datas);
-    allocSocketPairParam.Unmarshalling(datas);
-    allocSocketPairReply.Marshalling(datas);
-    allocSocketPairReply.Unmarshalling(datas);
-    return true;
-}
-
 } // namespace OHOS
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
@@ -125,7 +107,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     OHOS::SocketConnectionFuzzTest(data, size);
-    OHOS::SocketParamsFuzzTest(data, size);
     return 0;
 }
 } // namespace DeviceStatus

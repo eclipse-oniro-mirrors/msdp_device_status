@@ -18,6 +18,7 @@ config("intention_stationary_server_public_config") {
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
     "${device_status_root_path}/libs/interface",
+    "${device_status_root_path}/services/boomerang/include",
     "${device_status_root_path}/services/native/include",
   ]
 }
@@ -38,16 +39,20 @@ ohos_source_set("intention_stationary_server") {
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
     "${device_status_root_path}/libs/interface",
+    "${device_status_root_path}/services/boomerang/include",
     "${device_status_root_path}/services/native/include",
   ]
 
   sources = [
+    "${device_status_root_path}/services/boomerang/src/accessibility_manager.cpp",
+    "${device_status_root_path}/services/boomerang/src/boomerang_surfacecapture_callback.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_dumper.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_hisysevent.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_manager.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_msdp_client_impl.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_napi_manager.cpp",
     "src/stationary_server.cpp",
+    "src/sensor_manager.cpp",
   ]
 
   public_configs = [ ":intention_stationary_server_public_config" ]
@@ -55,7 +60,6 @@ ohos_source_set("intention_stationary_server") {
   defines = device_status_default_defines
 
   deps = [
-    "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/stationary/data:intention_stationary_data",
     "${device_status_root_path}/utils/common:devicestatus_util",
@@ -63,12 +67,18 @@ ohos_source_set("intention_stationary_server") {
   ]
 
   external_deps = [
+    "accessibility:accessibility_common",
+    "accessibility:accessibleability",
+    "accessibility:accessibilityclient",
     "access_token:libaccesstoken_sdk",
+    "ace_engine:ui_session",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
+    "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
   ]
 
   if (device_status_hisysevent_enable) {
@@ -84,6 +94,11 @@ ohos_source_set("intention_stationary_server") {
   if (device_status_motion_enable) {
     defines += [ "MOTION_ENABLE" ]
     external_deps += [ "motion:motion_interface_native" ]
+  }
+
+  if (device_status_sensor_enable) {
+    defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+    external_deps += [ "sensor:sensor_interface_native" ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"

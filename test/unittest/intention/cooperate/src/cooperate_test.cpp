@@ -15,7 +15,6 @@
 #include "cooperate_test.h"
 
 #include "cooperate.h"
-#include "cooperate_params.h"
 #include "ddm_adapter.h"
 #include "input_adapter.h"
 #include "i_cooperate.h"
@@ -323,11 +322,39 @@ HWTEST_F(CooperateTest, CooperateTest7, TestSize.Level0)
     int32_t ret = RET_ERR;
     if (g_cooperate != nullptr) {
         g_cooperate->Dump(1);
-        GetCooperateStateSyncParam param;
+        std::string udId { "default" };
         bool state { false };
-        int32_t ret = g_cooperate->GetCooperateState(param.udId, state);
+        int32_t ret = g_cooperate->GetCooperateState(udId, state);
         EXPECT_EQ(ret, RET_OK);
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    } else {
+        GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
+        EXPECT_EQ(!ret, RET_OK);
+    }
+}
+
+/**
+ * @tc.name: CooperateTest8
+ * @tc.desc: cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateTest, CooperateTest8, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t ret = RET_ERR;
+    if (g_cooperate != nullptr) {
+        CooperateOptions withOptions;
+        withOptions.displayX = 500;
+        withOptions.displayY = 500;
+        withOptions.displayId = 1;
+        int32_t pid = IPCSkeleton::GetCallingPid();
+        int32_t userData = 1;
+        int32_t startDeviceId = 0;
+        const std::string &remoteNetworkId = "test";
+        ret = g_cooperate->StartWithOptions(pid, userData, remoteNetworkId,
+        startDeviceId, withOptions);
+        EXPECT_EQ(ret, RET_OK);
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
         EXPECT_EQ(!ret, RET_OK);

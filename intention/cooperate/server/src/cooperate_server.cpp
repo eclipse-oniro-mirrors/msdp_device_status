@@ -20,8 +20,6 @@
 #include <tokenid_kit.h>
 
 #include "accesstoken_kit.h"
-#include "cooperate_params.h"
-#include "default_params.h"
 #include "devicestatus_define.h"
 #include "ipc_skeleton.h"
 #include "utility.h"
@@ -93,7 +91,7 @@ int32_t CooperateServer::StartCooperate(CallingContext &context, const std::stri
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
-    return cooperate->Start(context.pid, userData, remoteNetworkId, startDeviceId);
+    return cooperate->Start(context.pid, userData, remoteNetworkId, startDeviceId, context.uid);
 }
 
 int32_t CooperateServer::StartCooperateWithOptions(CallingContext &context, const std::string& remoteNetworkId,

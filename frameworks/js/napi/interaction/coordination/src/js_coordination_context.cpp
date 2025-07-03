@@ -179,13 +179,10 @@ napi_value JsCoordinationContext::ActivateCompatible(napi_env env, napi_callback
 CooperateOptions JsCoordinationContext::GetCooperationsData(napi_env env, CooperateOptions &cooperateOptions,
     napi_value optionsHandle)
 {
-    int32_t displayX = 0;
-    cooperateOptions.displayX = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayX", displayX);
-    int32_t displayY = 0;
-    cooperateOptions.displayY = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayY", displayY);
-    int32_t displayId = 0;
-    cooperateOptions.displayId = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayId", displayId);
-    FI_HILOGI("Start cooperate,displayX:%{public}d,displayY:%{public}d,displayId:%{public}d",
+    cooperateOptions.displayX = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayX");
+    cooperateOptions.displayY = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayY");
+    cooperateOptions.displayId = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayId");
+    FI_HILOGI("Start cooperate,displayX:%{private}d,displayY:%{private}d,displayId:%{public}d",
         cooperateOptions.displayX, cooperateOptions.displayY, cooperateOptions.displayId);
     return cooperateOptions;
 }
@@ -214,17 +211,15 @@ napi_value JsCoordinationContext::ActivateCooperateWithOptions(napi_env env, nap
     CHKRP(napi_get_value_string_utf8(env, argv[0], remoteNetworkId, sizeof(remoteNetworkId), &length),
         GET_VALUE_STRING_UTF8);
     CHKRP(napi_get_value_int32(env, argv[1], &startDeviceId), GET_VALUE_INT32);
-
-    if (!UtilNapi::TypeOf(env, argv[ARGV_TWO], napi_object)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "cooperateOptions", "object");
-        return nullptr;
-    }
-
-    CooperateOptions cooperateOptions = GetCooperationsData(env, cooperateOptions, argv[2]);
     JsCoordinationContext *jsDev = JsCoordinationContext::GetInstance(env);
     CHKPP(jsDev);
     std::shared_ptr<JsCoordinationManager> jsCoordinationMgr = jsDev->GetJsCoordinationMgr();
     CHKPP(jsCoordinationMgr);
+    if (!UtilNapi::TypeOf(env, argv[ARGV_TWO], napi_object)) {
+        FI_HILOGI("CooperateOptions is not assigned, call ActivateCooperate");
+        return jsCoordinationMgr->Activate(env, remoteNetworkId, startDeviceId, true);
+    }
+    CooperateOptions cooperateOptions = GetCooperationsData(env, cooperateOptions, argv[2]);
     return jsCoordinationMgr->ActivateCooperateWithOptions(env, remoteNetworkId, startDeviceId, cooperateOptions);
 }
 

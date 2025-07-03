@@ -157,7 +157,7 @@ int32_t IntentionClient::StartCooperateWithOptions(const std::string &remoteNetw
     SequenceableCooperateOptions sequenceableCooperateOptions(options);
     if (int32_t ret = devicestatusProxy_->StartCooperateWithOptions(remoteNetworkId, userData,
         startDeviceId, checkPermission, sequenceableCooperateOptions); ret != RET_OK) {
-        FI_HILOGE("proxy::StartCooperate fail");
+        FI_HILOGE("proxy::StartCooperateWithOptions fail");
         return ret;
     }
     return RET_OK;
@@ -362,6 +362,23 @@ int32_t IntentionClient::StopDrag(const DragDropResult &dropResult)
     SequenceableDragResult sequenceableDragResult(dropResult);
     if (int32_t ret = devicestatusProxy_->StopDrag(sequenceableDragResult); ret != RET_OK) {
         FI_HILOGE("proxy::StopDrag fail");
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t IntentionClient::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("Can not connect to IntentionService");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    int32_t ret = devicestatusProxy_->EnableInternalDropAnimation(animationInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy::EnableInternalDropAnimation fail");
         return ret;
     }
     return RET_OK;
@@ -650,6 +667,23 @@ int32_t IntentionClient::GetDragState(DragState &dragState)
         return ret;
     }
     dragState = static_cast<DragState>(state);
+    return RET_OK;
+}
+
+int32_t IntentionClient::IsDragStart(bool &isStart)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("Can not connect to IntentionService");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    auto ret = devicestatusProxy_->IsDragStart(isStart);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy::IsDragStart fail, ret =  %{public}d", ret);
+        return ret;
+    }
     return RET_OK;
 }
 
@@ -953,6 +987,25 @@ int32_t IntentionClient::GetDeviceStatusData(int32_t type, int32_t &replyType, i
         FI_HILOGE("proxy::GetDeviceStatusData fail");
         return ret;
     }
+    return RET_OK;
+}
+
+int32_t IntentionClient::GetDevicePostureDataSync(DevicePostureData &postureData)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("cannot get device status data");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    SequenceablePostureData seqData(postureData);
+    int32_t ret = devicestatusProxy_->GetDevicePostureDataSync(seqData);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy::GetDevicePostureDataSync fail");
+        return ret;
+    }
+    postureData = seqData.GetPostureData();
     return RET_OK;
 }
 

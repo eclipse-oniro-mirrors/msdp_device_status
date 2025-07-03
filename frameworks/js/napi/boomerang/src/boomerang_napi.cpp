@@ -23,12 +23,12 @@
 #include "image_pixel_map_mdk.h"
 #include "pixel_map_napi.h"
 
-#include "util_napi_error.h"
+#include "boomerang_manager.h"
+#include "boomerang_napi_error.h"
 #include "devicestatus_client.h"
 #include "devicestatus_define.h"
-#include "boomerang_napi_error.h"
-#include "boomerang_manager.h"
 #include "napi_constants.h"
+#include "util_napi_error.h"
 
 #undef LOG_TAG
 #define LOG_TAG "BoomerangNapi"
@@ -542,8 +542,8 @@ bool BoomerangNapi::InitNapiObject(napi_env env, napi_callback_info info)
             (void)env;
             (void)hint;
             CHKPV(data);
-            BoomerangNapi *devicestatus = static_cast<BoomerangNapi *>(data);
-            delete devicestatus;
+            BoomerangNapi *deviceStatus = static_cast<BoomerangNapi *>(data);
+            delete deviceStatus;
             g_obj = nullptr;
         },
         nullptr,
@@ -580,13 +580,13 @@ bool BoomerangNapi::CheckArguments(napi_env env, napi_callback_info info, int32_
     }
     if (validataType == VALIDATA_ON_PARAM) {
         if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_string || arr[ARG_2] != napi_function) {
-            FI_HILOGE("Failed to get arguements");
+            FI_HILOGE("Failed to get arguments");
             return false;
         }
     }
     if (validataType == VALIDATA_OFF_PARAM) {
         if (arr[ARG_0] != napi_string || arr[ARG_1] != napi_string) {
-            FI_HILOGE("Failed to get arguements");
+            FI_HILOGE("Failed to get arguments");
             return false;
         }
     }
@@ -597,7 +597,7 @@ bool BoomerangNapi::CreateMetadataExecution(napi_env env, AsyncContext *asyncCon
     std::string bundleName, sptr<IRemoteBoomerangCallback> callback)
 {
     if (asyncContext == nullptr || callback == nullptr) {
-        FI_HILOGE("not init notity metadata asyncContext");
+        FI_HILOGE("not init notify metadata asyncContext");
         return false;
     }
     asyncContext->callback = callback;

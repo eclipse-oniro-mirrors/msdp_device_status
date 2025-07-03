@@ -12,7 +12,10 @@
     "syscap": [
       "SystemCapability.Msdp.DeviceStatus.Drag",
       "SystemCapability.Msdp.DeviceStatus.Cooperate",
-      "SystemCapability.Msdp.DeviceStatus.Stationary"
+      "SystemCapability.Msdp.DeviceStatus.Stationary",
+      "SystemCapability.MultimodalAwareness.Motion",
+      "SystemCapability.MultimodalAwareness.DeviceStatus",
+      "SystemCapability.MultimodalAwareness.MetadataBinding"
     ],
     "hisysevent_config": [
       "//base/msdp/device_status/hisysevent.yaml",
@@ -30,7 +33,9 @@
       "device_status_memmgr_enable",
       "device_status_device_type",
       "device_status_enable_universal_drag",
-      "device_status_motion_enable"
+      "device_status_motion_enable",
+      "device_status_enable_internal_drop_animation",
+      "device_status_pullthrow_enable"
     ],
     "adapted_system_type": [ "standard" ],
     "rom": "2048KB",
@@ -38,7 +43,9 @@
     "deps": {
       "components": [
         "ability_runtime",
+        "accessibility",
         "access_token",
+        "ace_engine",
         "cJSON",
         "hicollie",
         "hilog",
@@ -90,7 +97,8 @@
           "//base/msdp/device_status/frameworks/js/napi/interaction:interaction_jsapi_group",
           "//base/msdp/device_status/frameworks/js/napi/motion:motion_napi",
           "//base/msdp/device_status/frameworks/js/napi/boomerang:metadatabinding_napi",
-          "//base/msdp/device_status/frameworks/js/napi/device_status:devicestatus_napi"
+          "//base/msdp/device_status/frameworks/js/napi/device_status:devicestatus_napi",
+          "//base/msdp/device_status/frameworks/js/napi/underage_model:userstatus_napi"
         ],
         "service_group":[
           "//base/msdp/device_status/libs:devicestatus_algo",

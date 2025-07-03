@@ -42,6 +42,7 @@ public:
         sptr<IRemoteDevStaCallback> callback);
     int32_t UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
     Data GetDeviceStatusData(const Type type);
+    int32_t GetDevicePostureDataSync(DevicePostureData &data);
     int32_t RegisterCoordinationListener(
         std::shared_ptr<ICoordinationListener> listener, bool isCompatible = false);
     int32_t UnregisterCoordinationListener(
@@ -102,6 +103,8 @@ public:
     int32_t GetAppDragSwitchState(bool &state);
     void SetDraggableStateAsync(bool state, int64_t downTime);
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
+    int32_t EnableInternalDropAnimation(const std::string &animationInfo);
+    bool IsDragStart();
 
 private:
     void InitClient();

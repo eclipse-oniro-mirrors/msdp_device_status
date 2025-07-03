@@ -18,7 +18,6 @@
 
 #include "ddm_adapter.h"
 #include "drag_data_manager.h"
-#include "drag_params.h"
 #include "drag_server.h"
 #include "dsoftbus_adapter.h"
 #include "fi_log.h"
@@ -59,8 +58,11 @@ constexpr bool HAS_CUSTOM_ANIMATION { true };
 std::shared_ptr<ContextService> g_context { nullptr };
 std::shared_ptr<IntentionService> g_intentionService { nullptr };
 std::shared_ptr<IntentionService> g_intentionServiceNullptr { nullptr };
+sptr<IRemoteDevStaCallback> stationaryCallback_;
 IContext *g_contextNullptr { nullptr };
 int32_t PERMISSION_EXCEPTION { 201 };
+constexpr int32_t RET_NO_SUPPORT = 801;
+constexpr float DOUBLEPIMAX = 6.3F;
 } // namespace
 
 int32_t MockDelegateTasks::PostSyncTask(DTaskCallback callback)
@@ -147,7 +149,10 @@ void IntentionServiceTest::TearDownTestCase()
     g_intentionServiceNullptr = nullptr;
 }
 
-void IntentionServiceTest::SetUp() {}
+void IntentionServiceTest::SetUp()
+{
+    stationaryCallback_ = new (std::nothrow) TestDevStaCallback();
+}
 
 void IntentionServiceTest::TearDown() {}
 
@@ -302,6 +307,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_EnableCooperate001, TestSize
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
+
 /**
  * @tc.name: IntentionServiceTest3
  * @tc.desc: Test DisableCooperate
@@ -315,7 +321,6 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_DisableCooperate001, TestSiz
     ErrCode ret = g_intentionService->DisableCooperate(userData);
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
-
 /**
  * @tc.name: IntentionServiceTest4
  * @tc.desc: Test StartCooperate
@@ -330,6 +335,30 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartCooperate001, TestSize.
     int32_t startDeviceId = 0;
     bool isCheckPermission = true;
     ErrCode ret = g_intentionService->StartCooperate(remoteNetworkId, userData, startDeviceId, isCheckPermission);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
+}
+
+/**
+ * @tc.name: IntentionServiceTest_StartCooperateWithOptions001
+ * @tc.desc: Test StartCooperate
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartCooperateWithOptions001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string remoteNetworkId = "networkId";
+    int32_t userData = 0;
+    int32_t startDeviceId = 0;
+    bool isCheckPermission = true;
+    CooperateOptions options {
+            .displayX = 500,
+            .displayY = 500,
+            .displayId = 1
+    };
+    SequenceableCooperateOptions sequenceableCooperateOptions(options);
+    ErrCode ret = g_intentionService->StartCooperateWithOptions(remoteNetworkId, userData, startDeviceId,
+        isCheckPermission, sequenceableCooperateOptions);
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
@@ -373,7 +402,6 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterHotAreaListener001, 
     ErrCode ret = g_intentionServiceNullptr->RegisterHotAreaListener(userData, isCheckPermission);
     EXPECT_EQ(ret, RET_ERR);
 }
-
 /**
  * @tc.name: IntentionServiceTest8
  * @tc.desc: Test UnregisterHotAreaListener
@@ -576,7 +604,6 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UpdateDragStyle001, TestSize
 }
 
 /**
-
  * @tc.name: IntentionServiceTest22
  * @tc.desc: Test UpdateShadowPic
  * @tc.type: FUNC
@@ -609,7 +636,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragTargetPid001, TestSiz
  * @tc.desc: GetUdKey
  * @tc.type: FUNC
  * @tc.require:
-*/
+ */
 HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetUdKey001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
@@ -894,6 +921,87 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDraggableStateAsync001, T
     EXPECT_EQ(ret, RET_ERR);
 }
 
+/**
+ * @tc.name: IntentionServiceTest44
+ * @tc.desc: Test GetDragBundleInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragBundleInfo001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string bundleName = {"name"};
+    bool state = true;
+    ErrCode ret = g_intentionServiceNullptr->GetDragBundleInfo(bundleName, state);
+    EXPECT_EQ(ret, RET_ERR);
+    ret = g_intentionServiceNullptr->GetDragBundleInfo(bundleName, state);
+    EXPECT_EQ(ret, RET_ERR);
+}
+/**
+ * @tc.name: IntentionServiceTest45
+ * @tc.desc: Test SubscribeStationaryCallback
+ * @tc.desc: Test GetDragBundleInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SubscribeStationary001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t type = Type::TYPE_STILL;
+    int32_t event = ActivityEvent::ENTER;
+    int32_t reportTime = ReportLatencyNs::MIDDLE;
+    ErrCode ret = g_intentionService->SubscribeStationaryCallback(type, event, reportTime, stationaryCallback_);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionServiceTest46
+ * @tc.desc: Test UnsubscribeStationaryCallback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnsubscribeStationary001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t type = Type::TYPE_STILL;
+    int32_t event = ActivityEvent::ENTER;
+    ErrCode ret = g_intentionService->UnsubscribeStationaryCallback(type, event, stationaryCallback_);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionServiceTest47
+ * @tc.desc: Test GetDeviceStatusData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDeviceStatusData001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t type = Type::TYPE_STILL;
+    int32_t retType = 0;
+    int32_t retValue = 0;
+    int32_t ret = g_intentionService->GetDeviceStatusData(type, retType, retValue);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionServiceTest48
+ * @tc.desc: Test GetDevicePostureDataSync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDevicePostureDataSync001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DevicePostureData data;
+    SequenceablePostureData seqData(data);
+    ErrCode ret = g_intentionService->GetDevicePostureDataSync(seqData);
+    EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
+    data = seqData.GetPostureData();
+    EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
+        data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

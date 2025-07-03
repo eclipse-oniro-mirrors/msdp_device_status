@@ -27,8 +27,11 @@ declare_args() {
   device_status_sensor_enable = true
   device_status_memmgr_enable = false
   device_status_enable_universal_drag = false
+  device_status_enable_internal_drop_animation = false
   device_status_device_type = "default"
   device_status_motion_enable = false
+  device_status_pullthrow_enable = false
+  device_status_mouse_drawing = true
 
   # origin variables sets
   if (!is_arkui_x) {
@@ -36,6 +39,9 @@ declare_args() {
     device_status_drag_enable_monitor = true
     device_status_sensor_enable = true
     device_status_memmgr_enable = false
+    if (is_emulator) {
+      device_status_mouse_drawing = false
+    }
 
     if (defined(global_parts_info)) {
       if (!defined(global_parts_info.sensors_sensor)) {
@@ -130,6 +136,18 @@ if (device_status_enable_universal_drag) {
   device_status_default_defines += [ "OHOS_BUILD_UNIVERSAL_DRAG" ]
 }
 
+if (device_status_enable_internal_drop_animation) {
+  device_status_default_defines += [ "OHOS_BUILD_INTERNAL_DROP_ANIMATION" ]
+}
+
 if (device_status_device_type == "pc") {
   device_status_default_defines += [ "OHOS_BUILD_PC_PRODUCT" ]
+}
+
+if (device_status_pullthrow_enable) {
+  device_status_default_defines += [ "OHOS_ENABLE_PULLTHROW" ]
+}
+
+if (device_status_mouse_drawing) {
+  device_status_default_defines += [ "OHOS_ENABLE_MOUSE_DRAWING" ]
 }

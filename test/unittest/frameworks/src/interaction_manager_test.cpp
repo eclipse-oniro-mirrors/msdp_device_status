@@ -1939,6 +1939,45 @@ HWTEST_F(InteractionManagerTest, GetDragState, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsDragStart
+ * @tc.desc: IsDragStart from interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, IsDragStart, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+        FI_HILOGD("Drag state, displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    SimulateDownPointerEvent(
+        { DRAG_SRC_X, DRAG_SRC_Y }, MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID);
+    std::optional<DragData> dragData = CreateDragData({ TEST_PIXEL_MAP_WIDTH, TEST_PIXEL_MAP_HEIGHT },
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
+    ASSERT_TRUE(dragData);
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<UnitTestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+
+    auto flag = InteractionManager::GetInstance()->IsDragStart();
+    EXPECT_TRUE(flag);
+
+    SimulateUpPointerEvent(
+        { DRAG_SRC_X, DRAG_SRC_Y }, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
+    flag = InteractionManager::GetInstance()->IsDragStart();
+    EXPECT_FALSE(flag);
+}
+
+/**
  * @tc.name: InteractionManagerTest_GetDragSummary
  * @tc.desc: Get drag summarys
  * @tc.type: FUNC
@@ -3033,8 +3072,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002
     int64_t downTime = 0;
     InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
     bool status = true;
-    ret = InteractionManager::GetInstance()->GetAppDragSwitchState(status);
-    EXPECT_EQ(ret, RET_OK);
+    ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->GetAppDragSwitchState(status));
     RemovePermission();
 }
 
@@ -3075,6 +3113,38 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDraggableStateAsync, 
     ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime));
     RemovePermission();
 }
+
+/**
+ * @tc.name: InteractionManagerTest_EnableInternalDropAnimation01
+ * @tc.desc: Check EnableInternalDropAnimation
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimation01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::string animationInfo = "{\"targetPos\": [8, 8]}";
+    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
+    EXPECT_EQ(ret, RET_OK);
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
+/**
+ * @tc.name: InteractionManagerTest_EnableInternalDropAnimation02
+ * @tc.desc: Check EnableInternalDropAnimation
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimation02, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::string animationInfo = "{}";
+    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
+    EXPECT_EQ(ret, COMMON_PARAMETER_ERROR);
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

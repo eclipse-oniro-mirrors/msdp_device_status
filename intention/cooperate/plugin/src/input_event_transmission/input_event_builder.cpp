@@ -262,6 +262,8 @@ void InputEventBuilder::OnKeyEvent(Msdp::NetPacket &packet)
         FI_HILOGE("Failed to deserialize key event");
         return;
     }
+    UpdateKeyEvent(keyEvent_);
+    TagRemoteEvent(keyEvent_);
     FI_HILOGD("KeyEvent(No:%{public}d,Key:%{private}d,Action:%{public}d)",
         keyEvent_->GetId(), keyEvent_->GetKeyCode(), keyEvent_->GetKeyAction());
     keyEvent_->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
@@ -373,6 +375,13 @@ bool InputEventBuilder::DampPointerMotion(std::shared_ptr<MMI::PointerEvent> poi
     return true;
 }
 
+void InputEventBuilder::UpdateKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
+{
+    int64_t time = Utility::GetSysClockTime();
+    keyEvent->SetActionTime(time);
+    keyEvent->SetActionStartTime(time);
+}
+
 void InputEventBuilder::TagRemoteEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     std::shared_lock<std::shared_mutex> lock(lock_);
@@ -380,6 +389,16 @@ void InputEventBuilder::TagRemoteEvent(std::shared_ptr<MMI::PointerEvent> pointe
         pointerEvent->SetDeviceId(remote2VirtualIds_[deviceId]);
     } else {
         pointerEvent->SetDeviceId((deviceId >= 0) ? -(deviceId + 1) : deviceId);
+    }
+}
+
+void InputEventBuilder::TagRemoteEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
+{
+    std::shared_lock<std::shared_mutex> lock(lock_);
+    if (auto deviceId = keyEvent->GetDeviceId(); remote2VirtualIds_.find(deviceId) != remote2VirtualIds_.end()) {
+        keyEvent->SetDeviceId(remote2VirtualIds_[deviceId]);
+    } else {
+        keyEvent->SetDeviceId((deviceId >= 0) ? -(deviceId + 1) : deviceId);
     }
 }
 

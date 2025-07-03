@@ -15,8 +15,6 @@
 
 #include "drag_client.h"
 
-#include "default_params.h"
-#include "drag_params.h"
 #include "devicestatus_define.h"
 #include "devicestatus_proto.h"
 #include "intention_client.h"
@@ -80,6 +78,16 @@ int32_t DragClient::StopDrag(const DragDropResult &dropResult)
     int32_t ret = INTENTION_CLIENT->StopDrag(dropResult);
     if (ret != RET_OK) {
         FI_HILOGE("StopDrag fail");
+    }
+    return ret;
+}
+
+int32_t DragClient::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->EnableInternalDropAnimation(animationInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("EnableInternalDropAnimation fail, ret:%{public}d", ret);
     }
     return ret;
 }
@@ -513,6 +521,18 @@ void DragClient::OnDisconnected()
     connectedDragListeners_ = dragListeners_;
     dragListeners_.clear();
     hasRegistered_ = false;
+}
+
+bool DragClient::IsDragStart()
+{
+    CALL_DEBUG_ENTER;
+    bool isStart = false;
+    int32_t ret = INTENTION_CLIENT->IsDragStart(isStart);
+    if (ret != RET_OK) {
+        FI_HILOGE("IsDragStart fail, ret = %{public}d", ret);
+        isStart = false;
+    }
+    return isStart;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -37,6 +37,7 @@ public:
     int32_t UnsubscribeCallback(Type type, ActivityEvent event,
         sptr<IRemoteDevStaCallback> callback);
     Data GetDeviceStatusData(Type type);
+    int32_t GetDevicePostureDataSync(DevicePostureData &data);
     void OnConnected();
 
 private:

@@ -322,6 +322,27 @@ public:
      * @since 20
      */
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
+
+    /**
+     * @brief Enable the internal animation.
+     * @param animationInfo Indicates the internal drop animation's configuration.
+     * @return 0 - Success.
+     *         202 - Called by no-system application
+     *         401 - Parameter error.
+     *         801 - Capability not support
+     *         -1  - Other error.
+     * @since 20
+     */
+    int32_t EnableInternalDropAnimation(const std::string &animationInfo);
+
+    /**
+     * @brief Determine whether the current dragging state is DragState::START.
+     * @return true - The current dragging state is DragState::START.
+     *         false - The current dragging state is not DragState::START.
+     * @since 20
+     */
+    bool IsDragStart();
+
 #ifndef  OHOS_BUILD_ENABLE_ARKUI_X
     /**
      * @brief Registers a listener for screen hot area of the mouse pointer.

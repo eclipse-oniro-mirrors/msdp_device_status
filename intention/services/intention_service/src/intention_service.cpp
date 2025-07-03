@@ -81,7 +81,7 @@ ErrCode IntentionService::Socket(const std::string& programName, int32_t moduleT
     CALL_INFO_TRACE;
     CallingContext context = GetCallingContext();
     PrintCallingContext(context);
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &programName, moduleType, &socketFd, &tokenType] {
         return socketServer_.Socket(context, programName, moduleType, socketFd, tokenType);
     });
 }
@@ -91,7 +91,7 @@ ErrCode IntentionService::Socket(const std::string& programName, int32_t moduleT
 ErrCode IntentionService::EnableCooperate(int32_t userData)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, userData] {
         return cooperate_.EnableCooperate(context, userData);
     });
 }
@@ -99,7 +99,7 @@ ErrCode IntentionService::EnableCooperate(int32_t userData)
 ErrCode IntentionService::DisableCooperate(int32_t userData)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, userData] {
         return cooperate_.DisableCooperate(context, userData);
     });
 }
@@ -108,7 +108,7 @@ ErrCode IntentionService::StartCooperate(const std::string& remoteNetworkId, int
     bool checkPermission)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &remoteNetworkId, userData, startDeviceId, checkPermission] {
         return cooperate_.StartCooperate(context, remoteNetworkId, userData, startDeviceId, checkPermission);
     });
 }
@@ -117,7 +117,7 @@ ErrCode IntentionService::StartCooperateWithOptions(const std::string& remoteNet
     int32_t startDeviceId, bool checkPermission, const SequenceableCooperateOptions& options)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &remoteNetworkId, userData, startDeviceId, checkPermission, &options] {
         return cooperate_.StartCooperateWithOptions(context, remoteNetworkId, userData,
             startDeviceId, options.options_);
     });
@@ -126,7 +126,7 @@ ErrCode IntentionService::StartCooperateWithOptions(const std::string& remoteNet
 ErrCode IntentionService::StopCooperate(int32_t userData, bool isUnchained, bool checkPermission)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, userData, isUnchained, checkPermission] {
         return cooperate_.StopCooperate(context, userData, isUnchained, checkPermission);
     });
 }
@@ -134,7 +134,7 @@ ErrCode IntentionService::StopCooperate(int32_t userData, bool isUnchained, bool
 ErrCode IntentionService::RegisterCooperateListener()
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context] {
         return cooperate_.RegisterCooperateListener(context);
     });
 }
@@ -142,7 +142,7 @@ ErrCode IntentionService::RegisterCooperateListener()
 ErrCode IntentionService::UnregisterCooperateListener()
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context] {
         return cooperate_.UnregisterCooperateListener(context);
     });
 }
@@ -150,7 +150,7 @@ ErrCode IntentionService::UnregisterCooperateListener()
 ErrCode IntentionService::RegisterHotAreaListener(int32_t userData, bool checkPermission)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, userData, checkPermission] {
         return cooperate_.RegisterHotAreaListener(context, userData, checkPermission);
     });
 }
@@ -158,7 +158,7 @@ ErrCode IntentionService::RegisterHotAreaListener(int32_t userData, bool checkPe
 ErrCode IntentionService::UnregisterHotAreaListener()
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context] {
         return cooperate_.UnregisterHotAreaListener(context);
     });
 }
@@ -166,7 +166,7 @@ ErrCode IntentionService::UnregisterHotAreaListener()
 ErrCode IntentionService::RegisterMouseEventListener(const std::string& networkId)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &networkId] {
         return cooperate_.RegisterMouseEventListener(context, networkId);
     });
 }
@@ -174,7 +174,7 @@ ErrCode IntentionService::RegisterMouseEventListener(const std::string& networkI
 ErrCode IntentionService::UnregisterMouseEventListener(const std::string& networkId)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &networkId] {
         return cooperate_.UnregisterMouseEventListener(context, networkId);
     });
 }
@@ -182,7 +182,7 @@ ErrCode IntentionService::UnregisterMouseEventListener(const std::string& networ
 ErrCode IntentionService::GetCooperateStateSync(const std::string& udid, bool& state)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &udid, &state] {
         return cooperate_.GetCooperateStateSync(context, udid, state);
     });
 }
@@ -190,7 +190,7 @@ ErrCode IntentionService::GetCooperateStateSync(const std::string& udid, bool& s
 ErrCode IntentionService::GetCooperateStateAsync(const std::string& networkId, int32_t userData, bool isCheckPermission)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &networkId, userData, isCheckPermission] {
         return cooperate_.GetCooperateStateAsync(context, networkId, userData, isCheckPermission);
     });
 }
@@ -198,7 +198,7 @@ ErrCode IntentionService::GetCooperateStateAsync(const std::string& networkId, i
 ErrCode IntentionService::SetDamplingCoefficient(uint32_t direction, double coefficient)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, direction, coefficient] {
         return cooperate_.SetDamplingCoefficient(context, direction, coefficient);
     });
 }
@@ -206,7 +206,7 @@ ErrCode IntentionService::SetDamplingCoefficient(uint32_t direction, double coef
 ErrCode IntentionService::StartDrag(const SequenceableDragData &sequenceableDragData)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &sequenceableDragData] {
         return drag_.StartDrag(context, sequenceableDragData.dragData_);
     });
 }
@@ -214,15 +214,23 @@ ErrCode IntentionService::StartDrag(const SequenceableDragData &sequenceableDrag
 ErrCode IntentionService::StopDrag(const SequenceableDragResult &sequenceableDragResult)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &sequenceableDragResult] {
         return drag_.StopDrag(context, sequenceableDragResult.dragDropResult_);
+    });
+}
+
+ErrCode IntentionService::EnableInternalDropAnimation(const std::string &animationInfo)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([&] {
+        return drag_.EnableInternalDropAnimation(context, animationInfo);
     });
 }
 
 ErrCode IntentionService::AddDraglistener(bool isJsCaller)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, isJsCaller] {
         return drag_.AddDraglistener(context, isJsCaller);
     });
 }
@@ -230,7 +238,7 @@ ErrCode IntentionService::AddDraglistener(bool isJsCaller)
 ErrCode IntentionService::RemoveDraglistener(bool isJsCaller)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, isJsCaller] {
         return drag_.RemoveDraglistener(context, isJsCaller);
     });
 }
@@ -238,7 +246,7 @@ ErrCode IntentionService::RemoveDraglistener(bool isJsCaller)
 ErrCode IntentionService::AddSubscriptListener()
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context] {
         return drag_.AddSubscriptListener(context);
     });
 }
@@ -246,14 +254,14 @@ ErrCode IntentionService::AddSubscriptListener()
 ErrCode IntentionService::RemoveSubscriptListener()
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context] {
         return drag_.RemoveSubscriptListener(context);
     });
 }
 
 ErrCode IntentionService::SetDragWindowVisible(const SequenceableDragVisible &sequenceableDragVisible)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &sequenceableDragVisible] {
         return drag_.SetDragWindowVisible(sequenceableDragVisible.dragVisibleParam_.visible,
             sequenceableDragVisible.dragVisibleParam_.isForce, sequenceableDragVisible.dragVisibleParam_.rsTransaction);
     });
@@ -263,7 +271,7 @@ ErrCode IntentionService::UpdateDragStyle(int32_t style, int32_t eventId)
 {
     CallingContext context = GetCallingContext();
     DragCursorStyle cursorStyle = static_cast<DragCursorStyle>(style);
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, cursorStyle, eventId] {
         return drag_.UpdateDragStyle(context, cursorStyle, eventId);
     });
 }
@@ -274,7 +282,7 @@ ErrCode IntentionService::UpdateShadowPic(const std::shared_ptr<PixelMap>& pixel
     shadowInfo.pixelMap = pixelMap;
     shadowInfo.x = x;
     shadowInfo.y = y;
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &shadowInfo] {
         return drag_.UpdateShadowPic(shadowInfo);
     });
 }
@@ -282,14 +290,14 @@ ErrCode IntentionService::UpdateShadowPic(const std::shared_ptr<PixelMap>& pixel
 ErrCode IntentionService::GetDragTargetPid(int32_t &targetPid)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &targetPid] {
         return drag_.GetDragTargetPid(context, targetPid);
     });
 }
 
 ErrCode IntentionService::GetUdKey(std::string &udKey)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &udKey] {
         return drag_.GetUdKey(udKey);
     });
 }
@@ -297,7 +305,7 @@ ErrCode IntentionService::GetUdKey(std::string &udKey)
 ErrCode IntentionService::GetShadowOffset(int32_t &offsetX, int32_t &offsetY, int32_t &width, int32_t &height)
 {
     ShadowOffset shadowOffset;
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &shadowOffset, &offsetX, &offsetY, &width, &height] {
         int32_t ret = drag_.GetShadowOffset(shadowOffset);
         if (ret != RET_OK) {
             return ret;
@@ -313,14 +321,14 @@ ErrCode IntentionService::GetShadowOffset(int32_t &offsetX, int32_t &offsetY, in
 ErrCode IntentionService::GetDragData(SequenceableDragData &sequenceableDragData)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &sequenceableDragData] {
         return drag_.GetDragData(context, sequenceableDragData.dragData_);
     });
 }
 
 ErrCode IntentionService::UpdatePreviewStyle(const SequenceablePreviewStyle &sequenceablePreviewStyle)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &sequenceablePreviewStyle] {
         return drag_.UpdatePreviewStyle(sequenceablePreviewStyle.previewStyle_);
     });
 }
@@ -328,7 +336,7 @@ ErrCode IntentionService::UpdatePreviewStyle(const SequenceablePreviewStyle &seq
 ErrCode IntentionService::UpdatePreviewStyleWithAnimation(
     const SequenceablePreviewAnimation &sequenceablePreviewAnimation)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &sequenceablePreviewAnimation] {
         return drag_.UpdatePreviewStyleWithAnimation(
             sequenceablePreviewAnimation.previewStyle_, sequenceablePreviewAnimation.previewAnimation_);
     });
@@ -337,7 +345,7 @@ ErrCode IntentionService::UpdatePreviewStyleWithAnimation(
 ErrCode IntentionService::RotateDragWindowSync(const SequenceableRotateWindow &sequenceableRotateWindow)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &sequenceableRotateWindow] {
         return drag_.RotateDragWindowSync(context, sequenceableRotateWindow.rsTransaction_);
     });
 }
@@ -345,7 +353,7 @@ ErrCode IntentionService::RotateDragWindowSync(const SequenceableRotateWindow &s
 ErrCode IntentionService::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, displayId, screenId] {
         return drag_.SetDragWindowScreenId(context, displayId, screenId);
     });
 }
@@ -353,7 +361,7 @@ ErrCode IntentionService::SetDragWindowScreenId(uint64_t displayId, uint64_t scr
 ErrCode IntentionService::GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &summarys, isJsCaller] {
         return drag_.GetDragSummary(context, summarys, isJsCaller);
     });
 }
@@ -361,7 +369,7 @@ ErrCode IntentionService::GetDragSummary(std::map<std::string, int64_t> &summary
 ErrCode IntentionService::SetDragSwitchState(bool enable, bool isJsCaller)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, enable, isJsCaller] {
         return drag_.SetDragSwitchState(context, enable, isJsCaller);
     });
 }
@@ -369,16 +377,17 @@ ErrCode IntentionService::SetDragSwitchState(bool enable, bool isJsCaller)
 ErrCode IntentionService::SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, enable, &pkgName, isJsCaller] {
        return drag_.SetAppDragSwitchState(context, enable, pkgName, isJsCaller);
     });
 }
 
 ErrCode IntentionService::GetDragState(int32_t& dragState)
 {
-    return PostSyncTask([&] {
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &dragState] {
         DragState state = static_cast<DragState>(dragState);
-        auto ret = drag_.GetDragState(state);
+        auto ret = drag_.GetDragState(context, state);
         dragState = static_cast<int32_t>(state);
         return ret;
     });
@@ -386,14 +395,14 @@ ErrCode IntentionService::GetDragState(int32_t& dragState)
 
 ErrCode IntentionService::EnableUpperCenterMode(bool enable)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, enable] {
         return drag_.EnableUpperCenterMode(enable);
     });
 }
 
 ErrCode IntentionService::GetDragAction(int32_t &dragAction)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &dragAction] {
         DragAction action = static_cast<DragAction>(dragAction);
         auto ret = drag_.GetDragAction(action);
         dragAction = static_cast<int32_t>(action);
@@ -403,7 +412,7 @@ ErrCode IntentionService::GetDragAction(int32_t &dragAction)
 
 ErrCode IntentionService::GetExtraInfo(std::string &extraInfo)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &extraInfo] {
        return drag_.GetExtraInfo(extraInfo);
     });
 }
@@ -411,7 +420,7 @@ ErrCode IntentionService::GetExtraInfo(std::string &extraInfo)
 ErrCode IntentionService::AddPrivilege()
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context] {
        return drag_.AddPrivilege(context);
     });
 }
@@ -419,41 +428,41 @@ ErrCode IntentionService::AddPrivilege()
 ErrCode IntentionService::EraseMouseIcon()
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context] {
        return drag_.EraseMouseIcon(context);
     });
 }
 
 ErrCode IntentionService::SetMouseDragMonitorState(bool state)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, state] {
         return drag_.SetMouseDragMonitorState(state);
     });
 }
 
 ErrCode IntentionService::SetDraggableState(bool state)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, state] {
        return drag_.SetDraggableState(state);
     });
 }
 ErrCode IntentionService::GetAppDragSwitchState(bool &state)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &state] {
        return drag_.GetAppDragSwitchState(state);
     });
 }
 
 ErrCode IntentionService::SetDraggableStateAsync(bool state, int64_t downTime)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, state, downTime] {
        return drag_.SetDraggableStateAsync(state, downTime);
     });
 }
 
 ErrCode IntentionService::GetDragBundleInfo(std::string &bundleName, bool &state)
 {
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &bundleName, &state] {
         DragBundleInfo dragBundleInfo;
         if (int32_t ret = drag_.GetDragBundleInfo(dragBundleInfo); ret != RET_OK) {
             return ret;
@@ -464,13 +473,20 @@ ErrCode IntentionService::GetDragBundleInfo(std::string &bundleName, bool &state
     });
 }
 
+ErrCode IntentionService::IsDragStart(bool &isStart)
+{
+    return PostSyncTask([this, &isStart] {
+        return drag_.IsDragStart(isStart);
+    });
+}
+
 // Boomerang
 
 ErrCode IntentionService::SubscribeCallback(int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& subCallback)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, type, &bundleName, &subCallback] {
        return boomerang_.SubscribeCallback(context, type, bundleName, subCallback);
     });
 }
@@ -479,7 +495,7 @@ ErrCode IntentionService::UnsubscribeCallback(int32_t type, const std::string& b
     const sptr<IRemoteBoomerangCallback>& unsubCallback)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, type, &bundleName, &unsubCallback] {
        return boomerang_.UnsubscribeCallback(context, type, bundleName, unsubCallback);
     });
 }
@@ -488,7 +504,7 @@ ErrCode IntentionService::NotifyMetadataBindingEvent(const std::string& bundleNa
     const sptr<IRemoteBoomerangCallback>& notifyCallback)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &bundleName, &notifyCallback] {
        return boomerang_.NotifyMetadataBindingEvent(context, bundleName, notifyCallback);
     });
 }
@@ -496,7 +512,7 @@ ErrCode IntentionService::NotifyMetadataBindingEvent(const std::string& bundleNa
 ErrCode IntentionService::SubmitMetadata(const std::string& metaData)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &metaData] {
        return boomerang_.SubmitMetadata(context, metaData);
     });
 }
@@ -505,7 +521,7 @@ ErrCode IntentionService::BoomerangEncodeImage(const std::shared_ptr<PixelMap>& 
     const sptr<IRemoteBoomerangCallback>& encodeCallback)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &pixelMap, &metaData, &encodeCallback] {
        return boomerang_.BoomerangEncodeImage(context, pixelMap, metaData, encodeCallback);
     });
 }
@@ -514,7 +530,7 @@ ErrCode IntentionService::BoomerangDecodeImage(const std::shared_ptr<PixelMap>& 
     const sptr<IRemoteBoomerangCallback>& decodeCallback)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, &pixelMap, &decodeCallback] {
        return boomerang_.BoomerangDecodeImage(context, pixelMap, decodeCallback);
     });
 }
@@ -525,7 +541,7 @@ ErrCode IntentionService::SubscribeStationaryCallback(int32_t type, int32_t even
     int32_t latency, const sptr<IRemoteDevStaCallback> &subCallback)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, type, event, latency, &subCallback] {
        return stationary_.SubscribeStationaryCallback(context, type, event, latency, subCallback);
     });
 }
@@ -534,7 +550,7 @@ ErrCode IntentionService::UnsubscribeStationaryCallback(int32_t type, int32_t ev
     const sptr<IRemoteDevStaCallback> &unsubCallback)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, type, event, &unsubCallback] {
        return stationary_.UnsubscribeStationaryCallback(context, type, event, unsubCallback);
     });
 }
@@ -542,8 +558,22 @@ ErrCode IntentionService::UnsubscribeStationaryCallback(int32_t type, int32_t ev
 ErrCode IntentionService::GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([&] {
+    return PostSyncTask([this, &context, type, &replyType, &replyValue] {
        return stationary_.GetDeviceStatusData(context, type, replyType, replyValue);
+    });
+}
+
+ErrCode IntentionService::GetDevicePostureDataSync(SequenceablePostureData &data)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &data] {
+        DevicePostureData rawPostureData;
+        int32_t ret = stationary_.GetDevicePostureDataSync(context, rawPostureData);
+        if (ret != RET_OK) {
+            return ret;
+        }
+        data.SetPostureData(rawPostureData);
+        return RET_OK;
     });
 }
 } // namespace DeviceStatus

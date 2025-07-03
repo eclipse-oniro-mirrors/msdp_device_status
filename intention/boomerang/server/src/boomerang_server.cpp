@@ -20,8 +20,6 @@
 #include "tokenid_kit.h"
 #include "accesstoken_kit.h"
 
-#include "boomerang_params.h"
-#include "default_params.h"
 #include "devicestatus_define.h"
 #include "devicestatus_dumper.h"
 #include "devicestatus_hisysevent.h"
@@ -35,7 +33,6 @@ namespace DeviceStatus {
 
 BoomerangServer::BoomerangServer()
 {
-    manager_.Init();
 }
 
 void BoomerangServer::DumpDeviceStatusSubscriber(int32_t fd) const
@@ -118,7 +115,7 @@ int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, con
     appInfo->packageName = DS_DUMPER->GetPackageName(appInfo->tokenId);
     appInfo->boomerangCallback = notifyCallback;
     DS_DUMPER->SetNotifyMetadatAppInfo(appInfo);
-    int32_t ret = manager_.NotifyMedata(bundleName, notifyCallback);
+    int32_t ret = manager_.NotifyMetadata(bundleName, notifyCallback);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang NotifyMetadataBindingEvent failed");
     }

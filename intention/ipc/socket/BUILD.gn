@@ -36,7 +36,6 @@ ohos_source_set("intention_socket_server") {
   ]
 
   sources = [
-    "src/socket_params.cpp",
     "src/socket_server.cpp",
   ]
 
@@ -136,7 +135,6 @@ ohos_source_set("intention_socket_connection") {
   sources = [
     "src/socket_client.cpp",
     "src/socket_connection.cpp",
-    "src/socket_params.cpp",
   ]
 
   public_configs = [ ":intention_socket_connection_public_config" ]

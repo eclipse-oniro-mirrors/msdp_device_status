@@ -18,7 +18,6 @@
 #include "tokenid_kit.h"
 
 #include "accesstoken_kit.h"
-#include "drag_params.h"
 #include "devicestatus_define.h"
 
 #undef LOG_TAG
@@ -62,6 +61,19 @@ int32_t DragServer::StopDrag(CallingContext &context, const DragDropResult &drop
     return env_->GetDragManager().StopDrag(dropResult, GetPackageName(context.tokenId), context.pid);
 }
 
+int32_t DragServer::EnableInternalDropAnimation(CallingContext &context, const std::string &animationInfo)
+{
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    CHKPR(env_, RET_ERR);
+    return env_->GetDragManager().EnableInternalDropAnimation(animationInfo);
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    return COMMON_CAPABILITY_NOT_SUPPORT;
+}
+
 int32_t DragServer::AddDraglistener(CallingContext &context, bool isJsCaller)
 {
     if (!IsSystemHAPCalling(context)) {
@@ -94,8 +106,8 @@ int32_t DragServer::RemoveDraglistener(CallingContext &context, bool isJsCaller)
 
 int32_t DragServer::AddSubscriptListener(CallingContext &context)
 {
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service calling");
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
     FI_HILOGD("Add subscript listener, from:%{public}d", context.pid);
@@ -109,8 +121,8 @@ int32_t DragServer::AddSubscriptListener(CallingContext &context)
 
 int32_t DragServer::RemoveSubscriptListener(CallingContext &context)
 {
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service calling");
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
     FI_HILOGD("Remove subscript listener, from:%{public}d", context.pid);
@@ -132,9 +144,9 @@ int32_t DragServer::SetDragWindowVisible(bool visible, bool isForce,
 
 int32_t DragServer::GetDragTargetPid(CallingContext &context, int32_t &targetPid)
 {
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service calling");
-        return RET_ERR;
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
     }
     CHKPR(env_, RET_ERR);
     targetPid = env_->GetDragManager().GetDragTargetPid();
@@ -185,9 +197,9 @@ int32_t DragServer::UpdateShadowPic(const ShadowInfo &shadowInfo)
 
 int32_t DragServer::GetDragData(CallingContext &context, DragData &dragData)
 {
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service calling");
-        return RET_ERR;
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
     }
     CHKPR(env_, RET_ERR);
     if (int32_t ret = env_->GetDragManager().GetDragData(dragData); ret != RET_OK) {
@@ -220,9 +232,9 @@ int32_t DragServer::UpdatePreviewStyleWithAnimation(const PreviewStyle &previewS
 int32_t DragServer::RotateDragWindowSync(CallingContext &context,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service calling");
-        return RET_ERR;
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
     }
     CHKPR(env_, RET_ERR);
     if (int32_t ret = env_->GetDragManager().RotateDragWindowSync(rsTransaction); ret != RET_OK) {
@@ -234,9 +246,9 @@ int32_t DragServer::RotateDragWindowSync(CallingContext &context,
 
 int32_t DragServer::SetDragWindowScreenId(CallingContext &context, uint64_t displayId, uint64_t screenId)
 {
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service calling");
-        return RET_ERR;
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
     }
     CHKPR(env_, RET_ERR);
     env_->GetDragManager().SetDragWindowScreenId(displayId, screenId);
@@ -246,7 +258,7 @@ int32_t DragServer::SetDragWindowScreenId(CallingContext &context, uint64_t disp
 int32_t DragServer::GetDragSummary(CallingContext &context, std::map<std::string, int64_t> &summarys, bool isJsCaller)
 {
     if (isJsCaller && !IsSystemHAPCalling(context)) {
-        FI_HILOGE("The caller is not system service calling");
+        FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
     CHKPR(env_, RET_ERR);
@@ -282,9 +294,14 @@ int32_t DragServer::SetAppDragSwitchState(
     return RET_OK;
 }
 
-int32_t DragServer::GetDragState(DragState &dragState)
+int32_t DragServer::GetDragState(CallingContext &context, DragState &dragState)
 {
     CHKPR(env_, RET_ERR);
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+
     if (int32_t ret = env_->GetDragManager().GetDragState(dragState); ret != RET_OK) {
         FI_HILOGE("IDragManager::GetDragState fail, error:%{public}d", ret);
         return ret;
@@ -334,8 +351,8 @@ int32_t DragServer::AddPrivilege(CallingContext &context)
 
 int32_t DragServer::EraseMouseIcon(CallingContext &context)
 {
-    if (!IsSystemServiceCalling(context)) {
-        FI_HILOGE("The caller is not system service calling");
+    if (!IsSystemHAPCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
     CHKPR(env_, RET_ERR);
@@ -447,6 +464,13 @@ bool DragServer::IsSystemHAPCalling(CallingContext &context)
         return true;
     }
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
+}
+
+int32_t DragServer::IsDragStart(bool &isStart)
+{
+    CHKPR(env_, RET_ERR);
+    isStart = env_->GetDragManager().IsDragStart();
+    return RET_OK;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

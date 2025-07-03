@@ -52,8 +52,6 @@ ohos_unittest("BoomerangClientTest") {
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "${device_status_root_path}/intention/boomerang/data:intention_boomerang_data",
-    "${device_status_root_path}/intention/data:intention_data",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/utils/common:devicestatus_util",
@@ -67,13 +65,14 @@ ohos_unittest("BoomerangClientTest") {
     "eventhandler:libeventhandler",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
-    "graphic_2d:librender_service_client",
   ]
 }
 
@@ -108,7 +107,11 @@ ohos_unittest("BoomerangServerTest") {
 
   sources = [
     "src/boomerang_server_test.cpp",
-    "src/boomerang_server_test_mock.cpp",
+  ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
   ]
 
   deps = [
@@ -138,6 +141,7 @@ ohos_unittest("BoomerangServerTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
   ]
 }
 

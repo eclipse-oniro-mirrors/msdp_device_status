@@ -21,9 +21,9 @@
 
 #include "nocopyable.h"
 
+#include "boomerang_data.h"
 #include "devicestatus_common.h"
 #include "iremote_boomerang_callback.h"
-#include "boomerang_data.h"
 
 namespace OHOS {
 namespace Msdp {

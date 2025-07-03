@@ -97,6 +97,7 @@ private:
     void TurnOnChannelScan();
     int32_t SetWifiScene(unsigned int scene);
     bool UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    void UpdateKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent);
     bool IsActive(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void ResetPressedEvents();
     double GetDamplingCoefficient(DamplingDirection direction) const;
@@ -121,6 +122,7 @@ private:
     std::shared_ptr<MMI::KeyEvent> keyEvent_;
     std::shared_mutex lock_;
     std::unordered_map<int32_t, int32_t> remote2VirtualIds_;
+    void TagRemoteEvent(std::shared_ptr<MMI::KeyEvent> KeyEvent);
     void TagRemoteEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void OnNotifyCrossDrag(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 };

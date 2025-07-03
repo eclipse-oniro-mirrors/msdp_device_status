@@ -40,6 +40,15 @@ private:
     napi_env env_;
 };
 
+struct AsyncContext {
+    napi_env env = nullptr;
+    napi_async_work work = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_handle_scope scope;
+    DeviceStatus::DevicePostureData postureData;
+    int32_t result;
+};
+
 class DeviceStatusNapi : public DeviceStatusNapiEvent {
 public:
     explicit DeviceStatusNapi(napi_env env, napi_value thisVar);
@@ -48,6 +57,7 @@ public:
     static napi_value Init(napi_env env, napi_value exports);
     static napi_value SubscribeDeviceStatus(napi_env env, napi_callback_info info);
     static napi_value UnsubscribeDeviceStatus(napi_env env, napi_callback_info info);
+    static napi_value GetDeviceRotationRadian(napi_env env, napi_callback_info info);
 
     std::map<DeviceStatus::Type, sptr<DeviceStatus::IRemoteDevStaCallback>> callbacks_;
 
@@ -61,7 +71,11 @@ private:
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
     static void SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
     static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
-
+    static bool GetPostureDataExecution(AsyncContext *asyncContext);
+    static void GetPostureDataExecutionCB(napi_env env, void *data);
+    static void GetPostureDataCompleteCB(napi_env env, napi_status status, void *data);
+    static void SetValueDouble(napi_env env, const std::string &fieldStr, const double &floatValue,
+        napi_value &result);
     napi_env env_;
 };
 } // namespace DeviceStatusV1

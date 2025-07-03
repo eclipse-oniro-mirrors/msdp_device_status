@@ -15,7 +15,6 @@
 
 #include "stationary_client.h"
 
-#include "default_params.h"
 #include "devicestatus_define.h"
 #include "stationary_params.h"
 #include "intention_client.h"
@@ -79,6 +78,16 @@ Data StationaryClient::GetDeviceStatusData(Type type)
     reply.type = static_cast<Type>(replyType);
     reply.value = static_cast<OnChangedValue>(replyValue);
     return reply;
+}
+
+int32_t StationaryClient::GetDevicePostureDataSync(DevicePostureData &data)
+{
+    int32_t ret = INTENTION_CLIENT->GetDevicePostureDataSync(data);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetDevicePostureData failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return ret;
 }
 
 void StationaryClient::OnConnected()

@@ -48,6 +48,11 @@ Data StationaryManager::GetDeviceStatusData(Type type)
 {
     return INTER_MGR_IMPL.GetDeviceStatusData(type);
 }
+
+int32_t StationaryManager::GetDevicePostureDataSync(DevicePostureData &data)
+{
+    return INTER_MGR_IMPL.GetDevicePostureDataSync(data);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

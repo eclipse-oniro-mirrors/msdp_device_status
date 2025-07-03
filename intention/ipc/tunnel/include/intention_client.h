@@ -55,6 +55,7 @@ public:
     // Drag
     int32_t StartDrag(const DragData &dragData);
     int32_t StopDrag(const DragDropResult &dropResult);
+    int32_t EnableInternalDropAnimation(const std::string &animationInfo);
     int32_t AddDraglistener(bool isJsCaller);
     int32_t RemoveDraglistener(bool isJsCaller);
     int32_t AddSubscriptListener();
@@ -85,6 +86,7 @@ public:
     int32_t GetAppDragSwitchState(bool &state);
     int32_t SetDraggableStateAsync(bool state, int64_t downTime);
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
+    int32_t IsDragStart(bool &isStart);
 
     // Boomerang
     int32_t SubscribeCallback(int32_t type, const std::string& bundleName,
@@ -105,6 +107,7 @@ public:
     int32_t UnsubscribeStationaryCallback(int32_t type, int32_t event,
         const sptr<IRemoteDevStaCallback> &unsubCallback);
     int32_t GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue);
+    int32_t GetDevicePostureDataSync(DevicePostureData &postureData);
 
 private:
     class DeathRecipient : public IRemoteObject::DeathRecipient {

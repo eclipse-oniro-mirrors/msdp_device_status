@@ -59,8 +59,6 @@ ohos_unittest("IntentionServiceTest") {
 
   deps = [
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
-    "${device_status_root_path}/intention/data:intention_data",
-    "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
@@ -82,10 +80,12 @@ ohos_unittest("IntentionServiceTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
     "data_share:datashare_consumer",
     "device_manager:devicemanagersdk",
+    "eventhandler:libeventhandler",
     "googletest:gtest_main",
     "graphic_2d:libcomposer",
     "graphic_2d:librender_service_base",
@@ -94,14 +94,21 @@ ohos_unittest("IntentionServiceTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
   ]
 
   if (device_status_motion_enable) {
     defines += [ "MOTION_ENABLE" ]
     external_deps += [ "motion:motion_interface_native" ]
+  }
+
+  if (device_status_sensor_enable) {
+    defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+    external_deps += [ "sensor:sensor_interface_native" ]
   }
 }
 
@@ -271,6 +278,7 @@ ohos_unittest("IntentionDeviceManagerTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
     "data_share:datashare_consumer",
@@ -316,8 +324,6 @@ ohos_unittest("IntentionDumperTest") {
 
   deps = [
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
-    "${device_status_root_path}/intention/data:intention_data",
-    "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
@@ -338,10 +344,12 @@ ohos_unittest("IntentionDumperTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
     "data_share:datashare_consumer",
     "device_manager:devicemanagersdk",
+    "eventhandler:libeventhandler",
     "googletest:gtest_main",
     "graphic_2d:libcomposer",
     "graphic_2d:librender_service_base",
@@ -353,6 +361,7 @@ ohos_unittest("IntentionDumperTest") {
     "samgr:samgr_proxy",
     "libxml2:libxml2",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
   ]
 }
@@ -384,8 +393,6 @@ ohos_unittest("BoomerangDumperTest") {
 
   deps = [
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
-    "${device_status_root_path}/intention/data:intention_data",
-    "${device_status_root_path}/intention/drag/data:intention_drag_data",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
@@ -406,10 +413,12 @@ ohos_unittest("BoomerangDumperTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
     "data_share:datashare_consumer",
     "device_manager:devicemanagersdk",
+    "eventhandler:libeventhandler",
     "googletest:gtest_main",
     "graphic_2d:libcomposer",
     "graphic_2d:librender_service_base",
@@ -418,7 +427,9 @@ ohos_unittest("BoomerangDumperTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "libxml2:libxml2",
     "window_manager:libdm",
+    "window_manager:libwm",
     "window_manager:libwmutil_base",
     "samgr:samgr_proxy",
   ]

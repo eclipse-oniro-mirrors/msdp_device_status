@@ -49,10 +49,10 @@ public:
     ~MotionNapi() override;
 
     static napi_value Init(napi_env env, napi_value exports);
+    static void DefineHoldingHandStatus(napi_env env, napi_value exports);
     static napi_value SubscribeMotion(napi_env env, napi_callback_info info);
     static napi_value UnSubscribeMotion(napi_env env, napi_callback_info info);
     static napi_value GetRecentOptHandStatus(napi_env env, napi_callback_info info);
-
 public:
 #ifdef MOTION_ENABLE
     std::map<int32_t, sptr<IMotionCallback>> callbacks_;
