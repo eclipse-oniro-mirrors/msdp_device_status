@@ -235,7 +235,6 @@ bool UnderageModelNapiEvent::InsertRef(std::shared_ptr<UnderageModelEventListene
 
 void UnderageModelNapiEvent::OnEventChanged(uint32_t eventType, int32_t result, float confidence)
 {
-    
     std::lock_guard<std::mutex> lock(eventsMutex_);
     auto typeIter = events_.find(eventType);
     if (typeIter == events_.end()) {
