@@ -44,21 +44,30 @@ UnderageModelNapiEvent::UnderageModelNapiEvent(napi_env env, napi_value thisVar)
 
 UnderageModelNapiEvent::~UnderageModelNapiEvent()
 {
+    if (env_ == nullptr) {
+        FI_HILOGW("env_ is nullptr");
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(eventsMutex_);
-        for (auto& eventPair : events_) {
-            if (env_ == nullptr) {
-                FI_HILOGW("env_ is nullptr");
-                break;
-            }
-            if (eventPair.second == nullptr || eventPair.second->onHandlerRef == nullptr) {
+        for (auto& iter : events_) {
+            if (iter.second == nullptr) {
                 continue;
             }
-            napi_status status = napi_delete_reference(env_, eventPair.second->onHandlerRef);
-            if (status != napi_ok) {
-                FI_HILOGW("Failed to napi_delete_reference");
+            for (auto it = iter.second->onRefSets.begin(); it != iter.second->onRefSets.end();) {
+                if (*it == nullptr) {
+                    ++it;
+                    continue;
+                }
+                napi_status status = napi_delete_reference(env_, *it);
+                if (status != napi_ok) {
+                    FI_HILOGE("napi_delete_reference failed");
+                    ++it;
+                    continue;
+                }
+                it = iter.second->onRefSets.erase(it);
             }
-            eventPair.second->onHandlerRef = nullptr;
+            iter.second = nullptr;
         }
         events_.clear();
     }
@@ -81,14 +90,20 @@ bool UnderageModelNapiEvent::AddCallback(uint32_t eventType, napi_value handler)
             return false;
         }
         auto listener = std::make_shared<UnderageModelEventListener>();
-        listener->onHandlerRef = onHandlerRef;
+        std::set<napi_ref> onRefSets;
+        listener->onRefSets = onRefSets;
+        auto ret = listener->onRefSets.insert(onHandlerRef);
+        if (!ret.second) {
+            FI_HILOGE("Failed to insert refs");
+            return false;
+        }
         events_.insert(std::make_pair(eventType, listener));
         FI_HILOGD("Insert finish");
         return true;
     }
     FI_HILOGD("found event: %{public}d", eventType);
-    if (iter->second == nullptr || iter->second->onHandlerRef == nullptr) {
-        FI_HILOGE("listener or onHandlerRef is nullptr");
+    if (iter->second == nullptr || iter->second->onRefSets.empty()) {
+        FI_HILOGE("listener or onRefSets is nullptr");
         events_.erase(iter);
         return false;
     }
@@ -101,7 +116,40 @@ bool UnderageModelNapiEvent::AddCallback(uint32_t eventType, napi_value handler)
     return true;
 }
 
-bool UnderageModelNapiEvent::RemoveCallback(uint32_t eventType)
+bool UnderageModelNapiEvent::RemoveAllCallback(uint32_t eventType)
+{
+    FI_HILOGD("RemoveAllCallback in, event:%{public}d", eventType);
+    std::lock_guard<std::mutex> lock(eventsMutex_);
+    auto iter = events_.find(eventType);
+    if (iter == events_.end()) {
+        FI_HILOGE("EventType %{public}d not found", eventType);
+        return false;
+    }
+    if (iter->second == nullptr) {
+        FI_HILOGE("listener is nullptr");
+        return false;
+    }
+    for (auto it = iter->second->onRefSets.begin(); it != iter->second->onRefSets.end();) {
+        if (*it == nullptr) {
+            ++it;
+            continue;
+        }
+        napi_status status = napi_delete_reference(env_, *it);
+        if (status != napi_ok) {
+            FI_HILOGE("napi_delete_reference failed");
+            ++it;
+            continue;
+        }
+        it = iter->second->onRefSets.erase(it);
+    }
+    if (iter->second->onRefSets.empty()) {
+        FI_HILOGE("onRefSets is empty");
+        events_.erase(iter);
+    }
+    return true;
+}
+
+bool UnderageModelNapiEvent::RemoveCallback(uint32_t eventType, napi_value handler)
 {
     FI_HILOGD("Enter, event:%{public}d", eventType);
     std::lock_guard<std::mutex> lock(eventsMutex_);
@@ -110,17 +158,38 @@ bool UnderageModelNapiEvent::RemoveCallback(uint32_t eventType)
         FI_HILOGE("EventType %{public}d not found", eventType);
         return false;
     }
-    if (iter->second == nullptr || iter->second->onHandlerRef == nullptr) {
-        FI_HILOGE("listener or onHandlerRef is nullptr");
+    if (iter->second == nullptr) {
+        FI_HILOGE("listener is nullptr");
         events_.erase(iter);
         return false;
     }
-
-    napi_status status = napi_delete_reference(env_, iter->second->onHandlerRef);
-    if (status != napi_ok) {
-        FI_HILOGW("napi_delete_reference failed");
+    for (auto it = iter->second->onRefSets.begin(); it != iter->second->onRefSets.end();) {
+        if (*it == nullptr) {
+            ++it;
+            continue;
+        }
+        napi_value deleteHandler;
+        napi_status status = napi_get_reference_value(env_, *it, &deleteHandler);
+        if (status != napi_ok) {
+            FI_HILOGE("napi_get_reference_value failed");
+            ++it;
+            continue;
+        }
+        if (IsSameValue(env_, handler, deleteHandler)) {
+            status = napi_delete_reference(env_, *it);
+            if (status != napi_ok) {
+                FI_HILOGE("napi_delete_reference failed");
+                ++it;
+                continue;
+            }
+            iter->second->onRefSets.erase(it++);
+            break;
+        }
+        ++it;
     }
-    events_.erase(iter);
+    if (iter->second->onRefSets.empty()) {
+        events_.erase(eventType);
+    }
     return true;
 }
 
@@ -130,51 +199,72 @@ bool UnderageModelNapiEvent::InsertRef(std::shared_ptr<UnderageModelEventListene
         FI_HILOGE("listener is nullptr");
         return false;
     }
-    napi_value onHandler = nullptr;
-    napi_status status = napi_get_reference_value(env_, listener->onHandlerRef, &onHandler);
-    if (status != napi_ok) {
-        FI_HILOGE("napi_get_reference_value failed");
-        status = napi_delete_reference(env_, listener->onHandlerRef);
-        if (status != napi_ok) {
-            FI_HILOGE("napi_delete_reference failed");
+    for (auto item = listener->onRefSets.begin(); item != listener->onRefSets.end();) {
+        if (*item == nullptr) {
+            ++item;
+            continue;
         }
-        listener->onHandlerRef = nullptr;
-        return false;
-    }
-    if (IsSameValue(env_, handler, onHandler)) {
-        return true;
+        napi_value onHandler = nullptr;
+        napi_status status = napi_get_reference_value(env_, *item, &onHandler);
+        if (status != napi_ok) {
+            FI_HILOGE("napi_get_reference_value failed");
+            status = napi_delete_reference(env_, *item);
+            if (status != napi_ok) {
+                FI_HILOGE("napi_delete_reference failed");
+                ++item;
+                continue;
+            }
+            listener->onRefSets.erase(item++);
+            continue;
+        }
+        if (IsSameValue(env_, handler, onHandler)) {
+            FI_HILOGD("napi repeat subscribe");
+            return true;
+        }
     }
     napi_ref onHandlerRef = nullptr;
-    status = napi_create_reference(env_, handler, ONE_PARAMETER, &onHandlerRef);
+    napi_status status = napi_create_reference(env_, handler, 1, &(onHandlerRef));
     if (status != napi_ok) {
         FI_HILOGE("napi_create_reference failed");
         return false;
     }
+
     FI_HILOGD("Insert new ref");
-    listener->onHandlerRef = onHandlerRef;
+    auto ret = listener->onRefSets.insert(onHandlerRef);
+    if (!ret.second) {
+        FI_HILOGE("Failed to insert");
+        return false;
+    }
+    FI_HILOGD("ref size %{public}zu", listener->onRefSets.size());
     return true;
 }
 
 void UnderageModelNapiEvent::OnEventChanged(uint32_t eventType, int32_t result, float confidence)
 {
-    napi_value handler = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(eventsMutex_);
-        auto typeIter = events_.find(eventType);
-        if (typeIter == events_.end()) {
-            FI_HILOGE("eventType: %{public}d not found", eventType);
-            return;
-        }
-        if (typeIter->second == nullptr || typeIter->second->onHandlerRef == nullptr) {
-            FI_HILOGE("listener or onHandlerRef is nullptr.");
-            return;
-        }
-        napi_status ret = napi_get_reference_value(env_, typeIter->second->onHandlerRef, &handler);
+    
+    std::lock_guard<std::mutex> lock(eventsMutex_);
+    auto typeIter = events_.find(eventType);
+    if (typeIter == events_.end()) {
+        FI_HILOGE("eventType: %{public}d not found", eventType);
+        return;
+    }
+    if (typeIter->second == nullptr) {
+        FI_HILOGE("listener is nullptr.");
+        return;
+    }
+    for (auto item : typeIter->second->onRefSets) {
+        napi_value handler = nullptr;
+        napi_status ret = napi_get_reference_value(env_, item, &handler);
         if (ret != napi_ok) {
             FI_HILOGE("napi_get_reference_value for %{public}d failed, status: %{public}d", eventType, ret);
             return;
         }
+        ConvertUserAgeGroup(handler, result, confidence);
     }
+}
+
+void UnderageModelNapiEvent::ConvertUserAgeGroup(napi_value handler, int32_t result, float confidence)
+{
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env_, &scope);
     CHKPV(scope);
@@ -215,6 +305,9 @@ bool UnderageModelNapiEvent::CheckEvents(uint32_t eventType)
     auto typeIter = events_.find(eventType);
     if (typeIter == events_.end()) {
         FI_HILOGD("eventType %{public}d not find", eventType);
+        return false;
+    }
+    if (typeIter->second->onRefSets.empty()) {
         return false;
     }
     return true;
