@@ -2054,10 +2054,10 @@ int32_t DragDrawing::InitLayer()
             return RET_ERR;
         }
     }
-    int32_t rootNodeSize = std::max(display->GetWidth(), display->GetHeight());
+    int32_t rootNodeSize = std::max(displayWidth_, displayHeight_);
     InitCanvas(rootNodeSize, rootNodeSize);
     FI_HILOGI("Root node size:%{public}d, display Width:%{public}d, display height:%{public}d",
-        rootNodeSize, display->GetWidth(), display->GetHeight());
+        rootNodeSize, displayWidth_, displayHeight_);
 #else
     CHKPR(window_, RET_ERR);
     InitCanvas(window_->GetRect().width_, window_->GetRect().height_);
