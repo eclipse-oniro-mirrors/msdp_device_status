@@ -3479,7 +3479,6 @@ Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
         displayWidth_ = display->GetWidth();
         displayHeight_ = display->GetHeight();
     }
-
     int32_t width = displayWidth_;
     int32_t height = displayHeight_;
 #else
