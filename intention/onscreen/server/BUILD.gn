@@ -13,11 +13,14 @@
 
 import("../../../device_status.gni")
 
-config("sequenceable_types_public_config") {
-  include_dirs = [ "include" ]
+config("intention_on_screen_server_public_config") {
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/interfaces/innerkits/include",
+  ]
 }
 
-ohos_source_set("sequenceable_types") {
+ohos_source_set("intention_on_screen_server") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -29,35 +32,28 @@ ohos_source_set("sequenceable_types") {
 
   branch_protector_ret = "pac_ret"
 
-  defines = device_status_default_defines
-
   include_dirs = [
     "include",
     "${device_status_root_path}/interfaces/innerkits/include",
-    "${device_status_root_path}/interfaces/innerkits/interaction/include",
   ]
 
   sources = [
-    "src/sequenceable_content_option.cpp",
-    "src/sequenceable_control_event.cpp",
-    "src/sequenceable_cooperate_options.cpp",
-    "src/sequenceable_drag_data.cpp",
-    "src/sequenceable_drag_result.cpp",
-    "src/sequenceable_drag_visible.cpp",
-    "src/sequenceable_page_content.cpp",
-    "src/sequenceable_posture_data.cpp",
-    "src/sequenceable_preview_animation.cpp",
-    "src/sequenceable_preview_style.cpp",
-    "src/sequenceable_rotate_window.cpp",
+    "src/on_screen_server.cpp"
   ]
 
-  public_configs = [ ":sequenceable_types_public_config" ]
+  public_configs = [ ":intention_on_screen_server_public_config" ]
 
-  deps = [ "${device_status_root_path}/utils/common:devicestatus_util" ]
+  defines = device_status_default_defines
+
+  deps = [
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/utils/common:devicestatus_util",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+  ]
 
   external_deps = [
-    "c_utils:utils",
-    "graphic_2d:librender_service_client",
+    "access_token:libaccesstoken_sdk",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "image_framework:image_native",
   ]

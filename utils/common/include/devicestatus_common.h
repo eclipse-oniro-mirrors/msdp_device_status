@@ -83,6 +83,14 @@ namespace DeviceStatus {
         } \
     } while (0)
 
+#define WRITEUINT64(parcel, data, ...) \
+    do { \
+        if (!(parcel).WriteUint64(data)) { \
+            FI_HILOGE("WriteUint64 "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
+
 #define WRITESTRING(parcel, data, ...) \
     do { \
         if (!(parcel).WriteString(data)) { \
@@ -175,6 +183,14 @@ namespace DeviceStatus {
     do { \
         if (!(parcel).ReadFloat(data)) { \
             FI_HILOGE("ReadFloat "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
+
+#define READUINT64(parcel, data, ...) \
+    do { \
+        if (!(parcel).ReadUint64(data)) { \
+            FI_HILOGE("ReadUint64 "#data" failed"); \
             return __VA_ARGS__; \
         } \
     } while (0)

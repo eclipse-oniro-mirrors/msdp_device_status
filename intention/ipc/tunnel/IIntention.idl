@@ -13,7 +13,7 @@
  * limitations under the License.
  */
  
- sequenceable OHOS.Msdp.DeviceStatus.SequenceableCooperateOptions;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableCooperateOptions;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragData;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragResult;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragVisible;
@@ -21,6 +21,9 @@ sequenceable OHOS.Msdp.DeviceStatus.SequenceablePreviewAnimation;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceablePreviewStyle;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableRotateWindow;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceablePostureData;
+sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableContentOption;
+sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableControlEvent;
+sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceablePageContent;
 interface OHOS.Msdp.DeviceStatus.IRemoteBoomerangCallback;
 interface OHOS.Msdp.DeviceStatus.IRemoteDevStaCallback;
 sequenceable OHOS.Media.PixelMap;
@@ -97,4 +100,8 @@ interface OHOS.Msdp.IIntention {
         [in] IRemoteDevStaCallback unsubCallback);
     void GetDeviceStatusData([in] int type, [out] int replyType, [out] int replyValue);
     void GetDevicePostureDataSync([out] SequenceablePostureData postureData);
+
+    // OnScreen
+    void GetPageContent([in] SequenceableContentOption contentOption, [out] SequenceablePageContent pageContent);
+    void SendControlEvent([in] SequenceableControlEvent event);
 }

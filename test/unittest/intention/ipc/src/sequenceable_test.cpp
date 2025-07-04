@@ -19,6 +19,7 @@
 #include "message_parcel.h"
 
 #include "devicestatus_define.h"
+#include "devicestatus_common.h"
 #include "i_context.h"
 
 
@@ -146,6 +147,167 @@ HWTEST_F(SequencableTest, SequencableTest6, TestSize.Level1)
     bool ret = sequenceablePreviewAnimation.Marshalling(parcel);
     EXPECT_TRUE(ret);
     ASSERT_NO_FATAL_FAILURE(sequenceablePreviewAnimation.Unmarshalling(parcel));
+}
+
+/**
+ * @tc.name: SequencableTest7
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest7, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    SequenceablePostureData postureData;
+    bool ret = postureData.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(postureData.Unmarshalling(parcel));
+}
+
+/**
+ * @tc.name: SequencableTest8
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest8, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceableContentOption option;
+    bool ret = option.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(option.Unmarshalling(parcel));
+}
+
+/**
+ * @tc.name: SequencableTest9
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest9, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceablePageContent pageContent;
+    OnScreen::Paragraph para;
+    pageContent.pageContent_.paragraphs.push_back(para);
+    bool ret = pageContent.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(pageContent.Unmarshalling(parcel));
+}
+
+/**
+ * @tc.name: SequencableTest10
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest10, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceableControlEvent event;
+    event.controlEvent_.eventType = OnScreen::EventType::SCROLL_TO_HOOK;
+    bool ret = event.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(event.Unmarshalling(parcel));
+}
+
+/**
+ * @tc.name: SequencableTest11
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest11, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceableControlEvent event;
+    event.controlEvent_.eventType = OnScreen::EventType::END;
+    bool ret = event.Marshalling(parcel);
+    EXPECT_FALSE(ret);
+    event.controlEvent_.eventType = OnScreen::EventType::UNKNOWN;
+    ret = event.Marshalling(parcel);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SequencableTest12
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest12, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceablePageContent content;
+    content.pageContent_.scenario = OnScreen::Scenario::END;
+    bool ret = content.Marshalling(parcel);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SequencableTest13
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest13, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(OnScreen::EventType::END) + 1);
+    parcel.WriteUint64(0);
+    OnScreen::SequenceableControlEvent event;
+    OnScreen::SequenceableControlEvent *eventPtr = event.Unmarshalling(parcel);
+    EXPECT_EQ(eventPtr, nullptr);
+    Parcel parcel1;
+    parcel1.WriteInt32(0);
+    parcel1.WriteInt32(-1);
+    parcel1.WriteUint64(0);
+    eventPtr = event.Unmarshalling(parcel1);
+    EXPECT_EQ(eventPtr, nullptr);
+}
+
+/**
+ * @tc.name: SequencableTest14
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest14, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceablePageContent content;
+    std::string str;
+    parcel.WriteInt32(0);
+    parcel.WriteUint64(0);
+    parcel.WriteString(str);
+    parcel.WriteInt32(static_cast<int32_t>(OnScreen::Scenario::END) + 1);
+    parcel.WriteString(str);
+    parcel.WriteString(str);
+    parcel.WriteString(str);
+    parcel.WriteInt32(0);
+    OnScreen::SequenceablePageContent *contentPtr = content.Unmarshalling(parcel);
+    EXPECT_EQ(contentPtr, nullptr);
+    Parcel parcel1;
+    parcel1.WriteInt32(0);
+    parcel1.WriteUint64(0);
+    parcel1.WriteString(str);
+    parcel1.WriteInt32(-1);
+    parcel1.WriteString(str);
+    parcel1.WriteString(str);
+    parcel1.WriteString(str);
+    parcel1.WriteInt32(0);
+    contentPtr = content.Unmarshalling(parcel);
+    EXPECT_EQ(contentPtr, nullptr);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

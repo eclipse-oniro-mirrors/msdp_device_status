@@ -18,10 +18,14 @@
 
 #include <gtest/gtest.h>
 
+#include "sequenceable_content_option.h"
+#include "sequenceable_control_event.h"
 #include "sequenceable_cooperate_options.h"
 #include "sequenceable_drag_data.h"
 #include "sequenceable_drag_result.h"
 #include "sequenceable_drag_visible.h"
+#include "sequenceable_page_content.h"
+#include "sequenceable_posture_data.h"
 #include "sequenceable_preview_animation.h"
 #include "sequenceable_preview_style.h"
 #include "sequenceable_rotate_window.h"

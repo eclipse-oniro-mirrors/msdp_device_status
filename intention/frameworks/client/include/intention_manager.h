@@ -26,6 +26,7 @@
 #include "drag_data.h"
 #include "drag_manager_impl.h"
 #include "i_event_listener.h"
+#include "on_screen_client.h"
 #include "socket_client.h"
 #include "stationary_client.h"
 
@@ -105,6 +106,8 @@ public:
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
     int32_t EnableInternalDropAnimation(const std::string &animationInfo);
     bool IsDragStart();
+    int32_t GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent);
+    int32_t SendControlEvent(const OnScreen::ControlEvent& event);
 
 private:
     void InitClient();
@@ -116,6 +119,7 @@ private:
     DragClient drag_;
     StationaryClient stationary_;
     BoomerangClient boomerang_;
+    OnScreen::OnScreenClient onScreen_;
     bool isScreenRotation_ { false };
     std::vector<std::string> foldRotatePolicys_ {};
 };

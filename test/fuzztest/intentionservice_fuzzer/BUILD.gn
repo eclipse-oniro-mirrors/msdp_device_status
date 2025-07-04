@@ -58,6 +58,7 @@ ohos_fuzztest("MsdpIntentionServiceFuzzTest") {
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_server",
     "${device_status_root_path}/intention/ipc/tunnel:intention_server_stub",
+    "${device_status_root_path}/intention/onscreen/server:intention_on_screen_server",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/stationary/server:intention_stationary_server",
     "${device_status_root_path}/utils/common:devicestatus_util",

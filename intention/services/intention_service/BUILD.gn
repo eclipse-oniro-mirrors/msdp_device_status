@@ -22,6 +22,7 @@ config("intention_service_config") {
     "${device_status_root_path}/interfaces/innerkits/interaction/include",
     "${device_status_root_path}/intention/prototype/include",
     "${device_status_root_path}/intention/boomerang/server/include",
+    "${device_status_root_path}/intention/onscreen/server/include",
   ]
 }
 
@@ -67,6 +68,7 @@ ohos_shared_library("intention_service") {
     "${device_status_root_path}/intention/stationary/server:intention_stationary_server",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_root_path}/intention/onscreen/server:intention_on_screen_server"
   ]
 
   external_deps = [

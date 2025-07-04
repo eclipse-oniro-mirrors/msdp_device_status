@@ -25,6 +25,7 @@
 #include "intention_dumper.h"
 #include "intention_stub.h"
 #include "i_context.h"
+#include "on_screen_server.h"
 #include "sequenceable_drag_visible.h"
 #include "socket_server.h"
 #include "stationary_server.h"
@@ -118,6 +119,11 @@ public:
     ErrCode GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue) override;
     ErrCode GetDevicePostureDataSync(SequenceablePostureData &data) override;
 
+    // OnScreen
+    ErrCode GetPageContent(const OnScreen::SequenceableContentOption &contentOption,
+        OnScreen::SequenceablePageContent &pageContent) override;
+    ErrCode SendControlEvent(const OnScreen::SequenceableControlEvent &event) override;
+
 private:
     CallingContext GetCallingContext();
     void PrintCallingContext(const CallingContext &context);
@@ -131,6 +137,7 @@ private:
     IntentionDumper dumper_;
     BoomerangServer boomerang_;
     BoomerangDumper boomerangDumper_;
+    OnScreen::OnScreenServer onScreen_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
