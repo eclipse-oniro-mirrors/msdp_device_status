@@ -128,6 +128,9 @@ bool UnderageModelNapi::SubscribeCallback(napi_env env, uint32_t type)
             FI_HILOGE("RegisterListener failed, ret:%{public}d", ret);
             return false;
         }
+        if (!Subscribe(type)) {
+            return false;
+        }
         g_underageModelObj->callbacks_.insert(std::make_pair(type, listener));
     }
     return true;
@@ -161,8 +164,8 @@ bool UnderageModelNapi::UnsubscribeCallback(napi_env env, uint32_t type)
             return true;
         }
         FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
+        ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
     }
-    ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
     return false;
 }
 
@@ -220,15 +223,11 @@ napi_value UnderageModelNapi::SubscribeUnderageModel(napi_env env, napi_callback
             return nullptr;
         }
         if (!SubscribeCallback(env, type)) {
-            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "RegisterListener failed");
+            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "SubscribeCallback failed");
             return nullptr;
         }
         if (!g_underageModelObj->AddCallback(type, args[1])) {
             ThrowUnderageModelErr(env, SERVICE_EXCEPTION, "AddCallback failed");
-            return nullptr;
-        }
-        if (!Subscribe(type)) {
-            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Subscribe failed");
             return nullptr;
         }
     }

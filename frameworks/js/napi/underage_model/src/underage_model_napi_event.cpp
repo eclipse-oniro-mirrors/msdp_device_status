@@ -193,28 +193,27 @@ bool UnderageModelNapiEvent::InsertRef(std::shared_ptr<UnderageModelEventListene
         FI_HILOGE("listener is nullptr");
         return false;
     }
-    for (auto item = listener->onRefSets.begin(); item != listener->onRefSets.end();) {
-        if (*item == nullptr) {
-            ++item;
-            continue;
-        }
+    bool hasHandler = false;
+    for (auto item : listener->onRefSets) {
         napi_value onHandler = nullptr;
-        napi_status status = napi_get_reference_value(env_, *item, &onHandler);
+        napi_status status = napi_get_reference_value(env_, item, &onHandler);
         if (status != napi_ok) {
             FI_HILOGE("napi_get_reference_value failed");
-            status = napi_delete_reference(env_, *item);
+            status = napi_delete_reference(env_, item);
             if (status != napi_ok) {
                 FI_HILOGE("napi_delete_reference failed");
-                ++item;
                 continue;
             }
-            item = listener->onRefSets.erase(item);
             continue;
         }
         if (IsSameValue(env_, handler, onHandler)) {
-            FI_HILOGD("napi repeat subscribe");
-            return true;
+            hasHandler = true;
+            break;
         }
+    }
+    if (hasHandler) {
+        FI_HILOGD("napi repeat subscribe");
+        return true;
     }
     napi_ref onHandlerRef = nullptr;
     napi_status status = napi_create_reference(env_, handler, 1, &(onHandlerRef));
