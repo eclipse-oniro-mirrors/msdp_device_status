@@ -2054,11 +2054,10 @@ int32_t DragDrawing::InitLayer()
             return RET_ERR;
         }
     }
-    displayWidth_ = display->GetWidth();
-    int32_t rootNodeSize = std::max(display->GetWidth(), display->GetHeight());
+    int32_t rootNodeSize = std::max(displayWidth_, displayHeight_);
     InitCanvas(rootNodeSize, rootNodeSize);
     FI_HILOGI("Root node size:%{public}d, display Width:%{public}d, display height:%{public}d",
-        rootNodeSize, display->GetWidth(), display->GetHeight());
+        rootNodeSize, displayWidth_, displayHeight_);
 #else
     CHKPR(window_, RET_ERR);
     InitCanvas(window_->GetRect().width_, window_->GetRect().height_);
@@ -2159,6 +2158,8 @@ void DragDrawing::CreateWindow()
         }
     }
     uint64_t rsScreenId = screenId_;
+    int32_t displayWidth_ = display->GetWidth();
+    int32_t displayHeight_ = display->GetHeight();
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Screen> screen = Rosen::ScreenManager::GetInstance().GetScreenById(screenId_);
     if ((screen != nullptr) && (!screen->IsReal())) {
@@ -2175,7 +2176,7 @@ void DragDrawing::CreateWindow()
 #endif // OHOS_BUILD_PC_PRODUCT
     screenId_ = rsScreenId;
     FI_HILOGI("Parameter rsScreen number:%{public}llu", static_cast<unsigned long long>(rsScreenId));
-    int32_t surfaceNodeSize = std::max(display->GetWidth(), display->GetHeight());
+    int32_t surfaceNodeSize = std::max(displayWidth_, displayHeight_);
     g_drawingInfo.surfaceNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
 #else
     CHKPV(window_);
@@ -3460,24 +3461,8 @@ void DragDrawing::RotatePosition(float &displayX, float &displayY)
 {
 Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
-    sptr<Rosen::DisplayInfo> display =
-        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
-    if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-        rotation = GetRotation(0);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
-        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
-        CHKPV(display);
-    }
-    int32_t width = display->GetWidth();
-    int32_t height = display->GetHeight();
+    int32_t width = displayWidth_;
+    int32_t height = displayHeight_;
 #else
     CHKPV(window_);
     int32_t width = window_->GetRect().width_;
@@ -3601,6 +3586,7 @@ void DragDrawing::ResetParameter()
     g_drawingInfo.startNum = START_TIME;
     g_drawingInfo.needDestroyDragWindow = false;
     displayWidth_ = -1;
+    displayHeight_ = -1;
     needRotatePixelMapXY_ = false;
     hasRunningStopAnimation_ = false;
     needMultiSelectedAnimation_ = true;
@@ -3648,6 +3634,25 @@ int32_t DragDrawing::DoRotateDragWindow(float rotation,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool isAnimated)
 {
     FI_HILOGI("Rotation:%{public}f, isAnimated:%{public}d", rotation, isAnimated);
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+#ifndef OHOS_BUILD_PC_PRODUCT
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
+#else
+    sptr<Rosen::DisplayInfo> display =
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
+#endif // OHOS_BUILD_PC_PRODUCT
+    if (display == nullptr) {
+        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
+#ifndef OHOS_BUILD_PC_PRODUCT
+        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+#else
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
+#endif // OHOS_BUILD_PC_PRODUCT
+        CHKPR(display, RET_ERR);
+    }
+    displayWidth_ = display->GetWidth();
+    displayHeight_ = display->GetHeight();
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     CHKPR(currentPixelMap, RET_ERR);
     if ((currentPixelMap->GetWidth() <= 0) || (currentPixelMap->GetHeight() <= 0)) {
