@@ -2054,7 +2054,6 @@ int32_t DragDrawing::InitLayer()
             return RET_ERR;
         }
     }
-    displayWidth_ = display->GetWidth();
     int32_t rootNodeSize = std::max(display->GetWidth(), display->GetHeight());
     InitCanvas(rootNodeSize, rootNodeSize);
     FI_HILOGI("Root node size:%{public}d, display Width:%{public}d, display height:%{public}d",
@@ -3606,6 +3605,7 @@ void DragDrawing::ResetParameter()
     g_drawingInfo.startNum = START_TIME;
     g_drawingInfo.needDestroyDragWindow = false;
     displayWidth_ = -1;
+    displayHeight_ = -1;
     needRotatePixelMapXY_ = false;
     hasRunningStopAnimation_ = false;
     needMultiSelectedAnimation_ = true;

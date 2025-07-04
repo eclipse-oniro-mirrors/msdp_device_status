@@ -441,6 +441,7 @@ private:
 private:
     bool needMultiSelectedAnimation_ { true };
     int32_t displayWidth_ { -1 };
+    int32_t displayHeight_ { -1 };
     int64_t interruptNum_ { -1 };
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ { nullptr };
     std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };
@@ -462,8 +463,6 @@ private:
     void* dragExtHandler_ { nullptr };
     bool needRotatePixelMapXY_ { false };
     uint64_t screenId_ { 0 };
-    int32_t displayWidth_ { 0 };
-    int32_t displayHeight_ { 0 };
 #ifdef OHOS_ENABLE_PULLTHROW
     float pullThrowScale_ { 1.0 };
 #endif // OHOS_ENABLE_PULLTHROW
