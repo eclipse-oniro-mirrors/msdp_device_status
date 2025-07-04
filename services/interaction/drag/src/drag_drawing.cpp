@@ -3461,24 +3461,6 @@ void DragDrawing::RotatePosition(float &displayX, float &displayY)
 {
 Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
-    sptr<Rosen::DisplayInfo> display =
-        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
-    if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-        rotation = GetRotation(0);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
-        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
-        CHKPV(display);
-        displayWidth_ = display->GetWidth();
-        displayHeight_ = display->GetHeight();
-    }
     int32_t width = displayWidth_;
     int32_t height = displayHeight_;
 #else
