@@ -30,6 +30,10 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     WRITEINT32(parcel, pageContent_.windowId, false);
     WRITEUINT64(parcel, pageContent_.sessionId, false);
     WRITESTRING(parcel, pageContent_.bundleName, false);
+    if (pageContent_.scenario >= Scenario::END) {
+        FI_HILOGE("scenario is illedgel");
+        return false;
+    }
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
     WRITESTRING(parcel, pageContent_.title, false);
     WRITESTRING(parcel, pageContent_.content, false);
@@ -61,7 +65,9 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     READSTRING(parcel, pageContent_.bundleName, false);
     int32_t scenario = 0;
     READINT32(parcel, scenario, false);
+    // scenario 只判断小于0，因为PageContent作为出参，赋初值时为UNKNOWN符合预期
     if (scenario < 0 || scenario >= static_cast<int32_t>(Scenario::END)) {
+        FI_HILOGE("scenario is illedgel");
         return false;
     }
     pageContent_.scenario = static_cast<Scenario>(scenario);

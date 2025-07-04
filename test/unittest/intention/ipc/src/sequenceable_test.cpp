@@ -209,9 +209,104 @@ HWTEST_F(SequencableTest, SequencableTest10, TestSize.Level1)
     CALL_TEST_DEBUG;
     Parcel parcel;
     OnScreen::SequenceableControlEvent event;
+    event.eventType = OnScreen::EventType::SCROLL_TO_HOOK;
     bool ret = event.Marshalling(parcel);
     EXPECT_TRUE(ret);
     ASSERT_NO_FATAL_FAILURE(event.Unmarshalling(parcel));
+}
+
+/**
+ * @tc.name: SequencableTest11
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest11, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceableControlEvent event;
+    event.eventType == EventType::END;  
+    bool ret = event.Marshalling(parcel);
+    EXPECT_FALSE(ret);
+    event.eventType == EventType::UNKNOWN;
+    bool ret = event.Marshalling(parcel);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SequencableTest12
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest12, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceablePageContent content;
+    content.pageContent_ = OnScreen::Scenario::END;
+    bool ret = content.Marshalling(parcel);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SequencableTest13
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest13, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    WRITEINT32(parcel, 0, false);
+    WRITEINT32(parcel, 3, false);
+    WRITEUINT64(parcel, 0, false);
+    OnScreen::SequenceableControlEvent event;
+    OnScreen::SequenceableControlEvent *eventPtr = event.Unmarshalling(parcel);
+    EXPECT_EQ(eventPtr, nullptr);
+    Parcel parcel1;
+    WRITEINT32(parcel1, 0, false);
+    WRITEINT32(parcel1, -1, false);
+    WRITEUINT64(parcel1, 0, false);
+    eventPtr = event.Unmarshalling(parcel1);
+    EXPECT_EQ(eventPtr, nullptr);
+}
+
+/**
+ * @tc.name: SequencableTest14
+ * @tc.desc: SequencableTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequencableTest, SequencableTest14, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    OnScreen::SequenceablePageContent content;
+    std::string str;
+    WRITEINT32(parcel, 0, false);
+    WRITEUINT64(parcel, 0, false);
+    WRITESTRING(parcel, str, false);
+    WRITEINT32(parcel, 3, false);
+    WRITESTRING(parcel, str, false);
+    WRITESTRING(parcel, str, false);
+    WRITESTRING(parcel, str, false);
+    WRITEINT32(parcel, 0, false);
+    OnScreen::SequenceablePageContent *contentPtr = content.Unmarshalling(parcel);
+    EXPECT_EQ(contentPtr, nullptr);
+    Parcel parcel1;
+    WRITEINT32(parcel, 0, false);
+    WRITEUINT64(parcel, 0, false);
+    WRITESTRING(parcel, str, false);
+    WRITEINT32(parcel, -1, false);
+    WRITESTRING(parcel, str, false);
+    WRITESTRING(parcel, str, false);
+    WRITESTRING(parcel, str, false);
+    WRITEINT32(parcel, 0, false);
+    OnScreen::SequenceablePageContent *contentPtr = content.Unmarshalling(parcel);
+    EXPECT_EQ(contentPtr, nullptr);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

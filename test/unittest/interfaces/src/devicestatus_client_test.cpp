@@ -211,6 +211,20 @@ HWTEST_F(DeviceStatusClientTest, GetPageContent001, TestSize.Level0)
         << pageContent.paragraphs.size() << ", " << ret << std::endl;
     EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
 }
+
+/**
+ * @tc.name: GetPageContent001
+ * @tc.desc: test GetPageContent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusClientTest, SendControlEvent, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::ControlEvent event;
+    event.eventType = EventType::END;
+    int32_t ret = OnScreen::OnScreenManager::GetInstance().SendControlEvent(event);
+    EXPECT_TRUE(ret == RET_ERR || ret == RET_NO_SUPPORT);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

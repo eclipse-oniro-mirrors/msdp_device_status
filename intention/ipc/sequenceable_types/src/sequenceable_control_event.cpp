@@ -24,6 +24,10 @@ namespace OnScreen {
 bool SequenceableControlEvent::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, controlEvent_.windowId, false);
+    if (controlEvent_.eventType <= EventType::UNKNOWN || controlEvent_.eventType >= EventType::END) {
+        FI_HILOGE("eventType is illedgel");
+        return false;
+    }
     WRITEINT32(parcel, static_cast<int32_t>(controlEvent_.eventType), false);
     WRITEUINT64(parcel, controlEvent_.hookId, false);
     return true;
@@ -46,7 +50,8 @@ bool SequenceableControlEvent::ReadFromParcel(Parcel &parcel)
     READINT32(parcel, controlEvent_.windowId, false);
     READINT32(parcel, eventType, false);
     READUINT64(parcel, controlEvent_.hookId, false);
-    if (eventType < 0 || eventType >= static_cast<int32_t>(EventType::END)) {
+    if (eventType <= EventType::UNKNOWN || eventType >= static_cast<int32_t>(EventType::END)) {
+        FI_HILOGE("eventType is illedgel");
         return false;
     }
     controlEvent_.eventType = static_cast<EventType>(eventType);

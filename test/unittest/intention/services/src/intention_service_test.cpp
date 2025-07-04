@@ -1002,6 +1002,36 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDevicePostureDataSync001,
     EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
         data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
 }
+
+/**
+ * @tc.name: IntentionServiceTest49
+ * @tc.desc: Test GetPageContent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetPageContent001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::SequenceablePageContent content;
+    OnScreen::SequenceableContentOption option;
+    ErrCode ret = g_intentionService->GetPageContent(option, content);
+    EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
+}
+
+/**
+ * @tc.name: IntentionServiceTest50
+ * @tc.desc: Test SendControlEvent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SendControlEvent001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::SequenceableControlEvent event;
+    event.controlEvent_ = OnScreen::EventType::SCROLL_TO_HOOK;
+    ErrCode ret = g_intentionService->SendControlEvent(event);
+    EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
