@@ -55,7 +55,6 @@ public:
 HWTEST_F(OnScreenServerTest, GetPageContent001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    ASSERT_NE(callback, nullptr);
     ContentOption option;
     PageContent content;
     int32_t ret = onScreen_.GetPageContent(context_, option, content);
@@ -67,12 +66,11 @@ HWTEST_F(OnScreenServerTest, GetPageContent001, TestSize.Level0)
  * @tc.desc: Test func named  SendControlEvent
  * @tc.type: FUNC
  */
-HWTEST_F(OnScreenServerTest, GetPageContent001, TestSize.Level0)
+HWTEST_F(OnScreenServerTest, SendControlEvent001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    ASSERT_NE(callback, nullptr);
     ControlEvent event;
-    event.eventType = EVENT_TYPE::SCROLL_TO_HOOK;
+    event.eventType = EventType::SCROLL_TO_HOOK;
     int32_t ret = onScreen_.SendControlEvent(context_, event);
     EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
 }

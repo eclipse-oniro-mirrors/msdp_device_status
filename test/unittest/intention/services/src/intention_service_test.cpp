@@ -1028,7 +1028,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SendControlEvent001, TestSiz
 {
     CALL_TEST_DEBUG;
     OnScreen::SequenceableControlEvent event;
-    event.controlEvent_ = OnScreen::EventType::SCROLL_TO_HOOK;
+    event.controlEvent_.eventType = OnScreen::EventType::SCROLL_TO_HOOK;
     ErrCode ret = g_intentionService->SendControlEvent(event);
     EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
 }

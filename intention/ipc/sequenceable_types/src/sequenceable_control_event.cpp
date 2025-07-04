@@ -50,7 +50,7 @@ bool SequenceableControlEvent::ReadFromParcel(Parcel &parcel)
     READINT32(parcel, controlEvent_.windowId, false);
     READINT32(parcel, eventType, false);
     READUINT64(parcel, controlEvent_.hookId, false);
-    if (eventType <= EventType::UNKNOWN || eventType >= static_cast<int32_t>(EventType::END)) {
+    if (eventType <= static_cast<int32_t>(EventType::UNKNOWN) || eventType >= static_cast<int32_t>(EventType::END)) {
         FI_HILOGE("eventType is illedgel");
         return false;
     }

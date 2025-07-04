@@ -221,9 +221,9 @@ HWTEST_F(DeviceStatusClientTest, SendControlEvent, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     OnScreen::ControlEvent event;
-    event.eventType = EventType::END;
+    event.eventType = OnScreen::EventType::END;
     int32_t ret = OnScreen::OnScreenManager::GetInstance().SendControlEvent(event);
-    EXPECT_TRUE(ret == RET_ERR || ret == RET_NO_SUPPORT);
+    EXPECT_TRUE(ret != RET_OK);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

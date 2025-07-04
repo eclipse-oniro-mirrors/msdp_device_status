@@ -19,6 +19,7 @@
 #include "message_parcel.h"
 
 #include "devicestatus_define.h"
+#include "devicestatus_common.h"
 #include "i_context.h"
 
 
@@ -209,7 +210,7 @@ HWTEST_F(SequencableTest, SequencableTest10, TestSize.Level1)
     CALL_TEST_DEBUG;
     Parcel parcel;
     OnScreen::SequenceableControlEvent event;
-    event.eventType = OnScreen::EventType::SCROLL_TO_HOOK;
+    event.controlEvent_.eventType = OnScreen::EventType::SCROLL_TO_HOOK;
     bool ret = event.Marshalling(parcel);
     EXPECT_TRUE(ret);
     ASSERT_NO_FATAL_FAILURE(event.Unmarshalling(parcel));
@@ -226,11 +227,11 @@ HWTEST_F(SequencableTest, SequencableTest11, TestSize.Level1)
     CALL_TEST_DEBUG;
     Parcel parcel;
     OnScreen::SequenceableControlEvent event;
-    event.eventType == EventType::END;  
+    event.controlEvent_.eventType == OnScreen::EventType::END;  
     bool ret = event.Marshalling(parcel);
     EXPECT_FALSE(ret);
-    event.eventType == EventType::UNKNOWN;
-    bool ret = event.Marshalling(parcel);
+    event.controlEvent_.eventType == OnScreen::EventType::UNKNOWN;
+    ret = event.Marshalling(parcel);
     EXPECT_FALSE(ret);
 }
 
@@ -245,7 +246,8 @@ HWTEST_F(SequencableTest, SequencableTest12, TestSize.Level1)
     CALL_TEST_DEBUG;
     Parcel parcel;
     OnScreen::SequenceablePageContent content;
-    content.pageContent_ = OnScreen::Scenario::END;
+    event.
+    content.pageContent_.scenario = OnScreen::Scenario::END;
     bool ret = content.Marshalling(parcel);
     EXPECT_FALSE(ret);
 }
@@ -260,16 +262,16 @@ HWTEST_F(SequencableTest, SequencableTest13, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Parcel parcel;
-    WRITEINT32(parcel, 0, false);
-    WRITEINT32(parcel, 3, false);
-    WRITEUINT64(parcel, 0, false);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(OnScreen::EventType::END) + 1);
+    parcel.WriteUInt64(0);
     OnScreen::SequenceableControlEvent event;
     OnScreen::SequenceableControlEvent *eventPtr = event.Unmarshalling(parcel);
     EXPECT_EQ(eventPtr, nullptr);
     Parcel parcel1;
-    WRITEINT32(parcel1, 0, false);
-    WRITEINT32(parcel1, -1, false);
-    WRITEUINT64(parcel1, 0, false);
+    parcel1.WriteInt32(0);
+    parcel1.WriteInt32(-1);
+    parcel1.WriteUInt64(0);
     eventPtr = event.Unmarshalling(parcel1);
     EXPECT_EQ(eventPtr, nullptr);
 }
@@ -286,26 +288,26 @@ HWTEST_F(SequencableTest, SequencableTest14, TestSize.Level1)
     Parcel parcel;
     OnScreen::SequenceablePageContent content;
     std::string str;
-    WRITEINT32(parcel, 0, false);
-    WRITEUINT64(parcel, 0, false);
-    WRITESTRING(parcel, str, false);
-    WRITEINT32(parcel, 3, false);
-    WRITESTRING(parcel, str, false);
-    WRITESTRING(parcel, str, false);
-    WRITESTRING(parcel, str, false);
-    WRITEINT32(parcel, 0, false);
+    parcel.WriteInt32(0);
+    parcel.WriteUint64(0);
+    parcel.WriteString(str);
+    parcel.WriteInt32(static_cast<int32_t>(OnScreen::Scenario::END) + 1);
+    parcel.WriteString(str);
+    parcel.WriteString(str);
+    parcel.WriteString(str);
+    parcel.WriteInt32(0);
     OnScreen::SequenceablePageContent *contentPtr = content.Unmarshalling(parcel);
     EXPECT_EQ(contentPtr, nullptr);
     Parcel parcel1;
-    WRITEINT32(parcel, 0, false);
-    WRITEUINT64(parcel, 0, false);
-    WRITESTRING(parcel, str, false);
-    WRITEINT32(parcel, -1, false);
-    WRITESTRING(parcel, str, false);
-    WRITESTRING(parcel, str, false);
-    WRITESTRING(parcel, str, false);
-    WRITEINT32(parcel, 0, false);
-    OnScreen::SequenceablePageContent *contentPtr = content.Unmarshalling(parcel);
+    parcel1.WriteInt32(0);
+    parcel1.WriteUint64(0);
+    parcel1.WriteString(str);
+    parcel1.WriteInt32(-1);
+    parcel1.WriteString(str);
+    parcel1.WriteString(str);
+    parcel1.WriteString(str);
+    parcel1.WriteInt32(0);
+    contentPtr = content.Unmarshalling(parcel);
     EXPECT_EQ(contentPtr, nullptr);
 }
 } // namespace DeviceStatus
