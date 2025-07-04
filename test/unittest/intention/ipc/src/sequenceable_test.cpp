@@ -227,7 +227,7 @@ HWTEST_F(SequencableTest, SequencableTest11, TestSize.Level1)
     CALL_TEST_DEBUG;
     Parcel parcel;
     OnScreen::SequenceableControlEvent event;
-    event.controlEvent_.eventType = OnScreen::EventType::END;  
+    event.controlEvent_.eventType = OnScreen::EventType::END;
     bool ret = event.Marshalling(parcel);
     EXPECT_FALSE(ret);
     event.controlEvent_.eventType = OnScreen::EventType::UNKNOWN;

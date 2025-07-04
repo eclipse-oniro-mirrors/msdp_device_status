@@ -18,9 +18,7 @@
 #include "devicestatus_define.h"
 #include "fi_log.h"
 #include "on_screen_data.h"
-#define private public
 #include "on_screen_server.h"
-#undef private
 #include "ipc_skeleton.h"
 
 #undef LOG_TAG
