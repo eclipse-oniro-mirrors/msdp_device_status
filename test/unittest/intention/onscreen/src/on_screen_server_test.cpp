@@ -23,7 +23,6 @@
 #include "on_screen_data.h"
 #include "on_screen_server.h"
 #include "token_setproc.h"
-#include "window_manager.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenServerTest"
