@@ -1152,7 +1152,6 @@ void DragDrawing::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
     dragInternalInfo.scale = GetScaling();
     dragInternalInfo.pixelMapX = g_drawingInfo.pixelMapX;
     dragInternalInfo.pixelMapY = g_drawingInfo.pixelMapY;
-    dragInternalInfo.displayWidth = displayWidth_;
     dragInternalInfo.argb = g_drawingInfo.filterInfo.argb;
     dragInternalInfo.rootNode = g_drawingInfo.rootNode;
     dragInternalInfo.parentNode = g_drawingInfo.parentNode;
@@ -1160,8 +1159,47 @@ void DragDrawing::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
     dragInternalInfo.lightNode = g_drawingInfo.lightNode;
     dragInternalInfo.currentPixelMap = AccessGlobalPixelMapLocked();
     dragInternalInfo.nodes = g_drawingInfo.nodes;
+    dragInternalInfo.multiSelectedNodes = g_drawingInfo.multiSelectedNodes;
+    dragInternalInfo.multiSelectedPixelMaps = g_drawingInfo.multiSelectedPixelMaps;
+    dragInternalInfo.rotation = GetRotation(g_drawingInfo.displayId);
+ 
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
+    if (display == nullptr) {
+        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
+        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+        if (display == nullptr) {
+            FI_HILOGE("Get default display info failed");
+            dragInternalInfo.displayWidth = 0;
+            dragInternalInfo.displayHeight = 0;
+            FI_HILOGI("leave");
+            return;
+        }
+    }
+    int32_t width = display->GetWidth();
+    int32_t height = display->GetHeight();
+    dragInternalInfo.displayWidth = width;
+    dragInternalInfo.displayHeight = height;
     FI_HILOGI("leave");
     return;
+}
+ 
+void DragDrawing::RemoveStyleNodeAnimations()
+{
+    FI_HILOGI("enter");
+    if (!CheckNodesValid()) {
+        FI_HILOGE("Check nodes valid failed");
+        return;
+    }
+    std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+    CHKPV(dragStyleNode);
+    if (dragStyleNode != nullptr && drawStyleScaleModifier_ != nullptr) {
+        dragStyleNode->RemoveModifier(drawStyleScaleModifier_);
+        dragStyleNode->RemoveAllAnimations();
+        drawStyleScaleModifier_ = nullptr;
+        needBreakStyleScaleAnimation_ = true;
+    }
+    Rosen::RSTransaction::FlushImplicitTransaction();
+    FI_HILOGI("leave");
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
