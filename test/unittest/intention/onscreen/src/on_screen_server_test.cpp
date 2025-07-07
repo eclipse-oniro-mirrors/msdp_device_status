@@ -40,8 +40,8 @@ CallingContext context_ {
     .pid = IPCSkeleton::GetCallingPid(),
 };
 OnScreenServer onScreen_;
-const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.ON_SCREEN_GET_CONTENT";
-const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.ON_SCREEN_CONTROL";
+const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
+const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.INJECT_INPUT_EVENT";
 class OnScreenServerTest : public testing::Test {
 public:
     static void SetUpTestCase();

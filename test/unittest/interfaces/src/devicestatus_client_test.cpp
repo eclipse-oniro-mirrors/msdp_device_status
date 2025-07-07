@@ -37,8 +37,8 @@ using namespace Security::AccessToken;
 namespace {
 constexpr float DOUBLEPIMAX = 6.3F;
 constexpr int32_t RET_NO_SUPPORT = 801;
-const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.ON_SCREEN_GET_CONTENT";
-const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.ON_SCREEN_CONTROL";
+const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
+const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.INJECT_INPUT_EVENT";
 constexpr int32_t RET_ERR = -1;
 }
 
