@@ -23,7 +23,6 @@
 #include "on_screen_data.h"
 #include "on_screen_server.h"
 #include "token_setproc.h"
-#include "window_manager.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenServerTest"
@@ -41,7 +40,6 @@ CallingContext context_ {
     .pid = IPCSkeleton::GetCallingPid(),
 };
 OnScreenServer onScreen_;
-constexpr int32_t RET_NO_SUPPORT = 801;
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.ON_SCREEN_GET_CONTENT";
 const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.ON_SCREEN_CONTROL";
 class OnScreenServerTest : public testing::Test {
