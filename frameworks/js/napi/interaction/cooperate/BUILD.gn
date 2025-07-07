@@ -29,7 +29,6 @@ ohos_shared_library("inputdevicecooperate") {
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_utils_path}:devicestatus_util",
-    "//third_party/libuv:uv",
   ]
 
   external_deps = [
@@ -39,6 +38,7 @@ ohos_shared_library("inputdevicecooperate") {
     "hilog:libhilog",
     "image_framework:image_native",
     "napi:ace_napi",
+    "libuv:uv",
   ]
 
   relative_install_dir = "module/multimodalinput"

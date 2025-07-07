@@ -80,10 +80,10 @@
         "power_manager",
         "resource_schedule_service",
         "motion",
+        "libuv",
         "data_share"
       ],
       "third_party": [
-        "libuv",
         "openssl",
         "jsoncpp"
       ]
