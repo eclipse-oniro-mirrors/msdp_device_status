@@ -19,6 +19,7 @@
 #include <dlfcn.h>
 #include <vector>
 
+#include "accesstoken_kit.h"
 #include "devicestatus_define.h"
 
 #undef LOG_TAG
@@ -156,7 +157,7 @@ int32_t OnScreenServer::UnloadAlgoLib()
 
 bool OnScreenServer::CheckPermission(const CallingContext &context, const std::string &permission)
 {
-    return AccessTokenKit::VerifyAccessToken(context.tokenId, permission) == RET_OK;
+    return Security::AccessToken::AccessTokenKit::VerifyAccessToken(context.tokenId, permission) == RET_OK;
 }
 } // namespace OnScreen
 } // namespace DeviceStatus

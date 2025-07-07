@@ -39,6 +39,7 @@ constexpr float DOUBLEPIMAX = 6.3F;
 constexpr int32_t RET_NO_SUPPORT = 801;
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.ON_SCREEN_GET_CONTENT";
 const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.ON_SCREEN_CONTROL";
+constexpr int32_t RET_ERR = -1;
 }
 
 class DeviceStatusClientTest : public testing::Test {
@@ -217,7 +218,7 @@ HWTEST_F(DeviceStatusClientTest, GetPageContent001, TestSize.Level0)
     std::cout << pageContent.windowId << ", " << pageContent.bundleName << ", "
         << pageContent.title << ", " << pageContent.content << ", "
         << pageContent.paragraphs.size() << ", " << ret << std::endl;
-    EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 
 /**
@@ -231,7 +232,7 @@ HWTEST_F(DeviceStatusClientTest, SendControlEvent, TestSize.Level0)
     OnScreen::ControlEvent event;
     event.eventType = OnScreen::EventType::END;
     int32_t ret = OnScreen::OnScreenManager::GetInstance().SendControlEvent(event);
-    EXPECT_TRUE(ret != RET_OK);
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

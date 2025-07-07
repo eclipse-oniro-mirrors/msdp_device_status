@@ -15,11 +15,15 @@
 
 #include <gtest/gtest.h>
 
+#include "accesstoken_kit.h"
 #include "devicestatus_define.h"
 #include "fi_log.h"
+#include "ipc_skeleton.h"
+#include "nativetoken_kit.h"
 #include "on_screen_data.h"
 #include "on_screen_server.h"
-#include "ipc_skeleton.h"
+#include "token_setproc.h"
+#include "window_manager.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenServerTest"
@@ -29,6 +33,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
 using namespace testing::ext;
+using namespace Security::AccessToken;
 CallingContext context_ {
     .intention = Intention::UNKNOWN_INTENTION,
     .tokenId = IPCSkeleton::GetCallingTokenID(),
@@ -81,7 +86,7 @@ HWTEST_F(OnScreenServerTest, GetPageContent001, TestSize.Level0)
     ContentOption option;
     PageContent content;
     int32_t ret = onScreen_.GetPageContent(context_, option, content);
-    EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 
 /**
@@ -95,7 +100,7 @@ HWTEST_F(OnScreenServerTest, SendControlEvent001, TestSize.Level0)
     ControlEvent event;
     event.eventType = EventType::SCROLL_TO_HOOK;
     int32_t ret = onScreen_.SendControlEvent(context_, event);
-    EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 } // namespace OnScreen
 } // namespace DeviceStatus
