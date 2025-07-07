@@ -31,13 +31,17 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     WRITEUINT64(parcel, pageContent_.sessionId, false);
     WRITESTRING(parcel, pageContent_.bundleName, false);
     if (pageContent_.scenario >= Scenario::END) {
-        FI_HILOGE("scenario is illedgel");
+        FI_HILOGE("scenario is illegal");
         return false;
     }
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
     WRITESTRING(parcel, pageContent_.title, false);
     WRITESTRING(parcel, pageContent_.content, false);
     WRITESTRING(parcel, pageContent_.links, false);
+    if (pageContent_.paragraphs.size() > static_cast<size_t>(MAX_PARA_LEN)) {
+        FI_HILOGE("paragraph size is too long");
+        return false;
+    }
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.paragraphs.size()), false);
     for (size_t i = 0; i < pageContent_.paragraphs.size(); i++) {
         WRITEUINT64(parcel, pageContent_.paragraphs[i].hookId, false);
@@ -67,7 +71,7 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     READINT32(parcel, scenario, false);
     // scenario 只判断小于0，因为PageContent作为出参，赋初值时为UNKNOWN符合预期
     if (scenario < 0 || scenario >= static_cast<int32_t>(Scenario::END)) {
-        FI_HILOGE("scenario is illedgel");
+        FI_HILOGE("scenario is illegal");
         return false;
     }
     pageContent_.scenario = static_cast<Scenario>(scenario);
@@ -78,7 +82,7 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     READINT32(parcel, paragraphSize, false);
     std::vector<Paragraph>().swap(pageContent_.paragraphs);
     if (paragraphSize > MAX_PARA_LEN || paragraphSize < 0) {
-        FI_HILOGE("paragraphSize is invaild");
+        FI_HILOGE("paragraphSize is too long or illedgal");
         return false;
     }
     for (int32_t i = 0; i < paragraphSize; i++) {

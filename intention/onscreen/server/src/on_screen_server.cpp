@@ -59,7 +59,7 @@ int32_t OnScreenServer::GetPageContent(const CallingContext &context, const Cont
 {
     std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
-    if (CheckPermission(context, PERMISSION_GET_PAGE_CONTENT) != RET_OK) {
+    if (!CheckPermission(context, PERMISSION_GET_PAGE_CONTENT)) {
         FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_GET_PAGE_CONTENT);
         return RET_NO_PERMISSION;
     }
@@ -86,7 +86,7 @@ int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const Co
 {
     std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
-    if (CheckPermission(context, PERMISSION_SEND_CONTROL_EVENT) != RET_OK) {
+    if (!CheckPermission(context, PERMISSION_SEND_CONTROL_EVENT)) {
         FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_SEND_CONTROL_EVENT);
         return RET_NO_PERMISSION;
     }
@@ -154,9 +154,9 @@ int32_t OnScreenServer::UnloadAlgoLib()
     return RET_OK;
 }
 
-int32_t OnScreenServer::CheckPermission(const CallingContext &context, const std::string &permission)
+bool OnScreenServer::CheckPermission(const CallingContext &context, const std::string &permission)
 {
-    return RET_OK;
+    return AccessTokenKit::VerifyAccessToken(context.tokenId, permission) == RET_OK;
 }
 } // namespace OnScreen
 } // namespace DeviceStatus

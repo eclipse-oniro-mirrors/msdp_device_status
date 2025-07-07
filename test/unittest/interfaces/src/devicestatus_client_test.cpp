@@ -37,6 +37,8 @@ using namespace Security::AccessToken;
 namespace {
 constexpr float DOUBLEPIMAX = 6.3F;
 constexpr int32_t RET_NO_SUPPORT = 801;
+const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.ON_SCREEN_GET_CONTENT";
+const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.ON_SCREEN_CONTROL";
 }
 
 class DeviceStatusClientTest : public testing::Test {
@@ -59,12 +61,18 @@ void DeviceStatusClientTest::TearDown() {}
 
 void DeviceStatusClientTest::SetUpTestCase()
 {
+    const char **perms = new (std::nothrow) const char *[2];
+    if (perms == nullptr) {
+        return;
+    }
+    perms[0] = PERMISSION_GET_PAGE_CONTENT;
+    perms[1] = PERMISSION_SEND_CONTROL_EVENT;
     TokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 0,
         .aclsNum = 0,
         .dcaps = nullptr,
-        .perms = nullptr,
+        .perms = perms,
         .acls = nullptr,
         .processName = "DeviceStatusClientTest",
         .aplStr = "system_core",
