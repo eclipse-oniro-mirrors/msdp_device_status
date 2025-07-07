@@ -2035,25 +2035,6 @@ int32_t DragDrawing::InitLayer()
     }
     rsUiDirector_->SetRSSurfaceNode(g_drawingInfo.surfaceNode);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
-    sptr<Rosen::DisplayInfo> display =
-        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-        FI_HILOGI("Get visible area display info by id, displayid:%{public}d", g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
-    if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
-        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
-        if (display == nullptr) {
-            FI_HILOGE("Get display info failed, display is nullptr");
-            return RET_ERR;
-        }
-    }
     int32_t rootNodeSize = std::max(displayWidth_, displayHeight_);
     InitCanvas(rootNodeSize, rootNodeSize);
     FI_HILOGI("Root node size:%{public}d, display Width:%{public}d, display height:%{public}d",
@@ -3756,8 +3737,10 @@ void DragDrawing::ScreenRotateAdjustDisplayXY(
 #endif // OHOS_BUILD_PC_PRODUCT
         CHKPV(display);
     }
-    int32_t width = display->GetWidth();
-    int32_t height = display->GetHeight();
+    displayWidth_ = display->GetWidth();
+    displayHeight_ = display->GetHeight();
+    int32_t width = displayWidth_;
+    int32_t height = displayHeight_;
 #else
     CHKPV(window_);
     int32_t width = window_->GetRect().width_;
@@ -4564,8 +4547,10 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     }
     screenId_ = rsScreenId;
 #endif // OHOS_BUILD_PC_PRODUCT
+    displayWidth_ = display->GetWidth();
+    displayHeight_ = display->GetHeight();
     FI_HILOGI("Parameter rsScreen number:%{public}llu", static_cast<unsigned long long>(screenId_));
-    int32_t surfaceNodeSize = std::max(display->GetWidth(), display->GetHeight());
+    int32_t surfaceNodeSize = std::max(displayWidth_, displayHeight_);
     g_drawingInfo.rootNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
     g_drawingInfo.rootNode->SetFrame(0, 0, surfaceNodeSize, surfaceNodeSize);
     g_drawingInfo.surfaceNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
