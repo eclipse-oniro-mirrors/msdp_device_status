@@ -80,6 +80,7 @@ ohos_unittest("IntentionServiceTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
@@ -278,6 +279,7 @@ ohos_unittest("IntentionDeviceManagerTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
@@ -344,6 +346,7 @@ ohos_unittest("IntentionDumperTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
@@ -413,6 +416,7 @@ ohos_unittest("BoomerangDumperTest") {
   external_deps = [
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_innerkits",
     "cJSON:cjson",
     "c_utils:utils",

@@ -20,6 +20,7 @@ deps_ex = [
   "ability_runtime:app_manager",
   "device_manager:devicemanagersdk",
   "access_token:libaccesstoken_sdk",
+  "bundle_framework:appexecfwk_core",
   "cJSON:cjson",
   "c_utils:utils",
   "data_share:datashare_consumer",

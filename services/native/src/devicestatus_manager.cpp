@@ -17,12 +17,11 @@
 
 #include "image_packer.h"
 #include "iservice_registry.h"
+#include "iservice_registry.h"
+#include "os_account_manager.h"
 #include "wm_common.h"
-#include "ui_content_service_interface.h"
-#include "ui_content_proxy.h"
 
 #include "accessibility_manager.h"
-#include "boomerang_surfacecapture_callback.h"
 #include "devicestatus_define.h"
 #include "devicestatus_napi_manager.h"
 #include "fi_log.h"
@@ -34,11 +33,10 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-    constexpr int32_t IMAGE_PAIR_LIST_MAX_LENGTH = 100;
-    std::mutex g_screenShotMutex;
     const std::string BUNDLE_NAME = "com.tencent.wechat";
-    DeviceStatusManager* g_deviceManager { nullptr };
 }
+std::shared_ptr<DeviceStatusManager> DeviceStatusManager::g_deviceManager;
+std::mutex DeviceStatusManager::g_mutex;
 
 void DeviceStatusManager::DeviceStatusCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
@@ -78,15 +76,20 @@ void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wp
 void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId,
     const std::string &deviceId)
 {
-    CHKPV(manager_);
+    std::lock_guard<std::mutex> guard(g_mutex);
     switch (systemAbilityId) {
         case ACCESSIBILITY_MANAGER_SERVICE_ID: {
+            if (g_deviceManager == nullptr) {
+                g_deviceManager = std::make_shared<DeviceStatusManager>();
+            }
+            CHKPV(g_deviceManager);
             ACCESSIBILITY_MANAGER.AccessibilityConnect([this](int32_t value) {
+                std::lock_guard<std::mutex> guard(g_mutex);
                 if (value == AccessibilityStatus::ON_ABILITY_CONNECTED) {
-                    manager_->isAccessbilityInit = true;
+                    g_deviceManager->isAccessibilityInit = true;
                     FI_HILOGI("Accessibility service has connect");
                 } else if (value == AccessibilityStatus::ON_ABILITY_SCROLLED_EVENT) {
-                    manager_->handlerPageScrollerEnvent();
+                    g_deviceManager->HandlerPageScrollerEvent();
                 }
             });
             break;
@@ -112,27 +115,34 @@ void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t 
 void DeviceStatusManager::AccessibilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId,
     const std::string &deviceId)
 {
+    std::lock_guard<std::mutex> guard(g_mutex);
+    CHKPV(g_deviceManager);
     if (systemAbilityId == ACCESSIBILITY_MANAGER_SERVICE_ID) {
         FI_HILOGE("the accessibility service died");
+        g_deviceManager->isAccessibilityInit = false;
     } else if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
         CHKPV(g_deviceManager);
-        g_deviceManager->g_lastEnable = true;
+        g_deviceManager->lastEnable = true;
+    }
+    if (!g_deviceManager->isAccessibilityInit && g_deviceManager->lastEnable) {
+        g_deviceManager = nullptr;
     }
 }
 
 void DeviceStatusManager::SystemBarStyleChangedListener::OnWindowSystemBarPropertyChanged(WindowType type,
     const SystemBarProperty& systemBarProperty)
 {
-    std::lock_guard<std::mutex> guard(mutex_);
+    std::lock_guard<std::mutex> guard(g_mutex);
+    FI_HILOGI("OnWindowSystemBarPropertyChanged status:%{public}d", systemBarProperty.enable_);
     if (g_deviceManager == nullptr) {
-        g_deviceManager = new (std::nothrow) DeviceStatusManager();
+        g_deviceManager = std::make_shared<DeviceStatusManager>();
     }
     CHKPV(g_deviceManager);
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ != g_deviceManager->g_lastEnable) {
-        g_deviceManager->g_lastEnable = systemBarProperty.enable_;
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ != g_deviceManager->lastEnable) {
+        g_deviceManager->lastEnable = systemBarProperty.enable_;
     }
-    if (!g_deviceManager->g_lastEnable) {
-        g_deviceManager->handlerPageScrollerEnvent();
+    if (!g_deviceManager->lastEnable) {
+        g_deviceManager->HandlerPageScrollerEvent();
     }
 }
 
@@ -161,15 +171,18 @@ bool DeviceStatusManager::Init()
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     CHKPF(samgrProxy);
 
-    accessibilityStatusChange_ = new (std::nothrow) AccessibilityStatusChange(this);
-    CHKPF(accessibilityStatusChange_);
-    int32_t ret = samgrProxy->SubscribeSystemAbility(ACCESSIBILITY_MANAGER_SERVICE_ID, accessibilityStatusChange_);
+    sptr<SystemAbilityStatusChangeStub> accessibilityStatusChange = sptr<AccessibilityStatusChange>::MakeSptr();
+    int32_t ret = samgrProxy->SubscribeSystemAbility(ACCESSIBILITY_MANAGER_SERVICE_ID, accessibilityStatusChange);
     if (ret != RET_OK) {
-        FI_HILOGE("SubscribeSystemAbility accessibility error");
+        FI_HILOGE("SubscribeSystemAbility accessibility service faild");
+        return false;
     }
-    ret = samgrProxy->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, accessibilityStatusChange_);
+
+    sptr<SystemAbilityStatusChangeStub> windowStatusChange = sptr<AccessibilityStatusChange>::MakeSptr();
+    ret = samgrProxy->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, windowStatusChange);
     if (ret != RET_OK) {
-        FI_HILOGE("SubscribeSystemAbility window manager error");
+        FI_HILOGE("SubscribeSystemAbility window manager service faild");
+        return false;
     }
     FI_HILOGD("Init success");
     return true;
@@ -490,6 +503,52 @@ int32_t DeviceStatusManager::NotifyMetadata(const std::string &bundleName, sptr<
     }
     object->AddDeathRecipient(boomerangCBDeathRecipient_);
     notityListener_ = callback;
+    auto callbackIter = bundleNameCache_.find(callback);
+    if (callbackIter == bundleNameCache_.end()) {
+        bundleNameCache_.emplace(callback, bundleName);
+    }
+    return RET_OK;
+}
+
+int32_t DeviceStatusManager::GetBundleNameByCallback(std::string &bundleName)
+{
+    auto iter = bundleNameCache_.find(notityListener_);
+    if (iter != bundleNameCache_.end()) {
+        bundleName = iter->second;
+        bundleNameCache_.erase(iter);
+        return RET_OK;
+    }
+    return RET_ERR;
+}
+
+int32_t DeviceStatusManager::GetBundleNameByApplink(std::string &bundleName, const std::string &metadata)
+{
+    if (bundleManager_ == nullptr) {
+        sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        CHKPR(systemAbilityManager, E_DEVICESTATUS_GET_SYSTEM_ABILITY_MANAGER_FAILED);
+        sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        CHKPR(remoteObject, E_DEVICESTATUS_GET_SERVICE_FAILED);
+        bundleManager_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+        CHKPR(bundleManager_, RET_ERR);
+    }
+    OHOS::AAFwk::Want want;
+    want.SetUri(metadata);
+    std::vector<int32_t> ids;
+    ErrCode accountRet = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (accountRet != ERR_OK || ids.empty()) {
+        FI_HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", accountRet);
+        return RET_ERR;
+    }
+    int32_t userId = ids[0];
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetAbilityInfoFlag::GET_ABILITY_INFO_WITH_APP_LINKING);
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    bundleManager_->QueryAbilityInfosV9(want, flags, userId, abilityInfos);
+    if (abilityInfos.empty()) {
+        FI_HILOGE("Get abilityInfos fail.");
+        return RET_ERR;
+    }
+    bundleName = abilityInfos[0].bundleName;
     return RET_OK;
 }
 
@@ -498,7 +557,25 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
     CALL_DEBUG_ENTER;
     std::lock_guard lock(mutex_);
     CHKPR(notityListener_, RET_ERR);
-    notityListener_->OnNotifyMetadata(metadata);
+    std::string callbackBundleName;
+    std::string applinkBundleName;
+    auto callbackRet = GetBundleNameByCallback(callbackBundleName);
+    if (callbackRet != RET_OK) {
+        FI_HILOGE("Get callbackBundleName fail.");
+        return callbackRet;
+    }
+    auto applinkRet = GetBundleNameByApplink(applinkBundleName, metadata);
+    if (applinkRet != RET_OK) {
+        FI_HILOGE("Get applinkBundleName fail.");
+        return applinkRet;
+    }
+    if (callbackBundleName.compare(applinkBundleName) != 0) {
+        FI_HILOGE("BundleName Check fail.");
+        std::string emptyMetadata;
+        notityListener_->OnNotifyMetadata(emptyMetadata);
+    } else {
+        notityListener_->OnNotifyMetadata(metadata);
+    }
     return RET_OK;
 }
  
@@ -595,7 +672,7 @@ int32_t DeviceStatusManager::GetFocuseWindowId(int32_t &windowId, std::string &b
             continue;
         }
         if (winInfo->IsFocused()) {
-            windowId = winInfo->GetWindowId();
+            windowId = static_cast<int32_t>(winInfo->GetWindowId());
             bundleName =  winInfo->GetBundleName();
             FI_HILOGD("get focuse windowId, ret=%{public}d, bundleName:%{public}s",
                 winInfo->GetWindowId(), winInfo->GetBundleName().c_str());
@@ -605,42 +682,8 @@ int32_t DeviceStatusManager::GetFocuseWindowId(int32_t &windowId, std::string &b
     return RET_ERR;
 }
 
-void showImagesCallback(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> imagePairList)
+void DeviceStatusManager::HandlerPageScrollerEvent()
 {
-    std::unique_lock<std::mutex> lock(g_screenShotMutex);
-    int32_t maxArea = 0;
-    std::shared_ptr<Media::PixelMap> encodeImage;
-    for (size_t index = 0; index < imagePairList.size(); index++) {
-        if (index > IMAGE_PAIR_LIST_MAX_LENGTH) {
-            FI_HILOGE("showImagesCallback, imagePairList images cut: %{public}d to %{public}d",
-                static_cast<int32_t>(imagePairList.size()), IMAGE_PAIR_LIST_MAX_LENGTH);
-            break;
-        }
-        std::pair<int32_t, std::shared_ptr<Media::PixelMap>> imagePair = imagePairList[index];
-        if (imagePair.second == nullptr || imagePair.second->GetPixels() == nullptr) {
-            FI_HILOGE("showImagesCallback, empty pixelmap");
-            continue;
-        }
-        int32_t imageWidth = imagePair.second->GetWidth();
-        int32_t imageHeight = imagePair.second->GetHeight();
-        int32_t area = imageWidth * imageHeight;
-        if (area > maxArea) {
-            maxArea = area;
-            encodeImage = imagePair.second;
-        }
-    }
-    CHKPV(encodeImage);
-
-    std::string metadata;
-    auto algo = std::make_shared<BoomerangAlgoImpl>();
-    CHKPV(algo);
-    algo->DecodeImage(encodeImage, metadata);
-    FI_HILOGI("Boomerang Algo decode image result:%{public}s", metadata.c_str());
-}
-
-void DeviceStatusManager::handlerPageScrollerEnvent()
-{
-    std::lock_guard lock(mutex_);
     int32_t windowId;
     std::string bundleName;
     int32_t result = GetFocuseWindowId(windowId, bundleName);
@@ -649,41 +692,36 @@ void DeviceStatusManager::handlerPageScrollerEnvent()
         return;
     }
     CHKPV(g_deviceManager);
-    if (g_deviceManager->g_lastEnable || bundleName != BUNDLE_NAME) {
+    if (g_deviceManager->lastEnable || bundleName != BUNDLE_NAME) {
         FI_HILOGD("The current status bar is in display mode or does not belong to the whitelist application");
         return;
     }
-    sptr<IRemoteObject> tmpRemoteObj = nullptr;
-    auto ret = OHOS::Rosen::WindowManager::GetInstance().GetUIContentRemoteObj(windowId, tmpRemoteObj);
-    if (tmpRemoteObj == nullptr || static_cast<uint32_t>(ret) != RET_OK) {
-        FI_HILOGE("tempRemoteObj is null or get uicontent remote faild");
-        return;
-    }
-    sptr<Ace::IUiContentService> service = iface_cast<Ace::IUiContentService>(tmpRemoteObj);
-    CHKPV(service);
-    std::string connResult;
-    auto connectCallback = [&connResult](const std::string &data) -> void {
-        connResult = data;
-        FI_HILOGE("Connected before getCurrentImagesShowing %{public}s", connResult.c_str());
-    };
-    if (!service->IsConnect()) {
-        service->Connect(connectCallback);
-    }
-
-    int32_t getImagesShowingRes = service->GetCurrentImagesShowing(showImagesCallback);
-    if (getImagesShowingRes != RET_OK) {
-        FI_HILOGI("getCurrentImagesShowing result faild: %{public}d", getImagesShowingRes);
+    std::shared_ptr<Media::PixelMap> screenShot;
+    Rosen::WMError ret = WindowManager::GetInstance().GetSnapshotByWindowId(windowId, screenShot);
+    if (ret == Rosen::WMError::WM_OK) {
+        OnSurfaceCapture(windowId, screenShot);
     }
 }
 
-void DeviceStatusManager::OnSurfaceCapture(std::shared_ptr<Media::PixelMap> screenShot)
+void DeviceStatusManager::OnSurfaceCapture(int32_t windowId, std::shared_ptr<Media::PixelMap> &screenShot)
 {
     auto algo = std::make_shared<BoomerangAlgoImpl>();
     CHKPV(algo);
     std::string metadata;
     algo->DecodeImage(screenShot, metadata);
-    if (metadata.empty()) {
+    std::lock_guard lock(countMutex_);
+    if (!metadata.empty()) {
+        FI_HILOGI("Boomerang Algo decode image result:%{public}s", metadata.c_str());
+        retryCount = 0;
         return;
+    }
+    if (retryCount < 1) {
+        retryCount++;
+        Rosen::WMError ret = WindowManager::GetInstance().GetSnapshotByWindowId(windowId, screenShot);
+        if (ret == Rosen::WMError::WM_OK) {
+            OnSurfaceCapture(windowId, screenShot);
+        }
+        retryCount = 0;
     }
 }
 } // namespace DeviceStatus

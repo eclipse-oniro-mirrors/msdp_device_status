@@ -20,10 +20,6 @@
 #include <regex>
 #include <thread>
 
-#include "accessibility_system_ability_client.h"
-#include "accessibility_ui_test_ability.h"
-#include "accessible_ability_listener.h"
-
 #include "devicestatus_define.h"
 #include "fi_log.h"
 
@@ -33,48 +29,32 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace {
-    constexpr int32_t THREAD_SLEEP_TIME = 3000;
-}
-
-class AccessibleAbilityListenerImpl : public Accessibility::AccessibleAbilityListener {
-public:
-    explicit AccessibleAbilityListenerImpl(AccessibilityCallback callback)
-    {
-        callback_ = callback;
-    }
-    ~AccessibleAbilityListenerImpl() = default;
-
-    void OnAbilityConnected() override;
-    void OnAbilityDisconnected() override;
-    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo &eventInfo) override;
-    bool OnKeyPressEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent) override;
-
-private:
-    AccessibilityCallback callback_;
-};
-
-void AccessibleAbilityListenerImpl::OnAbilityConnected()
+void AccessibilityManager::AccessibleAbilityListenerImpl::OnAbilityConnected()
 {
-    FI_HILOGE("Accessibility is connected");
+    std::lock_guard<std::mutex> guard(mutex_);
+    FI_HILOGI("Accessibility is OnAbilityConnected");
+    isConnected = true;
     CHKPV(callback_);
     callback_(ON_ABILITY_CONNECTED);
 }
 
-void AccessibleAbilityListenerImpl::OnAbilityDisconnected()
+void AccessibilityManager::AccessibleAbilityListenerImpl::OnAbilityDisconnected()
 {
-    auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Disconnect();
-    if (ret != 0) {
-        FI_HILOGE("AccessibilityManager Disconnect faild");
-        return;
-    }
+    std::lock_guard<std::mutex> guard(mutex_);
+    FI_HILOGI("Accessibility is OnAbilityDisconnected");
+    CHKPV(manager_);
+    isConnected = false;
     CHKPV(callback_);
     callback_(ON_ABILITY_DISCONNECTED);
+    callback_ = nullptr;
+    manager_ = nullptr;
 }
 
-void AccessibleAbilityListenerImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo &eventInfo)
+void AccessibilityManager::AccessibleAbilityListenerImpl::OnAccessibilityEvent
+    (const Accessibility::AccessibilityEventInfo &eventInfo)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mutex_);
     CHKPV(callback_);
     if (eventInfo.GetEventType() == Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT) {
         FI_HILOGD("trigger view scrolled");
@@ -82,7 +62,8 @@ void AccessibleAbilityListenerImpl::OnAccessibilityEvent(const Accessibility::Ac
     }
 }
 
-bool AccessibleAbilityListenerImpl::OnKeyPressEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent)
+bool AccessibilityManager::AccessibleAbilityListenerImpl::OnKeyPressEvent
+    (const std::shared_ptr<MMI::KeyEvent> &keyEvent)
 {
     return true;
 }
@@ -93,73 +74,34 @@ AccessibilityManager::~AccessibilityManager() = default;
 
 void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
 {
+    std::lock_guard<std::mutex> guard(mutex_);
     CALL_DEBUG_ENTER;
-    std::shared_ptr<Accessibility::AccessibleAbilityListener> listener =
-        std::make_shared<AccessibleAbilityListenerImpl>(callback);
+    CHKPV(callback);
+    AccessibilityManager* manager = new (std::nothrow) AccessibilityManager();
+    auto listener = std::make_shared<AccessibleAbilityListenerImpl>(callback, manager);
+    CHKPV(listener);
     auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->RegisterAbilityListener(listener);
     if (ret != 0) {
         FI_HILOGE("Accessibility register ablity listener failed");
+        delete manager;
         return;
     }
     ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Connect();
     if (ret != 0) {
         FI_HILOGE("Accessibility Connect failed");
+        delete manager;
         return;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_SLEEP_TIME));
 }
 
 void AccessibilityManager::AccessibilityDisconnect()
 {
-    Accessibility::AccessibilityUITestAbility::GetInstance()->Disconnect();
-}
-
-int32_t AccessibilityManager::FindElementInfo(const int32_t windowId, DragElementInfo &info)
-{
-    CALL_DEBUG_ENTER;
-    Accessibility::AccessibilityWindowInfo windowInfo;
-    int32_t ret = Accessibility::AccessibilityUITestAbility::GetInstance()->GetWindow(windowId, windowInfo);
-    if (ret != RET_OK) {
-        FI_HILOGE("Accessibility::GetWindow failed,ret:%{public}d,windowId is:%{public}d", ret, windowId);
-        return RET_ERR;
+    std::lock_guard<std::mutex> guard(mutex_);
+    auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Disconnect();
+    if (ret != 0) {
+        FI_HILOGE("Accessibility disConnect failed");
+        return;
     }
-    std::vector<Accessibility::AccessibilityElementInfo> elementInfos;
-    ret = Accessibility::AccessibilityUITestAbility::GetInstance()->GetRootBatch(elementInfos);
-    if (ret != RET_OK || elementInfos.empty()) {
-        FI_HILOGE("GetRootByWindowBatch failed, ret:%{public}d, windowId is:%{public}d", ret, windowId);
-        return RET_ERR;
-    }
-
-    size_t elementInfosSize = elementInfos.size();
-    double maxArea = 0.0;
-    Accessibility::AccessibilityElementInfo imageElementInfo;
-    for (size_t i = 0; i < elementInfosSize; ++i) {
-        std::string componentType = elementInfos[i].GetComponentType();
-        if (componentType != "RenderNode" && componentType != "Image") {
-            continue;
-        }
-        Accessibility::Rect screenRect = elementInfos[i].GetRectInScreen();
-        int32_t leftTopX = screenRect.GetLeftTopXScreenPostion();
-        int32_t leftTopY = screenRect.GetLeftTopYScreenPostion();
-        int32_t rightBottomX = screenRect.GetRightBottomXScreenPostion();
-        int32_t rightBottomY = screenRect.GetRightBottomYScreenPostion();
-        double area = (rightBottomX - leftTopX) * (rightBottomY - leftTopY);
-        if (area > maxArea) {
-            FI_HILOGI("componentType:%{public}s, leftTopX:%{public}d, leftTopY:%{public}d",
-                componentType.c_str(), leftTopX, leftTopY);
-            maxArea = area;
-            imageElementInfo = elementInfos[i];
-        }
-    }
-
-    if (std::abs(maxArea) < std::numeric_limits<double>::epsilon()) {
-        return RET_ERR;
-    }
-    info.componentType = imageElementInfo.GetComponentType();
-    info.leftTopX = imageElementInfo.GetRectInScreen().GetLeftTopXScreenPostion();
-    info.leftTopY = imageElementInfo.GetRectInScreen().GetLeftTopYScreenPostion();
-    FI_HILOGD("find elementInfo success");
-    return RET_OK;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

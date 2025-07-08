@@ -45,7 +45,6 @@ ohos_source_set("intention_stationary_server") {
 
   sources = [
     "${device_status_root_path}/services/boomerang/src/accessibility_manager.cpp",
-    "${device_status_root_path}/services/boomerang/src/boomerang_surfacecapture_callback.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_dumper.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_hisysevent.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_manager.cpp",
@@ -67,15 +66,18 @@ ohos_source_set("intention_stationary_server") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "accessibility:accessibility_common",
     "accessibility:accessibleability",
     "accessibility:accessibilityclient",
     "access_token:libaccesstoken_sdk",
     "ace_engine:ui_session",
+    "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
+    "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
