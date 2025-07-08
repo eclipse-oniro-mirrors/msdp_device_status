@@ -34,7 +34,7 @@ using CooperateMsgInfoCallback = std::function<void(const std::string&, const Co
 std::shared_ptr<InteractionManager> InteractionManager::instance_ = nullptr;
 std::mutex InteractionManager::mutex_;
 
-InteractionManager *InteractionManager::GetInstance()
+std::shared_ptr<InteractionManager> InteractionManager::GetInstance()
 {
     if (instance_ == nullptr) {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -42,7 +42,7 @@ InteractionManager *InteractionManager::GetInstance()
             instance_ = std::make_shared<InteractionManager>();
         }
     }
-    return instance_.get();
+    return instance_;
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X

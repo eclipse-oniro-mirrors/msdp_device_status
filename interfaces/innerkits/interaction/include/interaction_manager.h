@@ -46,7 +46,7 @@ public:
 
     InteractionManager() = default;
     virtual ~InteractionManager() = default;
-    static InteractionManager *GetInstance();
+    static std::shared_ptr<InteractionManager> GetInstance();
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     /**
