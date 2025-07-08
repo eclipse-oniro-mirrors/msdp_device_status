@@ -67,15 +67,14 @@ void FuzzIntentionClientCooperate(const uint8_t *rawData, size_t size)
     std::string str(reinterpret_cast<const char *>(rawData), size);
     bool boolean = static_cast<bool>(*rawData);
     double doubleNum = static_cast<double>(*rawData);
-
+    CooperateOptions options {
+            .displayX = 500,
+            .displayY = 500,
+            .displayId = 1
+    };
     INTENTION_CLIENT->EnableCooperate(integer);
     INTENTION_CLIENT->DisableCooperate(integer);
     INTENTION_CLIENT->StartCooperate(str, integer, integer, boolean);
-    CooperateOptions options {
-        .displayX = integer,
-        .displayY = integer,
-        .displayId = integer
-    };
     INTENTION_CLIENT->StartCooperateWithOptions(str, integer, integer, boolean, options);
     INTENTION_CLIENT->StopCooperate(integer, boolean, boolean);
     INTENTION_CLIENT->RegisterCooperateListener();

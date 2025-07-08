@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,8 +25,8 @@ deps_ex = [
   "common_event_service:cesfwk_innerkits",
   "data_share:datashare_consumer",
   "graphic_2d:libcomposer",
-  "graphic_2d:window_animation",
   "graphic_2d:librender_service_client",
+  "graphic_2d:window_animation",
   "hisysevent:libhisysevent",
   "hitrace:hitrace_meter",
   "hilog:libhilog",
@@ -40,10 +40,9 @@ deps_ex = [
 ]
 
 ###############################fuzztest#################################
-ohos_fuzztest("HandleAllocSocketFdFuzzTest") {
+ohos_fuzztest("SequenceableFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file =
-      "${device_status_root_path}/test/fuzztest/handleallocsocketfd_fuzzer"
+  fuzz_config_file = "${device_status_root_path}/test/fuzztest/sequenceable_fuzzer"
   include_dirs = [
     "${device_status_root_path}/libs/interface",
     "${device_status_service_path}/interaction/drag/include",
@@ -56,13 +55,14 @@ ohos_fuzztest("HandleAllocSocketFdFuzzTest") {
     "-O0",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "handleallocsocketfd_fuzzer.cpp" ]
+
+  sources = [ "sequenceable_fuzzer.cpp" ]
 
   deps = [
-    "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
-    "${device_status_root_path}/intention/cooperate/plugin:intention_cooperate",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/intention/ipc/sequenceable_types:sequenceable_types",
     "${device_status_root_path}/intention/ipc/tunnel:intention_client",
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",
@@ -74,5 +74,5 @@ ohos_fuzztest("HandleAllocSocketFdFuzzTest") {
 group("fuzztest") {
   testonly = true
   deps = []
-  deps += [ ":HandleAllocSocketFdFuzzTest" ]
+  deps += [ ":SequenceableFuzzTest" ]
 }

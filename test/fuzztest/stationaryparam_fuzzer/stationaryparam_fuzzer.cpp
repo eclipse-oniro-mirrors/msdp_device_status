@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "devicestatusstreambuffer_fuzzer.h"
+#include "stationaryparam_fuzzer.h"
 
 #include "singleton.h"
 
 #define private public
-#include "devicestatus_stream_buffer.h"
+#include "stationary_params.h"
 #include "fi_log.h"
 #include "message_parcel.h"
 
 #undef LOG_TAG
-#define LOG_TAG "DeviceStatusStreamFuzzTest"
+#define LOG_TAG "StationaryParamFuzzTest"
 
 namespace OHOS {
 namespace Msdp {
@@ -31,7 +31,7 @@ namespace DeviceStatus {
 namespace OHOS {
 const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
 
-bool DeviceStatusStreamFuzzTest(const uint8_t* data, size_t size)
+bool StationaryParamFuzzTest(const uint8_t* data, size_t size)
 {
     MessageParcel datas;
     if (!datas.WriteInterfaceToken(FORMMGR_DEVICE_TOKEN) ||
@@ -39,23 +39,22 @@ bool DeviceStatusStreamFuzzTest(const uint8_t* data, size_t size)
         FI_HILOGE("Write failed");
         return false;
     }
-    StreamBuffer streamBuffer;
-    int32_t n = 0;
-    streamBuffer.SeekReadPos(n);
-    const char *buf = streamBuffer.ReadBuf();
-    char *buf1 = nullptr;
-    streamBuffer.Write(buf, size);
-    streamBuffer.Read(buf1, size);
-    streamBuffer.Write(buf);
-    streamBuffer.Read(buf);
-    streamBuffer.Write(buf1);
-    streamBuffer.Read(buf1);
-    streamBuffer.GetErrorStatusRemark();
-    streamBuffer.Reset();
-    streamBuffer.Clean();
+    Type type = TYPE_ABSOLUTE_STILL;
+    ActivityEvent event = ENTER;
+    ReportLatencyNs latency = SHORT;
+    sptr<IRemoteDevStaCallback> callback = nullptr;
+    SubscribeStationaryParam Param = { type, event, latency, callback };
+    MessageParcel parcel;
+    Param.Marshalling(parcel);
+    Param.Unmarshalling(parcel);
+    GetStaionaryDataParam param1;
+    param1.Marshalling(parcel);
+    param1.Unmarshalling(parcel);
+    GetStaionaryDataReply param2;
+    bool ret = param2.Marshalling(parcel);
+    ret = param2.Unmarshalling(parcel);
     return true;
 }
-
 } // namespace OHOS
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
@@ -64,7 +63,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (data == nullptr) {
         return 0;
     }
-    OHOS::DeviceStatusStreamFuzzTest(data, size);
+    OHOS::StationaryParamFuzzTest(data, size);
     return 0;
 }
 } // namespace DeviceStatus
