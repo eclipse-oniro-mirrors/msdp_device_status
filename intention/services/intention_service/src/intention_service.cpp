@@ -384,9 +384,10 @@ ErrCode IntentionService::SetAppDragSwitchState(bool enable, const std::string &
 
 ErrCode IntentionService::GetDragState(int32_t& dragState)
 {
-    return PostSyncTask([this, &dragState] {
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &dragState] {
         DragState state = static_cast<DragState>(dragState);
-        auto ret = drag_.GetDragState(state);
+        auto ret = drag_.GetDragState(context, state);
         dragState = static_cast<int32_t>(state);
         return ret;
     });
@@ -469,6 +470,13 @@ ErrCode IntentionService::GetDragBundleInfo(std::string &bundleName, bool &state
         bundleName = dragBundleInfo.bundleName;
         state = dragBundleInfo.isCrossDevice;
         return RET_OK;
+    });
+}
+
+ErrCode IntentionService::IsDragStart(bool &isStart)
+{
+    return PostSyncTask([this, &isStart] {
+        return drag_.IsDragStart(isStart);
     });
 }
 
@@ -566,6 +574,29 @@ ErrCode IntentionService::GetDevicePostureDataSync(SequenceablePostureData &data
         }
         data.SetPostureData(rawPostureData);
         return RET_OK;
+    });
+}
+
+ErrCode IntentionService::GetPageContent(const OnScreen::SequenceableContentOption &contentOption,
+    OnScreen::SequenceablePageContent &pageContent)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &contentOption, &pageContent] {
+        OnScreen::PageContent rawPageContent;
+        int32_t ret = onScreen_.GetPageContent(context, contentOption.option_, rawPageContent);
+        if (ret != RET_OK) {
+            return ret;
+        }
+        pageContent.pageContent_ = rawPageContent;
+        return RET_OK;
+    });
+}
+
+ErrCode IntentionService::SendControlEvent(const OnScreen::SequenceableControlEvent &event)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &event] {
+        return onScreen_.SendControlEvent(context, event.controlEvent_);
     });
 }
 } // namespace DeviceStatus

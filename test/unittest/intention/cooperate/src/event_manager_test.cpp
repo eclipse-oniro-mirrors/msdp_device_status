@@ -377,6 +377,64 @@ HWTEST_F(EventManagerTest, EventManagerTest005, TestSize.Level1)
     };
     ASSERT_NO_FATAL_FAILURE(g_context->eventMgr_.RemoteStartWithOptionsFinish(result));
 }
+
+/**
+ * @tc.name: EventManagerTest6
+ * @tc.desc: cooperate plugin
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(EventManagerTest, EventManagerTest006, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    RegisterListenerEvent registerListenerEvent{IPCSkeleton::GetCallingPid(), 1};
+    g_context->eventMgr_.RegisterListener(registerListenerEvent);
+    g_context->eventMgr_.RegisterListener(registerListenerEvent);
+
+    EnableCooperateEvent enableCooperateEvent{1, 1, 1};
+    g_context->eventMgr_.EnableCooperate(enableCooperateEvent);
+    g_context->eventMgr_.DisableCooperate(registerListenerEvent);
+
+    StartCooperateEvent event {
+        .pid = IPCSkeleton::GetCallingPid(),
+        .userData = 1,
+        .remoteNetworkId = "test",
+        .startDeviceId = 1,
+        .errCode = std::make_shared<std::promise<int32_t>>(),
+        .uid = 20020135,
+    };
+    g_context->eventMgr_.StartCooperate(event);
+    DSoftbusStartCooperate startEvent {
+        .networkId = "test",
+        .success = true,
+    };
+    g_context->eventMgr_.StartCooperateFinish(startEvent);
+    g_context->eventMgr_.RemoteStart(startEvent);
+    g_context->eventMgr_.RemoteStartFinish(startEvent);
+    StopCooperateEvent stopEvent {
+        .pid = IPCSkeleton::GetCallingPid(),
+        .userData = 1,
+        .isUnchained = true,
+    };
+    g_context->eventMgr_.OnUnchain(stopEvent);
+    g_context->eventMgr_.StopCooperate(stopEvent);
+
+    DDMBoardOnlineEvent dDMBoardOnlineEvent {
+        .networkId = "test",
+        .normal = true,
+    };
+    g_context->eventMgr_.StopCooperateFinish(dDMBoardOnlineEvent);
+    g_context->eventMgr_.RemoteStopFinish(dDMBoardOnlineEvent);
+    g_context->eventMgr_.OnProfileChanged(dDMBoardOnlineEvent);
+    g_context->eventMgr_.OnSoftbusSessionClosed(dDMBoardOnlineEvent);
+    NotifyCooperate();
+    g_context->eventMgr_.OnSoftbusSessionClosed(dDMBoardOnlineEvent);
+    g_context->eventMgr_.RemoteStop(dDMBoardOnlineEvent);
+    g_context->eventMgr_.UnregisterListener(registerListenerEvent);
+    NetPacket packet1(MessageId::INVALID);
+    bool ret = g_context->dsoftbus_.OnPacket("test", packet1);
+    EXPECT_FALSE(ret);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

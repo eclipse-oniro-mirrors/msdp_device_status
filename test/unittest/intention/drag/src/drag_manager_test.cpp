@@ -30,6 +30,9 @@ namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+constexpr int32_t TIME_WAIT_FOR_INTERNAL_DROP_ANIMATION { 500 };
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
 constexpr int32_t PIXEL_MAP_HEIGHT { 3 };
@@ -996,9 +999,10 @@ HWTEST_F(DragManagerTest, DragManagerTest26, TestSize.Level0)
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
-    summarys.clear();
-    ret = InteractionManager::GetInstance()->GetDragSummary(summarys);
+    std::map<std::string, int64_t> summarysRlt;
+    ret = InteractionManager::GetInstance()->GetDragSummary(summarysRlt);
     ASSERT_EQ(ret, RET_OK);
+    EXPECT_EQ(summarysRlt, summarys);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     DragDropResult dropResult { DragResult::DRAG_SUCCESS,
         HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
@@ -1603,7 +1607,7 @@ HWTEST_F(DragManagerTest, DragManagerTest79, TestSize.Level0)
     DRAG_DATA_MGR.Init(dragData);
     g_dragMgr.enableInternalDropAnimation_ = true;
     int32_t ret = g_dragMgr.HandleDragSuccess(hasCustomAnimation);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
     g_dragMgr.enableInternalDropAnimation_ = false;
 }
 
@@ -1643,7 +1647,7 @@ HWTEST_F(DragManagerTest, DragManagerTest81, TestSize.Level0)
     DRAG_DATA_MGR.Init(dragData);
     g_dragMgr.enableInternalDropAnimation_ = true;
     int32_t ret = g_dragMgr.HandleDragResult(result, hasCustomAnimation);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
     g_dragMgr.enableInternalDropAnimation_ = false;
 }
 
@@ -1694,6 +1698,80 @@ HWTEST_F(DragManagerTest, DragManagerTest84, TestSize.Level0)
     g_dragMgr.enableInternalDropAnimation_ = false;
     int32_t ret = g_dragMgr.HandleDragResult(result, hasCustomAnimation);
     EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: DragManagerTest85
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest85, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.InitCanvas(100, 100);
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.dragDrawing_.RemoveStyleNodeAnimations());
+}
+
+/**
+ * @tc.name: DragManagerTest86
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest86, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.InitCanvas(100, 100);
+    g_dragMgr.dragDrawing_.drawStyleScaleModifier_ = std::make_shared<DrawStyleScaleModifier>();
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.dragDrawing_.RemoveStyleNodeAnimations());
+}
+
+/**
+ * @tc.name: DragManagerTest87
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest87, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.InitCanvas(100, 100);
+    g_dragMgr.dragDrawing_.drawStyleScaleModifier_ = std::make_shared<DrawStyleScaleModifier>();
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.dragDrawing_.RemoveStyleNodeAnimations());
+}
+
+/**
+ * @tc.name: DragManagerTest88
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest88, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    std::string animationInfo = "{\"targetPos\": [200, 1000]}";
+    ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
+    EXPECT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        !HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    InteractionManager::GetInstance()->StopDrag(dropResult);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_INTERNAL_DROP_ANIMATION));
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus

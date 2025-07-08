@@ -76,6 +76,7 @@ public:
     virtual bool GetControlCollaborationVisible() const = 0;
     virtual void SetControlCollaborationVisible(bool visible) = 0;
     virtual int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const = 0;
+    virtual bool IsDragStart() const = 0;
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
     virtual int32_t EnableInternalDropAnimation(const std::string &animationInfo) = 0;
     virtual void GetDragDrawingInfo(DragInternalInfo &dragInternalInfo) = 0;

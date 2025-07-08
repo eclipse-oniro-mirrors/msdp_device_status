@@ -1869,7 +1869,7 @@ int32_t DragManager::HandleDragSuccess(bool hasCustomAnimation)
     if (!hasCustomAnimation) {
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
         DragData dragData = DRAG_DATA_MGR.GetDragData();
-        if (enableInternalDropAnimation_ && (dragData.dragNum == 1)) {
+        if (enableInternalDropAnimation_) {
             FI_HILOGI("Run internal drp animation");
             int32_t ret = PerformInternalDropAnimation();
             if (ret != RET_OK) {
@@ -1902,7 +1902,7 @@ int32_t DragManager::HandleDragResult(DragResult result, bool hasCustomAnimation
             int32_t ret = HandleDragSuccess(hasCustomAnimation);
             if (ret != RET_OK) {
                 FI_HILOGE("HandleDragSuccess failed");
-                return RET_ERR;
+                return ret;
             }
             break;
         }
@@ -2282,6 +2282,18 @@ int32_t DragManager::GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const
     return RET_OK;
 }
 
+bool DragManager::IsDragStart() const
+{
+    FI_HILOGD("enter");
+    if (dragState_ == DragState::START) {
+        FI_HILOGD("the drag state is DragState::START");
+        return true;
+    }
+
+    FI_HILOGD("the drag state is not DragState::START, it is %{public}d", static_cast<int32_t>(dragState_));
+    return false;
+}
+
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
 int32_t DragManager::EnableInternalDropAnimation(const std::string &animationInfo)
 {
@@ -2320,6 +2332,8 @@ void DragManager::ResetAnimationParameter()
 {
     FI_HILOGI("enter");
     dragDrawing_.ResetAnimationParameter();
+    dragDrawing_.StopVSyncStation();
+    dragDrawing_.RemoveStyleNodeAnimations();
     FI_HILOGI("leave");
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION

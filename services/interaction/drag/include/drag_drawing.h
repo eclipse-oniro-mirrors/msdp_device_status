@@ -339,6 +339,7 @@ public:
 #endif // OHOS_ENABLE_PULLTHROW
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
     void GetDragDrawingInfo(DragInternalInfo &dragInternalInfo);
+    void RemoveStyleNodeAnimations();
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 private:
@@ -441,6 +442,7 @@ private:
 private:
     bool needMultiSelectedAnimation_ { true };
     int32_t displayWidth_ { -1 };
+    int32_t displayHeight_ { -1 };
     int64_t interruptNum_ { -1 };
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ { nullptr };
     std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };

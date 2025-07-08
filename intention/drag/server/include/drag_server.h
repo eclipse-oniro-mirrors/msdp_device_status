@@ -56,7 +56,7 @@ public:
     int32_t GetDragSummary(CallingContext &context, std::map<std::string, int64_t> &summarys, bool isJsCaller);
     int32_t SetDragSwitchState(CallingContext &context, bool enable, bool isJsCaller);
     int32_t SetAppDragSwitchState(CallingContext &context, bool enable, const std::string &pkgName, bool isJsCaller);
-    int32_t GetDragState(DragState &dragState);
+    int32_t GetDragState(CallingContext &context, DragState &dragState);
     int32_t EnableUpperCenterMode(bool enable);
     int32_t GetDragAction(DragAction &dragAction);
     int32_t GetExtraInfo(std::string &extraInfo);
@@ -67,6 +67,7 @@ public:
     int32_t GetAppDragSwitchState(bool &state);
     int32_t SetDraggableStateAsync(bool state, int64_t downTime);
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
+    int32_t IsDragStart(bool &isStart);
 
 private:
     std::string GetPackageName(Security::AccessToken::AccessTokenID tokenId);

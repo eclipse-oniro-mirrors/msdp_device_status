@@ -324,7 +324,13 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
     StartCooperateEvent startEvent = std::get<StartCooperateEvent>(event.event);
-    if (!env_->GetDDM().CheckSameAccountToLocal(startEvent.remoteNetworkId, startEvent.uid)) {
+    bool checkSameAccount = false;
+    if (startEvent.uid > 0) {
+        checkSameAccount = env_->GetDDM().CheckSameAccountToLocalWithUid(startEvent.remoteNetworkId, startEvent.uid);
+    } else {
+        checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.remoteNetworkId);
+    }
+    if (!checkSameAccount) {
         FI_HILOGE("CheckSameAccountToLocal failed");
         startEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
         CooperateRadarInfo radarInfo {
@@ -576,6 +582,7 @@ void StateMachine::OnSoftbusMouseLocation(Context &context, const CooperateEvent
 void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
 {
     CALL_DEBUG_ENTER;
+    CHKPV(env_);
     DSoftbusStartCooperate startEvent = std::get<DSoftbusStartCooperate>(event.event);
     CooperateRadarInfo radarInfo {
         .funcName =  __FUNCTION__,
@@ -585,21 +592,20 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
         .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
         .peerNetId = Utility::DFXRadarAnonymize(startEvent.originNetworkId.c_str())
     };
-    bool checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId, startEvent.uid);
-    bool cooperateEnable = isCooperateEnable_;
+    bool checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId);
     if (!checkSameAccount) {
         radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT);
         radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
         radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CHECK_SAME_ACCOUNT_FAILED);
         CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     }
-    if (!cooperateEnable) {
+    if (!isCooperateEnable_) {
         radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CHECK_PEER_SWITCH);
         radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
         radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::CHECK_PEER_SWITCH_FAILED);
         CooperateRadar::ReportCooperateRadarInfo(radarInfo);
     }
-    if (!checkSameAccount || !cooperateEnable) {
+    if (!checkSameAccount || !isCooperateEnable_) {
         FI_HILOGE("CheckSameAccountToLocal failed, switch is : %{public}d, unchain", isCooperateEnable_);
         CooperateEvent stopEvent(
             CooperateEventType::STOP,

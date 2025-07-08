@@ -72,7 +72,8 @@ void DeviceStatusClientFuzzer::TestGetDevicestatusData(Type type)
 {
     std::cout << "TestGetDevicestatusData: Enter" << std::endl;
     stationaryMgr->GetDeviceStatusData(type);
-
+    DeviceStatus::DevicePostureData postureData;
+    stationaryMgr->GetDevicePostureDataSync(postureData);
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_TIME));
     TestUnSubscribeCallback(type);
 }

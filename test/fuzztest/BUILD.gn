@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,8 +20,10 @@ group("device_status_fuzztest") {
   deps += [
     "adddraglistener_fuzzer:fuzztest",
     "addhotarealistener_fuzzer:fuzztest",
+    "addhotarealistenerstub_fuzzer:fuzztest",
     "addprivilegestub_fuzzer:fuzztest",
     "addsubscriptlistener_fuzzer:fuzztest",
+    "addsubscriptlistenerstub_fuzzer:fuzztest",
     "devicegetcachestub_fuzzer:fuzztest",
     "devicestatusagent_fuzzer:fuzztest",
     "devicestatusclient_fuzzer:fuzztest",
@@ -42,11 +44,15 @@ group("device_status_fuzztest") {
     "msdpdevicemanager_fuzzer:fuzztest",
     "removedraglistener_fuzzer:fuzztest",
     "removehotarealistener_fuzzer:fuzztest",
+    "removehotarealistenerstub_fuzzer:fuzztest",
     "removesubscriptlistener_fuzzer:fuzztest",
+    "removesubscriptlistenerstub_fuzzer:fuzztest",
     "setdragwindowvisible_fuzzer:fuzztest",
     "startdrag_fuzzer:fuzztest",
     "stopdrag_fuzzer:fuzztest",
+    "subscribe_fuzzer:fuzztest",
     "unregistercoordinationlistener_fuzzer:fuzztest",
+    "unsubscribe_fuzzer:fuzztest",
     "updatedragstyle_fuzzer:fuzztest",
     "updatepreviewstyle_fuzzer:fuzztest",
     "updatepreviewstylewithanimationstub_fuzzer:fuzztest",

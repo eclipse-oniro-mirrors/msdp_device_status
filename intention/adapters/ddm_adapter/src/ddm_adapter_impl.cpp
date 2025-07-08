@@ -124,7 +124,39 @@ int32_t DDMAdapterImpl::GetTrustedDeviceList(std::vector<DistributedHardware::Dm
     return RET_OK;
 }
 
-bool DDMAdapterImpl::CheckSameAccountToLocal(const std::string &networkId, const int32_t uid)
+bool DDMAdapterImpl::CheckSameAccountToLocal(const std::string &networkId)
+{
+    CALL_INFO_TRACE;
+    std::vector<int32_t> ids;
+    ErrCode ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        FI_HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+        return false;
+    }
+    OHOS::AccountSA::OhosAccountInfo osAccountInfo;
+    ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(osAccountInfo);
+    if (ret != 0 || osAccountInfo.uid_ == "") {
+        FI_HILOGE("Get accountId from Ohos account info fail, ret: %{public}d.", ret);
+        return false;
+    }
+    DistributedHardware::DmAccessCaller Caller = {
+        .accountId = osAccountInfo.uid_,
+        .networkId = IDSoftbusAdapter::GetLocalNetworkId(),
+        .userId = ids[0],
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+    };
+    DistributedHardware::DmAccessCallee Callee = {
+        .networkId = networkId,
+        .peerId = "",
+    };
+    if (D_DEV_MGR.CheckIsSameAccount(Caller, Callee)) {
+            return true;
+        }
+    FI_HILOGI("check same account fail, will try check access Group by hichain");
+    return false;
+}
+
+bool DDMAdapterImpl::CheckSameAccountToLocalWithUid(const std::string &networkId, const int32_t uid)
 {
     CALL_INFO_TRACE;
     int32_t appUserId = -1;
@@ -157,39 +189,7 @@ bool DDMAdapterImpl::CheckSameAccountToLocal(const std::string &networkId, const
         FI_HILOGI("app userId is not Foreground");
         return false;
     }
-    return CheckIsSameAccount(networkId);
-}
-
-bool DDMAdapterImpl::CheckIsSameAccount(const std::string &networkId)
-{
-    CALL_INFO_TRACE;
-    std::vector<int32_t> ids;
-    ErrCode ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    if (ret != ERR_OK || ids.empty()) {
-        FI_HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
-        return false;
-    }
-    OHOS::AccountSA::OhosAccountInfo osAccountInfo;
-    ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(osAccountInfo);
-    if (ret != 0 || osAccountInfo.uid_ == "") {
-        FI_HILOGE("Get accountId from Ohos account info fail, ret: %{public}d.", ret);
-        return false;
-    }
-    DistributedHardware::DmAccessCaller Caller = {
-        .accountId = osAccountInfo.uid_,
-        .networkId = IDSoftbusAdapter::GetLocalNetworkId(),
-        .userId = ids[0],
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-    };
-    DistributedHardware::DmAccessCallee Callee = {
-        .networkId = networkId,
-        .peerId = "",
-    };
-    if (D_DEV_MGR.CheckIsSameAccount(Caller, Callee)) {
-            return true;
-        }
-    FI_HILOGI("check same account fail, will try check access Group by hichain");
-    return false;
+    return CheckSameAccountToLocal(networkId);
 }
 
 void DDMAdapterImpl::OnBoardOnline(const std::string &networkId)

@@ -14,9 +14,12 @@
  */
 
 #include <gtest/gtest.h>
+#include <vector>
 
 #include "devicestatus_callback_stub.h"
 #include "devicestatus_define.h"
+#include "on_screen_data.h"
+#include "on_screen_manager.h"
 #include "stationary_manager.h"
 
 #include "accesstoken_kit.h"
@@ -186,6 +189,41 @@ HWTEST_F(DeviceStatusClientTest, GetDevicePostureDataSyncTest001, TestSize.Level
     EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
     EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
         data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
+}
+
+/**
+ * @tc.name: GetPageContent001
+ * @tc.desc: test GetPageContent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusClientTest, GetPageContent001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::ContentOption option;
+    option.contentUnderstand = true;
+    option.pageLink = true;
+    option.textOnly = true;
+    option.longTextSplit = true;
+    OnScreen::PageContent pageContent;
+    int32_t ret = OnScreen::OnScreenManager::GetInstance().GetPageContent(option, pageContent);
+    std::cout << pageContent.windowId << ", " << pageContent.bundleName << ", "
+        << pageContent.title << ", " << pageContent.content << ", "
+        << pageContent.paragraphs.size() << ", " << ret << std::endl;
+    EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
+}
+
+/**
+ * @tc.name: GetPageContent001
+ * @tc.desc: test GetPageContent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusClientTest, SendControlEvent, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::ControlEvent event;
+    event.eventType = OnScreen::EventType::END;
+    int32_t ret = OnScreen::OnScreenManager::GetInstance().SendControlEvent(event);
+    EXPECT_TRUE(ret != RET_OK);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

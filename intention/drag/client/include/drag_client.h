@@ -75,6 +75,7 @@ public:
     int32_t EnableInternalDropAnimation(const std::string &animationInfo);
     void OnConnected();
     void OnDisconnected();
+    bool IsDragStart();
 
 private:
     mutable std::mutex mtx_;

@@ -27,7 +27,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-const std::string DRAG_INTERNAL_ANIMATION_SO_PATH = "system/lib64/libdrag_internal_animation.z.so";
+const std::string DRAG_INTERNAL_ANIMATION_SO_PATH = "/system/lib64/libdrag_internal_animation.z.so";
 }
 
 DragInternalAnimationWrapper::~DragInternalAnimationWrapper()

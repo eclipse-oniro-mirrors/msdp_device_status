@@ -612,6 +612,24 @@ int32_t IntentionManager::EnableInternalDropAnimation(const std::string &animati
     CALL_DEBUG_ENTER;
     return drag_.EnableInternalDropAnimation(animationInfo);
 }
+
+bool IntentionManager::IsDragStart()
+{
+    CALL_DEBUG_ENTER;
+    return drag_.IsDragStart();
+}
+
+int32_t IntentionManager::GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent)
+{
+    CALL_DEBUG_ENTER;
+    return onScreen_.GetPageContent(option, pageContent);
+}
+
+int32_t IntentionManager::SendControlEvent(const OnScreen::ControlEvent& event)
+{
+    CALL_DEBUG_ENTER;
+    return onScreen_.SendControlEvent(event);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -86,6 +86,7 @@ public:
     int32_t GetAppDragSwitchState(bool &state);
     int32_t SetDraggableStateAsync(bool state, int64_t downTime);
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
+    int32_t IsDragStart(bool &isStart);
 
     // Boomerang
     int32_t SubscribeCallback(int32_t type, const std::string& bundleName,
@@ -107,6 +108,10 @@ public:
         const sptr<IRemoteDevStaCallback> &unsubCallback);
     int32_t GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue);
     int32_t GetDevicePostureDataSync(DevicePostureData &postureData);
+
+    // OnScreen
+    int32_t GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent);
+    int32_t SendControlEvent(const OnScreen::ControlEvent& event);
 
 private:
     class DeathRecipient : public IRemoteObject::DeathRecipient {

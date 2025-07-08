@@ -454,9 +454,30 @@ HWTEST_F(DragServerTest, DragServerTest8, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest9, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     DragState dragState;
-    int32_t ret = g_dragServer->GetDragState(dragState);
+    int32_t ret = g_dragServer->GetDragState(context, dragState);
     EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: DragServerTest_GetDragState_002
+ * @tc.desc: verify GetDragState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest_GetDragState_002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context;
+    DragState dragState;
+    int32_t ret = g_dragServer->GetDragState(context, dragState);
+    EXPECT_EQ(ret, COMMON_NOT_SYSTEM_APP);
 }
 
 /**
@@ -1411,6 +1432,34 @@ HWTEST_F(DragServerTest, DragServerTest74, TestSize.Level0)
     int32_t eventId = 1;
     DRAG_DATA_MGR.SetEventId(eventId);
     EXPECT_TRUE(DRAG_DATA_MGR.GetEventId() == eventId);
+}
+
+/**
+ * @tc.name: DragServerTest75
+ * @tc.desc: Test
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest75, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool isStart = false;
+
+    g_dragMgr.dragState_ = DragState::ERROR;
+    int32_t ret = g_dragServer->IsDragStart(isStart);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(isStart, false);
+
+    g_dragMgr.dragState_ = DragState::START;
+    ret = g_dragServer->IsDragStart(isStart);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(isStart, true);
+
+    g_dragMgr.dragState_ = DragState::MOTION_DRAGGING;
+    ret = g_dragServer->IsDragStart(isStart);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(isStart, false);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -98,6 +98,23 @@ public:
     }
 };
 
+class BoardObserverTest final : public IBoardObserver {
+public:
+    explicit BoardObserverTest() {}
+    ~BoardObserverTest() = default;
+    DISALLOW_COPY_AND_MOVE(BoardObserverTest);
+
+    void OnBoardOnline(const std::string &networkId) override
+    {
+        FI_HILOGD("\'%{public}s\' is online", networkId.c_str());
+    }
+
+    void OnBoardOffline(const std::string &networkId) override
+    {
+        FI_HILOGD("\'%{public}s\' is offline", networkId.c_str());
+    }
+};
+
 void SetPermission(const std::string &level, const char** perms, size_t permAmount)
 {
     CALL_DEBUG_ENTER;
@@ -233,6 +250,23 @@ bool InitSocketFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
+bool SendHeartBeatFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < 1)) {
+        return false;
+    }
+ 
+    std::string networkId = GetStringFromData(STR_LEN);
+
+    DSoftbusAdapterImpl::GetInstance()->InitHeartBeat();
+    DSoftbusAdapterImpl::GetInstance()->StartHeartBeat(networkId);
+    DSoftbusAdapterImpl::GetInstance()->GetHeartBeatState(networkId);
+    DSoftbusAdapterImpl::GetInstance()->KeepHeartBeating(networkId);
+    DSoftbusAdapterImpl::GetInstance()->UpdateHeartBeatState(networkId, false);
+    DSoftbusAdapterImpl::GetInstance()->StopHeartBeat(networkId);
+    return true;
+}
+
 bool DDMAdapterFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < 1)) {
@@ -243,7 +277,12 @@ bool DDMAdapterFuzzTest(const uint8_t* data, size_t size)
     DDMAdapter ddmAdapter;
     ddmAdapter.Enable();
     std::string networkId = GetStringFromData(STR_LEN);
+    int32_t uid = 0;
+    auto boardObserver = std::make_shared<BoardObserverTest>();
+    ddmAdapter.AddBoardObserver(boardObserver);
     ddmAdapter.CheckSameAccountToLocal(networkId);
+    ddmAdapter.CheckSameAccountToLocalWithUid(networkId, uid);
+    ddmAdapter.RemoveBoardObserver(boardObserver);
     ddmAdapter.Disable();
     RemovePermission();
     return true;
@@ -264,6 +303,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::Msdp::DeviceStatus::SendPacketFuzzTest(data, size);
     OHOS::Msdp::DeviceStatus::InitSocketFuzzTest(data, size);
     OHOS::Msdp::DeviceStatus::DDMAdapterFuzzTest(data, size);
+    OHOS::Msdp::DeviceStatus::SendHeartBeatFuzzTest(data, size);
     return 0;
 }
 } // namespace DeviceStatus

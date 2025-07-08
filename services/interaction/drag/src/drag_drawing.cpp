@@ -102,8 +102,11 @@ constexpr float BEGIN_SCALE { 1.0f };
 constexpr float END_SCALE_FAIL { 1.2f };
 constexpr float END_SCALE_SUCCESS { 0.0f };
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
 constexpr float DEFAULT_PIVOT { 0.0f };
-#else
+#endif // OHOS_ENABLE_MOUSE_DRAWING
+#endif // OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_BUILD_PC_PRODUCT
 constexpr int32_t DOT_PER_INCH { 160 };
 #endif // OHOS_BUILD_PC_PRODUCT
 constexpr float HALF_PIVOT { 0.5f };
@@ -223,11 +226,13 @@ bool CheckNodesValid()
     }
 
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     if ((g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
         (g_drawingInfo.nodes.size() < MOUSE_NODE_MIN_COUNT)) {
         FI_HILOGE("Nodes size invalid when mouse type, node size:%{public}zu", g_drawingInfo.nodes.size());
         return false;
     }
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
 
     if ((g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) &&
@@ -334,10 +339,12 @@ int32_t DragDrawing::Init(const DragData &dragData, bool isLongPressDrag)
     }
 
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     if (DrawMouseIcon() != RET_OK) {
         FI_HILOGE("Draw mouse icon failed");
         return INIT_FAIL;
     }
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
 
     rsUiDirector_->SendMessages();
@@ -415,9 +422,11 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY, bo
     g_drawingInfo.parentNode->SetFrame(positionX, positionY, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight() + adjustSize);
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         DoDrawMouse(mousePositionX, mousePositionY);
     }
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
     if (!g_drawingInfo.multiSelectedNodes.empty() && !g_drawingInfo.multiSelectedPixelMaps.empty()) {
         MultiSelectedAnimation(positionX, positionY, adjustSize, isMultiSelectedAnimation);
@@ -442,8 +451,10 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
     g_drawingInfo.displayX = static_cast<int32_t>(displayX);
     g_drawingInfo.displayY = static_cast<int32_t>(displayY);
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     float mousePositionX = displayX;
     float mousePositionY = displayY;
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
     AdjustRotateDisplayXY(displayX, displayY);
     g_drawingInfo.x = displayX;
@@ -466,9 +477,11 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
     parentNode->SetFrame(positionX, positionY, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight() + adjustSize);
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         UpdateMousePosition(mousePositionX, mousePositionY);
     }
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
     if (!g_drawingInfo.multiSelectedNodes.empty() && !g_drawingInfo.multiSelectedPixelMaps.empty()) {
         DoMultiSelectedAnimation(positionX, positionY, adjustSize);
@@ -564,9 +577,11 @@ int32_t DragDrawing::UpdateShadowPic(const ShadowInfo &shadowInfo)
         return RET_ERR;
     }
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         DrawMouseIcon();
     }
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
     ProcessFilter();
     Draw(g_drawingInfo.displayId, g_drawingInfo.displayX, g_drawingInfo.displayY, false);
@@ -635,12 +650,14 @@ int32_t DragDrawing::UpdatePixeMapDrawingOrder()
     g_drawingInfo.rootNode->RemoveChild(g_drawingInfo.parentNode);
     g_drawingInfo.rootNode->AddChild(g_drawingInfo.parentNode);
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         std::shared_ptr<Rosen::RSCanvasNode> mouseIconNode = g_drawingInfo.nodes[MOUSE_ICON_INDEX];
         CHKPR(mouseIconNode, RET_ERR);
         g_drawingInfo.rootNode->RemoveChild(mouseIconNode);
         g_drawingInfo.rootNode->AddChild(mouseIconNode);
     }
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
     if (UpdatePixelMapsAngleAndAlpha() != RET_OK) {
         FI_HILOGE("setPixelMapsAngleAndAlpha failed");
@@ -1135,7 +1152,6 @@ void DragDrawing::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
     dragInternalInfo.scale = GetScaling();
     dragInternalInfo.pixelMapX = g_drawingInfo.pixelMapX;
     dragInternalInfo.pixelMapY = g_drawingInfo.pixelMapY;
-    dragInternalInfo.displayWidth = displayWidth_;
     dragInternalInfo.argb = g_drawingInfo.filterInfo.argb;
     dragInternalInfo.rootNode = g_drawingInfo.rootNode;
     dragInternalInfo.parentNode = g_drawingInfo.parentNode;
@@ -1143,8 +1159,47 @@ void DragDrawing::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
     dragInternalInfo.lightNode = g_drawingInfo.lightNode;
     dragInternalInfo.currentPixelMap = AccessGlobalPixelMapLocked();
     dragInternalInfo.nodes = g_drawingInfo.nodes;
+    dragInternalInfo.multiSelectedNodes = g_drawingInfo.multiSelectedNodes;
+    dragInternalInfo.multiSelectedPixelMaps = g_drawingInfo.multiSelectedPixelMaps;
+    dragInternalInfo.rotation = GetRotation(g_drawingInfo.displayId);
+ 
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
+    if (display == nullptr) {
+        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
+        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+        if (display == nullptr) {
+            FI_HILOGE("Get default display info failed");
+            dragInternalInfo.displayWidth = 0;
+            dragInternalInfo.displayHeight = 0;
+            FI_HILOGI("leave");
+            return;
+        }
+    }
+    int32_t width = display->GetWidth();
+    int32_t height = display->GetHeight();
+    dragInternalInfo.displayWidth = width;
+    dragInternalInfo.displayHeight = height;
     FI_HILOGI("leave");
     return;
+}
+ 
+void DragDrawing::RemoveStyleNodeAnimations()
+{
+    FI_HILOGI("enter");
+    if (!CheckNodesValid()) {
+        FI_HILOGE("Check nodes valid failed");
+        return;
+    }
+    std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
+    CHKPV(dragStyleNode);
+    if (dragStyleNode != nullptr && drawStyleScaleModifier_ != nullptr) {
+        dragStyleNode->RemoveModifier(drawStyleScaleModifier_);
+        dragStyleNode->RemoveAllAnimations();
+        drawStyleScaleModifier_ = nullptr;
+        needBreakStyleScaleAnimation_ = true;
+    }
+    Rosen::RSTransaction::FlushImplicitTransaction();
+    FI_HILOGI("leave");
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
@@ -2018,30 +2073,10 @@ int32_t DragDrawing::InitLayer()
     }
     rsUiDirector_->SetRSSurfaceNode(g_drawingInfo.surfaceNode);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
-    sptr<Rosen::DisplayInfo> display =
-        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-        FI_HILOGI("Get visible area display info by id, displayid:%{public}d", g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
-    if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
-        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
-        if (display == nullptr) {
-            FI_HILOGE("Get display info failed, display is nullptr");
-            return RET_ERR;
-        }
-    }
-    displayWidth_ = display->GetWidth();
-    int32_t rootNodeSize = std::max(display->GetWidth(), display->GetHeight());
+    int32_t rootNodeSize = std::max(displayWidth_, displayHeight_);
     InitCanvas(rootNodeSize, rootNodeSize);
     FI_HILOGI("Root node size:%{public}d, display Width:%{public}d, display height:%{public}d",
-        rootNodeSize, display->GetWidth(), display->GetHeight());
+        rootNodeSize, displayWidth_, displayHeight_);
 #else
     CHKPR(window_, RET_ERR);
     InitCanvas(window_->GetRect().width_, window_->GetRect().height_);
@@ -2097,14 +2132,17 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
     g_drawingInfo.rootNode->AddChild(g_drawingInfo.parentNode);
     CHKPV(rsUiDirector_);
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         std::shared_ptr<Rosen::RSCanvasNode> mouseIconNode = Rosen::RSCanvasNode::Create();
         CHKPV(mouseIconNode);
         g_drawingInfo.nodes.emplace_back(mouseIconNode);
         g_drawingInfo.rootNode->AddChild(mouseIconNode);
         rsUiDirector_->SetRSRootNode(Rosen::RSBaseNode::ReinterpretCast<Rosen::RSRootNode>(g_drawingInfo.rootNode));
+        FI_HILOGI("leave");
         return;
     }
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
     rsUiDirector_->SetRSRootNode(Rosen::RSBaseNode::ReinterpretCast<Rosen::RSRootNode>(g_drawingInfo.rootNode));
     FI_HILOGI("leave");
@@ -2139,6 +2177,8 @@ void DragDrawing::CreateWindow()
         }
     }
     uint64_t rsScreenId = screenId_;
+    int32_t displayWidth_ = display->GetWidth();
+    int32_t displayHeight_ = display->GetHeight();
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Screen> screen = Rosen::ScreenManager::GetInstance().GetScreenById(screenId_);
     if ((screen != nullptr) && (!screen->IsReal())) {
@@ -2155,7 +2195,7 @@ void DragDrawing::CreateWindow()
 #endif // OHOS_BUILD_PC_PRODUCT
     screenId_ = rsScreenId;
     FI_HILOGI("Parameter rsScreen number:%{public}llu", static_cast<unsigned long long>(rsScreenId));
-    int32_t surfaceNodeSize = std::max(display->GetWidth(), display->GetHeight());
+    int32_t surfaceNodeSize = std::max(displayWidth_, displayHeight_);
     g_drawingInfo.surfaceNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
 #else
     CHKPV(window_);
@@ -2777,6 +2817,7 @@ void DragDrawing::RotateCanvasNode(float pivotX, float pivotY, float rotation)
         }
     }
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         if (!CheckNodesValid()) {
             FI_HILOGE("Check nodes valid failed");
@@ -2787,6 +2828,7 @@ void DragDrawing::RotateCanvasNode(float pivotX, float pivotY, float rotation)
         mouseIconNode->SetPivot(DEFAULT_PIVOT, DEFAULT_PIVOT);
         mouseIconNode->SetRotation(rotation);
     }
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
     float positionX = g_drawingInfo.currentPositionX;
     float positionY = g_drawingInfo.currentPositionY;
@@ -3438,24 +3480,8 @@ void DragDrawing::RotatePosition(float &displayX, float &displayY)
 {
 Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
-    sptr<Rosen::DisplayInfo> display =
-        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
-    if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-        rotation = GetRotation(0);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
-        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
-        CHKPV(display);
-    }
-    int32_t width = display->GetWidth();
-    int32_t height = display->GetHeight();
+    int32_t width = displayWidth_;
+    int32_t height = displayHeight_;
 #else
     CHKPV(window_);
     int32_t width = window_->GetRect().width_;
@@ -3579,6 +3605,7 @@ void DragDrawing::ResetParameter()
     g_drawingInfo.startNum = START_TIME;
     g_drawingInfo.needDestroyDragWindow = false;
     displayWidth_ = -1;
+    displayHeight_ = -1;
     needRotatePixelMapXY_ = false;
     hasRunningStopAnimation_ = false;
     needMultiSelectedAnimation_ = true;
@@ -3626,6 +3653,25 @@ int32_t DragDrawing::DoRotateDragWindow(float rotation,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool isAnimated)
 {
     FI_HILOGI("Rotation:%{public}f, isAnimated:%{public}d", rotation, isAnimated);
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+#ifndef OHOS_BUILD_PC_PRODUCT
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
+#else
+    sptr<Rosen::DisplayInfo> display =
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
+#endif // OHOS_BUILD_PC_PRODUCT
+    if (display == nullptr) {
+        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
+#ifndef OHOS_BUILD_PC_PRODUCT
+        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+#else
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
+#endif // OHOS_BUILD_PC_PRODUCT
+        CHKPR(display, RET_ERR);
+    }
+    displayWidth_ = display->GetWidth();
+    displayHeight_ = display->GetHeight();
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     CHKPR(currentPixelMap, RET_ERR);
     if ((currentPixelMap->GetWidth() <= 0) || (currentPixelMap->GetHeight() <= 0)) {
@@ -3729,8 +3775,10 @@ void DragDrawing::ScreenRotateAdjustDisplayXY(
 #endif // OHOS_BUILD_PC_PRODUCT
         CHKPV(display);
     }
-    int32_t width = display->GetWidth();
-    int32_t height = display->GetHeight();
+    displayWidth_ = display->GetWidth();
+    displayHeight_ = display->GetHeight();
+    int32_t width = displayWidth_;
+    int32_t height = displayHeight_;
 #else
     CHKPV(window_);
     int32_t width = window_->GetRect().width_;
@@ -3792,11 +3840,13 @@ void DragDrawing::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRot
     ScreenRotateAdjustDisplayXY(rotation, lastRotation, g_drawingInfo.x, g_drawingInfo.y);
     DrawRotateDisplayXY(g_drawingInfo.x, g_drawingInfo.y);
 #ifndef OHOS_BUILD_PC_PRODUCT
+#ifdef OHOS_ENABLE_MOUSE_DRAWING
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         ScreenRotateAdjustDisplayXY(
             rotation, lastRotation, g_drawingInfo.currentPositionX, g_drawingInfo.currentPositionY);
         UpdateMousePosition(g_drawingInfo.currentPositionX, g_drawingInfo.currentPositionY);
     }
+#endif // OHOS_ENABLE_MOUSE_DRAWING
 #endif // OHOS_BUILD_PC_PRODUCT
     Rosen::RSTransaction::FlushImplicitTransaction();
     screenRotateState_ = true;
@@ -4535,8 +4585,10 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     }
     screenId_ = rsScreenId;
 #endif // OHOS_BUILD_PC_PRODUCT
+    displayWidth_ = display->GetWidth();
+    displayHeight_ = display->GetHeight();
     FI_HILOGI("Parameter rsScreen number:%{public}llu", static_cast<unsigned long long>(screenId_));
-    int32_t surfaceNodeSize = std::max(display->GetWidth(), display->GetHeight());
+    int32_t surfaceNodeSize = std::max(displayWidth_, displayHeight_);
     g_drawingInfo.rootNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
     g_drawingInfo.rootNode->SetFrame(0, 0, surfaceNodeSize, surfaceNodeSize);
     g_drawingInfo.surfaceNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);

@@ -175,6 +175,7 @@ public:
     int32_t AddPrivilege(int32_t tokenId) override;
     int32_t EraseMouseIcon() override;
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const override;
+    bool IsDragStart() const override;
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
     int32_t EnableInternalDropAnimation(const std::string &animationInfo) override;
     void GetDragDrawingInfo(DragInternalInfo &dragInternalInfo) override;
