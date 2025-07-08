@@ -19,6 +19,7 @@
 #include "parcel.h"
 
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+#include "dm_common.h"
 #include "ui/rs_canvas_node.h"
 #include "ui/rs_node.h"
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
@@ -44,13 +45,17 @@ struct DragInternalInfo {
     int32_t pixelMapX { -1 };
     int32_t pixelMapY { -1 };
     int32_t displayWidth { -1 };
+    int32_t displayHeight { -1 };
     uint32_t argb { 0 };
+    Rosen::Rotation rotation { Rosen::Rotation::ROTATION_0 };
     std::shared_ptr<Rosen::RSNode> rootNode { nullptr };
     std::shared_ptr<Rosen::RSNode> parentNode { nullptr };
     std::shared_ptr<Rosen::RSNode> curvesMaskNode { nullptr };
     std::shared_ptr<Rosen::RSNode> lightNode { nullptr };
     std::shared_ptr<Media::PixelMap> currentPixelMap { nullptr };
     std::vector<std::shared_ptr<Rosen::RSCanvasNode>> nodes;
+    std::vector<std::shared_ptr<Rosen::RSCanvasNode>> multiSelectedNodes;
+    std::vector<std::shared_ptr<Media::PixelMap>> multiSelectedPixelMaps;
 };
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus

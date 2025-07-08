@@ -339,6 +339,7 @@ public:
 #endif // OHOS_ENABLE_PULLTHROW
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
     void GetDragDrawingInfo(DragInternalInfo &dragInternalInfo);
+    void RemoveStyleNodeAnimations();
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
 private:
