@@ -32,7 +32,7 @@ namespace OnScreen {
 namespace {
 const char *LIB_ON_SCREEN_ALGO_PATH = "/system/lib64/libon_screen.z.so";
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
-const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.INJECT_INPUT_EVENT";
+const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_PERMISSION = 201;
 }

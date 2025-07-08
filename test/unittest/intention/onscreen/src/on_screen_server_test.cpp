@@ -41,7 +41,7 @@ CallingContext context_ {
 };
 OnScreenServer onScreen_;
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
-const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.INJECT_INPUT_EVENT";
+const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
 class OnScreenServerTest : public testing::Test {
 public:
     static void SetUpTestCase();
