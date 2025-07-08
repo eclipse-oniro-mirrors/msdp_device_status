@@ -31,11 +31,18 @@ namespace DeviceStatus {
 using CooperateMsgInfoCallback = std::function<void(const std::string&, const CoordinationMsgInfo&)>;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
-InteractionManager *InteractionManager::instance_ = new (std::nothrow) InteractionManager();
+std::shared_ptr<InteractionManager> InteractionManager::instance_ = nullptr;
+std::mutex InteractionManager::mutex_;
 
 InteractionManager *InteractionManager::GetInstance()
 {
-    return instance_;
+    if (instance_ == nullptr) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (instance_ == nullptr) {
+            instance_ = std::make_shared<InteractionManager>();
+        }
+    }
+    return instance_.get();
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X

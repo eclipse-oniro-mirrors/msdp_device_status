@@ -44,8 +44,9 @@ namespace DeviceStatus {
 class InteractionManager {
 public:
 
-    static InteractionManager *GetInstance();
+    InteractionManager() = default;
     virtual ~InteractionManager() = default;
+    static InteractionManager *GetInstance();
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     /**
@@ -509,9 +510,9 @@ public:
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 private:
-    InteractionManager() = default;
     DISALLOW_COPY_AND_MOVE(InteractionManager);
-    static InteractionManager *instance_;
+    static std::shared_ptr<InteractionManager> instance_;
+    static std::mutex mutex_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
