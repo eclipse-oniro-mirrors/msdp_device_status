@@ -48,6 +48,8 @@ bool DeviceStatusStreamFuzzTest(const uint8_t* data, size_t size)
     streamBuffer.Read(buf1, size);
     streamBuffer.Write(buf);
     streamBuffer.Read(buf);
+    streamBuffer.Write(buf1);
+    streamBuffer.Read(buf1);
     streamBuffer.GetErrorStatusRemark();
     streamBuffer.Reset();
     streamBuffer.Clean();
