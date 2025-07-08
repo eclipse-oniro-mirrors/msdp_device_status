@@ -44,7 +44,6 @@ group("device_status_fuzztest") {
     "handleallocsocketfd_fuzzer:fuzztest",
     "ipcsocket_fuzzer:fuzztest",
     "msdpdevicemanager_fuzzer:fuzztest",
-    "registercooperatemonitor_fuzzer:fuzztest",
     "removedraglistener_fuzzer:fuzztest",
     "removehotarealistener_fuzzer:fuzztest",
     "removehotarealistenerstub_fuzzer:fuzztest",
@@ -57,7 +56,6 @@ group("device_status_fuzztest") {
     "stopdrag_fuzzer:fuzztest",
     "subscribe_fuzzer:fuzztest",
     "unregistercoordinationlistener_fuzzer:fuzztest",
-    "unregistercooperatemonitor_fuzzer:fuzztest",
     "unsubscribe_fuzzer:fuzztest",
     "updatedragstyle_fuzzer:fuzztest",
     "updatepreviewstyle_fuzzer:fuzztest",
@@ -76,9 +74,11 @@ group("device_status_fuzztest") {
       "getcoordinationstate_fuzzer:fuzztest",
       "preparecooperate_fuzzer:fuzztest",
       "preparecoordination_fuzzer:fuzztest",
+      "registercooperatemonitor_fuzzer:fuzztest",
       "registercoordinationlistener_fuzzer:fuzztest",
       "unpreparecooperate_fuzzer:fuzztest",
       "unpreparecoordination_fuzzer:fuzztest",
+      "unregistercooperatemonitor_fuzzer:fuzztest",
     ]
   }
 }
