@@ -457,6 +457,20 @@ std::string GetStringFromData(int strlen)
     return str;
 }
 
+std::shared_ptr<MMI::InputDevice> GetDevice(int32_t deviceId)
+{
+    std::shared_ptr<MMI::InputDevice> inputDevice;
+    auto callback = [&inputDevice](std::shared_ptr<MMI::InputDevice> device) {
+        inputDevice = device;
+    };
+    int32_t ret = MMI::InputManager::GetInstance()->GetDevice(deviceId, callback);
+    if (ret != RET_OK || inputDevice == nullptr) {
+        FI_HILOGE("Get device failed");
+        return nullptr;
+    }
+    return inputDevice;
+}
+
 bool MsdpDeviceManagerFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < 1)) {
@@ -471,6 +485,9 @@ bool MsdpDeviceManagerFuzzTest(const uint8_t* data, size_t size)
     auto env = ContextService::GetInstance();
 
     env->devMgr_.AddDevice(devStr);
+    std::shared_ptr<MMI::InputDevice> device = GetDevice(id);
+    env->devMgr_.IsLocalPointerDevice(device);
+    env->devMgr_.IsVirtualTrackpad(device);
     env->devMgr_.FindDevice(devStr);
     env->GetDeviceManager().GetDevice(id);
     env->GetDeviceManager().RetriggerHotplug(weakObserver);
@@ -478,9 +495,15 @@ bool MsdpDeviceManagerFuzzTest(const uint8_t* data, size_t size)
     env->GetDeviceManager().RemoveDeviceObserver(weakObserver);
     env->devMgr_.HasLocalPointerDevice();
     env->devMgr_.HasLocalKeyboardDevice();
+    env->devMgr_.GetPointerDevice();
     env->devMgr_.HasKeyboard();
     env->devMgr_.GetKeyboard();
+    env->devMgr_.GetVirTrackPad();
     env->devMgr_.RemoveDevice(devStr);
+    env->devMgr_.Disable();
+    struct epoll_event ev {};
+    ev.events = EPOLLIN;
+    env->devMgr_.Dispatch(ev);
     return true;
 }
 

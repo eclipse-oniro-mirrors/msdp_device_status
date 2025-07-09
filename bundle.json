@@ -82,7 +82,8 @@
         "resource_schedule_service",
         "motion",
         "libuv",
-        "data_share"
+        "data_share",
+        "rust_libc"
       ],
       "third_party": [
         "openssl",

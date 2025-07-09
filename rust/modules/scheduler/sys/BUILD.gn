@@ -19,11 +19,11 @@ ohos_rust_shared_library("fusion_scheduler_rust") {
   deps = [
     "${device_status_root_path}/rust/data/sys:fusion_data_rust",
     "${device_status_root_path}/rust/utils:fusion_utils_rust",
-    "//third_party/rust/crates/libc:lib",
   ]
 
   external_deps = [
     "hilog:hilog_rust",
+    "rust_libc:lib",
     "ylong_runtime:ylong_runtime",
   ]
 
