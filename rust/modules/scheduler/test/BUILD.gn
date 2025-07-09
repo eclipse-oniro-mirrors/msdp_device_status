@@ -21,10 +21,12 @@ ohos_rust_unittest("fusion_scheduler_test") {
   deps = [
     "${device_status_root_path}/rust/modules/scheduler/sys:fusion_scheduler_rust",
     "${device_status_root_path}/rust/utils:fusion_utils_rust",
-    "//third_party/rust/crates/libc:lib",
   ]
 
-  external_deps = [ "hilog:hilog_rust" ]
+  external_deps = [
+    "hilog:hilog_rust",
+    "rust_libc:lib",
+  ]
 
   subsystem_name = "${device_status_subsystem_name}"
   part_name = "${device_status_part_name}"
