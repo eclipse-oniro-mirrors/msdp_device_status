@@ -81,8 +81,9 @@ void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
     CHKPV(manager);
     auto listener = std::make_shared<AccessibleAbilityListenerImpl>(callback, manager);
     if (listener == nullptr) {
-        delete manager;
         FI_HILOGE("create accessible ability listener failed");
+        delete manager;
+        return;
     }
     auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->RegisterAbilityListener(listener);
     if (ret != 0) {
