@@ -78,8 +78,12 @@ void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
     CALL_DEBUG_ENTER;
     CHKPV(callback);
     AccessibilityManager* manager = new (std::nothrow) AccessibilityManager();
+    CHKPV(manager);
     auto listener = std::make_shared<AccessibleAbilityListenerImpl>(callback, manager);
-    CHKPV(listener);
+    if (listener == nullptr) {
+        delete manager;
+        FI_HILOGE("create accessible ability listener failed");
+    }
     auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->RegisterAbilityListener(listener);
     if (ret != 0) {
         FI_HILOGE("Accessibility register ablity listener failed");
