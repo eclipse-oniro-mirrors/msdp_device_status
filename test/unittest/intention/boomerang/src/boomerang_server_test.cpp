@@ -39,7 +39,7 @@ namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
 BoomerangServer boomerang_;
-int32_t FD { 5 };
+int32_t FD { 1 };
 inline constexpr size_t MAX_STRING_LEN{1024};
 Intention intention_ { Intention::BOOMERANG };
 
