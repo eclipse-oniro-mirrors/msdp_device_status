@@ -171,14 +171,14 @@ bool DeviceStatusManager::Init()
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     CHKPF(samgrProxy);
 
-    sptr<SystemAbilityStatusChangeStub> accessibilityStatusChange = sptr<AccessibilityStatusChange>::MakeSptr();
+    auto accessibilityStatusChange = sptr<AccessibilityStatusChange>::MakeSptr();
     int32_t ret = samgrProxy->SubscribeSystemAbility(ACCESSIBILITY_MANAGER_SERVICE_ID, accessibilityStatusChange);
     if (ret != RET_OK) {
         FI_HILOGE("SubscribeSystemAbility accessibility service faild");
         return false;
     }
 
-    sptr<SystemAbilityStatusChangeStub> windowStatusChange = sptr<AccessibilityStatusChange>::MakeSptr();
+    auto windowStatusChange = sptr<AccessibilityStatusChange>::MakeSptr();
     ret = samgrProxy->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, windowStatusChange);
     if (ret != RET_OK) {
         FI_HILOGE("SubscribeSystemAbility window manager service faild");

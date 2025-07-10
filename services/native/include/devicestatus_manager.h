@@ -128,10 +128,10 @@ private:
     std::map<Type, OnChangedValue> msdpData_;
     std::map<Type, std::set<const sptr<IRemoteDevStaCallback>, classcomp>> listeners_;
     std::map<std::string, std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp>> boomerangListeners_;
-    sptr<IRemoteBoomerangCallback> notityListener_;
-    sptr<IRemoteBoomerangCallback> encodeCallback_;
+    sptr<IRemoteBoomerangCallback> notityListener_ { nullptr };
+    sptr<IRemoteBoomerangCallback> encodeCallback_ { nullptr };
     std::map<sptr<IRemoteBoomerangCallback>, std::string> bundleNameCache_;
-    sptr<AppExecFwk::IBundleMgr> bundleManager_;
+    sptr<AppExecFwk::IBundleMgr> bundleManager_ { nullptr };
     bool isAccessibilityInit = false;
     int32_t type_ { -1 };
     int32_t boomerangType_ { -1 };
