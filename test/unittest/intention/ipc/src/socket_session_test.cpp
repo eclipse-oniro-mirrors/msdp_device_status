@@ -388,7 +388,7 @@ HWTEST_F(SocketSessionTest, SocketSessionTest33, TestSize.Level0)
     auto recv = [](const NetPacket &pkt) {
         return;
     };
-    SocketConnection socketConnection(1, recv, onDisconnected);
+    SocketConnection socketConnection(fd, recv, onDisconnected);
     ASSERT_NO_FATAL_FAILURE(socketConnection.OnReadable(fd));
     ASSERT_NO_FATAL_FAILURE(socketConnection.OnShutdown(fd));
 }
