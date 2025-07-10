@@ -157,6 +157,11 @@ int32_t OnScreenServer::UnloadAlgoLib()
 
 bool OnScreenServer::CheckPermission(const CallingContext &context, const std::string &permission)
 {
+    auto type = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    FI_HILOGD("called tokenType is %{public}d", type);
+    if (type == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        FI_HILOGD("called tokenType is shell, verify succ");
+    }
     return Security::AccessToken::AccessTokenKit::VerifyAccessToken(context.tokenId, permission) == RET_OK;
 }
 } // namespace OnScreen

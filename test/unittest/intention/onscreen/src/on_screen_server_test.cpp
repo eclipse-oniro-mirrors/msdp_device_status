@@ -33,19 +33,14 @@ namespace DeviceStatus {
 namespace OnScreen {
 using namespace testing::ext;
 using namespace Security::AccessToken;
-CallingContext context_ {
-    .intention = Intention::UNKNOWN_INTENTION,
-    .tokenId = IPCSkeleton::GetCallingTokenID(),
-    .uid = IPCSkeleton::GetCallingUid(),
-    .pid = IPCSkeleton::GetCallingPid(),
-};
 OnScreenServer onScreen_;
+uint64_t tokenId_ = 0;
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
 const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
 class OnScreenServerTest : public testing::Test {
 public:
     static void SetUpTestCase();
-    static void TearDownTestCase() {};
+    static void TearDownTestCase();
     void SetUp() {};
     void TearDown() {};
 };
@@ -60,7 +55,7 @@ void OnScreenServerTest::SetUpTestCase()
     perms[1] = PERMISSION_SEND_CONTROL_EVENT;
     TokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 0,
+        .permsNum = 2,
         .aclsNum = 0,
         .dcaps = nullptr,
         .perms = perms,
@@ -68,9 +63,16 @@ void OnScreenServerTest::SetUpTestCase()
         .processName = "OnScreenServerTest",
         .aplStr = "system_core",
     };
-    uint64_t tokenId = GetAccessTokenId(&infoInstance);
-    ASSERT_EQ(SetSelfTokenID(tokenId), 0);
-    AccessTokenKit::ReloadNativeTokenInfo();
+    tokenId_ = GetAccessTokenId(&infoInstance);
+}
+
+void OnScreenServerTest::TearDownTestCase()
+{
+    int32_t ret = AccessTokenKit::DeleteToken(tokenId_);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to remove permission");
+        return;
+    }
 }
 
 /**
@@ -81,9 +83,11 @@ void OnScreenServerTest::SetUpTestCase()
 HWTEST_F(OnScreenServerTest, GetPageContent001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    CallingContext context;
+    context.tokenId = tokenId_;
     ContentOption option;
     PageContent content;
-    int32_t ret = onScreen_.GetPageContent(context_, option, content);
+    int32_t ret = onScreen_.GetPageContent(context, option, content);
     EXPECT_TRUE(ret >= RET_ERR);
 }
 
@@ -95,9 +99,11 @@ HWTEST_F(OnScreenServerTest, GetPageContent001, TestSize.Level0)
 HWTEST_F(OnScreenServerTest, SendControlEvent001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    CallingContext context;
+    context.tokenId = tokenId_;
     ControlEvent event;
     event.eventType = EventType::SCROLL_TO_HOOK;
-    int32_t ret = onScreen_.SendControlEvent(context_, event);
+    int32_t ret = onScreen_.SendControlEvent(context, event);
     EXPECT_TRUE(ret >= RET_ERR);
 }
 } // namespace OnScreen

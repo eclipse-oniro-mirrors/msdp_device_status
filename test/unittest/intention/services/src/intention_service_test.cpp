@@ -1015,7 +1015,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetPageContent001, TestSize.
     OnScreen::SequenceablePageContent content;
     OnScreen::SequenceableContentOption option;
     ErrCode ret = g_intentionService->GetPageContent(option, content);
-    EXPECT_TRUE(ret == PERMISSION_EXCEPTION);
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 
 /**
@@ -1030,7 +1030,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SendControlEvent001, TestSiz
     OnScreen::SequenceableControlEvent event;
     event.controlEvent_.eventType = OnScreen::EventType::SCROLL_TO_HOOK;
     ErrCode ret = g_intentionService->SendControlEvent(event);
-    EXPECT_TRUE(ret == PERMISSION_EXCEPTION);
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

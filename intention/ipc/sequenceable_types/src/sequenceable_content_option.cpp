@@ -27,7 +27,7 @@ bool SequenceableContentOption::Marshalling(Parcel &parcel) const
     WRITEBOOL(parcel, option_.contentUnderstand, false);
     WRITEBOOL(parcel, option_.pageLink, false);
     WRITEBOOL(parcel, option_.textOnly, false);
-    WRITEBOOL(parcel, option_.longTextSplit, false);
+    WRITEINT32(parcel, option_.maxParagraphSize, false);
     return true;
 }
 
@@ -48,7 +48,7 @@ bool SequenceableContentOption::ReadFromParcel(Parcel &parcel)
     READBOOL(parcel, option_.contentUnderstand, false);
     READBOOL(parcel, option_.pageLink, false);
     READBOOL(parcel, option_.textOnly, false);
-    READBOOL(parcel, option_.longTextSplit, false);
+    READINT32(parcel, option_.maxParagraphSize, false);
     return true;
 }
 } // namespace OnScreen

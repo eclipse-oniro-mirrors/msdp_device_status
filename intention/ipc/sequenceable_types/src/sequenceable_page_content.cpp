@@ -37,7 +37,7 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
     WRITESTRING(parcel, pageContent_.title, false);
     WRITESTRING(parcel, pageContent_.content, false);
-    WRITESTRING(parcel, pageContent_.links, false);
+    WRITESTRING(parcel, pageContent_.pageLink, false);
     if (pageContent_.paragraphs.size() > static_cast<size_t>(MAX_PARA_LEN)) {
         FI_HILOGE("paragraph size is too long");
         return false;
@@ -46,7 +46,7 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     for (size_t i = 0; i < pageContent_.paragraphs.size(); i++) {
         WRITEUINT64(parcel, pageContent_.paragraphs[i].hookId, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].title, false);
-        WRITESTRING(parcel, pageContent_.paragraphs[i].text, false);
+        WRITESTRING(parcel, pageContent_.paragraphs[i].content, false);
     }
     return true;
 }
@@ -77,7 +77,7 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     pageContent_.scenario = static_cast<Scenario>(scenario);
     READSTRING(parcel, pageContent_.title, false);
     READSTRING(parcel, pageContent_.content, false);
-    READSTRING(parcel, pageContent_.links, false);
+    READSTRING(parcel, pageContent_.pageLink, false);
     int32_t paragraphSize = 0;
     READINT32(parcel, paragraphSize, false);
     std::vector<Paragraph>().swap(pageContent_.paragraphs);
@@ -89,7 +89,7 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
         Paragraph para;
         READUINT64(parcel, para.hookId, false);
         READSTRING(parcel, para.title, false);
-        READSTRING(parcel, para.text, false);
+        READSTRING(parcel, para.content false);
         pageContent_.paragraphs.push_back(para);
     }
     return true;
