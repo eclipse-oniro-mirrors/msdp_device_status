@@ -89,7 +89,7 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
         Paragraph para;
         READUINT64(parcel, para.hookId, false);
         READSTRING(parcel, para.title, false);
-        READSTRING(parcel, para.content false);
+        READSTRING(parcel, para.content, false);
         pageContent_.paragraphs.push_back(para);
     }
     return true;

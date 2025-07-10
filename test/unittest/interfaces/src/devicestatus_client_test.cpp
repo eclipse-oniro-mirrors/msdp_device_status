@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <fstream>
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -225,19 +224,10 @@ HWTEST_F(DeviceStatusClientTest, GetPageContent001, TestSize.Level0)
     option.textOnly = true;
     OnScreen::PageContent pageContent;
     int32_t ret = OnScreen::OnScreenManager::GetInstance().GetPageContent(option, pageContent);
-    std::ofstream outfile;
-    outfile.open("/data/pageContentData.txt");
-    if (outfile.is_open()) {
-        outfile << "windowId:" << pageContent.windowId << std::endl;
-        outfile << "bundleName:" << pageContent.bundleName << std::endl;
-        outfile << "title:" << pageContent.title << std::endl;
-        outfile << "content:" << pageContent.content << std::endl;
-        outfile.close();
-    }
-    outfile << "windowId:" << pageContent.windowId << std::endl;
-    outfile << "bundleName:" << pageContent.bundleName << std::endl;
-    outfile << "title:" << pageContent.title << std::endl;
-    outfile << "content:" << pageContent.content << std::endl;
+    std::cout << "windowId:" << pageContent.windowId << std::endl;
+    std::cout << "bundleName:" << pageContent.bundleName << std::endl;
+    std::cout << "title:" << pageContent.title << std::endl;
+    std::cout << "content:" << pageContent.content << std::endl;
     EXPECT_TRUE(ret >= RET_ERR);
 }
 
