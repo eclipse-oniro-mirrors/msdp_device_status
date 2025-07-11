@@ -22,11 +22,15 @@
 #include "nocopyable.h"
 #include "singleton.h"
 
+#include "accessibility_system_ability_client.h"
+#include "accessibility_ui_test_ability.h"
+#include "accessible_ability_listener.h"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 enum AccessibilityStatus {
-    ABILITY_INVALID_STATU,
+    ABILITY_INVALID_STATUS,
     ON_ABILITY_CONNECTED = 1,
     ON_ABILITY_SCROLLED_EVENT,
     ON_ABILITY_DISCONNECTED,
@@ -50,9 +54,24 @@ class AccessibilityManager final {
 public:
     DISALLOW_MOVE(AccessibilityManager);
 
+    class AccessibleAbilityListenerImpl : public Accessibility::AccessibleAbilityListener {
+    public:
+        AccessibleAbilityListenerImpl(AccessibilityCallback callback) : callback_(callback) {}
+        ~AccessibleAbilityListenerImpl() = default;
+
+        void OnAbilityConnected() override;
+        void OnAbilityDisconnected() override;
+        void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo &eventInfo) override;
+        bool OnKeyPressEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent) override;
+    private:
+        AccessibilityCallback callback_ { nullptr };
+        std::mutex mutex_;
+    };
+
     void AccessibilityConnect(AccessibilityCallback callback);
     void AccessibilityDisconnect();
-    int32_t FindElementInfo(const int32_t windowId, DragElementInfo &info);
+private:
+    std::mutex mutex_;
 };
 
 #define ACCESSIBILITY_MANAGER OHOS::Singleton<AccessibilityManager>::GetInstance()

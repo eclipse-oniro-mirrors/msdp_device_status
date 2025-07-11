@@ -42,6 +42,7 @@ ohos_unittest("StationaryServerTest") {
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",

@@ -31,7 +31,7 @@
 #include "system_ability_definition.h"
 #include "system_ability_status_change_stub.h"
 #include "window_manager.h"
-#include "transaction/rs_interfaces.h"
+#include "bundle_mgr_proxy.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -63,13 +63,13 @@ public:
 
     class AccessibilityStatusChange : public SystemAbilityStatusChangeStub {
     public:
-        explicit AccessibilityStatusChange(DeviceStatusManager* deviceStatusManager) : manager_(deviceStatusManager) {}
+        AccessibilityStatusChange() = default;
         ~AccessibilityStatusChange() = default;
         void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
         void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     private:
-        DeviceStatusManager* manager_ { nullptr };
         friend class DeviceStatusManager;
+        std::mutex mutex_;
     };
 
     class SystemBarStyleChangedListener : public IWindowSystemBarPropertyChangedListener {
@@ -99,7 +99,7 @@ public:
     int32_t LoadAlgorithm();
     int32_t UnloadAlgorithm();
     int32_t GetPackageName(AccessTokenID tokenId, std::string &packageName);
-    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> screenShot);
+    void OnSurfaceCapture(int32_t windowId, std::shared_ptr<Media::PixelMap> &screenShot);
 
 private:
     struct classcomp {
@@ -116,7 +116,9 @@ private:
         }
     };
     int32_t GetFocuseWindowId(int32_t &windowId, std::string &bundleName);
-    void handlerPageScrollerEnvent();
+    int32_t GetBundleNameByCallback(std::string &bundleName);
+    int32_t GetBundleNameByApplink(std::string &bundleName, const std::string &metadata);
+    void HandlerPageScrollerEvent();
     static constexpr int32_t argSize_ { TYPE_MAX };
 
     std::mutex mutex_;
@@ -126,15 +128,20 @@ private:
     std::map<Type, OnChangedValue> msdpData_;
     std::map<Type, std::set<const sptr<IRemoteDevStaCallback>, classcomp>> listeners_;
     std::map<std::string, std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp>> boomerangListeners_;
-    sptr<IRemoteBoomerangCallback> notityListener_;
-    sptr<IRemoteBoomerangCallback> encodeCallback_;
-    sptr<ISystemAbilityStatusChange> accessibilityStatusChange_ { nullptr };
-    bool isAccessbilityInit = false;
+    sptr<IRemoteBoomerangCallback> notityListener_ { nullptr };
+    sptr<IRemoteBoomerangCallback> encodeCallback_ { nullptr };
+    std::map<sptr<IRemoteBoomerangCallback>, std::string> bundleNameCache_;
+    sptr<AppExecFwk::IBundleMgr> bundleManager_ { nullptr };
+    bool isAccessibilityInit = false;
     int32_t type_ { -1 };
     int32_t boomerangType_ { -1 };
     int32_t event_ { -1 };
     int32_t arrs_[argSize_] {};
-    std::atomic<bool> g_lastEnable { true };
+    std::atomic<bool> lastEnable_ { true };
+    int32_t retryCount { 0 };
+    static std::shared_ptr<DeviceStatusManager> g_deviceManager_;
+    static std::mutex g_mutex_;
+    std::recursive_mutex countMutex_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

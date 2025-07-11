@@ -47,6 +47,7 @@
         "accessibility",
         "access_token",
         "ace_engine",
+        "bundle_framework",
         "cJSON",
         "hicollie",
         "hilog",
