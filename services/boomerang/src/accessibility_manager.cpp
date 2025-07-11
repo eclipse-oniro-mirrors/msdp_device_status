@@ -100,7 +100,7 @@ void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
         return;
     }
 
-    ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Connect();
+    ret = accessibilityInstance->Connect();
     if (ret != RET_OK) {
         FI_HILOGE("Accessibility Connect failed");
         delete manager;
@@ -115,7 +115,7 @@ void AccessibilityManager::AccessibilityDisconnect()
         FI_HILOGE("get AccessibilityUITestAbility Instance failed on disConnect");
         return;
     }
-    auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Disconnect();
+    auto ret = accessibilityInstance->Disconnect();
     if (ret != RET_OK) {
         FI_HILOGE("Accessibility disConnect failed");
         return;
