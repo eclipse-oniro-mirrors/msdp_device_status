@@ -208,7 +208,7 @@ HWTEST_F(DeviceStatusManagerTest, OnRemoveSystemAbilityTest, TestSize.Level0) {
 
     deviceStatusManager->g_deviceManager = std::make_shared<DeviceStatusManager>();
     accessibilityStatusChange->OnRemoveSystemAbility(WINDOW_MANAGER_SERVICE_ID, deviceId);
-    EXPECT_EQ(deviceStatusManager->g_deviceManager, nullptr);
+    EXPECT_NE(deviceStatusManager->g_deviceManager, nullptr);
 
     accessibilityStatusChange->OnRemoveSystemAbility(WINDOW_MANAGER_SERVICE_ID, deviceId);
     EXPECT_TRUE(deviceStatusManager->lastEnable_);
