@@ -139,8 +139,8 @@ private:
     int32_t arrs_[argSize_] {};
     std::atomic<bool> lastEnable_ { true };
     int32_t retryCount { 0 };
-    static std::shared_ptr<DeviceStatusManager> g_deviceManager;
-    static std::mutex g_mutex;
+    static std::shared_ptr<DeviceStatusManager> g_deviceManager_;
+    static std::mutex g_mutex_;
     std::recursive_mutex countMutex_;
 };
 } // namespace DeviceStatus

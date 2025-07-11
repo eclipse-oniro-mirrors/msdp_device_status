@@ -68,7 +68,7 @@ public:
         AccessibilityCallback callback_ { nullptr };
         AccessibilityManager* manager_ { nullptr };
         std::mutex mutex_;
-        bool isConnected{ false };
+        bool isConnected_ { false };
     };
 
     void AccessibilityConnect(AccessibilityCallback callback);

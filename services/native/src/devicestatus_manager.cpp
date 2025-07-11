@@ -35,8 +35,8 @@ namespace DeviceStatus {
 namespace {
     const std::string BUNDLE_NAME = "com.tencent.wechat";
 }
-std::shared_ptr<DeviceStatusManager> DeviceStatusManager::g_deviceManager;
-std::mutex DeviceStatusManager::g_mutex;
+std::shared_ptr<DeviceStatusManager> DeviceStatusManager::g_deviceManager_;
+std::mutex DeviceStatusManager::g_mutex_;
 
 void DeviceStatusManager::DeviceStatusCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
@@ -76,18 +76,18 @@ void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wp
 void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId,
     const std::string &deviceId)
 {
-    std::lock_guard<std::mutex> guard(g_mutex);
+    std::lock_guard<std::mutex> guard(g_mutex_);
     switch (systemAbilityId) {
         case ACCESSIBILITY_MANAGER_SERVICE_ID: {
-            g_deviceManager = std::make_shared<DeviceStatusManager>();
-            CHKPV(g_deviceManager);
+            g_deviceManager_ = std::make_shared<DeviceStatusManager>();
+            CHKPV(g_deviceManager_);
             ACCESSIBILITY_MANAGER.AccessibilityConnect([this](int32_t value) {
-                std::lock_guard<std::mutex> guard(g_mutex);
+                std::lock_guard<std::mutex> guard(g_mutex_);
                 if (value == AccessibilityStatus::ON_ABILITY_CONNECTED) {
-                    g_deviceManager->isAccessibilityInit = true;
+                    g_deviceManager_->isAccessibilityInit = true;
                     FI_HILOGI("Accessibility service has connect");
                 } else if (value == AccessibilityStatus::ON_ABILITY_SCROLLED_EVENT) {
-                    g_deviceManager->HandlerPageScrollerEvent();
+                    g_deviceManager_->HandlerPageScrollerEvent();
                 }
             });
             break;
@@ -113,28 +113,28 @@ void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t 
 void DeviceStatusManager::AccessibilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId,
     const std::string &deviceId)
 {
-    std::lock_guard<std::mutex> guard(g_mutex);
-    CHKPV(g_deviceManager);
+    std::lock_guard<std::mutex> guard(g_mutex_);
+    CHKPV(g_deviceManager_);
     if (systemAbilityId == ACCESSIBILITY_MANAGER_SERVICE_ID) {
         FI_HILOGE("the accessibility service died");
-        g_deviceManager->isAccessibilityInit = false;
+        g_deviceManager_->isAccessibilityInit = false;
     } else if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
-        CHKPV(g_deviceManager);
-        g_deviceManager->lastEnable_ = true;
+        CHKPV(g_deviceManager_);
+        g_deviceManager_->lastEnable_ = true;
     }
 }
 
 void DeviceStatusManager::SystemBarStyleChangedListener::OnWindowSystemBarPropertyChanged(WindowType type,
     const SystemBarProperty& systemBarProperty)
 {
-    std::lock_guard<std::mutex> guard(g_mutex);
+    std::lock_guard<std::mutex> guard(g_mutex_);
     FI_HILOGI("OnWindowSystemBarPropertyChanged status:%{public}d", systemBarProperty.enable_);
-    CHKPV(g_deviceManager);
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ != g_deviceManager->lastEnable_) {
-        g_deviceManager->lastEnable_ = systemBarProperty.enable_;
+    CHKPV(g_deviceManager_);
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ != g_deviceManager_->lastEnable_) {
+        g_deviceManager_->lastEnable_ = systemBarProperty.enable_;
     }
-    if (!g_deviceManager->lastEnable_) {
-        g_deviceManager->HandlerPageScrollerEvent();
+    if (!g_deviceManager_->lastEnable_) {
+        g_deviceManager_->HandlerPageScrollerEvent();
     }
 }
 
@@ -683,8 +683,8 @@ void DeviceStatusManager::HandlerPageScrollerEvent()
         FI_HILOGE("get the focuse widowId faild, result=%{public}d", result);
         return;
     }
-    CHKPV(g_deviceManager);
-    if (g_deviceManager->lastEnable_ || bundleName != BUNDLE_NAME) {
+    CHKPV(g_deviceManager_);
+    if (g_deviceManager_->lastEnable_ || bundleName != BUNDLE_NAME) {
         FI_HILOGD("The current status bar is in display mode or does not belong to the whitelist application");
         return;
     }

@@ -91,12 +91,12 @@ HWTEST_F(DeviceStatusManagerTest, HandlerPageScrollerEventTest, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "HandlerPageScrollerEventTest start";
     deviceStatusManager->HandlerPageScrollerEvent();
-    EXPECT_EQ(deviceStatusManager->g_deviceManager, nullptr);
-    deviceStatusManager->g_deviceManager = std::make_shared<DeviceStatusManager>();
-    ASSERT_NE(deviceStatusManager->g_deviceManager, nullptr);
-    deviceStatusManager->g_deviceManager->lastEnable_ = true;
+    EXPECT_EQ(deviceStatusManager->g_deviceManager_, nullptr);
+    deviceStatusManager->g_deviceManager_ = std::make_shared<DeviceStatusManager>();
+    ASSERT_NE(deviceStatusManager->g_deviceManager_, nullptr);
+    deviceStatusManager->g_deviceManager_->lastEnable_ = true;
     deviceStatusManager->HandlerPageScrollerEvent();
-    deviceStatusManager->g_deviceManager->lastEnable_ = false;
+    deviceStatusManager->g_deviceManager_->lastEnable_ = false;
     deviceStatusManager->HandlerPageScrollerEvent();
     EXPECT_TRUE(deviceStatusManager->lastEnable_);
     GTEST_LOG_(INFO) << "HandlerPageScrollerEventTest end";
@@ -180,16 +180,16 @@ HWTEST_F(DeviceStatusManagerTest, OnAddSystemAbilityTest, TestSize.Level0) {
         new (std::nothrow) DeviceStatusManager::AccessibilityStatusChange();
     ASSERT_NE(accessibilityStatusChange, nullptr);
     std::string deviceId;
-    deviceStatusManager->g_deviceManager = nullptr;
+    deviceStatusManager->g_deviceManager_ = nullptr;
     accessibilityStatusChange->OnAddSystemAbility(RET_ERR, deviceId);
-    EXPECT_EQ(deviceStatusManager->g_deviceManager, nullptr);
+    EXPECT_EQ(deviceStatusManager->g_deviceManager_, nullptr);
 
-    deviceStatusManager->g_deviceManager = std::make_shared<DeviceStatusManager>();
+    deviceStatusManager->g_deviceManager_ = std::make_shared<DeviceStatusManager>();
     accessibilityStatusChange->OnAddSystemAbility(ACCESSIBILITY_MANAGER_SERVICE_ID, deviceId);
-    EXPECT_FALSE(deviceStatusManager->g_deviceManager->isAccessibilityInit);
+    EXPECT_FALSE(deviceStatusManager->g_deviceManager_->isAccessibilityInit);
 
     accessibilityStatusChange->OnAddSystemAbility(WINDOW_MANAGER_SERVICE_ID, deviceId);
-    EXPECT_NE(deviceStatusManager->g_deviceManager, nullptr);
+    EXPECT_NE(deviceStatusManager->g_deviceManager_, nullptr);
     GTEST_LOG_(INFO) << "OnAddSystemAbilityTest end";
 }
 
@@ -206,9 +206,9 @@ HWTEST_F(DeviceStatusManagerTest, OnRemoveSystemAbilityTest, TestSize.Level0) {
     std::string deviceId;
     accessibilityStatusChange->OnRemoveSystemAbility(ACCESSIBILITY_MANAGER_SERVICE_ID, deviceId);
 
-    deviceStatusManager->g_deviceManager = std::make_shared<DeviceStatusManager>();
+    deviceStatusManager->g_deviceManager_ = std::make_shared<DeviceStatusManager>();
     accessibilityStatusChange->OnRemoveSystemAbility(WINDOW_MANAGER_SERVICE_ID, deviceId);
-    EXPECT_NE(deviceStatusManager->g_deviceManager, nullptr);
+    EXPECT_NE(deviceStatusManager->g_deviceManager_, nullptr);
 
     accessibilityStatusChange->OnRemoveSystemAbility(WINDOW_MANAGER_SERVICE_ID, deviceId);
     EXPECT_TRUE(deviceStatusManager->lastEnable_);
@@ -226,12 +226,12 @@ HWTEST_F(DeviceStatusManagerTest, OnWindowSystemBarPropertyChangedTest, TestSize
     EXPECT_NE(listener, nullptr);
     SystemBarProperty property4Params(true, 1, 1, true);
     listener->OnWindowSystemBarPropertyChanged({}, property4Params);
-    EXPECT_NE(deviceStatusManager->g_deviceManager, nullptr);
-    EXPECT_EQ(deviceStatusManager->g_deviceManager->lastEnable_, true);
+    EXPECT_NE(deviceStatusManager->g_deviceManager_, nullptr);
+    EXPECT_EQ(deviceStatusManager->g_deviceManager_->lastEnable_, true);
 
     property4Params.enable_ = false;
     listener->OnWindowSystemBarPropertyChanged(WindowType::WINDOW_TYPE_STATUS_BAR, property4Params);
-    EXPECT_EQ(deviceStatusManager->g_deviceManager->lastEnable_, false);
+    EXPECT_EQ(deviceStatusManager->g_deviceManager_->lastEnable_, false);
     GTEST_LOG_(INFO) << "OnWindowSystemBarPropertyChangedTest end";
 }
 
