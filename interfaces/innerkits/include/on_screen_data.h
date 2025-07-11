@@ -45,14 +45,14 @@ struct ContentOption {
     bool pageLink = false;
     // 是否只采集文本
     bool textOnly = false;
-    // 是否拆解长文本
-    bool longTextSplit = false;
+    // 文本最长长度，默认为0，不限制长度
+    int32_t maxParagraphSize = 0;
 };
 
 struct Paragraph {
     uint64_t hookId = 0;
     std::string title;
-    std::string text;
+    std::string content;
 };
 
 struct PageContent {
@@ -64,7 +64,7 @@ struct PageContent {
     std::string title;
     std::string content;
     // page_link = true
-    std::string links;
+    std::string pageLink;
     // text only = true
     std::vector<Paragraph> paragraphs;
 };

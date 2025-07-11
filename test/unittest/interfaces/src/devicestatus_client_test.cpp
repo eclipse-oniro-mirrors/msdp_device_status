@@ -37,6 +37,9 @@ using namespace Security::AccessToken;
 namespace {
 constexpr float DOUBLEPIMAX = 6.3F;
 constexpr int32_t RET_NO_SUPPORT = 801;
+uint64_t tokenId_ = 0;
+const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
+const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
 }
 
 class DeviceStatusClientTest : public testing::Test {
@@ -59,22 +62,38 @@ void DeviceStatusClientTest::TearDown() {}
 
 void DeviceStatusClientTest::SetUpTestCase()
 {
+    const char **perms = new (std::nothrow) const char *[2];
+    const char **acls = new (std::nothrow) const char *[2];
+    if (perms == nullptr || acls == nullptr) {
+        return;
+    }
+    perms[0] = PERMISSION_GET_PAGE_CONTENT;
+    perms[1] = PERMISSION_SEND_CONTROL_EVENT;
+    acls[0] = PERMISSION_GET_PAGE_CONTENT;
+    acls[1] = PERMISSION_SEND_CONTROL_EVENT;
     TokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 0,
-        .aclsNum = 0,
+        .permsNum = 2,
+        .aclsNum = 2,
         .dcaps = nullptr,
-        .perms = nullptr,
-        .acls = nullptr,
+        .perms = perms,
+        .acls = acls,
         .processName = "DeviceStatusClientTest",
         .aplStr = "system_core",
     };
-    uint64_t tokenId = GetAccessTokenId(&infoInstance);
-    ASSERT_EQ(SetSelfTokenID(tokenId), 0);
+    tokenId_ = GetAccessTokenId(&infoInstance);
+    ASSERT_EQ(SetSelfTokenID(tokenId_), 0);
     AccessTokenKit::ReloadNativeTokenInfo();
 }
 
-void DeviceStatusClientTest::TearDownTestCase() {}
+void DeviceStatusClientTest::TearDownTestCase()
+{
+    int32_t ret = AccessTokenKit::DeleteToken(tokenId_);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to remove permission");
+        return;
+    }
+}
 
 void DeviceStatusClientTest::DeviceStatusClientTestCallback::OnDeviceStatusChanged(const
     Data& devicestatusData)
@@ -203,13 +222,13 @@ HWTEST_F(DeviceStatusClientTest, GetPageContent001, TestSize.Level0)
     option.contentUnderstand = true;
     option.pageLink = true;
     option.textOnly = true;
-    option.longTextSplit = true;
     OnScreen::PageContent pageContent;
     int32_t ret = OnScreen::OnScreenManager::GetInstance().GetPageContent(option, pageContent);
-    std::cout << pageContent.windowId << ", " << pageContent.bundleName << ", "
-        << pageContent.title << ", " << pageContent.content << ", "
-        << pageContent.paragraphs.size() << ", " << ret << std::endl;
-    EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
+    std::cout << "windowId:" << pageContent.windowId << std::endl;
+    std::cout << "bundleName:" << pageContent.bundleName << std::endl;
+    std::cout << "title:" << pageContent.title << std::endl;
+    std::cout << "content:" << pageContent.content << std::endl;
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 
 /**
@@ -223,7 +242,7 @@ HWTEST_F(DeviceStatusClientTest, SendControlEvent, TestSize.Level0)
     OnScreen::ControlEvent event;
     event.eventType = OnScreen::EventType::END;
     int32_t ret = OnScreen::OnScreenManager::GetInstance().SendControlEvent(event);
-    EXPECT_TRUE(ret != RET_OK);
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

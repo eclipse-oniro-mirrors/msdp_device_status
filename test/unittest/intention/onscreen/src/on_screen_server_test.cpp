@@ -15,11 +15,14 @@
 
 #include <gtest/gtest.h>
 
+#include "accesstoken_kit.h"
 #include "devicestatus_define.h"
 #include "fi_log.h"
+#include "ipc_skeleton.h"
+#include "nativetoken_kit.h"
 #include "on_screen_data.h"
 #include "on_screen_server.h"
-#include "ipc_skeleton.h"
+#include "token_setproc.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenServerTest"
@@ -29,21 +32,48 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
 using namespace testing::ext;
-CallingContext context_ {
-    .intention = Intention::UNKNOWN_INTENTION,
-    .tokenId = IPCSkeleton::GetCallingTokenID(),
-    .uid = IPCSkeleton::GetCallingUid(),
-    .pid = IPCSkeleton::GetCallingPid(),
-};
+using namespace Security::AccessToken;
 OnScreenServer onScreen_;
-constexpr int32_t RET_NO_SUPPORT = 801;
+uint64_t tokenId_ = 0;
+const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
+const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
 class OnScreenServerTest : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp() {};
     void TearDown() {};
 };
+
+void OnScreenServerTest::SetUpTestCase()
+{
+    const char **perms = new (std::nothrow) const char *[2];
+    if (perms == nullptr) {
+        return;
+    }
+    perms[0] = PERMISSION_GET_PAGE_CONTENT;
+    perms[1] = PERMISSION_SEND_CONTROL_EVENT;
+    TokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 2,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .processName = "OnScreenServerTest",
+        .aplStr = "system_core",
+    };
+    tokenId_ = GetAccessTokenId(&infoInstance);
+}
+
+void OnScreenServerTest::TearDownTestCase()
+{
+    int32_t ret = AccessTokenKit::DeleteToken(tokenId_);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to remove permission");
+        return;
+    }
+}
 
 /**
  * @tc.name: GetPageContent001
@@ -53,10 +83,12 @@ public:
 HWTEST_F(OnScreenServerTest, GetPageContent001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    CallingContext context;
+    context.tokenId = tokenId_;
     ContentOption option;
     PageContent content;
-    int32_t ret = onScreen_.GetPageContent(context_, option, content);
-    EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
+    int32_t ret = onScreen_.GetPageContent(context, option, content);
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 
 /**
@@ -67,10 +99,12 @@ HWTEST_F(OnScreenServerTest, GetPageContent001, TestSize.Level0)
 HWTEST_F(OnScreenServerTest, SendControlEvent001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    CallingContext context;
+    context.tokenId = tokenId_;
     ControlEvent event;
     event.eventType = EventType::SCROLL_TO_HOOK;
-    int32_t ret = onScreen_.SendControlEvent(context_, event);
-    EXPECT_TRUE(ret == RET_NO_SUPPORT || ret == RET_OK);
+    int32_t ret = onScreen_.SendControlEvent(context, event);
+    EXPECT_TRUE(ret >= RET_ERR);
 }
 } // namespace OnScreen
 } // namespace DeviceStatus

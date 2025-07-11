@@ -31,18 +31,22 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     WRITEUINT64(parcel, pageContent_.sessionId, false);
     WRITESTRING(parcel, pageContent_.bundleName, false);
     if (pageContent_.scenario >= Scenario::END) {
-        FI_HILOGE("scenario is illedgel");
+        FI_HILOGE("scenario is illegal");
         return false;
     }
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.scenario), false);
     WRITESTRING(parcel, pageContent_.title, false);
     WRITESTRING(parcel, pageContent_.content, false);
-    WRITESTRING(parcel, pageContent_.links, false);
+    WRITESTRING(parcel, pageContent_.pageLink, false);
+    if (pageContent_.paragraphs.size() > static_cast<size_t>(MAX_PARA_LEN)) {
+        FI_HILOGE("paragraph size is too long");
+        return false;
+    }
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.paragraphs.size()), false);
     for (size_t i = 0; i < pageContent_.paragraphs.size(); i++) {
         WRITEUINT64(parcel, pageContent_.paragraphs[i].hookId, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].title, false);
-        WRITESTRING(parcel, pageContent_.paragraphs[i].text, false);
+        WRITESTRING(parcel, pageContent_.paragraphs[i].content, false);
     }
     return true;
 }
@@ -67,25 +71,25 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     READINT32(parcel, scenario, false);
     // scenario 只判断小于0，因为PageContent作为出参，赋初值时为UNKNOWN符合预期
     if (scenario < 0 || scenario >= static_cast<int32_t>(Scenario::END)) {
-        FI_HILOGE("scenario is illedgel");
+        FI_HILOGE("scenario is illegal");
         return false;
     }
     pageContent_.scenario = static_cast<Scenario>(scenario);
     READSTRING(parcel, pageContent_.title, false);
     READSTRING(parcel, pageContent_.content, false);
-    READSTRING(parcel, pageContent_.links, false);
+    READSTRING(parcel, pageContent_.pageLink, false);
     int32_t paragraphSize = 0;
     READINT32(parcel, paragraphSize, false);
     std::vector<Paragraph>().swap(pageContent_.paragraphs);
     if (paragraphSize > MAX_PARA_LEN || paragraphSize < 0) {
-        FI_HILOGE("paragraphSize is invaild");
+        FI_HILOGE("paragraphSize is too long or illedgal");
         return false;
     }
     for (int32_t i = 0; i < paragraphSize; i++) {
         Paragraph para;
         READUINT64(parcel, para.hookId, false);
         READSTRING(parcel, para.title, false);
-        READSTRING(parcel, para.text, false);
+        READSTRING(parcel, para.content, false);
         pageContent_.paragraphs.push_back(para);
     }
     return true;

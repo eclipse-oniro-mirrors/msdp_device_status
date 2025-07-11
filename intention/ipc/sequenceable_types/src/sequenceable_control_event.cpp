@@ -25,7 +25,7 @@ bool SequenceableControlEvent::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, controlEvent_.windowId, false);
     if (controlEvent_.eventType <= EventType::UNKNOWN || controlEvent_.eventType >= EventType::END) {
-        FI_HILOGE("eventType is illedgel");
+        FI_HILOGE("eventType is illegal");
         return false;
     }
     WRITEINT32(parcel, static_cast<int32_t>(controlEvent_.eventType), false);
@@ -51,7 +51,7 @@ bool SequenceableControlEvent::ReadFromParcel(Parcel &parcel)
     READINT32(parcel, eventType, false);
     READUINT64(parcel, controlEvent_.hookId, false);
     if (eventType <= static_cast<int32_t>(EventType::UNKNOWN) || eventType >= static_cast<int32_t>(EventType::END)) {
-        FI_HILOGE("eventType is illedgel");
+        FI_HILOGE("eventType is illegal");
         return false;
     }
     controlEvent_.eventType = static_cast<EventType>(eventType);

@@ -19,6 +19,7 @@
 #include <dlfcn.h>
 #include <vector>
 
+#include "accesstoken_kit.h"
 #include "devicestatus_define.h"
 
 #undef LOG_TAG
@@ -30,8 +31,8 @@ namespace DeviceStatus {
 namespace OnScreen {
 namespace {
 const char *LIB_ON_SCREEN_ALGO_PATH = "/system/lib64/libon_screen.z.so";
-const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.ON_SCREEN_GET_CONTENT";
-const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.ON_SCREEN_CONTROL";
+const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
+const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_PERMISSION = 201;
 }
@@ -59,7 +60,7 @@ int32_t OnScreenServer::GetPageContent(const CallingContext &context, const Cont
 {
     std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
-    if (CheckPermission(context, PERMISSION_GET_PAGE_CONTENT) != RET_OK) {
+    if (!CheckPermission(context, PERMISSION_GET_PAGE_CONTENT)) {
         FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_GET_PAGE_CONTENT);
         return RET_NO_PERMISSION;
     }
@@ -86,7 +87,7 @@ int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const Co
 {
     std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
-    if (CheckPermission(context, PERMISSION_SEND_CONTROL_EVENT) != RET_OK) {
+    if (!CheckPermission(context, PERMISSION_SEND_CONTROL_EVENT)) {
         FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_SEND_CONTROL_EVENT);
         return RET_NO_PERMISSION;
     }
@@ -154,9 +155,14 @@ int32_t OnScreenServer::UnloadAlgoLib()
     return RET_OK;
 }
 
-int32_t OnScreenServer::CheckPermission(const CallingContext &context, const std::string &permission)
+bool OnScreenServer::CheckPermission(const CallingContext &context, const std::string &permission)
 {
-    return RET_OK;
+    auto type = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    FI_HILOGD("called tokenType is %{public}d", type);
+    if (type == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        FI_HILOGD("called tokenType is shell, verify succ");
+    }
+    return Security::AccessToken::AccessTokenKit::VerifyAccessToken(context.tokenId, permission) == RET_OK;
 }
 } // namespace OnScreen
 } // namespace DeviceStatus
