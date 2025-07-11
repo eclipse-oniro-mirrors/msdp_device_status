@@ -83,6 +83,7 @@ void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
     if (listener == nullptr) {
         delete manager;
         FI_HILOGE("create accessible ability listener failed");
+        return;
     }
 
     auto accessibilityInstance = Accessibility::AccessibilityUITestAbility::GetInstance();
