@@ -42,12 +42,9 @@ void AccessibilityManager::AccessibleAbilityListenerImpl::OnAbilityDisconnected(
 {
     FI_HILOGI("Accessibility is OnAbilityDisconnected");
     std::lock_guard<std::mutex> guard(mutex_);
-    CHKPV(manager_);
     isConnected_ = false;
     CHKPV(callback_);
     callback_(ON_ABILITY_DISCONNECTED);
-    delete manager_;
-    manager_ = nullptr;
 }
 
 void AccessibilityManager::AccessibleAbilityListenerImpl::OnAccessibilityEvent
@@ -77,33 +74,23 @@ void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mutex_);
     CHKPV(callback);
-    AccessibilityManager* manager = new (std::nothrow) AccessibilityManager();
-    CHKPV(manager);
-    auto listener = std::make_shared<AccessibleAbilityListenerImpl>(callback, manager);
+    auto listener = std::make_shared<AccessibleAbilityListenerImpl>(callback);
     if (listener == nullptr) {
-        delete manager;
         FI_HILOGE("create accessible ability listener failed");
-        return;
     }
 
     auto accessibilityInstance = Accessibility::AccessibilityUITestAbility::GetInstance();
-    if (accessibilityInstance == nullptr) {
-        FI_HILOGE("get AccessibilityUITestAbility Instance failed");
-        delete manager;
-        return;
-    }
+    CHKPV(accessibilityInstance);
 
     auto ret = accessibilityInstance->RegisterAbilityListener(listener);
     if (ret != RET_OK) {
         FI_HILOGE("Accessibility register ablity listener failed on connect");
-        delete manager;
         return;
     }
 
     ret = accessibilityInstance->Connect();
     if (ret != RET_OK) {
         FI_HILOGE("Accessibility Connect failed");
-        delete manager;
     }
 }
 
@@ -111,10 +98,8 @@ void AccessibilityManager::AccessibilityDisconnect()
 {
 	std::lock_guard<std::mutex> guard(mutex_);
     auto accessibilityInstance = Accessibility::AccessibilityUITestAbility::GetInstance();
-    if (accessibilityInstance == nullptr) {
-        FI_HILOGE("get AccessibilityUITestAbility Instance failed on disConnect");
-        return;
-    }
+    CHKPV(accessibilityInstance);
+
     auto ret = accessibilityInstance->Disconnect();
     if (ret != RET_OK) {
         FI_HILOGE("Accessibility disConnect failed");

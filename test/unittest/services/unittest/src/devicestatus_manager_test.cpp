@@ -354,8 +354,7 @@ HWTEST_F(DeviceStatusManagerTest, AccessibilityDisconnectTest, TestSize.Level0) 
         EXPECT_EQ(type, ON_ABILITY_SCROLLED_EVENT);
     };
     accessibleAbilityManager->AccessibilityDisconnect();
-    auto listener = std::make_shared<AccessibilityManager::AccessibleAbilityListenerImpl>
-        (callback, accessibleAbilityManager);
+    auto listener = std::make_shared<AccessibilityManager::AccessibleAbilityListenerImpl>(callback);
     ASSERT_NE(listener, nullptr);
     listener->OnAccessibilityEvent(Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT);
     EXPECT_NE(listener->callback_, nullptr);

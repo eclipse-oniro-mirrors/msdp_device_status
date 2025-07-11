@@ -56,8 +56,7 @@ public:
 
     class AccessibleAbilityListenerImpl : public Accessibility::AccessibleAbilityListener {
     public:
-        AccessibleAbilityListenerImpl(AccessibilityCallback callback, AccessibilityManager* manager)
-            : callback_(callback), manager_(manager) {}
+        AccessibleAbilityListenerImpl(AccessibilityCallback callback) : callback_(callback) {}
         ~AccessibleAbilityListenerImpl() = default;
 
         void OnAbilityConnected() override;
@@ -66,7 +65,6 @@ public:
         bool OnKeyPressEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent) override;
     private:
         AccessibilityCallback callback_ { nullptr };
-        AccessibilityManager* manager_ { nullptr };
         std::mutex mutex_;
         bool isConnected_ { false };
     };
