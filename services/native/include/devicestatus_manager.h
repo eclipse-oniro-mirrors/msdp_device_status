@@ -137,7 +137,7 @@ private:
     int32_t boomerangType_ { -1 };
     int32_t event_ { -1 };
     int32_t arrs_[argSize_] {};
-    std::atomic<bool> lastEnable { true };
+    std::atomic<bool> lastEnable_ { true };
     int32_t retryCount { 0 };
     static std::shared_ptr<DeviceStatusManager> g_deviceManager;
     static std::mutex g_mutex;

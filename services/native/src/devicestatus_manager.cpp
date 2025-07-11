@@ -79,9 +79,7 @@ void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t 
     std::lock_guard<std::mutex> guard(g_mutex);
     switch (systemAbilityId) {
         case ACCESSIBILITY_MANAGER_SERVICE_ID: {
-            if (g_deviceManager == nullptr) {
-                g_deviceManager = std::make_shared<DeviceStatusManager>();
-            }
+            g_deviceManager = std::make_shared<DeviceStatusManager>();
             CHKPV(g_deviceManager);
             ACCESSIBILITY_MANAGER.AccessibilityConnect([this](int32_t value) {
                 std::lock_guard<std::mutex> guard(g_mutex);
@@ -122,10 +120,7 @@ void DeviceStatusManager::AccessibilityStatusChange::OnRemoveSystemAbility(int32
         g_deviceManager->isAccessibilityInit = false;
     } else if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
         CHKPV(g_deviceManager);
-        g_deviceManager->lastEnable = true;
-    }
-    if (!g_deviceManager->isAccessibilityInit && g_deviceManager->lastEnable) {
-        g_deviceManager = nullptr;
+        g_deviceManager->lastEnable_ = true;
     }
 }
 
@@ -134,14 +129,11 @@ void DeviceStatusManager::SystemBarStyleChangedListener::OnWindowSystemBarProper
 {
     std::lock_guard<std::mutex> guard(g_mutex);
     FI_HILOGI("OnWindowSystemBarPropertyChanged status:%{public}d", systemBarProperty.enable_);
-    if (g_deviceManager == nullptr) {
-        g_deviceManager = std::make_shared<DeviceStatusManager>();
-    }
     CHKPV(g_deviceManager);
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ != g_deviceManager->lastEnable) {
-        g_deviceManager->lastEnable = systemBarProperty.enable_;
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ != g_deviceManager->lastEnable_) {
+        g_deviceManager->lastEnable_ = systemBarProperty.enable_;
     }
-    if (!g_deviceManager->lastEnable) {
+    if (!g_deviceManager->lastEnable_) {
         g_deviceManager->HandlerPageScrollerEvent();
     }
 }
@@ -181,7 +173,7 @@ bool DeviceStatusManager::Init()
     auto windowStatusChange = sptr<AccessibilityStatusChange>::MakeSptr();
     ret = samgrProxy->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, windowStatusChange);
     if (ret != RET_OK) {
-        FI_HILOGE("SubscribeSystemAbility window manager service faild");
+        FI_HILOGE("SubscribeSystemAbility service faild on window manager");
         return false;
     }
     FI_HILOGD("Init success");
@@ -692,7 +684,7 @@ void DeviceStatusManager::HandlerPageScrollerEvent()
         return;
     }
     CHKPV(g_deviceManager);
-    if (g_deviceManager->lastEnable || bundleName != BUNDLE_NAME) {
+    if (g_deviceManager->lastEnable_ || bundleName != BUNDLE_NAME) {
         FI_HILOGD("The current status bar is in display mode or does not belong to the whitelist application");
         return;
     }

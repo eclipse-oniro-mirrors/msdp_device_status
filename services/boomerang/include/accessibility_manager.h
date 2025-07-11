@@ -16,10 +16,11 @@
 #ifndef ACCESSIBILITY_MANAGER_H
 #define ACCESSIBILITY_MANAGER_H
 
+#include <vector>
+
 #include <functional>
 #include "nocopyable.h"
 #include "singleton.h"
-#include <vector>
 
 #include "accessibility_system_ability_client.h"
 #include "accessibility_ui_test_ability.h"
@@ -63,11 +64,11 @@ public:
         void OnAbilityDisconnected() override;
         void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo &eventInfo) override;
         bool OnKeyPressEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent) override;
-        bool isConnected{ false };
     private:
-        AccessibilityCallback callback_;
+        AccessibilityCallback callback_ { nullptr };
         AccessibilityManager* manager_ { nullptr };
         std::mutex mutex_;
+        bool isConnected{ false };
     };
 
     void AccessibilityConnect(AccessibilityCallback callback);

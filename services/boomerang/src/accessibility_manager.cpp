@@ -31,8 +31,8 @@ namespace Msdp {
 namespace DeviceStatus {
 void AccessibilityManager::AccessibleAbilityListenerImpl::OnAbilityConnected()
 {
-    std::lock_guard<std::mutex> guard(mutex_);
     FI_HILOGI("Accessibility is OnAbilityConnected");
+    std::lock_guard<std::mutex> guard(mutex_);
     isConnected = true;
     CHKPV(callback_);
     callback_(ON_ABILITY_CONNECTED);
@@ -40,14 +40,14 @@ void AccessibilityManager::AccessibleAbilityListenerImpl::OnAbilityConnected()
 
 void AccessibilityManager::AccessibleAbilityListenerImpl::OnAbilityDisconnected()
 {
-    std::lock_guard<std::mutex> guard(mutex_);
     FI_HILOGI("Accessibility is OnAbilityDisconnected");
+    std::lock_guard<std::mutex> guard(mutex_);
     CHKPV(manager_);
     isConnected = false;
     CHKPV(callback_);
     callback_(ON_ABILITY_DISCONNECTED);
     callback_ = nullptr;
-    manager_ = nullptr;
+    delete manager_;
 }
 
 void AccessibilityManager::AccessibleAbilityListenerImpl::OnAccessibilityEvent
@@ -74,25 +74,33 @@ AccessibilityManager::~AccessibilityManager() = default;
 
 void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
 {
-    std::lock_guard<std::mutex> guard(mutex_);
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mutex_);
     CHKPV(callback);
     AccessibilityManager* manager = new (std::nothrow) AccessibilityManager();
     CHKPV(manager);
     auto listener = std::make_shared<AccessibleAbilityListenerImpl>(callback, manager);
     if (listener == nullptr) {
+        delete manager;
         FI_HILOGE("create accessible ability listener failed");
+    }
+
+    auto accessibilityInstance = Accessibility::AccessibilityUITestAbility::GetInstance();
+    if (accessibilityInstance == nullptr) {
+        FI_HILOGE("get AccessibilityUITestAbility Instance failed");
         delete manager;
         return;
     }
-    auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->RegisterAbilityListener(listener);
-    if (ret != 0) {
-        FI_HILOGE("Accessibility register ablity listener failed");
+
+    auto ret = accessibilityInstance->RegisterAbilityListener(listener);
+    if (ret != RET_OK) {
+        FI_HILOGE("Accessibility register ablity listener failed on connect");
         delete manager;
         return;
     }
+
     ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Connect();
-    if (ret != 0) {
+    if (ret != RET_OK) {
         FI_HILOGE("Accessibility Connect failed");
         delete manager;
         return;
@@ -101,9 +109,14 @@ void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
 
 void AccessibilityManager::AccessibilityDisconnect()
 {
-    std::lock_guard<std::mutex> guard(mutex_);
+	std::lock_guard<std::mutex> guard(mutex_);
+    auto accessibilityInstance = Accessibility::AccessibilityUITestAbility::GetInstance();
+    if (accessibilityInstance == nullptr) {
+        FI_HILOGE("get AccessibilityUITestAbility Instance failed on disConnect");
+        return;
+    }
     auto ret = Accessibility::AccessibilityUITestAbility::GetInstance()->Disconnect();
-    if (ret != 0) {
+    if (ret != RET_OK) {
         FI_HILOGE("Accessibility disConnect failed");
         return;
     }
