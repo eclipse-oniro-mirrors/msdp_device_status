@@ -33,7 +33,6 @@ void AccessibilityManager::AccessibleAbilityListenerImpl::OnAbilityConnected()
 {
     FI_HILOGI("Accessibility is OnAbilityConnected");
     std::lock_guard<std::mutex> guard(mutex_);
-    isConnected_ = true;
     CHKPV(callback_);
     callback_(ON_ABILITY_CONNECTED);
 }
@@ -42,7 +41,6 @@ void AccessibilityManager::AccessibleAbilityListenerImpl::OnAbilityDisconnected(
 {
     FI_HILOGI("Accessibility is OnAbilityDisconnected");
     std::lock_guard<std::mutex> guard(mutex_);
-    isConnected_ = false;
     CHKPV(callback_);
     callback_(ON_ABILITY_DISCONNECTED);
 }
