@@ -94,11 +94,11 @@ HWTEST_F(DeviceStatusManagerTest, HandlerPageScrollerEventTest, TestSize.Level0)
     EXPECT_EQ(deviceStatusManager->g_deviceManager, nullptr);
     deviceStatusManager->g_deviceManager = std::make_shared<DeviceStatusManager>();
     ASSERT_NE(deviceStatusManager->g_deviceManager, nullptr);
-    deviceStatusManager->g_deviceManager->lastEnable = true;
+    deviceStatusManager->g_deviceManager->lastEnable_ = true;
     deviceStatusManager->HandlerPageScrollerEvent();
-    deviceStatusManager->g_deviceManager->lastEnable = false;
+    deviceStatusManager->g_deviceManager->lastEnable_ = false;
     deviceStatusManager->HandlerPageScrollerEvent();
-    EXPECT_TRUE(deviceStatusManager->lastEnable);
+    EXPECT_TRUE(deviceStatusManager->lastEnable_);
     GTEST_LOG_(INFO) << "HandlerPageScrollerEventTest end";
 }
 
@@ -120,7 +120,7 @@ HWTEST_F(DeviceStatusManagerTest, OnSurfaceCaptureTest, TestSize.Level0)
 
     pixelMap = CreateEmptyPixelMap();
     deviceStatusManager->OnSurfaceCapture(windowId, pixelMap);
-    EXPECT_TRUE(deviceStatusManager->lastEnable);
+    EXPECT_TRUE(deviceStatusManager->lastEnable_);
 
     auto algo = std::make_shared<BoomerangAlgoImpl>();
     EXPECT_NE(algo, nullptr);
@@ -129,7 +129,7 @@ HWTEST_F(DeviceStatusManagerTest, OnSurfaceCaptureTest, TestSize.Level0)
     algo->EncodeImage(pixelMap, "metadata", encodePixelMap);
     EXPECT_NE(encodePixelMap, nullptr);
     deviceStatusManager->OnSurfaceCapture(windowId, pixelMap);
-    EXPECT_TRUE(deviceStatusManager->lastEnable);
+    EXPECT_TRUE(deviceStatusManager->lastEnable_);
     GTEST_LOG_(INFO) << "OnSurfaceCaptureTest end";
 }
 
@@ -211,7 +211,7 @@ HWTEST_F(DeviceStatusManagerTest, OnRemoveSystemAbilityTest, TestSize.Level0) {
     EXPECT_EQ(deviceStatusManager->g_deviceManager, nullptr);
 
     accessibilityStatusChange->OnRemoveSystemAbility(WINDOW_MANAGER_SERVICE_ID, deviceId);
-    EXPECT_TRUE(deviceStatusManager->lastEnable);
+    EXPECT_TRUE(deviceStatusManager->lastEnable_);
     GTEST_LOG_(INFO) << "OnRemoveSystemAbilityTest end";
 }
 
@@ -227,11 +227,11 @@ HWTEST_F(DeviceStatusManagerTest, OnWindowSystemBarPropertyChangedTest, TestSize
     SystemBarProperty property4Params(true, 1, 1, true);
     listener->OnWindowSystemBarPropertyChanged({}, property4Params);
     EXPECT_NE(deviceStatusManager->g_deviceManager, nullptr);
-    EXPECT_EQ(deviceStatusManager->g_deviceManager->lastEnable, true);
+    EXPECT_EQ(deviceStatusManager->g_deviceManager->lastEnable_, true);
 
     property4Params.enable_ = false;
     listener->OnWindowSystemBarPropertyChanged(WindowType::WINDOW_TYPE_STATUS_BAR, property4Params);
-    EXPECT_EQ(deviceStatusManager->g_deviceManager->lastEnable, false);
+    EXPECT_EQ(deviceStatusManager->g_deviceManager->lastEnable_, false);
     GTEST_LOG_(INFO) << "OnWindowSystemBarPropertyChangedTest end";
 }
 
