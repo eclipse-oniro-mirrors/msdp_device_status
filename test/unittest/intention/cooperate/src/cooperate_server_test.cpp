@@ -63,7 +63,7 @@ uint64_t GetShellTokenId()
 uint64_t GetNativeTokenIdFromProcess(const std::string &process)
 {
     uint64_t selfTokenId = GetSelfTokenID();
-    EXPECT_EQ(0, SetSelfTokenID(GetShellTokenId())); 
+    EXPECT_EQ(0, SetSelfTokenID(GetShellTokenId()));
 
     std::string dumpInfo;
     Security::AccessToken::AtmToolsParamInfo info;
@@ -94,7 +94,8 @@ int32_t AllocTestHapToken(const Security::AccessToken::HapInfoParams& hapInfo,
     uint64_t selfTokenId = GetSelfTokenID();
     for (auto& permissionStateFull : hapPolicy.permStateList) {
         Security::AccessToken::PermissionDef permDefResult;
-        if (Security::AccessToken::AccessTokenKit::GetDefPermission(permissionStateFull.permissionName, permDefResult) != Security::AccessToken::RET_SUCCESS) {
+        if (Security::AccessToken::AccessTokenKit::GetDefPermission(permissionStateFull.permissionName, permDefResult)
+            != Security::AccessToken::RET_SUCCESS) {
             continue;
         }
         if (permDefResult.availableLevel > hapPolicy.apl) {
@@ -212,11 +213,12 @@ void CooperateServerTest::SetUpTestCase()
     reqPerm.emplace_back(COOPERATE_ACCESS_PERMISSION);
     g_mock = new (std::nothrow) MockHapToken("MouseLocationListenerTest", reqPerm, true);
     CHKPV(g_mock);
-    FI_HILOGI("SetUpTestCase ok.");  
+    FI_HILOGI("SetUpTestCase ok.");
 }
 
 void CooperateServerTest::TearDownTestCase()
 {
+    std::lock_guard<std::mutex> lock(g_lockSetToken);
     g_shellTokenId = 0;
     if (g_mock != nullptr) {
         delete g_mock;
