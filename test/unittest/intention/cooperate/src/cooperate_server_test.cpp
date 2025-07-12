@@ -134,7 +134,7 @@ MockNativeToken::MockNativeToken(const std::string& process)
 {
     selfToken_ = GetSelfTokenID();
     uint32_t tokenId = GetNativeTokenIdFromProcess(process);
-    FI_HILOGI("yyl selfToken_:%{public}ld,tokenId:%{public}d", selfToken_, tokenId);
+    FI_HILOGI("selfToken_:%{public}" PRId64 ", tokenId:%{public}u", selfToken_, tokenId);
     SetSelfTokenID(tokenId);
 }
 
