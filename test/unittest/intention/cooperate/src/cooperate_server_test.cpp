@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 
 #include "cooperate_server.h"
+#include "cooperate_server_test.h"
 #include "fi_log.h"
 #include "nativetoken_kit.h"
 #include "test_context.h"
@@ -34,29 +35,164 @@ namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
 int32_t g_userData { 1 };
-uint64_t g_tokenID { 0 };
 uint64_t g_tokenID1 { 5 };
-const std::string SYSTEM_BASIC { "system_basic" };
-const char* g_basics[] = { "ohos.permission.COOPERATE_MANAGER" };
+const std::string COOPERATE_ACCESS_PERMISSION { "ohos.permission.COOPERATE_MANAGER" };
+std::mutex g_lockSetToken;
+uint64_t g_shellTokenId = 0;
+static constexpr int32_t DEFAULT_API_VERSION = 12;
+static MockHapToken* g_mock = nullptr;
 } // namespace
+void SetTestEvironment(uint64_t shellTokenId)
+{
+    std::lock_guard<std::mutex> lock(g_lockSetToken);
+    g_shellTokenId = shellTokenId;
+}
 
-class CooperateServerTest : public testing::Test {
-public:
-    CooperateServerTest();
-    ~CooperateServerTest() = default;
+void ResetTestEvironment()
+{
+    std::lock_guard<std::mutex> lock(g_lockSetToken);
+    g_shellTokenId = 0;
+}
 
-    void SetUp();
-    void TearDown();
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    static void SetPermission(const std::string &level, const char** perms, size_t permAmount);
-    static void RemovePermission();
+uint64_t GetShellTokenId()
+{
+    std::lock_guard<std::mutex> lock(g_lockSetToken);
+    return g_shellTokenId;
+}
 
-private:
-    Intention intention_ { Intention::COOPERATE };
-    std::shared_ptr<TestContext> context_ { nullptr };
-    std::shared_ptr<CooperateServer> cooperateServer_ { nullptr };
-};
+uint64_t GetNativeTokenIdFromProcess(const std::string &process)
+{
+    uint64_t selfTokenId = GetSelfTokenID();
+    EXPECT_EQ(0, SetSelfTokenID(GetShellTokenId())); 
+
+    std::string dumpInfo;
+    Security::AccessToken::AtmToolsParamInfo info;
+    info.processName = process;
+    Security::AccessToken::AccessTokenKit::DumpTokenInfo(info, dumpInfo);
+    size_t pos = dumpInfo.find("\"tokenID\": ");
+    if (pos == std::string::npos) {
+        FI_HILOGE("tokenid not find");
+        return 0;
+    }
+    pos += std::string("\"tokenID\": ").length();
+    std::string numStr;
+    while (pos < dumpInfo.length() && std::isdigit(dumpInfo[pos])) {
+        numStr += dumpInfo[pos];
+        ++pos;
+    }
+    EXPECT_EQ(0, SetSelfTokenID(selfTokenId));
+
+    std::istringstream iss(numStr);
+    Security::AccessToken::AccessTokenID tokenID;
+    iss >> tokenID;
+    return tokenID;
+}
+
+int32_t AllocTestHapToken(const Security::AccessToken::HapInfoParams& hapInfo,
+    Security::AccessToken::HapPolicyParams& hapPolicy, Security::AccessToken::AccessTokenIDEx& tokenIdEx)
+{
+    uint64_t selfTokenId = GetSelfTokenID();
+    for (auto& permissionStateFull : hapPolicy.permStateList) {
+        Security::AccessToken::PermissionDef permDefResult;
+        if (Security::AccessToken::AccessTokenKit::GetDefPermission(permissionStateFull.permissionName, permDefResult) != Security::AccessToken::RET_SUCCESS) {
+            continue;
+        }
+        if (permDefResult.availableLevel > hapPolicy.apl) {
+            hapPolicy.aclRequestedList.emplace_back(permissionStateFull.permissionName);
+        }
+    }
+    if (GetNativeTokenIdFromProcess("foundation") == selfTokenId) {
+        return Security::AccessToken::AccessTokenKit::InitHapToken(hapInfo, hapPolicy, tokenIdEx);
+    }
+
+    MockNativeToken mock("foundation");
+    int32_t ret = Security::AccessToken::AccessTokenKit::InitHapToken(hapInfo, hapPolicy, tokenIdEx);
+
+    // restore
+    EXPECT_EQ(0, SetSelfTokenID(selfTokenId));
+
+    return ret;
+}
+
+int32_t DeleteTestHapToken(Security::AccessToken::AccessTokenID tokenID)
+{
+    uint64_t selfTokenId = GetSelfTokenID();
+    if (GetNativeTokenIdFromProcess("foundation") == selfTokenId) {
+        return Security::AccessToken::AccessTokenKit::DeleteToken(tokenID);
+    }
+
+    MockNativeToken mock("foundation");
+
+    int32_t ret = Security::AccessToken::AccessTokenKit::DeleteToken(tokenID);
+
+    EXPECT_EQ(0, SetSelfTokenID(selfTokenId));
+    return ret;
+}
+
+MockNativeToken::MockNativeToken(const std::string& process)
+{
+    selfToken_ = GetSelfTokenID();
+    uint32_t tokenId = GetNativeTokenIdFromProcess(process);
+    FI_HILOGI("yyl selfToken_:%{public}ld,tokenId:%{public}d", selfToken_, tokenId);
+    SetSelfTokenID(tokenId);
+}
+
+MockNativeToken::~MockNativeToken()
+{
+    SetSelfTokenID(selfToken_);
+}
+
+MockHapToken::MockHapToken(
+    const std::string& bundle, const std::vector<std::string>& reqPerm, bool isSystemApp)
+{
+    selfToken_ = GetSelfTokenID();
+    Security::AccessToken::HapInfoParams infoParams = {
+        .userID = 0,
+        .bundleName = bundle,
+        .instIndex = 0,
+        .appIDDesc = "AccessTokenTestAppID",
+        .apiVersion = DEFAULT_API_VERSION,
+        .isSystemApp = isSystemApp,
+        .appDistributionType = "",
+    };
+
+    Security::AccessToken::HapPolicyParams policyParams = {
+        .apl = Security::AccessToken::APL_NORMAL,
+        .domain = "accesstoken_test_domain",
+    };
+    for (size_t i = 0; i < reqPerm.size(); ++i) {
+        Security::AccessToken::PermissionDef permDefResult;
+        if (Security::AccessToken::AccessTokenKit::GetDefPermission(reqPerm[i], permDefResult)
+            != Security::AccessToken::RET_SUCCESS) {
+            continue;
+        }
+        Security::AccessToken::PermissionStateFull permState = {
+            .permissionName = reqPerm[i],
+            .isGeneral = true,
+            .resDeviceID = {"local3"},
+            .grantStatus = {Security::AccessToken::PermissionState::PERMISSION_DENIED},
+            .grantFlags = {Security::AccessToken::PermissionFlag::PERMISSION_DEFAULT_FLAG}
+        };
+        policyParams.permStateList.emplace_back(permState);
+        if (permDefResult.availableLevel > policyParams.apl) {
+            policyParams.aclRequestedList.emplace_back(reqPerm[i]);
+        }
+    }
+
+    Security::AccessToken::AccessTokenIDEx tokenIdEx = {0};
+    EXPECT_EQ(Security::AccessToken::RET_SUCCESS, AllocTestHapToken(infoParams, policyParams, tokenIdEx));
+    mockToken_= tokenIdEx.tokenIdExStruct.tokenID;
+    EXPECT_NE(mockToken_, Security::AccessToken::INVALID_TOKENID);
+    EXPECT_EQ(0, SetSelfTokenID(tokenIdEx.tokenIDEx));
+}
+
+MockHapToken::~MockHapToken()
+{
+    if (mockToken_ != Security::AccessToken::INVALID_TOKENID) {
+        EXPECT_EQ(0, DeleteTestHapToken(mockToken_));
+    }
+    EXPECT_EQ(0, SetSelfTokenID(selfToken_));
+}
 
 CooperateServerTest::CooperateServerTest()
 {
@@ -72,44 +208,19 @@ void CooperateServerTest::TearDown()
 
 void CooperateServerTest::SetUpTestCase()
 {
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
+    std::vector<std::string> reqPerm;
+    reqPerm.emplace_back(COOPERATE_ACCESS_PERMISSION);
+    g_mock = new (std::nothrow) MockHapToken("MouseLocationListenerTest", reqPerm, true);
+    CHKPV(g_mock);
+    FI_HILOGI("SetUpTestCase ok.");  
 }
 
 void CooperateServerTest::TearDownTestCase()
 {
-    RemovePermission();
-}
-
-void CooperateServerTest::SetPermission(const std::string &level, const char** perms, size_t permAmount)
-{
-    CALL_DEBUG_ENTER;
-    if (perms == nullptr || permAmount == 0) {
-        FI_HILOGE("The perms is empty");
-        return;
-    }
-
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = permAmount,
-        .aclsNum = 0,
-        .dcaps = nullptr,
-        .perms = perms,
-        .acls = nullptr,
-        .processName = "CooperateServerTest",
-        .aplStr = level.c_str(),
-    };
-    g_tokenID = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(g_tokenID);
-    OHOS::Security::AccessToken::AccessTokenKit::AccessTokenKit::ReloadNativeTokenInfo();
-}
-
-void CooperateServerTest::RemovePermission()
-{
-    CALL_DEBUG_ENTER;
-    int32_t ret = OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenID);
-    if (ret != RET_OK) {
-        FI_HILOGE("Failed to remove permission");
-        return;
+    g_shellTokenId = 0;
+    if (g_mock != nullptr) {
+        delete g_mock;
+        g_mock = nullptr;
     }
 }
 
@@ -212,7 +323,6 @@ HWTEST_F(CooperateServerTest, StartTest1, TestSize.Level0)
     context_->GetPluginManager().UnloadCooperate();
 }
 
-
 /**
  * @tc.name: StartTest2
  * @tc.desc: Test func named start
@@ -237,12 +347,12 @@ HWTEST_F(CooperateServerTest, StartTest2, TestSize.Level0)
 }
 
 /**
- * @tc.name: StartCooperateWithOptionstTest1
- * @tc.desc: Test func named StartCooperateWithOptions
+ * @tc.name: StartWithOptionsTest1
+ * @tc.desc: Test func named start
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CooperateServerTest, StartCooperateWithOptionsTest1, TestSize.Level0)
+HWTEST_F(CooperateServerTest, StartWithOptionsTest1, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -251,34 +361,15 @@ HWTEST_F(CooperateServerTest, StartCooperateWithOptionsTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    std::string remoteNetworkId = "networkId";
+    std::string networkId = "networkId";
     int32_t startDeviceId = 0;
-    CooperateOptions options;
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperateWithOptions(context,
-        remoteNetworkId, g_userData, startDeviceId, options));
-    context_->GetPluginManager().UnloadCooperate();
-}
-
-/**
- * @tc.name: StartCooperateWithOptionstTest2
- * @tc.desc: Test func named StartCooperateWithOptions
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(CooperateServerTest, StartCooperateWithOptionsTest2, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = intention_,
-        .tokenId = g_tokenID1,
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
+    CooperateOptions options {
+            .displayX = 500,
+            .displayY = 500,
+            .displayId = 1
     };
-    std::string remoteNetworkId = "networkId";
-    int32_t startDeviceId = 0;
-    CooperateOptions options;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperateWithOptions(context,
-        remoteNetworkId, g_userData, startDeviceId, options));
+        networkId, g_userData, startDeviceId, options));
     context_->GetPluginManager().UnloadCooperate();
 }
 
