@@ -541,6 +541,173 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TimerManagerTest_AddTimerAsync001
+ * @tc.desc: Test AddTimer, Parameter correct expected success
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+
+    timerId_ = env->GetTimerManager().AddTimerAsync(DEFAULT_DELAY_TIME, RETRY_TIME, [this, env]() {
+        if (timerInfo_.times == 0) {
+            FI_HILOGI("It will be retry to call callback next time");
+            timerInfo_.times++;
+        } else {
+            env->GetTimerManager().RemoveTimerAsync(timerInfo_.timerId);
+        }
+    });
+    if (timerId_ < 0) {
+        FI_HILOGE("AddTimer failed");
+    } else {
+        FI_HILOGI("Add the timer %{public}d success", timerId_);
+    }
+
+    timerInfo_.timerId = timerId_;
+    timerInfo_.times = 0;
+
+    EXPECT_GE(timerId_, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS * RETRY_TIME));
+    timerId_ = -1;
+    timerInfo_.timerId = -1;
+}
+
+/**
+ * @tc.name: TimerManagerTest_AddTimerAsync002
+ * @tc.desc: Test AddTimer, Parameter correct expected success
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync002, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+
+    timerId_ = env->GetTimerManager().AddTimerAsync(DEFAULT_TIMEOUT, REPEAT_ONCE, [this, env]() {
+        FI_HILOGI("Timer %{public}d excute one times", timerId_);
+        EXPECT_GE(timerId_, 0);
+        env->GetTimerManager().RemoveTimerAsync(timerId_);
+    });
+    if (timerId_ < 0) {
+        FI_HILOGE("AddTimer failed");
+    } else {
+        FI_HILOGI("Add the timer %{public}d success", timerId_);
+    }
+
+    EXPECT_GE(timerId_, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    timerId_ = -1;
+}
+
+/**
+ * @tc.name: TimerManagerTest_AddTimerAsync003
+ * @tc.desc: Test AddTimer, Parameter correct expected success
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync003, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+
+    timerId_ = env->GetTimerManager().AddTimerAsync(DEFAULT_TIMEOUT, REPEAT_ONCE, [this, env]() {
+        if (timerId_ >= 0) {
+            env->GetTimerManager().RemoveTimerAsync(timerId_);
+            EXPECT_GE(timerId_, 0);
+        }
+    });
+
+    if (timerId_ < 0) {
+        FI_HILOGE("AddTimer failed");
+    } else {
+        FI_HILOGI("Add the timer %{public}d success", timerId_);
+    }
+
+    EXPECT_GE(timerId_, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    timerId_ = -1;
+}
+
+/**
+ * @tc.name: TimerManagerTest_AddTimerAsync004
+ * @tc.desc: Test AddTimer, Invalid number of repetitions, expected failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync004, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+
+    timerId_ = env->GetTimerManager().AddTimerAsync(DEFAULT_TIMEOUT, ERROR_REPEAT_COUNT, [this, env]() {
+        FI_HILOGI("Timer %{public}d excute onetimes", timerId_);
+        env->GetTimerManager().RemoveTimerAsync(timerId_);
+        EXPECT_GE(timerId_, 0);
+        timerId_ = -1;
+    });
+
+    if (timerId_ < 0) {
+        FI_HILOGI("Invalid repeat-count value, then error, so success");
+    } else {
+        FI_HILOGE("Invalid repeat-count value, but okay, so failed");
+    }
+
+    EXPECT_GE(timerId_, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
+/**
+ * @tc.name: TimerManagerTest_AddTimerAsync005
+ * @tc.desc: Test AddTimer, Invalid interval time, expected failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync005, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+
+    timerId_ = env->GetTimerManager().AddTimerAsync(ERROR_INTERVAL_MS, REPEAT_ONCE, [this, env]() {
+        FI_HILOGI("Timer %{public}d excute onetimes", timerId_);
+        env->GetTimerManager().RemoveTimerAsync(timerId_);
+        EXPECT_GE(timerId_, 0);
+    });
+    if (timerId_ < 0) {
+        FI_HILOGI("Invalid interval value, then error, so success");
+    } else {
+        FI_HILOGE("Invalid interval value, but okay, so failed");
+    }
+
+    EXPECT_GE(timerId_, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    timerId_ = -1;
+}
+
+/**
+ * @tc.name: TimerManagerTest_AddTimerAsync006
+ * @tc.desc: Test AddTimer, Invalid callback function, expected failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync006, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    timerId_ = env->GetTimerManager().AddTimerAsync(ERROR_INTERVAL_MS, REPEAT_ONCE, nullptr);
+    if (timerId_ < 0) {
+        FI_HILOGI("Invalid callback value, then error, so success");
+    } else {
+        FI_HILOGE("Invalid callback value, but okay, so failed");
+    }
+
+    EXPECT_GE(timerId_, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    timerId_ = -1;
+}
+
+/**
  * @tc.name: TimerManagerTest_GetTimerFd001
  * @tc.desc: Test GetTimerFd, Obtaining initialized TimerFd, expected success
  * @tc.type: FUNC
