@@ -119,6 +119,7 @@ bool UnderageModelNapi::SubscribeCallback(napi_env env, uint32_t type)
                 dlsym(g_underageModelObj->g_userStatusHandle, REGISTER_LISTENER_FUNC_NAME.data()));
             if (g_underageModelObj->g_registerListenerFunc == nullptr) {
                 FI_HILOGE("RegisterListener find symbol failed, error: %{public}s", dlerror());
+                ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Find symbol failed");
                 return false;
             }
         }
@@ -126,9 +127,10 @@ bool UnderageModelNapi::SubscribeCallback(napi_env env, uint32_t type)
         int32_t ret = std::abs(g_underageModelObj->g_registerListenerFunc(type, listener));
         if (ret < MAX_ERROR_CODE) {
             FI_HILOGE("RegisterListener failed, ret:%{public}d", ret);
+            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "RegisterListener failed");
             return false;
         }
-        if (!Subscribe(type)) {
+        if (!Subscribe(env, type)) {
             return false;
         }
         g_underageModelObj->callbacks_.insert(std::make_pair(type, listener));
@@ -162,6 +164,10 @@ bool UnderageModelNapi::UnsubscribeCallback(napi_env env, uint32_t type)
         if (ret == RET_OK) {
             g_underageModelObj->callbacks_.erase(iter);
             return true;
+        } else if (ret == DEVICE_EXCEPTION) {
+            FI_HILOGE("failed to unsubscribe");
+            ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
+            return false;
         }
         FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
         ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
@@ -169,22 +175,28 @@ bool UnderageModelNapi::UnsubscribeCallback(napi_env env, uint32_t type)
     return false;
 }
 
-bool UnderageModelNapi::Subscribe(uint32_t type)
+bool UnderageModelNapi::Subscribe(napi_env env, uint32_t type)
 {
     if (g_underageModelObj->g_subscribeFunc == nullptr) {
         g_underageModelObj->g_subscribeFunc = reinterpret_cast<SubscribeFunc>(
             dlsym(g_underageModelObj->g_userStatusHandle, SUBSCRIBE_FUNC_NAME.data()));
         if (g_underageModelObj->g_subscribeFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s", SUBSCRIBE_FUNC_NAME.data(), dlerror());
+            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Find symbol failed");
             return false;
         }
     }
     int32_t ret = g_underageModelObj->g_subscribeFunc(type);
-    if (ret != RET_OK) {
-        FI_HILOGE("Subscribe failed, ret: %{public}d", ret);
+    if (ret == RET_OK) {
+        return true;
+    } else if (ret == DEVICE_EXCEPTION) {
+        FI_HILOGE("failed to subscribe");
+        ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
         return false;
     }
-    return true;
+    FI_HILOGE("failed to subscribe");
+    ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Subscribe failed");
+    return false;
 }
 
 napi_value UnderageModelNapi::SubscribeUnderageModel(napi_env env, napi_callback_info info)
@@ -223,7 +235,6 @@ napi_value UnderageModelNapi::SubscribeUnderageModel(napi_env env, napi_callback
             return nullptr;
         }
         if (!SubscribeCallback(env, type)) {
-            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "SubscribeCallback failed");
             return nullptr;
         }
         if (!g_underageModelObj->AddCallback(type, args[1])) {
