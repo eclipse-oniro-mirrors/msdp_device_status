@@ -50,14 +50,14 @@ struct ContentOption {
 };
 
 struct Paragraph {
-    uint64_t hookId = 0;
+    int64_t hookId = 0;
     std::string title;
     std::string content;
 };
 
 struct PageContent {
     int32_t windowId = -1;
-    uint64_t sessionId = 0;
+    int64_t sessionId = 0;
     std::string bundleName;
     // content understand = true
     Scenario scenario = Scenario::UNKNOWN;
@@ -71,8 +71,9 @@ struct PageContent {
 
 struct ControlEvent {
     int32_t windowId = 0;
+    int64_t sessionId = 0;
     EventType eventType = EventType::UNKNOWN;
-    uint64_t hookId = 0;
+    int64_t hookId = 0;
 };
 
 struct OnScreenCallingContext {

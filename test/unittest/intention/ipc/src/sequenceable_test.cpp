@@ -262,15 +262,17 @@ HWTEST_F(SequencableTest, SequencableTest13, TestSize.Level1)
     CALL_TEST_DEBUG;
     Parcel parcel;
     parcel.WriteInt32(0);
+    parcel.WriteInt64(0);
     parcel.WriteInt32(static_cast<int32_t>(OnScreen::EventType::END) + 1);
-    parcel.WriteUint64(0);
+    parcel.WriteInt64(0);
     OnScreen::SequenceableControlEvent event;
     OnScreen::SequenceableControlEvent *eventPtr = event.Unmarshalling(parcel);
     EXPECT_EQ(eventPtr, nullptr);
     Parcel parcel1;
     parcel1.WriteInt32(0);
+    parcel1.WriteInt64(0);
     parcel1.WriteInt32(-1);
-    parcel1.WriteUint64(0);
+    parcel1.WriteInt64(0);
     eventPtr = event.Unmarshalling(parcel1);
     EXPECT_EQ(eventPtr, nullptr);
 }
@@ -288,7 +290,7 @@ HWTEST_F(SequencableTest, SequencableTest14, TestSize.Level1)
     OnScreen::SequenceablePageContent content;
     std::string str;
     parcel.WriteInt32(0);
-    parcel.WriteUint64(0);
+    parcel.WriteInt64(0);
     parcel.WriteString(str);
     parcel.WriteInt32(static_cast<int32_t>(OnScreen::Scenario::END) + 1);
     parcel.WriteString(str);
@@ -299,7 +301,7 @@ HWTEST_F(SequencableTest, SequencableTest14, TestSize.Level1)
     EXPECT_EQ(contentPtr, nullptr);
     Parcel parcel1;
     parcel1.WriteInt32(0);
-    parcel1.WriteUint64(0);
+    parcel1.WriteInt64(0);
     parcel1.WriteString(str);
     parcel1.WriteInt32(-1);
     parcel1.WriteString(str);
