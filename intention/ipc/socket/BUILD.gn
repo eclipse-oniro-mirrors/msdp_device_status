@@ -102,6 +102,7 @@ ohos_source_set("intention_socket_session_manager") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
 

@@ -46,6 +46,7 @@ ohos_source_set("intention_input_adapter") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "input:libmmi-client",
+    "ipc:ipc_single",
     "c_utils:utils",
   ]
 
