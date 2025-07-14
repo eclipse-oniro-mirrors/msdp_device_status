@@ -368,7 +368,7 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatusCallback(napi_env env, napi_ca
     }
     sptr<IRemoteDevStaCallback> callback = new (std::nothrow) DeviceStatusCallback(env);
     CHKPP(callback);
-    int32_t subscribeRet = StationaryManager::GetInstance()->SubscribeCallback(static_cast<Type>(type),
+    int32_t subscribeRet = StationaryManager::GetInstance().SubscribeCallback(static_cast<Type>(type),
         static_cast<ActivityEvent>(event), static_cast<ReportLatencyNs>(latency), callback);
     if (subscribeRet != RET_OK) {
         ThrowErr(env, SERVICE_EXCEPTION, "On:Failed to SubscribeCallback");
@@ -432,7 +432,7 @@ napi_value DeviceStatusNapi::UnsubscribeCallback(napi_env env, int32_t type, int
         NAPI_ASSERT(env, false, "No existed callback");
         return nullptr;
     }
-    int32_t unsubscribeRet = StationaryManager::GetInstance()->UnsubscribeCallback(static_cast<Type>(type),
+    int32_t unsubscribeRet = StationaryManager::GetInstance().UnsubscribeCallback(static_cast<Type>(type),
         static_cast<ActivityEvent>(event), callbackIter->second);
     if (unsubscribeRet != RET_OK) {
         ThrowErr(env, SERVICE_EXCEPTION, "Off:Failed to UnsubscribeCallback");
@@ -482,7 +482,7 @@ napi_value DeviceStatusNapi::GetDeviceStatus(napi_env env, napi_callback_info in
         FI_HILOGE("type:%{public}d already exists", type);
         return nullptr;
     }
-    Data devicestatusData = StationaryManager::GetInstance()->GetDeviceStatusData(static_cast<Type>(type));
+    Data devicestatusData = StationaryManager::GetInstance().GetDeviceStatusData(static_cast<Type>(type));
     if (devicestatusData.type == Type::TYPE_INVALID) {
         ThrowErr(env, SERVICE_EXCEPTION, "Once:Failed to get device status data");
     }

@@ -57,13 +57,13 @@ HWTEST_F(DeviceStatusModuleTest, DeviceStatusCallbackTest, TestSize.Level0)
 {
     g_moduleTest = Type::TYPE_ABSOLUTE_STILL;
     Type type = g_moduleTest;
-    auto stationaryManager = StationaryManager::GetInstance();
+    StationaryManager& stationaryManager = StationaryManager::GetInstance();
     sptr<IRemoteDevStaCallback> cb = new (std::nothrow) DeviceStatusModuleTestCallback();
     EXPECT_FALSE(cb == nullptr);
     GTEST_LOG_(INFO) << "DeviceStatusCallbackTest start register";
-    stationaryManager->SubscribeCallback(type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, cb);
+    stationaryManager.SubscribeCallback(type, ActivityEvent::ENTER_EXIT, ReportLatencyNs::LONG, cb);
     GTEST_LOG_(INFO) << "DeviceStatusCallbackTest cancel register";
-    stationaryManager->UnsubscribeCallback(type, ActivityEvent::ENTER_EXIT, cb);
+    stationaryManager.UnsubscribeCallback(type, ActivityEvent::ENTER_EXIT, cb);
 }
 
 /**
@@ -76,8 +76,8 @@ HWTEST_F(DeviceStatusModuleTest, GetDeviceStatusDataTest001, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_moduleTest = Type::TYPE_HORIZONTAL_POSITION;
     Type type = g_moduleTest;
-    auto stationaryManager = StationaryManager::GetInstance();
-    Data data = stationaryManager->GetDeviceStatusData(type);
+    StationaryManager& stationaryManager = StationaryManager::GetInstance();
+    Data data = stationaryManager.GetDeviceStatusData(type);
     GTEST_LOG_(INFO) << "type: " << data.type;
     GTEST_LOG_(INFO) << "value: " << data.value;
     EXPECT_EQ(true, data.type == g_moduleTest &&
@@ -95,8 +95,8 @@ HWTEST_F(DeviceStatusModuleTest, GetDeviceStatusDataTest002, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_moduleTest = Type::TYPE_ABSOLUTE_STILL;
     Type type = g_moduleTest;
-    auto stationaryManager = StationaryManager::GetInstance();
-    Data data = stationaryManager->GetDeviceStatusData(type);
+    StationaryManager& stationaryManager = StationaryManager::GetInstance();
+    Data data = stationaryManager.GetDeviceStatusData(type);
     GTEST_LOG_(INFO) << "type: " << data.type;
     GTEST_LOG_(INFO) << "value: " << data.value;
     EXPECT_EQ(true, data.type == g_moduleTest &&
@@ -114,8 +114,8 @@ HWTEST_F(DeviceStatusModuleTest, GetDeviceStatusDataTest003, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_moduleTest = Type::TYPE_VERTICAL_POSITION;
     Type type = g_moduleTest;
-    auto stationaryManager = StationaryManager::GetInstance();
-    Data data = stationaryManager->GetDeviceStatusData(type);
+    StationaryManager& stationaryManager = StationaryManager::GetInstance();
+    Data data = stationaryManager.GetDeviceStatusData(type);
     GTEST_LOG_(INFO) << "type: " << data.type;
     GTEST_LOG_(INFO) << "value: " << data.value;
     EXPECT_EQ(true, data.type == g_moduleTest &&
@@ -133,7 +133,7 @@ HWTEST_F(DeviceStatusModuleTest, GetDeviceStatusDataTest004, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_moduleTest = Type::TYPE_STILL;
     Type type = g_moduleTest;
-    Data data = StationaryManager::GetInstance()->GetDeviceStatusData(type);
+    Data data = StationaryManager::GetInstance().GetDeviceStatusData(type);
     GTEST_LOG_(INFO) << "type: " << data.type;
     GTEST_LOG_(INFO) << "value: " << data.value;
     EXPECT_EQ(true, data.type == g_moduleTest &&

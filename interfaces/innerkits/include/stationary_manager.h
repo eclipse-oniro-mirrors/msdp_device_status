@@ -30,13 +30,12 @@ namespace Msdp {
 namespace DeviceStatus {
 class StationaryManager {
 public:
-
     /**
      * @brief Obtains a <b>StationaryManager</b> instance.
      * @return Returns a <b>StationaryManager</b> instance.
      * @since 9
      */
-    static StationaryManager *GetInstance();
+    static StationaryManager& GetInstance();
 
     /**
      * @brief Subscribes to device status changes.
@@ -78,7 +77,6 @@ public:
 private:
     StationaryManager() = default;
     DISALLOW_COPY_AND_MOVE(StationaryManager);
-    static StationaryManager *instance_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

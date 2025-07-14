@@ -115,37 +115,37 @@ HWTEST_F(DeviceStatusClientTest, DeviceStatusCallbackTest001, TestSize.Level0)
     CALL_TEST_DEBUG;
     sptr<IRemoteDevStaCallback> cb = new (std::nothrow) DeviceStatusClientTestCallback();
     ASSERT_NE(cb, nullptr);
-    auto stationaryMgr = StationaryManager::GetInstance();
+    StationaryManager& stationaryMgr = StationaryManager::GetInstance();
     ReportLatencyNs latency = ReportLatencyNs::Latency_INVALID;
     ActivityEvent activityEvent = ActivityEvent::EVENT_INVALID;
-    int32_t result = stationaryMgr->SubscribeCallback(Type::TYPE_VERTICAL_POSITION, activityEvent, latency, cb);
+    int32_t result = stationaryMgr.SubscribeCallback(Type::TYPE_VERTICAL_POSITION, activityEvent, latency, cb);
     ASSERT_EQ(result, RET_OK);
-    result = stationaryMgr->UnsubscribeCallback(Type::TYPE_VERTICAL_POSITION, activityEvent, cb);
-    ASSERT_EQ(result, RET_OK);
-
-    result = stationaryMgr->SubscribeCallback(Type::TYPE_INVALID, activityEvent, latency, cb);
-    ASSERT_EQ(result, RET_OK);
-    result = stationaryMgr->UnsubscribeCallback(Type::TYPE_INVALID, activityEvent, cb);
+    result = stationaryMgr.UnsubscribeCallback(Type::TYPE_VERTICAL_POSITION, activityEvent, cb);
     ASSERT_EQ(result, RET_OK);
 
-    result = stationaryMgr->SubscribeCallback(Type::TYPE_ABSOLUTE_STILL, activityEvent, latency, cb);
+    result = stationaryMgr.SubscribeCallback(Type::TYPE_INVALID, activityEvent, latency, cb);
     ASSERT_EQ(result, RET_OK);
-    result = stationaryMgr->UnsubscribeCallback(Type::TYPE_ABSOLUTE_STILL, activityEvent, cb);
-    ASSERT_EQ(result, RET_OK);
-
-    result = stationaryMgr->SubscribeCallback(Type::TYPE_HORIZONTAL_POSITION, activityEvent, latency, cb);
-    ASSERT_EQ(result, RET_OK);
-    result = stationaryMgr->UnsubscribeCallback(Type::TYPE_HORIZONTAL_POSITION, activityEvent, cb);
+    result = stationaryMgr.UnsubscribeCallback(Type::TYPE_INVALID, activityEvent, cb);
     ASSERT_EQ(result, RET_OK);
 
-    result = stationaryMgr->SubscribeCallback(Type::TYPE_LID_OPEN, activityEvent, latency, cb);
+    result = stationaryMgr.SubscribeCallback(Type::TYPE_ABSOLUTE_STILL, activityEvent, latency, cb);
     ASSERT_EQ(result, RET_OK);
-    result = stationaryMgr->UnsubscribeCallback(Type::TYPE_LID_OPEN, activityEvent, cb);
+    result = stationaryMgr.UnsubscribeCallback(Type::TYPE_ABSOLUTE_STILL, activityEvent, cb);
     ASSERT_EQ(result, RET_OK);
 
-    result = stationaryMgr->SubscribeCallback(Type::TYPE_MAX, activityEvent, latency, cb);
+    result = stationaryMgr.SubscribeCallback(Type::TYPE_HORIZONTAL_POSITION, activityEvent, latency, cb);
     ASSERT_EQ(result, RET_OK);
-    result = stationaryMgr->UnsubscribeCallback(Type::TYPE_MAX, activityEvent, cb);
+    result = stationaryMgr.UnsubscribeCallback(Type::TYPE_HORIZONTAL_POSITION, activityEvent, cb);
+    ASSERT_EQ(result, RET_OK);
+
+    result = stationaryMgr.SubscribeCallback(Type::TYPE_LID_OPEN, activityEvent, latency, cb);
+    ASSERT_EQ(result, RET_OK);
+    result = stationaryMgr.UnsubscribeCallback(Type::TYPE_LID_OPEN, activityEvent, cb);
+    ASSERT_EQ(result, RET_OK);
+
+    result = stationaryMgr.SubscribeCallback(Type::TYPE_MAX, activityEvent, latency, cb);
+    ASSERT_EQ(result, RET_OK);
+    result = stationaryMgr.UnsubscribeCallback(Type::TYPE_MAX, activityEvent, cb);
     ASSERT_EQ(result, RET_OK);
 }
 
@@ -157,32 +157,32 @@ HWTEST_F(DeviceStatusClientTest, DeviceStatusCallbackTest001, TestSize.Level0)
 HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    auto stationaryMgr = StationaryManager::GetInstance();
+    StationaryManager& stationaryMgr = StationaryManager::GetInstance();
     OnChangedValue invalidValue = OnChangedValue::VALUE_INVALID;
     OnChangedValue exitValue = OnChangedValue::VALUE_EXIT;
 
     Type type = Type::TYPE_ABSOLUTE_STILL;
-    Data data = stationaryMgr->GetDeviceStatusData(type);
+    Data data = stationaryMgr.GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == type && data.value >= invalidValue && data.value <= exitValue);
 
     type = Type::TYPE_VERTICAL_POSITION;
-    data = stationaryMgr->GetDeviceStatusData(type);
+    data = stationaryMgr.GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == type && data.value >= invalidValue && data.value <= exitValue);
 
     type = Type::TYPE_HORIZONTAL_POSITION;
-    data = stationaryMgr->GetDeviceStatusData(type);
+    data = stationaryMgr.GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == type && data.value >= invalidValue && data.value <= exitValue);
 
     type = Type::TYPE_LID_OPEN;
-    data = stationaryMgr->GetDeviceStatusData(type);
+    data = stationaryMgr.GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == type && data.value >= invalidValue && data.value <= exitValue);
 
     type = Type::TYPE_INVALID;
-    data = stationaryMgr->GetDeviceStatusData(type);
+    data = stationaryMgr.GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == type && data.value >= invalidValue && data.value <= exitValue);
 
     type = static_cast<Type>(10);
-    data = stationaryMgr->GetDeviceStatusData(type);
+    data = stationaryMgr.GetDeviceStatusData(type);
     EXPECT_TRUE(data.type == type && data.value >= invalidValue && data.value <= exitValue);
 }
 
@@ -194,17 +194,17 @@ HWTEST_F(DeviceStatusClientTest, GetDeviceStatusDataTest001, TestSize.Level0)
 HWTEST_F(DeviceStatusClientTest, GetDevicePostureDataSyncTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    auto stationaryMgr = StationaryManager::GetInstance();
+    StationaryManager& stationaryMgr = StationaryManager::GetInstance();
     DevicePostureData data;
-    int32_t ret = stationaryMgr->GetDevicePostureDataSync(data);
+    int32_t ret = stationaryMgr.GetDevicePostureDataSync(data);
     EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
     EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
         data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
-    ret = stationaryMgr->GetDevicePostureDataSync(data);
+    ret = stationaryMgr.GetDevicePostureDataSync(data);
     EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
     EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
         data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
-    ret = stationaryMgr->GetDevicePostureDataSync(data);
+    ret = stationaryMgr.GetDevicePostureDataSync(data);
     EXPECT_TRUE(ret == RET_OK || ret == RET_NO_SUPPORT);
     EXPECT_TRUE(data.rollRad >= 0 && data.rollRad <= DOUBLEPIMAX && data.pitchRad >= 0 &&
         data.pitchRad <= DOUBLEPIMAX && data.yawRad >= 0 && data.yawRad <= DOUBLEPIMAX);
