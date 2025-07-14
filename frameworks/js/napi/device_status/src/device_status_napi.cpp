@@ -107,14 +107,14 @@ bool DeviceStatusNapi::SubscribeCallback(napi_env env, DeviceStatus::Type type)
     if (iter == g_deviceStatusObj->callbacks_.end()) {
         FI_HILOGD("Don't find callback, to create");
         sptr<DeviceStatus::IRemoteDevStaCallback> callback = new (std::nothrow) DeviceStatusCallback(env);
-        ret = DeviceStatus::StationaryManager::GetInstance()->SubscribeCallback(type,
+        ret = DeviceStatus::StationaryManager::GetInstance().SubscribeCallback(type,
             DeviceStatus::ActivityEvent::EVENT_INVALID, DeviceStatus::ReportLatencyNs::Latency_INVALID, callback);
         if (ret == RET_OK) {
             g_deviceStatusObj->callbacks_.insert(std::make_pair(type, callback));
             return true;
         }
     } else {
-        ret = DeviceStatus::StationaryManager::GetInstance()->SubscribeCallback(type,
+        ret = DeviceStatus::StationaryManager::GetInstance().SubscribeCallback(type,
             DeviceStatus::ActivityEvent::EVENT_INVALID, DeviceStatus::ReportLatencyNs::Latency_INVALID, iter->second);
         if (ret == RET_OK) {
             FI_HILOGI("repeat invoke motion to report cache data");
@@ -147,7 +147,7 @@ bool DeviceStatusNapi::UnsubscribeCallback(napi_env env, DeviceStatus::Type type
             ThrowDeviceStatusErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
             return false;
         }
-        int32_t ret = DeviceStatus::StationaryManager::GetInstance()->UnsubscribeCallback(
+        int32_t ret = DeviceStatus::StationaryManager::GetInstance().UnsubscribeCallback(
             type, DeviceStatus::ActivityEvent::EVENT_INVALID, iter->second);
         if (ret == RET_OK) {
             g_deviceStatusObj->callbacks_.erase(iter);
@@ -359,7 +359,7 @@ void DeviceStatusNapi::GetPostureDataExecutionCB(napi_env env, void* data)
     std::lock_guard lockGuard(g_mutex);
     AsyncContext* execAsyncContext = static_cast<AsyncContext*>(data);
     execAsyncContext->result = DeviceStatus::StationaryManager::
-        GetInstance()->GetDevicePostureDataSync(execAsyncContext->postureData);
+        GetInstance().GetDevicePostureDataSync(execAsyncContext->postureData);
 }
 
 void DeviceStatusNapi::GetPostureDataCompleteCB(napi_env env, napi_status status, void* data)
