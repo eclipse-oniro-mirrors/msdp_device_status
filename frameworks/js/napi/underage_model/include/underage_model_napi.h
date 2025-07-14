@@ -57,7 +57,7 @@ private:
     static uint32_t GetUnderageModelType(const std::string &type);
     static bool SubscribeCallback(napi_env env, uint32_t type);
     static bool UnsubscribeCallback(napi_env env, uint32_t type);
-    static bool Subscribe(uint32_t type);
+    static bool Subscribe(napi_env env, uint32_t type);
     static bool RemoveCallbackArgs(uint32_t type, size_t argc, napi_value args[]);
     static bool ConstructUnderageModel(napi_env env, napi_value jsThis);
     static bool CreateUserAgeGroup(napi_env env, napi_value exports);
