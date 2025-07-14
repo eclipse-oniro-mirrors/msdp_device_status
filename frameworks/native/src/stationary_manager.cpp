@@ -26,11 +26,10 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-StationaryManager *StationaryManager::instance_ = new (std::nothrow) StationaryManager();
-
-StationaryManager *StationaryManager::GetInstance()
+StationaryManager& StationaryManager::GetInstance()
 {
-    return instance_;
+    static StationaryManager instance;
+    return instance;
 }
 
 int32_t StationaryManager::SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,

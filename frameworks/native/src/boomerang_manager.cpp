@@ -26,11 +26,10 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-BoomerangManager *BoomerangManager::instance_ = new (std::nothrow) BoomerangManager();
-
-BoomerangManager *BoomerangManager::GetInstance()
+BoomerangManager& BoomerangManager::GetInstance()
 {
-    return instance_;
+    static BoomerangManager instance;
+    return instance;
 }
 
 int32_t BoomerangManager::SubscribeCallback(BoomerangType type, std::string bundleName,

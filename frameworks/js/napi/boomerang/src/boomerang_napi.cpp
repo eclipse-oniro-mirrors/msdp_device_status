@@ -286,7 +286,7 @@ napi_value BoomerangNapi::SubscribeMeatadataCallback(
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, nullptr);
     CHKPP(callback);
     int32_t subscribeRet =
-        BoomerangManager::GetInstance()->SubscribeCallback(static_cast<BoomerangType>(type), bundleName, callback);
+        BoomerangManager::GetInstance().SubscribeCallback(static_cast<BoomerangType>(type), bundleName, callback);
     if (subscribeRet != RET_OK) {
         ThrowErr(env,
             SUBSCRIBE_FAILED,
@@ -368,7 +368,7 @@ napi_value BoomerangNapi::SubmitMetadata(napi_env env, napi_callback_info info)
     size_t strLength = 0;
     CHKRP(napi_get_value_string_utf8(env, argv[0], metadata, sizeof(metadata), &strLength), CREATE_STRING_UTF8);
 
-    int32_t result = BoomerangManager::GetInstance()->SubmitMetadata(metadata);
+    int32_t result = BoomerangManager::GetInstance().SubmitMetadata(metadata);
     if (result != RET_OK) {
         ThrowErr(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
     }
@@ -507,7 +507,7 @@ napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
         NAPI_ASSERT(env, false, "No existed callback");
         return nullptr;
     }
-    int32_t unsubscribeRet = BoomerangManager::GetInstance()->UnsubscribeCallback(
+    int32_t unsubscribeRet = BoomerangManager::GetInstance().UnsubscribeCallback(
         static_cast<BoomerangType>(type), bundleName, callbackIter->second);
     if (unsubscribeRet != RET_OK) {
         ThrowErr(env,
@@ -658,7 +658,7 @@ void BoomerangNapi::NotifyMetadataExecuteCB(napi_env env, void* data)
         FI_HILOGE("bundleName or callback is error");
         return;
     }
-    innerAsyncContext->result = BoomerangManager::GetInstance()->NotifyMetadataBindingEvent(bundleName, callback);
+    innerAsyncContext->result = BoomerangManager::GetInstance().NotifyMetadataBindingEvent(bundleName, callback);
 }
 
 void BoomerangNapi::NotifyMetadataCompleteCB(napi_env env, napi_status status, void* data)
@@ -685,7 +685,7 @@ void BoomerangNapi::EncodeImageExecuteCB(napi_env env, void* data)
         FI_HILOGE("bundleName or callback or pixelMap is error");
         return;
     }
-    innerAsyncContext->result = BoomerangManager::GetInstance()->BoomerangEncodeImage(pixelMap, metadata, callback);
+    innerAsyncContext->result = BoomerangManager::GetInstance().BoomerangEncodeImage(pixelMap, metadata, callback);
 }
 
 void BoomerangNapi::EncodeImageCompleteCB(napi_env env, napi_status status, void* data)
@@ -708,7 +708,7 @@ void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
         FI_HILOGE("callback or pixelMap is error");
         return;
     }
-    innerAsyncContext->result = BoomerangManager::GetInstance()->BoomerangDecodeImage(pixelMap, callback);
+    innerAsyncContext->result = BoomerangManager::GetInstance().BoomerangDecodeImage(pixelMap, callback);
 }
  
 void BoomerangNapi::DecodeImageCompleteCB(napi_env env, napi_status status, void* data)

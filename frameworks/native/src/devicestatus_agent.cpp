@@ -71,13 +71,13 @@ void DeviceStatusAgent::RegisterServiceEvent(Type type, ActivityEvent event, Rep
     CALL_DEBUG_ENTER;
     callback_ = new (std::nothrow) DeviceStatusAgentCallback(shared_from_this());
     CHKPV(callback_);
-    StationaryManager::GetInstance()->SubscribeCallback(type, event, latency, callback_);
+    StationaryManager::GetInstance().SubscribeCallback(type, event, latency, callback_);
 }
 
 void DeviceStatusAgent::UnRegisterServiceEvent(Type type, ActivityEvent event)
 {
     CALL_DEBUG_ENTER;
-    StationaryManager::GetInstance()->UnsubscribeCallback(type, event, callback_);
+    StationaryManager::GetInstance().UnsubscribeCallback(type, event, callback_);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

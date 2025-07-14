@@ -36,7 +36,7 @@ public:
      * @return Returns a <b>BoomerangManager</b> instance.
      * @since 9
      */
-    static BoomerangManager *GetInstance();
+    static BoomerangManager& GetInstance();
 
     /**
      * @brief Subscribes to device status changes.
@@ -102,7 +102,6 @@ public:
 private:
     BoomerangManager() = default;
     DISALLOW_COPY_AND_MOVE(BoomerangManager);
-    static BoomerangManager *instance_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
