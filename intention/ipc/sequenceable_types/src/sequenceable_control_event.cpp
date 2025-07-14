@@ -24,12 +24,13 @@ namespace OnScreen {
 bool SequenceableControlEvent::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, controlEvent_.windowId, false);
+    WRITEINT64(parcel, controlEvent_.sessionId, false);
     if (controlEvent_.eventType <= EventType::UNKNOWN || controlEvent_.eventType >= EventType::END) {
         FI_HILOGE("eventType is illegal");
         return false;
     }
     WRITEINT32(parcel, static_cast<int32_t>(controlEvent_.eventType), false);
-    WRITEUINT64(parcel, controlEvent_.hookId, false);
+    WRITEINT64(parcel, controlEvent_.hookId, false);
     return true;
 }
 
@@ -48,8 +49,9 @@ bool SequenceableControlEvent::ReadFromParcel(Parcel &parcel)
 {
     int32_t eventType = 0;
     READINT32(parcel, controlEvent_.windowId, false);
+    READINT64(parcel, controlEvent_.sessionId, false);
     READINT32(parcel, eventType, false);
-    READUINT64(parcel, controlEvent_.hookId, false);
+    READINT64(parcel, controlEvent_.hookId, false);
     if (eventType <= static_cast<int32_t>(EventType::UNKNOWN) || eventType >= static_cast<int32_t>(EventType::END)) {
         FI_HILOGE("eventType is illegal");
         return false;

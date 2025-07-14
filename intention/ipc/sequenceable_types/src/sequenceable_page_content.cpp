@@ -28,7 +28,7 @@ constexpr int32_t MAX_PARA_LEN = 10000;
 bool SequenceablePageContent::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, pageContent_.windowId, false);
-    WRITEUINT64(parcel, pageContent_.sessionId, false);
+    WRITEINT64(parcel, pageContent_.sessionId, false);
     WRITESTRING(parcel, pageContent_.bundleName, false);
     if (pageContent_.scenario >= Scenario::END) {
         FI_HILOGE("scenario is illegal");
@@ -44,7 +44,7 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     }
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.paragraphs.size()), false);
     for (size_t i = 0; i < pageContent_.paragraphs.size(); i++) {
-        WRITEUINT64(parcel, pageContent_.paragraphs[i].hookId, false);
+        WRITEINT64(parcel, pageContent_.paragraphs[i].hookId, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].title, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].content, false);
     }
@@ -65,7 +65,7 @@ SequenceablePageContent* SequenceablePageContent::Unmarshalling(Parcel &parcel)
 bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
 {
     READINT32(parcel, pageContent_.windowId, false);
-    READUINT64(parcel, pageContent_.sessionId, false);
+    READINT64(parcel, pageContent_.sessionId, false);
     READSTRING(parcel, pageContent_.bundleName, false);
     int32_t scenario = 0;
     READINT32(parcel, scenario, false);
@@ -87,7 +87,7 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     }
     for (int32_t i = 0; i < paragraphSize; i++) {
         Paragraph para;
-        READUINT64(parcel, para.hookId, false);
+        READINT64(parcel, para.hookId, false);
         READSTRING(parcel, para.title, false);
         READSTRING(parcel, para.content, false);
         pageContent_.paragraphs.push_back(para);
