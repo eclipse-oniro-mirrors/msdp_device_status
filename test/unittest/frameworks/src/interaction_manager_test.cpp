@@ -35,6 +35,7 @@
 #include "devicestatus_errors.h"
 #include "drag_data_util.h"
 #include "interaction_manager.h"
+#include "interaction_manager_test.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
@@ -91,79 +92,161 @@ int32_t g_deviceMouseId { -1 };
 int32_t g_deviceTouchId { -1 };
 int32_t g_screenWidth { 720 };
 int32_t g_screenHeight { 1280 };
-uint64_t g_tokenID { 0 };
-const char* g_cores[] = { "ohos.permission.INPUT_MONITORING" };
-const char* g_basics[] = { "ohos.permission.COOPERATE_MANAGER" };
-const char* g_coresInject[] = { "ohos.permission.INJECT_INPUT_EVENT" };
+const std::string INPUT = { "ohos.permission.INPUT_MONITORING" };
+const std::string COOPERATE = { "ohos.permission.COOPERATE_MANAGER" };
+const std::string INJECT = { "ohos.permission.INJECT_INPUT_EVENT" };
 std::shared_ptr<MMI::KeyEvent> g_keyEvent = MMI::KeyEvent::Create();
+std::mutex g_lockSetToken;
+uint64_t g_shellTokenId = 0;
+static constexpr int32_t DEFAULT_API_VERSION = 12;
+static MockHapToken* g_mock = nullptr;
 } // namespace
 
-class InteractionManagerTest : public testing::Test {
-public:
-    void SetUp();
-    void TearDown();
-    static void SetUpTestCase();
-    static std::vector<int32_t> GetInputDeviceIds();
-    static std::shared_ptr<MMI::InputDevice> GetDevice(int32_t deviceId);
-    static std::pair<int32_t, int32_t> GetMouseAndTouch();
-    static std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height);
-    static std::optional<DragData> CreateDragData(const std::pair<int32_t, int32_t> &pixelMapSize, int32_t sourceType,
-        int32_t pointerId, int32_t displayId, const std::pair<int32_t, int32_t> &location);
-    static MMI::PointerEvent::PointerItem CreatePointerItem(int32_t pointerId,
-        int32_t deviceId, const std::pair<int32_t, int32_t> &displayLocation, bool isPressed);
-    static std::shared_ptr<MMI::PointerEvent> SetupPointerEvent(const std::pair<int32_t, int32_t> &displayLocation,
-        int32_t action, int32_t sourceType, int32_t pointerId, bool isPressed);
-    static void SimulateDownPointerEvent(
-        const std::pair<int32_t, int32_t> &location, int32_t sourceType, int32_t pointerId);
-    static void SimulateUpPointerEvent(
-        const std::pair<int32_t, int32_t> &location, int32_t sourceType, int32_t pointerId);
-    static void SimulateMovePointerEvent(const std::pair<int32_t, int32_t> &srcLocation,
-        const std::pair<int32_t, int32_t> &dstLocation, int32_t sourceType, int32_t pointerId, bool isPressed);
-    static int32_t TestAddMonitor(std::shared_ptr<MMI::IInputEventConsumer> consumer);
-    static void TestRemoveMonitor(int32_t monitorId);
-    static void PrintDragData(const DragData &dragData);
-    static void SetPermission(const std::string &level, const char** perms, size_t permAmount);
-    static void RemovePermission();
-    static void SetupKeyEvent(int32_t action, int32_t key, bool isPressed);
-    static void ClearUpKeyEvent();
-    static void SimulateDownKeyEvent(int32_t key);
-    static void SimulateUpKeyEvent(int32_t key);
-    static void PrintDragAction(DragAction dragAction);
-    static void AssignToAnimation(PreviewAnimation &animation);
-    static void EnableCooperate();
-};
-
-void InteractionManagerTest::SetPermission(const std::string &level, const char** perms, size_t permAmount)
+void SetTestEvironment(uint64_t shellTokenId)
 {
-    CALL_DEBUG_ENTER;
-    if (perms == nullptr || permAmount == 0) {
-        FI_HILOGE("The perms is empty");
-        return;
-    }
-
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = permAmount,
-        .aclsNum = 0,
-        .dcaps = nullptr,
-        .perms = perms,
-        .acls = nullptr,
-        .processName = "InteractionManagerTest",
-        .aplStr = level.c_str(),
-    };
-    g_tokenID = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(g_tokenID);
-    OHOS::Security::AccessToken::AccessTokenKit::AccessTokenKit::ReloadNativeTokenInfo();
+    std::lock_guard<std::mutex> lock(g_lockSetToken);
+    g_shellTokenId = shellTokenId;
 }
 
-void InteractionManagerTest::RemovePermission()
+void ResetTestEvironment()
 {
-    CALL_DEBUG_ENTER;
-    int32_t ret = OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenID);
-    if (ret != RET_OK) {
-        FI_HILOGE("Failed to remove permission");
-        return;
+    std::lock_guard<std::mutex> lock(g_lockSetToken);
+    g_shellTokenId = 0;
+}
+
+uint64_t GetShellTokenId()
+{
+    std::lock_guard<std::mutex> lock(g_lockSetToken);
+    return g_shellTokenId;
+}
+
+uint64_t GetNativeTokenIdFromProcess(const std::string &process)
+{
+    uint64_t selfTokenId = GetSelfTokenID();
+    EXPECT_EQ(0, SetSelfTokenID(GetShellTokenId()));
+
+    std::string dumpInfo;
+    Security::AccessToken::AtmToolsParamInfo info;
+    info.processName = process;
+    Security::AccessToken::AccessTokenKit::DumpTokenInfo(info, dumpInfo);
+    size_t pos = dumpInfo.find("\"tokenID\": ");
+    if (pos == std::string::npos) {
+        FI_HILOGE("tokenid not find");
+        return 0;
     }
+    pos += std::string("\"tokenID\": ").length();
+    std::string numStr;
+    while (pos < dumpInfo.length() && std::isdigit(dumpInfo[pos])) {
+        numStr += dumpInfo[pos];
+        ++pos;
+    }
+    EXPECT_EQ(0, SetSelfTokenID(selfTokenId));
+
+    std::istringstream iss(numStr);
+    Security::AccessToken::AccessTokenID tokenID;
+    iss >> tokenID;
+    return tokenID;
+}
+
+int32_t AllocTestHapToken(const Security::AccessToken::HapInfoParams& hapInfo,
+    Security::AccessToken::HapPolicyParams& hapPolicy, Security::AccessToken::AccessTokenIDEx& tokenIdEx)
+{
+    uint64_t selfTokenId = GetSelfTokenID();
+    for (auto& permissionStateFull : hapPolicy.permStateList) {
+        Security::AccessToken::PermissionDef permDefResult;
+        if (Security::AccessToken::AccessTokenKit::GetDefPermission(permissionStateFull.permissionName, permDefResult)
+            != Security::AccessToken::RET_SUCCESS) {
+            continue;
+        }
+        if (permDefResult.availableLevel > hapPolicy.apl) {
+            hapPolicy.aclRequestedList.emplace_back(permissionStateFull.permissionName);
+        }
+    }
+    if (GetNativeTokenIdFromProcess("foundation") == selfTokenId) {
+        return Security::AccessToken::AccessTokenKit::InitHapToken(hapInfo, hapPolicy, tokenIdEx);
+    }
+    MockNativeToken mock("foundation");
+    int32_t ret = Security::AccessToken::AccessTokenKit::InitHapToken(hapInfo, hapPolicy, tokenIdEx);
+    EXPECT_EQ(0, SetSelfTokenID(selfTokenId));
+
+    return ret;
+}
+
+int32_t DeleteTestHapToken(Security::AccessToken::AccessTokenID tokenID)
+{
+    uint64_t selfTokenId = GetSelfTokenID();
+    if (GetNativeTokenIdFromProcess("foundation") == selfTokenId) {
+        return Security::AccessToken::AccessTokenKit::DeleteToken(tokenID);
+    }
+    MockNativeToken mock("foundation");
+    int32_t ret = Security::AccessToken::AccessTokenKit::DeleteToken(tokenID);
+    EXPECT_EQ(0, SetSelfTokenID(selfTokenId));
+    return ret;
+}
+
+MockNativeToken::MockNativeToken(const std::string& process)
+{
+    selfToken_ = GetSelfTokenID();
+    uint32_t tokenId = GetNativeTokenIdFromProcess(process);
+    FI_HILOGI("selfToken_:%{public}" PRId64 ", tokenId:%{public}u", selfToken_, tokenId);
+    SetSelfTokenID(tokenId);
+}
+
+MockNativeToken::~MockNativeToken()
+{
+    SetSelfTokenID(selfToken_);
+}
+
+MockHapToken::MockHapToken(
+    const std::string& bundle, const std::vector<std::string>& reqPerm, bool isSystemApp)
+{
+    selfToken_ = GetSelfTokenID();
+    Security::AccessToken::HapInfoParams infoParams = {
+        .userID = 0,
+        .bundleName = bundle,
+        .instIndex = 0,
+        .appIDDesc = "AccessTokenTestAppID",
+        .apiVersion = DEFAULT_API_VERSION,
+        .isSystemApp = isSystemApp,
+        .appDistributionType = "",
+    };
+
+    Security::AccessToken::HapPolicyParams policyParams = {
+        .apl = Security::AccessToken::APL_NORMAL,
+        .domain = "accesstoken_test_domain",
+    };
+    for (size_t i = 0; i < reqPerm.size(); ++i) {
+        Security::AccessToken::PermissionDef permDefResult;
+        if (Security::AccessToken::AccessTokenKit::GetDefPermission(reqPerm[i], permDefResult)
+            != Security::AccessToken::RET_SUCCESS) {
+            continue;
+        }
+        Security::AccessToken::PermissionStateFull permState = {
+            .permissionName = reqPerm[i],
+            .isGeneral = true,
+            .resDeviceID = {"local3"},
+            .grantStatus = {Security::AccessToken::PermissionState::PERMISSION_DENIED},
+            .grantFlags = {Security::AccessToken::PermissionFlag::PERMISSION_DEFAULT_FLAG}
+        };
+        policyParams.permStateList.emplace_back(permState);
+        if (permDefResult.availableLevel > policyParams.apl) {
+            policyParams.aclRequestedList.emplace_back(reqPerm[i]);
+        }
+    }
+
+    Security::AccessToken::AccessTokenIDEx tokenIdEx = {0};
+    EXPECT_EQ(Security::AccessToken::RET_SUCCESS, AllocTestHapToken(infoParams, policyParams, tokenIdEx));
+    mockToken_= tokenIdEx.tokenIdExStruct.tokenID;
+    EXPECT_NE(mockToken_, Security::AccessToken::INVALID_TOKENID);
+    EXPECT_EQ(0, SetSelfTokenID(tokenIdEx.tokenIDEx));
+}
+
+MockHapToken::~MockHapToken()
+{
+    if (mockToken_ != Security::AccessToken::INVALID_TOKENID) {
+        EXPECT_EQ(0, DeleteTestHapToken(mockToken_));
+    }
+    EXPECT_EQ(0, SetSelfTokenID(selfToken_));
 }
 
 class DragListenerTest : public IDragListener {
@@ -314,6 +397,12 @@ void InteractionManagerTest::SetUpTestCase()
     auto mouseAndTouch = GetMouseAndTouch();
     g_deviceMouseId = mouseAndTouch.first;
     g_deviceTouchId = mouseAndTouch.second;
+    std::vector<std::string> reqPerm;
+    reqPerm.emplace_back(INPUT);
+    reqPerm.emplace_back(COOPERATE);
+    reqPerm.emplace_back(INJECT);
+    g_mock = new (std::nothrow) MockHapToken("InteractionManagerTest", reqPerm, true);
+    FI_HILOGI("SetUpTestCase ok.");
 }
 
 void InteractionManagerTest::SetUp()
@@ -328,7 +417,6 @@ void InteractionManagerTest::TearDown()
 
 void InteractionManagerTest::EnableCooperate()
 {
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto fun = [&promiseFlag](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
@@ -347,7 +435,6 @@ void InteractionManagerTest::EnableCooperate()
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 std::shared_ptr<Media::PixelMap> InteractionManagerTest::CreatePixelMap(int32_t width, int32_t height)
@@ -444,35 +531,30 @@ void InteractionManagerTest::SimulateDownPointerEvent(const std::pair<int32_t, i
     int32_t pointerId)
 {
     CALL_DEBUG_ENTER;
-    SetPermission(SYSTEM_CORE, g_coresInject, sizeof(g_coresInject) / sizeof(g_coresInject[0]));
     std::shared_ptr<MMI::PointerEvent> pointerEvent =
         SetupPointerEvent(location, MMI::PointerEvent::POINTER_ACTION_DOWN, sourceType, pointerId, true);
     CHKPV(pointerEvent);
     FI_HILOGD("TEST:sourceType:%{public}d, pointerId:%{public}d, pointerAction:%{public}d",
         pointerEvent->GetSourceType(), pointerEvent->GetPointerId(), pointerEvent->GetPointerAction());
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
-    RemovePermission();
 }
 
 void InteractionManagerTest::SimulateUpPointerEvent(const std::pair<int32_t, int32_t> &location, int32_t sourceType,
     int32_t pointerId)
 {
     CALL_DEBUG_ENTER;
-    SetPermission(SYSTEM_CORE, g_coresInject, sizeof(g_coresInject) / sizeof(g_coresInject[0]));
     std::shared_ptr<MMI::PointerEvent> pointerEvent = SetupPointerEvent(location,
         MMI::PointerEvent::POINTER_ACTION_UP, sourceType, pointerId, false);
     CHKPV(pointerEvent);
     FI_HILOGD("TEST:sourceType:%{public}d, pointerId:%{public}d, pointerAction:%{public}d",
         pointerEvent->GetSourceType(), pointerEvent->GetPointerId(), pointerEvent->GetPointerAction());
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
-    RemovePermission();
 }
 
 void InteractionManagerTest::SimulateMovePointerEvent(const std::pair<int32_t, int32_t> &srcLocation,
     const std::pair<int32_t, int32_t> &dstLocation, int32_t sourceType, int32_t pointerId, bool isPressed)
 {
     CALL_DEBUG_ENTER;
-    SetPermission(SYSTEM_CORE, g_coresInject, sizeof(g_coresInject) / sizeof(g_coresInject[0]));
     int32_t srcX = srcLocation.first;
     int32_t srcY = srcLocation.second;
     int32_t dstX = dstLocation.first;
@@ -504,7 +586,6 @@ void InteractionManagerTest::SimulateMovePointerEvent(const std::pair<int32_t, i
         MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_INJECT_MS));
     }
-    RemovePermission();
 }
 
 int32_t InteractionManagerTest::TestAddMonitor(std::shared_ptr<MMI::IInputEventConsumer> consumer)
@@ -571,23 +652,19 @@ void InteractionManagerTest::ClearUpKeyEvent()
 void InteractionManagerTest::SimulateDownKeyEvent(int32_t key)
 {
     CALL_DEBUG_ENTER;
-    SetPermission(SYSTEM_CORE, g_coresInject, sizeof(g_coresInject) / sizeof(g_coresInject[0]));
     SetupKeyEvent(MMI::KeyEvent::KEY_ACTION_DOWN, key, true);
     FI_HILOGD("TEST:keyCode:%{public}d, keyAction: KEY_ACTION_DOWN", key);
     MMI::InputManager::GetInstance()->SimulateInputEvent(g_keyEvent);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_INJECT_MS));
-    RemovePermission();
 }
 
 void InteractionManagerTest::SimulateUpKeyEvent(int32_t key)
 {
     CALL_DEBUG_ENTER;
-    SetPermission(SYSTEM_CORE, g_coresInject, sizeof(g_coresInject) / sizeof(g_coresInject[0]));
     SetupKeyEvent(MMI::KeyEvent::KEY_ACTION_UP, key, false);
     FI_HILOGD("TEST:keyCode:%{public}d, keyAction: KEY_ACTION_UP", key);
     MMI::InputManager::GetInstance()->SimulateInputEvent(g_keyEvent);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_INJECT_MS));
-    RemovePermission();
 }
 
 void InteractionManagerTest::PrintDragAction(DragAction dragAction)
@@ -652,7 +729,6 @@ void InputEventCallbackTest::OnInputEvent(std::shared_ptr<MMI::PointerEvent> poi
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_PrepareCoordination, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto fun = [&promiseFlag](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
@@ -667,7 +743,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_PrepareCoordination, Tes
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -679,7 +754,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_PrepareCoordination, Tes
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationListener_001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     std::shared_ptr<ICoordinationListener> consumer = nullptr;
     bool isCompatible = true;
     int32_t ret = InteractionManager::GetInstance()->RegisterCoordinationListener(consumer, isCompatible);
@@ -688,7 +762,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -700,7 +773,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationListener_002, TestSize.Level1)
 {
     CALL_DEBUG_ENTER;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     class CoordinationListenerTest : public ICoordinationListener {
     public:
         CoordinationListenerTest() : ICoordinationListener() {}
@@ -725,7 +797,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -738,7 +809,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
 {
     CALL_TEST_DEBUG;
     FI_HILOGD("InteractionManagerTest_RegisterCoordinationListener_003 enter");
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     class CoordinationListenerTest : public ICoordinationListener {
     public:
         CoordinationListenerTest() : ICoordinationListener() {}
@@ -769,7 +839,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
     #else
         ASSERT_EQ(ret, ERROR_UNSUPPORT);
     #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
     FI_HILOGD("InteractionManagerTest_RegisterCoordinationListener_003 finish");
 }
 
@@ -782,7 +851,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCoordination, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     std::string remoteNetworkId("");
     int32_t startDeviceId = -1;
     auto fun = [](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
@@ -797,7 +865,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCoordination, Te
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -809,7 +876,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCoordination, Te
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_DeactivateCoordination, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     auto fun = [](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
         FI_HILOGD("Stop coordination success");
         (void) listener;
@@ -823,7 +889,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_DeactivateCoordination, 
     ret = InteractionManager::GetInstance()->DeactivateCoordination(true, fun, isCompatible);
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -835,7 +900,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_DeactivateCoordination, 
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Abnormal, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     const std::string networkId("");
     auto fun = [](bool state) {
         FI_HILOGD("Get coordination state failed, state:%{public}d", state);
@@ -847,7 +911,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Abn
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -859,7 +922,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Abn
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Normal, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     const std::string networkId("networkId");
@@ -875,7 +937,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Nor
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -887,7 +948,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Nor
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Sync, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     const std::string udId("Default");
     bool state { false };
     int32_t ret = InteractionManager::GetInstance()->GetCoordinationState(udId, state);
@@ -896,7 +956,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Syn
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -908,7 +967,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Syn
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_UnregisterCoordinationListener, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     std::shared_ptr<ICoordinationListener> consumer = nullptr;
     bool isCompatible = true;
     int32_t ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer, isCompatible);
@@ -917,7 +975,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UnregisterCoordinationLi
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -929,7 +986,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UnregisterCoordinationLi
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_UnprepareCoordination, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto fun = [&promiseFlag](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
@@ -944,7 +1000,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UnprepareCoordination, T
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 
@@ -991,7 +1046,6 @@ private:
 HWTEST_F(InteractionManagerTest, AddHotAreaListener_001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     auto listener = std::make_shared<HotAreaListenerTest>(std::string("HOT_AREA"));
     int32_t ret = InteractionManager::GetInstance()->AddHotAreaListener(listener);
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
@@ -1005,7 +1059,6 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_001, TestSize.Level1)
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -1017,11 +1070,10 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_001, TestSize.Level1)
 HWTEST_F(InteractionManagerTest, AddHotAreaListener_002, TestSize.Level1)
 {
     CALL_DEBUG_ENTER;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
 #else
-    sptr<Rosen::DisplayInfo> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
+    auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
     CHKPV(display);
     g_screenWidth = display->GetWidth();
@@ -1044,14 +1096,12 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_002, TestSize.Level1)
         { HOT_AREA_COOR, g_screenHeight - HOT_AREA_SPAN },
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_TOUCH_DOWN_MS));
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     ret = InteractionManager::GetInstance()->RemoveHotAreaListener(listener);
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
 
 /**
@@ -1063,7 +1113,6 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_002, TestSize.Level1)
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDamplingCoefficient, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     constexpr double damplingCoefficient { 0.1 };
     auto ret = InteractionManager::GetInstance()->SetDamplingCoefficient(
         COORDINATION_DAMPLING_RIGHT, damplingCoefficient);
@@ -1623,7 +1672,6 @@ HWTEST_F(InteractionManagerTest, TouchEventDispatch, TestSize.Level1)
         ASSERT_EQ(result, RET_OK);
         result = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(result, RET_OK);
-        SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
         std::promise<bool> promiseEventFlag;
         std::future<bool> futureEventFlag = promiseEventFlag.get_future();
         auto callbackPtr = std::make_shared<InputEventCallbackTest>(
@@ -1633,14 +1681,12 @@ HWTEST_F(InteractionManagerTest, TouchEventDispatch, TestSize.Level1)
             MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
         ASSERT_TRUE(futureEventFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
             std::future_status::timeout);
-        SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
         TestRemoveMonitor(monitorId);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
         result = InteractionManager::GetInstance()->StopDrag(dropResult);
         ASSERT_EQ(result, RET_OK);
         ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
             std::future_status::timeout);
-        RemovePermission();
     }
 }
 
@@ -1673,7 +1719,6 @@ HWTEST_F(InteractionManagerTest, MouseEventDispatch, TestSize.Level1)
         ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(ret, RET_OK);
-        SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
         std::promise<bool> promiseEventFlag;
         std::future<bool> futureEventFlag = promiseEventFlag.get_future();
         auto callbackPtr = std::make_shared<InputEventCallbackTest>(
@@ -1683,7 +1728,6 @@ HWTEST_F(InteractionManagerTest, MouseEventDispatch, TestSize.Level1)
             MMI::PointerEvent::SOURCE_TYPE_MOUSE, TOUCH_POINTER_ID, true);
         ASSERT_TRUE(futureEventFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
             std::future_status::timeout);
-        SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
         TestRemoveMonitor(monitorId);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
         ret = InteractionManager::GetInstance()->StopDrag(dropResult);
@@ -1691,7 +1735,6 @@ HWTEST_F(InteractionManagerTest, MouseEventDispatch, TestSize.Level1)
         ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
             std::future_status::timeout);
     }
-    RemovePermission();
 }
 
 /**
@@ -2391,6 +2434,7 @@ HWTEST_F(InteractionManagerTest, GetDragAction_004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
+
 HWTEST_F(InteractionManagerTest, GetDragAction_005, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
@@ -3023,6 +3067,27 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState, T
 }
 
 /**
+ * @tc.name: InteractionManagerTest_SetAppDragSwitchState002
+ * @tc.desc: Check SetAppDragSwitchState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t ret = InteractionManager::GetInstance()->SetDragSwitchState(true, true);
+    EXPECT_EQ(ret, RET_OK);
+    std::string pkgName;
+    ret = InteractionManager::GetInstance()->SetAppDragSwitchState(true, pkgName, true);
+    EXPECT_EQ(ret, RET_OK);
+    ret = InteractionManager::GetInstance()->SetDraggableState(true);
+    EXPECT_EQ(ret, RET_OK);
+    int64_t downTime = 0;
+    InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
+    bool status = true;
+    ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->GetAppDragSwitchState(status));
+}
+/*
  * @tc.name: InteractionManagerTest_ActivateCooperateWithOptions
  * @tc.desc: Activate coordination
  * @tc.type: FUNC
@@ -3031,7 +3096,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState, T
 HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCooperateWithOptions, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
     std::string remoteNetworkId("");
     int32_t startDeviceId = -1;
     auto fun = [](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
@@ -3049,102 +3113,8 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCooperateWithOpt
 #else
     ASSERT_EQ(ret, ERROR_UNSUPPORT);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
-    RemovePermission();
 }
-
-/**
- * @tc.name: InteractionManagerTest_SetAppDragSwitchState002
- * @tc.desc: Check SetAppDragSwitchState
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002, TestSize.Level1)
-{
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
-    CALL_TEST_DEBUG;
-    int32_t ret = InteractionManager::GetInstance()->SetDragSwitchState(true, true);
-    EXPECT_EQ(ret, RET_OK);
-    std::string pkgName;
-    ret = InteractionManager::GetInstance()->SetAppDragSwitchState(true, pkgName, true);
-    EXPECT_EQ(ret, RET_OK);
-    ret = InteractionManager::GetInstance()->SetDraggableState(true);
-    EXPECT_EQ(ret, RET_OK);
-    int64_t downTime = 0;
-    InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
-    bool status = true;
-    ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->GetAppDragSwitchState(status));
-    RemovePermission();
-}
-
-/**
- * @tc.name: TestDragDataUtil
- * @tc.desc: Pack up dragdata
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, TestDragDataUtil01, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData({ TEST_PIXEL_MAP_WIDTH, TEST_PIXEL_MAP_HEIGHT },
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
-    ASSERT_TRUE(dragData);
-    Parcel parcel;
-    int32_t ret = DragDataUtil::MarshallingSummarys2(dragData.value(), parcel);
-    ASSERT_EQ(ret, RET_OK);
-    DragData dragDataFromParcel;
-    ret = DragDataUtil::UnMarshallingSummarys2(parcel, dragDataFromParcel);
-    ASSERT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: InteractionManagerTest_SetDraggableStateAsync
- * @tc.desc: Check SetDraggableStateAsync
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDraggableStateAsync, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    SetPermission(SYSTEM_BASIC, g_basics, sizeof(g_basics) / sizeof(g_basics[0]));
-    bool state = true;
-    int64_t downTime = 1;
-    int32_t ret = InteractionManager::GetInstance()->SetDraggableState(state);
-    EXPECT_EQ(ret, RET_OK);
-    ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime));
-    RemovePermission();
-}
-
-/**
- * @tc.name: InteractionManagerTest_EnableInternalDropAnimation01
- * @tc.desc: Check EnableInternalDropAnimation
- * @tc.type: FUNC
- * @tc.require:
- */
-#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimation01, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    std::string animationInfo = "{\"targetPos\": [8, 8]}";
-    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
-    EXPECT_EQ(ret, RET_OK);
-}
-#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
-
-/**
- * @tc.name: InteractionManagerTest_EnableInternalDropAnimation02
- * @tc.desc: Check EnableInternalDropAnimation
- * @tc.type: FUNC
- * @tc.require:
- */
-#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_EnableInternalDropAnimation02, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    std::string animationInfo = "{}";
-    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
-    EXPECT_EQ(ret, COMMON_PARAMETER_ERROR);
-}
-#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
+
