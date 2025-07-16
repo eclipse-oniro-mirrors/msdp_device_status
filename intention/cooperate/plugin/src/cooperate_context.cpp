@@ -197,7 +197,7 @@ NormalizedCoordinate Context::NormalizedCursorPosition() const
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(currentDisplayId_);
     if (display == nullptr) {
         FI_HILOGE("No default display");
-        return cursorPos_;
+        return { 0, 0 };
     }
     Rectangle displayRect {
         .width = display->GetWidth(),
@@ -205,7 +205,7 @@ NormalizedCoordinate Context::NormalizedCursorPosition() const
     };
     if ((displayRect.width <= 0) || (displayRect.height <= 0)) {
         FI_HILOGE("Invalid display information");
-        return cursorPos_;
+        return { 0, 0 };
     }
     return NormalizedCoordinate {
         .x = static_cast<int32_t>((cursorPos_.x + 1) * PERCENT / displayRect.width),
@@ -257,6 +257,11 @@ void Context::StartCooperateWithOptions(const StartWithOptionsEvent &event)
     remoteNetworkId_ = event.remoteNetworkId;
     startDeviceId_ = event.startDeviceId;
     priv_ = 0;
+    cooperateOptions_ = {
+        event.displayX,
+        event.displayY,
+        event.displayId
+    };
 }
 
 void Context::OnRemoteStart(const DSoftbusCooperateWithOptionsFinished &event)
@@ -268,6 +273,11 @@ void Context::OnRemoteStart(const DSoftbusCooperateWithOptionsFinished &event)
         event.cooperateOptions.displayId);
     FI_HILOGI("Set pointer location: %{private}d, %{private}d, %{private}d",
         event.cooperateOptions.displayX, event.cooperateOptions.displayY, event.cooperateOptions.displayId);
+    cooperateOptions_ = {
+        event.cooperateOptions.displayX,
+        event.cooperateOptions.displayY,
+        event.cooperateOptions.displayId,
+    };
 }
 
 void Context::AdjustPointerPos(DSoftbusCooperateOptions& dSoftbusCooperateOptions)
@@ -357,12 +367,13 @@ void Context::OnTransitionOut()
 {
     CHKPV(eventHandler_);
     FI_HILOGI("Notify observers of transition out");
+    CooperateInfo cooperateInfo = { NormalizedCursorPosition(), cooperateOptions_ };
     for (const auto &observer : observers_) {
         eventHandler_->PostTask(
-            [observer, remoteNetworkId = Peer(), cursorPos = NormalizedCursorPosition()] {
+            [observer, remoteNetworkId = Peer(), cooperateInfo] {
                 FI_HILOGI("Notify one observer of transition out");
                 CHKPV(observer);
-                observer->OnTransitionOut(remoteNetworkId, cursorPos);
+                observer->OnTransitionOut(remoteNetworkId, cooperateInfo);
             });
     }
 }
@@ -375,12 +386,13 @@ void Context::OnTransitionIn()
     SetTouchPadSpeed(peerTouchPadSpeed_);
     CHKPV(eventHandler_);
     FI_HILOGI("Notify observers of transition in");
+    CooperateInfo cooperateInfo = { NormalizedCursorPosition(), cooperateOptions_ };
     for (const auto &observer : observers_) {
         eventHandler_->PostTask(
-            [observer, remoteNetworkId = Peer(), cursorPos = NormalizedCursorPosition()] {
+            [observer, remoteNetworkId = Peer(), cooperateInfo] {
                 FI_HILOGI("Notify one observer of transition in");
                 CHKPV(observer);
-                observer->OnTransitionIn(remoteNetworkId, cursorPos);
+                observer->OnTransitionIn(remoteNetworkId, cooperateInfo);
             });
     }
 }
@@ -393,12 +405,13 @@ void Context::OnBack()
     ClearPeerTouchPadSpeed();
     CHKPV(eventHandler_);
     FI_HILOGI("Notify observers of come back");
+    CooperateInfo cooperateInfo = { NormalizedCursorPosition(), cooperateOptions_ };
     for (const auto &observer : observers_) {
         eventHandler_->PostTask(
-            [observer, remoteNetworkId = Peer(), cursorPos = NormalizedCursorPosition()] {
+            [observer, remoteNetworkId = Peer(), cooperateInfo] {
                 FI_HILOGI("Notify one observer of come back");
                 CHKPV(observer);
-                observer->OnBack(remoteNetworkId, cursorPos);
+                observer->OnBack(remoteNetworkId, cooperateInfo);
             });
     }
 }
@@ -407,12 +420,13 @@ void Context::OnRelayCooperation(const std::string &networkId, const NormalizedC
 {
     CHKPV(eventHandler_);
     FI_HILOGI("Notify observers of relay cooperation");
+    CooperateInfo cooperateInfo = { NormalizedCursorPosition(), cooperateOptions_ };
     for (const auto &observer : observers_) {
         eventHandler_->PostTask(
-            [observer, networkId, cursorPos] {
+            [observer, networkId, cooperateInfo] {
                 FI_HILOGI("Notify one observer of relay cooperation");
                 CHKPV(observer);
-                observer->OnRelay(networkId, cursorPos);
+                observer->OnRelay(networkId, cooperateInfo);
             });
     }
 }
@@ -491,7 +505,7 @@ void Context::SetCursorPosition(const Coordinate &cursorPos)
 {
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHKPV(display);
-    auto cursor = SetCursorPos(cursorPos);
+    auto cursor = GetCursorPos(cursorPos);
     cursorPos_ = cursor;
     env_->GetInput().SetPointerLocation(cursor.x, cursor.y);
     FI_HILOGI("Set cursor position (%{private}d,%{private}d)(%{private}d,%{private}d)(%{public}d,%{public}d)",
@@ -506,14 +520,14 @@ void Context::StopCooperateSetCursorPosition(const Coordinate &cursorPos)
     if (displayId < 0) {
         displayId = 0;
     }
-    auto cursor = SetCursorPos(cursorPos);
+    auto cursor = GetCursorPos(cursorPos);
     env_->GetInput().SetPointerLocation(cursor.x, cursor.y, displayId);
     FI_HILOGI("Set cursor position (%{private}d,%{private}d)(%{private}d,%{private}d)(%{public}d,%{public}d),"
         "dafault display id is %{public}d", cursorPos.x, cursorPos.y, cursor.x, cursor.y,
         display->GetWidth(), display->GetHeight(), displayId);
 }
 
-Coordinate Context::SetCursorPos(const Coordinate &cursorPos)
+Coordinate Context::GetCursorPos(const Coordinate &cursorPos)
 {
     double xPercent = (PERCENT - std::clamp<double>(cursorPos.x, 0.0, PERCENT)) / PERCENT;
     double yPercent = std::clamp<double>(cursorPos.y, 0.0, PERCENT) / PERCENT;

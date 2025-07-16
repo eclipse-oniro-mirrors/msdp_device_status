@@ -223,10 +223,10 @@ public:
     virtual void OnStartCooperate(StartCooperateData &data) {}
     virtual void OnRemoteStartCooperate(RemoteStartCooperateData &data) {}
     virtual void OnStopCooperate(const std::string &remoteNetworkId) {}
-    virtual void OnTransitionOut(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) {}
-    virtual void OnTransitionIn(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) {}
-    virtual void OnBack(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) {}
-    virtual void OnRelay(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) {}
+    virtual void OnTransitionOut(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnTransitionIn(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnBack(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnRelay(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
     virtual void OnReset() {}
     virtual void CloseDistributedFileConnection(const std::string &remoteNetworkId) {}
 };

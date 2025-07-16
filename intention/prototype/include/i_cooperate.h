@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,11 @@ struct CooperateOptions {
 };
 using NormalizedCooperateOptions = CooperateOptions;
 
+struct CooperateInfo {
+    NormalizedCoordinate normalizedCoords;
+    CooperateOptions cooperateOptions; // To support activateCooperateWithOptions
+};
+
 class ICooperateObserver {
 public:
     ICooperateObserver() = default;
@@ -53,10 +58,10 @@ public:
     virtual void OnStartCooperate(StartCooperateData &data) = 0;
     virtual void OnRemoteStartCooperate(RemoteStartCooperateData &data) = 0;
     virtual void OnStopCooperate(const std::string &remoteNetworkId) = 0;
-    virtual void OnTransitionOut(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) = 0;
-    virtual void OnTransitionIn(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) = 0;
-    virtual void OnBack(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) = 0;
-    virtual void OnRelay(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) = 0;
+    virtual void OnTransitionOut(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) = 0;
+    virtual void OnTransitionIn(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) = 0;
+    virtual void OnBack(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) = 0;
+    virtual void OnRelay(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) = 0;
     virtual void OnReset() = 0;
     virtual void CloseDistributedFileConnection(const std::string &remoteNetworkId) {}
 };

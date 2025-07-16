@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,10 +120,10 @@ public:
     virtual void OnStartCooperate(StartCooperateData &data) {}
     virtual void OnRemoteStartCooperate(RemoteStartCooperateData &data) {}
     virtual void OnStopCooperate(const std::string &remoteNetworkId) {}
-    virtual void OnTransitionOut(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) {}
-    virtual void OnTransitionIn(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) {}
-    virtual void OnBack(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) {}
-    virtual void OnRelay(const std::string &remoteNetworkId, const NormalizedCoordinate &cursorPos) {}
+    virtual void OnTransitionOut(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnTransitionIn(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnBack(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnRelay(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
     virtual void OnReset() {}
     virtual void CloseDistributedFileConnection(const std::string &remoteNetworkId) {}
 };

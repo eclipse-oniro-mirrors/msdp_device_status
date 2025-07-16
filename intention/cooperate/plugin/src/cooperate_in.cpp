@@ -255,6 +255,7 @@ void CooperateIn::Initial::OnStartWithOptions(Context &context, const CooperateE
     CALL_INFO_TRACE;
     StartWithOptionsEvent startEvent = std::get<StartWithOptionsEvent>(event.event);
     context.ResetPriv();
+    context.StartCooperateWithOptions(startEvent);
     if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Not allow cooperate");
         NotAollowCooperateWhenMotionDragging result {
