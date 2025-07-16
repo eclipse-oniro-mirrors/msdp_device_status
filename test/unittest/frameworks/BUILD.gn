@@ -27,6 +27,7 @@ ohos_unittest("InteractionManagerTest") {
 
   module_out_path = module_output_path
   include_dirs = [
+    "include",
     "${device_status_interfaces_path}/innerkits/interaction/include",
     "${device_status_utils_path}",
     "${device_status_utils_path}/include",
@@ -91,6 +92,7 @@ ohos_unittest("InteractionMouseLocationTest") {
   branch_protector_ret = "pac_ret"
   module_out_path = module_output_path
   include_dirs = [
+    "include",
     "${device_status_interfaces_path}/innerkits/interaction/include",
     "${device_status_utils_path}",
     "${device_status_utils_path}/include",
