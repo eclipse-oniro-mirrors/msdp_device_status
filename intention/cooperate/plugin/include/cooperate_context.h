@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,7 +136,7 @@ private:
     void DisableInputDevMgr();
     void SetCursorPosition(const Coordinate &cursorPos);
     void StopCooperateSetCursorPosition(const Coordinate &cursorPos);
-    Coordinate SetCursorPos(const Coordinate &cursorPos);
+    Coordinate GetCursorPos(const Coordinate &cursorPos);
 
     IContext *env_ { nullptr };
     Channel<CooperateEvent>::Sender sender_;
@@ -145,6 +145,7 @@ private:
     uint32_t flag_ {};
     uint32_t priv_ { 0 };
     Coordinate cursorPos_ {};
+    CooperateOptions cooperateOptions_ {};
     int32_t currentDisplayId_ { 0 };
     int32_t peerPointerSpeed_ { -1 };
     int32_t originPointerSpeed_ { -1 };
