@@ -29,13 +29,16 @@ ohos_shared_library("onscreen_napi") {
   }
 
   sources = [
-    "${device_status_frameworks_path}/js/napi/onscreen/src/onscreen_napi.cpp",
-    "${device_status_frameworks_path}/js/napi/onscreen/src/onscreen_napi_error.cpp",
+    "${device_status_frameworks_path}/js/napi/onscreen/src/on_screen_napi.cpp",
+    "${device_status_frameworks_path}/js/napi/onscreen/src/on_screen_napi_error.cpp",
   ]
 
   configs = [ ":device_onscreen_private_config" ]
 
-  deps = [ "${device_status_utils_path}:devicestatus_util" ]
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+  ]
 
   external_deps = [
     "c_utils:utils",

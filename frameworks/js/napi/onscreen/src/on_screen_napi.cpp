@@ -34,7 +34,6 @@ namespace OnScreen {
 namespace {
 constexpr uint8_t ARG_0 = 0;
 constexpr uint8_t ARG_1 = 1;
-constexpr size_t MAX_ARG_STRING_LEN = 512;
 OnScreenNapi *g_onScreenObj = nullptr;
 std::mutex g_mtx;
 } // namespace
@@ -71,7 +70,7 @@ napi_value OnScreenNapi::Init(napi_env env, napi_value exports)
     }
     // 声明枚举值EventType
     napi_value napiEventType;
-    napi_status status = napi_create_object(env, &napiEventType);
+    status = napi_create_object(env, &napiEventType);
     if (status != napi_ok) {
         FI_HILOGE("Failed create object");
         return exports;
@@ -94,11 +93,10 @@ napi_value OnScreenNapi::GetPageContentNapi(napi_env env, napi_callback_info inf
     size_t argc = ARG_1;
     napi_value args[ARG_1] = { nullptr };
     napi_value jsThis = nullptr;
-    napi_value result = nullptr;
     ContentOption option;
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
     if (status != napi_ok) {
-        ThrowOnScreenErr(env, SUBSCRIBE_EXCEPTION, "napi_get_cb_info failed");
+        ThrowOnScreenErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
         return nullptr;
     }
     if (!GetContentOption(env, args, argc, option)) {
@@ -124,8 +122,7 @@ napi_value OnScreenNapi::GetPageContentNapi(napi_env env, napi_callback_info inf
     asyncContext->env = env;
     asyncContext->deferred = deferred;
     asyncContext->option = option;
-    bool result = GetPageContentExec(asyncContext);
-    if (!result) {
+    if (!GetPageContentExec(asyncContext)) {
         FI_HILOGE("get page content execution failed");
         delete asyncContext;
         return nullptr;
@@ -139,10 +136,9 @@ napi_value OnScreenNapi::SendControlEventNapi(napi_env env, napi_callback_info i
     size_t argc = ARG_1;
     napi_value args[ARG_1] = { nullptr };
     napi_value jsThis = nullptr;
-    napi_value result = nullptr;
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
     if (status != napi_ok) {
-        ThrowOnScreenErr(env, SUBSCRIBE_EXCEPTION, "napi_get_cb_info failed");
+        ThrowOnScreenErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
         return nullptr;
     }
     ControlEvent event;
@@ -169,8 +165,7 @@ napi_value OnScreenNapi::SendControlEventNapi(napi_env env, napi_callback_info i
     asyncContext->env = env;
     asyncContext->deferred = deferred;
     asyncContext->event = event;
-    bool result = SendControlEventExec(asyncContext);
-    if (!result) {
+    if (!SendControlEventExec(asyncContext)) {
         FI_HILOGE("send control event execution failed");
         delete asyncContext;
         return nullptr;
@@ -227,11 +222,12 @@ bool OnScreenNapi::GetControlEvent(napi_env env, napi_value *args, size_t argc, 
     if (argc != ARG_1) {
         return false;
     }
+    napi_value eventObj = args[ARG_0];
     int32_t eventType = 0;
-    bool ret = GetInt32FromJs(env, contentOptionObj, "windowId", event.windowId, true);
-    ret = ret && GetInt64FromJs(env, contentOptionObj, "sessionId", event.sessionId, true);
-    ret = ret && GetInt32FromJs(env, contentOptionObj, "eventType", eventType, true);
-    ret = ret && GetInt32FromJs(env, contentOptionObj, "hookId", event.hookId, false);
+    bool ret = GetInt32FromJs(env, eventObj, "windowId", event.windowId, true);
+    ret = ret && GetInt64FromJs(env, eventObj, "sessionId", event.sessionId, true);
+    ret = ret && GetInt32FromJs(env, eventObj, "eventType", eventType, true);
+    ret = ret && GetInt64FromJs(env, eventObj, "hookId", event.hookId, false);
     if (eventType <= static_cast<int32_t>(EventType::UNKNOWN) || eventType >= static_cast<int32_t>(EventType::END)) {
         FI_HILOGE("event type is invalid");
         return false;
@@ -248,7 +244,7 @@ bool OnScreenNapi::GetInt32FromJs(napi_env env, const napi_value &value, const s
     int32_t &result, bool isNecessary)
 {
     bool hasProperty = false;
-    if (napi_has_named_property(env, value, field.c_str(), hasProperty) != napi_ok) {
+    if (napi_has_named_property(env, value, field.c_str(), &hasProperty) != napi_ok) {
         FI_HILOGE("napi_has_named_property failed");
         return false;
     }
@@ -282,7 +278,7 @@ bool OnScreenNapi::GetInt64FromJs(napi_env env, const napi_value &value, const s
     int64_t &result, bool isNecessary)
 {
     bool hasProperty = false;
-    if (napi_has_named_property(env, value, field.c_str(), hasProperty) != napi_ok) {
+    if (napi_has_named_property(env, value, field.c_str(), &hasProperty) != napi_ok) {
         FI_HILOGE("napi_has_named_property failed");
         return false;
     }
@@ -316,7 +312,7 @@ bool OnScreenNapi::GetBoolFromJs(napi_env env, const napi_value &value, const st
     bool &result, bool isNecessary)
 {
     bool hasProperty = false;
-    if (napi_has_named_property(env, value, field.c_str(), hasProperty) != napi_ok) {
+    if (napi_has_named_property(env, value, field.c_str(), &hasProperty) != napi_ok) {
         FI_HILOGE("napi_has_named_property failed");
         return false;
     }
@@ -357,7 +353,7 @@ bool OnScreenNapi::SetInt32Property(napi_env env, napi_value targetObj, int32_t 
     return SetPropertyName(env, targetObj, propName, prop);
 }
 
-bool OnScreenNapi::SetInt64Property(napi_env env, napi_value targetObj, uint64_t value, const char *propName)
+bool OnScreenNapi::SetInt64Property(napi_env env, napi_value targetObj, int64_t value, const char *propName)
 {
     napi_value prop = nullptr;
     napi_status ret = napi_create_int64(env, value, &prop);
@@ -389,7 +385,7 @@ bool OnScreenNapi::ConstructParagraphObj(napi_env env, napi_value retObj, const 
     }
     bool ret = SetInt64Property(env, retObj, value.hookId, "hookId");
     ret = ret && SetStringProperty(env, retObj, value.title, "title");
-    ret = ret && SetStringProperty(env, retObj, value.text, "text");
+    ret = ret && SetStringProperty(env, retObj, value.content, "text");
     if (!ret) {
         FI_HILOGE("create paragrah obj failed");
         return false;
@@ -405,8 +401,8 @@ bool OnScreenNapi::SetParagraphVecProperty(napi_env env, napi_value targetObj, c
         FI_HILOGE("failed to create array");
         return false;
     }
-    for (size_t i = 0; i < paragraphs.size(), i++) {
-        napi_value element;
+    for (size_t i = 0; i < paragraphs.size(); i++) {
+        napi_value element = nullptr;
         if (!ConstructParagraphObj(env, element, paragraphs[i])) {
             FI_HILOGE("failed to create para, i = %{public}zu", i);
             return false;
@@ -448,7 +444,7 @@ void OnScreenNapi::GetPageContentExecCB(napi_env env, void *data)
 {
     CHKPV(data);
     CHKPV(env);
-    std::lock_guard lockGuard(g_mtx_);
+    std::lock_guard lockGuard(g_mtx);
     GetPageContentAsyncContext* execAsyncContext = static_cast<GetPageContentAsyncContext*>(data);
     execAsyncContext->result = OnScreenManager::GetInstance().GetPageContent(
         execAsyncContext->option, execAsyncContext->pageContent);
@@ -463,6 +459,7 @@ void OnScreenNapi::GetPageContentCompCB(napi_env env, napi_status status, void *
     CHKPV(completeAsyncContext->deferred);
     napi_value errVal = nullptr;
     napi_value pageContentObj = nullptr;
+    napi_status retStatus = napi_ok;
     if (napi_create_object(env, &pageContentObj) != napi_ok) {
         FI_HILOGE("pageContent failed");
         return;
@@ -481,9 +478,9 @@ void OnScreenNapi::GetPageContentCompCB(napi_env env, napi_status status, void *
         completeAsyncContext->result = RET_ERR;
     }
     if (completeAsyncContext->result != RET_OK) {
-        if (ERROR_MESSAGES.find(completeAsyncContext->result) != ERROR_MESSAGES.end()) {
-            ThrowOnScreenErrByPromise(env, completeAsyncContext->result,
-                ERROR_MESSAGES[completeAsyncContext->result], errVal);
+        auto retMsg = GetOnScreenErrMsg(completeAsyncContext->result);
+        if (retMsg != std::nullopt) {
+            ThrowOnScreenErrByPromise(env, completeAsyncContext->result, retMsg.value(), errVal);
         } else {
             ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
         }
@@ -500,7 +497,7 @@ void OnScreenNapi::GetPageContentCompCB(napi_env env, napi_status status, void *
     completeAsyncContext = nullptr;
 }
 
-bool OnScreenNapi::SendControlEventExec(GetPageContentAsyncContext *asyncContext)
+bool OnScreenNapi::SendControlEventExec(SendControlEventAsyncContext *asyncContext)
 {
     CHKPF(asyncContext);
     CHKPF(asyncContext->env);
@@ -519,7 +516,7 @@ void OnScreenNapi::SendControlEventExecCB(napi_env env, void *data)
 {
     CHKPV(data);
     CHKPV(env);
-    std::lock_guard lockGuard(g_mtx_);
+    std::lock_guard lockGuard(g_mtx);
     SendControlEventAsyncContext* execAsyncContext = static_cast<SendControlEventAsyncContext*>(data);
     execAsyncContext->result = OnScreenManager::GetInstance().SendControlEvent(
         execAsyncContext->event);
@@ -533,6 +530,7 @@ void OnScreenNapi::SendControlEventCompCB(napi_env env, napi_status status, void
     SendControlEventAsyncContext* completeAsyncContext = static_cast<SendControlEventAsyncContext*>(data);
     CHKPV(completeAsyncContext->deferred);
     napi_value errVal = nullptr;
+    napi_status retStatus = napi_ok;
     if (completeAsyncContext->result != RET_OK) {
         if (ERROR_MESSAGES.find(completeAsyncContext->result) != ERROR_MESSAGES.end()) {
             ThrowOnScreenErrByPromise(env, completeAsyncContext->result,

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "device_status_napi_error.h"
+#include "on_screen_napi_error.h"
 
 #include <optional>
 

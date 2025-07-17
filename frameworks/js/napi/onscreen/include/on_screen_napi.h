@@ -49,7 +49,7 @@ private:
     static bool ConstructParagraphObj(napi_env env, napi_value retObj, const Paragraph &value);
     static bool SetParagraphVecProperty(napi_env env, napi_value targetObj, const std::vector<Paragraph> paragraphs,
         const char *propName);
-    static bool GetInt32FromJs(napi_env env, const napi_value &value, const std::string &field, int32_t &result, bool isNecessary)
+    static bool GetInt32FromJs(napi_env env, const napi_value &value, const std::string &field, int32_t &result, bool isNecessary);
     static bool GetInt64FromJs(napi_env env, const napi_value &value, const std::string &field, int64_t &result, bool isNecessary);
     static bool GetBoolFromJs(napi_env env, const napi_value &value, const std::string &field, bool &result, bool isNecessary);
     static bool SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
@@ -58,7 +58,7 @@ private:
     static void GetPageContentExecCB(napi_env env, void *data);
     static void GetPageContentCompCB(napi_env env, napi_status status, void *data);
     // SendControlEvent
-    static bool SendControlEventExec(GetPageContentAsyncContext *asyncContext);
+    static bool SendControlEventExec(SendControlEventAsyncContext *asyncContext);
     static void SendControlEventExecCB(napi_env env, void *data);
     static void SendControlEventCompCB(napi_env env, napi_status status, void *data);
     
