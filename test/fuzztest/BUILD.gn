@@ -44,6 +44,7 @@ group("device_status_fuzztest") {
     "handleallocsocketfd_fuzzer:fuzztest",
     "ipcsocket_fuzzer:fuzztest",
     "msdpdevicemanager_fuzzer:fuzztest",
+    "notifymetadatabindingevent_fuzzer:fuzztest",
     "removedraglistener_fuzzer:fuzztest",
     "removehotarealistener_fuzzer:fuzztest",
     "removehotarealistenerstub_fuzzer:fuzztest",
