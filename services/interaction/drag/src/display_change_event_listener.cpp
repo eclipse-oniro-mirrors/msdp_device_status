@@ -42,7 +42,14 @@ void DisplayChangeEventListener::OnCreate(Rosen::DisplayId displayId)
 {
     FI_HILOGI("display:%{public}" PRIu64"", displayId);
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    CHKPV(display);
+    if (display == nullptr) {
+        FI_HILOGW("Get display info failed, display:%{public}" PRIu64"", displayId);
+        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+        if (display == nullptr) {
+            FI_HILOGE("Get display info failed, display is nullptr");
+            return;
+        }
+    }
     Rosen::Rotation rotation = display->GetRotation();
     CHKPV(context_);
     context_->GetDragManager().SetRotation(displayId, rotation);
@@ -52,7 +59,7 @@ void DisplayChangeEventListener::OnDestroy(Rosen::DisplayId displayId)
 {
     FI_HILOGI("display:%{public}" PRIu64"", displayId);
     CHKPV(context_);
-    context_->GetDragManager().DestoryDisplayIdInMap(displayId);
+    context_->GetDragManager().RemoveDisplayIdFromMap(displayId);
 }
 
 void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)

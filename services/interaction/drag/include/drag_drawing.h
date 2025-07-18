@@ -287,7 +287,7 @@ public:
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation);
     Rosen::Rotation GetRotation(Rosen::DisplayId displayId);
-    void DestoryDisplayIdInMap(Rosen::DisplayId displayId);
+    void RemoveDisplayIdFromMap(Rosen::DisplayId displayId);
     float CalculateWidthScale();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     float CalculatePullThrowScale();
