@@ -190,7 +190,7 @@ public:
     int32_t RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation) override;
     void SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation) override;
     Rosen::Rotation GetRotation(Rosen::DisplayId displayId) override;
-    void DestoryDisplayIdInMap(Rosen::DisplayId displayId) override;
+    void RemoveDisplayIdFromMap(Rosen::DisplayId displayId) override;
     int32_t ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation) override;
     void SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) override;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X

@@ -326,6 +326,7 @@ int32_t DragManager::StartDrag(
         return RET_ERR;
     }
     peerNetId_ = peerNetId;
+    lastDisplayId_ = dragData.displayId;
     std::string packageName = GetPackageName(pid);
     DragRadarPackageName dragRadarPackageName = GetDragRadarPackageName(pid, packageName, appCaller);
     dragRadarPackageName.dragNum = dragData.dragNum;
@@ -2345,7 +2346,9 @@ int32_t DragManager::RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotatio
     auto SetDragWindowRotate = [displayId, rotation, this]() {
         SetRotation(displayId, rotation);
         if ((dragState_ == DragState::START) || (dragState_ == DragState::MOTION_DRAGGING)) {
-            return dragDrawing_.RotateDragWindowAsync(rotation);
+            if (static_cast<int32_t>(displayId) == lastDisplayId_) {
+                return dragDrawing_.RotateDragWindowAsync(rotation);
+            }
         }
         return RET_OK;
     };
@@ -2392,16 +2395,16 @@ Rosen::Rotation DragManager::GetRotation(Rosen::DisplayId displayId)
     return rotation;
 }
 
-void DragManager::DestoryDisplayIdInMap(Rosen::DisplayId displayId)
+void DragManager::RemoveDisplayIdFromMap(Rosen::DisplayId displayId)
 {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(context_);
     context_->GetDelegateTasks().PostSyncTask([this, displayId] {
-        this->dragDrawing_.DestoryDisplayIdInMap(displayId);
+        this->dragDrawing_.RemoveDisplayIdFromMap(displayId);
         return RET_OK;
     });
 #else
-    dragDrawing_.DestoryDisplayIdInMap(displayId);
+    dragDrawing_.RemoveDisplayIdFromMap(displayId);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 

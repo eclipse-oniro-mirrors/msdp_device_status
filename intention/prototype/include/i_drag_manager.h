@@ -115,7 +115,7 @@ public:
     virtual int32_t RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation) = 0;
     virtual void SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation) = 0;
     virtual Rosen::Rotation GetRotation(Rosen::DisplayId displayId) = 0;
-    virtual void DestoryDisplayIdInMap(Rosen::DisplayId displayId) = 0;
+    virtual void RemoveDisplayIdFromMap(Rosen::DisplayId displayId) = 0;
     virtual int32_t ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation) = 0;
     virtual int32_t EnterTextEditorArea(bool enable) = 0;
     virtual int32_t AddPrivilege(int32_t tokenId) = 0;

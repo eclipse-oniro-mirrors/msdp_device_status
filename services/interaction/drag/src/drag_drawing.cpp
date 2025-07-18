@@ -2865,7 +2865,7 @@ Rosen::Rotation DragDrawing::GetRotation(Rosen::DisplayId displayId)
     return Rosen::Rotation::ROTATION_0;
 }
 
-void DragDrawing::DestoryDisplayIdInMap(Rosen::DisplayId displayId)
+void DragDrawing::RemoveDisplayIdFromMap(Rosen::DisplayId displayId)
 {
     FI_HILOGI("displayId:%{public}d", static_cast<int32_t>(displayId));
     if (rotationMap_.empty()) {
