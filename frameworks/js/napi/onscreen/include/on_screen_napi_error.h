@@ -18,7 +18,7 @@
 
 #include <map>
 
-#include "napi/native_napi.h"
+#include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
 namespace OHOS {

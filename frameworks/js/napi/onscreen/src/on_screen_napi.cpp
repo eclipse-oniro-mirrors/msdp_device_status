@@ -532,9 +532,9 @@ void OnScreenNapi::SendControlEventCompCB(napi_env env, napi_status status, void
     napi_value errVal = nullptr;
     napi_status retStatus = napi_ok;
     if (completeAsyncContext->result != RET_OK) {
-        if (ERROR_MESSAGES.find(completeAsyncContext->result) != ERROR_MESSAGES.end()) {
-            ThrowOnScreenErrByPromise(env, completeAsyncContext->result,
-                ERROR_MESSAGES[completeAsyncContext->result], errVal);
+        auto retMsg = GetOnScreenErrMsg(completeAsyncContext->result);
+        if (retMsg != std::nullopt) {
+            ThrowOnScreenErrByPromise(env, completeAsyncContext->result, retMsg.value(), errVal);
         } else {
             ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
         }
@@ -558,7 +558,7 @@ EXTERN_C_START
 static napi_value OnScreenNapiInit(napi_env env, napi_value exports)
 {
     FI_HILOGD("Enter");
-    napi_value ret = OnScreenNapiInit::Init(env, exports);
+    napi_value ret = OnScreenNapi::Init(env, exports);
     if (ret == nullptr) {
         FI_HILOGE("Failed to init");
         return ret;
