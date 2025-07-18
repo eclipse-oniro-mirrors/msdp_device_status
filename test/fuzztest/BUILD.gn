@@ -24,6 +24,8 @@ group("device_status_fuzztest") {
     "addprivilegestub_fuzzer:fuzztest",
     "addsubscriptlistener_fuzzer:fuzztest",
     "addsubscriptlistenerstub_fuzzer:fuzztest",
+    "boomerangsubscribe_fuzzer:fuzztest",
+    "boomerangunsubscribe_fuzzer:fuzztest",
     "devicegetcachestub_fuzzer:fuzztest",
     "devicestatusagent_fuzzer:fuzztest",
     "devicestatusclient_fuzzer:fuzztest",
