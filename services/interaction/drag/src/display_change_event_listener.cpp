@@ -126,8 +126,6 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
         static_cast<int32_t>(currentRotation), static_cast<int32_t>(lastRotation));
     if (isScreenRotation) {
         ScreenRotate(currentRotation, lastRotation);
-        CHKPV(context_);
-        context_->GetDragManager().SetRotation(displayId, currentRotation);
         return;
     }
     RotateDragWindow(displayId, currentRotation);
