@@ -122,6 +122,9 @@ napi_value OnScreenNapi::GetPageContentNapi(napi_env env, napi_callback_info inf
     asyncContext->env = env;
     asyncContext->deferred = deferred;
     asyncContext->option = option;
+    FI_HILOGD("invoke get page content, windowid = %{public}d, contentUnderstand = %{public}d, pageLink = %{public}d,"
+        "textOnly = %{public}d, maxParaLen = %{public}d", asyncContext->option.windowId, asyncContext->option.contentUnderstand,
+        asyncContext->option.pageLink, asyncContext->option.textOnly, asyncContext->option.maxParagraphSize);
     if (!GetPageContentExec(asyncContext)) {
         FI_HILOGE("get page content execution failed");
         delete asyncContext;
@@ -165,6 +168,9 @@ napi_value OnScreenNapi::SendControlEventNapi(napi_env env, napi_callback_info i
     asyncContext->env = env;
     asyncContext->deferred = deferred;
     asyncContext->event = event;
+    FI_HILOGD("invoke send control event, windowid = %{public}d, sessionId = %{public}lld, eventType = %{public}d,"
+        "hookid = %{public}lld", asyncContext->event.windowId, asyncContext->event.sessionId,
+        asyncContext->event.eventType, asyncContext->event.hookId);
     if (!SendControlEventExec(asyncContext)) {
         FI_HILOGE("send control event execution failed");
         delete asyncContext;
