@@ -249,6 +249,22 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest007, TestSize.Level1)
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
     ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, std::atoi("x")));
 }
+
+/**
+ * @tc.name: BoomerangDumperTest008
+ * @tc.desc: test Boomerang Dumper
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangDumperTest, BoomerangDumperTest008, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
+    std::vector<std::string> argList = {"s", "h", "l", "c", "d"};
+    ASSERT_NO_FATAL_FAILURE(dumper.Dump(g_fd, argList));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

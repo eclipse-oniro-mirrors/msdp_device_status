@@ -48,6 +48,9 @@ constexpr int32_t DISPLAY_ID { 0 };
 constexpr int32_t DISPLAY_X { 50 };
 constexpr int32_t DISPLAY_Y { 50 };
 constexpr int32_t INT32_BYTE { 4 };
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+constexpr int32_t MAX_ANIMATION_INFO_LENGTH { 1024 };
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 int32_t g_shadowinfo_x { 0 };
 int32_t g_shadowinfo_y { 0 };
 ContextService *g_instance = nullptr;
@@ -1461,6 +1464,110 @@ HWTEST_F(DragServerTest, DragServerTest75, TestSize.Level0)
     EXPECT_EQ(ret, RET_OK);
     EXPECT_EQ(isStart, false);
 }
+
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+/**
+ * @tc.name: DragServerTest76
+ * @tc.desc: Test
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest76, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    g_dragServer->GetPackageName(IPCSkeleton::GetCallingTokenID());
+    bool ret = g_dragServer->IsSystemHAPCalling(context);
+    EXPECT_TRUE(ret);
+    std::string animationInfo = "{\"targetPos\": [8, 8]}";
+    int32_t ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo);
+    EXPECT_EQ(ret1, RET_OK);
+}
+
+/**
+ * @tc.name: DragServerTest77
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest77, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    Security::AccessToken::AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = Security::AccessToken::AccessTokenKit::AllocHapToken(g_testInfoParms, g_testPolicyPrams);
+    EXPECT_EQ(0, SetSelfTokenID(tokenIdEx.tokenIdExStruct.tokenID));
+    auto g_tokenId1 = tokenIdEx.tokenIdExStruct.tokenID;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    g_dragServer->GetPackageName(g_tokenId1);
+    bool ret = g_dragServer->IsSystemHAPCalling(context);
+    EXPECT_FALSE(ret);
+    std::string animationInfo = "{\"targetPos\": [8, 8]}";
+    int32_t ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo);
+    EXPECT_EQ(ret1, COMMON_NOT_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: DragServerTest78
+ * @tc.desc: Test
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest78, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    g_dragServer->GetPackageName(IPCSkeleton::GetCallingTokenID());
+    bool ret = g_dragServer->IsSystemHAPCalling(context);
+    EXPECT_TRUE(ret);
+    std::string animationInfo = "{}";
+    int32_t ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo);
+    EXPECT_EQ(ret1, COMMON_PARAMETER_ERROR);
+    std::string animationInfo1;
+    ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo1);
+    EXPECT_EQ(ret1, COMMON_PARAMETER_ERROR);
+    std::string animationInfo2 ="{ \"dip_scale\": 3.5, \"drag_shadow_offsetX\": 50, \"drag_shadow_offsetY\": 50, "
+        "\"drag_shadow_argb\": 872415231, \"drag_shadow_path\": \"M 10 10 H 90 V 90 H 10 L 10 10\", "
+		"\"shadow_color_strategy\": 0, \"shadow_is_hardwareacceleration\": true, \"shadow_elevation\": 120, "
+		"\"drag_type\": \"text\", \"dip_scale\": 3.5, \"drag_shadow_offsetX\": 50, \"drag_shadow_offsetY\": 50, "
+        "\"drag_shadow_argb\": 872415231, \"drag_shadow_path\": \"M 10 10 H 90 V 90 H 10 L 10 10\", "
+		"\"shadow_color_strategy\": 0, \"shadow_is_hardwareacceleration\": true, \"shadow_elevation\": 120, "
+		"\"drag_type\": \"text\",  \"dip_scale\": 3.5, \"drag_shadow_offsetX\": 50, \"drag_shadow_offsetY\": 50, "
+        "\"drag_shadow_argb\": 872415231, \"drag_shadow_path\": \"M 10 10 H 90 V 90 H 10 L 10 10\", "
+		"\"shadow_color_strategy\": 0, \"shadow_is_hardwareacceleration\": true, \"shadow_elevation\": 120, "
+        "\"shadow_color_strategy\": 0, \"shadow_is_hardwareacceleration\": true, \"shadow_elevation\": 120, "
+		"\"drag_type\": \"text\", \"shadow_enable\": true }";
+    EXPECT_FALSE(animationInfo2.length() > MAX_ANIMATION_INFO_LENGTH);
+    ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo2);
+    EXPECT_EQ(ret1, COMMON_PARAMETER_ERROR);
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
