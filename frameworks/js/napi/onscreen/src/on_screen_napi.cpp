@@ -289,7 +289,7 @@ bool OnScreenNapi::GetInt64FromJs(napi_env env, const napi_value &value, const s
         return false;
     }
     if (!hasProperty) {
-        FI_HILOGE("napi dont have this property");
+        FI_HILOGW("napi dont have this property");
         // 如果是必要的，则返回false，如果不必要，则返回true，使用默认值
         return !isNecessary;
     }
@@ -323,7 +323,7 @@ bool OnScreenNapi::GetBoolFromJs(napi_env env, const napi_value &value, const st
         return false;
     }
     if (!hasProperty) {
-        FI_HILOGE("napi dont have this property");
+        FI_HILOGW("napi dont have this property");
         // 如果是必要的，则返回false，如果不必要，则返回true，使用默认值
         return !isNecessary;
     }
@@ -537,6 +537,11 @@ void OnScreenNapi::SendControlEventCompCB(napi_env env, napi_status status, void
     CHKPV(completeAsyncContext->deferred);
     napi_value errVal = nullptr;
     napi_status retStatus = napi_ok;
+    napi_value retVal = nullptr;
+    if (napi_create_object(env, &retVal) != napi_ok) {
+        FI_HILOGE("send control event create obj failed");
+        return;
+    }
     if (completeAsyncContext->result != RET_OK) {
         auto retMsg = GetOnScreenErrMsg(completeAsyncContext->result);
         if (retMsg != std::nullopt) {
@@ -546,7 +551,7 @@ void OnScreenNapi::SendControlEventCompCB(napi_env env, napi_status status, void
         }
         retStatus = napi_reject_deferred(env, completeAsyncContext->deferred, errVal);
     } else {
-        retStatus = napi_resolve_deferred(env, completeAsyncContext->deferred, nullptr);
+        retStatus = napi_resolve_deferred(env, completeAsyncContext->deferred, retVal);
     }
     if (retStatus != napi_ok) {
         FI_HILOGE("napi pack deferred err, result = %{public}d, status = %{public}d", completeAsyncContext->result,
