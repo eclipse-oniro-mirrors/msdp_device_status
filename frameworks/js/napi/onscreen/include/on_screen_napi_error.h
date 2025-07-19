@@ -26,11 +26,9 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
-// TODO 这个需要加吗，因为能获取权限的一定是system hap
 constexpr int32_t NO_SYSTEM_API { 202 };
 constexpr int32_t PARAM_EXCEPTION { 401 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
-// TODO 根据syscap id修改错误编码
 constexpr int32_t SERVICE_EXCEPTION { 32500001 };
 const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {PERMISSION_EXCEPTION, "Permission check failed."},

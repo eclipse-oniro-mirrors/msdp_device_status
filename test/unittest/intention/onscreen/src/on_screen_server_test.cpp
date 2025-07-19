@@ -106,6 +106,26 @@ HWTEST_F(OnScreenServerTest, SendControlEvent001, TestSize.Level0)
     int32_t ret = onScreen_.SendControlEvent(context, event);
     EXPECT_TRUE(ret >= RET_ERR);
 }
+
+/**
+ * @tc.name: IsSystemCalling001
+ * @tc.desc: Test func named IsSystemCalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerTest, IsSystemCalling001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = Intention::UNKNOWN_INTENTION,
+        .fullTokenId = (static_cast<uint64_t>(1) << 32);
+        .tokenId = 0,
+        .uid = 0,
+        .pid = 0,
+    };
+    EXPECT_EQ(onScreen_.IsSystemCalling(context), true);
+    context.fullTokenId = 0;
+    EXPECT_EQ(onScreen_.IsSystemCalling(context), false);
+}
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp
