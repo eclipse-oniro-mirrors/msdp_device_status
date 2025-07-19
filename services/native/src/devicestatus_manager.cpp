@@ -34,6 +34,8 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
     const std::string BUNDLE_NAME = "com.tencent.wechat";
+    const int32_t SYSTEM_BAR_HIDDEN = 0;
+    const int32_t PAGE_SCROLL_ENVENT = 1;
 }
 std::shared_ptr<DeviceStatusManager> DeviceStatusManager::g_deviceManager_;
 std::mutex DeviceStatusManager::g_mutex_;
@@ -78,21 +80,8 @@ void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t 
 {
     std::lock_guard<std::mutex> guard(g_mutex_);
     switch (systemAbilityId) {
-        case ACCESSIBILITY_MANAGER_SERVICE_ID: {
-            g_deviceManager_ = std::make_shared<DeviceStatusManager>();
-            CHKPV(g_deviceManager_);
-            ACCESSIBILITY_MANAGER.AccessibilityConnect([this](int32_t value) {
-                std::lock_guard<std::mutex> guard(g_mutex_);
-                if (value == AccessibilityStatus::ON_ABILITY_CONNECTED) {
-                    g_deviceManager_->isAccessibilityInit = true;
-                    FI_HILOGI("Accessibility service has connect");
-                } else if (value == AccessibilityStatus::ON_ABILITY_SCROLLED_EVENT) {
-                    g_deviceManager_->HandlerPageScrollerEvent();
-                }
-            });
-            break;
-        }
         case WINDOW_MANAGER_SERVICE_ID: {
+            g_deviceManager_ = std::make_shared<DeviceStatusManager>();
             sptr<IWindowSystemBarPropertyChangedListener> systemBarListener =
                 sptr<SystemBarStyleChangedListener>::MakeSptr();
             CHKPV(systemBarListener);
@@ -115,10 +104,7 @@ void DeviceStatusManager::AccessibilityStatusChange::OnRemoveSystemAbility(int32
 {
     std::lock_guard<std::mutex> guard(g_mutex_);
     CHKPV(g_deviceManager_);
-    if (systemAbilityId == ACCESSIBILITY_MANAGER_SERVICE_ID) {
-        FI_HILOGE("the accessibility service died");
-        g_deviceManager_->isAccessibilityInit = false;
-    } else if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
+    if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
         CHKPV(g_deviceManager_);
         g_deviceManager_->lastEnable_ = true;
     }
@@ -133,8 +119,12 @@ void DeviceStatusManager::SystemBarStyleChangedListener::OnWindowSystemBarProper
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_ != g_deviceManager_->lastEnable_) {
         g_deviceManager_->lastEnable_ = systemBarProperty.enable_;
     }
-    if (!g_deviceManager_->lastEnable_) {
-        g_deviceManager_->HandlerPageScrollerEvent();
+    if (g_deviceManager_->lastEnable_) {
+        if (g_deviceManager_->isAccessibilityInit_) {
+            ACCESSIBILITY_MANAGER.AccessibilityDisconnect();
+        }
+    } else {
+        g_deviceManager_->HandlerPageScrollerEvent(SYSTEM_BAR_HIDDEN);
     }
 }
 
@@ -163,15 +153,8 @@ bool DeviceStatusManager::Init()
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     CHKPF(samgrProxy);
 
-    auto accessibilityStatusChange = sptr<AccessibilityStatusChange>::MakeSptr();
-    int32_t ret = samgrProxy->SubscribeSystemAbility(ACCESSIBILITY_MANAGER_SERVICE_ID, accessibilityStatusChange);
-    if (ret != RET_OK) {
-        FI_HILOGE("SubscribeSystemAbility accessibility service faild");
-        return false;
-    }
-
     auto windowStatusChange = sptr<AccessibilityStatusChange>::MakeSptr();
-    ret = samgrProxy->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, windowStatusChange);
+    int32_t ret = samgrProxy->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, windowStatusChange);
     if (ret != RET_OK) {
         FI_HILOGE("SubscribeSystemAbility service faild on window manager");
         return false;
@@ -674,7 +657,35 @@ int32_t DeviceStatusManager::GetFocuseWindowId(int32_t &windowId, std::string &b
     return RET_ERR;
 }
 
-void DeviceStatusManager::HandlerPageScrollerEvent()
+void DeviceStatusManager::SystemBarHiddedInit()
+{
+    ACCESSIBILITY_MANAGER.AccessibilityConnect([this](int32_t value) {
+        std::lock_guard<std::mutex> guard(g_mutex_);
+        CHKPV(g_deviceManager_);
+        switch (value) {
+            case AccessibilityStatus::ON_ABILITY_CONNECTED: {
+                g_deviceManager_->isAccessibilityInit_ = true;
+                FI_HILOGI("Accessibility service has connect");
+                break;
+            }
+            case AccessibilityStatus::ON_ABILITY_SCROLLED_EVENT: {
+                g_deviceManager_->HandlerPageScrollerEvent(PAGE_SCROLL_ENVENT);
+                break;
+            }
+            case AccessibilityStatus::ON_ABILITY_DISCONNECTED: {
+                g_deviceManager_->isAccessibilityInit_ = false;
+                FI_HILOGI("Accessibility service has disConnect");
+                break;
+            }
+            default: {
+                FI_HILOGW("Accessibility Unknown Event");
+                break;
+            }
+        }
+    });
+}
+
+void DeviceStatusManager::HandlerPageScrollerEvent(int32_t event)
 {
     int32_t windowId;
     std::string bundleName;
@@ -688,6 +699,11 @@ void DeviceStatusManager::HandlerPageScrollerEvent()
         FI_HILOGD("The current status bar is in display mode or does not belong to the whitelist application");
         return;
     }
+
+    if (event == SYSTEM_BAR_HIDDEN) {
+        SystemBarHiddedInit();
+    }
+
     std::shared_ptr<Media::PixelMap> screenShot;
     Rosen::WMError ret = WindowManager::GetInstance().GetSnapshotByWindowId(windowId, screenShot);
     if (ret == Rosen::WMError::WM_OK) {
