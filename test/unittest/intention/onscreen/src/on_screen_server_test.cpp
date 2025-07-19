@@ -117,7 +117,7 @@ HWTEST_F(OnScreenServerTest, IsSystemCalling001, TestSize.Level0)
     CALL_TEST_DEBUG;
     CallingContext context {
         .intention = Intention::UNKNOWN_INTENTION,
-        .fullTokenId = (static_cast<uint64_t>(1) << 32);
+        .fullTokenId = (static_cast<uint64_t>(1) << 32),
         .tokenId = 0,
         .uid = 0,
         .pid = 0,

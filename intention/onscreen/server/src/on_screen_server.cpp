@@ -21,6 +21,7 @@
 
 #include "accesstoken_kit.h"
 #include "devicestatus_define.h"
+#include "tokenid_kit.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenServer"
