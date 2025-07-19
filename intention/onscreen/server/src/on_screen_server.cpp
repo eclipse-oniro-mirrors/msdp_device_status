@@ -21,6 +21,7 @@
 
 #include "accesstoken_kit.h"
 #include "devicestatus_define.h"
+#include "tokenid_kit.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenServer"
@@ -35,6 +36,7 @@ const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
 const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_PERMISSION = 201;
+constexpr int32_t RET_NO_SYSTEM_CALLING = 202;
 }
 
 OnScreenAlgorithmHandle::~OnScreenAlgorithmHandle()
@@ -64,6 +66,10 @@ int32_t OnScreenServer::GetPageContent(const CallingContext &context, const Cont
         FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_GET_PAGE_CONTENT);
         return RET_NO_PERMISSION;
     }
+    if (!IsSystemCalling(context)) {
+        FI_HILOGE("calling is not system calling");
+        return RET_NO_SYSTEM_CALLING;
+    }
     if (ConnectAlgoLib() != RET_OK) {
         FI_HILOGE("failed to load algo lib");
         return RET_NO_SUPPORT;
@@ -90,6 +96,10 @@ int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const Co
     if (!CheckPermission(context, PERMISSION_SEND_CONTROL_EVENT)) {
         FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_SEND_CONTROL_EVENT);
         return RET_NO_PERMISSION;
+    }
+    if (!IsSystemCalling(context)) {
+        FI_HILOGE("calling is not system calling");
+        return RET_NO_SYSTEM_CALLING;
     }
     if (ConnectAlgoLib() != RET_OK) {
         FI_HILOGE("failed to load algo lib");
@@ -163,6 +173,25 @@ bool OnScreenServer::CheckPermission(const CallingContext &context, const std::s
         FI_HILOGD("called tokenType is shell, verify succ");
     }
     return Security::AccessToken::AccessTokenKit::VerifyAccessToken(context.tokenId, permission) == RET_OK;
+}
+
+bool OnScreenServer::IsSystemCalling(const CallingContext &context)
+{
+    if (IsSystemServiceCalling(context)) {
+        return true;
+    }
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
+}
+
+bool OnScreenServer::IsSystemServiceCalling(const CallingContext &context)
+{
+    auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    if ((flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) ||
+        (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL)) {
+        FI_HILOGI("system service calling, flag:%{public}u", flag);
+        return true;
+    }
+    return false;
 }
 } // namespace OnScreen
 } // namespace DeviceStatus

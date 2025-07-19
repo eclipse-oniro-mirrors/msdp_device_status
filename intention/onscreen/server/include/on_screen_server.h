@@ -47,6 +47,8 @@ private:
     int32_t UnloadAlgoLib();
     int32_t ConnectAlgoLib();
     bool CheckPermission(const CallingContext &context, const std::string &permission);
+    bool IsSystemCalling(const CallingContext &context);
+    bool IsSystemServiceCalling(const CallingContext &context);
 
     OnScreenAlgorithmHandle handle_;
     std::mutex mtx_;
