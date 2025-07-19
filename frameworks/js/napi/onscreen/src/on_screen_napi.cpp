@@ -168,8 +168,8 @@ napi_value OnScreenNapi::SendControlEventNapi(napi_env env, napi_callback_info i
     asyncContext->env = env;
     asyncContext->deferred = deferred;
     asyncContext->event = event;
-    FI_HILOGD("invoke send control event, windowid = %{public}d, sessionId = %{public}lld, eventType = %{public}d,"
-        "hookid = %{public}lld", asyncContext->event.windowId, asyncContext->event.sessionId,
+    FI_HILOGD("invoke send control event, windowid = %{public}d, sessionId = %{public}ld, eventType = %{public}d,"
+        "hookid = %{public}ld", asyncContext->event.windowId, asyncContext->event.sessionId,
         asyncContext->event.eventType, asyncContext->event.hookId);
     if (!SendControlEventExec(asyncContext)) {
         FI_HILOGE("send control event execution failed");
