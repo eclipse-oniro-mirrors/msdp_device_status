@@ -66,6 +66,10 @@ public:
     bool HasLocalPointerDevice() override;
     int32_t RegisterDevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback) override;
     int32_t UnregisterDevListener() override;
+    int32_t AddPreMonitor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback,
+        std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback,
+        MMI::HandleEventType eventType, std::vector<int32_t> keys) override;
+    void RemovePreMonitor(int32_t preMonitorId) override;
 private:
     bool IsLocalPointerDevice(std::shared_ptr<MMI::InputDevice> device);
     bool IsVirtualTrackpad(std::shared_ptr<MMI::InputDevice> device);

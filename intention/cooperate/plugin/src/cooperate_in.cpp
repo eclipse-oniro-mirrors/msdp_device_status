@@ -883,7 +883,8 @@ void CooperateIn::SetPointerVisible(Context &context)
 {
     CHKPV(env_);
     bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice() ||
-        env_->GetInput().HasLocalPointerDevice();
+        env_->GetInput().HasLocalPointerDevice() ||
+        env_->GetDeviceManager().HasPencilAirMouse();
     FI_HILOGI("HasLocalPointerDevice:%{public}s", hasLocalPointerDevice ? "true" : "false");
     env_->GetInput().SetPointerVisibility(hasLocalPointerDevice, PRIORITY);
 }

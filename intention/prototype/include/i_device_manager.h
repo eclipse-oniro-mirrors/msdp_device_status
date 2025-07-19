@@ -41,6 +41,8 @@ public:
     virtual std::vector<std::shared_ptr<IDevice>> GetKeyboard() = 0;
     virtual std::vector<std::shared_ptr<IDevice>> GetPointerDevice() = 0;
     virtual std::vector<std::shared_ptr<IDevice>> GetVirTrackPad() = 0;
+    virtual void SetPencilAirMouse(bool existAirMouse) = 0;
+    virtual bool HasPencilAirMouse() = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

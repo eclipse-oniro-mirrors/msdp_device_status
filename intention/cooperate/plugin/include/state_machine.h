@@ -98,6 +98,8 @@ private:
     void OnCommonEvent(Context &context, const std::string &commonEvent);
     void AddMonitor(Context &context);
     void RemoveMonitor(Context &context);
+    void AddPreMonitor(Context &context);
+    void RemovePreMonitor(Context &context);
     void RemoveWatches(Context &context);
     void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
     bool CheckIsVirtualTrackpad(int32_t deviceId);
@@ -109,6 +111,7 @@ private:
     std::array<std::shared_ptr<ICooperateState>, N_COOPERATE_STATES> states_;
     std::set<std::string> onlineBoards_;
     int32_t monitorId_ { -1 };
+    int32_t preMonitorId_ { -1 };
     int32_t screenEventTimer_ { -1 };
     std::vector<std::string> clientBundleNames_;
     sptr<AppStateObserver> appStateObserver_ { nullptr };
