@@ -18,10 +18,10 @@
 #include <mutex>
 
 #include "devicestatus_define.h"
-#include "on_screen_napi_error.h"
 #include "fi_log.h"
 #include "napi_constants.h"
 #include "on_screen_manager.h"
+#include "on_screen_napi_error.h"
 #include "util_napi.h"
 
 #undef LOG_TAG
