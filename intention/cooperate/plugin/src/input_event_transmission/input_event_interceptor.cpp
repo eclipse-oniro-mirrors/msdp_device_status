@@ -68,6 +68,7 @@ InputEventInterceptor::~InputEventInterceptor()
 int32_t InputEventInterceptor::Enable(Context &context)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     if (interceptorId_ > 0) {
         return RET_OK;
     }
@@ -122,6 +123,7 @@ void InputEventInterceptor::HeartBeatSend()
 void InputEventInterceptor::Disable()
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     TurnOnChannelScan();
     if (interceptorId_ > 0) {
         env_->GetInput().RemoveInterceptor(interceptorId_);
@@ -189,6 +191,7 @@ void InputEventInterceptor::OnPointerEvent(std::shared_ptr<MMI::PointerEvent> po
 void InputEventInterceptor::OnNotifyCrossDrag(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
+    CHKPV(env_);
     auto pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
@@ -205,6 +208,7 @@ void InputEventInterceptor::OnNotifyCrossDrag(std::shared_ptr<MMI::PointerEvent>
 void InputEventInterceptor::OnKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
     CHKPV(keyEvent);
+    CHKPV(env_);
     RefreshActivity();
     if (filterKeys_.find(keyEvent->GetKeyCode()) != filterKeys_.end()) {
         keyEvent->AddFlag(MMI::AxisEvent::EVENT_FLAG_NO_INTERCEPT);

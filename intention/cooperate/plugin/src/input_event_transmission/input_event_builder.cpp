@@ -69,6 +69,7 @@ InputEventBuilder::~InputEventBuilder()
 void InputEventBuilder::Enable(Context &context)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     if (enable_) {
         return;
     }
@@ -101,6 +102,7 @@ void InputEventBuilder::Enable(Context &context)
 void InputEventBuilder::Disable()
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     if (enable_) {
         enable_ = false;
         env_->GetDSoftbus().RemoveObserver(observer_);
@@ -208,6 +210,7 @@ bool InputEventBuilder::OnPacket(const std::string &networkId, Msdp::NetPacket &
 void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
 {
     CHKPV(pointerEvent_);
+    CHKPV(env_);
     if (scanState_) {
         TurnOffChannelScan();
     }

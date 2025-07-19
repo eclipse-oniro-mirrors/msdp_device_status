@@ -155,6 +155,7 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
     context.StartCooperate(notice);
     context.eventMgr_.StartCooperate(notice);
 
+    CHKPV(parent_.env_);
     if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Not allow cooperate");
         NotAollowCooperateWhenMotionDragging result {
@@ -261,6 +262,7 @@ void CooperateFree::Initial::OnStop(Context &context, const CooperateEvent &even
 void CooperateFree::Initial::OnStartWithOptions(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
+    CHKPV(parent_.env_);
     StartWithOptionsEvent notice = std::get<StartWithOptionsEvent>(event.event);
     FI_HILOGI("[start With] With \'%{public}s\'", Utility::Anonymize(notice.remoteNetworkId).c_str());
     context.StartCooperateWithOptions(notice);

@@ -181,7 +181,7 @@ void CooperateOut::Initial::OnDisable(Context &context, const CooperateEvent &ev
 void CooperateOut::Initial::OnStart(Context &context, const CooperateEvent &event)
 {
     StartCooperateEvent param = std::get<StartCooperateEvent>(event.event);
-
+    CHKPV(parent_.env_);
     if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Not allow cooperate");
         NotAollowCooperateWhenMotionDragging result {
@@ -207,6 +207,7 @@ void CooperateOut::Initial::OnStart(Context &context, const CooperateEvent &even
 void CooperateOut::Initial::OnStartWithOptions(Context &context, const CooperateEvent &event)
 {
     StartWithOptionsEvent param = std::get<StartWithOptionsEvent>(event.event);
+    CHKPV(parent_.env_);
     if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Not allow cooperate");
         NotAollowCooperateWhenMotionDragging result {

@@ -307,6 +307,7 @@ void StateMachine::EnableCooperate(Context &context, const CooperateEvent &event
 void StateMachine::DisableCooperate(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     DisableCooperateEvent disableEvent = std::get<DisableCooperateEvent>(event.event);
     context.DisableCooperate(disableEvent);
     context.eventMgr_.DisableCooperate(disableEvent);
@@ -323,6 +324,7 @@ void StateMachine::DisableCooperate(Context &context, const CooperateEvent &even
 void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     StartCooperateEvent startEvent = std::get<StartCooperateEvent>(event.event);
     bool checkSameAccount = false;
     if (startEvent.uid > 0) {
@@ -381,6 +383,7 @@ void StateMachine::StopCooperate(Context &context, const CooperateEvent &event)
 void StateMachine::StartCooperateWithOptions(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     StartWithOptionsEvent withOptionsEvent = std::get<StartWithOptionsEvent>(event.event);
     if (!env_->GetDDM().CheckSameAccountToLocal(withOptionsEvent.remoteNetworkId)) {
         FI_HILOGE("CheckSameAccountToLocal failed");
@@ -514,6 +517,7 @@ void StateMachine::OnSoftbusSessionClosed(Context &context, const CooperateEvent
 void StateMachine::OnSoftbusSessionOpened(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     DSoftbusSessionOpened notice = std::get<DSoftbusSessionOpened>(event.event);
     context.inputDevMgr_.OnSoftbusSessionOpened(notice);
     env_->GetDSoftbus().StartHeartBeat(notice.networkId);
@@ -850,6 +854,7 @@ void StateMachine::AddMonitor(Context &context)
 void StateMachine::RemoveMonitor(Context &context)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     if (monitorId_ < 0) {
         return;
     }

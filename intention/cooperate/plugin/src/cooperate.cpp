@@ -432,6 +432,7 @@ void Cooperate::StopWorker()
 void Cooperate::LoadMotionDrag()
 {
     FI_HILOGI("Load 'MotionDrag' module");
+    CHKPV(env_);
     IMotionDrag *motionDrag = env_->GetPluginManager().LoadMotionDrag();
     if (motionDrag == nullptr) {
         FI_HILOGE("Failed to load motion drag");

@@ -91,7 +91,7 @@ void VirtualTouchScreen::SendTouchEvent()
         SendEvent(EV_ABS, ABS_MT_POSITION_Y, slots_[s].coord.y);
         SendEvent(EV_ABS, ABS_MT_TRACKING_ID, s);
         SendEvent(EV_SYN, SYN_MT_REPORT, SYNC_VALUE);
-        FI_HILOGD("Send event [%{public}d], (%{public}d, %{public}d)", s, slots_[s].coord.x, slots_[s].coord.y);
+        FI_HILOGD("Send event [%{public}d], (%{private}d, %{private}d)", s, slots_[s].coord.x, slots_[s].coord.y);
     }
 }
 
@@ -172,7 +172,7 @@ int32_t VirtualTouchScreen::Move(int32_t slot, int32_t dx, int32_t dy)
         .x = std::min(std::max(slots_[slot].coord.x + dx, 0), screenWidth_ - 1),
         .y = std::min(std::max(slots_[slot].coord.y + dy, 0), screenHeight_ - 1)
     };
-    FI_HILOGD("Move [%{public}d] from (%{public}d, %{public}d) to (%{public}d, %{public}d)",
+    FI_HILOGD("Move [%{public}d] from (%{private}d, %{private}d) to (%{private}d, %{private}d)",
         slot, slots_[slot].coord.x, slots_[slot].coord.y, tcoord.x, tcoord.y);
 
     while ((tcoord.x != slots_[slot].coord.x) || (tcoord.y != slots_[slot].coord.y)) {

@@ -158,10 +158,10 @@ ssize_t Utility::GetFileSize(const char *path)
         if (S_ISREG(buf.st_mode)) {
             sz = buf.st_size;
         } else {
-            FI_HILOGE("Not regular file:\'%{public}s\'", path);
+            FI_HILOGE("Not regular file:\'%{private}s\'", path);
         }
     } else {
-        FI_HILOGE("stat(\'%{public}s\') failed:%{public}s", path, strerror(errno));
+        FI_HILOGE("stat(\'%{private}s\') failed:%{public}s", path, strerror(errno));
     }
     return sz;
 }
@@ -170,11 +170,11 @@ void Utility::ShowFileAttributes(const char *path)
 {
     CALL_DEBUG_ENTER;
     FI_HILOGD("======================= File Attributes ========================");
-    FI_HILOGD("%{public}20s:%{public}s", "FILE NAME", path);
+    FI_HILOGD("%{public}20s:%{private}s", "FILE NAME", path);
 
     struct stat buf {};
     if (stat(path, &buf) != 0) {
-        FI_HILOGE("stat(\'%{public}s\') failed:%{public}s", path, strerror(errno));
+        FI_HILOGE("stat(\'%{private}s\') failed:%{public}s", path, strerror(errno));
         return;
     }
     if (S_ISDIR(buf.st_mode)) {

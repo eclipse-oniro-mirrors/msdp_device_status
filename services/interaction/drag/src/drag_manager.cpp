@@ -882,7 +882,7 @@ void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     double hotZoneY = baseY + shadowInfo.y;
 
     FI_HILOGI("DRAGDOWN throw state: %{public}d", throwState_);
-    FI_HILOGD("Pointer X: %{public}d, Y: %{public}d",
+    FI_HILOGD("Pointer X: %{private}d, Y: %{private}d",
               pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     FI_HILOGD("Hotzone X: %{public}f, Y: %{public}f, Width: %{public}d, Height: %{public}d",
               hotZoneX, hotZoneY, shadowInfo.pixelMap->GetWidth(), shadowInfo.pixelMap->GetHeight());

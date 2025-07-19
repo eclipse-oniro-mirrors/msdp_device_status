@@ -284,6 +284,7 @@ void EventManager::ErrorNotAollowCooperateWhenMotionDragging(const NotAollowCoop
 
 void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
 {
+    CHKPV(env_);
     auto session = env_->GetSocketSessionManager().FindSessionByPid(notice.pid);
     if (session == nullptr) {
         FI_HILOGD("session is null");

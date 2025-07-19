@@ -138,6 +138,7 @@ void InputDeviceMgr::HandleRemoteHotPlug(const DSoftbusHotPlugEvent &notice)
 void InputDeviceMgr::NotifyInputDeviceToRemote(const std::string &remoteNetworkId)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     auto virTrackPads = env_->GetDeviceManager().GetVirTrackPad();
     if ((virTrackPads.size() == 0) &&
         (!env_->GetDeviceManager().HasKeyboard() && !env_->GetDeviceManager().HasLocalPointerDevice())) {
@@ -185,6 +186,7 @@ void InputDeviceMgr::NotifyInputDeviceToRemote(const std::string &remoteNetworkI
 void InputDeviceMgr::BroadcastHotPlugToRemote(const InputHotplugEvent &notice)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     FI_HILOGI("HotplugType%{public}d deviceId:%{public}d", static_cast<int32_t>(notice.type), notice.deviceId);
     if (!notice.isKeyboard) {
         FI_HILOGI("Not keyboard, skip");
@@ -285,6 +287,7 @@ void InputDeviceMgr::DumpRemoteInputDevice(const std::string &networkId)
 int32_t InputDeviceMgr::SerializeDevice(std::shared_ptr<IDevice> device, NetPacket &packet)
 {
     CALL_INFO_TRACE;
+    CHKPR(device, RET_ERR);
     packet << device->GetId() << device->GetDevPath() << device->GetSysPath() << device->GetBus() <<
     device->GetVendor() << device->GetProduct() << device->GetVersion() << device->GetName() <<
     device->GetPhys() << device->GetUniq() << device->IsPointerDevice()  << device->IsKeyboard() <<
@@ -347,6 +350,7 @@ void InputDeviceMgr::AddVirtualInputDevice(const std::string &networkId, int32_t
 void InputDeviceMgr::RemoveVirtualInputDevice(const std::string &networkId, int32_t remoteDeviceId)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     if (remote2VirtualIds_.find(remoteDeviceId) == remote2VirtualIds_.end()) {
         FI_HILOGE("No remote device from networkId%{public}s with id:%{public}d",
             Utility::Anonymize(networkId).c_str(), remoteDeviceId);

@@ -86,6 +86,7 @@ int32_t DeviceManager::OnInit(IContext *context)
 {
     CALL_INFO_TRACE;
     CHKPR(context, RET_ERR);
+    CHKPR(monitor_, RET_ERR);
     context_ = context;
     monitor_->SetDeviceMgr(&hotplug_);
     enumerator_.SetDeviceMgr(&hotplug_);
@@ -147,6 +148,7 @@ int32_t DeviceManager::Disable()
 
 int32_t DeviceManager::OnDisable()
 {
+    CHKPR(monitor_, RET_ERR);
     epollMgr_.Remove(monitor_);
     monitor_->Disable();
     epollMgr_.Close();
@@ -191,19 +193,19 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
         return nullptr;
     }
     if (!S_ISCHR(statbuf.st_mode)) {
-        FI_HILOGE("Not character device:%{public}s", devPath.c_str());
+        FI_HILOGE("Not character device:%{private}s", devPath.c_str());
         return nullptr;
     }
 
     int32_t deviceId = ParseDeviceId(devNode);
     if (deviceId < 0) {
-        FI_HILOGE("Parsing device name failed:%{public}s", devNode.c_str());
+        FI_HILOGE("Parsing device name failed:%{private}s", devNode.c_str());
         return nullptr;
     }
 
     std::shared_ptr<IDevice> dev = FindDevice(devPath);
     if (dev != nullptr) {
-        FI_HILOGD("Already exists:%{public}s", devPath.c_str());
+        FI_HILOGD("Already exists:%{private}s", devPath.c_str());
         return dev;
     }
 
@@ -218,7 +220,7 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
     dev->SetDevPath(devPath);
     dev->SetSysPath(std::string(rpath));
     if (dev->Open() != RET_OK) {
-        FI_HILOGE("Unable to open \'%{public}s\'", devPath.c_str());
+        FI_HILOGE("Unable to open \'%{private}s\'", devPath.c_str());
         return nullptr;
     }
     auto ret = devices_.insert_or_assign(dev->GetId(), dev);
@@ -281,7 +283,7 @@ void DeviceManager::DeviceInfo(std::shared_ptr<IDevice> dev)
     FI_HILOGD("  product:       %{public}04x", dev->GetProduct());
     FI_HILOGD("  version:       %{public}04x", dev->GetVersion());
     FI_HILOGI("  name:          \"%{public}s\"", Utility::Anonymize(dev->GetName()).c_str());
-    FI_HILOGD("  location:      \"%{public}s\"", dev->GetPhys().c_str());
+    FI_HILOGD("  location:      \"%{private}s\"", dev->GetPhys().c_str());
     FI_HILOGD("  unique id:     \"%{private}s\"", dev->GetUniq().c_str());
     FI_HILOGI("  is pointer:    %{public}s, is keyboard:%{public}s",
         dev->IsPointerDevice() ? "True" : "False", dev->IsKeyboard() ? "True" : "False");
@@ -474,9 +476,11 @@ std::vector<std::shared_ptr<IDevice>> DeviceManager::GetKeyboard()
 {
     std::vector<std::shared_ptr<IDevice>> keyboards;
     for (const auto &dev : devices_) {
-        if (dev.second->IsKeyboard() && !dev.second->IsRemote() &&
-            dev.second->GetKeyboardType() == IDevice::KeyboardType::KEYBOARD_TYPE_ALPHABETICKEYBOARD) {
-            keyboards.push_back(dev.second);
+        if (dev.second != nullptr) {
+            if (dev.second->IsKeyboard() && !dev.second->IsRemote() &&
+                dev.second->GetKeyboardType() == IDevice::KeyboardType::KEYBOARD_TYPE_ALPHABETICKEYBOARD) {
+                keyboards.push_back(dev.second);
+            }
         }
     }
     return keyboards;
@@ -489,8 +493,10 @@ std::vector<std::shared_ptr<IDevice>> DeviceManager::GetPointerDevice()
     }
     std::vector<std::shared_ptr<IDevice>> pointerDevices;
     for (const auto &dev : devices_) {
-        if (dev.second->IsPointerDevice() && !dev.second->IsRemote() && dev.second->GetName() != FINGER_PRINT) {
-            pointerDevices.push_back(dev.second);
+        if (dev.second != nullptr) {
+            if (dev.second->IsPointerDevice() && !dev.second->IsRemote() && dev.second->GetName() != FINGER_PRINT) {
+                pointerDevices.push_back(dev.second);
+            }
         }
     }
     return pointerDevices;
