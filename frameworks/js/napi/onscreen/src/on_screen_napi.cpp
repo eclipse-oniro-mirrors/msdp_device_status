@@ -64,7 +64,7 @@ napi_value OnScreenNapi::Init(napi_env env, napi_value exports)
     ret = SetInt32Property(env, napiScenario, static_cast<int32_t>(Scenario::UNKNOWN), "UNKNOWN");
     ret = ret && SetInt32Property(env, napiScenario, static_cast<int32_t>(Scenario::ARTICLE), "ARTICLE");
     ret = ret && SetPropertyName(env, exports, "Scenario", napiScenario);
-    if (ret != false) {
+    if (!ret) {
         FI_HILOGE("Failed set enum scenario");
         return exports;
     }
@@ -79,7 +79,7 @@ napi_value OnScreenNapi::Init(napi_env env, napi_value exports)
     ret = ret &&
         SetInt32Property(env, napiEventType, static_cast<int32_t>(EventType::SCROLL_TO_HOOK), "SCROLL_TO_HOOK");
     ret = ret && SetPropertyName(env, exports, "EventType", napiEventType);
-    if (ret != false) {
+    if (!ret) {
         FI_HILOGE("Failed set enum eventtype");
         return exports;
     }
