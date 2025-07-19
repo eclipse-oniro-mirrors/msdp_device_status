@@ -424,7 +424,7 @@ int32_t VirtualDeviceBuilder::ScanFor(std::function<bool(std::shared_ptr<Virtual
     CALL_DEBUG_ENTER;
     DIR *dir = opendir(DEV_INPUT_PATH.c_str());
     if (dir == nullptr) {
-        FI_HILOGE("Failed to open directory \'%{public}s\':%{public}s", DEV_INPUT_PATH.c_str(), strerror(errno));
+        FI_HILOGE("Failed to open directory \'%{private}s\':%{public}s", DEV_INPUT_PATH.c_str(), strerror(errno));
         return RET_ERR;
     }
     struct dirent *dent;

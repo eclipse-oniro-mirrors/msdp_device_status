@@ -33,6 +33,7 @@ namespace Cooperate {
 namespace {
 constexpr int32_t MAX_KEY_SIZE { 395 };
 const std::string HEART_BEAT_PACKET { "heart_beat_packet" };
+constexpr size_t MAX_N_PRESSED_BUTTONS { 10 };
 } // namespace
 
 int32_t InputEventSerialization::KeyEventToNetPacket(
@@ -284,9 +285,11 @@ int32_t InputEventSerialization::SerializePressedButtons(std::shared_ptr<MMI::Po
 {
     std::set<int32_t> pressedBtns = event->GetPressedButtons();
     std::set<int32_t>::size_type nPressed = pressedBtns.size();
-
+    if (nPressed >= MAX_N_PRESSED_BUTTONS) {
+        FI_HILOGE("Exceed maximum allowed number of pressed buttons");
+        return RET_ERR;
+    }
     pkt << nPressed;
-
     for (int32_t btnId : pressedBtns) {
         pkt << btnId;
     }
@@ -303,7 +306,10 @@ int32_t InputEventSerialization::DeserializePressedButtons(NetPacket &pkt, std::
     int32_t btnId {};
 
     pkt >> nPressed;
-
+    if (nPressed >= MAX_N_PRESSED_BUTTONS) {
+        FI_HILOGE("Exceed maximum allowed number of pressed buttons");
+        return RET_ERR;
+    }
     for (; nPressed > 0; --nPressed) {
         pkt >> btnId;
         event->SetButtonPressed(btnId);
@@ -343,7 +349,10 @@ int32_t InputEventSerialization::SerializePointers(std::shared_ptr<MMI::PointerE
 {
     std::vector<int32_t> pointerIds = event->GetPointerIds();
     std::vector<int32_t>::size_type nPointers = pointerIds.size();
-
+    if (nPointers >= MAX_N_PRESSED_BUTTONS) {
+        FI_HILOGE("Exceed maximum allowed number of nPointers");
+        return RET_ERR;
+    }
     pkt << nPointers;
 
     for (const auto &pointerId : pointerIds) {
@@ -369,7 +378,10 @@ int32_t InputEventSerialization::DeserializePointers(NetPacket &pkt, std::shared
 {
     std::vector<int32_t>::size_type nPointers;
     pkt >> nPointers;
-
+    if (nPointers >= MAX_N_PRESSED_BUTTONS) {
+        FI_HILOGE("Exceed maximum allowed number of nPointers");
+        return RET_ERR;
+    }
     for (; nPointers > 0; --nPointers) {
         MMI::PointerEvent::PointerItem item;
 

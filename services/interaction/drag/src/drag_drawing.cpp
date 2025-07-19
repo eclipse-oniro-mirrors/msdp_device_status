@@ -1375,7 +1375,9 @@ void DragDrawing::NotifyDragInfo(const std::string &sourceName, const std::strin
     struct DragEventInfo dragEventInfo;
     dragEventInfo.sourcePkgName = sourceName;
     dragEventInfo.targetPkgName = targetName;
-    if (!GetSuperHubHandler()->PostTask([dragDropExtFunc, dragEventInfo] ()
+    GetSuperHubHandler();
+    CHKPV(superHubHandler_);
+    if (!superHubHandler_->PostTask([dragDropExtFunc, dragEventInfo] ()
         mutable { return dragDropExtFunc(dragEventInfo); })) {
         FI_HILOGE("notify drag info failed");
     }
@@ -2394,6 +2396,7 @@ std::shared_ptr<Media::PixelMap> DragDrawing::DecodeSvgToPixelMap(
         int32_t ret = ParseAndAdjustSvgInfo(node);
         if (ret != RET_OK) {
             FI_HILOGE("Parse and adjust svg info failed, ret:%{public}d", ret);
+            xmlFreeDoc(xmlDoc);
             return nullptr;
         }
     }

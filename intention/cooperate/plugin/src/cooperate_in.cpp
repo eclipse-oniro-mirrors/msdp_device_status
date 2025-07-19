@@ -167,6 +167,7 @@ void CooperateIn::Initial::OnDisable(Context &context, const CooperateEvent &eve
 void CooperateIn::Initial::OnStart(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
+    CHKPV(parent_.env_);
     StartCooperateEvent startEvent = std::get<StartCooperateEvent>(event.event);
     context.ResetPriv();
 
@@ -253,6 +254,7 @@ void CooperateIn::Initial::OnRelayWithOptions(Context &context, const CooperateE
 void CooperateIn::Initial::OnStartWithOptions(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
+    CHKPV(parent_.env_);
     StartWithOptionsEvent startEvent = std::get<StartWithOptionsEvent>(event.event);
     context.ResetPriv();
     context.StartCooperateWithOptions(startEvent);

@@ -120,6 +120,7 @@ int32_t DragManagerImpl::OnStateChangedMessage(const StreamClient &client, NetPa
     }
     std::lock_guard<std::mutex> guard(mtx_);
     for (const auto &listener : dragListener_) {
+        CHKPR(listener, RET_ERR);
         listener->OnDragMessage(static_cast<DragState>(state));
     }
     return RET_OK;
@@ -136,6 +137,7 @@ int32_t DragManagerImpl::OnDragStyleChangedMessage(const StreamClient &client, N
     }
     std::lock_guard<std::mutex> guard(mtx_);
     for (const auto &listener : subscriptListener_) {
+        CHKPR(listener, RET_ERR);
         listener->OnMessage(static_cast<DragCursorStyle>(style));
     }
     return RET_OK;

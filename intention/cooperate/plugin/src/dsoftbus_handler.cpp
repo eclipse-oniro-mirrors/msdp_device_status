@@ -106,6 +106,7 @@ void DSoftbusHandler::AttachSender(Channel<CooperateEvent>::Sender sender)
 
 int32_t DSoftbusHandler::CheckDeviceOnline(const std::string &networkId)
 {
+    CHKPR(env_, RET_ERR);
     int32_t ret = env_->GetDSoftbus().CheckDeviceOnline(networkId);
     return ret;
 }
@@ -113,6 +114,7 @@ int32_t DSoftbusHandler::CheckDeviceOnline(const std::string &networkId)
 int32_t DSoftbusHandler::OpenSession(const std::string &networkId)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     auto tokenId = OHOS::IPCSkeleton::GetCallingTokenID();
     int ret = SetFirstCallerTokenID(tokenId);
     if (ret != RET_OK) {
@@ -128,18 +130,21 @@ int32_t DSoftbusHandler::OpenSession(const std::string &networkId)
 void DSoftbusHandler::CloseSession(const std::string &networkId)
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     env_->GetDSoftbus().CloseSession(networkId);
 }
 
 void DSoftbusHandler::CloseAllSessions()
 {
     CALL_INFO_TRACE;
+    CHKPV(env_);
     env_->GetDSoftbus().CloseAllSessions();
 }
 
 int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSoftbusStartCooperate &event)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE);
     packet << event.originNetworkId << event.cursorPos.x
         << event.cursorPos.y << event.success << event.extra.priv << event.pointerSpeed
@@ -182,6 +187,7 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
 int32_t DSoftbusHandler::StartCooperateWithOptions(const std::string &networkId, const DSoftbusCooperateOptions &event)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_COOPERATE_WITH_OPTIONS);
     packet << event.originNetworkId << event.cooperateOptions.displayX << event.cooperateOptions.displayY
         << event.cooperateOptions.displayId << event.success << event.extra.priv << event.pointerSpeed
@@ -224,6 +230,7 @@ int32_t DSoftbusHandler::StartCooperateWithOptions(const std::string &networkId,
 int32_t DSoftbusHandler::StopCooperate(const std::string &networkId, const DSoftbusStopCooperate &event)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_STOP_COOPERATE);
     int32_t ret = env_->GetDSoftbus().SendPacket(networkId, packet);
     if (ret != RET_OK) {
@@ -235,6 +242,7 @@ int32_t DSoftbusHandler::StopCooperate(const std::string &networkId, const DSoft
 int32_t DSoftbusHandler::ComeBack(const std::string &networkId, const DSoftbusComeBack &event)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_COME_BACK);
     packet << event.originNetworkId << event.cursorPos.x << event.cursorPos.y << event.extra.priv << event.uid;
     if (packet.ChkRWError()) {
@@ -251,6 +259,7 @@ int32_t DSoftbusHandler::ComeBack(const std::string &networkId, const DSoftbusCo
 int32_t DSoftbusHandler::ComeBackWithOptions(const std::string &networkId, const DSoftbusComeBackWithOptions &event)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_COME_BACK_WITH_OPTIONS);
     packet << event.originNetworkId << event.cooperateOptions.displayX  << event.cooperateOptions.displayY
         << event.cooperateOptions.displayId << event.extra.priv;
@@ -268,6 +277,7 @@ int32_t DSoftbusHandler::ComeBackWithOptions(const std::string &networkId, const
 int32_t DSoftbusHandler::RelayCooperate(const std::string &networkId, const DSoftbusRelayCooperate &event)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE);
     packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed << event.uid;
     if (packet.ChkRWError()) {
@@ -284,6 +294,7 @@ int32_t DSoftbusHandler::RelayCooperate(const std::string &networkId, const DSof
 int32_t DSoftbusHandler::RelayCooperateFinish(const std::string &networkId, const DSoftbusRelayCooperateFinished &event)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE_FINISHED);
     packet << event.targetNetworkId << event.normal << event.uid;
     if (packet.ChkRWError()) {
@@ -300,6 +311,7 @@ int32_t DSoftbusHandler::RelayCooperateFinish(const std::string &networkId, cons
 int32_t DSoftbusHandler::RelayCooperateWithOptions(const std::string &networkId, const DSoftbusRelayCooperate &event)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS);
     packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed;
     if (packet.ChkRWError()) {
@@ -317,6 +329,7 @@ int32_t DSoftbusHandler::RelayCooperateWithOptionsFinish(const std::string &netw
     const DSoftbusRelayCooperateFinished &event)
 {
     CALL_INFO_TRACE;
+    CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS_FINISHED);
     packet << event.targetNetworkId << event.normal;
     if (packet.ChkRWError()) {
@@ -453,6 +466,7 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
 
 void DSoftbusHandler::RemoteStartCooperate()
 {
+    CHKPV(env_);
     auto motionDrag = env_->GetPluginManager().LoadMotionDrag();
     if (motionDrag == nullptr) {
         FI_HILOGE("Failed to load motion drag");
