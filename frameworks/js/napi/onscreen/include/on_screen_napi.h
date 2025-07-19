@@ -49,9 +49,12 @@ private:
     static bool ConstructParagraphObj(napi_env env, napi_value retObj, const Paragraph &value);
     static bool SetParagraphVecProperty(napi_env env, napi_value targetObj, const std::vector<Paragraph> paragraphs,
         const char *propName);
-    static bool GetInt32FromJs(napi_env env, const napi_value &value, const std::string &field, int32_t &result, bool isNecessary);
-    static bool GetInt64FromJs(napi_env env, const napi_value &value, const std::string &field, int64_t &result, bool isNecessary);
-    static bool GetBoolFromJs(napi_env env, const napi_value &value, const std::string &field, bool &result, bool isNecessary);
+    static bool GetInt32FromJs(napi_env env, const napi_value &value, const std::string &field,
+        int32_t &result, bool isNecessary);
+    static bool GetInt64FromJs(napi_env env, const napi_value &value, const std::string &field,
+        int64_t &result, bool isNecessary);
+    static bool GetBoolFromJs(napi_env env, const napi_value &value, const std::string &field,
+        bool &result, bool isNecessary);
     static bool SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
     // GetPageContent
     static bool GetPageContentExec(GetPageContentAsyncContext *asyncContext);

@@ -123,8 +123,9 @@ napi_value OnScreenNapi::GetPageContentNapi(napi_env env, napi_callback_info inf
     asyncContext->deferred = deferred;
     asyncContext->option = option;
     FI_HILOGD("invoke get page content, windowid = %{public}d, contentUnderstand = %{public}d, pageLink = %{public}d,"
-        "textOnly = %{public}d, maxParaLen = %{public}d", asyncContext->option.windowId, asyncContext->option.contentUnderstand,
-        asyncContext->option.pageLink, asyncContext->option.textOnly, asyncContext->option.maxParagraphSize);
+        "textOnly = %{public}d, maxParaLen = %{public}d", asyncContext->option.windowId,
+        asyncContext->option.contentUnderstand, asyncContext->option.pageLink, asyncContext->option.textOnly,
+        asyncContext->option.maxParagraphSize);
     if (!GetPageContentExec(asyncContext)) {
         FI_HILOGE("get page content execution failed");
         delete asyncContext;
@@ -168,8 +169,8 @@ napi_value OnScreenNapi::SendControlEventNapi(napi_env env, napi_callback_info i
     asyncContext->env = env;
     asyncContext->deferred = deferred;
     asyncContext->event = event;
-    FI_HILOGD("invoke send control event, windowid = %{public}d, sessionId = %{public}ld, eventType = %{public}d,"
-        "hookid = %{public}ld", asyncContext->event.windowId, asyncContext->event.sessionId,
+    FI_HILOGD("invoke send control event, windowid = %{public}d, sessionId = %{public}lld, eventType = %{public}d,"
+        "hookid = %{public}lld", asyncContext->event.windowId, asyncContext->event.sessionId,
         asyncContext->event.eventType, asyncContext->event.hookId);
     if (!SendControlEventExec(asyncContext)) {
         FI_HILOGE("send control event execution failed");
@@ -277,7 +278,7 @@ bool OnScreenNapi::GetInt32FromJs(napi_env env, const napi_value &value, const s
         FI_HILOGE("napi_get_value_int32 failed");
         return false;
     }
-    return true;  
+    return true;
 }
 
 bool OnScreenNapi::GetInt64FromJs(napi_env env, const napi_value &value, const std::string &field,
@@ -311,7 +312,7 @@ bool OnScreenNapi::GetInt64FromJs(napi_env env, const napi_value &value, const s
         FI_HILOGE("napi_get_value_int64 failed");
         return false;
     }
-    return true;  
+    return true;
 }
 
 bool OnScreenNapi::GetBoolFromJs(napi_env env, const napi_value &value, const std::string &field,
@@ -345,7 +346,7 @@ bool OnScreenNapi::GetBoolFromJs(napi_env env, const napi_value &value, const st
         FI_HILOGE("napi_get_value_bool failed");
         return false;
     }
-    return true;  
+    return true;
 }
 
 bool OnScreenNapi::SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName)
@@ -478,7 +479,8 @@ void OnScreenNapi::GetPageContentCompCB(napi_env env, napi_status status, void *
     ret = ret && SetStringProperty(env, pageContentObj, completeAsyncContext->pageContent.title, "title");
     ret = ret && SetStringProperty(env, pageContentObj, completeAsyncContext->pageContent.content, "content");
     ret = ret && SetStringProperty(env, pageContentObj, completeAsyncContext->pageContent.pageLink, "pageLink");
-    ret = ret && SetParagraphVecProperty(env, pageContentObj, completeAsyncContext->pageContent.paragraphs, "paragraphs");
+    ret = ret && SetParagraphVecProperty(env, pageContentObj, completeAsyncContext->pageContent.paragraphs,
+        "paragraphs");
     if (!ret) {
         FI_HILOGE("construct page content failed");
         completeAsyncContext->result = RET_ERR;
