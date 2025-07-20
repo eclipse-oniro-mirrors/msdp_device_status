@@ -17,9 +17,8 @@
 #define ON_SCREEN_DATA_H
 
 #include <memory>
+#include <string>
 #include <vector>
-
-#include "pixel_map.h"
 
 namespace OHOS {
 namespace Msdp {

@@ -23,6 +23,8 @@ ohos_unittest("OnScreenServerTest") {
     debug = false
   }
 
+  cflags = [ "-fno-access-control" ]
+
   module_out_path = module_output_path
   include_dirs = [
     "${device_status_root_path}/intention/onscreen/server/include",
