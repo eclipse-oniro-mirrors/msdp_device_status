@@ -46,6 +46,8 @@ const int32_t UPPER_SCENE_FPS { 0 };
 const int32_t UPPER_SCENE_BW { 0 };
 const int32_t MODE_ENABLE { 0 };
 const int32_t MODE_DISABLE { 1 };
+const int32_t DRIVE_INTERCEPTOR_LATENCY { 5 };
+const int32_t INTERCEPTOR_TRANSMISSION_LATENCY { 20 };
 const std::string LOW_LATENCY_KEY = "identity";
 }
 
@@ -78,6 +80,9 @@ void InputEventBuilder::Enable(Context &context)
     movement_ = 0;
     freezing_ = (context.CooperateFlag() & COOPERATE_FLAG_FREEZE_CURSOR);
     remoteNetworkId_ = context.Peer();
+    localNetworkId_ = context.Local();
+    pointerSpeed_ = context.GetPointerSpeed();
+    touchPadSpeed_ = context.GetTouchPadSpeed();
     env_->GetDSoftbus().AddObserver(observer_);
     Coordinate cursorPos = context.CursorPosition();
     TurnOffChannelScan();
@@ -209,6 +214,7 @@ bool InputEventBuilder::OnPacket(const std::string &networkId, Msdp::NetPacket &
 
 void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
 {
+    int64_t curBuilderRecvTime = Utility::GetSysClockTime();
     CHKPV(pointerEvent_);
     CHKPV(env_);
     if (scanState_) {
@@ -219,12 +225,10 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
         pointerEventTimer_ = -1;
     }
     pointerEvent_->Reset();
-    int32_t ret = InputEventSerialization::Unmarshalling(packet, pointerEvent_);
+    int64_t curInterceptorTime = -1;
+    int32_t ret = InputEventSerialization::Unmarshalling(packet, pointerEvent_, curInterceptorTime);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to deserialize pointer event");
-        return;
-    }
-    if (!UpdatePointerEvent(pointerEvent_)) {
         return;
     }
     TagRemoteEvent(pointerEvent_);
@@ -232,12 +236,60 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
     FI_HILOGD("PointerEvent(No:%{public}d, Source:%{public}s, Action:%{public}s)",
         pointerEvent_->GetId(), pointerEvent_->DumpSourceType(), pointerEvent_->DumpPointerAction());
     if (IsActive(pointerEvent_)) {
+        CheckLatency(pointerEvent_->GetActionTime(), curInterceptorTime, curBuilderRecvTime, pointerEvent_);
+        if (!UpdatePointerEvent(pointerEvent_)) {
+            return;
+        }
         env_->GetInput().SimulateInputEvent(pointerEvent_);
     }
     pointerEventTimer_ = env_->GetTimerManager().AddTimerAsync(POINTER_EVENT_TIMEOUT, REPEAT_ONCE, [this]() {
         TurnOnChannelScan();
         pointerEventTimer_ = -1;
     });
+}
+
+void InputEventBuilder::CheckLatency(int64_t curDriveActionTime, int64_t curInterceptorTime,
+        int64_t curBuilderRecvTime, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        curInterceptorTime = -1) {
+        preDriveEventTime_ = -1;
+        return;
+    }
+    if (preDriveEventTime_ < 0) {
+        preDriveEventTime_ = curDriveActionTime;
+        preCooperateInterceptorTime_ = curInterceptorTime;
+        preCrossPlatformTime_ = curBuilderRecvTime;
+    }
+    driveEventTimeDT_ = curDriveActionTime - preDriveEventTime_;
+    cooperateInterceptorTimeDT_ = curInterceptorTime - preCooperateInterceptorTime_;
+    crossPlatformTimeDT_ = curBuilderRecvTime - preCrossPlatformTime_;
+    preDriveEventTime_ = curDriveActionTime;
+    preCooperateInterceptorTime_ = curInterceptorTime;
+    preCrossPlatformTime_ = curBuilderRecvTime;
+    TransmissionLatencyRadarInfo radarInfo {
+        .funcName = __FUNCTION__,
+        .bizState = static_cast<int32_t> (BizState::STATE_END),
+        .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CLIENT_ON_MESSAGE_RCVD),
+        .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_IDLE),
+        .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
+        .errCode = static_cast<int32_t> (msgInfo.errCode),
+        .localNetId = Utility::DFXRadarAnonymize(localNetworkId_.c_str()),
+        .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId_.c_str()),
+    };
+    int64_t DriveToInterceptorDT = Utility::GetSysClockTimeMilli(cooperateInterceptorTimeDT_ - driveEventTimeDT_);
+    int64_t InterceptorToCrossDT = std::abs(Utility::GetSysClockTimeMilli(
+        crossPlatformTimeDT_ - cooperateInterceptorTimeDT_));
+    if (DriveToInterceptorDT > DRIVE_INTERCEPTOR_LATENCY || InterceptorToCrossDT > INTERCEPTOR_TRANSMISSION_LATENCY) {
+        FI_HILOGI("driveEventTimeDT:%{public}ld, cooperateInterceptorTimeDT:%{public}ld,"
+            "crossPlatformTimeDT:%{public}ld", driveEventTimeDT_, cooperateInterceptorTimeDT_, crossPlatformTimeDT_);
+        radarInfo.driveEventTimeDT = driveEventTimeDT_;
+        radarInfo.cooperateInterceptorTimeDT = cooperateInterceptorTimeDT_;
+        radarInfo.crossPlatformTimeDT = crossPlatformTimeDT_;
+        radarInfo.pointerSpeed = pointerSpeed_;
+        radarInfo.touchPadSpeed = touchPadSpeed_;
+        CooperateRadar::ReportTransmissionLatencyRadarInfo(radarInfo);
+    }
 }
 
 void InputEventBuilder::OnNotifyCrossDrag(std::shared_ptr<MMI::PointerEvent> pointerEvent)

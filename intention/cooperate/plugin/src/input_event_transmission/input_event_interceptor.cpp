@@ -152,6 +152,7 @@ void InputEventInterceptor::Update(Context &context)
 void InputEventInterceptor::OnPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
+    int64_t interceptorTime = Utility::GetSysClockTime();
     if (scanState_) {
         TurnOffChannelScan();
     }
@@ -174,7 +175,7 @@ void InputEventInterceptor::OnPointerEvent(std::shared_ptr<MMI::PointerEvent> po
     OnNotifyCrossDrag(pointerEvent);
     NetPacket packet(MessageId::DSOFTBUS_INPUT_POINTER_EVENT);
 
-    int32_t ret = InputEventSerialization::Marshalling(pointerEvent, packet);
+    int32_t ret = InputEventSerialization::Marshalling(pointerEvent, packet, interceptorTime);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to serialize pointer event");
         return;

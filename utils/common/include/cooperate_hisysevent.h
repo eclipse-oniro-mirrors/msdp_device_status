@@ -25,7 +25,8 @@ namespace DeviceStatus {
     
 enum class BizCooperateScene {
     SCENE_ACTIVE = 1,
-    SCENE_PASSIVE
+    SCENE_PASSIVE,
+    SCENE_LATENCY
 };
     
 enum class BizCooperateStageRes {
@@ -92,9 +93,26 @@ struct CooperateRadarInfo {
     std::string peerDeviceType;
 };
 
+struct TransmissionLatencyRadarInfo {
+    std::string funcName;
+    int32_t bizState { -1 };
+    int32_t bizStage { -1 };
+    int32_t stageRes { -1 };
+    int32_t bizScene { -1 };
+    std::string localNetId;
+    std::string peerNetId;
+    std::string toCallPkg;
+    int64_t driveEventTimeDT { -1 };
+    int64_t cooperateInterceptorTimeDT { -1 };
+    int64_t crossPlatformTimeDT { -1 };
+    int32_t pointerSpeed { -1 };
+    int32_t touchPadSpeed { -1 };
+};
+
 class CooperateRadar {
 public:
     static void ReportCooperateRadarInfo(struct CooperateRadarInfo &cooperateRadarInfo);
+    static void ReportTransmissionLatencyRadarInfo(struct TransmissionLatencyRadarInfo &transmissionLatencyRadarInfo);
 };
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -488,7 +488,30 @@ int32_t InputEventSerialization::DeserializeBuffer(NetPacket &pkt, std::shared_p
     return RET_OK;
 }
 
-int32_t InputEventSerialization::Marshalling(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt)
+int32_t InputEventSerialization::SerializeInterceptorTime(int64_t interceptorTime, NetPacket &pkt)
+{
+    pkt << interceptorTime;
+
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Failed to serialize interceptor time");
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
+int32_t InputEventSerialization::DeserializeInterceptorTime(NetPacket &pkt, int64_t &interceptorTime)
+{
+    pkt >> interceptorTime;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Failed to deserialize interceptor time");
+        interceptorTime = -1;
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
+int32_t InputEventSerialization::Marshalling(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt
+    int64_t interceptorTime)
 {
     CALL_DEBUG_ENTER;
     CHKPR(event, ERROR_NULL_POINTER);
@@ -521,10 +544,15 @@ int32_t InputEventSerialization::Marshalling(std::shared_ptr<MMI::PointerEvent> 
         FI_HILOGE("Failed to serialize buffer");
         return RET_ERR;
     }
+    if (SerializeInterceptorTime(interceptorTime, pkt)) {
+        FI_HILOGE("Failed to serialize interceptorTime");
+        return RET_ERR;
+    }
     return RET_OK;
 }
 
-int32_t InputEventSerialization::Unmarshalling(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event)
+int32_t InputEventSerialization::Unmarshalling(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event
+    int64_t &interceptorTime)
 {
     CALL_DEBUG_ENTER;
     CHKPR(event, ERROR_NULL_POINTER);
@@ -556,6 +584,9 @@ int32_t InputEventSerialization::Unmarshalling(NetPacket &pkt, std::shared_ptr<M
     if (DeserializeBuffer(pkt, event) != RET_OK) {
         FI_HILOGE("Failed to deserialize buffer");
         return RET_ERR;
+    }
+    if (DeserializeInterceptorTime(pkt, interceptorTime)) {
+        FI_HILOGE("Failed to deserialize interceptorTime");
     }
     return RET_OK;
 }

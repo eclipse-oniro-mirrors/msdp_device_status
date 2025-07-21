@@ -104,6 +104,8 @@ private:
     bool DampPointerMotion(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void ExecuteInner();
     void HandleStopTimer();
+    void CheckLatency(int64_t sourceActionTime, int64_t interceptorTime,
+        int64_t builderRecvTime, std::shared_ptr<MMI::PointerEvent> pointerEvent);
 
     IContext *env_ { nullptr };
     bool enable_ { false };
@@ -115,7 +117,16 @@ private:
     int32_t pointerEventTimer_ { -1 };
     double rawDxRightRemainder_ { 0.0 };
     double rawDxLeftRemainder_ { 0.0 };
+    int64_t driveEventTimeDT_ { -1 };
+    int64_t cooperateInterceptorTimeDT_ { -1 };
+    int64_t crossPlatformTimeDT_ { -1 };
+    int64_t preDriveEventTime_ { -1 };
+    int64_t preCooperateInterceptorTime_ { -1 };
+    int64_t preCrossPlatformTime_ { -1 };
+    int32_t pointerSpeed_ { -1 };
+    int32_t touchPadSpeed_ { -1 };
     std::string remoteNetworkId_;
+    std::string localNetworkId_;
     std::array<double, N_DAMPLING_DIRECTIONS> damplingCoefficients_;
     std::shared_ptr<DSoftbusObserver> observer_;
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
