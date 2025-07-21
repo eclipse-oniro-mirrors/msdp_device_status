@@ -267,6 +267,10 @@ bool OnScreenNapi::GetInt32FromJs(napi_env env, const napi_value &value, const s
         FI_HILOGE("typeof failed");
         return false;
     }
+    if ((!isNecessary) && valueType == napi_undefined) {
+        FI_HILOGW("isNecessary is false and valueType is undefined");
+        return true;
+    }
     if (valueType != napi_number) {
         FI_HILOGE("valueType is not number");
         return false;
@@ -301,6 +305,10 @@ bool OnScreenNapi::GetInt64FromJs(napi_env env, const napi_value &value, const s
         FI_HILOGE("typeof failed");
         return false;
     }
+    if ((!isNecessary) && valueType == napi_undefined) {
+        FI_HILOGW("isNecessary is false and valueType is undefined");
+        return true;
+    }
     if (valueType != napi_number) {
         FI_HILOGE("valueType is not number");
         return false;
@@ -334,6 +342,10 @@ bool OnScreenNapi::GetBoolFromJs(napi_env env, const napi_value &value, const st
     if (napi_typeof(env, fieldValue, &valueType) != napi_ok) {
         FI_HILOGE("typeof failed");
         return false;
+    }
+    if ((!isNecessary) && valueType == napi_undefined) {
+        FI_HILOGW("isNecessary is false and valueType is undefined");
+        return true;
     }
     if (valueType != napi_boolean) {
         FI_HILOGE("valueType is not bool");
