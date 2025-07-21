@@ -236,6 +236,8 @@ HWTEST_F(DeviceStatusClientTest, GetPageContent001, TestSize.Level0)
         std::cout << "title: "<< pageContent.paragraphs[i].title << std::endl;
         std::cout << "content: "<< pageContent.paragraphs[i].content << std::endl;
     }
+    std::cout << "--------------------------" << ret << std::endl;
+    std::cout << "ret:" << ret << std::endl;
     EXPECT_TRUE(ret >= RET_ERR);
 }
 

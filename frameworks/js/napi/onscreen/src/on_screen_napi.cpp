@@ -58,30 +58,27 @@ napi_value OnScreenNapi::Init(napi_env env, napi_value exports)
     napi_status status = napi_create_object(env, &napiScenario);
     if (status != napi_ok) {
         FI_HILOGE("Failed create object");
-        return exports;
+        return nullptr;
     }
-    bool ret = true;
-    ret = SetInt32Property(env, napiScenario, static_cast<int32_t>(Scenario::UNKNOWN), "UNKNOWN");
+    bool ret = SetInt32Property(env, napiScenario, static_cast<int32_t>(Scenario::UNKNOWN), "UNKNOWN");
     ret = ret && SetInt32Property(env, napiScenario, static_cast<int32_t>(Scenario::ARTICLE), "ARTICLE");
     ret = ret && SetPropertyName(env, exports, "Scenario", napiScenario);
     if (!ret) {
         FI_HILOGE("Failed set enum scenario");
-        return exports;
+        return nullptr;
     }
     // 声明枚举值EventType
     napi_value napiEventType;
     status = napi_create_object(env, &napiEventType);
     if (status != napi_ok) {
         FI_HILOGE("Failed create object");
-        return exports;
+        return nullptr;
     }
-    ret = true;
-    ret = ret &&
-        SetInt32Property(env, napiEventType, static_cast<int32_t>(EventType::SCROLL_TO_HOOK), "SCROLL_TO_HOOK");
+    ret = SetInt32Property(env, napiEventType, static_cast<int32_t>(EventType::SCROLL_TO_HOOK), "SCROLL_TO_HOOK");
     ret = ret && SetPropertyName(env, exports, "EventType", napiEventType);
     if (!ret) {
         FI_HILOGE("Failed set enum eventtype");
-        return exports;
+        return nullptr;
     }
     FI_HILOGD("Exit");
     return exports;
@@ -383,11 +380,12 @@ bool OnScreenNapi::SetStringProperty(napi_env env, napi_value targetObj, const s
     return SetPropertyName(env, targetObj, propName, prop);
 }
 
-bool OnScreenNapi::ConstructParagraphObj(napi_env env, napi_value retObj, const Paragraph &value)
+bool OnScreenNapi::ConstructParagraphObj(napi_env env, napi_value &retObj, const Paragraph &value)
 {
     retObj = nullptr;
     if (napi_create_object(env, &retObj) != napi_ok) {
         FI_HILOGE("create obj failed");
+        retObj = nullptr;
         return false;
     }
     bool ret = SetInt64Property(env, retObj, value.hookId, "hookId");
@@ -419,7 +417,7 @@ bool OnScreenNapi::SetParagraphVecProperty(napi_env env, napi_value targetObj, c
             return false;
         }
     }
-    return true;
+    return SetPropertyName(env, targetObj, propName, paraArray);
 }
 
 bool OnScreenNapi::SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue)
@@ -462,47 +460,49 @@ void OnScreenNapi::GetPageContentCompCB(napi_env env, napi_status status, void *
     CHKPV(data);
     CHKPV(env);
     std::lock_guard lockGrd(g_mtx);
-    GetPageContentAsyncContext* completeAsyncContext = static_cast<GetPageContentAsyncContext*>(data);
-    CHKPV(completeAsyncContext->deferred);
+    GetPageContentAsyncContext* ctx = static_cast<GetPageContentAsyncContext*>(data);
+    CHKPV(ctx->deferred);
     napi_value errVal = nullptr;
     napi_value pageContentObj = nullptr;
     napi_status retStatus = napi_ok;
     if (napi_create_object(env, &pageContentObj) != napi_ok) {
         FI_HILOGE("pageContent failed");
+        ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
+        napi_reject_deferred(env, ctx->deferred, errVal);
+        napi_delete_async_work(env, ctx->work);
+        delete ctx;
+        ctx = nullptr;
         return;
     }
-    bool ret = SetInt32Property(env, pageContentObj, completeAsyncContext->pageContent.windowId, "windowId");
-    ret = ret && SetInt64Property(env, pageContentObj, completeAsyncContext->pageContent.sessionId, "sessionId");
-    ret = ret && SetStringProperty(env, pageContentObj, completeAsyncContext->pageContent.bundleName, "bundleName");
-    ret = ret && SetInt32Property(env, pageContentObj,
-        static_cast<int32_t>(completeAsyncContext->pageContent.scenario), "scenario");
-    ret = ret && SetStringProperty(env, pageContentObj, completeAsyncContext->pageContent.title, "title");
-    ret = ret && SetStringProperty(env, pageContentObj, completeAsyncContext->pageContent.content, "content");
-    ret = ret && SetStringProperty(env, pageContentObj, completeAsyncContext->pageContent.pageLink, "pageLink");
-    ret = ret && SetParagraphVecProperty(env, pageContentObj, completeAsyncContext->pageContent.paragraphs,
-        "paragraphs");
+    bool ret = SetInt32Property(env, pageContentObj, ctx->pageContent.windowId, "windowId");
+    ret = ret && SetInt64Property(env, pageContentObj, ctx->pageContent.sessionId, "sessionId");
+    ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.bundleName, "bundleName");
+    ret = ret && SetInt32Property(env, pageContentObj, static_cast<int32_t>(ctx->pageContent.scenario), "scenario");
+    ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.title, "title");
+    ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.content, "content");
+    ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.pageLink, "pageLink");
+    ret = ret && SetParagraphVecProperty(env, pageContentObj, ctx->pageContent.paragraphs, "paragraphs");
     if (!ret) {
         FI_HILOGE("construct page content failed");
-        completeAsyncContext->result = RET_ERR;
+        ctx->result = RET_ERR;
     }
-    if (completeAsyncContext->result != RET_OK) {
-        auto retMsg = GetOnScreenErrMsg(completeAsyncContext->result);
+    if (ctx->result != RET_OK) {
+        auto retMsg = GetOnScreenErrMsg(ctx->result);
         if (retMsg != std::nullopt) {
-            ThrowOnScreenErrByPromise(env, completeAsyncContext->result, retMsg.value(), errVal);
+            ThrowOnScreenErrByPromise(env, ctx->result, retMsg.value(), errVal);
         } else {
             ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
         }
-        retStatus = napi_reject_deferred(env, completeAsyncContext->deferred, errVal);
+        retStatus = napi_reject_deferred(env, ctx->deferred, errVal);
     } else {
-        retStatus = napi_resolve_deferred(env, completeAsyncContext->deferred, pageContentObj);
+        retStatus = napi_resolve_deferred(env, ctx->deferred, pageContentObj);
     }
     if (retStatus != napi_ok) {
-        FI_HILOGE("napi pack deferred err, result = %{public}d, status = %{public}d", completeAsyncContext->result,
-            retStatus);
+        FI_HILOGE("napi pack defer err, result = %{public}d, status = %{public}d", ctx->result, retStatus);
     }
-    napi_delete_async_work(env, completeAsyncContext->work);
-    delete completeAsyncContext;
-    completeAsyncContext = nullptr;
+    napi_delete_async_work(env, ctx->work);
+    delete ctx;
+    ctx = nullptr;
 }
 
 bool OnScreenNapi::SendControlEventExec(SendControlEventAsyncContext *asyncContext)
@@ -535,33 +535,37 @@ void OnScreenNapi::SendControlEventCompCB(napi_env env, napi_status status, void
     CHKPV(data);
     CHKPV(env);
     std::lock_guard lockGrd(g_mtx);
-    SendControlEventAsyncContext* completeAsyncContext = static_cast<SendControlEventAsyncContext*>(data);
-    CHKPV(completeAsyncContext->deferred);
+    SendControlEventAsyncContext* ctx = static_cast<SendControlEventAsyncContext*>(data);
+    CHKPV(ctx->deferred);
     napi_value errVal = nullptr;
     napi_status retStatus = napi_ok;
     napi_value retVal = nullptr;
     if (napi_create_object(env, &retVal) != napi_ok) {
         FI_HILOGE("send control event create obj failed");
+        ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
+        napi_reject_deferred(env, ctx->deferred, errVal);
+        napi_delete_async_work(env, ctx->work);
+        delete ctx;
+        ctx = nullptr;
         return;
     }
-    if (completeAsyncContext->result != RET_OK) {
-        auto retMsg = GetOnScreenErrMsg(completeAsyncContext->result);
+    if (ctx->result != RET_OK) {
+        auto retMsg = GetOnScreenErrMsg(ctx->result);
         if (retMsg != std::nullopt) {
-            ThrowOnScreenErrByPromise(env, completeAsyncContext->result, retMsg.value(), errVal);
+            ThrowOnScreenErrByPromise(env, ctx->result, retMsg.value(), errVal);
         } else {
             ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
         }
-        retStatus = napi_reject_deferred(env, completeAsyncContext->deferred, errVal);
+        retStatus = napi_reject_deferred(env, ctx->deferred, errVal);
     } else {
-        retStatus = napi_resolve_deferred(env, completeAsyncContext->deferred, retVal);
+        retStatus = napi_resolve_deferred(env, ctx->deferred, retVal);
     }
     if (retStatus != napi_ok) {
-        FI_HILOGE("napi pack deferred err, result = %{public}d, status = %{public}d", completeAsyncContext->result,
-            retStatus);
+        FI_HILOGE("napi pack defer err, result = %{public}d, status = %{public}d", ctx->result, retStatus);
     }
-    napi_delete_async_work(env, completeAsyncContext->work);
-    delete completeAsyncContext;
-    completeAsyncContext = nullptr;
+    napi_delete_async_work(env, ctx->work);
+    delete ctx;
+    ctx = nullptr;
 }
 
 EXTERN_C_START

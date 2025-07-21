@@ -25,6 +25,14 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
+std::map<int32_t, std::string> ERROR_MESSAGES = {
+    {PERMISSION_EXCEPTION, "Permission check failed."},
+    {NO_SYSTEM_API, "Permission check failed. A non-system application uses the system API."},
+    {PARAM_EXCEPTION, "Params check failed."},
+    {DEVICE_EXCEPTION, "The device does not support this API."},
+    {SERVICE_EXCEPTION, "Service exception."}
+};
+
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage)
 {
     napi_value businessError = nullptr;
@@ -32,8 +40,8 @@ napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const s
     napi_value msg = nullptr;
     NAPI_CALL(env, napi_create_int32(env, errCode, &code));
     NAPI_CALL(env, napi_create_string_utf8(env, errMessage.c_str(), NAPI_AUTO_LENGTH, &msg));
-    napi_create_error(env, nullptr, msg, &businessError);
-    napi_set_named_property(env, businessError, "code", code);
+    NAPI_CALL(env, napi_create_error(env, nullptr, msg, &businessError));
+    NAPI_CALL(env, napi_set_named_property(env, businessError, "code", code));
     return businessError;
 }
 
