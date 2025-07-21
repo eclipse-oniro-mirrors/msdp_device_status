@@ -16,6 +16,7 @@
 #include "cooperate_hisysevent.h"
     
 #include "hisysevent.h"
+#include "fi_log.h"
     
 #undef LOG_TAG
 #define LOG_TAG "CooperateHisysevent"
@@ -48,9 +49,9 @@ void CooperateRadar::ReportCooperateRadarInfo(struct CooperateRadarInfo &coopera
         "PEER_DEV_TYPE", cooperateRadarInfo.peerDeviceType);
 }
 
-void ReportTransmissionLatencyRadarInfo(struct TransmissionLatencyRadarInfo &transmissionLatencyRadarInfo);
+void CooperateRadar::ReportTransmissionLatencyRadarInfo(struct TransmissionLatencyRadarInfo &transmissionLatencyRadarInfo)
 {
-    if (TransmissionLatencyRadarInfo.stageRes < 0) {
+    if (transmissionLatencyRadarInfo.stageRes < 0) {
         FI_HILOGE("Transmission latency HiSysEventWrite fail");
     } else {
         FI_HILOGI("Transmission latency HiSysEventWrite success");

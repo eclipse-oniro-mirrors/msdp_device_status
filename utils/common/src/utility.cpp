@@ -253,13 +253,13 @@ int64_t Utility::GetSysClockTime()
 {
     struct timespec ts = { 0, 0 };
     if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-        MMI_HILOGD("clock_gettime failed:%{public}d", errno);
+        FI_HILOGD("clock_gettime failed:%{public}d", errno);
         return 0;
     }
 
     if (static_cast<uint64_t>(ts.tv_sec) > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()) / (
         TIME_CONVERSION_UNIT * TIME_CONVERSION_UNIT)) {
-        MMI_HILOGE("Integer overflow detected!");
+        FI_HILOGE("Integer overflow detected!");
         return 0;
     }
 
@@ -267,7 +267,7 @@ int64_t Utility::GetSysClockTime()
     TIME_CONVERSION_UNIT + ts.tv_nsec / TIME_CONVERSION_UNIT;
 
     if (totalMicroSeconds > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) {
-        MMI_HILOGE("Total time value integer overflow detected!");
+        FI_HILOGE("Total time value integer overflow detected!");
         return 0;
     }
     return static_cast<int64_t>(totalMicroSeconds);

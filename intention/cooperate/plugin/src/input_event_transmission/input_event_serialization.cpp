@@ -510,7 +510,7 @@ int32_t InputEventSerialization::DeserializeInterceptorTime(NetPacket &pkt, int6
     return RET_OK;
 }
 
-int32_t InputEventSerialization::Marshalling(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt
+int32_t InputEventSerialization::Marshalling(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt,
     int64_t interceptorTime)
 {
     CALL_DEBUG_ENTER;
@@ -551,7 +551,7 @@ int32_t InputEventSerialization::Marshalling(std::shared_ptr<MMI::PointerEvent> 
     return RET_OK;
 }
 
-int32_t InputEventSerialization::Unmarshalling(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event
+int32_t InputEventSerialization::Unmarshalling(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event,
     int64_t &interceptorTime)
 {
     CALL_DEBUG_ENTER;

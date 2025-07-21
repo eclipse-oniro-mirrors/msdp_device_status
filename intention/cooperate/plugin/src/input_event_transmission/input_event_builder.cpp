@@ -252,7 +252,7 @@ void InputEventBuilder::CheckLatency(int64_t curDriveActionTime, int64_t curInte
         int64_t curBuilderRecvTime, std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE ||
-        curInterceptorTime = -1) {
+        curInterceptorTime == -1) {
         preDriveEventTime_ = -1;
         return;
     }
@@ -273,7 +273,6 @@ void InputEventBuilder::CheckLatency(int64_t curDriveActionTime, int64_t curInte
         .bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_CLIENT_ON_MESSAGE_RCVD),
         .stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_IDLE),
         .bizScene = static_cast<int32_t> (BizCooperateScene::SCENE_ACTIVE),
-        .errCode = static_cast<int32_t> (msgInfo.errCode),
         .localNetId = Utility::DFXRadarAnonymize(localNetworkId_.c_str()),
         .peerNetId = Utility::DFXRadarAnonymize(remoteNetworkId_.c_str()),
     };
@@ -281,8 +280,8 @@ void InputEventBuilder::CheckLatency(int64_t curDriveActionTime, int64_t curInte
     int64_t InterceptorToCrossDT = std::abs(Utility::GetSysClockTimeMilli(
         crossPlatformTimeDT_ - cooperateInterceptorTimeDT_));
     if (DriveToInterceptorDT > DRIVE_INTERCEPTOR_LATENCY || InterceptorToCrossDT > INTERCEPTOR_TRANSMISSION_LATENCY) {
-        FI_HILOGI("driveEventTimeDT:%{public}ld, cooperateInterceptorTimeDT:%{public}ld,"
-            "crossPlatformTimeDT:%{public}ld", driveEventTimeDT_, cooperateInterceptorTimeDT_, crossPlatformTimeDT_);
+        FI_HILOGI("driveEventTimeDT:%{public}" PRId64 ", cooperateInterceptorTimeDT:%{public}" PRId64 ""
+            "crossPlatformTimeDT:%{public}" PRId64, driveEventTimeDT_, cooperateInterceptorTimeDT_, crossPlatformTimeDT_);
         radarInfo.driveEventTimeDT = driveEventTimeDT_;
         radarInfo.cooperateInterceptorTimeDT = cooperateInterceptorTimeDT_;
         radarInfo.crossPlatformTimeDT = crossPlatformTimeDT_;

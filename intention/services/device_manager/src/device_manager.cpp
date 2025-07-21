@@ -529,6 +529,19 @@ std::vector<std::shared_ptr<IDevice>> DeviceManager::GetVirTrackPad()
     }
     return VirTrackPadDevices;
 }
+
+void DeviceManager::SetPencilAirMouse(bool existAirMouse)
+{
+    FI_HILOGI("Set pencil air mouse:%{public}s", existAirMouse ? "true" : "false");
+    hasPencilAirMouse_ = existAirMouse;
+}
+
+bool DeviceManager::HasPencilAirMouse()
+{
+    FI_HILOGI("Has pencil air mouse:%{public}s", hasPencilAirMouse_ ? "true" : "false");
+    return hasPencilAirMouse_;
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
