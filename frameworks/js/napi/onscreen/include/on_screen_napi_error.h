@@ -30,13 +30,7 @@ constexpr int32_t NO_SYSTEM_API { 202 };
 constexpr int32_t PARAM_EXCEPTION { 401 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
 constexpr int32_t SERVICE_EXCEPTION { 32500001 };
-const std::map<int32_t, std::string> ERROR_MESSAGES = {
-    {PERMISSION_EXCEPTION, "Permission check failed."},
-    {NO_SYSTEM_API, "Permission check failed. A non-system application uses the system API."},
-    {PARAM_EXCEPTION, "Params check failed."},
-    {DEVICE_EXCEPTION, "The device does not support this API."},
-    {SERVICE_EXCEPTION, "Service exception."}
-};
+extern std::map<int32_t, std::string> ERROR_MESSAGES;
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage);
 std::optional<std::string> GetOnScreenErrMsg(int32_t errCode);
 void ThrowOnScreenErr(const napi_env &env, int32_t errCode, const std::string &printMsg);

@@ -28,7 +28,6 @@ struct GetPageContentAsyncContext {
     napi_env env = nullptr;
     napi_async_work work = nullptr;
     napi_deferred deferred = nullptr;
-    napi_handle_scope scope;
     ContentOption option;
     PageContent pageContent;
     int32_t result;
@@ -38,7 +37,6 @@ struct SendControlEventAsyncContext {
     napi_env env = nullptr;
     napi_async_work work = nullptr;
     napi_deferred deferred = nullptr;
-    napi_handle_scope scope;
     ControlEvent event;
     int32_t result;
 };
