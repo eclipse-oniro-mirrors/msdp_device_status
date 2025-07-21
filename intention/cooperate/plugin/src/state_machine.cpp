@@ -284,6 +284,7 @@ void StateMachine::EnableCooperate(Context &context, const CooperateEvent &event
     context.commonEvent_.AddObserver(observer_);
     AddSessionObserver(context, enableEvent);
     AddMonitor(context);
+    AddPreMonitor(context);
     auto devAddedCallback = [this, &context](int32_t deviceId, const std::string &type) {
         FI_HILOGI("Device added");
         bool isVirtualtrackpad = this->CheckIsVirtualTrackpad(deviceId);
@@ -315,6 +316,7 @@ void StateMachine::DisableCooperate(Context &context, const CooperateEvent &even
     context.inputDevMgr_.RemoveAllVirtualInputDevice();
     RemoveSessionObserver(context, disableEvent);
     RemoveMonitor(context);
+    RemovePreMonitor(context);
     env_->GetInput().UnregisterDevListener();
     context.ResetVirtualTrackpadDeviceId();
     isCooperateEnable_ = false;
@@ -851,6 +853,33 @@ void StateMachine::AddMonitor(Context &context)
     }
 }
 
+void StateMachine::AddPreMonitor(Context &context)
+{
+    CALL_INFO_TRACE;
+    if (preMonitorId_ >= 0) {
+        return;
+    }
+    CHKPV(env_);
+    std::vector<int32_t> keys;
+    keys.push_back(MMI::KeyEvent::KEYCODE_KEY_PEN_AIR_MOUSE);
+    preMonitorId_ = env_->GetInput().AddPreMonitor(nullptr, [&context, this]
+        (std::shared_ptr<MMI::KeyEvent> keyEvent) mutable {
+            CHKPV(keyEvent);
+            if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_KEY_PEN_AIR_MOUSE) {
+                if (keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
+                    FI_HILOGI("Air mouse key down");
+                    env_->GetDeviceManager().SetPencilAirMouse(true);
+                } else {
+                    FI_HILOGI("Air mouse key up or cancel or unknow");
+                    env_->GetDeviceManager().SetPencilAirMouse(false);
+                }
+            }
+        }, MMI::HANDLE_EVENT_TYPE_PRE_KEY, keys);
+    if (preMonitorId_ < 0) {
+        FI_HILOGE("MMI::Add Monitor fail");
+    }
+}
+
 void StateMachine::RemoveMonitor(Context &context)
 {
     CALL_INFO_TRACE;
@@ -860,6 +889,17 @@ void StateMachine::RemoveMonitor(Context &context)
     }
     env_->GetInput().RemoveMonitor(monitorId_);
     monitorId_ = -1;
+}
+
+void StateMachine::RemovePreMonitor(Context &context)
+{
+    CALL_INFO_TRACE;
+    CHKPV(env_);
+    if (preMonitorId_ < 0) {
+        return;
+    }
+    env_->GetInput().RemovePreMonitor(preMonitorId_);
+    preMonitorId_ = -1;
 }
 
 void StateMachine::RemoveWatches(Context &context)

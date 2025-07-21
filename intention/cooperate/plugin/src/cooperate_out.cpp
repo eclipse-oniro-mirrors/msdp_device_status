@@ -75,7 +75,8 @@ void CooperateOut::SetPointerVisible(Context &context)
 {
     CHKPV(env_);
     bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice() ||
-        env_->GetInput().HasLocalPointerDevice();
+        env_->GetInput().HasLocalPointerDevice() ||
+        env_->GetDeviceManager().HasPencilAirMouse();
     bool visible = !context.NeedHideCursor() && hasLocalPointerDevice;
     FI_HILOGI("Set pointer visible:%{public}s, HasLocalPointerDevice:%{public}s",
         visible ? "true" : "false", hasLocalPointerDevice ? "true" : "false");

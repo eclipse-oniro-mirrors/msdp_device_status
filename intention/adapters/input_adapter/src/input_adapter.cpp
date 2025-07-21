@@ -64,6 +64,23 @@ void InputAdapter::RemoveMonitor(int32_t monitorId)
     MMI::InputManager::GetInstance()->RemoveMonitor(monitorId);
 }
 
+int32_t InputAdapter::AddPreMonitor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback,
+    std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback,
+    MMI::HandleEventType eventType, std::vector<int32_t> keys)
+{
+    auto monitor = std::make_shared<MonitorConsumer>(pointCallback, keyCallback);
+    int32_t preMonitorId = MMI::InputManager::GetInstance()->AddPreMonitor(monitor, eventType, keys);
+    if (preMonitorId < 0) {
+        FI_HILOGE("AddPreMonitor fail");
+    }
+    return preMonitorId;
+}
+
+void InputAdapter::RemovePreMonitor(int32_t preMonitorId)
+{
+    MMI::InputManager::GetInstance()->RemovePreMonitor(preMonitorId);
+}
+
 int32_t InputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback)
 {
     return AddInterceptor(pointCallback, nullptr);

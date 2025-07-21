@@ -56,6 +56,16 @@ int32_t MockInputAdapter::AddMonitor(std::function<void(std::shared_ptr<MMI::Poi
 void MockInputAdapter::RemoveMonitor(int32_t monitorId)
 {}
 
+int32_t MockInputAdapter::AddPreMonitor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointerCallback,
+    std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback,
+    MMI::HandleEventType eventType, std::vector<int32_t> keys)
+{
+    return RET_OK;
+}
+
+void MockInputAdapter::RemovePreMonitor(int32_t monitorId)
+{}
+
 int32_t MockInputAdapter::AddInterceptor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback)
 {
     return RET_OK;

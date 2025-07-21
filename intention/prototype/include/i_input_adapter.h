@@ -65,6 +65,10 @@ public:
     virtual bool HasLocalPointerDevice() = 0;
     virtual int32_t RegisterDevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback) = 0;
     virtual int32_t UnregisterDevListener() = 0;
+    virtual int32_t AddPreMonitor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback,
+        std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback,
+        MMI::HandleEventType eventType, std::vector<int32_t> keys) = 0;
+    virtual void RemovePreMonitor(int32_t preMonitorId) = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
