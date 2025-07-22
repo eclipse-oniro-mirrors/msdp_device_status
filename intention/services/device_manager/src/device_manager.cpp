@@ -472,6 +472,17 @@ bool DeviceManager::HasKeyboard()
     });
 }
 
+std::vector<std::shared_ptr<IDevice>> DeviceManager::GetTouchDevices() const
+{
+    std::vector<std::shared_ptr<IDevice>> touchDevices;
+    for (const auto &[_, dev] : devices_) {
+        if ((dev != nullptr) && dev->IsTouchDevice() && !dev->IsRemote()) {
+            touchDevices.push_back(dev);
+        }
+    }
+    return touchDevices;
+}
+
 std::vector<std::shared_ptr<IDevice>> DeviceManager::GetKeyboard()
 {
     std::vector<std::shared_ptr<IDevice>> keyboards;

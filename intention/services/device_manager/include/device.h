@@ -89,6 +89,7 @@ public:
     std::string GetPhys() const override;
     std::string GetUniq() const override;
     IDevice::KeyboardType GetKeyboardType() const override;
+    bool IsTouchDevice() const override;
     bool IsPointerDevice() const override;
     bool IsKeyboard() const override;
     bool IsRemote() const override;
@@ -270,6 +271,11 @@ inline std::string Device::GetUniq() const
 inline IDevice::KeyboardType Device::GetKeyboardType() const
 {
     return keyboardType_;
+}
+
+inline bool Device::IsTouchDevice() const
+{
+    return caps_.test(DEVICE_CAP_TOUCH);
 }
 
 inline bool Device::IsPointerDevice() const

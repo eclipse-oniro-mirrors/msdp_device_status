@@ -140,40 +140,31 @@ void InputDeviceMgr::NotifyInputDeviceToRemote(const std::string &remoteNetworkI
     CALL_INFO_TRACE;
     CHKPV(env_);
     auto virTrackPads = env_->GetDeviceManager().GetVirTrackPad();
-    if ((virTrackPads.size() == 0) &&
-        (!env_->GetDeviceManager().HasKeyboard() && !env_->GetDeviceManager().HasLocalPointerDevice())) {
-        FI_HILOGE("Local device have no keyboard or pointer device, skip");
-        return;
-    }
     auto keyboards = env_->GetDeviceManager().GetKeyboard();
     auto pointerDevices =  env_->GetDeviceManager().GetPointerDevice();
+    auto touchDevices = env_->GetDeviceManager().GetTouchDevices();
+    FI_HILOGI("Synchronize input devices to peer '%{public}s':", Utility::Anonymize(remoteNetworkId).c_str());
+    FI_HILOGI("%{public}35s: %{public}zu", "Number of virtual trackpads", virTrackPads.size());
+    FI_HILOGI("%{public}35s: %{public}zu", "Number of keyboards", keyboards.size());
+    FI_HILOGI("%{public}35s: %{public}zu", "Number of pointer devices", pointerDevices.size());
+    FI_HILOGI("%{public}35s: %{public}zu", "Number of touch devices", touchDevices.size());
+
+    std::vector<std::shared_ptr<IDevice>> inputDevs;
+    inputDevs.insert(inputDevs.cend(), virTrackPads.cbegin(), virTrackPads.cend());
+    inputDevs.insert(inputDevs.cend(), keyboards.cbegin(), keyboards.cend());
+    inputDevs.insert(inputDevs.cend(), pointerDevices.cbegin(), pointerDevices.cend());
+    inputDevs.insert(inputDevs.cend(), touchDevices.cbegin(), touchDevices.cend());
+
     NetPacket packet(MessageId::DSOFTBUS_INPUT_DEV_SYNC);
-    FI_HILOGI("Num: keyboard:%{public}zu, pointerDevice:%{public}zu, virTrackPads:%{public}zu",
-        keyboards.size(), pointerDevices.size(), virTrackPads.size());
-    int32_t inputDeviceNum = static_cast<int32_t>(keyboards.size() + pointerDevices.size() + virTrackPads.size());
+    int32_t inputDeviceNum = static_cast<int32_t>(inputDevs.size());
     packet << inputDeviceNum;
-    for (const auto &keyboard : keyboards) {
-        if (SerializeDevice(keyboard, packet) != RET_OK) {
-            FI_HILOGE("Serialize keyboard failed");
+
+    for (const auto &inputDev : inputDevs) {
+        if (SerializeDevice(inputDev, packet) != RET_OK) {
+            FI_HILOGE("Serialize inputDev failed");
             return;
         }
-        DispDeviceInfo(keyboard);
-    }
-    for (const auto &pointerDevice : pointerDevices) {
-        if (SerializeDevice(pointerDevice, packet) != RET_OK) {
-            FI_HILOGE("Serialize pointer device failed");
-            return;
-        }
-        DispDeviceInfo(pointerDevice);
-    }
-    if (virTrackPads.size() > 0) {
-        for (const auto &virTrackPad : virTrackPads) {
-            if (SerializeDevice(virTrackPad, packet) != RET_OK) {
-                FI_HILOGE("Serialize virTrackPad failed");
-                return;
-            }
-            DispDeviceInfo(virTrackPad);
-        }
+        DispDeviceInfo(inputDev);
     }
     if (int32_t ret = env_->GetDSoftbus().SendPacket(remoteNetworkId, packet); ret != RET_OK) {
         FI_HILOGE("SenPacket to networkId:%{public}s failed, ret:%{public}d",
@@ -336,7 +327,11 @@ void InputDeviceMgr::AddVirtualInputDevice(const std::string &networkId, int32_t
     auto device = GetRemoteDeviceById(networkId, remoteDeviceId);
     CHKPV(device);
     int32_t virtualDeviceId = -1;
-    if (env_->GetInput().AddVirtualInputDevice(Transform(device), virtualDeviceId) != RET_OK) {
+    auto inputDev = Transform(device);
+    CHKPV(inputDev);
+    inputDev->SetRemoteDevice(true);
+
+    if (env_->GetInput().AddVirtualInputDevice(inputDev, virtualDeviceId) != RET_OK) {
         FI_HILOGE("Add virtual device failed, remoteDeviceId:%{public}d, name:%{public}s", remoteDeviceId,
             device->GetName().c_str());
         return;

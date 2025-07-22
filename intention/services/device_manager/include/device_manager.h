@@ -53,6 +53,7 @@ public:
     bool HasLocalPointerDevice() override;
     bool HasLocalKeyboardDevice() override;
     bool HasKeyboard() override;
+    std::vector<std::shared_ptr<IDevice>> GetTouchDevices() const override;
     std::vector<std::shared_ptr<IDevice>> GetKeyboard() override;
     std::vector<std::shared_ptr<IDevice>> GetPointerDevice() override;
     std::vector<std::shared_ptr<IDevice>> GetVirTrackPad() override;
