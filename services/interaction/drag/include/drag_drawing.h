@@ -26,12 +26,7 @@
 #include "libxml/tree.h"
 #include "libxml/parser.h"
 
-#if defined(MODIFIER_NG)
 #include "modifier_ng/custom/rs_content_style_modifier.h"
-#else
-#include "modifier/rs_extended_modifier.h"
-#include "modifier/rs_modifier.h"
-#endif
 
 #include "vsync_receiver.h"
 
@@ -55,15 +50,9 @@ class DragDrawing;
 using DragStartExtFunc = void (*)(DragData &dragData);
 using DragNotifyExtFunc = void (*)(DragEventInfo &dragEventInfo);
 
-#if defined(MODIFIER_NG)
 using RSContentStyleModifier = Rosen::ModifierNG::RSContentStyleModifier;
 using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
 using RSModifier = Rosen::ModifierNG::RSModifier;
-#else
-using RSContentStyleModifier = Rosen::RSContentStyleModifier;
-using RSDrawingContext = Rosen::RSDrawingContext;
-using RSModifier = Rosen::RSModifier;
-#endif
 
 class DrawSVGModifier : public RSContentStyleModifier {
 public:
