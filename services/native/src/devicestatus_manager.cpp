@@ -532,11 +532,12 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
     CALL_DEBUG_ENTER;
     std::lock_guard lock(mutex_);
     CHKPR(notityListener_, RET_ERR);
+    std::string emptyMetadata;
     std::string callbackBundleName;
     auto callbackRet = GetBundleNameByCallback(callbackBundleName);
     if (callbackRet != RET_OK) {
         FI_HILOGE("Get callbackBundleName fail.");
-        notityListener_->OnNotifyMetadata("");
+        notityListener_->OnNotifyMetadata(emptyMetadata);
         return RET_OK;
     }
 
@@ -544,14 +545,14 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
     auto applinkRet = GetBundleNameByApplink(applinkBundleName, metadata);
     if (applinkRet != RET_OK) {
         FI_HILOGE("Get applinkBundleName fail.");
-        notityListener_->OnNotifyMetadata("");
+        notityListener_->OnNotifyMetadata(emptyMetadata);
         return RET_OK;
     }
 
     if (callbackBundleName.compare(applinkBundleName) == 0) {
         notityListener_->OnNotifyMetadata(metadata);
     } else {
-        notityListener_->OnNotifyMetadata("");
+        notityListener_->OnNotifyMetadata(emptyMetadata);
     }
     return RET_OK;
 }
