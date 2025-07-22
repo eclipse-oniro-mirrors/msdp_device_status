@@ -46,7 +46,7 @@ private:
     static bool SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
     static bool SetInt64Property(napi_env env, napi_value targetObj, int64_t value, const char *propName);
     static bool SetStringProperty(napi_env env, napi_value targetObj, const std::string &value, const char *propName);
-    static bool ConstructParagraphObj(napi_env env, napi_value retObj, const Paragraph &value);
+    static bool ConstructParagraphObj(napi_env env, napi_value &retObj, const Paragraph &value);
     static bool SetParagraphVecProperty(napi_env env, napi_value targetObj, const std::vector<Paragraph> paragraphs,
         const char *propName);
     static bool GetInt32FromJs(napi_env env, const napi_value &value, const std::string &field,
