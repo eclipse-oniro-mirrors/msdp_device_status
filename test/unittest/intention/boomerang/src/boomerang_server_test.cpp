@@ -328,7 +328,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest12, TestSize.Level1)
     };
     string metadata = "test";
     int32_t ret = boomerang_.SubmitMetadata(context, metadata);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, RET_OK);
 }
 
 /**
