@@ -381,6 +381,115 @@ HWTEST_F(DragServerTest, DragServerTest4, TestSize.Level0)
 }
 
 /**
+ * @tc.name  : ResetParameter_ShouldResetAllParameters_WhenCalled
+ * @tc.number: DragDrawingTest_001
+ * @tc.desc  : 测试 ResetParameter 函数是否正确地重置了所有参数
+ */
+HWTEST_F(ResetParameterTest,ATC_ResetParameter_ShouldResetAllParameters_WhenCalled, TestSize.Level0) {
+    // 调用 ResetParameter 函数
+    dragDrawing->ResetParameter();
+
+    // 验证各个成员变量是否被正确重置
+    EXPECT_EQ(dragDrawing->g_drawingInfo.startNum, START_TIME);
+    EXPECT_FALSE(dragDrawing->g_drawingInfo.needDestroyDragWindow);
+    EXPECT_EQ(dragDrawing->displayWidth_, -1);
+    EXPECT_EQ(dragDrawing->displayHeight_, -1);
+    EXPECT_FALSE(dragDrawing->needRotatePixelMapXY_);
+    EXPECT_FALSE(dragDrawing->hasRunningStopAnimation_);
+    EXPECT_TRUE(dragDrawing->needMultiSelectedAnimation_);
+    EXPECT_EQ(dragDrawing->pointerStyle_, {});
+    EXPECT_FALSE(dragDrawing->g_drawingInfo.isExistScalingValue);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.currentPositionX, -1.0f);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.currentPositionY, -1.0f);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.sourceType, -1);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.currentDragNum, -1);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.pixelMapX, -1);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.pixelMapY, -1);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.displayX, -1);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.displayY, -1);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.mouseWidth, 0);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.mouseHeight, 0);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.rootNodeWidth, -1);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.rootNodeHeight, -1);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.stylePixelMap, nullptr);
+    EXPECT_FALSE(dragDrawing->g_drawingInfo.isPreviousDefaultStyle);
+    EXPECT_FALSE(dragDrawing->g_drawingInfo.isCurrentDefaultStyle);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.currentStyle, DragCursorStyle::DEFAULT);
+    EXPECT_EQ(dragDrawing->g_drawingInfo.filterInfo, {});
+    EXPECT_EQ(dragDrawing->g_drawingInfo.extraInfo, {});
+    EXPECT_FALSE(dragDrawing->isRunningRotateAnimation_);
+    EXPECT_FALSE(dragDrawing->screenRotateState_);
+    EXPECT_EQ(dragDrawing->ScreenRotateState_, Rosen::Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name  : InitLayer_ShouldReturnErr_WhenSurfaceNodeIsNull
+ * @tc.number: InitLayerTest_001
+ * @tc.desc  : 测试当 g_drawingInfo.surfaceNode 为 nullptr 时,InitLayer 函数应返回 RET_ERR
+ */
+HWTEST_F(InitLayerTest,ATC_InitLayer_ShouldReturnErr_WhenSurfaceNodeIsNull, TestSize.Level0) {
+    g_drawingInfo.surfaceNode = nullptr;
+    int32_t result = InitLayer();
+    EXPECT_EQ(result, RET_ERR);
+}
+
+/**
+ * @tc.name  : InitLayer_ShouldReturnErr_WhenSurfaceIsNull
+ * @tc.number: InitLayerTest_002
+ * @tc.desc  : 测试当 g_drawingInfo.surfaceNode->GetSurface() 为 nullptr 时,InitLayer 函数应返回 RET_ERR
+ */
+HWTEST_F(InitLayerTest,ATC_InitLayer_ShouldReturnErr_WhenSurfaceIsNull, TestSize.Level0) {
+    g_drawingInfo.surfaceNode = new SurfaceNode();
+    g_drawingInfo.surfaceNode->GetSurface = []() { return nullptr; };
+    int32_t result = InitLayer();
+    EXPECT_EQ(result, RET_ERR);
+    delete g_drawingInfo.surfaceNode;
+}
+
+/**
+ * @tc.name  : InitLayer_ShouldReturnOk_WhenInitUiDirectorIsTrue
+ * @tc.number: InitLayerTest_003
+ * @tc.desc  : 测试当 g_drawingInfo.isInitUiDirector 为 true 时,InitLayer 函数应返回 RET_OK
+ */
+HWTEST_F(InitLayerTest,ATC_InitLayer_ShouldReturnOk_WhenInitUiDirectorIsTrue, TestSize.Level0) {
+    g_drawingInfo.surfaceNode = new SurfaceNode();
+    g_drawingInfo.surfaceNode->GetSurface = []() { return reinterpret_cast<Surface*>(1); };
+    g_drawingInfo.isInitUiDirector = true;
+    int32_t result = InitLayer();
+    EXPECT_EQ(result, RET_OK);
+    delete g_drawingInfo.surfaceNode;
+}
+
+/**
+ * @tc.name  : InitLayer_ShouldReturnOk_WhenInitUiDirectorIsFalse
+ * @tc.number: InitLayerTest_004
+ * @tc.desc  : 测试当 g_drawingInfo.isInitUiDirector 为 false 时,InitLayer 函数应返回 RET_OK
+ */
+HWTEST_F(InitLayerTest,ATC_InitLayer_ShouldReturnOk_WhenInitUiDirectorIsFalse, TestSize.Level0) {
+    g_drawingInfo.surfaceNode = new SurfaceNode();
+    g_drawingInfo.surfaceNode->GetSurface = []() { return reinterpret_cast<Surface*>(1); };
+    g_drawingInfo.isInitUiDirector = false;
+    int32_t result = InitLayer();
+    EXPECT_EQ(result, RET_OK);
+    delete g_drawingInfo.surfaceNode;
+}
+
+/**
+ * @tc.name  : InitLayer_ShouldReturnOk_WhenArkUiXIsEnabled
+ * @tc.number: InitLayerTest_005
+ * @tc.desc  : 测试当定义了 OHOS_BUILD_ENABLE_ARKUI_X 时,InitLayer 函数应返回 RET_OK
+ */
+HWTEST_F(InitLayerTest,ATC_InitLayer_ShouldReturnOk_WhenArkUiXIsEnabled, TestSize.Level0) {
+    #define OHOS_BUILD_ENABLE_ARKUI_X
+    g_drawingInfo.surfaceNode = new SurfaceNode();
+    g_drawingInfo.surfaceNode->GetSurface = []() { return reinterpret_cast<Surface*>(1); };
+    g_drawingInfo.isInitUiDirector = false;
+    int32_t result = InitLayer();
+    EXPECT_EQ(result, RET_OK);
+    delete g_drawingInfo.surfaceNode;
+}
+
+/**
  * @tc.name: DragServerTest5
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
