@@ -48,6 +48,7 @@ namespace {
         std::unique_ptr<Media::PixelMap> pixmap = Media::PixelMap::Create(initOptions);
         return pixmap;
     }
+    const int32_t SYSTEM_BAR_HIDDEN = 0;
 } // namespace
 
 void DeviceStatusManagerTest::SetUpTestCase()
@@ -90,14 +91,14 @@ namespace {
 HWTEST_F(DeviceStatusManagerTest, HandlerPageScrollerEventTest, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "HandlerPageScrollerEventTest start";
-    deviceStatusManager->HandlerPageScrollerEvent();
+    deviceStatusManager->HandlerPageScrollerEvent(SYSTEM_BAR_HIDDEN);
     EXPECT_EQ(deviceStatusManager->g_deviceManager_, nullptr);
     deviceStatusManager->g_deviceManager_ = std::make_shared<DeviceStatusManager>();
     ASSERT_NE(deviceStatusManager->g_deviceManager_, nullptr);
     deviceStatusManager->g_deviceManager_->lastEnable_ = true;
-    deviceStatusManager->HandlerPageScrollerEvent();
+    deviceStatusManager->HandlerPageScrollerEvent(SYSTEM_BAR_HIDDEN);
     deviceStatusManager->g_deviceManager_->lastEnable_ = false;
-    deviceStatusManager->HandlerPageScrollerEvent();
+    deviceStatusManager->HandlerPageScrollerEvent(SYSTEM_BAR_HIDDEN);
     EXPECT_TRUE(deviceStatusManager->lastEnable_);
     GTEST_LOG_(INFO) << "HandlerPageScrollerEventTest end";
 }
@@ -186,7 +187,7 @@ HWTEST_F(DeviceStatusManagerTest, OnAddSystemAbilityTest, TestSize.Level0) {
 
     deviceStatusManager->g_deviceManager_ = std::make_shared<DeviceStatusManager>();
     accessibilityStatusChange->OnAddSystemAbility(ACCESSIBILITY_MANAGER_SERVICE_ID, deviceId);
-    EXPECT_FALSE(deviceStatusManager->g_deviceManager_->isAccessibilityInit);
+    EXPECT_FALSE(deviceStatusManager->g_deviceManager_->isAccessibilityInit_);
 
     accessibilityStatusChange->OnAddSystemAbility(WINDOW_MANAGER_SERVICE_ID, deviceId);
     EXPECT_NE(deviceStatusManager->g_deviceManager_, nullptr);

@@ -68,7 +68,6 @@ if (!is_arkui_x) {
     }
 
     defines = device_status_default_defines
-    defines += [ "MODIFIER_NG" ]
 
     public_configs = [ ":interaction_drag_public_config" ]
 
@@ -152,7 +151,6 @@ if (!is_arkui_x) {
       sources = [ "src/universal_drag_wrapper.cpp" ]
 
       defines = device_status_default_defines
-      defines += [ "MODIFIER_NG" ]
 
       public_configs = [ ":interaction_drag_public_config" ]
 
@@ -206,7 +204,6 @@ if (!is_arkui_x) {
     ]
 
     defines = device_status_default_defines
-    defines += [ "MODIFIER_NG" ]
 
     if (target_os == "android") {
       defines += [ "ANDROID_PLATFORM" ]
