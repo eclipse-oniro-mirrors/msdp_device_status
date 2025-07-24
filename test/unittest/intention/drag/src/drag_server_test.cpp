@@ -1600,6 +1600,11 @@ HWTEST_F(DragServerTest, DragServerTest79, TestSize.Level0) {
     }
     DragWindowRotationFlush_ = currentRotation;
     FinishTrace(HITRACE_TAG_MSDP);
+
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    StopVSyncStation();
+    frameCallback_ = nullptr;
+    DragWindowRotationFlush_ = { Rosen::Rotation::ROTATION_0 };
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
