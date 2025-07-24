@@ -585,7 +585,7 @@ int32_t InputEventSerialization::Unmarshalling(NetPacket &pkt, std::shared_ptr<M
         FI_HILOGE("Failed to deserialize buffer");
         return RET_ERR;
     }
-    if (DeserializeInterceptorTime(pkt, interceptorTime)) {
+    if (DeserializeInterceptorTime(pkt, interceptorTime) != RET_OK) {
         FI_HILOGE("Failed to deserialize interceptorTime");
     }
     return RET_OK;

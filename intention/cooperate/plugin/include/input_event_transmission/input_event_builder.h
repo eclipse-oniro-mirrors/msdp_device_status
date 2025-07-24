@@ -121,7 +121,7 @@ private:
     int64_t cooperateInterceptorTimeDT_ { -1 };
     int64_t crossPlatformTimeDT_ { -1 };
     int64_t preDriveEventTime_ { -1 };
-    int64_t preCooperateInterceptorTime_ { -1 };
+    int64_t preInterceptorTime_ { -1 };
     int64_t preCrossPlatformTime_ { -1 };
     int32_t pointerSpeed_ { -1 };
     int32_t touchPadSpeed_ { -1 };

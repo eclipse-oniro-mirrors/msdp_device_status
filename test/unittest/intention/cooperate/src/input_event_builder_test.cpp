@@ -186,7 +186,8 @@ HWTEST_F(InputEventBuilderTest, OnPacketTest003, TestSize.Level1)
     CALL_TEST_DEBUG;
     builder_->remoteNetworkId_ = "1234";
     NetPacket packet(MessageId::DSOFTBUS_INPUT_POINTER_EVENT);
-    int32_t ret1 = InputEventSerialization::Marshalling(builder_->pointerEvent_, packet);
+    int64_t interceptorTime = 1;
+    int32_t ret1 = InputEventSerialization::Marshalling(builder_->pointerEvent_, packet, interceptorTime);
     ASSERT_EQ(ret1, RET_OK);
     bool ret = builder_->OnPacket(networkId_, packet);
     ASSERT_EQ(ret, true);
@@ -564,7 +565,8 @@ HWTEST_F(InputEventBuilderTest, ResetPressedEventsTest001, TestSize.Level1)
     item.SetRawDx(-60);
     item.SetRawDy(-60);
     pointerEvent->AddPointerItem(item);
-    int32_t ret1 = InputEventSerialization::Marshalling(pointerEvent, packet);
+    int64_t interceptorTime = 1;
+    int32_t ret1 = InputEventSerialization::Marshalling(pointerEvent, packet, interceptorTime);
     ASSERT_EQ(ret1, RET_OK);
     bool ret = builder_->OnPacket(networkId_, packet);
     ASSERT_EQ(ret, true);
@@ -597,7 +599,8 @@ HWTEST_F(InputEventBuilderTest, ResetPressedEventsTest002, TestSize.Level1)
     item.SetRawDx(-60);
     item.SetRawDy(-60);
     pointerEvent->AddPointerItem(item);
-    int32_t ret1 = InputEventSerialization::Marshalling(pointerEvent, packet);
+    int64_t interceptorTime = 1;
+    int32_t ret1 = InputEventSerialization::Marshalling(pointerEvent, packet, interceptorTime);
     ASSERT_EQ(ret1, RET_OK);
     bool ret = builder_->OnPacket(networkId_, packet);
     ASSERT_EQ(ret, true);
@@ -630,7 +633,8 @@ HWTEST_F(InputEventBuilderTest, ResetPressedEventsTest003, TestSize.Level1)
     item.SetRawDx(-60);
     item.SetRawDy(-60);
     pointerEvent->AddPointerItem(item);
-    int32_t ret1 = InputEventSerialization::Marshalling(pointerEvent, packet);
+    int64_t interceptorTime = 1;
+    int32_t ret1 = InputEventSerialization::Marshalling(pointerEvent, packet, interceptorTime);
     ASSERT_EQ(ret1, RET_OK);
     bool ret = builder_->OnPacket(networkId_, packet);
     ASSERT_EQ(ret, true);
@@ -663,7 +667,8 @@ HWTEST_F(InputEventBuilderTest, ResetPressedEventsTest004, TestSize.Level1)
     item.SetRawDx(-60);
     item.SetRawDy(-60);
     pointerEvent->AddPointerItem(item);
-    int32_t ret1 = InputEventSerialization::Marshalling(pointerEvent, packet);
+    int64_t interceptorTime = 1;
+    int32_t ret1 = InputEventSerialization::Marshalling(pointerEvent, packet, interceptorTime);
     ASSERT_EQ(ret1, RET_OK);
     bool ret = builder_->OnPacket(networkId_, packet);
     ASSERT_EQ(ret, true);

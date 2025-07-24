@@ -53,6 +53,7 @@ void CooperateRadar::ReportTransmissionLatencyRadarInfo(struct TransmissionLaten
 {
     if (transmissionLatencyRadarInfo.stageRes < 0) {
         FI_HILOGE("Transmission latency HiSysEventWrite fail");
+        return;
     } else {
         FI_HILOGI("Transmission latency HiSysEventWrite success");
     }

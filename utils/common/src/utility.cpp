@@ -46,6 +46,7 @@ constexpr size_t SUBSTR_ID_LENGTH { 5 };
 constexpr int32_t MULTIPLES { 2 };
 constexpr size_t DFX_RADAR_MASK_SIZE { 2 };
 constexpr int64_t TIME_CONVERSION_UNIT { 1000 };
+constexpr int64_t TIME_ROUND_UP { 999 };
 } // namespace
 
 size_t Utility::CopyNulstr(char *dest, size_t size, const char *src)
@@ -264,7 +265,7 @@ int64_t Utility::GetSysClockTime()
     }
 
     uint64_t totalMicroSeconds = static_cast<uint64_t>(ts.tv_sec) * TIME_CONVERSION_UNIT *
-    TIME_CONVERSION_UNIT + ts.tv_nsec / TIME_CONVERSION_UNIT;
+    TIME_CONVERSION_UNIT + static_cast<uint64_t>(ts.tv_nsec) / TIME_CONVERSION_UNIT;
 
     if (totalMicroSeconds > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) {
         FI_HILOGE("Total time value integer overflow detected!");
@@ -275,7 +276,7 @@ int64_t Utility::GetSysClockTime()
 
 int64_t Utility::GetSysClockTimeMilli(int64_t timeDT)
 {
-    return (timeDT + 999) / TIME_CONVERSION_UNIT;
+    return (timeDT + TIME_ROUND_UP) / TIME_CONVERSION_UNIT;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

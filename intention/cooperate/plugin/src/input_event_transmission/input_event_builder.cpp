@@ -214,7 +214,7 @@ bool InputEventBuilder::OnPacket(const std::string &networkId, Msdp::NetPacket &
 
 void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
 {
-    int64_t curBuilderRecvTime = Utility::GetSysClockTime();
+    int64_t curCrossPlatformTime = Utility::GetSysClockTime();
     CHKPV(pointerEvent_);
     CHKPV(env_);
     if (scanState_) {
@@ -236,7 +236,7 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
     FI_HILOGD("PointerEvent(No:%{public}d, Source:%{public}s, Action:%{public}s)",
         pointerEvent_->GetId(), pointerEvent_->DumpSourceType(), pointerEvent_->DumpPointerAction());
     if (IsActive(pointerEvent_)) {
-        CheckLatency(pointerEvent_->GetActionTime(), curInterceptorTime, curBuilderRecvTime, pointerEvent_);
+        CheckLatency(pointerEvent_->GetActionTime(), curInterceptorTime, curCrossPlatformTime, pointerEvent_);
         if (!UpdatePointerEvent(pointerEvent_)) {
             return;
         }
@@ -249,7 +249,7 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
 }
 
 void InputEventBuilder::CheckLatency(int64_t curDriveActionTime, int64_t curInterceptorTime,
-        int64_t curBuilderRecvTime, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+    int64_t curCrossPlatformTime, std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE ||
         curInterceptorTime == -1) {
@@ -258,15 +258,16 @@ void InputEventBuilder::CheckLatency(int64_t curDriveActionTime, int64_t curInte
     }
     if (preDriveEventTime_ < 0) {
         preDriveEventTime_ = curDriveActionTime;
-        preCooperateInterceptorTime_ = curInterceptorTime;
-        preCrossPlatformTime_ = curBuilderRecvTime;
+        preInterceptorTime_ = curInterceptorTime;
+        preCrossPlatformTime_ = curCrossPlatformTime;
+        return;
     }
     driveEventTimeDT_ = curDriveActionTime - preDriveEventTime_;
-    cooperateInterceptorTimeDT_ = curInterceptorTime - preCooperateInterceptorTime_;
-    crossPlatformTimeDT_ = curBuilderRecvTime - preCrossPlatformTime_;
+    cooperateInterceptorTimeDT_ = curInterceptorTime - preInterceptorTime_;
+    crossPlatformTimeDT_ = curCrossPlatformTime - preCrossPlatformTime_;
     preDriveEventTime_ = curDriveActionTime;
-    preCooperateInterceptorTime_ = curInterceptorTime;
-    preCrossPlatformTime_ = curBuilderRecvTime;
+    preInterceptorTime_ = curInterceptorTime;
+    preCrossPlatformTime_ = curCrossPlatformTime;
     TransmissionLatencyRadarInfo radarInfo {
         .funcName = __FUNCTION__,
         .bizState = static_cast<int32_t> (BizState::STATE_END),
@@ -281,7 +282,8 @@ void InputEventBuilder::CheckLatency(int64_t curDriveActionTime, int64_t curInte
         crossPlatformTimeDT_ - cooperateInterceptorTimeDT_));
     if (DriveToInterceptorDT > DRIVE_INTERCEPTOR_LATENCY || InterceptorToCrossDT > INTERCEPTOR_TRANSMISSION_LATENCY) {
         FI_HILOGI("driveEventTimeDT:%{public}" PRId64 ", cooperateInterceptorTimeDT:%{public}" PRId64 ""
-            "crossPlatformTimeDT:%{public}" PRId64, driveEventTimeDT_, cooperateInterceptorTimeDT_, crossPlatformTimeDT_);
+            "crossPlatformTimeDT:%{public}" PRId64, driveEventTimeDT_, cooperateInterceptorTimeDT_,
+            crossPlatformTimeDT_);
         radarInfo.driveEventTimeDT = driveEventTimeDT_;
         radarInfo.cooperateInterceptorTimeDT = cooperateInterceptorTimeDT_;
         radarInfo.crossPlatformTimeDT = crossPlatformTimeDT_;

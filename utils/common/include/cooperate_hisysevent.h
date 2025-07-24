@@ -101,7 +101,6 @@ struct TransmissionLatencyRadarInfo {
     int32_t bizScene { -1 };
     std::string localNetId;
     std::string peerNetId;
-    std::string toCallPkg;
     int64_t driveEventTimeDT { -1 };
     int64_t cooperateInterceptorTimeDT { -1 };
     int64_t crossPlatformTimeDT { -1 };
@@ -112,7 +111,8 @@ struct TransmissionLatencyRadarInfo {
 class CooperateRadar {
 public:
     static void ReportCooperateRadarInfo(struct CooperateRadarInfo &cooperateRadarInfo);
-    static void ReportTransmissionLatencyRadarInfo(struct TransmissionLatencyRadarInfo &transmissionLatencyRadarInfo);
+    static void ReportTransmissionLatencyRadarInfo(
+        struct TransmissionLatencyRadarInfo &transmissionLatencyRadarInfo);
 };
 } // namespace DeviceStatus
 } // namespace Msdp
