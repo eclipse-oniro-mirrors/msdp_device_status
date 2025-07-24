@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ namespace Msdp {
 class NapiEventUtils {
 public:
     static int64_t AddProcessor();
-    static void WriteEndEvent(const std::string& transId, const std::string& apiName, const int64_t beginTime, 
+    static void WriteEndEvent(const std::string& transId, const std::string& apiName, const int64_t beginTime,
         const int result, const int errCode);
     static int64_t GetSysClockTime();
 };
