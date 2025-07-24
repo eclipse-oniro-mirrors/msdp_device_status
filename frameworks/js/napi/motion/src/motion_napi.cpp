@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "motion_napi.h"
+#include "motion_napi.h"++
 
 #include <mutex>
 #include "devicestatus_define.h"

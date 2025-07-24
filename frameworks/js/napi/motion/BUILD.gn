@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../../device_status.gni")
+import("../../../../device_status.gni")++
 
 config("device_motion_private_config") {
   include_dirs = [ "include" ]
