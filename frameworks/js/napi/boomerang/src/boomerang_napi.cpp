@@ -169,22 +169,18 @@ void BoomerangNapi::OnEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap>
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(encodeMutex_);
-    if (pixelMap == nullptr || deferred == nullptr) {
-        FI_HILOGE("the asyncContext or pixelMap is error");
-        return;
-    }
+    CHKPV(pixelMap);
+    CHKPV(deferred);
 
     napi_value pixelMapNapi;
     uint32_t width = static_cast<uint32_t>(pixelMap->GetWidth());
     uint32_t height = static_cast<uint32_t>(pixelMap->GetHeight());
     const unsigned char *data = pixelMap->GetPixels();
+    CHKPV(data);
     uint32_t rowStride = static_cast<uint32_t>(pixelMap->GetRowStride());
     uint32_t bufferSize = width * height * BITMAP_TRAVERSE_STEP;
     uint8_t *pixelArrayBuffer = new (std::nothrow) uint8_t[bufferSize];
-    if (pixelArrayBuffer == nullptr) {
-        FI_HILOGE("create pixelmap buff error");
-        return;
-    }
+    CHKPV(pixelArrayBuffer);
     for (uint32_t y = 0; y < height; ++y) {
         for (uint32_t x = 0; x < width; ++x) {
             uint32_t pixIndex = y * rowStride + x * BITMAP_TRAVERSE_STEP;
