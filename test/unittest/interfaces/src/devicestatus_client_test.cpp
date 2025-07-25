@@ -224,20 +224,24 @@ HWTEST_F(DeviceStatusClientTest, GetPageContent001, TestSize.Level0)
     option.textOnly = true;
     OnScreen::PageContent pageContent;
     int32_t ret = OnScreen::OnScreenManager::GetInstance().GetPageContent(option, pageContent);
-    std::cout << "windowId:" << pageContent.windowId << std::endl;
-    std::cout << "bundleName:" << pageContent.bundleName << std::endl;
-    std::cout << "title:" << pageContent.title << std::endl;
-    std::cout << "content:" << pageContent.content << std::endl;
-    std::cout << "pageLink:" << pageContent.pageLink << std::endl;
-    std::cout << "paragraphs:" << std::endl;
-    for (auto i = 0; i < pageContent.paragraphs.size(); i++) {
-        std::cout << "------pagegragh " << i << "---------" << std::endl;
-        std::cout << "hookid: "<< pageContent.paragraphs[i].hookId << std::endl;
-        std::cout << "title: "<< pageContent.paragraphs[i].title << std::endl;
-        std::cout << "content: "<< pageContent.paragraphs[i].content << std::endl;
+    if (ret != RET_OK) {
+        std::cout << "ret:" << ret << std::endl;
+    } else {
+        std::cout << "windowId:" << pageContent.windowId << std::endl;
+        std::cout << "bundleName:" << pageContent.bundleName << std::endl;
+        std::cout << "title:" << pageContent.title << std::endl;
+        std::cout << "content:" << pageContent.content << std::endl;
+        std::cout << "pageLink:" << pageContent.pageLink << std::endl;
+        std::cout << "paragraphs:" << std::endl;
+        for (auto i = 0; i < pageContent.paragraphs.size(); i++) {
+            std::cout << "------pagegragh " << i << "---------" << std::endl;
+            std::cout << "hookid: "<< pageContent.paragraphs[i].hookId << std::endl;
+            std::cout << "title: "<< pageContent.paragraphs[i].title << std::endl;
+            std::cout << "content: "<< pageContent.paragraphs[i].content << std::endl;
+        }
+        std::cout << "--------------------------" << std::endl;
+        std::cout << "ret:" << ret << std::endl;
     }
-    std::cout << "--------------------------" << std::endl;
-    std::cout << "ret:" << ret << std::endl;
     EXPECT_TRUE(ret >= RET_ERR);
 }
 
