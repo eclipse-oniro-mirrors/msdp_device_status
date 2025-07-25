@@ -1810,11 +1810,16 @@ void DragDrawing::FlushDragPosition(uint64_t nanoTimestamp)
         vSyncStation_.GetVSyncPeriod());
     FI_HILOGD("Move position x:%{private}f, y:%{private}f, timestamp:%{public}" PRId64
         "displayId:%{public}d", event.displayX, event.displayY, event.timestamp, event.displayId);
-    StartTrace(HITRACE_TAG_MSDP,
-        "OnDragMove,displayX:" + std::to_string(event.displayX) + ",displayY:" + std::to_string(event.displayY));
-    UpdateDragPosition(event.displayId, event.displayX, event.displayY);
+    Rosen::Rotation currentRotation = GetRotation(event.displayId);
+    StartTrace(HITRACE_TAG_MSDP, "OnDragMove,displayX:" + std::to_string(event.displayX)
+        + ",displayY:" + std::to_string(event.displayY) + "displayId:" + std::to_string(event.displayId)
+        + ",rotation:" + std::to_string(static_cast<uint32_t>(currentRotation)));
+    if (DragWindowRotationFlush_ == currentRotation) {
+        UpdateDragPosition(event.displayId, event.displayX, event.displayY);
+        vSyncStation_.RequestFrame(TYPE_FLUSH_DRAG_POSITION, frameCallback_);
+    }
+    DragWindowRotationFlush_ = currentRotation;
     FinishTrace(HITRACE_TAG_MSDP);
-    vSyncStation_.RequestFrame(TYPE_FLUSH_DRAG_POSITION, frameCallback_);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
@@ -2089,6 +2094,9 @@ int32_t DragDrawing::InitLayer()
     } else {
         DragWindowRotateInfo_.rotation = ROTATION_0;
     }
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    DragWindowRotationFlush_ = rotation;
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     Rosen::RSTransaction::FlushImplicitTransaction();
     FI_HILOGI("leave");
     return RET_OK;
@@ -3636,6 +3644,7 @@ void DragDrawing::ResetParameter()
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     StopVSyncStation();
     frameCallback_ = nullptr;
+    DragWindowRotationFlush_ = { Rosen::Rotation::ROTATION_0 };
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     isRunningRotateAnimation_ = false;
     screenRotateState_ = false;
