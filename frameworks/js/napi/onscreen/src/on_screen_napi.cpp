@@ -390,7 +390,7 @@ bool OnScreenNapi::GetParagraphSizeRange(napi_env env, const napi_value &value, 
         FI_HILOGE("typeof failed");
         return false;
     }
-    if ((!isNecessary) && valueType == napi_object) {
+    if ((!isNecessary) && valueType == napi_undefined) {
         FI_HILOGW("isNecessary is false and valueType is undefined");
         return true;
     }
