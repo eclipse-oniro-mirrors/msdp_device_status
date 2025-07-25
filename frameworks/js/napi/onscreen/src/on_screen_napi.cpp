@@ -223,12 +223,6 @@ bool OnScreenNapi::GetContentOption(napi_env env, napi_value *args, size_t argc,
         FI_HILOGE("windowId is invalid");
         return false;
     }
-    if (option.maxParagraphSize != 0) {
-        if (option.maxParagraphSize > MAX_PARA_SIZE_MAX || option.maxParagraphSize < MAX_PARA_SIZE_MIN) {
-            FI_HILOGE("maxParagraphSize is over %{public}d or below %{public}d", MAX_PARA_SIZE_MAX, MAX_PARA_SIZE_MIN);
-            return false;
-        }
-    }
     return ret;
 }
 
