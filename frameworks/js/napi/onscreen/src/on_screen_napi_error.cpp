@@ -32,11 +32,9 @@ std::map<int32_t, std::string> ERROR_MESSAGES = {
     { RET_PARAM_ERR, "Params check failed." },
     { RET_NO_SUPPORT, "The device does not support this API." },
     { RET_SERVICE_EXCEPTION, "Service exception." },
-    { RET_NOT_IN_WHITELIST, "application or page is not in whitelist" },
+    { RET_NOT_IN_WHITELIST, "application or page is not supported." },
     { RET_WINDOW_ID_ERR, "window id is invalid. Possible causes: 1. window id is not passes when"
-                                    "screen is splited. 2. passed window id is not on screen or floating" },
-    { RET_EVENT_ID_NOT_FIND, "event id is not find. Possible causes: 1. passed event id is invalid. "
-                                    "2. getPageContent is not invoked before sendControlEvent" }
+                        "screen is splited. 2. passed window id is not on screen or floating." }
 };
 
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage)
