@@ -27,18 +27,6 @@ namespace OnScreen {
 namespace {
 constexpr int32_t MIN_PARA_SIZE = 300;
 constexpr int32_t MAX_PARA_SIZE = 500;
-enum OnScreenErrCode {
-    RET_ERR = -1,
-    RET_OK = 0,
-    RET_NO_PERMISSION = 201,
-    RET_NO_SYSTEM_CALLING = 202,
-    RET_PARAM_ERR = 401,
-    RET_NO_SUPPORT = 801,
-    RET_SERVICE_EXCEPTION = 34000001,
-    RET_NOT_IN_WHITELIST,
-    RET_WINDOW_ID_ERR,
-    RET_EVENT_ID_NOT_FIND,
-};
 }
 
 enum class Scenario {

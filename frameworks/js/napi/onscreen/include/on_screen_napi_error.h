@@ -25,6 +25,16 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
+enum OnScreenErrCode {
+    RET_NO_PERMISSION = 201,
+    RET_NO_SYSTEM_CALLING = 202,
+    RET_PARAM_ERR = 401,
+    RET_NO_SUPPORT = 801,
+    RET_SERVICE_EXCEPTION = 34000001,
+    RET_NOT_IN_WHITELIST,
+    RET_WINDOW_ID_ERR,
+    RET_EVENT_ID_NOT_FIND,
+};
 extern std::map<int32_t, std::string> ERROR_MESSAGES;
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage);
 std::optional<std::string> GetOnScreenErrMsg(int32_t errCode);
