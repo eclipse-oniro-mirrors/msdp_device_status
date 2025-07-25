@@ -34,6 +34,7 @@ namespace OnScreen {
 namespace {
 constexpr uint8_t ARG_0 = 0;
 constexpr uint8_t ARG_1 = 1;
+constexpr int32_t DEFAULT_WINDOW_ID = -1;
 OnScreenNapi *g_onScreenObj = nullptr;
 std::mutex g_mtx;
 } // namespace
@@ -218,6 +219,16 @@ bool OnScreenNapi::GetContentOption(napi_env env, napi_value *args, size_t argc,
     if (!ret) {
         FI_HILOGE("get content option failed");
     }
+    if (option.windowId < DEFAULT_WINDOW_ID) {
+        FI_HILOGE("windowId is invalid");
+        return false;
+    }
+    if (option.maxParagraphSize != 0) {
+        if (option.maxParagraphSize > MAX_PARA_SIZE_MAX || option.maxParagraphSize < MAX_PARA_SIZE_MIN) {
+            FI_HILOGE("maxParagraphSize is over %{public}d or below %{public}d", MAX_PARA_SIZE_MAX, MAX_PARA_SIZE_MIN);
+            return false;
+        }
+    }
     return ret;
 }
 
@@ -240,6 +251,10 @@ bool OnScreenNapi::GetControlEvent(napi_env env, napi_value *args, size_t argc, 
     }
     if (!ret) {
         FI_HILOGE("get control event failed");
+    }
+    if (event.windowId < 0 || event.sessionId < 0 || event.hookId < 0) {
+        FI_HILOGE("windowId or sessionId or hookId is invalid");
+        return false;
     }
     return ret;
 }

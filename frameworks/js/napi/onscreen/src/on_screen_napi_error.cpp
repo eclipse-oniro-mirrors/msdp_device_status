@@ -26,11 +26,15 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
 std::map<int32_t, std::string> ERROR_MESSAGES = {
-    {PERMISSION_EXCEPTION, "Permission check failed."},
-    {NO_SYSTEM_API, "Permission check failed. A non-system application uses the system API."},
-    {PARAM_EXCEPTION, "Params check failed."},
-    {DEVICE_EXCEPTION, "The device does not support this API."},
-    {SERVICE_EXCEPTION, "Service exception."}
+    { PERMISSION_EXCEPTION, "Permission check failed." },
+    { NO_SYSTEM_API, "Permission check failed. A non-system application uses the system API." },
+    { PARAM_EXCEPTION, "Params check failed." },
+    { DEVICE_EXCEPTION, "The device does not support this API." },
+    { SERVICE_EXCEPTION, "Service exception." },
+    { INVALID_WINDOW_ID_EXCEPTION, "window id is invalid. Possible causes: 1. window id is not passes when"
+                                    "screen is splited. 2. passed window id is not on screen or floating" },
+    { EVENT_ID_NOT_FIND_EXCEPTION, "event id is not find. Possible causes: 1. passed event id is invalid. "
+                                    "2. getPageContent is not invoked before sendControlEvent" }
 };
 
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage)

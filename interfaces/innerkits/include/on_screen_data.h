@@ -24,6 +24,11 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
+namespace {
+constexpr int32_t MAX_PARA_SIZE_MIN = 10;
+constexpr int32_t MAX_PARA_SIZE_MAX = 10000;
+}
+
 enum class Scenario {
     UNKNOWN = 0,
     ARTICLE,
