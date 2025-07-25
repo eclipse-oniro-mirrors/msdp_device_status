@@ -84,7 +84,8 @@
         "motion",
         "libuv",
         "data_share",
-        "rust_libc"
+        "rust_libc",
+        "hiappevent"
       ],
       "third_party": [
         "openssl",

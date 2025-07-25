@@ -49,7 +49,8 @@ void CooperateRadar::ReportCooperateRadarInfo(struct CooperateRadarInfo &coopera
         "PEER_DEV_TYPE", cooperateRadarInfo.peerDeviceType);
 }
 
-void CooperateRadar::ReportTransmissionLatencyRadarInfo(struct TransmissionLatencyRadarInfo &transmissionLatencyRadarInfo)
+void CooperateRadar::ReportTransmissionLatencyRadarInfo(
+    struct TransmissionLatencyRadarInfo &transmissionLatencyRadarInfo)
 {
     if (transmissionLatencyRadarInfo.stageRes < 0) {
         FI_HILOGE("Transmission latency HiSysEventWrite fail");

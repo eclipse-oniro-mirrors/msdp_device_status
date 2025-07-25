@@ -20,6 +20,7 @@
 #include "fi_log.h"
 #ifdef MOTION_ENABLE
 #include "motion_client.h"
+#include "napi_event_utils.h"
 #endif
 #include "motion_napi_error.h"
 
@@ -34,6 +35,7 @@ auto &g_motionClient = MotionClient::GetInstance();
 constexpr int32_t PERMISSION_DENIED = 201;
 static constexpr uint8_t ARG_1 = 1;
 constexpr int32_t HOLDING_HAND_FEATURE_DISABLE = 11;
+constexpr int32_t EVENT_NOT_SUPPORT = -200;
 #endif
 static constexpr uint8_t ARG_0 = 0;
 static constexpr uint8_t ARG_2 = 2;
@@ -231,6 +233,11 @@ bool MotionNapi::ConstructMotion(napi_env env, napi_value jsThis) __attribute__(
 napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
+#ifdef MOTION_ENABLE
+    int64_t processorId = NapiEventUtils::AddProcessor();
+    int64_t beginTime = NapiEventUtils::GetSysClockTime();
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
+#endif
     size_t argc = ARG_2;
     napi_value args[ARG_2] = { nullptr };
     napi_value jsThis = nullptr;
@@ -272,6 +279,11 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
         ThrowMotionErr(env, SERVICE_EXCEPTION, "AddCallback failed");
         return nullptr;
     }
+    if (processorId == EVENT_NOT_SUPPORT) {
+        FI_HILOGW("Non-applications do not support breakpoint");
+    } else {
+        NapiEventUtils::WriteEndEvent(transId, "motion.on", beginTime, 0, 0);
+    }
     napi_get_undefined(env, &result);
     return result;
 #else
@@ -283,6 +295,11 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
 napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
+#ifdef MOTION_ENABLE
+    int64_t processorId = NapiEventUtils::AddProcessor();
+    int64_t beginTime = NapiEventUtils::GetSysClockTime();
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
+#endif
     if (g_motionObj == nullptr) {
         ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "g_motionObj is nullptr");
         return nullptr;
@@ -334,6 +351,11 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 
     if (!UnSubscribeCallback(env, type)) {
         return nullptr;
+    }
+    if (processorId == EVENT_NOT_SUPPORT) {
+        FI_HILOGW("Non-applications do not support breakpoint");
+    } else {
+        NapiEventUtils::WriteEndEvent(transId, "motion.off", beginTime, 0, 0);
     }
     napi_get_undefined(env, &result);
     return result;
