@@ -17,6 +17,7 @@
 #include <optional>
 
 #include "fi_log.h"
+#include "on_screen_data.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenNapiError"
@@ -26,11 +27,14 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
 std::map<int32_t, std::string> ERROR_MESSAGES = {
-    {PERMISSION_EXCEPTION, "Permission check failed."},
-    {NO_SYSTEM_API, "Permission check failed. A non-system application uses the system API."},
-    {PARAM_EXCEPTION, "Params check failed."},
-    {DEVICE_EXCEPTION, "The device does not support this API."},
-    {SERVICE_EXCEPTION, "Service exception."}
+    { RET_NO_PERMISSION, "Permission check failed." },
+    { RET_NO_SYSTEM_CALLING, "Permission check failed. A non-system application uses the system API." },
+    { RET_PARAM_ERR, "Params check failed." },
+    { RET_NO_SUPPORT, "The device does not support this API." },
+    { RET_SERVICE_EXCEPTION, "Service exception." },
+    { RET_NOT_IN_WHITELIST, "application or page is not supported." },
+    { RET_WINDOW_ID_ERR, "window id is invalid. Possible causes: 1. window id is not passes when"
+                        "screen is splited. 2. passed window id is not on screen or floating." }
 };
 
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage)

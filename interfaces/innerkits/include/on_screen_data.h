@@ -24,6 +24,11 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
+namespace {
+constexpr int32_t MIN_PARA_SIZE = 300;
+constexpr int32_t MAX_PARA_SIZE = 500;
+}
+
 enum class Scenario {
     UNKNOWN = 0,
     ARTICLE,
@@ -36,6 +41,11 @@ enum class EventType {
     END,
 };
 
+struct ParagraphSizeRange {
+    int32_t minSize;
+    int32_t maxSize;
+};
+
 struct ContentOption {
     int32_t windowId = -1;
     // 是否进行内容理解
@@ -44,8 +54,11 @@ struct ContentOption {
     bool pageLink = false;
     // 是否只采集文本
     bool textOnly = false;
-    // 文本最长长度，默认为0，不限制长度
-    int32_t maxParagraphSize = 0;
+    // 设置最小分段长度和最大分段长度，默认为300 500
+    ParagraphSizeRange paragraphSizeRange = {
+        .minSize = MIN_PARA_SIZE,
+        .maxSize = MAX_PARA_SIZE
+    };
 };
 
 struct Paragraph {

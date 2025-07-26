@@ -34,6 +34,7 @@ namespace OnScreen {
 namespace {
 constexpr uint8_t ARG_0 = 0;
 constexpr uint8_t ARG_1 = 1;
+constexpr int32_t DEFAULT_WINDOW_ID = -1;
 OnScreenNapi *g_onScreenObj = nullptr;
 std::mutex g_mtx;
 } // namespace
@@ -93,17 +94,17 @@ napi_value OnScreenNapi::GetPageContentNapi(napi_env env, napi_callback_info inf
     ContentOption option;
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
     if (status != napi_ok) {
-        ThrowOnScreenErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
+        ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "napi_get_cb_info failed");
         return nullptr;
     }
     if (!GetContentOption(env, args, argc, option)) {
-        ThrowOnScreenErr(env, PARAM_EXCEPTION, "param is invalid");
+        ThrowOnScreenErr(env, RET_PARAM_ERR, "param is invalid");
         return nullptr;
     }
     {
         std::lock_guard lockGrd(g_mtx);
         if (!ConstructOnScreen(env, jsThis)) {
-            ThrowOnScreenErr(env, SERVICE_EXCEPTION, "failed to get g_onScreenObj");
+            ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "failed to get g_onScreenObj");
             return nullptr;
         }
     }
@@ -111,7 +112,7 @@ napi_value OnScreenNapi::GetPageContentNapi(napi_env env, napi_callback_info inf
     napi_deferred deferred = nullptr;
     status = napi_create_promise(env, &deferred, &promise);
     if (status != napi_ok) {
-        ThrowOnScreenErr(env, SERVICE_EXCEPTION, "Failed to create promise");
+        ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "Failed to create promise");
         return nullptr;
     }
     GetPageContentAsyncContext* asyncContext = new (std::nothrow) GetPageContentAsyncContext();
@@ -120,9 +121,9 @@ napi_value OnScreenNapi::GetPageContentNapi(napi_env env, napi_callback_info inf
     asyncContext->deferred = deferred;
     asyncContext->option = option;
     FI_HILOGD("invoke get page content, windowid = %{public}d, contentUnderstand = %{public}d, pageLink = %{public}d,"
-        "textOnly = %{public}d, maxParaLen = %{public}d", asyncContext->option.windowId,
+        "textOnly = %{public}d, minParaLen = %{public}d, maxParaLen = %{public}d", asyncContext->option.windowId,
         asyncContext->option.contentUnderstand, asyncContext->option.pageLink, asyncContext->option.textOnly,
-        asyncContext->option.maxParagraphSize);
+        asyncContext->option.paragraphSizeRange.minSize, asyncContext->option.paragraphSizeRange.maxSize);
     if (!GetPageContentExec(asyncContext)) {
         FI_HILOGE("get page content execution failed");
         delete asyncContext;
@@ -139,18 +140,18 @@ napi_value OnScreenNapi::SendControlEventNapi(napi_env env, napi_callback_info i
     napi_value jsThis = nullptr;
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
     if (status != napi_ok) {
-        ThrowOnScreenErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
+        ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "napi_get_cb_info failed");
         return nullptr;
     }
     ControlEvent event;
     if (!GetControlEvent(env, args, argc, event)) {
-        ThrowOnScreenErr(env, PARAM_EXCEPTION, "param is invalid");
+        ThrowOnScreenErr(env, RET_PARAM_ERR, "param is invalid");
         return nullptr;
     }
     {
         std::lock_guard lockGrd(g_mtx);
         if (!ConstructOnScreen(env, jsThis)) {
-            ThrowOnScreenErr(env, SERVICE_EXCEPTION, "failed to get g_onScreenObj");
+            ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "failed to get g_onScreenObj");
             return nullptr;
         }
     }
@@ -158,7 +159,7 @@ napi_value OnScreenNapi::SendControlEventNapi(napi_env env, napi_callback_info i
     napi_deferred deferred = nullptr;
     status = napi_create_promise(env, &deferred, &promise);
     if (status != napi_ok) {
-        ThrowOnScreenErr(env, SERVICE_EXCEPTION, "Failed to create promise");
+        ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "Failed to create promise");
         return nullptr;
     }
     SendControlEventAsyncContext* asyncContext = new (std::nothrow) SendControlEventAsyncContext();
@@ -214,9 +215,13 @@ bool OnScreenNapi::GetContentOption(napi_env env, napi_value *args, size_t argc,
     ret = ret && GetBoolFromJs(env, contentOptionObj, "contentUnderstand", option.contentUnderstand, false);
     ret = ret && GetBoolFromJs(env, contentOptionObj, "pageLink", option.pageLink, false);
     ret = ret && GetBoolFromJs(env, contentOptionObj, "textOnly", option.textOnly, false);
-    ret = ret && GetInt32FromJs(env, contentOptionObj, "maxParagraphSize", option.maxParagraphSize, false);
+    ret = ret && GetParagraphSizeRange(env, contentOptionObj, "paragraphSizeRange", option.paragraphSizeRange, false);
     if (!ret) {
         FI_HILOGE("get content option failed");
+    }
+    if (option.windowId < DEFAULT_WINDOW_ID) {
+        FI_HILOGE("windowId is invalid");
+        return false;
     }
     return ret;
 }
@@ -240,6 +245,10 @@ bool OnScreenNapi::GetControlEvent(napi_env env, napi_value *args, size_t argc, 
     }
     if (!ret) {
         FI_HILOGE("get control event failed");
+    }
+    if (event.windowId < 0 || event.sessionId < 0 || event.hookId < 0) {
+        FI_HILOGE("windowId or sessionId or hookId is invalid");
+        return false;
     }
     return ret;
 }
@@ -353,6 +362,50 @@ bool OnScreenNapi::GetBoolFromJs(napi_env env, const napi_value &value, const st
     }
     if (napi_get_value_bool(env, fieldValue, &result) != napi_ok) {
         FI_HILOGE("napi_get_value_bool failed");
+        return false;
+    }
+    return true;
+}
+
+bool OnScreenNapi::GetParagraphSizeRange(napi_env env, const napi_value &value, const std::string &field,
+    ParagraphSizeRange &range, bool isNecessary)
+{
+    bool hasProperty = false;
+    if (napi_has_named_property(env, value, field.c_str(), &hasProperty) != napi_ok) {
+        FI_HILOGE("napi_has_named_property failed");
+        return false;
+    }
+    if (!hasProperty) {
+        FI_HILOGW("napi dont have this property");
+        // 如果是必要的，则返回false，如果不必要，则返回true，使用默认值
+        return !isNecessary;
+    }
+    napi_value fieldValue = nullptr;
+    napi_valuetype valueType = napi_undefined;
+    if (napi_get_named_property(env, value, field.c_str(), &fieldValue) != napi_ok) {
+        FI_HILOGE("napi_get_named_property failed");
+        return false;
+    }
+    if (napi_typeof(env, fieldValue, &valueType) != napi_ok) {
+        FI_HILOGE("typeof failed");
+        return false;
+    }
+    if ((!isNecessary) && valueType == napi_undefined) {
+        FI_HILOGW("isNecessary is false and valueType is undefined");
+        return true;
+    }
+    if (valueType != napi_object) {
+        FI_HILOGE("valueType is not object");
+        return false;
+    }
+    bool ret = GetInt32FromJs(env, fieldValue, "minSize", range.minSize, true);
+    ret = ret && GetInt32FromJs(env, fieldValue, "maxSize", range.maxSize, true);
+    if (!ret) {
+        FI_HILOGE("para size range is not enough to parse");
+        return false;
+    }
+    if (!(range.minSize > 0 && range.maxSize > 0 && range.maxSize > range.minSize)) {
+        FI_HILOGE("para size range is invalid");
         return false;
     }
     return true;
@@ -479,7 +532,7 @@ void OnScreenNapi::GetPageContentCompCB(napi_env env, napi_status status, void *
     napi_status retStatus = napi_ok;
     if (napi_create_object(env, &pageContentObj) != napi_ok) {
         FI_HILOGE("pageContent failed");
-        ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
+        ThrowOnScreenErrByPromise(env, RET_SERVICE_EXCEPTION, "service exception", errVal);
         napi_reject_deferred(env, ctx->deferred, errVal);
         napi_delete_async_work(env, ctx->work);
         delete ctx;
@@ -503,7 +556,7 @@ void OnScreenNapi::GetPageContentCompCB(napi_env env, napi_status status, void *
         if (retMsg != std::nullopt) {
             ThrowOnScreenErrByPromise(env, ctx->result, retMsg.value(), errVal);
         } else {
-            ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
+            ThrowOnScreenErrByPromise(env, RET_SERVICE_EXCEPTION, "service exception", errVal);
         }
         retStatus = napi_reject_deferred(env, ctx->deferred, errVal);
     } else {
@@ -554,7 +607,7 @@ void OnScreenNapi::SendControlEventCompCB(napi_env env, napi_status status, void
     napi_value retVal = nullptr;
     if (napi_create_object(env, &retVal) != napi_ok) {
         FI_HILOGE("send control event create obj failed");
-        ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
+        ThrowOnScreenErrByPromise(env, RET_SERVICE_EXCEPTION, "service exception", errVal);
         napi_reject_deferred(env, ctx->deferred, errVal);
         napi_delete_async_work(env, ctx->work);
         delete ctx;
@@ -566,7 +619,7 @@ void OnScreenNapi::SendControlEventCompCB(napi_env env, napi_status status, void
         if (retMsg != std::nullopt) {
             ThrowOnScreenErrByPromise(env, ctx->result, retMsg.value(), errVal);
         } else {
-            ThrowOnScreenErrByPromise(env, SERVICE_EXCEPTION, "service exception", errVal);
+            ThrowOnScreenErrByPromise(env, RET_SERVICE_EXCEPTION, "service exception", errVal);
         }
         retStatus = napi_reject_deferred(env, ctx->deferred, errVal);
     } else {
