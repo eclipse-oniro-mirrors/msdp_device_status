@@ -237,7 +237,7 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
         pointerEvent_->GetId(), pointerEvent_->DumpSourceType(), pointerEvent_->DumpPointerAction());
     if (IsActive(pointerEvent_)) {
         CheckLatency(pointerEvent_->GetActionTime(), curInterceptorTime, curCrossPlatformTime, pointerEvent_);
-        if (!UpdatePointerEvent(pointerEvent_)) {
+        if (!UpdatePointerEvent()) {
             return;
         }
         env_->GetInput().SimulateInputEvent(pointerEvent_);
@@ -251,6 +251,7 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
 void InputEventBuilder::CheckLatency(int64_t curDriveActionTime, int64_t curInterceptorTime,
     int64_t curCrossPlatformTime, std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
+    CHKPV(pointerEvent);
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE ||
         curInterceptorTime == -1) {
         preDriveEventTime_ = -1;
@@ -377,22 +378,22 @@ int32_t InputEventBuilder::SetWifiScene(unsigned int scene)
     return RET_OK;
 }
 
-bool InputEventBuilder::UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+bool InputEventBuilder::UpdatePointerEvent()
 {
-    if (pointerEvent->GetSourceType() != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+    if (pointerEvent_->GetSourceType() != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         return true;
     }
-    if (!DampPointerMotion(pointerEvent)) {
+    if (!DampPointerMotion(pointerEvent_)) {
         FI_HILOGE("DampPointerMotion fail");
         return false;
     }
-    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
+    pointerEvent_->AddFlag(MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
     int64_t time = Utility::GetSysClockTime();
-    pointerEvent->SetActionTime(time);
-    pointerEvent->SetActionStartTime(time);
-    pointerEvent->SetTargetDisplayId(-1);
-    pointerEvent->SetTargetWindowId(-1);
-    pointerEvent->SetAgentWindowId(-1);
+    pointerEvent_->SetActionTime(time);
+    pointerEvent_->SetActionStartTime(time);
+    pointerEvent_->SetTargetDisplayId(-1);
+    pointerEvent_->SetTargetWindowId(-1);
+    pointerEvent_->SetAgentWindowId(-1);
     return true;
 }
 

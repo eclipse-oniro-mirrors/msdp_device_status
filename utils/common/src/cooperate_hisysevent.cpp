@@ -56,7 +56,7 @@ void CooperateRadar::ReportTransmissionLatencyRadarInfo(
         FI_HILOGE("Transmission latency HiSysEventWrite fail");
         return;
     } else {
-        FI_HILOGI("Transmission latency HiSysEventWrite success");
+        FI_HILOGD("Transmission latency HiSysEventWrite success");
     }
     HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,

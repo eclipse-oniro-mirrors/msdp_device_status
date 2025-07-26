@@ -1568,6 +1568,58 @@ HWTEST_F(DragServerTest, DragServerTest78, TestSize.Level0)
     EXPECT_EQ(ret1, COMMON_PARAMETER_ERROR);
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
+/**
+ * @tc.name: DragServerTest79
+ * @tc.desc: Test
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest79, TestSize.Level0) {
+    CALL_TEST_DEBUG;
+    g_dragMgr.SetDragState(DragState::MOTION_DRAGGING);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.FlushDragPosition(0);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest80
+ * @tc.desc: Test
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest80, TestSize.Level0) {
+    CALL_TEST_DEBUG;
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.FlushDragPosition(0);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest81
+ * @tc.desc: Test
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest81, TestSize.Level0) {
+    CALL_TEST_DEBUG;
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.DragWindowRotationFlush_ = Rosen::Rotation::ROTATION_90;
+    g_dragMgr.dragDrawing_.FlushDragPosition(0);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

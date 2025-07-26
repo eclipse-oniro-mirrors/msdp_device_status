@@ -464,6 +464,7 @@ private:
     std::shared_ptr<DragFrameCallback> frameCallback_ { nullptr };
     std::atomic_bool isRunningRotateAnimation_ { false };
     DragWindowRotationInfo DragWindowRotateInfo_;
+    Rosen::Rotation DragWindowRotationFlush_ { Rosen::Rotation::ROTATION_0 };
     DragState dragState_ { DragState::STOP };
     int32_t timerId_ { -1 };
     std::shared_mutex receiverMutex_;

@@ -96,7 +96,7 @@ private:
     void TurnOffChannelScan();
     void TurnOnChannelScan();
     int32_t SetWifiScene(unsigned int scene);
-    bool UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    bool UpdatePointerEvent();
     void UpdateKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent);
     bool IsActive(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void ResetPressedEvents();

@@ -250,7 +250,7 @@ HWTEST_F(InputEventBuilderTest, InputEventBuilderTest_UpdatePointerEvent_001, Te
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    bool ret = builder_->UpdatePointerEvent(pointerEvent);
+    bool ret = builder_->UpdatePointerEvent();
     ASSERT_FALSE(ret);
 }
 
@@ -424,7 +424,7 @@ HWTEST_F(InputEventBuilderTest, InputEventBuilderTest_UpdatePointerEvent_002, Te
     item.SetRawDx(-60);
     item.SetRawDy(-60);
     pointerEvent->AddPointerItem(item);
-    bool ret = builder_->UpdatePointerEvent(pointerEvent);
+    bool ret = builder_->UpdatePointerEvent();
     ASSERT_TRUE(ret);
 }
 
