@@ -17,6 +17,7 @@
     global:
         extern "C++" {
             "OHOS::Msdp::DeviceStatus::CooperateRadar::ReportCooperateRadarInfo(OHOS::Msdp::DeviceStatus::CooperateRadarInfo&)";
+            "OHOS::Msdp::DeviceStatus::CooperateRadar::ReportTransmissionLatencyRadarInfo(OHOS::Msdp::DeviceStatus::TransmissionLatencyRadarInfo&)";
             "OHOS::Msdp::DeviceStatus::GetThisThreadId()";
             "OHOS::Msdp::DeviceStatus::GetPid()";
             "OHOS::Msdp::DeviceStatus::GetProgramName()";
@@ -26,6 +27,7 @@
             "OHOS::Msdp::DeviceStatus::IsNum(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
             "OHOS::Msdp::DeviceStatus::SetThreadName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
             "OHOS::Msdp::DeviceStatus::GetMillisTime()";
+            "OHOS::Msdp::DeviceStatus::Utility::GetSysClockTimeMilli(long long)";
             "OHOS::Msdp::UtilNapi::TypeOf(napi_env__*, napi_value__*, napi_valuetype)";
             "OHOS::Msdp::DeviceStatus::UtilNapiError::GetErrorMsg(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
             "OHOS::Msdp::DeviceStatus::UtilNapiError::HandleExecuteResult(napi_env__*, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";

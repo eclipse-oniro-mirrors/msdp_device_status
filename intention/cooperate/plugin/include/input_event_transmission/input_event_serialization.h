@@ -35,8 +35,10 @@ public:
     static int32_t SwitchEventToNetPacket(const std::shared_ptr<MMI::SwitchEvent> key, NetPacket &pkt);
     static int32_t NetPacketToSwitchEvent(NetPacket &pkt, std::shared_ptr<MMI::SwitchEvent> key);
     static int32_t HeartBeatMarshalling(NetPacket &pkt);
-    static int32_t Marshalling(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt);
-    static int32_t Unmarshalling(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event);
+    static int32_t Marshalling(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt,
+        int64_t interceptorTime);
+    static int32_t Unmarshalling(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event,
+        int64_t &interceptorTime);
 #ifdef OHOS_BUILD_ENABLE_SECURITY_PART
     static int32_t MarshallingEnhanceData(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt);
     static int32_t UnmarshallingEnhanceData(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event);
@@ -60,6 +62,8 @@ private:
     static int32_t DeserializePressedKeys(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event);
     static int32_t SerializeBuffer(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt);
     static int32_t DeserializeBuffer(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event);
+    static int32_t SerializeInterceptorTime(int64_t interceptorTime, NetPacket &pkt);
+    static int32_t DeserializeInterceptorTime(NetPacket &pkt, int64_t &interceptorTime);
     static void ReadFunctionKeys(NetPacket &pkt, std::shared_ptr<MMI::KeyEvent> key);
 
 #ifdef OHOS_BUILD_ENABLE_SECURITY_PART

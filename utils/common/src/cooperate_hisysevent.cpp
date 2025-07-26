@@ -16,6 +16,7 @@
 #include "cooperate_hisysevent.h"
     
 #include "hisysevent.h"
+#include "fi_log.h"
     
 #undef LOG_TAG
 #define LOG_TAG "CooperateHisysevent"
@@ -46,6 +47,34 @@ void CooperateRadar::ReportCooperateRadarInfo(struct CooperateRadarInfo &coopera
         "TO_CALL_PKG", cooperateRadarInfo.toCallPkg,
         "LOCAL_DEV_TYPE", cooperateRadarInfo.localDeviceType,
         "PEER_DEV_TYPE", cooperateRadarInfo.peerDeviceType);
+}
+
+void CooperateRadar::ReportTransmissionLatencyRadarInfo(
+    struct TransmissionLatencyRadarInfo &transmissionLatencyRadarInfo)
+{
+    if (transmissionLatencyRadarInfo.stageRes < 0) {
+        FI_HILOGE("Transmission latency HiSysEventWrite fail");
+        return;
+    } else {
+        FI_HILOGD("Transmission latency HiSysEventWrite success");
+    }
+    HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+        COOPERTATE_BEHAVIOR,
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "ORG_PKG", ORG_PKG_NAME,
+        "FUNC", transmissionLatencyRadarInfo.funcName,
+        "BIZ_STATE", transmissionLatencyRadarInfo.bizState,
+        "BIZ_STAGE", transmissionLatencyRadarInfo.bizStage,
+        "STAGE_RES", transmissionLatencyRadarInfo.stageRes,
+        "BIZ_SCENE", transmissionLatencyRadarInfo.bizScene,
+        "LOCAL_NET_ID", transmissionLatencyRadarInfo.localNetId,
+        "PEER_NET_ID", transmissionLatencyRadarInfo.peerNetId,
+        "DRIVE_EVENT_DT", transmissionLatencyRadarInfo.driveEventTimeDT,
+        "COOPERATE_INTERCEPTOR_EVENT_DT", transmissionLatencyRadarInfo.cooperateInterceptorTimeDT,
+        "CROSS_PLATFORM_EVENT", transmissionLatencyRadarInfo.crossPlatformTimeDT,
+        "POINTER_SPEED_EVENT", transmissionLatencyRadarInfo.pointerSpeed,
+        "TOUCHPAD_SPEED_EVET", transmissionLatencyRadarInfo.touchPadSpeed);
 }
 
 } // namespace DeviceStatus

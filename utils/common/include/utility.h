@@ -69,6 +69,7 @@ public:
     static void ShowUserAndGroup();
 
     static int64_t GetSysClockTime();
+    static int64_t GetSysClockTimeMilli(const int64_t time);
 };
 
 inline bool Utility::IsEmpty(const char *str) noexcept

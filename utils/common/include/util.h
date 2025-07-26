@@ -45,6 +45,10 @@ enum class StageRes {
     RES_CANCEL
 };
 
+enum class BizLatencyStage {
+    STAGE_LATENCY = 1,
+};
+
 enum class DragRadarErrCode {
     DRAG_SUCCESS = 0,
     FAILED_INIT_DRAWING = 61210623,

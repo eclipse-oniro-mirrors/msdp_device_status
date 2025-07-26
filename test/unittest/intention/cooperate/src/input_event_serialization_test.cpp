@@ -283,9 +283,10 @@ HWTEST_F(InputEventSerializationTest, TestMarshalling, TestSize.Level1)
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
     NetPacket packet(MessageId::DSOFTBUS_INPUT_KEY_EVENT);
-    int32_t ret = Cooperate::InputEventSerialization::Marshalling(pointerEvent, packet);
+    int64_t interceptorTime = 1;
+    int32_t ret = Cooperate::InputEventSerialization::Marshalling(pointerEvent, packet, interceptorTime);
     ASSERT_EQ(ret, RET_OK);
-    ret = Cooperate::InputEventSerialization::Unmarshalling(packet, pointerEvent);
+    ret = Cooperate::InputEventSerialization::Unmarshalling(packet, pointerEvent, interceptorTime);
     ASSERT_EQ(ret, RET_OK);
 }
 
@@ -489,7 +490,8 @@ HWTEST_F(InputEventSerializationTest, TestMarshalling_01, TestSize.Level1)
     CALL_TEST_DEBUG;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-    int32_t ret = Cooperate::InputEventSerialization::Marshalling(pointerEvent, pkt);
+    int64_t interceptorTime = 1;
+    int32_t ret = Cooperate::InputEventSerialization::Marshalling(pointerEvent, pkt, interceptorTime);
     ASSERT_EQ(ret, RET_ERR);
 }
 
@@ -504,7 +506,8 @@ HWTEST_F(InputEventSerializationTest, TestUnmarshalling_01, TestSize.Level1)
     CALL_TEST_DEBUG;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-    int32_t ret = Cooperate::InputEventSerialization::Unmarshalling(pkt, pointerEvent);
+    int64_t interceptorTime = 1;
+    int32_t ret = Cooperate::InputEventSerialization::Unmarshalling(pkt, pointerEvent, interceptorTime);
     ASSERT_EQ(ret, RET_ERR);
 }
 } // namespace DeviceStatus
