@@ -33,7 +33,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-    const std::string BUNDLE_NAME = "com.tencent.wechat";
+    const std::string BUNDLE_NAME = "";
     const int32_t SYSTEM_BAR_HIDDEN = 0;
     const int32_t PAGE_SCROLL_ENVENT = 1;
 }
