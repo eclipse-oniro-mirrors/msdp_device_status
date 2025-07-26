@@ -1693,7 +1693,7 @@ int32_t DragManager::OnSetDragWindowVisible(bool visible, bool isForce, bool isZ
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
         return RET_ERR;
     }
-    if (!isForce && GetControlCollaborationVisible()) {
+    if (!isForce && GetControlCollaborationVisible() && rsTransaction == nullptr) {
         FI_HILOGW("The drag-and-drop window is controlled by multi-screen coordination,"
             "can not set drag window visible:%{public}d", visible);
         return RET_OK;
