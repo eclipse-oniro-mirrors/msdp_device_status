@@ -38,6 +38,14 @@ using TimeStamp = std::chrono::high_resolution_clock::time_point;
     #define RET_ERR (-1)
 #endif
 
+#define CHKEF(errCode, desc) \
+    do { \
+        if ((errCode) != RET_OK) { \
+            FI_HILOGE("%{public}s", desc); \
+            return false; \
+        } \
+    } while (0)
+
 #define CHKPL(cond) \
     do { \
         if ((cond) == nullptr) { \

@@ -18,6 +18,7 @@
 #include "ddm_adapter.h"
 #include "devicestatus_service.h"
 #include "drag_data_manager.h"
+#include "drag_data_util.h"
 #include "drag_server.h"
 #include "interaction_manager.h"
 #include "ipc_skeleton.h"
@@ -1619,6 +1620,130 @@ HWTEST_F(DragServerTest, DragServerTest81, TestSize.Level0) {
     g_dragMgr.dragDrawing_.DragWindowRotationFlush_ = Rosen::Rotation::ROTATION_90;
     g_dragMgr.dragDrawing_.FlushDragPosition(0);
     g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest82
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest82, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragState_ = DragState::STOP;
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = g_dragServer->GetDragSummaryInfo(dragSummaryInfo);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest83
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest83, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragState_ = DragState::START;
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = g_dragServer->GetDragSummaryInfo(dragSummaryInfo);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest84
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest84, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    const std::string udType = "general.message";
+    constexpr int64_t recordSize = 20;
+    dragData.value().detailedSummarys = { { udType, recordSize } };
+    Parcel parcel;
+    int32_t ret = DragDataUtil::MarshallingDetailedSummarys(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    DragData dragDataFromParcel;
+    ret = DragDataUtil::UnMarshallingDetailedSummarys(parcel, dragDataFromParcel);
+    ASSERT_EQ(ret, RET_OK);
+}
+ 
+/**
+ * @tc.name: DragServerTest85
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest85, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    dragData.value().summaryFormat = { { "image", { 0, 1 } } };
+    dragData.value().summaryTotalSize = 100;
+    Parcel parcel;
+    int32_t ret = DragDataUtil::MarshallingSummaryExpanding(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    DragData dragDataFromParcel;
+    ret = DragDataUtil::UnMarshallingSummaryExpanding(parcel, dragDataFromParcel);
+    ASSERT_EQ(ret, RET_OK);
+}
+ 
+/**
+ * @tc.name: DragServerTest86
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest86, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragSummaryInfo dragSummaryInfo;
+    Parcel parcel;
+    SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
+    bool ret = sequenceableDragSummaryInfo.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(sequenceableDragSummaryInfo.Unmarshalling(parcel));
+}
+ 
+/**
+ * @tc.name: DragServerTest87
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest87, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragSummaryInfo dragSummaryInfo;
+    Parcel parcel;
+    SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
+    bool ret = sequenceableDragSummaryInfo.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(sequenceableDragSummaryInfo.SetDragSummaryInfo(dragSummaryInfo));
+}
+ 
+/**
+ * @tc.name: DragServerTest88
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest88, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    Parcel parcel;
+    SequenceableDragData sequenceableDragData(dragData);
+    bool ret = sequenceableDragData.Marshalling(parcel);
+    EXPECT_FALSE(ret);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

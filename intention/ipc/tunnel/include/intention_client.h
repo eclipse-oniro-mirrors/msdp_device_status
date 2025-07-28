@@ -87,6 +87,7 @@ public:
     int32_t SetDraggableStateAsync(bool state, int64_t downTime);
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
     int32_t IsDragStart(bool &isStart);
+    int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo);
 
     // Boomerang
     int32_t SubscribeCallback(int32_t type, const std::string& bundleName,

@@ -619,6 +619,12 @@ bool IntentionManager::IsDragStart()
     return drag_.IsDragStart();
 }
 
+int32_t IntentionManager::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
+{
+    CALL_DEBUG_ENTER;
+    return drag_.GetDragSummaryInfo(dragSummaryInfo);
+}
+
 int32_t IntentionManager::GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent)
 {
     CALL_DEBUG_ENTER;

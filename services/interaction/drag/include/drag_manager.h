@@ -186,6 +186,7 @@ public:
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) override;
     void SimulatePullCancelEvent() override;
+    int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo) override;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation) override;
     void SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation) override;

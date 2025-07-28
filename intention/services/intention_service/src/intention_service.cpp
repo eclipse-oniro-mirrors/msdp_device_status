@@ -366,6 +366,19 @@ ErrCode IntentionService::GetDragSummary(std::map<std::string, int64_t> &summary
     });
 }
 
+ErrCode IntentionService::GetDragSummaryInfo(SequenceableDragSummaryInfo &sequenceableDragSummaryInfo)
+{
+    return PostSyncTask([this, &sequenceableDragSummaryInfo] {
+        DragSummaryInfo dragSummaryInfo;
+        int32_t ret = drag_.GetDragSummaryInfo(dragSummaryInfo);
+        if (ret != RET_OK) {
+            return ret;
+        }
+        sequenceableDragSummaryInfo.SetDragSummaryInfo(dragSummaryInfo);
+        return RET_OK;
+    });
+}
+
 ErrCode IntentionService::SetDragSwitchState(bool enable, bool isJsCaller)
 {
     CallingContext context = GetCallingContext();

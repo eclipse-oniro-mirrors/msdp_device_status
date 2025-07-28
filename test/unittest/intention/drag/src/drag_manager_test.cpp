@@ -1459,7 +1459,7 @@ HWTEST_F(DragManagerTest, DragManagerTest72, TestSize.Level0)
     const std::string udType = "general.message";
     constexpr int64_t recordSize = 20;
     std::map<std::string, int64_t> summarys = { { udType, recordSize } };
-    dragData.value().summarys2 = summarys;
+    dragData.value().detailedSummarys = summarys;
  
     const std::string udType1 = "general1.message";
     constexpr int64_t recordSize1 = 30;
@@ -1767,13 +1767,150 @@ HWTEST_F(DragManagerTest, DragManagerTest88, TestSize.Level0)
     ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
     EXPECT_EQ(ret, RET_OK);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS,
-        !HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     InteractionManager::GetInstance()->StopDrag(dropResult);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_INTERNAL_DROP_ANIMATION));
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
+/**
+ * @tc.name: DragManagerTest89
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest89, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData.value().summaryFormat = { { "image", { 0, 1 } } };
+    dragData.value().summaryTotalSize = 100;
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    DragSummaryInfo dragSummaryInfo;
+    ret = InteractionManager::GetInstance()->GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    ASSERT_EQ(dragSummaryInfo.totalSize, 100);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    InteractionManager::GetInstance()->StopDrag(dropResult);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
+}
+ 
+/**
+ * @tc.name: DragManagerTest90
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest90, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = InteractionManager::GetInstance()->GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_ERR);
+}
+ 
+/**
+ * @tc.name: DragManagerTest91
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest91, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_ERR);
+}
+ 
+/**
+ * @tc.name: DragManagerTest92
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest92, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragState_ = DragState::START;
+    DragData dragData;
+    dragData.summaryFormat = { { "image", { 0, 1 } } };
+    DRAG_DATA_MGR.Init(dragData);
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+ 
+/**
+ * @tc.name: DragManagerTest93
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest93, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragState_ = DragState::MOTION_DRAGGING;
+    DragData dragData;
+    dragData.summaryFormat = { { "image", {} } };
+    DRAG_DATA_MGR.Init(dragData);
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+ 
+/**
+ * @tc.name: DragManagerTest94
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest94, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    const std::string udType = "general.message";
+    constexpr int64_t recordSize = 20;
+    std::map<std::string, int64_t> summarys = { { udType, recordSize } };
+    dragData.detailedSummarys = summarys;
+    dragData.summaryFormat = { { "image", { 0, 1 } } };
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+}
+ 
+/**
+ * @tc.name: DragManagerTest95
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest95, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    const std::string udType = "general.message";
+    constexpr int64_t recordSize = 20;
+    std::map<std::string, int64_t> summarys = { { udType, recordSize } };
+    dragData.detailedSummarys = summarys;
+    dragData.summaryFormat = { { "image", {} } };
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

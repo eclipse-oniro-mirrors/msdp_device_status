@@ -25,21 +25,44 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-int32_t DragDataPacker::MarshallingSummarys2(const DragData &dragData, Parcel &data)
+int32_t DragDataPacker::MarshallingDetailedSummarys(const DragData &dragData, Parcel &data)
 {
-    if (SummaryPacker::Marshalling(dragData.summarys2, data) != RET_OK) {
-        FI_HILOGE("Marshalling summarys2 failed");
-    }
-
+    CHKEF(SummaryPacker::Marshalling(dragData.detailedSummarys, data), "Marshalling detailedSummarys failed");
     return RET_OK;
 }
 
-int32_t DragDataPacker::UnMarshallingSummarys2(Parcel &data, DragData &dragData)
+int32_t DragDataPacker::UnMarshallingDetailedSummarys(Parcel &data, DragData &dragData)
 {
-    if (SummaryPacker::UnMarshalling(data, dragData.summarys2) != RET_OK) {
-        FI_HILOGE("UnMarshalling summarys2 failed");
+    if (SummaryPacker::UnMarshalling(data, dragData.detailedSummarys) != RET_OK) {
+        FI_HILOGE("UnMarshalling detailedSummarys failed");
     }
+    return RET_OK;
+}
 
+int32_t DragDataPacker::MarshallingSummaryExpanding(const DragData &dragData, Parcel &data)
+{
+    CHKEF(SummaryFormat::Marshalling(dragData.summaryFormat, data), "Marshalling summaryFormat failed");
+    WRITEINT32(data, dragData.summaryVersion, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    WRITEINT64(data, dragData.summaryTotalSize, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    return RET_OK;
+}
+ 
+int32_t DragDataPacker::UnMarshallingSummaryExpanding(Parcel &data, DragData &dragData)
+{
+    do {
+        if (SummaryFormat::UnMarshalling(data, dragData.summaryFormat) != RET_OK) {
+            FI_HILOGE("UnMarshalling summaryFormat failed");
+            break;
+        }
+        if (!(data).ReadInt32(dragData.summaryVersion)) {
+            FI_HILOGE("ReadInt32 summaryVersion failed");
+            break;
+        }
+        if (!(data).ReadInt64(dragData.summaryTotalSize)) {
+            FI_HILOGE("ReadInt64 summaryTotalSize failed");
+            break;
+        }
+    } while (false);
     return RET_OK;
 }
 
@@ -264,6 +287,33 @@ int32_t ShadowOffsetPacker::UnMarshalling(Parcel &parcel, ShadowOffset&shadowOff
     READINT32(parcel, shadowOffset.offsetY, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READINT32(parcel, shadowOffset.width, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READINT32(parcel, shadowOffset.height, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    return RET_OK;
+}
+
+int32_t SummaryFormat::Marshalling(const std::map<std::string, std::vector<int32_t>> &val, Parcel &parcel)
+{
+    WRITEINT32(parcel, static_cast<int32_t>(val.size()), ERR_INVALID_VALUE);
+    for (auto const &[k, v] : val) {
+        WRITESTRING(parcel, k, ERR_INVALID_VALUE);
+        WRITEINT32VECTOR(parcel, v, ERR_INVALID_VALUE);
+    }
+    return RET_OK;
+}
+ 
+int32_t SummaryFormat::UnMarshalling(Parcel &parcel, std::map<std::string, std::vector<int32_t>> &val)
+{
+    size_t readAbleSize = parcel.GetReadableBytes();
+    int32_t size = 0;
+    READINT32(parcel, size, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    if (size < 0 || (static_cast<size_t>(size) > readAbleSize) || static_cast<size_t>(size) > val.max_size()) {
+        FI_HILOGE("Invalid size:%{public}d", size);
+        return RET_ERR;
+    }
+    for (int32_t i = 0; i < size; ++i) {
+        std::string key;
+        READSTRING(parcel, key, E_DEVICESTATUS_READ_PARCEL_ERROR);
+        READINT32VECTOR(parcel, val[key], E_DEVICESTATUS_READ_PARCEL_ERROR);
+    }
     return RET_OK;
 }
 } // namespace DeviceStatus

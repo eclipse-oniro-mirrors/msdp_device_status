@@ -406,6 +406,18 @@ public:
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller = false);
 
     /**
+     * @brief Obtains data summary info of the drag object.
+     * @param dragSummaryInfo Output parameter, indicates data summary info of the drag object.
+     * @return 0 - Success.
+     *         202 - Called by no-system application
+     *         401 - Parameter error.
+     *         801 - Capability not support
+     *         -1  - Other error.
+     * @since 20
+     */
+    int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo);
+
+    /**
      * @brief Sets the master switch for enhancing the drag capability.
      * @param enable Switch state.
      * @param isJsCaller Indicates whether to add checking.

@@ -74,7 +74,10 @@ struct DragData {
     bool hasCoordinateCorrected { false };
     std::map<std::string, int64_t> summarys;
     bool isDragDelay { false };
-    std::map<std::string, int64_t> summarys2;
+    std::map<std::string, int64_t> detailedSummarys;
+    std::map<std::string, std::vector<int32_t>> summaryFormat;
+    int32_t summaryVersion { 0 };
+    int64_t summaryTotalSize { -1 };
     std::string appCallee;
     std::string appCaller;
 
@@ -87,7 +90,8 @@ struct DragData {
                hasCanceledAnimation == other.hasCanceledAnimation &&
                hasCoordinateCorrected == other.hasCoordinateCorrected && summarys == other.summarys &&
                appCallee == other.appCallee && appCaller == other.appCaller && isDragDelay == other.isDragDelay &&
-               summarys2 == other.summarys2;
+               detailedSummarys == other.detailedSummarys && summaryFormat == other.summaryFormat &&
+               summaryTotalSize == other.summaryTotalSize && summaryVersion == other.summaryVersion;
     }
 
     bool operator != (const DragData &other) const
@@ -236,6 +240,14 @@ struct DragRadarPackageName {
     std::string appCaller;
     std::string peerNetId;
     int32_t dragNum { -1 };
+};
+
+struct DragSummaryInfo {
+    std::map<std::string, int64_t> summarys;
+    std::map<std::string, int64_t> detailedSummarys;
+    std::map<std::string, std::vector<int32_t>> summaryFormat;
+    int32_t version { 0 };
+    int64_t totalSize { -1 };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

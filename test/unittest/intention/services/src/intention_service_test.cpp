@@ -60,6 +60,7 @@ std::shared_ptr<IntentionService> g_intentionService { nullptr };
 std::shared_ptr<IntentionService> g_intentionServiceNullptr { nullptr };
 sptr<IRemoteDevStaCallback> stationaryCallback_;
 IContext *g_contextNullptr { nullptr };
+DragManager g_dragMgr;
 int32_t PERMISSION_EXCEPTION { 201 };
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr float DOUBLEPIMAX = 6.3F;
@@ -109,7 +110,7 @@ ITimerManager& ContextService::GetTimerManager()
 
 IDragManager& ContextService::GetDragManager()
 {
-    return dragMgr_;
+    return g_dragMgr;
 }
 
 ISocketSessionManager& ContextService::GetSocketSessionManager()
@@ -1031,6 +1032,25 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SendControlEvent001, TestSiz
     event.controlEvent_.eventType = OnScreen::EventType::SCROLL_TO_HOOK;
     ErrCode ret = g_intentionService->SendControlEvent(event);
     EXPECT_TRUE(ret >= RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest_GetDragSummaryInfo
+ * @tc.desc: Test GetDragSummaryInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragSummaryInfo, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragState_ = DragState::START;
+    DragSummaryInfo dragSummaryInfo;
+    SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
+    bool ret = g_intentionService->GetDragSummaryInfo(sequenceableDragSummaryInfo);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+    ErrCode errCode = g_intentionService->GetDragSummaryInfo(sequenceableDragSummaryInfo);
+    EXPECT_EQ(errCode, RET_ERR);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

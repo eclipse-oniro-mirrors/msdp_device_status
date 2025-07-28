@@ -76,6 +76,7 @@ public:
     void OnConnected();
     void OnDisconnected();
     bool IsDragStart();
+    int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo);
 
 private:
     mutable std::mutex mtx_;

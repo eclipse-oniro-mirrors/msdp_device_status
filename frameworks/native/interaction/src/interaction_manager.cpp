@@ -254,6 +254,11 @@ int32_t InteractionManager::GetDragSummary(std::map<std::string, int64_t> &summa
     return INTER_MGR_IMPL.GetDragSummary(summarys, isJsCaller);
 }
 
+int32_t InteractionManager::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
+{
+    return INTER_MGR_IMPL.GetDragSummaryInfo(dragSummaryInfo);
+}
+
 int32_t InteractionManager::SetDragSwitchState(bool enable, bool isJsCaller)
 {
     return INTER_MGR_IMPL.SetDragSwitchState(enable, isJsCaller);

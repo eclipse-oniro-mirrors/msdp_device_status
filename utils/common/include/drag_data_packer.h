@@ -34,8 +34,10 @@ public:
     static int32_t Marshalling(const DragData &dragData, Parcel &data, bool isCross = false);
     static int32_t UnMarshalling(Parcel &data, DragData &dragData, bool isCross = false);
     static int32_t CheckDragData(const DragData &dragData);
-    static int32_t MarshallingSummarys2(const DragData &dragData, Parcel &data);
-    static int32_t UnMarshallingSummarys2(Parcel &data, DragData &dragData);
+    static int32_t MarshallingDetailedSummarys(const DragData &dragData, Parcel &data);
+    static int32_t UnMarshallingDetailedSummarys(Parcel &data, DragData &dragData);
+    static int32_t MarshallingSummaryExpanding(const DragData &dragData, Parcel &data);
+    static int32_t UnMarshallingSummaryExpanding(Parcel &data, DragData &dragData);
 };
 
 class ShadowPacker {

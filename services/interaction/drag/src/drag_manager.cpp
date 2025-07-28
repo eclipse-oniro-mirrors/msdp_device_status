@@ -249,18 +249,30 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
         summarys += str;
     }
 
-    std::string summarys2;
-    for (const auto &[udKey, recordSize] : dragData.summarys2) {
+    std::string detailedSummarys;
+    for (const auto &[udKey, recordSize] : dragData.detailedSummarys) {
         std::string str = udKey + "-" + std::to_string(recordSize) + ";";
-        summarys2 += str;
+        detailedSummarys += str;
+    }
+    std::string summaryFormat;
+    for (const auto &[udKey, format] : dragData.summaryFormat) {
+        summaryFormat += udKey + ":";
+        if (!format.empty()) {
+            for (auto const &udsType : format) {
+                summaryFormat += "_" +  std::to_string(static_cast<int32_t>(udsType));
+            }
+            summaryFormat += ",";
+        }
     }
     FI_HILOGI("SourceType:%{public}d, pointerId:%{public}d, displayId:%{public}d,"
         " displayX:%{private}d, displayY:%{private}d, dragNum:%{public}d,"
         " hasCanceledAnimation:%{public}d, udKey:%{public}s, hasCoordinateCorrected:%{public}d, summarys:%{public}s,"
-        " packageName:%{public}s, isDragDelay:%{public}d, summarys2:%{public}s,", dragData.sourceType,
-        dragData.pointerId, dragData.displayId, dragData.displayX, dragData.displayY, dragData.dragNum,
-        dragData.hasCanceledAnimation, GetAnonyString(dragData.udKey).c_str(), dragData.hasCoordinateCorrected,
-        summarys.c_str(), packageName.c_str(), dragData.isDragDelay, summarys2.c_str());
+        " packageName:%{public}s, isDragDelay:%{public}d, detailedSummarys:%{public}s, summaryFormat:%{public}s,"
+        " summaryVersion:%{public}d, totalSize:%{public} " PRId64 "", dragData.sourceType, dragData.pointerId,
+        dragData.displayId, dragData.displayX, dragData.displayY, dragData.dragNum, dragData.hasCanceledAnimation,
+        GetAnonyString(dragData.udKey).c_str(), dragData.hasCoordinateCorrected, summarys.c_str(),
+        GetAnonyString(packageName).c_str(), dragData.isDragDelay, detailedSummarys.c_str(), summaryFormat.c_str(),
+        dragData.summaryVersion, dragData.summaryTotalSize);
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -1851,9 +1863,9 @@ int32_t DragManager::GetDragSummary(std::map<std::string, int64_t> &summarys)
 {
     FI_HILOGI("enter");
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    summarys = dragData.summarys2;
+    summarys = dragData.detailedSummarys;
     if (summarys.empty()) {
-        FI_HILOGD("Summarys2 is empty");
+        FI_HILOGD("detailedSummarys is empty");
         summarys = dragData.summarys;
     }
 
@@ -2084,6 +2096,32 @@ void DragManager::HandleCtrlKeyEvent(DragCursorStyle style, DragAction action)
         FI_HILOGE("Post async task failed");
     }
     FI_HILOGD("leave");
+}
+
+int32_t DragManager::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
+{
+    if (dragState_ != DragState::START && dragState_ != DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Drag instance not running");
+        return RET_ERR;
+    }
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    dragSummaryInfo.summarys = dragData.summarys;
+    dragSummaryInfo.detailedSummarys = dragData.detailedSummarys;
+    dragSummaryInfo.summaryFormat = dragData.summaryFormat;
+    dragSummaryInfo.version = dragData.summaryVersion;
+    dragSummaryInfo.totalSize = dragData.summaryTotalSize;
+    std::string summaryFormat;
+    for (const auto &[udKey, format] : dragSummaryInfo.summaryFormat) {
+        summaryFormat += udKey + ":";
+        if (!format.empty()) {
+            for (auto const &udsType : format) {
+                summaryFormat += "_" +  std::to_string(static_cast<int32_t>(udsType));
+            }
+            summaryFormat += ",";
+        }
+    }
+    FI_HILOGI("summaryFormat:%{public}s", summaryFormat.c_str());
+    return RET_OK;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
