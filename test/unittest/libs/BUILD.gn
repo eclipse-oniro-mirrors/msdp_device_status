@@ -147,6 +147,85 @@ ohos_unittest("device_status_mock_test") {
   }
 }
 
+ohos_unittest("device_status_algo_mgr_test") {
+  module_out_path = module_output_path
+
+  sources = [ "src/device_status_algo_mgr_test.cpp" ]
+
+  configs = [
+    "${device_status_utils_path}:devicestatus_utils_config",
+    ":devicestatus_private_config",
+  ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "../../../libs:devicestatus_algo",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
+    "cJSON:cjson_static",
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "window_manager:libdm",
+    "window_manager:libwm",
+  ]
+  defines = []
+  if (device_status_sensor_enable) {
+    external_deps += [ "sensor:sensor_interface_native" ]
+    defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+  }
+}
+
+ohos_unittest("device_status_algo_mock_test") {
+  module_out_path = module_output_path
+
+  sources = [ "src/device_status_algo_mock_test.cpp" ]
+
+  configs = [
+    "${device_status_utils_path}:devicestatus_utils_config",
+    ":devicestatus_private_config",
+  ]
+
+  cflags = [ "-Dprivate=public" ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "../../../libs:devicestatus_algo",
+    "../../../libs:devicestatus_mock",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "access_token:libaccesstoken_sdk",
+    "cJSON:cjson_static",
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+  defines = []
+  if (device_status_sensor_enable) {
+    external_deps += [ "sensor:sensor_interface_native" ]
+    defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = []
@@ -155,5 +234,7 @@ group("unittest") {
     ":device_status_algorithm_test",
     ":device_status_datahub_test",
     ":device_status_mock_test",
+    ":device_status_algo_mgr_test",
+    ":device_status_algo_mock_test",
   ]
 }
