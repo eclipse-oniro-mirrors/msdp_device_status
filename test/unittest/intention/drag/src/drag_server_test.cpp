@@ -18,6 +18,7 @@
 #include "ddm_adapter.h"
 #include "devicestatus_service.h"
 #include "drag_data_manager.h"
+#include "drag_data_packer.h"
 #include "drag_data_util.h"
 #include "drag_server.h"
 #include "interaction_manager.h"
@@ -1762,6 +1763,40 @@ HWTEST_F(DragServerTest, DragServerTest89, TestSize.Level1)
     auto ret = sequenceableDragSummaryInfo.Unmarshalling(parcel);
     ASSERT_EQ(ret, nullptr);
     ASSERT_NO_FATAL_FAILURE(sequenceableDragSummaryInfo.SetDragSummaryInfo(dragSummaryInfo));
+}
+
+/**
+ * @tc.name: DragServerTest90
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest90, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    parcel.SetMaxCapacity(0);
+    DragDataPacker dragDataPacker;
+    DragData dragData;
+    auto ret = dragDataPacker.UnMarshallingDetailedSummarys(parcel, dragData);
+    ASSERT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: DragServerTest91
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest91, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    parcel.SetMaxCapacity(0);
+    DragDataPacker dragDataPacker;
+    DragData dragData;
+    auto ret = dragDataPacker.UnMarshallingSummaryExpanding(parcel, dragData);
+    ASSERT_EQ(ret, RET_OK);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
