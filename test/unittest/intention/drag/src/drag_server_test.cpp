@@ -1745,6 +1745,24 @@ HWTEST_F(DragServerTest, DragServerTest88, TestSize.Level1)
     bool ret = sequenceableDragData.Marshalling(parcel);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: DragServerTest89
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest89, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragSummaryInfo dragSummaryInfo;
+    SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
+    Parcel parcel;
+    parcel.SetMaxCapacity(0);
+    auto ret = sequenceableDragSummaryInfo.Unmarshalling(parcel);
+    ASSERT_EQ(ret, nullptr);
+    ASSERT_NO_FATAL_FAILURE(sequenceableDragSummaryInfo.SetDragSummaryInfo(dragSummaryInfo));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
