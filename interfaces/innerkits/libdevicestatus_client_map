@@ -101,6 +101,7 @@
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::GetInstance()";
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::GetPageContent(OHOS::Msdp::DeviceStatus::OnScreen::ContentOption const&, OHOS::Msdp::DeviceStatus::OnScreen::PageContent&)";
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::SendControlEvent(OHOS::Msdp::DeviceStatus::OnScreen::ControlEvent const&)";
+            "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragSummaryInfo(OHOS::Msdp::DeviceStatus::DragSummaryInfo&)";
         };
     local:
         *;
