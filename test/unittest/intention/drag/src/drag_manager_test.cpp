@@ -1787,8 +1787,6 @@ HWTEST_F(DragManagerTest, DragManagerTest89, TestSize.Level0)
     std::promise<bool> promiseFlag;
     std::future<bool> futureFlag = promiseFlag.get_future();
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
         promiseFlag.set_value(true);
     };
     std::optional<DragData> dragData = CreateDragData(
