@@ -30,6 +30,7 @@
 #include "devicestatus_define.h"
 #include "i_ddm_adapter.h"
 #include "utility.h"
+#include "inner_socket.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DSoftbusAdapterImpl"
@@ -54,6 +55,7 @@ constexpr int32_t HEART_BEAT_SIZE_BYTE { 28 }; // Ensure size of heartBeat packe
 const std::string HEART_BEAT_THREAD_NAME { "OS_Cooperate_Heart_Beat" };
 const char* PARAM_KEY_OS_TYPE = "OS_TYPE";
 constexpr int32_t OS_TYPE_OH { 10 };
+constexpr int32_t OPT_TYPE_FLOW_INFO { 10005 };
 }
 
 std::mutex DSoftbusAdapterImpl::mutex_;
@@ -383,6 +385,7 @@ int32_t DSoftbusAdapterImpl::InitSocket(SocketInfo info, int32_t socketType, int
             FI_HILOGE("DSOFTBUS::Listen failed");
         }
     } else if (socketType == SOCKET_CLIENT) {
+        SetSocketOpt(socket);
         ret = ::Bind(socket, socketQos, sizeof(socketQos) / sizeof(socketQos[0]), &listener);
         if (ret != 0) {
             FI_HILOGE("DSOFTBUS::Bind failed");
@@ -394,6 +397,26 @@ int32_t DSoftbusAdapterImpl::InitSocket(SocketInfo info, int32_t socketType, int
         return ret;
     }
     return RET_OK;
+}
+
+void DSoftbusAdapterImpl::SetSocketOpt(int32_t socket)
+{
+    CALL_INFO_TRACE;
+    if (socket < 0) {
+        FI_HILOGE("DSOFTBUS::Socket failed");
+        return;
+    }
+    TransFlowInfo transInfo = {
+        .flowSize = 0,
+        .sessionType = SHORT_FOREGROUND_SESSION,
+        .flowQosType = LOW_LATENCY_10MS,
+    };
+    int32_t size = sizeof(TransFlowInfo);
+    int32_t ret = ::SetSocketOpt(socket, OPT_LEVEL_SOFTBUS, (OptType)OPT_TYPE_FLOW_INFO,
+        (void *)&transInfo, size);
+    if (ret != 0) {
+        FI_HILOGE("DSOFTBUS::SetSocketOpt failed");
+    }
 }
 
 int32_t DSoftbusAdapterImpl::SetupServer()
