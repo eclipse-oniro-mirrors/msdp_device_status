@@ -60,6 +60,12 @@ public:
     static int32_t Marshalling(const ShadowOffset &shadowOffset, Parcel &parcel);
     static int32_t UnMarshalling(Parcel &parcel, ShadowOffset &shadowOffset);
 };
+
+class SummaryFormat {
+public:
+    static int32_t Marshalling(const std::map<std::string, std::vector<int32_t>> &val, Parcel &parcel);
+    static int32_t UnMarshalling(Parcel &parcel, std::map<std::string, std::vector<int32_t>> &val);
+};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
