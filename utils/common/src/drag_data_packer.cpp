@@ -27,7 +27,10 @@ namespace Msdp {
 namespace DeviceStatus {
 int32_t DragDataPacker::MarshallingDetailedSummarys(const DragData &dragData, Parcel &data)
 {
-    CHKEF(SummaryPacker::Marshalling(dragData.detailedSummarys, data), "Marshalling detailedSummarys failed");
+    if (SummaryPacker::Marshalling(dragData.detailedSummarys, data) != RET_OK) {
+        FI_HILOGE("Marshalling detailedSummarys failed");
+        return RET_ERR;
+    }
     return RET_OK;
 }
 
@@ -41,12 +44,15 @@ int32_t DragDataPacker::UnMarshallingDetailedSummarys(Parcel &data, DragData &dr
 
 int32_t DragDataPacker::MarshallingSummaryExpanding(const DragData &dragData, Parcel &data)
 {
-    CHKEF(SummaryFormat::Marshalling(dragData.summaryFormat, data), "Marshalling summaryFormat failed");
+    if (SummaryFormat::Marshalling(dragData.summaryFormat, data) != RET_OK) {
+        FI_HILOGE("Marshalling summaryFormat failed");
+        return RET_ERR;
+    }
     WRITEINT32(data, dragData.summaryVersion, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
     WRITEINT64(data, dragData.summaryTotalSize, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
     return RET_OK;
 }
- 
+
 int32_t DragDataPacker::UnMarshallingSummaryExpanding(Parcel &data, DragData &dragData)
 {
     do {
@@ -299,7 +305,7 @@ int32_t SummaryFormat::Marshalling(const std::map<std::string, std::vector<int32
     }
     return RET_OK;
 }
- 
+
 int32_t SummaryFormat::UnMarshalling(Parcel &parcel, std::map<std::string, std::vector<int32_t>> &val)
 {
     size_t readAbleSize = parcel.GetReadableBytes();

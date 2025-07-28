@@ -231,6 +231,7 @@ public:
     ThrowState throwState_ { ThrowState::NOT_THROW };
 #endif // OHOS_ENABLE_PULLTHROW
 private:
+    std::string GetSummaryFormatStrings(const std::map<std::string, std::vector<int32_t>> &summaryFormat);
     void PrintDragData(const DragData &dragData, const std::string &packageName = "");
     int32_t HandleDragSuccess(bool hasCustomAnimation);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
