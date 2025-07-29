@@ -411,11 +411,9 @@ void DSoftbusAdapterImpl::SetSocketOpt(int32_t socket)
         .sessionType = SHORT_FOREGROUND_SESSION,
         .flowQosType = LOW_LATENCY_10MS,
     };
-    int32_t size = sizeof(TransFlowInfo);
-    int32_t ret = ::SetSocketOpt(socket, OPT_LEVEL_SOFTBUS, (OptType)OPT_TYPE_FLOW_INFO,
-        (void *)&transInfo, size);
-    if (ret != 0) {
-        FI_HILOGE("DSOFTBUS::SetSocketOpt failed");
+    if (int32_t ret = ::SetSocketOpt(socket, OPT_LEVEL_SOFTBUS, static_cast<OptType>(OPT_TYPE_FLOW_INFO),
+        static_cast<void *>(&transInfo), sizeof(TransFlowInfo)); ret != RET_OK) {
+        FI_HILOGE("DSOFTBUS::SetSocketOpt failed, ret:%{public}d", ret);
     }
 }
 

@@ -183,7 +183,6 @@ int32_t StationaryServer::GetDevicePostureDataSync(CallingContext &context, Devi
         return RET_ERR;
     }
     TransQuaternionsToZXYRot(cacheRotVecData_.value(), data);
-    FI_HILOGI("roll %{public}f, pitch %{public}f, yaw %{public}f", data.rollRad, data.pitchRad, data.yawRad);
     return RET_OK;
 #endif
 }

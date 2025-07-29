@@ -394,8 +394,6 @@ void DeviceStatusNapi::GetPostureDataCompleteCB(napi_env env, napi_status status
         FI_HILOGE("napi pack deferred err, result = %{public}d, status = %{public}d", completeAsyncContext->result,
             retStatus);
     }
-    FI_HILOGI("roll %{public}f, pitch %{public}f, yaw %{public}f", completeAsyncContext->postureData.rollRad,
-        completeAsyncContext->postureData.pitchRad, completeAsyncContext->postureData.yawRad);
     napi_delete_async_work(env, completeAsyncContext->work);
     delete completeAsyncContext;
     completeAsyncContext = nullptr;
