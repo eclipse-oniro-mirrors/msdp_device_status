@@ -34,7 +34,7 @@ enum OnScreenErrCode {
     RET_NOT_IN_WHITELIST,
     RET_WINDOW_ID_ERR,
     RET_PAGE_NOT_READY,
-    RET_ELEMENT_NOT_FOUND,
+    RET_TARGET_NOT_FOUND,
 };
 extern std::map<int32_t, std::string> ERROR_MESSAGES;
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage);
