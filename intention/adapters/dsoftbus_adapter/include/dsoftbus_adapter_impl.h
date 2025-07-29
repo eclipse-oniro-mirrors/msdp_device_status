@@ -116,6 +116,7 @@ private:
     void UpdateHeartBeatState(const std::string &networkId, bool state);
     bool GetHeartBeatState(const std::string &networkId);
     bool CheckDeviceOsType(const std::string &networkId);
+    void SetSocketOpt(int32_t socket);
 
     /*
     These four interfaces followed only read members, use shared_lock to avoid dead lock.
