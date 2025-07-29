@@ -34,7 +34,9 @@ std::map<int32_t, std::string> ERROR_MESSAGES = {
     { RET_SERVICE_EXCEPTION, "Service exception." },
     { RET_NOT_IN_WHITELIST, "application or page is not supported." },
     { RET_WINDOW_ID_ERR, "window id is invalid. Possible causes: 1. window id is not passes when"
-                        "screen is splited. 2. passed window id is not on screen or floating." }
+                        "screen is splited. 2. passed window id is not on screen or floating." },
+    { RET_PAGE_NOT_READY, "page is not ready, please wait a moment before invoking again." },
+    { RET_ELEMENT_NOT_FOUND, "element is not found." },
 };
 
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage)
