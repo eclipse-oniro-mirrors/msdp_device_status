@@ -57,6 +57,7 @@ public:
     bool GetTextEditorAreaFlag();
     void SetInitialPixelMapLocation(const std::pair<int32_t, int32_t> &location);
     void SetDragOriginDpi(float dragOriginDpi);
+    void GetSummaryInfo(DragSummaryInfo &dragSummaryInfo);
     float GetDragOriginDpi() const;
     std::pair<int32_t, int32_t> GetInitialPixelMapLocation();
 

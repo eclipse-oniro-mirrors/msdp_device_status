@@ -186,6 +186,7 @@ public:
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) override;
     void SimulatePullCancelEvent() override;
+    int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo) override;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation) override;
     void SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation) override;
@@ -230,6 +231,7 @@ public:
     ThrowState throwState_ { ThrowState::NOT_THROW };
 #endif // OHOS_ENABLE_PULLTHROW
 private:
+    std::string GetSummaryFormatStrings(const std::map<std::string, std::vector<int32_t>> &summaryFormat);
     void PrintDragData(const DragData &dragData, const std::string &packageName = "");
     int32_t HandleDragSuccess(bool hasCustomAnimation);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X

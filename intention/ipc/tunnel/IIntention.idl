@@ -21,6 +21,7 @@ sequenceable OHOS.Msdp.DeviceStatus.SequenceablePreviewAnimation;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceablePreviewStyle;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableRotateWindow;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceablePostureData;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragSummaryInfo;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableContentOption;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableControlEvent;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceablePageContent;
@@ -69,6 +70,7 @@ interface OHOS.Msdp.IIntention {
     void RotateDragWindowSync([in] SequenceableRotateWindow sequenceableRotateWindow);
     void SetDragWindowScreenId([in] unsigned long displayId, [in] unsigned long screenId);
     void GetDragSummary([out] OrderedMap<String, long> summarys, [in] boolean isJsCaller);
+    void GetDragSummaryInfo([out] SequenceableDragSummaryInfo sequenceableDragSummaryInfo);
     void SetDragSwitchState([in] boolean enable, [in] boolean isJsCaller);
     void SetAppDragSwitchState([in] boolean enable, [in] String pkgName, [in] boolean isJsCaller);
     void GetDragState([out] int dragState);

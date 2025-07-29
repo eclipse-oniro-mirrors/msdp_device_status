@@ -108,6 +108,7 @@ public:
     bool IsDragStart();
     int32_t GetPageContent(const OnScreen::ContentOption& option, OnScreen::PageContent& pageContent);
     int32_t SendControlEvent(const OnScreen::ControlEvent& event);
+    int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo);
 
 private:
     void InitClient();

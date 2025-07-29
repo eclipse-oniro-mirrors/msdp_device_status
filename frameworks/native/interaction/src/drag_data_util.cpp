@@ -33,14 +33,24 @@ int32_t DragDataUtil::UnMarshalling(Parcel &data, DragData &dragData, bool isCro
     return DragDataPacker::UnMarshalling(data, dragData, isCross);
 }
 
-int32_t DragDataUtil::MarshallingSummarys2(const DragData &dragData, Parcel &data)
+int32_t DragDataUtil::MarshallingDetailedSummarys(const DragData &dragData, Parcel &data)
 {
-    return DragDataPacker::MarshallingSummarys2(dragData, data);
+    return DragDataPacker::MarshallingDetailedSummarys(dragData, data);
 }
-
-int32_t DragDataUtil::UnMarshallingSummarys2(Parcel &data, DragData &dragData)
+ 
+int32_t DragDataUtil::UnMarshallingDetailedSummarys(Parcel &data, DragData &dragData)
 {
-    return DragDataPacker::UnMarshallingSummarys2(data, dragData);
+    return DragDataPacker::UnMarshallingDetailedSummarys(data, dragData);
+}
+ 
+int32_t DragDataUtil::MarshallingSummaryExpanding(const DragData &dragData, Parcel &data)
+{
+    return DragDataPacker::MarshallingSummaryExpanding(dragData, data);
+}
+ 
+int32_t DragDataUtil::UnMarshallingSummaryExpanding(Parcel &data, DragData &dragData)
+{
+    return DragDataPacker::UnMarshallingSummaryExpanding(data, dragData);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

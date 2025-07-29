@@ -323,6 +323,12 @@ ErrCode GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller
     return 0;
 }
 
+ErrCode GetDragSummaryInfo(SequenceableDragSummaryInfo &sequenceableDragSummaryInfo) override
+{
+    (void)sequenceableDragSummaryInfo;
+    return 0;
+}
+ 
 ErrCode SetDragSwitchState(bool enable, bool isJsCaller) override
 {
     (void)enable;

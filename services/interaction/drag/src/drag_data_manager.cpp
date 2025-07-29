@@ -161,6 +161,15 @@ void DragDataManager::SetDragOriginDpi(float dragOriginDpi)
     FI_HILOGD("dragOriginDpi_:%{public}f", dragOriginDpi_);
 }
 
+void DragDataManager::GetSummaryInfo(DragSummaryInfo &dragSummaryInfo)
+{
+    dragSummaryInfo.summarys = dragData_.summarys;
+    dragSummaryInfo.detailedSummarys = dragData_.detailedSummarys;
+    dragSummaryInfo.summaryFormat = dragData_.summaryFormat;
+    dragSummaryInfo.version = dragData_.summaryVersion;
+    dragSummaryInfo.totalSize = dragData_.summaryTotalSize;
+}
+
 float DragDataManager::GetDragOriginDpi() const
 {
     return dragOriginDpi_;

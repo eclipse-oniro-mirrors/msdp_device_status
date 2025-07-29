@@ -782,6 +782,25 @@ int32_t IntentionClient::BoomerangDecodeImage(const std::shared_ptr<PixelMap>& p
     return RET_OK;
 }
 
+int32_t IntentionClient::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("Can not connect to IntentionService");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    auto ret = devicestatusProxy_->GetDragSummaryInfo(sequenceableDragSummaryInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy::GetDragSummaryInfo fail, ret =  %{public}d", ret);
+        return ret;
+    }
+    sequenceableDragSummaryInfo.GetDragSummaryInfo(dragSummaryInfo);
+    return RET_OK;
+}
+
 int32_t IntentionClient::EnableUpperCenterMode(bool enable)
 {
     if (Connect() != RET_OK) {

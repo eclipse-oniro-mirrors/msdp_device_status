@@ -472,6 +472,17 @@ int32_t DragServer::IsDragStart(bool &isStart)
     isStart = env_->GetDragManager().IsDragStart();
     return RET_OK;
 }
+
+int32_t DragServer::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
+{
+    CHKPR(env_, RET_ERR);
+    int32_t ret = env_->GetDragManager().GetDragSummaryInfo(dragSummaryInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("IDragManager::GetDragSummaryInfo fail, error:%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

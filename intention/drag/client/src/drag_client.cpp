@@ -534,6 +534,16 @@ bool DragClient::IsDragStart()
     }
     return isStart;
 }
+
+int32_t DragClient::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
+{
+    CALL_DEBUG_ENTER;
+    int32_t ret = INTENTION_CLIENT->GetDragSummaryInfo(dragSummaryInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("GetDragSummaryInfo fail, ret = %{public}d", ret);
+    }
+    return ret;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
