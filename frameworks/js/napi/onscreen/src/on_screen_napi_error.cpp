@@ -35,7 +35,7 @@ std::map<int32_t, std::string> ERROR_MESSAGES = {
     { RET_NOT_IN_WHITELIST, "The application or page is not supported." },
     { RET_WINDOW_ID_ERR, "The window ID is invalid. Possible causes: 1. window id is not passes when"
                         "screen is splited. 2. passed window id is not on screen or floating." },
-    { RET_PAGE_NOT_READY, "The Page is not ready." },
+    { RET_PAGE_NOT_READY, "The page is not ready." },
     { RET_TARGET_NOT_FOUND, "The target is not found." },
 };
 
