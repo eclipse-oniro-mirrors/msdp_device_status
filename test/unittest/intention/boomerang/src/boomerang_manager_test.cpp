@@ -63,8 +63,8 @@ public:
 };
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest001 check GetInstance
+ * @tc.name: BoomerangManagerTest001
+ * @tc.desc: BoomerangManagerTest001 for check GetInstance
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -78,8 +78,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest002 SubscribeCallback subCallback is nullptr
+ * @tc.name: BoomerangManagerTest002
+ * @tc.desc: BoomerangManagerTest002 for SubscribeCallback subCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -97,8 +97,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest003 SubscribeCallback
+ * @tc.name: BoomerangManagerTest003
+ * @tc.desc: BoomerangManagerTest003 for SubscribeCallback
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -112,12 +112,12 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest003, TestSize.Level1)
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.SubscribeCallback(type, bundleName, subCallback);
     EXPECT_EQ(ret, RET_OK);
-    GTEST_LOG_(INFO) << "BoomerangManagerTest002 end";
+    GTEST_LOG_(INFO) << "BoomerangManagerTest003 end";
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest004 UnsubscribeCallback subCallback is nullptr
+ * @tc.name: BoomerangManagerTest004
+ * @tc.desc: BoomerangManagerTest004 for UnsubscribeCallback subCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -135,8 +135,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest005 UnsubscribeCallback
+ * @tc.name: BoomerangManagerTest005
+ * @tc.desc: BoomerangManagerTest005 for UnsubscribeCallback
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -154,8 +154,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest006 NotifyMetadataBindingEvent subCallback is nullptr
+ * @tc.name: BoomerangManagerTest006
+ * @tc.desc: BoomerangManagerTest006 for NotifyMetadataBindingEvent subCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -172,8 +172,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest007 NotifyMetadataBindingEvent
+ * @tc.name: BoomerangManagerTest007
+ * @tc.desc: BoomerangManagerTest007 for NotifyMetadataBindingEvent
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -190,8 +190,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest008 encodeCallback is nullptr
+ * @tc.name: BoomerangManagerTest008
+ * @tc.desc: BoomerangManagerTest008 for encodeCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -213,8 +213,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest009 pixelMap is nullptr
+ * @tc.name: BoomerangManagerTest009
+ * @tc.desc: BoomerangManagerTest009 for pixelMap is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -232,8 +232,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest010 pixelMap and encodeCallback is nullptr
+ * @tc.name: BoomerangManagerTest010
+ * @tc.desc: BoomerangManagerTest010 for pixelMap and encodeCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -251,8 +251,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest011 BoomerangEncodeImage
+ * @tc.name: BoomerangManagerTest011
+ * @tc.desc: BoomerangManagerTest011 for BoomerangEncodeImage
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -274,8 +274,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest012 SubmitMetadata
+ * @tc.name: BoomerangManagerTest012
+ * @tc.desc: BoomerangManagerTest012 for SubmitMetadata
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -290,8 +290,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest013 SubmitMetadata
+ * @tc.name: BoomerangManagerTest013
+ * @tc.desc: BoomerangManagerTest013 for SubmitMetadata
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -306,8 +306,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest014 decodeCallback is nullptr
+ * @tc.name: BoomerangManagerTest014
+ * @tc.desc: BoomerangManagerTest014 for decodeCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -328,8 +328,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest015 pixelMap is nullptr
+ * @tc.name: BoomerangManagerTest015
+ * @tc.desc: BoomerangManagerTest015 for pixelMap is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -346,8 +346,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest016 pixelMap and decodeCallback is nullptr
+ * @tc.name: BoomerangManagerTest016
+ * @tc.desc: BoomerangManagerTest016 for pixelMap and decodeCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -364,8 +364,8 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: BoomerangManagerTest
- * @tc.desc: BoomerangManagerTest011 BoomerangDecodeImage
+ * @tc.name: BoomerangManagerTest017
+ * @tc.desc: BoomerangManagerTest017 for BoomerangDecodeImage
  * @tc.type: FUNC
  * @tc.require:
  */
