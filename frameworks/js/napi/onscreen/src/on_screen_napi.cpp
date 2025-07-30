@@ -454,6 +454,7 @@ bool OnScreenNapi::ConstructParagraphObj(napi_env env, napi_value &retObj, const
         return false;
     }
     bool ret = SetInt64Property(env, retObj, value.hookId, "hookId");
+    ret = ret && SetInt32Property(env, retObj, value.chapterId, "chapterId");
     ret = ret && SetStringProperty(env, retObj, value.title, "title");
     ret = ret && SetStringProperty(env, retObj, value.content, "text");
     if (!ret) {

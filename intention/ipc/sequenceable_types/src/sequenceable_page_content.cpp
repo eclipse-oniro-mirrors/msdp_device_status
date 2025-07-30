@@ -45,6 +45,7 @@ bool SequenceablePageContent::Marshalling(Parcel &parcel) const
     WRITEINT32(parcel, static_cast<int32_t>(pageContent_.paragraphs.size()), false);
     for (size_t i = 0; i < pageContent_.paragraphs.size(); i++) {
         WRITEINT64(parcel, pageContent_.paragraphs[i].hookId, false);
+        WRITEINT32(parcel, pageContent_.paragraphs[i].chapterId, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].title, false);
         WRITESTRING(parcel, pageContent_.paragraphs[i].content, false);
     }
@@ -88,6 +89,7 @@ bool SequenceablePageContent::ReadFromParcel(Parcel &parcel)
     for (int32_t i = 0; i < paragraphSize; i++) {
         Paragraph para;
         READINT64(parcel, para.hookId, false);
+        READINT32(parcel, para.chapterId, false);
         READSTRING(parcel, para.title, false);
         READSTRING(parcel, para.content, false);
         pageContent_.paragraphs.push_back(para);
