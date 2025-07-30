@@ -60,6 +60,10 @@ constexpr uint32_t RED_SHIFT = 16;
 constexpr uint32_t GREEN_SHIFT = 8;
 constexpr int32_t VALIDATA_ON_PARAM = 1;
 constexpr int32_t VALIDATA_OFF_PARAM = 2;
+constexpr int32_t MAX_LENGTH = 128;
+constexpr int32_t MIN_IMAGE_PIXEL = 1080;
+constexpr char const *URL_CHARACTERES =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=|";
 }  // namespace
 std::map<int32_t, sptr<IRemoteBoomerangCallback>> BoomerangNapi::callbacks_;
 napi_ref BoomerangNapi::boomerangValueRef_ = nullptr;
@@ -398,32 +402,15 @@ napi_value BoomerangNapi::BoomerangEncodeImage(napi_env env, napi_callback_info 
     size_t strLength = 0;
     CHKRP(napi_get_value_string_utf8(env, argv[1], metadata, sizeof(metadata), &strLength), CREATE_STRING_UTF8);
 
+    if (!ValidateEncodeParam(metadata, pixelMap)) {
+        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "The parameters do not meet the requirements");
+        return nullptr;
+    }
     if (!InitNapiObject(env, info)) {
         THROWERR_CUSTOM(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
         return nullptr;
     }
-
-    auto asyncContext = new (std::nothrow) AsyncContext();
-    CHKPP(asyncContext);
-
-    asyncContext->env = env;
-    napi_value promise = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_status status = napi_create_promise(env, &deferred, &promise);
-    if (status != napi_ok) {
-        THROWERR_CUSTOM(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
-        return nullptr;
-    }
-
-    asyncContext->deferred = deferred;
-    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, deferred);
-    CHKPP(callback);
-    bool result = CreateEncodeImageExecution(env, asyncContext, metadata, pixelMap, callback);
-    if (!result) {
-        FI_HILOGE("encode image error by Create execution");
-        delete asyncContext;
-    }
-    return promise;
+    return HandleBoomerangEncodeImage(env, pixelMap, metadata);
 }
 
 napi_value BoomerangNapi::DecodeImage(napi_env env, napi_callback_info info)
@@ -512,6 +499,52 @@ napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
     }
     callbacks_.erase(type);
     return nullptr;
+}
+
+bool BoomerangNapi::ValidateEncodeParam(std::string metadata, std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    if (metadata.empty() || metadata.size() > MAX_LENGTH) {
+        FI_HILOGE("The metadata data size does not comply with the specifications");
+        return false;
+    }
+
+    size_t pos = metadata.find_first_not_of(URL_CHARACTERES);
+    if (pos != std::string::npos) {
+        FI_HILOGE("There are illegal characters present in metadata");
+        return false;
+    }
+
+    if (pixelMap->GetWidth() < MIN_IMAGE_PIXEL || pixelMap->GetHeight() < MIN_IMAGE_PIXEL) {
+        FI_HILOGE("The image size does not meet the requirements");
+        return false;
+    }
+    return true;
+}
+
+napi_value BoomerangNapi::HandleBoomerangEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap> pixelMap,
+    std::string metadata)
+{
+    napi_value promise = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_status status = napi_create_promise(env, &deferred, &promise);
+    if (status != napi_ok) {
+        THROWERR_CUSTOM(env, HANDLER_FAILD, "Internal handling failed. File creation failed.");
+        return nullptr;
+    }
+
+    sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, deferred);
+    CHKPP(callback);
+    auto asyncContext = new (std::nothrow) AsyncContext();
+    CHKPP(asyncContext);
+    asyncContext->env = env;
+    asyncContext->deferred = deferred;
+    bool result = CreateEncodeImageExecution(env, asyncContext, metadata, pixelMap, callback);
+    if (!result) {
+        FI_HILOGE("encode image error by Create execution");
+        delete asyncContext;
+        return nullptr;
+    }
+    return promise;
 }
 
 bool BoomerangNapi::InitNapiObject(napi_env env, napi_callback_info info)

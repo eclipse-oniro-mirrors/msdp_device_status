@@ -277,9 +277,7 @@ void BoomerangEvent::OnEvent(int32_t eventType, size_t argc, int32_t value, bool
     }
     FI_HILOGD("%{public}zu callbacks of eventType %{public}d are sent",
         typeHandler->second.size(), eventType);
-    for (auto handler : typeHandler->second) {
-        CheckRet(eventType, argc, value, handler);
-    }
+    CheckRet(eventType, argc, value, typeHandler->second.back());
 }
 
 void BoomerangEvent::ClearEventMap()
