@@ -101,8 +101,8 @@ private:
     static void DecodeImageExecuteCB(napi_env env, void* data);
     static void DecodeImageCompleteCB(napi_env env, napi_status status, void* data);
     static void ProcessErrorResult(napi_env env, int32_t result, int32_t code, AsyncContext* asyncContext);
-    static bool ValidateEncodeParam(const std::string& metadata, std::shared_ptr<Media::PixelMap> pixelMap);
-    static napi_value HandleBoomerangEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap> pixelMap,
+    static bool ValidateEncodeParam(const std::string& metadata, std::shared_ptr<Media::PixelMap>& pixelMap);
+    static napi_value HandleBoomerangEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap>& pixelMap,
         const std::string& metadata);
     static napi_ref boomerangValueRef_;
     napi_env env_ { nullptr };

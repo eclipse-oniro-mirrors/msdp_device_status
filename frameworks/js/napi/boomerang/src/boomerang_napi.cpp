@@ -501,7 +501,7 @@ napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-bool BoomerangNapi::ValidateEncodeParam(const std::string& metadata, std::shared_ptr<Media::PixelMap> pixelMap)
+bool BoomerangNapi::ValidateEncodeParam(const std::string& metadata, std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     if (metadata.empty() || metadata.size() > MAX_LENGTH) {
         FI_HILOGE("The metadata data size does not comply with the specifications");
@@ -521,7 +521,7 @@ bool BoomerangNapi::ValidateEncodeParam(const std::string& metadata, std::shared
     return true;
 }
 
-napi_value BoomerangNapi::HandleBoomerangEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap> pixelMap,
+napi_value BoomerangNapi::HandleBoomerangEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap>& pixelMap,
     const std::string& metadata)
 {
     napi_value promise = nullptr;
