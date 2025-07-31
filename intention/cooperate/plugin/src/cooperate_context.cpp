@@ -264,6 +264,15 @@ void Context::StartCooperateWithOptions(const StartWithOptionsEvent &event)
     };
 }
 
+void Context::UpdateCooperateOptions(const StartWithOptionsEvent &event)
+{
+    cooperateOptions_ = {
+        event.displayX,
+        event.displayY,
+        event.displayId
+    };
+}
+
 void Context::OnRemoteStart(const DSoftbusCooperateWithOptionsFinished &event)
 {
     remoteNetworkId_ = event.originNetworkId;
