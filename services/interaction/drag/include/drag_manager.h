@@ -168,6 +168,7 @@ public:
         const PreviewAnimation &animation) override;
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys) override;
+    int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo) override;
     void DragKeyEventCallback(std::shared_ptr<MMI::KeyEvent> keyEvent);
     int32_t EnterTextEditorArea(bool enable) override;
     int32_t GetDragAction(DragAction &dragAction) const override;
@@ -186,7 +187,6 @@ public:
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> pixelMap) override;
     void SimulatePullCancelEvent() override;
-    int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo) override;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation) override;
     void SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation) override;

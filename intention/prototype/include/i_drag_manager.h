@@ -68,6 +68,7 @@ public:
     virtual DragResult GetDragResult() const = 0;
     virtual std::string GetAppCallee() const = 0;
     virtual int32_t GetDragSummary(std::map<std::string, int64_t> &summarys) = 0;
+    virtual int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo) = 0;
     virtual int32_t GetDragAction(DragAction &dragAction) const = 0;
     virtual int32_t OnSetDragWindowVisible(
         bool visible, bool isForce = false, bool isZoomInAndAlphaChanged = false,
@@ -93,7 +94,6 @@ public:
     virtual void UnregisterCrossDrag() = 0;
     virtual void NotifyCrossDrag(bool isButtonDown) = 0;
     virtual bool IsCrossDragging() = 0;
-    virtual int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo) = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     virtual void SetPointerEventFilterTime(int64_t filterTime) = 0;
     virtual void MoveTo(int32_t x, int32_t y, bool isMultiSelectedAnimation = true) = 0;
