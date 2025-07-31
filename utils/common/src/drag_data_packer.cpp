@@ -38,6 +38,7 @@ int32_t DragDataPacker::UnMarshallingDetailedSummarys(Parcel &data, DragData &dr
 {
     if (SummaryPacker::UnMarshalling(data, dragData.detailedSummarys) != RET_OK) {
         FI_HILOGE("UnMarshalling detailedSummarys failed");
+        return RET_ERR;
     }
     return RET_OK;
 }
@@ -55,20 +56,18 @@ int32_t DragDataPacker::MarshallingSummaryExpanding(const DragData &dragData, Pa
 
 int32_t DragDataPacker::UnMarshallingSummaryExpanding(Parcel &data, DragData &dragData)
 {
-    do {
-        if (SummaryFormat::UnMarshalling(data, dragData.summaryFormat) != RET_OK) {
-            FI_HILOGE("UnMarshalling summaryFormat failed");
-            break;
-        }
-        if (!(data).ReadInt32(dragData.summaryVersion)) {
-            FI_HILOGE("ReadInt32 summaryVersion failed");
-            break;
-        }
-        if (!(data).ReadInt64(dragData.summaryTotalSize)) {
-            FI_HILOGE("ReadInt64 summaryTotalSize failed");
-            break;
-        }
-    } while (false);
+    if (SummaryFormat::UnMarshalling(data, dragData.summaryFormat) != RET_OK) {
+        FI_HILOGE("UnMarshalling summaryFormat failed");
+        return RET_ERR;
+    }
+    if (!(data).ReadInt32(dragData.summaryVersion)) {
+        FI_HILOGE("ReadInt32 summaryVersion failed");
+        return RET_ERR;
+    }
+    if (!(data).ReadInt64(dragData.summaryTotalSize)) {
+        FI_HILOGE("ReadInt64 summaryTotalSize failed");
+        return RET_ERR;
+    }
     return RET_OK;
 }
 

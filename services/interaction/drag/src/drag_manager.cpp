@@ -1877,6 +1877,18 @@ int32_t DragManager::GetDragSummary(std::map<std::string, int64_t> &summarys)
     return RET_OK;
 }
 
+int32_t DragManager::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
+{
+    if (dragState_ != DragState::START && dragState_ != DragState::MOTION_DRAGGING) {
+        FI_HILOGE("Drag instance not running");
+        return RET_ERR;
+    }
+    DRAG_DATA_MGR.GetSummaryInfo(dragSummaryInfo);
+    std::string summaryFormat = GetSummaryFormatStrings(dragSummaryInfo.summaryFormat);
+    FI_HILOGI("summaryFormat:%{public}s", summaryFormat.c_str());
+    return RET_OK;
+}
+
 int32_t DragManager::HandleDragSuccess(bool hasCustomAnimation)
 {
     FI_HILOGI("enter");
@@ -2097,18 +2109,6 @@ void DragManager::HandleCtrlKeyEvent(DragCursorStyle style, DragAction action)
         FI_HILOGE("Post async task failed");
     }
     FI_HILOGD("leave");
-}
-
-int32_t DragManager::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
-{
-    if (dragState_ != DragState::START && dragState_ != DragState::MOTION_DRAGGING) {
-        FI_HILOGE("Drag instance not running");
-        return RET_ERR;
-    }
-    DRAG_DATA_MGR.GetSummaryInfo(dragSummaryInfo);
-    std::string summaryFormat = GetSummaryFormatStrings(dragSummaryInfo.summaryFormat);
-    FI_HILOGI("summaryFormat:%{public}s", summaryFormat.c_str());
-    return RET_OK;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
