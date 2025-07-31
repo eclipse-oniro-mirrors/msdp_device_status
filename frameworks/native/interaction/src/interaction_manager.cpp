@@ -392,6 +392,11 @@ int32_t InteractionManager::GetDragSummary(std::map<std::string, int64_t> &summa
     return DRAG_MANAGER.GetDragSummary(summarys);
 }
 
+int32_t InteractionManager::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
+{
+    return DRAG_MANAGER.GetDragSummaryInfo(dragSummaryInfo);
+}
+
 int32_t InteractionManager::GetDragAction(DragAction &dragAction)
 {
     return DRAG_MANAGER.GetDragAction(dragAction);
