@@ -29,7 +29,7 @@
 
 namespace OHOS {
 namespace Msdp {
-namespace {
+namespace {++
 #ifdef MOTION_ENABLE
 auto &g_motionClient = MotionClient::GetInstance();
 constexpr int32_t PERMISSION_DENIED = 201;

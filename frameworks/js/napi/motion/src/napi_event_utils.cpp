@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Msdp {
-namespace {
+namespace {++
 const std::string SDK_NAME = "MultimodalAwarenessKit";
 constexpr int32_t TIMEOUT = 90;
 constexpr int32_t ROW = 30;
