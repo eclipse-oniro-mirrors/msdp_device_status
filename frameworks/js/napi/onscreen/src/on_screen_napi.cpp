@@ -454,6 +454,7 @@ bool OnScreenNapi::ConstructParagraphObj(napi_env env, napi_value &retObj, const
         return false;
     }
     bool ret = SetInt64Property(env, retObj, value.hookId, "hookId");
+    ret = ret && SetInt32Property(env, retObj, value.chapterId, "chapterId");
     ret = ret && SetStringProperty(env, retObj, value.title, "title");
     ret = ret && SetStringProperty(env, retObj, value.content, "text");
     if (!ret) {
@@ -495,6 +496,34 @@ bool OnScreenNapi::SetPropertyName(napi_env env, napi_value targetObj, const cha
     return true;
 }
 
+bool OnScreenNapi::ConstructPageContentObj(napi_env env, napi_value &pageContentObj,
+    const GetPageContentAsyncContext* ctx)
+{
+    if (napi_create_object(env, &pageContentObj) != napi_ok) {
+        FI_HILOGE("create pageContent failed");
+        return false;
+    }
+    bool ret = SetInt32Property(env, pageContentObj, ctx->pageContent.windowId, "windowId");
+    ret = ret && SetInt64Property(env, pageContentObj, ctx->pageContent.sessionId, "sessionId");
+    ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.bundleName, "bundleName");
+    if (ctx->option.contentUnderstand) {
+        ret = ret && SetInt32Property(env, pageContentObj, static_cast<int32_t>(ctx->pageContent.scenario), "scenario");
+        ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.title, "title");
+        ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.content, "content");
+    }
+    if (ctx->option.pageLink) {
+        ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.pageLink, "pageLink");
+    }
+    if (ctx->option.textOnly) {
+        ret = ret && SetParagraphVecProperty(env, pageContentObj, ctx->pageContent.paragraphs, "paragraphs");
+    }
+    if (!ret) {
+        FI_HILOGE("construct page content failed");
+        return false;
+    }
+    return true;
+}
+
 bool OnScreenNapi::GetPageContentExec(GetPageContentAsyncContext *asyncContext)
 {
     CHKPF(asyncContext);
@@ -530,27 +559,6 @@ void OnScreenNapi::GetPageContentCompCB(napi_env env, napi_status status, void *
     napi_value errVal = nullptr;
     napi_value pageContentObj = nullptr;
     napi_status retStatus = napi_ok;
-    if (napi_create_object(env, &pageContentObj) != napi_ok) {
-        FI_HILOGE("pageContent failed");
-        ThrowOnScreenErrByPromise(env, RET_SERVICE_EXCEPTION, "service exception", errVal);
-        napi_reject_deferred(env, ctx->deferred, errVal);
-        napi_delete_async_work(env, ctx->work);
-        delete ctx;
-        ctx = nullptr;
-        return;
-    }
-    bool ret = SetInt32Property(env, pageContentObj, ctx->pageContent.windowId, "windowId");
-    ret = ret && SetInt64Property(env, pageContentObj, ctx->pageContent.sessionId, "sessionId");
-    ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.bundleName, "bundleName");
-    ret = ret && SetInt32Property(env, pageContentObj, static_cast<int32_t>(ctx->pageContent.scenario), "scenario");
-    ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.title, "title");
-    ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.content, "content");
-    ret = ret && SetStringProperty(env, pageContentObj, ctx->pageContent.pageLink, "pageLink");
-    ret = ret && SetParagraphVecProperty(env, pageContentObj, ctx->pageContent.paragraphs, "paragraphs");
-    if (!ret) {
-        FI_HILOGE("construct page content failed");
-        ctx->result = RET_ERR;
-    }
     if (ctx->result != RET_OK) {
         auto retMsg = GetOnScreenErrMsg(ctx->result);
         if (retMsg != std::nullopt) {
@@ -560,6 +568,10 @@ void OnScreenNapi::GetPageContentCompCB(napi_env env, napi_status status, void *
         }
         retStatus = napi_reject_deferred(env, ctx->deferred, errVal);
     } else {
+        if (!ConstructPageContentObj(env, pageContentObj, ctx)) {
+            ThrowOnScreenErrByPromise(env, RET_SERVICE_EXCEPTION, "service exception", errVal);
+            retStatus = napi_reject_deferred(env, ctx->deferred, errVal);
+        }
         retStatus = napi_resolve_deferred(env, ctx->deferred, pageContentObj);
     }
     if (retStatus != napi_ok) {

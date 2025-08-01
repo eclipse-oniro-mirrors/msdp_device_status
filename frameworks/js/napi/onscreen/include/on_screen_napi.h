@@ -58,6 +58,8 @@ private:
     static bool GetParagraphSizeRange(napi_env env, const napi_value &value, const std::string &field,
         ParagraphSizeRange &range, bool isNecessary);
     static bool SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
+    static bool ConstructPageContentObj(napi_env env, napi_value &pageContentObj,
+        const GetPageContentAsyncContext* ctx);
     // GetPageContent
     static bool GetPageContentExec(GetPageContentAsyncContext *asyncContext);
     static void GetPageContentExecCB(napi_env env, void *data);

@@ -63,6 +63,7 @@ struct ContentOption {
 
 struct Paragraph {
     int64_t hookId = 0;
+    int32_t chapterId = 0;
     std::string title;
     std::string content;
 };
