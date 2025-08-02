@@ -29,13 +29,15 @@
 
 namespace OHOS {
 namespace Msdp {
-namespace {++
+namespace {
 #ifdef MOTION_ENABLE
 auto &g_motionClient = MotionClient::GetInstance();
 constexpr int32_t PERMISSION_DENIED = 201;
 static constexpr uint8_t ARG_1 = 1;
 constexpr int32_t HOLDING_HAND_FEATURE_DISABLE = 11;
 constexpr int32_t EVENT_NOT_SUPPORT = -200;
+constexpr int32_t EVENT_NO_INITIALIZE = -1;
+static int64_t processorId = -1;
 #endif
 static constexpr uint8_t ARG_0 = 0;
 static constexpr uint8_t ARG_2 = 2;
@@ -234,7 +236,9 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
 #ifdef MOTION_ENABLE
-    int64_t processorId = NapiEventUtils::AddProcessor();
+    if (processorId == EVENT_NO_INITIALIZE) {
+        processorId = NapiEventUtils::AddProcessor();
+    }
     int64_t beginTime = NapiEventUtils::GetSysClockTime();
     std::string transId = std::string("transId_") + std::to_string(std::rand());
 #endif
@@ -282,7 +286,9 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
     if (processorId == EVENT_NOT_SUPPORT) {
         FI_HILOGW("Non-applications do not support breakpoint");
     } else {
-        NapiEventUtils::WriteEndEvent(transId, "motion.on", beginTime, 0, 0);
+        std::string apiName = "motion." + typeStr + ".on";
+        FI_HILOGW("lichen ::%{public}s",apiName.c_str());
+        NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
     }
     napi_get_undefined(env, &result);
     return result;
@@ -296,7 +302,9 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
 #ifdef MOTION_ENABLE
-    int64_t processorId = NapiEventUtils::AddProcessor();
+    if (processorId == EVENT_NO_INITIALIZE) {
+        processorId = NapiEventUtils::AddProcessor();
+    }
     int64_t beginTime = NapiEventUtils::GetSysClockTime();
     std::string transId = std::string("transId_") + std::to_string(std::rand());
 #endif
@@ -355,7 +363,9 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
     if (processorId == EVENT_NOT_SUPPORT) {
         FI_HILOGW("Non-applications do not support breakpoint");
     } else {
-        NapiEventUtils::WriteEndEvent(transId, "motion.off", beginTime, 0, 0);
+        std::string apiName = "motion." + typeStr + ".off";
+        FI_HILOGW("lichen ::%{public}s",apiName.c_str());
+        NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
     }
     napi_get_undefined(env, &result);
     return result;
