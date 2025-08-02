@@ -287,7 +287,6 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
         FI_HILOGW("Non-applications do not support breakpoint");
     } else {
         std::string apiName = "motion." + typeStr + ".on";
-        FI_HILOGW("lichen ::%{public}s",apiName.c_str());
         NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
     }
     napi_get_undefined(env, &result);
@@ -364,7 +363,6 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
         FI_HILOGW("Non-applications do not support breakpoint");
     } else {
         std::string apiName = "motion." + typeStr + ".off";
-        FI_HILOGW("lichen ::%{public}s",apiName.c_str());
         NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
     }
     napi_get_undefined(env, &result);
