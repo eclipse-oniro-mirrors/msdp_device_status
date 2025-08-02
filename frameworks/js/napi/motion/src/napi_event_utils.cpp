@@ -20,42 +20,15 @@
 
 namespace OHOS {
 namespace Msdp {
-namespace {++
+namespace {
 const std::string SDK_NAME = "MultimodalAwarenessKit";
-constexpr int32_t TIMEOUT = 90;
-constexpr int32_t ROW = 30;
 }
 
 int64_t NapiEventUtils::AddProcessor()
 {
     HiviewDFX::HiAppEvent::ReportConfig config;
     config.name = "ha_app_event";
-    config.appId = "com_huawei_hmos_sdk_ocg";
-    config.routeInfo = "AUTO";
-    config.triggerCond.timeout = TIMEOUT;
-    config.triggerCond.row = ROW;
-    config.eventConfigs.clear();
-    {
-        OHOS::HiviewDFX::HiAppEvent::EventConfig event1;
-        event1.domain = "api_diagnostic";
-        event1.name = "api_exec_end";
-        event1.isRealTime = false;
-        config.eventConfigs.push_back(event1);
-    }
-    {
-        OHOS::HiviewDFX::HiAppEvent::EventConfig event2;
-        event2.domain = "api_diagnostic";
-        event2.name = "api_called_stat";
-        event2.isRealTime = true;
-        config.eventConfigs.push_back(event2);
-    }
-    {
-        OHOS::HiviewDFX::HiAppEvent::EventConfig event3;
-        event3.domain = "api_diagnostic";
-        event3.name = "api_called_stat_cnt";
-        event3.isRealTime = true;
-        config.eventConfigs.push_back(event3);
-    }
+    config.configName = "SDK_OCG";
     return HiviewDFX::HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
 }
 
