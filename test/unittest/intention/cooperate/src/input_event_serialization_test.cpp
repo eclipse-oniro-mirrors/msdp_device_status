@@ -34,6 +34,9 @@ namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
 NetPacket pkt(MessageId::INVALID);
+constexpr size_t MAX_N_PRESSED_BUTTONS { 10 };
+std::set<int32_t>::size_type nPressed = { 10 };
+constexpr int32_t buttonId { 10 };
 } // namespace
 
 class InputEventSerializationTest : public testing::Test {
