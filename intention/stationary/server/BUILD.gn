@@ -44,7 +44,6 @@ ohos_source_set("intention_stationary_server") {
   ]
 
   sources = [
-    "${device_status_root_path}/services/boomerang/src/accessibility_manager.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_dumper.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_hisysevent.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_manager.cpp",
@@ -66,10 +65,6 @@ ohos_source_set("intention_stationary_server") {
   ]
 
   external_deps = [
-    "ability_base:want",
-    "accessibility:accessibility_common",
-    "accessibility:accessibleability",
-    "accessibility:accessibilityclient",
     "access_token:libaccesstoken_sdk",
     "ace_engine:ui_session",
     "bundle_framework:appexecfwk_core",
@@ -80,7 +75,6 @@ ohos_source_set("intention_stationary_server") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
     "window_manager:libdm",
-    "window_manager:libwm",
   ]
 
   if (device_status_hisysevent_enable) {
@@ -101,6 +95,19 @@ ohos_source_set("intention_stationary_server") {
   if (device_status_sensor_enable) {
     defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
     external_deps += [ "sensor:sensor_interface_native" ]
+  }
+
+  if (device_status_boomerang_onestep) {
+    defines += [ "BOOMERANG_ONESTEP" ]
+    external_deps += [
+      "accessibility:accessibility_common",
+      "accessibility:accessibleability",
+      "accessibility:accessibilityclient",
+      "window_manager:libwm",
+    ]
+    sources += [
+      "${device_status_root_path}/services/boomerang/src/accessibility_manager.cpp",
+    ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"
