@@ -593,6 +593,136 @@ HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest010, TestSize.Lev
     env->devMgr_.OnAddDeviceObserver(weakObserver);
     ASSERT_NO_FATAL_FAILURE(env->devMgr_.OnRemoveDeviceObserver(weakObserver));
 }
+
+/**
+ * @tc.name: IntentionDeviceManagerTest011
+ * @tc.desc: Test the founction SetPencilAirMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest011, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    env->devMgr_.SetPencilAirMouse(true);
+    EXPECT_TRUE(env->devMgr_.hasPencilAirMouse_);
+}
+ 
+/**
+ * @tc.name: IntentionDeviceManagerTest012
+ * @tc.desc: Test the founction SetPencilAirMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest012, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    env->devMgr_.SetPencilAirMouse(false);
+    EXPECT_FALSE(env->devMgr_.hasPencilAirMouse_);
+}
+ 
+/**
+ * @tc.name: IntentionDeviceManagerTest013
+ * @tc.desc: Test the founction SetPencilAirMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest013, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    env->devMgr_.hasPencilAirMouse_ = true;
+    bool result = env->devMgr_.HasPencilAirMouse();
+    EXPECT_TRUE(result);
+}
+ 
+/**
+ * @tc.name: IntentionDeviceManagerTest014
+ * @tc.desc: Test the founction SetPencilAirMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest014, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    env->devMgr_.hasPencilAirMouse_ = false;
+    bool result = env->devMgr_.HasPencilAirMouse();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IntentionDeviceManagerTest015
+ * @tc.desc: Test the founction OnRemoveDeviceObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest015, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    int32_t deviceId = 0;
+    std::string name = {"hw_fingerprint_mouse"};
+    std::shared_ptr<IDevice> dev = std::make_shared<Device>(deviceId);
+    dev->SetId(deviceId);
+    dev->SetName(name);
+    dev->SetKeyboardType(IDevice::KeyboardType::KEYBOARD_TYPE_ALPHABETICKEYBOARD);
+    dev->AddCapability(Device::DEVICE_CAP_KEYBOARD);
+    env->devMgr_.devices_.insert_or_assign(dev->GetId(), dev);
+    int32_t deviceId1 = 1;
+    std::string name1 = {"DistributedInput"};
+    std::shared_ptr<IDevice> dev1 = std::make_shared<Device>(deviceId1);
+    dev1->SetId(deviceId1);
+    dev1->SetName(name1);
+    dev1->SetKeyboardType(IDevice::KeyboardType::KEYBOARD_TYPE_DIGITALKEYBOARD);
+    dev1->AddCapability(Device::DEVICE_CAP_POINTER);
+    env->devMgr_.devices_.insert_or_assign(dev1->GetId(), dev1);
+    int32_t deviceId2 = 2;
+    std::string name2 = {"hw_fingerprint_mouse"};
+    std::shared_ptr<IDevice> dev2 = std::make_shared<Device>(deviceId2);
+    dev2->SetId(deviceId2);
+    dev2->SetName(name2);
+    dev2->AddCapability(Device::DEVICE_CAP_KEYBOARD);
+    dev2->AddCapability(Device::DEVICE_CAP_POINTER);
+    env->devMgr_.devices_.insert_or_assign(dev2->GetId(), dev2);
+    ASSERT_NO_FATAL_FAILURE(env->devMgr_.GetKeyboard());
+}
+ 
+/**
+ * @tc.name: IntentionDeviceManagerTest016
+ * @tc.desc: Test the founction OnRemoveDeviceObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest016, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    int32_t deviceId = 0;
+    std::string name = {"hw_fingerprint_mouse"};
+    std::shared_ptr<IDevice> dev = std::make_shared<Device>(deviceId);
+    dev->SetId(deviceId);
+    dev->SetName(name);
+    dev->AddCapability(Device::DEVICE_CAP_KEYBOARD);
+    env->devMgr_.devices_.insert_or_assign(dev->GetId(), dev);
+    int32_t deviceId1 = 1;
+    std::string name1 = {"DistributedInput"};
+    std::shared_ptr<IDevice> dev1 = std::make_shared<Device>(deviceId1);
+    dev1->SetId(deviceId1);
+    dev1->SetName(name1);
+    dev1->AddCapability(Device::DEVICE_CAP_POINTER);
+    env->devMgr_.devices_.insert_or_assign(dev1->GetId(), dev1);
+    int32_t deviceId2 = 2;
+    std::string name2 = {"hw_fingerprint_mouse"};
+    std::shared_ptr<IDevice> dev2 = std::make_shared<Device>(deviceId2);
+    dev2->SetId(deviceId2);
+    dev2->SetName(name2);
+    dev2->AddCapability(Device::DEVICE_CAP_KEYBOARD);
+    dev2->AddCapability(Device::DEVICE_CAP_POINTER);
+    env->devMgr_.devices_.insert_or_assign(dev2->GetId(), dev2);
+    ASSERT_NO_FATAL_FAILURE(env->devMgr_.GetPointerDevice());
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

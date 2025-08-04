@@ -510,6 +510,27 @@ HWTEST_F(InputEventSerializationTest, TestUnmarshalling_01, TestSize.Level1)
     int32_t ret = Cooperate::InputEventSerialization::Unmarshalling(pkt, pointerEvent, interceptorTime);
     ASSERT_EQ(ret, RET_ERR);
 }
+
+/**
+ * @tc.name: TestSerializePressedButtons_02
+ * @tc.desc: Test SerializePressedButtons_02
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSerializationTest, TestSerializePressedButtons_02, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    NetPacket packet(MessageId::DSOFTBUS_INPUT_KEY_EVENT);
+    pointerEvent->pressedButtons_.insert(buttonId);
+    EXPECT_FALSE(pointerEvent->pressedButtons_.size() >= MAX_N_PRESSED_BUTTONS);
+    int32_t ret = Cooperate::InputEventSerialization::SerializePressedButtons(pointerEvent, pkt);
+    ASSERT_EQ(ret, RET_ERR);
+    packet << nPressed;
+    ret = Cooperate::InputEventSerialization::DeserializePressedButtons(pkt, pointerEvent);
+    ASSERT_EQ(ret, RET_ERR);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
