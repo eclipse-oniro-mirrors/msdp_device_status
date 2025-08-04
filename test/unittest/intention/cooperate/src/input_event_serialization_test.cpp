@@ -35,8 +35,8 @@ using namespace testing::ext;
 namespace {
 NetPacket pkt(MessageId::INVALID);
 constexpr size_t MAX_N_PRESSED_BUTTONS { 10 };
-std::set<int32_t>::size_type nPressed = { 10 };
-constexpr int32_t buttonId { 10 };
+std::set<int32_t>::size_type PRESSED_BUTTONS = { 10 };
+constexpr int32_t BUTTONSID { 10 };
 } // namespace
 
 class InputEventSerializationTest : public testing::Test {
@@ -526,11 +526,11 @@ HWTEST_F(InputEventSerializationTest, TestSerializePressedButtons_02, TestSize.L
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
     NetPacket packet(MessageId::DSOFTBUS_INPUT_KEY_EVENT);
-    pointerEvent->pressedButtons_.insert(buttonId);
+    pointerEvent->pressedButtons_.insert(BUTTONSID);
     EXPECT_FALSE(pointerEvent->pressedButtons_.size() >= MAX_N_PRESSED_BUTTONS);
     int32_t ret = Cooperate::InputEventSerialization::SerializePressedButtons(pointerEvent, pkt);
     ASSERT_EQ(ret, RET_ERR);
-    packet << nPressed;
+    packet << PRESSED_BUTTONS;
     ret = Cooperate::InputEventSerialization::DeserializePressedButtons(pkt, pointerEvent);
     ASSERT_EQ(ret, RET_ERR);
 }
