@@ -50,6 +50,7 @@ ohos_shared_library("devicestatus_util") {
     "src/util_napi.cpp",
     "src/util_napi_error.cpp",
     "src/utility.cpp",
+    "src/napi_event_utils.cpp"
   ]
 
   configs = [ ":devicestatus_util_private_config" ]
@@ -65,6 +66,7 @@ ohos_shared_library("devicestatus_util") {
     "image_framework:image_native",
     "init:libbegetutil",
     "napi:ace_napi",
+    "hiappevent:hiappevent_innerapi"
   ]
 
   innerapi_tags = [ "platformsdk" ]

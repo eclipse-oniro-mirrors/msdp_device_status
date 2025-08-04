@@ -24,6 +24,7 @@
 #include "devicestatus_define.h"
 #include "devicestatus_errors.h"
 #include "utility.h"
+#include "napi_event_utils.h"
 
 #undef LOG_TAG
 #define LOG_TAG "UtilityTest"
@@ -1238,6 +1239,21 @@ HWTEST_F(UtilityTest, UtityTest_RemoveTrailingChars2_005, TestSize.Level1)
     std::string path2 = "abc";
     Utility::RemoveTrailingChars(path1, path2);
     ASSERT_STREQ(path2.c_str(), "abc");
+}
+
+/**
+ * @tc.name: UtityTest_NapiEventUtils_001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UtilityTest, UtityTest_NapiEventUtils_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t ret = NapiEventUtils::AddProcessor();
+    EXPECT_EQ(ret, 0);
+    int64_t timeRet = NapiEventUtils::GetSysClockTime();
+    EXPECT_TRUE(timeRet > 0); 
 }
 } // namespace DeviceStatus
 } // namespace Msdp

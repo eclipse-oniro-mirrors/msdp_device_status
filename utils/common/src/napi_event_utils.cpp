@@ -20,6 +20,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 namespace {
 const std::string SDK_NAME = "MultimodalAwarenessKit";
 }
@@ -51,5 +52,6 @@ int64_t NapiEventUtils::GetSysClockTime()
     return std::chrono::time_point_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now()).time_since_epoch().count();
 }
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
