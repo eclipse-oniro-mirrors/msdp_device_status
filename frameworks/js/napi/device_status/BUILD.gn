@@ -16,6 +16,7 @@ import("../../../../device_status.gni")
 config("device_status_napi_private_config") {
   include_dirs = [
     "include",
+    "${device_status_frameworks_path}/js/utils/include",
     "${device_status_interfaces_path}/innerkits/include",
     "${device_status_service_path}/native/include",
   ]
@@ -51,6 +52,7 @@ ohos_shared_library("devicestatus_napi") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "hiappevent:hiappevent_innerapi"
   ]
 
   relative_install_dir = "module/multimodalawareness"

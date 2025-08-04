@@ -14,7 +14,10 @@
 import("../../../../device_status.gni")
 
 config("device_motion_private_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${device_status_frameworks_path}/js/utils/include"
+  ]
 }
 
 ohos_shared_library("motion_napi") {
@@ -51,7 +54,8 @@ ohos_shared_library("motion_napi") {
     defines += [ "MOTION_ENABLE" ]
     external_deps += [
       "motion:motion_client",
-      "motion:motion_interface_native"
+      "motion:motion_interface_native",
+      "hiappevent:hiappevent_innerapi"
     ]
   }
 

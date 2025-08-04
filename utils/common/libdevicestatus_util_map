@@ -74,9 +74,6 @@
             "OHOS::Msdp::DeviceStatus::PreviewAnimationPacker::Marshalling(OHOS::Msdp::DeviceStatus::PreviewAnimation const&, OHOS::Parcel&)";
             "OHOS::Msdp::DeviceStatus::PreviewAnimationPacker::UnMarshalling(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::PreviewAnimation&)";
             "OHOS::Msdp::DeviceStatus::AnimationCurve::CreateCurve(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<float, std::__h::allocator<float>> const&)";
-            "OHOS::Msdp::DeviceStatus::NapiEventUtils::AddProcessor()";
-            "OHOS::Msdp::DeviceStatus::NapiEventUtils::GetSysClockTime()";
-            "OHOS::Msdp::DeviceStatus::NapiEventUtils::WriteEndEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, long, int, int)";
         };
     local:
         *;
