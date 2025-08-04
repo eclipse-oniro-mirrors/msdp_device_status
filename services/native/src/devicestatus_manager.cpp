@@ -17,11 +17,14 @@
 
 #include "image_packer.h"
 #include "iservice_registry.h"
-#include "iservice_registry.h"
 #include "os_account_manager.h"
+#ifdef BOOMERANG_ONESTEP
 #include "wm_common.h"
+#endif
 
+#ifdef BOOMERANG_ONESTEP
 #include "accessibility_manager.h"
+#endif
 #include "devicestatus_define.h"
 #include "devicestatus_napi_manager.h"
 #include "fi_log.h"
@@ -33,11 +36,15 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
+#ifdef BOOMERANG_ONESTEP
     const std::string BUNDLE_NAME = "";
     const int32_t SYSTEM_BAR_HIDDEN = 0;
     const int32_t PAGE_SCROLL_ENVENT = 1;
+#endif
 }
+#ifdef BOOMERANG_ONESTEP
 std::shared_ptr<DeviceStatusManager> DeviceStatusManager::g_deviceManager_;
+#endif
 std::mutex DeviceStatusManager::g_mutex_;
 
 void DeviceStatusManager::DeviceStatusCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
@@ -75,6 +82,7 @@ void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wp
     }
 }
 
+#ifdef BOOMERANG_ONESTEP
 void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId,
     const std::string &deviceId)
 {
@@ -98,7 +106,9 @@ void DeviceStatusManager::AccessibilityStatusChange::OnAddSystemAbility(int32_t 
         }
     }
 }
+#endif
 
+#ifdef BOOMERANG_ONESTEP
 void DeviceStatusManager::AccessibilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId,
     const std::string &deviceId)
 {
@@ -109,7 +119,9 @@ void DeviceStatusManager::AccessibilityStatusChange::OnRemoveSystemAbility(int32
         g_deviceManager_->lastEnable_ = true;
     }
 }
+#endif
 
+#ifdef BOOMERANG_ONESTEP
 void DeviceStatusManager::SystemBarStyleChangedListener::OnWindowSystemBarPropertyChanged(WindowType type,
     const SystemBarProperty& systemBarProperty)
 {
@@ -127,6 +139,7 @@ void DeviceStatusManager::SystemBarStyleChangedListener::OnWindowSystemBarProper
         g_deviceManager_->HandlerPageScrollerEvent(SYSTEM_BAR_HIDDEN);
     }
 }
+#endif
 
 bool DeviceStatusManager::Init()
 {
@@ -150,6 +163,7 @@ bool DeviceStatusManager::Init()
     msdpImpl_ = std::make_shared<DeviceStatusMsdpClientImpl>();
     CHKPF(msdpImpl_);
 
+#ifdef BOOMERANG_ONESTEP
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     CHKPF(samgrProxy);
 
@@ -159,6 +173,7 @@ bool DeviceStatusManager::Init()
         FI_HILOGE("SubscribeSystemAbility service faild on window manager");
         return false;
     }
+#endif
     FI_HILOGD("Init success");
     return true;
 }
@@ -637,6 +652,7 @@ int32_t DeviceStatusManager::GetPackageName(AccessTokenID tokenId, std::string &
     return RET_OK;
 }
 
+#ifdef BOOMERANG_ONESTEP
 int32_t DeviceStatusManager::GetFocuseWindowId(int32_t &windowId, std::string &bundleName)
 {
     std::vector<sptr<Rosen::WindowVisibilityInfo>> winInfos;
@@ -659,7 +675,9 @@ int32_t DeviceStatusManager::GetFocuseWindowId(int32_t &windowId, std::string &b
     }
     return RET_ERR;
 }
+#endif
 
+#ifdef BOOMERANG_ONESTEP
 void DeviceStatusManager::SystemBarHiddedInit()
 {
     ACCESSIBILITY_MANAGER.AccessibilityConnect([this](int32_t value) {
@@ -687,7 +705,9 @@ void DeviceStatusManager::SystemBarHiddedInit()
         }
     });
 }
+#endif
 
+#ifdef BOOMERANG_ONESTEP
 void DeviceStatusManager::HandlerPageScrollerEvent(int32_t event)
 {
     int32_t windowId;
@@ -713,7 +733,9 @@ void DeviceStatusManager::HandlerPageScrollerEvent(int32_t event)
         OnSurfaceCapture(windowId, screenShot);
     }
 }
+#endif
 
+#ifdef BOOMERANG_ONESTEP
 void DeviceStatusManager::OnSurfaceCapture(int32_t windowId, std::shared_ptr<Media::PixelMap> &screenShot)
 {
     auto algo = std::make_shared<BoomerangAlgoImpl>();
@@ -735,6 +757,7 @@ void DeviceStatusManager::OnSurfaceCapture(int32_t windowId, std::shared_ptr<Med
         retryCount = 0;
     }
 }
+#endif
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

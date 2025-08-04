@@ -48,7 +48,9 @@ namespace {
         std::unique_ptr<Media::PixelMap> pixmap = Media::PixelMap::Create(initOptions);
         return pixmap;
     }
+#ifdef BOOMERANG_ONESTEP
     const int32_t SYSTEM_BAR_HIDDEN = 0;
+#endif
 } // namespace
 
 void DeviceStatusManagerTest::SetUpTestCase()
@@ -88,6 +90,7 @@ namespace {
  * @tc.desc: test devicestatus callback in proxy
  * @tc.type: FUNC
  */
+#ifdef BOOMERANG_ONESTEP
 HWTEST_F(DeviceStatusManagerTest, HandlerPageScrollerEventTest, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "HandlerPageScrollerEventTest start";
@@ -102,12 +105,14 @@ HWTEST_F(DeviceStatusManagerTest, HandlerPageScrollerEventTest, TestSize.Level0)
     EXPECT_TRUE(deviceStatusManager->lastEnable_);
     GTEST_LOG_(INFO) << "HandlerPageScrollerEventTest end";
 }
+#endif
 
 /**
  * @tc.name: OnSurfaceCaptureTest
  * @tc.desc: test devicestatus OnSurfaceCapture
  * @tc.type: FUNC
  */
+#ifdef BOOMERANG_ONESTEP
 HWTEST_F(DeviceStatusManagerTest, OnSurfaceCaptureTest, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "OnSurfaceCaptureTest start";
@@ -133,6 +138,7 @@ HWTEST_F(DeviceStatusManagerTest, OnSurfaceCaptureTest, TestSize.Level0)
     EXPECT_TRUE(deviceStatusManager->lastEnable_);
     GTEST_LOG_(INFO) << "OnSurfaceCaptureTest end";
 }
+#endif
 
 /**
  * @tc.name: BoomerangDecodeImageTest
@@ -161,6 +167,7 @@ HWTEST_F(DeviceStatusManagerTest, BoomerangDecodeImageTest, TestSize.Level0)
  * @tc.desc: test devicestatus GetFocuseWindowId
  * @tc.type: FUNC
  */
+#ifdef BOOMERANG_ONESTEP
 HWTEST_F(DeviceStatusManagerTest, GetFocuseWindowIdEventTest, TestSize.Level0) {
     GTEST_LOG_(INFO) << "GetFocuseWindowIdEventTest start";
     int32_t windowId = 0;
@@ -169,12 +176,14 @@ HWTEST_F(DeviceStatusManagerTest, GetFocuseWindowIdEventTest, TestSize.Level0) {
     EXPECT_EQ(result, RET_OK);
     GTEST_LOG_(INFO) << "GetFocuseWindowIdEventTest end";
 }
+#endif
 
 /**
  * @tc.name: OnAddSystemAbilityTest
  * @tc.desc: test devicestatus OnAddSystemAbilityTest Test
  * @tc.type: FUNC
  */
+#ifdef BOOMERANG_ONESTEP
 HWTEST_F(DeviceStatusManagerTest, OnAddSystemAbilityTest, TestSize.Level0) {
     GTEST_LOG_(INFO) << "OnAddSystemAbilityTest start";
     auto accessibilityStatusChange =
@@ -193,12 +202,14 @@ HWTEST_F(DeviceStatusManagerTest, OnAddSystemAbilityTest, TestSize.Level0) {
     EXPECT_NE(deviceStatusManager->g_deviceManager_, nullptr);
     GTEST_LOG_(INFO) << "OnAddSystemAbilityTest end";
 }
+#endif
 
 /**
  * @tc.name: OnRemoveSystemAbilityTest
  * @tc.desc: test devicestatus OnRemoveSystemAbilityTest
  * @tc.type: FUNC
  */
+#ifdef BOOMERANG_ONESTEP
 HWTEST_F(DeviceStatusManagerTest, OnRemoveSystemAbilityTest, TestSize.Level0) {
     GTEST_LOG_(INFO) << "OnRemoveSystemAbilityTest start";
     auto accessibilityStatusChange =
@@ -215,12 +226,14 @@ HWTEST_F(DeviceStatusManagerTest, OnRemoveSystemAbilityTest, TestSize.Level0) {
     EXPECT_TRUE(deviceStatusManager->lastEnable_);
     GTEST_LOG_(INFO) << "OnRemoveSystemAbilityTest end";
 }
+#endif
 
 /**
  * @tc.name: OnWindowSystemBarPropertyChangedTest
  * @tc.desc: test devicestatus OnWindowSystemBarPropertyChanged
  * @tc.type: FUNC
  */
+#ifdef BOOMERANG_ONESTEP
 HWTEST_F(DeviceStatusManagerTest, OnWindowSystemBarPropertyChangedTest, TestSize.Level0) {
     GTEST_LOG_(INFO) << "OnWindowSystemBarPropertyChangedTest start";
     auto listener = new (std::nothrow) DeviceStatusManager::SystemBarStyleChangedListener();
@@ -235,6 +248,7 @@ HWTEST_F(DeviceStatusManagerTest, OnWindowSystemBarPropertyChangedTest, TestSize
     EXPECT_EQ(deviceStatusManager->g_deviceManager_->lastEnable_, false);
     GTEST_LOG_(INFO) << "OnWindowSystemBarPropertyChangedTest end";
 }
+#endif
 
 /**
  * @tc.name: BoomerangEncodeImageTest
@@ -346,6 +360,7 @@ HWTEST_F(DeviceStatusManagerTest, BoomerangUnsubscribeTest, TestSize.Level0) {
  * @tc.desc: test devicestatus AccessibilityDisconnectTest
  * @tc.type: FUNC
  */
+#ifdef BOOMERANG_ONESTEP
 HWTEST_F(DeviceStatusManagerTest, AccessibilityDisconnectTest, TestSize.Level0) {
     GTEST_LOG_(INFO) << "AccessibilityDisconnectTest start";
     auto accessibleAbilityManager  = new (std::nothrow) AccessibilityManager();
@@ -364,6 +379,7 @@ HWTEST_F(DeviceStatusManagerTest, AccessibilityDisconnectTest, TestSize.Level0) 
     EXPECT_FALSE(ret);
     GTEST_LOG_(INFO) << "AccessibilityDisconnectTest end";
 }
+#endif
 } // namespace
 } // namespace DeviceStatus
 } // namespace Msdp

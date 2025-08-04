@@ -30,7 +30,9 @@
 #include "stationary_data.h"
 #include "system_ability_definition.h"
 #include "system_ability_status_change_stub.h"
+#ifdef BOOMERANG_ONESTEP
 #include "window_manager.h"
+#endif
 #include "bundle_mgr_proxy.h"
 
 namespace OHOS {
@@ -61,6 +63,7 @@ public:
         friend class DeviceStatusManager;
     };
 
+#ifdef BOOMERANG_ONESTEP
     class AccessibilityStatusChange : public SystemAbilityStatusChangeStub {
     public:
         AccessibilityStatusChange() = default;
@@ -71,13 +74,16 @@ public:
         friend class DeviceStatusManager;
         std::mutex mutex_;
     };
+#endif
 
+#ifdef BOOMERANG_ONESTEP
     class SystemBarStyleChangedListener : public IWindowSystemBarPropertyChangedListener {
     public:
         void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) override;
     private:
         std::mutex mutex_;
     };
+#endif
 
     bool Init();
     bool Enable(Type type);
@@ -99,7 +105,9 @@ public:
     int32_t LoadAlgorithm();
     int32_t UnloadAlgorithm();
     int32_t GetPackageName(AccessTokenID tokenId, std::string &packageName);
+#ifdef BOOMERANG_ONESTEP
     void OnSurfaceCapture(int32_t windowId, std::shared_ptr<Media::PixelMap> &screenShot);
+#endif
 
 private:
     struct classcomp {
@@ -115,11 +123,15 @@ private:
             return left->AsObject() < right->AsObject();
         }
     };
+#ifdef BOOMERANG_ONESTEP
     int32_t GetFocuseWindowId(int32_t &windowId, std::string &bundleName);
+#endif
     int32_t GetBundleNameByCallback(std::string &bundleName);
     int32_t GetBundleNameByApplink(std::string &bundleName, const std::string &metadata);
+#ifdef BOOMERANG_ONESTEP
     void HandlerPageScrollerEvent(int32_t event);
     void SystemBarHiddedInit();
+#endif
     static constexpr int32_t argSize_ { TYPE_MAX };
 
     std::mutex mutex_;
@@ -133,14 +145,17 @@ private:
     sptr<IRemoteBoomerangCallback> encodeCallback_ { nullptr };
     std::map<sptr<IRemoteBoomerangCallback>, std::string> bundleNameCache_;
     sptr<AppExecFwk::IBundleMgr> bundleManager_ { nullptr };
-    bool isAccessibilityInit_ = false;
     int32_t type_ { -1 };
     int32_t boomerangType_ { -1 };
     int32_t event_ { -1 };
     int32_t arrs_[argSize_] {};
+#ifdef BOOMERANG_ONESTEP
+    bool isAccessibilityInit_ = false;
     std::atomic<bool> lastEnable_ { true };
     int32_t retryCount { 0 };
     static std::shared_ptr<DeviceStatusManager> g_deviceManager_;
+#endif
+
     static std::mutex g_mutex_;
     std::recursive_mutex countMutex_;
 };

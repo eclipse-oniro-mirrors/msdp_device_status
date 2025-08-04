@@ -37,7 +37,8 @@
       "device_status_enable_universal_drag",
       "device_status_motion_enable",
       "device_status_enable_internal_drop_animation",
-      "device_status_pullthrow_enable"
+      "device_status_pullthrow_enable",
+      "device_status_boomerang_onestep"
     ],
     "adapted_system_type": [ "standard" ],
     "rom": "2048KB",

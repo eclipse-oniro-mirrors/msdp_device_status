@@ -83,7 +83,6 @@ ohos_shared_library("intention_service") {
     "input:libmmi-client",
     "samgr:samgr_proxy",
     "window_manager:libdm",
-    "window_manager:libwm",
   ]
 
   if (device_status_motion_enable) {
@@ -95,6 +94,14 @@ ohos_shared_library("intention_service") {
     defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
     external_deps += [ "sensor:sensor_interface_native" ]
   }
+
+  if (device_status_boomerang_onestep) {
+    defines += [ "BOOMERANG_ONESTEP" ]
+    external_deps += [
+      "window_manager:libwm",
+    ]
+  }
+
   subsystem_name = "${device_status_subsystem_name}"
   part_name = "${device_status_part_name}"
 }
