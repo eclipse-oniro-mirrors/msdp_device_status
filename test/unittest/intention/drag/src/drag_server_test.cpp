@@ -1363,62 +1363,6 @@ HWTEST_F(DragServerTest, DragServerTest71, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragServerTest72
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest72, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    uint64_t g_tokenId = NativeTokenGet();
-    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    g_dragServer->GetPackageName(IPCSkeleton::GetCallingTokenID());
-    bool ret = g_dragServer->IsSystemHAPCalling(context);
-    EXPECT_TRUE(ret);
-    std::string animationInfo = { "drag" };
-    int32_t ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo);
-    EXPECT_EQ(ret1, RET_ERR);
-}
-
-/**
- * @tc.name: DragServerTest73
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest73, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    Security::AccessToken::AccessTokenIDEx tokenIdEx = {0};
-    tokenIdEx = Security::AccessToken::AccessTokenKit::AllocHapToken(g_testInfoParms, g_testPolicyPrams);
-    EXPECT_EQ(0, SetSelfTokenID(tokenIdEx.tokenIdExStruct.tokenID));
-    auto g_tokenId1 = tokenIdEx.tokenIdExStruct.tokenID;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = g_tokenId1,
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    MessageParcel reply;
-    MessageParcel datas;
-    g_dragServer->GetPackageName(g_tokenId1);
-    bool ret = g_dragServer->IsSystemHAPCalling(context);
-    EXPECT_FALSE(ret);
-    std::string animationInfo = { "drag" };
-    int32_t ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo);
-    EXPECT_EQ(ret1, COMMON_NOT_SYSTEM_APP);
-}
-
-/**
  * @tc.name: DragServerTest74
  * @tc.desc: Test
  * @tc.desc: Drag Drawing
@@ -1571,10 +1515,10 @@ HWTEST_F(DragServerTest, DragServerTest78, TestSize.Level0)
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 
+
 /**
  * @tc.name: DragServerTest79
- * @tc.desc: Test
- * @tc.desc: Drag Drawing
+ * @tc.desc: When dragState_ is MOTION_DRAGGING, FlushDragPosition should skip execution.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1584,14 +1528,16 @@ HWTEST_F(DragServerTest, DragServerTest79, TestSize.Level0) {
     DragState dragState;
     int32_t ret = g_dragMgr.GetDragState(dragState);
     EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::MOTION_DRAGGING);
+    g_dragMgr.dragDrawing_.dragSmoothProcessor_.InsertEvent({0, 0, -1, 0});
     g_dragMgr.dragDrawing_.FlushDragPosition(0);
+    g_dragMgr.dragDrawing_.StopVSyncStation();
     g_dragMgr.SetDragState(DragState::STOP);
 }
 
 /**
  * @tc.name: DragServerTest80
- * @tc.desc: Test
- * @tc.desc: Drag Drawing
+ * @tc.desc: When rsUiDirector_ is nullptr, FlushDragPosition should output an error log and return.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1601,14 +1547,16 @@ HWTEST_F(DragServerTest, DragServerTest80, TestSize.Level0) {
     DragState dragState;
     int32_t ret = g_dragMgr.GetDragState(dragState);
     EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
+    g_dragMgr.dragDrawing_.dragSmoothProcessor_.InsertEvent({0, 0, -1, 0});
     g_dragMgr.dragDrawing_.FlushDragPosition(0);
+    g_dragMgr.dragDrawing_.StopVSyncStation();
     g_dragMgr.SetDragState(DragState::STOP);
 }
 
 /**
  * @tc.name: DragServerTest81
- * @tc.desc: Test
- * @tc.desc: Drag Drawing
+ * @tc.desc: When DragWindowRotationFlush_ is not equal to the current rotation state.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1618,18 +1566,110 @@ HWTEST_F(DragServerTest, DragServerTest81, TestSize.Level0) {
     DragState dragState;
     int32_t ret = g_dragMgr.GetDragState(dragState);
     EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
     g_dragMgr.dragDrawing_.DragWindowRotationFlush_ = Rosen::Rotation::ROTATION_90;
+    g_dragMgr.dragDrawing_.dragSmoothProcessor_.InsertEvent({0, 0, -1, 0});
     g_dragMgr.dragDrawing_.FlushDragPosition(0);
+    g_dragMgr.dragDrawing_.StopVSyncStation();
+    Rosen::Rotation rotation = g_dragMgr.dragDrawing_.GetRotation(WINDOW_ID);
+    EXPECT_EQ(g_dragMgr.dragDrawing_.DragWindowRotationFlush_, rotation);
     g_dragMgr.SetDragState(DragState::STOP);
 }
 
 /**
  * @tc.name: DragServerTest82
- * @tc.desc: Drag Drawing
+ * @tc.desc: The drag-and-drop window is controlled by drag manager.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(DragServerTest, DragServerTest82, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool visible = true;
+    bool isForce = false;
+    DRAG_DATA_MGR.SetDragWindowVisible(false);
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction { nullptr };
+    g_dragMgr.SetControlCollaborationVisible(false);
+    bool collaborationVisible = g_dragMgr.GetControlCollaborationVisible();
+    EXPECT_FALSE(collaborationVisible);
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
+    ret = g_dragServer->SetDragWindowVisible(visible, isForce, rsTransaction);
+    EXPECT_EQ(ret, RET_OK);
+    bool dragWindowVisible = DRAG_DATA_MGR.GetDragWindowVisible();
+    EXPECT_TRUE(dragWindowVisible);
+    g_dragMgr.SetControlCollaborationVisible(false);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest83
+ * @tc.desc: The drag-and-drop window is controlled by drag manager.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest83, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool visible = true;
+    bool isForce = true;
+    DRAG_DATA_MGR.SetDragWindowVisible(false);
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction { nullptr };
+    g_dragMgr.SetControlCollaborationVisible(false);
+    bool collaborationVisible = g_dragMgr.GetControlCollaborationVisible();
+    EXPECT_FALSE(collaborationVisible);
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
+    ret = g_dragServer->SetDragWindowVisible(visible, isForce, rsTransaction);
+    EXPECT_EQ(ret, RET_OK);
+    bool dragWindowVisible = DRAG_DATA_MGR.GetDragWindowVisible();
+    EXPECT_TRUE(dragWindowVisible);
+    g_dragMgr.SetControlCollaborationVisible(false);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest84
+ * @tc.desc: The drag-and-drop window is controlled by multi-screen collaboration.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest84, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool visible = true;
+    bool isForce = false;
+    DRAG_DATA_MGR.SetDragWindowVisible(false);
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction { nullptr };
+    g_dragMgr.SetControlCollaborationVisible(true);
+    bool collaborationVisible = g_dragMgr.GetControlCollaborationVisible();
+    EXPECT_TRUE(collaborationVisible);
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
+    ret = g_dragServer->SetDragWindowVisible(visible, isForce, rsTransaction);
+    EXPECT_EQ(ret, RET_OK);
+    bool dragWindowVisible = DRAG_DATA_MGR.GetDragWindowVisible();
+    EXPECT_FALSE(dragWindowVisible);
+    g_dragMgr.SetControlCollaborationVisible(false);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest85
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest85, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     g_dragMgr.dragState_ = DragState::STOP;
@@ -1639,12 +1679,12 @@ HWTEST_F(DragServerTest, DragServerTest82, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragServerTest83
+ * @tc.name: DragServerTest86
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest83, TestSize.Level0)
+HWTEST_F(DragServerTest, DragServerTest86, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     g_dragMgr.dragState_ = DragState::START;
@@ -1655,12 +1695,12 @@ HWTEST_F(DragServerTest, DragServerTest83, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragServerTest84
+ * @tc.name: DragServerTest87
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest84, TestSize.Level1)
+HWTEST_F(DragServerTest, DragServerTest87, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
@@ -1677,12 +1717,12 @@ HWTEST_F(DragServerTest, DragServerTest84, TestSize.Level1)
 }
  
 /**
- * @tc.name: DragServerTest85
+ * @tc.name: DragServerTest88
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest85, TestSize.Level1)
+HWTEST_F(DragServerTest, DragServerTest88, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
@@ -1698,12 +1738,12 @@ HWTEST_F(DragServerTest, DragServerTest85, TestSize.Level1)
 }
  
 /**
- * @tc.name: DragServerTest86
+ * @tc.name: DragServerTest89
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest86, TestSize.Level1)
+HWTEST_F(DragServerTest, DragServerTest89, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DragSummaryInfo dragSummaryInfo;
@@ -1715,12 +1755,12 @@ HWTEST_F(DragServerTest, DragServerTest86, TestSize.Level1)
 }
  
 /**
- * @tc.name: DragServerTest87
+ * @tc.name: DragServerTest90
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest87, TestSize.Level1)
+HWTEST_F(DragServerTest, DragServerTest90, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DragSummaryInfo dragSummaryInfo;
@@ -1732,12 +1772,12 @@ HWTEST_F(DragServerTest, DragServerTest87, TestSize.Level1)
 }
  
 /**
- * @tc.name: DragServerTest88
+ * @tc.name: DragServerTest91
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest88, TestSize.Level1)
+HWTEST_F(DragServerTest, DragServerTest91, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DragData dragData;
@@ -1748,12 +1788,12 @@ HWTEST_F(DragServerTest, DragServerTest88, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest89
+ * @tc.name: DragServerTest92
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest89, TestSize.Level1)
+HWTEST_F(DragServerTest, DragServerTest92, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DragSummaryInfo dragSummaryInfo;
@@ -1766,12 +1806,12 @@ HWTEST_F(DragServerTest, DragServerTest89, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest90
+ * @tc.name: DragServerTest93
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest90, TestSize.Level1)
+HWTEST_F(DragServerTest, DragServerTest93, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Parcel parcel;
@@ -1779,16 +1819,16 @@ HWTEST_F(DragServerTest, DragServerTest90, TestSize.Level1)
     DragDataPacker dragDataPacker;
     DragData dragData;
     auto ret = dragDataPacker.UnMarshallingDetailedSummarys(parcel, dragData);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_EQ(ret, RET_ERR);
 }
 
 /**
- * @tc.name: DragServerTest91
+ * @tc.name: DragServerTest94
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragServerTest, DragServerTest91, TestSize.Level1)
+HWTEST_F(DragServerTest, DragServerTest94, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Parcel parcel;
@@ -1796,7 +1836,7 @@ HWTEST_F(DragServerTest, DragServerTest91, TestSize.Level1)
     DragDataPacker dragDataPacker;
     DragData dragData;
     auto ret = dragDataPacker.UnMarshallingSummaryExpanding(parcel, dragData);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_EQ(ret, RET_ERR);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

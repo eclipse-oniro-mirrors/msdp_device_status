@@ -25,6 +25,7 @@
 
 #include "cooperate_events.h"
 #include "delegate_tasks.h"
+#include "device.h"
 #include "device_manager.h"
 #include "devicestatus_define.h"
 #include "devicestatus_delayed_sp_singleton.h"

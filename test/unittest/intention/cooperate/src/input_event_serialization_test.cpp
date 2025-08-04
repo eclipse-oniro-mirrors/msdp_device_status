@@ -34,6 +34,9 @@ namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
 NetPacket pkt(MessageId::INVALID);
+constexpr size_t MAX_N_PRESSED_BUTTONS { 10 };
+std::set<int32_t>::size_type PRESSED_BUTTONS = { 10 };
+constexpr int32_t BUTTONSID { 10 };
 } // namespace
 
 class InputEventSerializationTest : public testing::Test {
@@ -508,6 +511,27 @@ HWTEST_F(InputEventSerializationTest, TestUnmarshalling_01, TestSize.Level1)
     ASSERT_NE(pointerEvent, nullptr);
     int64_t interceptorTime = 1;
     int32_t ret = Cooperate::InputEventSerialization::Unmarshalling(pkt, pointerEvent, interceptorTime);
+    ASSERT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: TestSerializePressedButtons_02
+ * @tc.desc: Test SerializePressedButtons_02
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSerializationTest, TestSerializePressedButtons_02, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    NetPacket packet(MessageId::DSOFTBUS_INPUT_KEY_EVENT);
+    pointerEvent->pressedButtons_.insert(BUTTONSID);
+    EXPECT_FALSE(pointerEvent->pressedButtons_.size() >= MAX_N_PRESSED_BUTTONS);
+    int32_t ret = Cooperate::InputEventSerialization::SerializePressedButtons(pointerEvent, pkt);
+    ASSERT_EQ(ret, RET_ERR);
+    packet << PRESSED_BUTTONS;
+    ret = Cooperate::InputEventSerialization::DeserializePressedButtons(pkt, pointerEvent);
     ASSERT_EQ(ret, RET_ERR);
 }
 } // namespace DeviceStatus
