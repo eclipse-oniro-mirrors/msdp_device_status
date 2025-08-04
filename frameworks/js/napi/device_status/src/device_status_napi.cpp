@@ -40,6 +40,7 @@ constexpr int32_t STATUS_ENTER = 1;
 constexpr int32_t STATUS_EXIT = 0;
 constexpr int32_t EVENT_NOT_SUPPORT = -200;
 constexpr int32_t EVENT_NO_INITIALIZE = -1;
+static int64_t processorId = -1;
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES = { "string", "function" };
 const std::vector<std::string> EXPECTED_UNSUB_ONE_ARG_TYPES = { "string" };
 const std::vector<std::string> EXPECTED_UNSUB_TWO_ARG_TYPES = { "string", "function" };
