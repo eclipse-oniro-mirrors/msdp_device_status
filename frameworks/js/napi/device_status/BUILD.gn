@@ -44,6 +44,7 @@ ohos_shared_library("devicestatus_napi") {
   deps = [
     "${device_status_utils_path}:devicestatus_util",
     "../../../../interfaces/innerkits:devicestatus_client",
+    "${device_status_frameworks_path}/js/utils:device_status_napi_utils"
   ]
 
   external_deps = [

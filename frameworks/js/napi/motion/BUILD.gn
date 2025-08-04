@@ -39,7 +39,10 @@ ohos_shared_library("motion_napi") {
 
   configs = [ ":device_motion_private_config" ]
 
-  deps = [ "${device_status_utils_path}:devicestatus_util" ]
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_frameworks_path}/js/utils:device_status_napi_utils"
+  ]
 
   external_deps = [
     "c_utils:utils",
