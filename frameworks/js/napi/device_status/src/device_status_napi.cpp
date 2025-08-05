@@ -293,25 +293,27 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
     return result;
 }
 
-DeviceStatus::Type CheckGetSubType(napi_env env, size_t argc, napi_value *args, std::string &typeStr)
+DeviceStatus::Type DeviceStatusNapi::CheckGetSubType(napi_env env, size_t argc, napi_value *args,
+    std::string &typeStr)
 {
     if (!ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES)) {
         ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "validateargstype failed");
-        return DeviceStatus::Type::INVALID;
+        return DeviceStatus::Type::TYPE_INVALID;
     }
     if (!TransJsToStr(env, args[ARG_0], typeStr)) {
         ThrowDeviceStatusErr(env, SUBSCRIBE_EXCEPTION, "Trans to string failed");
-        return DeviceStatus::Type::INVALID;
+        return DeviceStatus::Type::TYPE_INVALID;
     }
     DeviceStatus::Type type = GetDeviceStatusType(typeStr);
     if (type == DeviceStatus::Type::TYPE_INVALID) {
         ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "Type is illegal");
-        return DeviceStatus::Type::INVALID;
+        return DeviceStatus::Type::TYPE_INVALID;
     }
     return type;
 }
 
-DeviceStatus::Type CheckGetUnsubType(napi_env env, size_t argc, napi_value *args, std::string &typeStr)
+DeviceStatus::Type DeviceStatusNapi::CheckGetUnsubType(napi_env env, size_t argc, napi_value *args,
+    std::string &typeStr)
 {
     auto expectedArgs = EXPECTED_UNSUB_TWO_ARG_TYPES;
     if (argc != ARG_2) {
@@ -319,16 +321,16 @@ DeviceStatus::Type CheckGetUnsubType(napi_env env, size_t argc, napi_value *args
     }
     if (!ValidateArgsType(env, args, argc, expectedArgs)) {
         ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "validateargstype failed");
-        return DeviceStatus::Type::INVALID;
+        return DeviceStatus::Type::TYPE_INVALID;
     }
     if (!TransJsToStr(env, args[ARG_0], typeStr)) {
         ThrowDeviceStatusErr(env, UNSUBSCRIBE_EXCEPTION, "Trans to string failed");
-        return DeviceStatus::Type::INVALID;
+        return DeviceStatus::Type::TYPE_INVALID;
     }
     DeviceStatus::Type type = GetDeviceStatusType(typeStr);
     if (type == DeviceStatus::Type::TYPE_INVALID) {
         ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "Type is illegal");
-        return DeviceStatus::Type::INVALID;
+        return DeviceStatus::Type::TYPE_INVALID;
     }
     return type;
 }
