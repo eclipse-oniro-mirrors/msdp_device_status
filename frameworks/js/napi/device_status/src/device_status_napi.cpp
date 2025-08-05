@@ -293,7 +293,7 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
     return result;
 }
 
-DeviceStatus::Type DeviceStatusNapi::CheckGetSubType(napi_env env, size_t argc, napi_value *args,
+DeviceStatus::Type DeviceStatusNapi::GetSubType(napi_env env, size_t argc, napi_value *args,
     std::string &typeStr)
 {
     if (!ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES)) {
@@ -312,7 +312,7 @@ DeviceStatus::Type DeviceStatusNapi::CheckGetSubType(napi_env env, size_t argc, 
     return type;
 }
 
-DeviceStatus::Type DeviceStatusNapi::CheckGetUnsubType(napi_env env, size_t argc, napi_value *args,
+DeviceStatus::Type DeviceStatusNapi::GetUnsubType(napi_env env, size_t argc, napi_value *args,
     std::string &typeStr)
 {
     auto expectedArgs = EXPECTED_UNSUB_TWO_ARG_TYPES;
