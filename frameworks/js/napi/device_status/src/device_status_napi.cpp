@@ -20,6 +20,7 @@
 #include "devicestatus_define.h"
 #include "device_status_napi_error.h"
 #include "fi_log.h"
+#include "napi_event_utils.h"
 #include "stationary_manager.h"
 #include "napi_constants.h"
 #include "util_napi.h"
@@ -37,6 +38,8 @@ static constexpr uint8_t ARG_2 = 2;
 constexpr size_t MAX_ARG_STRING_LEN = 512;
 constexpr int32_t STATUS_ENTER = 1;
 constexpr int32_t STATUS_EXIT = 0;
+constexpr int32_t EVENT_NOT_SUPPORT = -200;
+constexpr int32_t EVENT_NO_INITIALIZE = -1;
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES = { "string", "function" };
 const std::vector<std::string> EXPECTED_UNSUB_ONE_ARG_TYPES = { "string" };
 const std::vector<std::string> EXPECTED_UNSUB_TWO_ARG_TYPES = { "string", "function" };
@@ -45,6 +48,7 @@ const std::map<const std::string, DeviceStatus::Type> DEVICE_STATUS_TYPE_MAP = {
 };
 DeviceStatusNapi *g_deviceStatusObj = nullptr;
 std::mutex g_mutex;
+static int64_t g_processorId = -1;
 } // namespace
 
 void DeviceStatusCallback::OnDeviceStatusChanged(const DeviceStatus::Data &event)
@@ -196,7 +200,11 @@ bool DeviceStatusNapi::ConstructDeviceStatus(napi_env env, napi_value jsThis)
 
 napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_info info)
 {
-    FI_HILOGD("Enter");
+    if (g_processorId == EVENT_NO_INITIALIZE) {
+        g_processorId = DeviceStatus::NapiEventUtils::AddProcessor();
+    }
+    int64_t beginTime = DeviceStatus::NapiEventUtils::GetSysClockTime();
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
     size_t argc = ARG_2;
     napi_value args[ARG_2] = { nullptr };
     napi_value jsThis = nullptr;
@@ -206,21 +214,9 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
         ThrowDeviceStatusErr(env, SUBSCRIBE_EXCEPTION, "napi_get_cb_info failed");
         return nullptr;
     }
-
-    if (!ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES)) {
-        ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "validateargstype failed");
-        return nullptr;
-    }
-
     std::string typeStr;
-    if (!TransJsToStr(env, args[ARG_0], typeStr)) {
-        ThrowDeviceStatusErr(env, SUBSCRIBE_EXCEPTION, "Trans to string failed");
-        return nullptr;
-    }
-
-    DeviceStatus::Type type = GetDeviceStatusType(typeStr);
+    DeviceStatus::Type type = GetSubType(env, argc, args, typeStr);
     if (type == DeviceStatus::Type::TYPE_INVALID) {
-        ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "Type is illegal");
         return nullptr;
     }
     {
@@ -239,18 +235,27 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
             return nullptr;
         }
     }
+    if (g_processorId == EVENT_NOT_SUPPORT) {
+        FI_HILOGW("Non-applications do not support breakpoint");
+    } else {
+        std::string apiName = "deviceStatus." + typeStr + ".on";
+        DeviceStatus::NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
+    }
     napi_get_undefined(env, &result);
     return result;
 }
 
 napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback_info info)
 {
-    FI_HILOGD("Enter");
+    if (g_processorId == EVENT_NO_INITIALIZE) {
+        g_processorId = DeviceStatus::NapiEventUtils::AddProcessor();
+    }
+    int64_t beginTime = DeviceStatus::NapiEventUtils::GetSysClockTime();
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
     if (g_deviceStatusObj == nullptr) {
         ThrowDeviceStatusErr(env, UNSUBSCRIBE_EXCEPTION, "g_deviceStatusObj is nullptr");
         return nullptr;
     }
-
     size_t argc = ARG_2;
     napi_value args[ARG_2] = { nullptr };
     napi_value jsThis = nullptr;
@@ -260,25 +265,9 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
         ThrowDeviceStatusErr(env, UNSUBSCRIBE_EXCEPTION, "napi_get_cb_info is failed");
         return nullptr;
     }
-
-    auto expectedArgs = EXPECTED_UNSUB_TWO_ARG_TYPES;
-    if (argc != ARG_2) {
-        expectedArgs = EXPECTED_UNSUB_ONE_ARG_TYPES;
-    }
-    if (!ValidateArgsType(env, args, argc, expectedArgs)) {
-        ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "validateargstype failed");
-        return nullptr;
-    }
-
     std::string typeStr;
-    if (!TransJsToStr(env, args[ARG_0], typeStr)) {
-        ThrowDeviceStatusErr(env, UNSUBSCRIBE_EXCEPTION, "Trans to string failed");
-        return nullptr;
-    }
-
-    DeviceStatus::Type type = GetDeviceStatusType(typeStr);
+    DeviceStatus::Type type = GetUnsubType(env, argc, args, typeStr);
     if (type == DeviceStatus::Type::TYPE_INVALID) {
-        ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "Type is illegal");
         return nullptr;
     }
     {
@@ -294,8 +283,56 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
             return nullptr;
         }
     }
+    if (g_processorId == EVENT_NOT_SUPPORT) {
+        FI_HILOGW("Non-applications do not support breakpoint");
+    } else {
+        std::string apiName = "deviceStatus." + typeStr + ".off";
+        DeviceStatus::NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
+    }
     napi_get_undefined(env, &result);
     return result;
+}
+
+DeviceStatus::Type DeviceStatusNapi::GetSubType(napi_env env, size_t argc, napi_value *args,
+    std::string &typeStr)
+{
+    if (!ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES)) {
+        ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "validateargstype failed");
+        return DeviceStatus::Type::TYPE_INVALID;
+    }
+    if (!TransJsToStr(env, args[ARG_0], typeStr)) {
+        ThrowDeviceStatusErr(env, SUBSCRIBE_EXCEPTION, "Trans to string failed");
+        return DeviceStatus::Type::TYPE_INVALID;
+    }
+    DeviceStatus::Type type = GetDeviceStatusType(typeStr);
+    if (type == DeviceStatus::Type::TYPE_INVALID) {
+        ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "Type is illegal");
+        return DeviceStatus::Type::TYPE_INVALID;
+    }
+    return type;
+}
+
+DeviceStatus::Type DeviceStatusNapi::GetUnsubType(napi_env env, size_t argc, napi_value *args,
+    std::string &typeStr)
+{
+    auto expectedArgs = EXPECTED_UNSUB_TWO_ARG_TYPES;
+    if (argc != ARG_2) {
+        expectedArgs = EXPECTED_UNSUB_ONE_ARG_TYPES;
+    }
+    if (!ValidateArgsType(env, args, argc, expectedArgs)) {
+        ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "validateargstype failed");
+        return DeviceStatus::Type::TYPE_INVALID;
+    }
+    if (!TransJsToStr(env, args[ARG_0], typeStr)) {
+        ThrowDeviceStatusErr(env, UNSUBSCRIBE_EXCEPTION, "Trans to string failed");
+        return DeviceStatus::Type::TYPE_INVALID;
+    }
+    DeviceStatus::Type type = GetDeviceStatusType(typeStr);
+    if (type == DeviceStatus::Type::TYPE_INVALID) {
+        ThrowDeviceStatusErr(env, PARAM_EXCEPTION, "Type is illegal");
+        return DeviceStatus::Type::TYPE_INVALID;
+    }
+    return type;
 }
 
 napi_value DeviceStatusNapi::GetDeviceRotationRadian(napi_env env, napi_callback_info info)
