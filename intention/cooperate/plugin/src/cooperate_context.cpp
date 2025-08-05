@@ -159,11 +159,13 @@ void Context::StopEventHandler()
 void Context::EnableDDM()
 {
     boardObserver_ = std::make_shared<BoardObserver>(sender_);
+    CHKPV(env_);
     env_->GetDDM().AddBoardObserver(boardObserver_);
 }
 
 void Context::DisableDDM()
 {
+    CHKPV(env_);
     env_->GetDDM().RemoveBoardObserver(boardObserver_);
     boardObserver_.reset();
 }
@@ -171,12 +173,14 @@ void Context::DisableDDM()
 int32_t Context::EnableDevMgr()
 {
     hotplugObserver_ = std::make_shared<HotplugObserver>(sender_);
+    CHKPV(env_);
     env_->GetDeviceManager().AddDeviceObserver(hotplugObserver_);
     return RET_OK;
 }
 
 void Context::DisableDevMgr()
 {
+    CHKPV(env_);
     env_->GetDeviceManager().RemoveDeviceObserver(hotplugObserver_);
     hotplugObserver_.reset();
 }
@@ -278,6 +282,7 @@ void Context::OnRemoteStart(const DSoftbusCooperateWithOptionsFinished &event)
     remoteNetworkId_ = event.originNetworkId;
     flag_ = event.extra.flag;
     priv_ = event.extra.priv;
+    CHKPV(env_);
     env_->GetInput().SetPointerLocation(event.cooperateOptions.displayX, event.cooperateOptions.displayY,
         event.cooperateOptions.displayId);
     FI_HILOGI("Set pointer location: %{private}d, %{private}d, %{private}d",
@@ -516,6 +521,7 @@ void Context::SetCursorPosition(const Coordinate &cursorPos)
     CHKPV(display);
     auto cursor = GetCursorPos(cursorPos);
     cursorPos_ = cursor;
+    CHKPV(env_);
     env_->GetInput().SetPointerLocation(cursor.x, cursor.y);
     FI_HILOGI("Set cursor position (%{private}d,%{private}d)(%{private}d,%{private}d)(%{public}d,%{public}d)",
         cursorPos.x, cursorPos.y, cursor.x, cursor.y, display->GetWidth(), display->GetHeight());
@@ -530,6 +536,7 @@ void Context::StopCooperateSetCursorPosition(const Coordinate &cursorPos)
         displayId = 0;
     }
     auto cursor = GetCursorPos(cursorPos);
+    CHKPV(env_);
     env_->GetInput().SetPointerLocation(cursor.x, cursor.y, displayId);
     FI_HILOGI("Set cursor position (%{private}d,%{private}d)(%{private}d,%{private}d)(%{public}d,%{public}d),"
         "dafault display id is %{public}d", cursorPos.x, cursorPos.y, cursor.x, cursor.y,
@@ -542,6 +549,7 @@ Coordinate Context::GetCursorPos(const Coordinate &cursorPos)
     double yPercent = std::clamp<double>(cursorPos.y, 0.0, PERCENT) / PERCENT;
 
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHKPV(display);
     int32_t displayId = static_cast<int32_t>(display->GetId());
     if (displayId < 0) {
         displayId = 0;
@@ -558,6 +566,7 @@ Coordinate Context::GetCursorPos(const Coordinate &cursorPos)
 
 void Context::UpdateCursorPosition()
 {
+    CHKPV(env_);
     env_->GetInput().SetPointerLocation(cursorPos_.x, cursorPos_.y);
     FI_HILOGI("Update cursor position (%{private}d,%{private}d)", cursorPos_.x, cursorPos_.y);
 }
@@ -565,6 +574,7 @@ void Context::UpdateCursorPosition()
 int32_t Context::GetPointerSpeed()
 {
     int32_t speed { -1 };
+    CHKPV(env_);
     env_->GetInput().GetPointerSpeed(speed);
     FI_HILOGI("Current pointer speed:%{public}d", speed);
     return speed;
@@ -572,6 +582,7 @@ int32_t Context::GetPointerSpeed()
 
 void Context::SetPointerSpeed(int32_t speed)
 {
+    CHKPV(env_);
     env_->GetInput().SetPointerSpeed(speed);
     FI_HILOGI("Current pointer speed:%{public}d", speed);
 }
@@ -579,6 +590,7 @@ void Context::SetPointerSpeed(int32_t speed)
 int32_t Context::GetTouchPadSpeed()
 {
     int32_t speed { -1 };
+    CHKPV(env_);
     env_->GetInput().GetTouchPadSpeed(speed);
     FI_HILOGI("Current touchPad speed:%{public}d", speed);
     return speed;
@@ -590,6 +602,7 @@ void Context::SetTouchPadSpeed(int32_t speed)
         FI_HILOGE("speed is :%{public}d", speed);
         return;
     }
+    CHKPV(env_);
     env_->GetInput().SetTouchPadSpeed(speed);
     FI_HILOGI("Current touchPad speed:%{public}d", speed);
 }
