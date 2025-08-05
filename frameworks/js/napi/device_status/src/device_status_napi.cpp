@@ -215,7 +215,7 @@ napi_value DeviceStatusNapi::SubscribeDeviceStatus(napi_env env, napi_callback_i
         return nullptr;
     }
     std::string typeStr;
-    DeviceStatus::Type type = CheckGetSubType(env, argc, args, typeStr);
+    DeviceStatus::Type type = GetSubType(env, argc, args, typeStr);
     if (type == DeviceStatus::Type::TYPE_INVALID) {
         return nullptr;
     }
@@ -266,7 +266,7 @@ napi_value DeviceStatusNapi::UnsubscribeDeviceStatus(napi_env env, napi_callback
         return nullptr;
     }
     std::string typeStr;
-    DeviceStatus::Type type = CheckGetUnsubType(env, argc, args, typeStr);
+    DeviceStatus::Type type = GetUnsubType(env, argc, args, typeStr);
     if (type == DeviceStatus::Type::TYPE_INVALID) {
         return nullptr;
     }
