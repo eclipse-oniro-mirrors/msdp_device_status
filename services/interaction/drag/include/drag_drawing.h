@@ -268,6 +268,8 @@ public:
     void OnDragSuccess(IContext* context);
     void OnDragFail(IContext* context, bool isLongPressDrag);
     void StopVSyncStation();
+    void GetDisplay(int32_t displayId, sptr<Rosen::Display> &display);
+    void GetDisplayInfo(int32_t displayId, sptr<Rosen::DisplayInfo> &displayInfo);
 #else
     void OnDragSuccess();
     void OnDragFail();
@@ -450,6 +452,7 @@ private:
     std::atomic_bool needBreakStyleScaleAnimation_ { false };
     std::atomic_bool hasRunningAnimation_ { false };
     std::atomic_bool screenRotateState_ { false };
+    std::atomic_bool isPC_ { false };
     void* dragExtHandler_ { nullptr };
     bool needRotatePixelMapXY_ { false };
     uint64_t screenId_ { 0 };
