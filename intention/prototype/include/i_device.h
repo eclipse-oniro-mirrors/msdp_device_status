@@ -77,7 +77,6 @@ public:
     virtual std::string GetPhys() const = 0;
     virtual std::string GetUniq() const = 0;
     virtual KeyboardType GetKeyboardType() const = 0;
-    virtual bool IsTouchDevice() const = 0;
     virtual bool IsPointerDevice() const = 0;
     virtual bool IsKeyboard() const = 0;
     virtual bool IsRemote() const = 0;
