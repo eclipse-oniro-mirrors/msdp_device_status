@@ -173,7 +173,7 @@ void Context::DisableDDM()
 int32_t Context::EnableDevMgr()
 {
     hotplugObserver_ = std::make_shared<HotplugObserver>(sender_);
-    CHKPV(env_);
+    CHKPR(env_, RET_ERR);
     env_->GetDeviceManager().AddDeviceObserver(hotplugObserver_);
     return RET_OK;
 }
@@ -549,14 +549,13 @@ Coordinate Context::GetCursorPos(const Coordinate &cursorPos)
     double yPercent = std::clamp<double>(cursorPos.y, 0.0, PERCENT) / PERCENT;
 
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    CHKPV(display);
-    int32_t displayId = static_cast<int32_t>(display->GetId());
-    if (displayId < 0) {
-        displayId = 0;
-    }
     if (display == nullptr) {
         FI_HILOGE("No default display");
         return cursorPos_;
+    }
+    int32_t displayId = static_cast<int32_t>(display->GetId());
+    if (displayId < 0) {
+        displayId = 0;
     }
     return Coordinate {
         .x = static_cast<int32_t>(xPercent * display->GetWidth()),
@@ -574,7 +573,7 @@ void Context::UpdateCursorPosition()
 int32_t Context::GetPointerSpeed()
 {
     int32_t speed { -1 };
-    CHKPV(env_);
+    CHKPR(env_, RET_ERR);
     env_->GetInput().GetPointerSpeed(speed);
     FI_HILOGI("Current pointer speed:%{public}d", speed);
     return speed;
@@ -590,7 +589,7 @@ void Context::SetPointerSpeed(int32_t speed)
 int32_t Context::GetTouchPadSpeed()
 {
     int32_t speed { -1 };
-    CHKPV(env_);
+    CHKPR(env_, RET_ERR);
     env_->GetInput().GetTouchPadSpeed(speed);
     FI_HILOGI("Current touchPad speed:%{public}d", speed);
     return speed;

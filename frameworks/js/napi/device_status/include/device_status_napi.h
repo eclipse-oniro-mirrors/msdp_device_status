@@ -65,6 +65,8 @@ private:
     static bool SubscribeCallback(napi_env env, DeviceStatus::Type type);
     static bool UnsubscribeCallback(napi_env env, DeviceStatus::Type type);
     static DeviceStatus::Type GetDeviceStatusType(const std::string &type);
+    static DeviceStatus::Type GetSubType(napi_env env, size_t argc, napi_value *args, std::string &typeStr);
+    static DeviceStatus::Type GetUnsubType(napi_env env, size_t argc, napi_value *args, std::string &typeStr);
     static bool ConstructDeviceStatus(napi_env env, napi_value jsThis);
     static bool ValidateArgsType(napi_env env, napi_value *args, size_t argc,
         const std::vector<std::string> &expectedTypes);

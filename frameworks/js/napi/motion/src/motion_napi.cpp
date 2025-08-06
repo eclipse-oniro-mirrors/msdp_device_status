@@ -237,9 +237,9 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
     FI_HILOGD("Enter");
 #ifdef MOTION_ENABLE
     if (processorId == EVENT_NO_INITIALIZE) {
-        processorId = NapiEventUtils::AddProcessor();
+        processorId = DeviceStatus::NapiEventUtils::AddProcessor();
     }
-    int64_t beginTime = NapiEventUtils::GetSysClockTime();
+    int64_t beginTime = DeviceStatus::NapiEventUtils::GetSysClockTime();
     std::string transId = std::string("transId_") + std::to_string(std::rand());
 #endif
     size_t argc = ARG_2;
@@ -287,7 +287,7 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
         FI_HILOGW("Non-applications do not support breakpoint");
     } else {
         std::string apiName = "motion." + typeStr + ".on";
-        NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
+        DeviceStatus::NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
     }
     napi_get_undefined(env, &result);
     return result;
@@ -302,9 +302,9 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
     FI_HILOGD("Enter");
 #ifdef MOTION_ENABLE
     if (processorId == EVENT_NO_INITIALIZE) {
-        processorId = NapiEventUtils::AddProcessor();
+        processorId = DeviceStatus::NapiEventUtils::AddProcessor();
     }
-    int64_t beginTime = NapiEventUtils::GetSysClockTime();
+    int64_t beginTime = DeviceStatus::NapiEventUtils::GetSysClockTime();
     std::string transId = std::string("transId_") + std::to_string(std::rand());
 #endif
     if (g_motionObj == nullptr) {
@@ -363,7 +363,7 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
         FI_HILOGW("Non-applications do not support breakpoint");
     } else {
         std::string apiName = "motion." + typeStr + ".off";
-        NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
+        DeviceStatus::NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
     }
     napi_get_undefined(env, &result);
     return result;
