@@ -4566,7 +4566,6 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(g_drawingInfo.rootNode);
     CHKPV(g_drawingInfo.surfaceNode);
-    FI_HILOGI("Get screen id:%{public}llu", static_cast<unsigned long long>(screenId_));
     if (!isPC_) {
         sptr<Rosen::Display> display { nullptr };
         GetDisplay(displayId, display);
@@ -4574,6 +4573,7 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
         displayWidth_ = display->GetWidth();
         displayHeight_ = display->GetHeight();
         screenId_ = display->GetScreenId();
+        FI_HILOGI("Display get screen id:%{public}llu", static_cast<unsigned long long>(screenId_));
     } else {
         sptr<Rosen::DisplayInfo> displayInfo { nullptr};
         GetDisplayInfo(displayId, displayInfo);
@@ -4581,6 +4581,7 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
         displayWidth_ = displayInfo->GetWidth();
         displayHeight_ = displayInfo->GetHeight();
         screenId_ = displayInfo->GetScreenId();
+        FI_HILOGI("Display info get screen id:%{public}llu", static_cast<unsigned long long>(screenId_));
         uint64_t rsScreenId = screenId_;
         if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {
             FI_HILOGE("ConvertScreenIdToRsScreenId failed");
