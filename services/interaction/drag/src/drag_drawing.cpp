@@ -530,15 +530,17 @@ void DragDrawing::DoMultiSelectedAnimation(float positionX, float positionY, flo
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-void DragDrawing::GetDisplay(int32_t displayId, sptr<Rosen::Display> &display) {
+void DragDrawing::GetDisplay(int32_t displayId, sptr<Rosen::Display> &display)
+{
     display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
         FI_HILOGE("Get display failed, display:%{public}d", displayId);
         display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
     }
 }
- 
-void DragDrawing::GetDisplayInfo(int32_t displayId, sptr<Rosen::DisplayInfo> &displayInfo) {
+
+void DragDrawing::GetDisplayInfo(int32_t displayId, sptr<Rosen::DisplayInfo> &displayInfo)
+{
     displayInfo = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
         FI_HILOGE("Get display info failed, display:%{public}d", displayId);
