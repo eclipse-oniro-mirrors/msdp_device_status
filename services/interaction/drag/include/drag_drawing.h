@@ -357,8 +357,8 @@ private:
     void UpdateTspanNode(xmlNodePtr curNode);
     int32_t ParseAndAdjustSvgInfo(xmlNodePtr curNode);
     std::shared_ptr<Media::PixelMap> DecodeSvgToPixelMap(const std::string &filePath);
-    int32_t GetFilePath(std::string &filePath);
-    int32_t GetLTRFilePath(std::string &filePath);
+    void GetFilePath(std::string &filePath);
+    void GetLTRFilePath(std::string &filePath);
     bool NeedAdjustSvgInfo();
     void SetDecodeOptions(Media::DecodeOptions &decodeOpts);
     bool ParserFilterInfo(const std::string &filterInfoStr, FilterInfo &filterInfo);
@@ -412,7 +412,7 @@ private:
     void LongPressDragAlphaAnimation();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<AppExecFwk::EventHandler> GetSuperHubHandler();
-    int32_t GetRTLFilePath(std::string &filePath);
+    void GetRTLFilePath(std::string &filePath);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void RotateCanvasNode(float pivotX, float pivotY, float rotation);
     void FlushDragPosition(uint64_t nanoTimestamp);
