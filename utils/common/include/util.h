@@ -166,6 +166,10 @@ bool IsValidSvgFile(const std::string &filePath);
 bool IsNum(const std::string &str);
 void GetRotatePolicy(bool &isScreenRotation, std::vector<std::string> &foldRotatePolicys);
 bool IsSecondaryDevice();
+bool IsValidJsonPath(const std::string &filePath);
+bool IsFileExists(const std::string &fileName);
+std::string ReadFile(const std::string &filePath);
+std::string ReadJsonFile(const std::string &filePath);
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

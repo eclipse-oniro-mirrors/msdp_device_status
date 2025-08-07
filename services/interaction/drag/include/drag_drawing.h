@@ -368,8 +368,8 @@ private:
     void SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_ptr<Rosen::RSCanvasNode> filterNode);
     void SetComponentDragBlur(const FilterInfo &filterInfo, const ExtraInfo &extraInfo,
         std::shared_ptr<Rosen::RSCanvasNode> filterNode);
-    void ParserDragShadowInfo(cJSON* filterInfoParser, FilterInfo &filterInfo);
-    void ParserTextDragShadowInfo(cJSON* filterInfoParser, FilterInfo &filterInfo);
+    void ParserDragShadowInfo(const cJSON* filterInfoParser, FilterInfo &filterInfo);
+    void ParserTextDragShadowInfo(const cJSON* filterInfoParser, FilterInfo &filterInfo);
     void PrintDragShadowInfo();
     void ProcessFilter();
     bool ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &extraInfo);

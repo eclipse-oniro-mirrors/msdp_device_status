@@ -53,7 +53,7 @@ public:
 private:
     sptr<DisplayChangeEventListener> displayChangeEventListener_ { nullptr };
     IContext *context_ { nullptr };
-    std::atomic_bool isHPR_ { false };
+    std::atomic_bool isFoldPC_ { false };
 };
 
 class AppStateObserverStatusChange : public SystemAbilityStatusChangeStub {

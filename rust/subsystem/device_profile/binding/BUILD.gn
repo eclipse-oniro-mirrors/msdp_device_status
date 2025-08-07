@@ -15,13 +15,19 @@ import("//base/msdp/device_status/device_status.gni")
 import("//build/ohos.gni")
 
 config("fusion_device_profile_binding_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/utils/json_parser/include"
+  ]
 
   defines = device_status_default_defines
 }
 
 config("fusion_device_profile_binding_public_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/utils/json_parser/include"
+  ]
 }
 
 ohos_shared_library("fusion_device_profile_binding") {
@@ -31,7 +37,10 @@ ohos_shared_library("fusion_device_profile_binding") {
     "src/fusion_security.cpp",
   ]
 
-  deps = [ "${device_status_root_path}/utils/common:devicestatus_util" ]
+  deps = [
+    "${device_status_root_path}/utils/common:devicestatus_util",
+    "${device_status_root_path}/utils/json_parser:json_parser"
+  ]
 
   configs = [ ":fusion_device_profile_binding_config" ]
 
