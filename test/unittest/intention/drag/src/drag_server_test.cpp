@@ -21,6 +21,7 @@
 #include "drag_data_packer.h"
 #include "drag_data_util.h"
 #include "drag_server.h"
+#include "event_hub.h"
 #include "interaction_manager.h"
 #include "ipc_skeleton.h"
 #include "singleton.h"
@@ -1838,6 +1839,31 @@ HWTEST_F(DragServerTest, DragServerTest94, TestSize.Level1)
     auto ret = dragDataPacker.UnMarshallingSummaryExpanding(parcel, dragData);
     ASSERT_EQ(ret, RET_ERR);
 }
+
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+/**
+ * @tc.name: DragServerTest95
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest95, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<EventHub> eventHub = EventHub::GetEventHub(g_context);
+    ASSERT_NE(eventHub, nullptr);
+    g_dragMgr.dragState_ = DragState::START;
+    OHOS::AAFwk::Want want;
+    EventFwk::CommonEventData event;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
+    event.SetWant(want);
+    ASSERT_NO_FATAL_FAILURE(eventHub->OnReceiveEvent(event));
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_LOCALE_CHANGED);
+    event.SetWant(want);
+    ASSERT_NO_FATAL_FAILURE(eventHub->OnReceiveEvent(event));
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

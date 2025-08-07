@@ -377,6 +377,139 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
     DRAG_DATA_MGR.SetEventId(eventId);
     EXPECT_TRUE(DRAG_DATA_MGR.GetEventId() == eventId);
 }
+
+/**
+ * @tc.name: DragDataManagerTest014
+ * @tc.desc: normal test DragDrawing RemoveModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest014, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    int32_t width = 30;
+    int32_t height = 50;
+    dragDrawing.InitCanvas(width, height);
+    if (dragDrawing.drawStyleScaleModifier_ == nullptr) {
+        dragDrawing.drawStyleScaleModifier_ = std::make_shared<DrawStyleScaleModifier>();
+    }
+ 
+    if (dragDrawing.drawStyleChangeModifier_ == nullptr) {
+        dragDrawing.drawStyleChangeModifier_ = std::make_shared<DrawStyleChangeModifier>();
+    }
+    EXPECT_NE(dragDrawing.drawStyleChangeModifier_, nullptr);
+    EXPECT_NE(dragDrawing.drawStyleScaleModifier_, nullptr);
+    dragDrawing.RemoveModifier();
+ 
+    EXPECT_EQ(dragDrawing.drawStyleChangeModifier_, nullptr);
+    EXPECT_EQ(dragDrawing.drawStyleScaleModifier_, nullptr);
+    dragDrawing.RemoveModifier();
+    dragDrawing.DestroyDragWindow();
+    dragDrawing.UpdateDrawingState();
+}
+
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+/**
+ * @tc.name: DragDataManagerTest015
+ * @tc.desc: normal test DragDrawing GetFilePath
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest015, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    bool isRTL = true;
+    std::string filePath;
+    dragDrawing.SetDragStyleRTL(isRTL);
+    EXPECT_TRUE(dragDrawing.isRTL_);
+    dragDrawing.GetFilePath(filePath);
+    bool isRTL1 = false;
+    dragDrawing.SetDragStyleRTL(isRTL1);
+    EXPECT_FALSE(dragDrawing.isRTL_);
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::COPY);
+    EXPECT_TRUE(DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::COPY);
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::COPY);
+    dragDrawing.GetLTRFilePath(filePath);
+    dragDrawing.GetFilePath(filePath);
+}
+
+/**
+ * @tc.name: DragDataManagerTest016
+ * @tc.desc: normal test DragDrawing GetFilePath
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    std::string filePath;
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::DEFAULT);
+    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::DEFAULT);
+    dragDrawing.UpdateDragWindowState(DRAG_WINDOW_VISIBLE);
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::DEFAULT);
+    dragDrawing.GetRTLFilePath(filePath);
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::FORBIDDEN);
+    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::FORBIDDEN);
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData == std::nullopt);
+    dragDrawing.InitDrawingInfo(dragData.value());
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::FORBIDDEN);
+    dragDrawing.GetRTLFilePath(filePath);
+    std::optional<DragData> dragData1 = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, POINTER_ID);
+    ASSERT_FALSE(dragData1 == std::nullopt);
+    dragDrawing.InitDrawingInfo(dragData1.value());
+    dragDrawing.GetRTLFilePath(filePath);
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::COPY);
+    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::COPY);
+    std::optional<DragData> dragData2 = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData2 == std::nullopt);
+    dragDrawing.InitDrawingInfo(dragData2.value());
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::COPY);
+    dragDrawing.GetRTLFilePath(filePath);
+    std::optional<DragData> dragData3 = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, POINTER_ID);
+    ASSERT_FALSE(dragData3 == std::nullopt);
+    dragDrawing.InitDrawingInfo(dragData3.value());
+    dragDrawing.GetRTLFilePath(filePath);
+    DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::MOVE);
+    EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::MOVE);
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::MOVE);
+    dragDrawing.GetRTLFilePath(filePath);
+    dragDrawing.UpdateValidDragStyle(static_cast<DragCursorStyle>(-1));
+    dragDrawing.GetRTLFilePath(filePath);
+}
+
+/**
+ * @tc.name: DragDataManagerTest017
+ * @tc.desc: normal test DragDrawing Draw
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest017, TestSize.Level0)
+{
+    std::shared_ptr<Media::PixelMap> stylePixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    bool isRTL = false;
+    RSDrawingContext context;
+    DrawSVGModifier drawSVGModifier(stylePixelMap, isRTL);
+    ASSERT_NO_FATAL_FAILURE(drawSVGModifier.Draw(context));
+}
+
+/**
+ * @tc.name: DragDataManagerTest018
+ * @tc.desc: normal test DragDrawing Draw
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest018, TestSize.Level0)
+{
+    std::shared_ptr<Media::PixelMap> stylePixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    bool isRTL = true;
+    RSDrawingContext context;
+    DrawSVGModifier drawSVGModifier(stylePixelMap, isRTL);
+    ASSERT_NO_FATAL_FAILURE(drawSVGModifier.Draw(context));
+}
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 } // namespace
 } // namespace DeviceStatus
 } // namespace Msdp

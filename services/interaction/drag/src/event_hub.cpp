@@ -35,6 +35,7 @@ static std::map<std::string, EventId> g_actionMap = {
     { EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED, EventId::EVENT_SCREEN_UNLOCK },
     { EventFwk::CommonEventSupport::COMMON_EVENT_BATTERY_LOW, EventId::EVENT_BATTERY_LOW },
     { EventFwk::CommonEventSupport::COMMON_EVENT_BATTERY_OKAY, EventId::EVENT_BATTERY_OKAY },
+    { EventFwk::CommonEventSupport::COMMON_EVENT_LOCALE_CHANGED, EventId::EVENT_LOCALE_CHANGED },
 };
 
 std::shared_ptr<EventHub> EventHub::GetEventHub(IContext* context)
@@ -75,6 +76,22 @@ void EventHub::OnReceiveEvent(const EventFwk::CommonEventData &event)
     }
     EventId eventId = g_actionMap[action];
     FI_HILOGD("Receive action:%{public}s, eventId:%{public}d", action.c_str(), static_cast<int32_t>(eventId));
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    if (eventId == EventId::EVENT_LOCALE_CHANGED) {
+        CHKPV(context_);
+        int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this] {
+            CHKPR(this->context_, RET_ERR);
+            if (auto dragState = this->context_->GetDragManager().GetDragState();
+                dragState == DragState::START || dragState == DragState::MOTION_DRAGGING) {
+                this->context_->GetDragManager().UpdateDragStylePositon();
+            }
+            return RET_OK;
+        });
+        if (ret != RET_OK) {
+            FI_HILOGE("Post async task failed");
+        }
+    }
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     if (eventId != EventId::EVENT_SCREEN_LOCK) {
         return;
     }
