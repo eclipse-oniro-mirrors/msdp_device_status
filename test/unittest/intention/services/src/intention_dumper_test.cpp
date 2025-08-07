@@ -43,11 +43,10 @@ namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
-std::shared_ptr<ContextService> g_context { nullptr };
 int32_t g_fd { 1 };
 StationaryServer stationary;
+ContextService *g_instance = nullptr;
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
-const std::string TEST_DEV_NODE {"TestDeviceNode"};
 } // namespace
 
 class IntentionDumperTest : public testing::Test {
@@ -82,9 +81,11 @@ ContextService* ContextService::GetInstance()
 {
     static std::once_flag flag;
     std::call_once(flag, [&]() {
-        g_context = std::make_shared<ContextService>();
+        ContextService *cooContext = new (std::nothrow) ContextService();
+        CHKPL(cooContext);
+        g_instance = cooContext;
     });
-    return g_context.get();
+    return g_instance;
 }
 
 ContextService::ContextService()
@@ -149,8 +150,9 @@ IDSoftbusAdapter& ContextService::GetDSoftbus()
 HWTEST_F(IntentionDumperTest, IntentionDumperTest001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    IContext *env { nullptr };
-    IntentionDumper dumper = IntentionDumper(env, stationary);
+    auto env1 = ContextService::GetInstance();
+    ASSERT_NE(env1, nullptr);
+    IntentionDumper dumper = IntentionDumper(env1, stationary);
     std::vector<std::string> argList = {"s", "h", "l", "c", "d"};
     ASSERT_NO_FATAL_FAILURE(dumper.Dump(g_fd, argList));
 }
