@@ -81,10 +81,9 @@ void EventHub::OnReceiveEvent(const EventFwk::CommonEventData &event)
         CHKPV(context_);
         int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this] {
             CHKPR(this->context_, RET_ERR);
-            auto dragMgr = this->context_->GetDragManager();
-            if (auto dragState = dragMgr.GetDragState();
+            if (auto dragState = this->context_->GetDragManager().GetDragState();
                 dragState == DragState::START || dragState == DragState::MOTION_DRAGGING) {
-                dragState.UpdateDragStylePositon();
+                this->context_->GetDragManager().UpdateDragStylePositon();
             }
             return RET_OK;
         });
