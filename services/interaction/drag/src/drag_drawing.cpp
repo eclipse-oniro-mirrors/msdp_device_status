@@ -1551,7 +1551,8 @@ void DragDrawing::OnDragStyleAnimation()
     CheckStyleNodeModifier(dragStyleNode);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(handler_);
-    handler_->PostTask(std::bind(&DragDrawing::ChangeStyleAnimation, this));
+    handler_->RemoveTask("dragStyleAnimationTask");
+    handler_->PostTask(std::bind(&DragDrawing::ChangeStyleAnimation, this), "dragStyleAnimationTask");
 #else
     ChangeStyleAnimation();
 #endif
