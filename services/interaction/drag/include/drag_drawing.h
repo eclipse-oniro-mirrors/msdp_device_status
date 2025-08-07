@@ -495,3 +495,6 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 #endif // DRAG_DRAWING_H
+    void GetFilePath(std::string &filePath);
+    void GetLTRFilePath(std::string &filePath);
+    void GetRTLFilePath(std::string &filePath);
