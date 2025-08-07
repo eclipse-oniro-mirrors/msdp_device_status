@@ -369,35 +369,3 @@ private:
 #define DRAG_MANAGER  OHOS::Msdp::DeviceStatus::DragManager::GetInstance()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 #endif // DRAG_MANAGER_H
-static std::map<std::string, std::string> g_rtlLanguageMap {
-    { "ar", "arabic" },
-    { "fa", "persian" },
-    { "ur", "urdu" },
-    { "he", "hebrew" },
-    { "ug", "uyghur" },
-};
-
-void DragManager::UpdateDragStylePositon()
-{
-    FI_HILOGI("enter");
-    std::string systemLanguage = system::GetParameter(LANGUAGE_KEY, "");
-    if (systemLanguage.empty()) {
-        systemLanguage = system::GetParameter(DEFAULT_LANGUAGE_KEY, "");
-        if (systemLanguage.empty()) {
-            FI_HILOGE("Get systemLanguage failed");
-            return;
-        }
-    }
-    std::transform(systemLanguage.begin(), systemLanguage.end(), systemLanguage.begin(), ::tolower);
-    bool isCurrentRTL = false;
-    if (g_rtlLanguageMap.find(systemLanguage) != g_rtlLanguageMap.end()) {
-        isCurrentRTL = true;
-    }
-    if (isRTL_ != isCurrentRTL) {
-        isRTL_ = isCurrentRTL;
-        dragDrawing_.SetDragStyleRTL(isRTL_);
-        DragCursorStyle dragStyle = DRAG_DATA_MGR.GetDragStyle();
-        dragDrawing_.UpdateDragStyle(dragStyle);
-    }
-    FI_HILOGI("leave");
-}

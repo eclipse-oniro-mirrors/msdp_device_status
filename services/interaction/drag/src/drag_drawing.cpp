@@ -3614,6 +3614,17 @@ void DragDrawing::ResetAnimationParameter()
     FI_HILOGI("leave");
 }
 
+int32_t DragDrawing::GetSvgTouchPositionX(int32_t currentPixelMapWidth, int32_t stylePixelMapWidth, bool isRTL)
+{
+    float scalingValue = GetScaling();
+    int32_t adjustSize = EIGHT_SIZE * scalingValue;
+    int32_t svgTouchPositionX = -adjustSize;
+    if (!isRTL) {
+        svgTouchPositionX = currentPixelMapWidth + adjustSize - stylePixelMapWidth;
+    }
+    return svgTouchPositionX;
+}
+
 void DragDrawing::ResetAnimationFlag(bool isForce)
 {
     FI_HILOGI("enter");
@@ -3989,20 +4000,15 @@ void DrawSVGModifier::Draw(RSDrawingContext& context) const
         FI_HILOGE("Invalid scalingValue:%{public}f", scalingValue);
         return;
     }
-    int32_t adjustSize = EIGHT_SIZE * scalingValue;
-    int32_t svgTouchPositionX = -1;
-    if (isRTL_) {
-        svgTouchPositionX = -adjustSize;
-    } else {
-        svgTouchPositionX = currentPixelMap->GetWidth() + adjustSize - stylePixelMap_->GetWidth();
-    }
+    int32_t svgTouchPositionX = DragDrawing::GetSvgTouchPositionX(
+        currentPixelMap->GetWidth(), stylePixelMap_->GetWidth(), isRTL_);
     if (!CheckNodesValid()) {
         FI_HILOGE("Check nodes valid failed");
         return;
     }
     std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
     CHKPV(dragStyleNode);
-    adjustSize = (TWELVE_SIZE - EIGHT_SIZE) * scalingValue;
+    int32_t adjustSize = (TWELVE_SIZE - EIGHT_SIZE) * scalingValue;
     dragStyleNode->SetBounds(svgTouchPositionX, adjustSize, stylePixelMap_->GetWidth() + adjustSize,
         stylePixelMap_->GetHeight());
     dragStyleNode->SetFrame(svgTouchPositionX, adjustSize, stylePixelMap_->GetWidth() + adjustSize,
@@ -4269,13 +4275,7 @@ void DrawStyleChangeModifier::Draw(RSDrawingContext &context) const
     if ((1.0 * INT_MAX / EIGHT_SIZE) <= scalingValue) {
         return;
     }
-    int32_t adjustSize = EIGHT_SIZE * scalingValue;
-    int32_t svgTouchPositionX = -1;
-    if (isRTL_) {
-        svgTouchPositionX = -adjustSize;
-    } else {
-        svgTouchPositionX = pixelMapWidth + adjustSize - stylePixelMap_->GetWidth();
-    }
+    int32_t svgTouchPositionX = DragDrawing::GetSvgTouchPositionX(pixelMapWidth, stylePixelMap_->GetWidth(), isRTL_);
     dragStyleNode->SetBounds(svgTouchPositionX, (TWELVE_SIZE-EIGHT_SIZE)*scalingValue, stylePixelMap_->GetWidth(),
         stylePixelMap_->GetHeight());
     dragStyleNode->SetFrame(svgTouchPositionX, (TWELVE_SIZE-EIGHT_SIZE)*scalingValue, stylePixelMap_->GetWidth(),
