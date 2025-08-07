@@ -428,10 +428,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest015, TestSize.Level0)
     EXPECT_FALSE(dragDrawing.isRTL_);
     DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::COPY);
     EXPECT_TRUE(DRAG_DATA_MGR.GetDragStyle() == DragCursorStyle::COPY);
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::COPY);
     dragDrawing.GetLTRFilePath(filePath);
     dragDrawing.GetFilePath(filePath);
 }
- 
+
 /**
  * @tc.name: DragDataManagerTest016
  * @tc.desc: normal test DragDrawing GetFilePath
@@ -445,6 +446,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
     DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::DEFAULT);
     EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::DEFAULT);
     dragDrawing.UpdateDragWindowState(DRAG_WINDOW_VISIBLE);
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::DEFAULT);
     dragDrawing.GetRTLFilePath(filePath);
     DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::FORBIDDEN);
     EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::FORBIDDEN);
@@ -452,6 +454,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
         MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, DRAG_NUM_ONE);
     ASSERT_FALSE(dragData == std::nullopt);
     dragDrawing.InitDrawingInfo(dragData.value());
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::FORBIDDEN);
     dragDrawing.GetRTLFilePath(filePath);
     std::optional<DragData> dragData1 = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, POINTER_ID);
@@ -464,6 +467,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
         MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, DRAG_NUM_ONE);
     ASSERT_FALSE(dragData2 == std::nullopt);
     dragDrawing.InitDrawingInfo(dragData2.value());
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::COPY);
     dragDrawing.GetRTLFilePath(filePath);
     std::optional<DragData> dragData3 = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, POINTER_ID);
@@ -472,9 +476,10 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
     dragDrawing.GetRTLFilePath(filePath);
     DRAG_DATA_MGR.SetDragStyle(DragCursorStyle::MOVE);
     EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::MOVE);
+    dragDrawing.UpdateValidDragStyle(DragCursorStyle::MOVE);
     dragDrawing.GetRTLFilePath(filePath);
 }
- 
+
 /**
  * @tc.name: DragDataManagerTest017
  * @tc.desc: normal test DragDrawing Draw
@@ -488,7 +493,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest017, TestSize.Level0)
     DrawSVGModifier drawSVGModifier(stylePixelMap, isRTL);
     ASSERT_NO_FATAL_FAILURE(drawSVGModifier.Draw(context));
 }
- 
+
 /**
  * @tc.name: DragDataManagerTest018
  * @tc.desc: normal test DragDrawing Draw

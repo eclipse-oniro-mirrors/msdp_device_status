@@ -56,8 +56,8 @@ using RSModifier = Rosen::ModifierNG::RSModifier;
 
 class DrawSVGModifier : public RSContentStyleModifier {
 public:
-    DrawSVGModifier(std::shared_ptr<Media::PixelMap> stylePixelMap, bool isRTL) :
-        stylePixelMap_(stylePixelMap), isRTL_(isRTL) {}
+    DrawSVGModifier(std::shared_ptr<Media::PixelMap> stylePixelMap, bool isRTL)
+        : stylePixelMap_(stylePixelMap), isRTL_(isRTL) {}
     ~DrawSVGModifier() = default;
     void Draw(RSDrawingContext& context) const override;
 
@@ -123,8 +123,8 @@ private:
 class DrawStyleChangeModifier : public RSContentStyleModifier {
 public:
     DrawStyleChangeModifier() = default;
-    DrawStyleChangeModifier(std::shared_ptr<Media::PixelMap> stylePixelMap, bool isRTL) :
-        stylePixelMap_(stylePixelMap), isRTL_(isRTL) {}
+    DrawStyleChangeModifier(std::shared_ptr<Media::PixelMap> stylePixelMap, bool isRTL)
+        : stylePixelMap_(stylePixelMap), isRTL_(isRTL) {}
     ~DrawStyleChangeModifier() = default;
     void Draw(RSDrawingContext &context) const override;
     void SetScale(float scale);
@@ -495,6 +495,3 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 #endif // DRAG_DRAWING_H
-    void GetFilePath(std::string &filePath);
-    void GetLTRFilePath(std::string &filePath);
-    void GetRTLFilePath(std::string &filePath);

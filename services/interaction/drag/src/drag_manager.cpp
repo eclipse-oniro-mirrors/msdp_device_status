@@ -71,6 +71,11 @@ const std::string DEVICE_TYPE_HPR {"HPR"};
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 const std::string LANGUAGE_KEY {"persist.global.language"};
 const std::string DEFAULT_LANGUAGE_KEY {"const.global.language"};
+const std::string LANGUAGE_ARABIC {"ar"};
+const std::string LANGUAGE_PERSIAN {"fa"};
+const std::string LANGUAGE_URDU {"ur"};
+const std::string LANGUAGE_HEBREW {"he"};
+const std::string LANGUAGE_UYGHUR {"ug"};
 const std::string PRODUCT_TYPE = OHOS::system::GetParameter("const.build.product", "HYM");
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 #ifdef OHOS_ENABLE_PULLTHROW
@@ -605,9 +610,11 @@ void DragManager::UpdateDragStylePositon()
             return;
         }
     }
+    std::transform(systemLanguage.begin(), systemLanguage.end(), systemLanguage.begin(), ::tolower);
     bool isCurrentRTL = false;
-    if ((systemLanguage == "ar") || (systemLanguage == "fa") || (systemLanguage == "ur")
-        || (systemLanguage == "he") || (systemLanguage == "ug")) {
+    if ((systemLanguage == LANGUAGE_ARABIC) || (systemLanguage == LANGUAGE_PERSIAN) ||
+        (systemLanguage == LANGUAGE_URDU) || (systemLanguage == LANGUAGE_HEBREW) ||
+        (systemLanguage == LANGUAGE_UYGHUR)) {
         isCurrentRTL = true;
     }
     if (isRTL_ != isCurrentRTL) {

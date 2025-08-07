@@ -2456,33 +2456,23 @@ bool DragDrawing::NeedAdjustSvgInfo()
     return true;
 }
 
-int32_t DragDrawing::GetFilePath(std::string &filePath)
+void DragDrawing::GetFilePath(std::string &filePath)
 {
     FI_HILOGD("enter");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if (isRTL_) {
-        if (GetRTLFilePath(filePath) != RET_OK) {
-            FI_HILOGD("Get svg rtl file path failed");
-            return RET_ERR;
-        }
+        GetRTLFilePath(filePath);
     } else {
-        if (GetLTRFilePath(filePath) != RET_OK) {
-            FI_HILOGD("Get svg ltr file path failed");
-            return RET_ERR;
-        }
+        GetLTRFilePath(filePath);
     }
 #else
-    if (GetLTRFilePath(filePath) != RET_OK) {
-        FI_HILOGD("Get svg ltr file path failed");
-        return RET_ERR;
-    }
+    GetLTRFilePath(filePath);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     FI_HILOGD("leave");
-    return RET_OK;
 }
  
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-int32_t DragDrawing::GetLTRFilePath(std::string &filePath)
+void DragDrawing::GetLTRFilePath(std::string &filePath)
 {
     FI_HILOGD("enter");
     switch (g_drawingInfo.currentStyle) {
@@ -2513,10 +2503,9 @@ int32_t DragDrawing::GetLTRFilePath(std::string &filePath)
         }
     }
     FI_HILOGD("leave");
-    return RET_OK;
 }
  
-int32_t DragDrawing::GetRTLFilePath(std::string &filePath)
+void DragDrawing::GetRTLFilePath(std::string &filePath)
 {
     FI_HILOGD("enter");
     switch (g_drawingInfo.currentStyle) {
@@ -2547,10 +2536,9 @@ int32_t DragDrawing::GetRTLFilePath(std::string &filePath)
         }
     }
     FI_HILOGD("leave");
-    return RET_OK;
 }
 #else
-int32_t DragDrawing::GetLTRFilePath(std::string &filePath)
+void DragDrawing::GetLTRFilePath(std::string &filePath)
 {
     FI_HILOGD("enter");
     switch (g_drawingInfo.currentStyle) {
@@ -2581,7 +2569,6 @@ int32_t DragDrawing::GetLTRFilePath(std::string &filePath)
         }
     }
     FI_HILOGD("leave");
-    return RET_OK;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
@@ -3327,10 +3314,7 @@ int32_t DragDrawing::UpdateValidDragStyle(DragCursorStyle style)
         g_drawingInfo.parentNode->AddChild(dragStyleNode);
     }
     std::string filePath;
-    if (GetFilePath(filePath) != RET_OK) {
-        FI_HILOGD("Get file path failed");
-        return RET_ERR;
-    }
+    GetFilePath(filePath);
     if (!IsValidSvgFile(filePath)) {
         FI_HILOGE("Svg file is invalid");
         return RET_ERR;
