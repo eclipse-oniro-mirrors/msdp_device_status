@@ -434,6 +434,7 @@ private:
     float CalculateSMScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide);
     float CalculateMDScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide);
     float CalculateDefaultScale(int32_t pixelMapWidth, int32_t pixelMapHeight, int32_t shortSide);
+    int32_t GetSvgTouchPositionX(int32_t currentPixelMapWidth, int32_t stylePixelMapWidth);
 
 private:
     bool needMultiSelectedAnimation_ { true };
@@ -495,3 +496,15 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 #endif // DRAG_DRAWING_H
+int32_t DrawSVGModifier::GetSvgTouchPositionX(int32_t currentPixelMapWidth, int32_t stylePixelMapWidth)
+{
+    int32_t adjustSize = EIGHT_SIZE * scalingValue;
+    int32_t svgTouchPositionX = -adjustSize;
+    if (!isRTL_) {
+        svgTouchPositionX = currentPixelMapWidth + adjustSize - stylePixelMapWidth;
+    }
+    return svgTouchPositionX;
+}
+int32_t svgTouchPositionX = -1;
+int32_t svgTouchPositionX = GetSvgTouchPositionX(currentPixelMap->GetWidth(), stylePixelMap_->GetWidth());
+int32_t svgTouchPositionX = GetSvgTouchPositionX(pixelMapWidth, stylePixelMap_->GetWidth());

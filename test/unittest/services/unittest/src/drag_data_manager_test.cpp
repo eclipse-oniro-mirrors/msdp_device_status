@@ -478,6 +478,8 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
     EXPECT_FALSE(DRAG_DATA_MGR.GetDragStyle() != DragCursorStyle::MOVE);
     dragDrawing.UpdateValidDragStyle(DragCursorStyle::MOVE);
     dragDrawing.GetRTLFilePath(filePath);
+    dragDrawing.UpdateValidDragStyle(static_cast<DragCursorStyle>(-1));
+    dragDrawing.GetRTLFilePath(filePath);
 }
 
 /**
