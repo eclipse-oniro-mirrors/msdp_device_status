@@ -380,6 +380,31 @@ HWTEST_F(DeviceStatusManagerTest, AccessibilityDisconnectTest, TestSize.Level0) 
     GTEST_LOG_(INFO) << "AccessibilityDisconnectTest end";
 }
 #endif
+
+/**
+ * @tc.name: TimerTaskTest
+ * @tc.desc: test devicestatus TimerTaskTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusManagerTest, TimerTaskTest, TestSize.Level0) {
+    GTEST_LOG_(INFO) << "TimerTaskTest start";
+    ASSERT_NO_FATAL_FAILURE(deviceStatusManager->TimerTask());
+    GTEST_LOG_(INFO) << "TimerTaskTest end";
+}
+
+/**
+ * @tc.name: HasSubmittedTest
+ * @tc.desc: test devicestatus HasSubmittedTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusManagerTest, HasSubmittedTest, TestSize.Level0) {
+    GTEST_LOG_(INFO) << "HasSubmittedTest start";
+    deviceStatusManager->notityListener_ = boomerangCallback_;
+    deviceStatusManager->hasSubmitted_ = true;
+    int32_t result = deviceStatusManager->SubmitMetadata("metadata");
+    EXPECT_EQ(result, RET_ERR);
+    GTEST_LOG_(INFO) << "HasSubmittedTest end";
+}
 } // namespace
 } // namespace DeviceStatus
 } // namespace Msdp

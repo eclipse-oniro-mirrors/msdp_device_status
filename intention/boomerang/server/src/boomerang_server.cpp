@@ -33,6 +33,7 @@ namespace DeviceStatus {
 
 BoomerangServer::BoomerangServer()
 {
+    manager_.Init();
 }
 
 void BoomerangServer::DumpDeviceStatusSubscriber(int32_t fd) const
@@ -168,10 +169,6 @@ int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, const std
 
 int32_t BoomerangServer::SubmitMetadata(CallingContext &context, const std::string& metaData)
 {
-    if (metaData.empty()) {
-        FI_HILOGE("The metaData is empty.");
-        return RET_ERR;
-    }
     int32_t ret = manager_.SubmitMetadata(metaData);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang submit metada failed");
