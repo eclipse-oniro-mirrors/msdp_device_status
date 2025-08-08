@@ -41,6 +41,7 @@ namespace {
     const int32_t SYSTEM_BAR_HIDDEN = 0;
     const int32_t PAGE_SCROLL_ENVENT = 1;
 #endif
+    const int32_t SLEEP_TIME = 150;
 }
 #ifdef BOOMERANG_ONESTEP
 std::shared_ptr<DeviceStatusManager> DeviceStatusManager::g_deviceManager_;
@@ -497,6 +498,9 @@ int32_t DeviceStatusManager::NotifyMetadata(const std::string &bundleName, sptr<
     if (callbackIter == bundleNameCache_.end()) {
         bundleNameCache_.emplace(callback, bundleName);
     }
+    hasSubmitted_.store(false);
+    std::thread timerThread(std::bind(&DeviceStatusManager::TimerTask, this));
+    timerThread.detach();
     return RET_OK;
 }
 
@@ -546,6 +550,11 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard lock(mutex_);
+    if (hasSubmitted_) {
+        FI_HILOGE("get metadata timeout");
+        return RET_ERR;
+    }
+    hasSubmitted_.store(true);
     CHKPR(notityListener_, RET_ERR);
     std::string emptyMetadata;
     std::string callbackBundleName;
@@ -650,6 +659,14 @@ int32_t DeviceStatusManager::GetPackageName(AccessTokenID tokenId, std::string &
         }
     }
     return RET_OK;
+}
+
+void DeviceStatusManager::TimerTask()
+{
+    if (!hasSubmitted_) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+        SubmitMetadata("");
+    }
 }
 
 #ifdef BOOMERANG_ONESTEP

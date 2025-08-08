@@ -132,6 +132,7 @@ private:
     void HandlerPageScrollerEvent(int32_t event);
     void SystemBarHiddedInit();
 #endif
+    void TimerTask();
     static constexpr int32_t argSize_ { TYPE_MAX };
 
     std::mutex mutex_;
@@ -155,7 +156,7 @@ private:
     int32_t retryCount { 0 };
     static std::shared_ptr<DeviceStatusManager> g_deviceManager_;
 #endif
-
+    std::atomic<bool> hasSubmitted_ { false };
     static std::mutex g_mutex_;
     std::recursive_mutex countMutex_;
 };
