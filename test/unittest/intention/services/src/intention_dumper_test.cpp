@@ -78,7 +78,7 @@ int32_t MockDelegateTasks::PostAsyncTask(DTaskCallback callback)
 
 ContextService* ContextService::GetInstance()
 {
-   static ContextService g_instance;
+    static ContextService g_instance;
     return &g_instance;
 }
 
