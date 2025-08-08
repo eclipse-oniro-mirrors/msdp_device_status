@@ -14,7 +14,10 @@
 import("../../../../device_status.gni")
 
 config("device_motion_private_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${device_status_frameworks_path}/js/utils/include"
+  ]
 }
 
 ohos_shared_library("motion_napi") {
@@ -36,7 +39,10 @@ ohos_shared_library("motion_napi") {
 
   configs = [ ":device_motion_private_config" ]
 
-  deps = [ "${device_status_utils_path}:devicestatus_util" ]
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_frameworks_path}/js/utils:device_status_napi_utils"
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -49,13 +55,10 @@ ohos_shared_library("motion_napi") {
   defines = [ "LOG_DOMAIN = 0xD002210" ]
   if (device_status_motion_enable) {
     defines += [ "MOTION_ENABLE" ]
-    sources += [
-      "${device_status_frameworks_path}/js/napi/motion/src/napi_event_utils.cpp",
-    ]
     external_deps += [
       "motion:motion_client",
       "motion:motion_interface_native",
-      "hiappevent:hiappevent_innerapi",
+      "hiappevent:hiappevent_innerapi"
     ]
   }
 

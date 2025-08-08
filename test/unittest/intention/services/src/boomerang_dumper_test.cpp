@@ -151,7 +151,7 @@ HWTEST_F(BoomerangDumperTest, BoomerangDumperTest001, TestSize.Level1)
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     BoomerangDumper dumper =  BoomerangDumper(env, boomerang);
-    std::vector<std::string> argList;
+    std::vector<std::string> argList = {"s", "h", "l", "c", "d"};
     ASSERT_NO_FATAL_FAILURE(dumper.Dump(g_fd, argList));
 }
 

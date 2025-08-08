@@ -69,6 +69,15 @@ const std::string START_CROSSING_DRAG {"START_CROSSING_DRAG"};
 const std::string END_CROSSING_DRAG {"END_CROSSING_DRAG"};
 const std::string DEVICE_TYPE_HPR {"HPR"};
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+const std::string LANGUAGE_KEY {"persist.global.language"};
+const std::string DEFAULT_LANGUAGE_KEY {"const.global.language"};
+static std::map<std::string, std::string> g_rtlLanguageMap {
+    { "ar", "arabic" },
+    { "fa", "persian" },
+    { "ur", "urdu" },
+    { "he", "hebrew" },
+    { "ug", "uyghur" },
+};
 const std::string PRODUCT_TYPE = OHOS::system::GetParameter("const.build.product", "HYM");
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 #ifdef OHOS_ENABLE_PULLTHROW
@@ -534,6 +543,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     needLongPressDragAnimation_ = true;
     isLongPressDrag_ = false;
     currentPointerEvent_ = nullptr;
+    isRTL_ = false;
 #ifdef OHOS_ENABLE_PULLTHROW
     inHoveringState_ = false;
     throwState_ = ThrowState::NOT_THROW;
@@ -591,6 +601,31 @@ int32_t DragManager::GetUdKey(std::string &udKey) const
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+void DragManager::UpdateDragStylePositon()
+{
+    FI_HILOGI("enter");
+    std::string systemLanguage = system::GetParameter(LANGUAGE_KEY, "");
+    if (systemLanguage.empty()) {
+        systemLanguage = system::GetParameter(DEFAULT_LANGUAGE_KEY, "");
+        if (systemLanguage.empty()) {
+            FI_HILOGE("Get systemLanguage failed");
+            return;
+        }
+    }
+    std::transform(systemLanguage.begin(), systemLanguage.end(), systemLanguage.begin(), ::tolower);
+    bool isCurrentRTL = false;
+    if (g_rtlLanguageMap.find(systemLanguage) != g_rtlLanguageMap.end()) {
+        isCurrentRTL = true;
+    }
+    if (isRTL_ != isCurrentRTL) {
+        isRTL_ = isCurrentRTL;
+        dragDrawing_.SetDragStyleRTL(isRTL_);
+        DragCursorStyle dragStyle = DRAG_DATA_MGR.GetDragStyle();
+        dragDrawing_.UpdateDragStyle(dragStyle);
+    }
+    FI_HILOGI("leave");
+}
+
 int32_t DragManager::UpdateDragStyle(DragCursorStyle style, int32_t targetPid, int32_t targetTid, int32_t eventId)
 #else
 int32_t DragManager::UpdateDragStyle(DragCursorStyle style)
@@ -1604,6 +1639,7 @@ int32_t DragManager::OnStartDrag()
             dragDrawing_.SetScreenId(screenId_);
         }
     }
+    UpdateDragStylePositon();
     int32_t ret = dragDrawing_.Init(dragData, context_, isLongPressDrag_);
 #else
     int32_t ret = dragDrawing_.Init(dragData);

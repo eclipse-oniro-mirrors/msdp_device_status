@@ -16,6 +16,9 @@
 
 #define BUFF_SIZE 100
 #include <future>
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+#include "parameters.h"
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 #include "pointer_event.h"
 #include "securec.h"
 #include "message_parcel.h"
@@ -1909,6 +1912,54 @@ HWTEST_F(DragManagerTest, DragManagerTest95, TestSize.Level0)
     dragData.summaryFormat = { { "image", {} } };
     ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
 }
+
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+/**
+ * @tc.name: DragManagerTest96
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest96, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string persistLanguage = system::GetParameter("persist.global.language", "");
+    bool isRTL = g_dragMgr.isRTL_;
+    system::SetParameter("persist.global.language", "");
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    system::SetParameter("persist.global.language", "ch");
+    g_dragMgr.isRTL_ = true;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    g_dragMgr.isRTL_ = false;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    system::SetParameter("persist.global.language", "ar");
+    g_dragMgr.isRTL_ = false;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    g_dragMgr.isRTL_ = true;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    system::SetParameter("persist.global.language", "fa");
+    g_dragMgr.isRTL_ = false;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    g_dragMgr.isRTL_ = true;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    system::SetParameter("persist.global.language", "ur");
+    g_dragMgr.isRTL_ = false;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    g_dragMgr.isRTL_ = true;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    system::SetParameter("persist.global.language", "he");
+    g_dragMgr.isRTL_ = false;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    g_dragMgr.isRTL_ = true;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    system::SetParameter("persist.global.language", "ug");
+    g_dragMgr.isRTL_ = false;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    g_dragMgr.isRTL_ = true;
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
+    g_dragMgr.isRTL_ = isRTL;
+}
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

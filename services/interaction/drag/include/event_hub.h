@@ -40,6 +40,7 @@ enum class EventId {
     EVENT_BATTERY_LOW,
     EVENT_BATTERY_OKAY,
     EVENT_MAX,
+    EVENT_LOCALE_CHANGED,
 };
 class EventHub : public OHOS::EventFwk::CommonEventSubscriber {
 public:

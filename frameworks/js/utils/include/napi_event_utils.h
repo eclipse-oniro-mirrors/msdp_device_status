@@ -21,6 +21,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class NapiEventUtils {
 public:
     static int64_t AddProcessor();
@@ -28,7 +29,7 @@ public:
         const int result, const int errCode);
     static int64_t GetSysClockTime();
 };
-
+} // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif //MOTION_NAPI_H
+#endif // NAPI_EVENT_UTILS_H

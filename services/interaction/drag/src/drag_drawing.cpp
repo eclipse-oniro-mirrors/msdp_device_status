@@ -198,6 +198,11 @@ const std::string FORBID_ONE_DRAG_PATH { "/system/etc/device_status/drag_icon/Fo
 const std::string MOVE_DRAG_PATH { "/system/etc/device_status/drag_icon/Move_Drag.svg" };
 const std::string DEVICE_TYPE = system::GetParameter("const.product.devicetype", "unknown");
 const std::string PRODUCT_TYPE_PC = "2in1";
+const std::string COPY_DRAG_RTL_PATH { "/system/etc/device_status/drag_icon/Copy_Drag_RTL.svg" };
+const std::string COPY_ONE_DRAG_RTL_PATH { "/system/etc/device_status/drag_icon/Copy_One_Drag_RTL.svg" };
+const std::string FORBID_DRAG_RTL_PATH { "/system/etc/device_status/drag_icon/Forbid_Drag_RTL.svg" };
+const std::string FORBID_ONE_DRAG_RTL_PATH { "/system/etc/device_status/drag_icon/Forbid_One_Drag_RTL.svg" };
+const std::string MOVE_DRAG_RTL_PATH { "/system/etc/device_status/drag_icon/Move_Drag_RTL.svg" };
 #else
 const std::string COPY_DRAG_NAME { "/base/media/Copy_Drag.svg" };
 const std::string COPY_ONE_DRAG_NAME { "/base/media/Copy_One_Drag.svg" };
@@ -1515,7 +1520,7 @@ void DragDrawing::StartStyleAnimation(float startScale, float endScale, int32_t 
             dragStyleNode->RemoveModifier(drawStyleScaleModifier_);
             drawStyleScaleModifier_ = nullptr;
         }
-        drawStyleChangeModifier_ = std::make_shared<DrawStyleChangeModifier>(g_drawingInfo.stylePixelMap);
+        drawStyleChangeModifier_ = std::make_shared<DrawStyleChangeModifier>(g_drawingInfo.stylePixelMap, isRTL_);
         dragStyleNode->AddModifier(drawStyleChangeModifier_);
     }
     if (endScale == STYLE_END_SCALE && drawStyleScaleModifier_ != nullptr) {
@@ -1553,7 +1558,7 @@ void DragDrawing::OnDragStyleAnimation()
     if (g_drawingInfo.isPreviousDefaultStyle == true || g_drawingInfo.isCurrentDefaultStyle == true) {
         FI_HILOGE("Has DefaultStyle, change style and return");
         CheckStyleNodeModifier(dragStyleNode);
-        drawStyleChangeModifier_ = std::make_shared<DrawStyleChangeModifier>(g_drawingInfo.stylePixelMap);
+        drawStyleChangeModifier_ = std::make_shared<DrawStyleChangeModifier>(g_drawingInfo.stylePixelMap, isRTL_);
         dragStyleNode->AddModifier(drawStyleChangeModifier_);
         return;
     }
@@ -1566,7 +1571,8 @@ void DragDrawing::OnDragStyleAnimation()
     CheckStyleNodeModifier(dragStyleNode);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(handler_);
-    handler_->PostTask(std::bind(&DragDrawing::ChangeStyleAnimation, this));
+    handler_->RemoveTask("dragStyleAnimationTask");
+    handler_->PostTask(std::bind(&DragDrawing::ChangeStyleAnimation, this), "dragStyleAnimationTask");
 #else
     ChangeStyleAnimation();
 #endif
@@ -1913,7 +1919,7 @@ int32_t DragDrawing::DrawStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNod
         dragStyleNode->RemoveModifier(drawSVGModifier_);
         drawSVGModifier_ = nullptr;
     }
-    drawSVGModifier_ = std::make_shared<DrawSVGModifier>(stylePixelMap);
+    drawSVGModifier_ = std::make_shared<DrawSVGModifier>(stylePixelMap, isRTL_);
     dragStyleNode->AddModifier(drawSVGModifier_);
     FI_HILOGD("leave");
     return RET_OK;
@@ -2457,8 +2463,23 @@ bool DragDrawing::NeedAdjustSvgInfo()
     return true;
 }
 
+void DragDrawing::GetFilePath(std::string &filePath)
+{
+    FI_HILOGD("enter");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-int32_t DragDrawing::GetFilePath(std::string &filePath)
+    if (isRTL_) {
+        GetRTLFilePath(filePath);
+    } else {
+        GetLTRFilePath(filePath);
+    }
+#else
+    GetLTRFilePath(filePath);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
+    FI_HILOGD("leave");
+}
+ 
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+void DragDrawing::GetLTRFilePath(std::string &filePath)
 {
     FI_HILOGD("enter");
     switch (g_drawingInfo.currentStyle) {
@@ -2489,10 +2510,42 @@ int32_t DragDrawing::GetFilePath(std::string &filePath)
         }
     }
     FI_HILOGD("leave");
-    return RET_OK;
+}
+ 
+void DragDrawing::GetRTLFilePath(std::string &filePath)
+{
+    FI_HILOGD("enter");
+    switch (g_drawingInfo.currentStyle) {
+        case DragCursorStyle::COPY: {
+            if (g_drawingInfo.currentDragNum == DRAG_NUM_ONE) {
+                filePath = COPY_ONE_DRAG_RTL_PATH;
+            } else {
+                filePath = COPY_DRAG_RTL_PATH;
+            }
+            break;
+        }
+        case DragCursorStyle::MOVE: {
+            filePath = MOVE_DRAG_RTL_PATH;
+            break;
+        }
+        case DragCursorStyle::FORBIDDEN: {
+            if (g_drawingInfo.currentDragNum == DRAG_NUM_ONE) {
+                filePath = FORBID_ONE_DRAG_RTL_PATH;
+            } else {
+                filePath = FORBID_DRAG_RTL_PATH;
+            }
+            break;
+        }
+        case DragCursorStyle::DEFAULT:
+        default: {
+            FI_HILOGW("Not need draw svg style, DragCursorStyle:%{public}d", g_drawingInfo.currentStyle);
+            break;
+        }
+    }
+    FI_HILOGD("leave");
 }
 #else
-int32_t DragDrawing::GetFilePath(std::string &filePath)
+void DragDrawing::GetLTRFilePath(std::string &filePath)
 {
     FI_HILOGD("enter");
     switch (g_drawingInfo.currentStyle) {
@@ -2523,7 +2576,6 @@ int32_t DragDrawing::GetFilePath(std::string &filePath)
         }
     }
     FI_HILOGD("leave");
-    return RET_OK;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
@@ -3269,10 +3321,7 @@ int32_t DragDrawing::UpdateValidDragStyle(DragCursorStyle style)
         g_drawingInfo.parentNode->AddChild(dragStyleNode);
     }
     std::string filePath;
-    if (GetFilePath(filePath) != RET_OK) {
-        FI_HILOGD("Get file path failed");
-        return RET_ERR;
-    }
+    GetFilePath(filePath);
     if (!IsValidSvgFile(filePath)) {
         FI_HILOGE("Svg file is invalid");
         return RET_ERR;
@@ -3569,6 +3618,17 @@ void DragDrawing::ResetAnimationParameter()
     FI_HILOGI("leave");
 }
 
+int32_t DragDrawing::GetSvgTouchPositionX(int32_t currentPixelMapWidth, int32_t stylePixelMapWidth, bool isRTL)
+{
+    float scalingValue = GetScaling();
+    int32_t adjustSize = EIGHT_SIZE * scalingValue;
+    int32_t svgTouchPositionX = -adjustSize;
+    if (!isRTL) {
+        svgTouchPositionX = currentPixelMapWidth + adjustSize - stylePixelMapWidth;
+    }
+    return svgTouchPositionX;
+}
+
 void DragDrawing::ResetAnimationFlag(bool isForce)
 {
     FI_HILOGI("enter");
@@ -3651,6 +3711,7 @@ void DragDrawing::ResetParameter()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     isRunningRotateAnimation_ = false;
     screenRotateState_ = false;
+    isRTL_ = false;
     FI_HILOGI("leave");
 }
 
@@ -3660,6 +3721,13 @@ void DragDrawing::StopVSyncStation()
     FI_HILOGI("enter");
     dragSmoothProcessor_.ResetParameters();
     vSyncStation_.StopVSyncRequest();
+    FI_HILOGI("leave");
+}
+
+void DragDrawing::SetDragStyleRTL(bool isRTL)
+{
+    FI_HILOGI("enter");
+    isRTL_ = isRTL;
     FI_HILOGI("leave");
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
@@ -3928,15 +3996,15 @@ void DrawSVGModifier::Draw(RSDrawingContext& context) const
         FI_HILOGE("Invalid scalingValue:%{public}f", scalingValue);
         return;
     }
-    int32_t adjustSize = EIGHT_SIZE * scalingValue;
-    int32_t svgTouchPositionX = currentPixelMap->GetWidth() + adjustSize - stylePixelMap_->GetWidth();
+    int32_t svgTouchPositionX = DragDrawing::GetSvgTouchPositionX(
+        currentPixelMap->GetWidth(), stylePixelMap_->GetWidth(), isRTL_);
     if (!CheckNodesValid()) {
         FI_HILOGE("Check nodes valid failed");
         return;
     }
     std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
     CHKPV(dragStyleNode);
-    adjustSize = (TWELVE_SIZE - EIGHT_SIZE) * scalingValue;
+    int32_t adjustSize = (TWELVE_SIZE - EIGHT_SIZE) * scalingValue;
     dragStyleNode->SetBounds(svgTouchPositionX, adjustSize, stylePixelMap_->GetWidth() + adjustSize,
         stylePixelMap_->GetHeight());
     dragStyleNode->SetFrame(svgTouchPositionX, adjustSize, stylePixelMap_->GetWidth() + adjustSize,
@@ -4203,8 +4271,7 @@ void DrawStyleChangeModifier::Draw(RSDrawingContext &context) const
     if ((1.0 * INT_MAX / EIGHT_SIZE) <= scalingValue) {
         return;
     }
-    int32_t adjustSize = EIGHT_SIZE * scalingValue;
-    int32_t svgTouchPositionX = pixelMapWidth + adjustSize - stylePixelMap_->GetWidth();
+    int32_t svgTouchPositionX = DragDrawing::GetSvgTouchPositionX(pixelMapWidth, stylePixelMap_->GetWidth(), isRTL_);
     dragStyleNode->SetBounds(svgTouchPositionX, (TWELVE_SIZE-EIGHT_SIZE)*scalingValue, stylePixelMap_->GetWidth(),
         stylePixelMap_->GetHeight());
     dragStyleNode->SetFrame(svgTouchPositionX, (TWELVE_SIZE-EIGHT_SIZE)*scalingValue, stylePixelMap_->GetWidth(),

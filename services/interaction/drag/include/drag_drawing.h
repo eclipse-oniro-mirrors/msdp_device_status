@@ -56,12 +56,14 @@ using RSModifier = Rosen::ModifierNG::RSModifier;
 
 class DrawSVGModifier : public RSContentStyleModifier {
 public:
-    explicit DrawSVGModifier(std::shared_ptr<Media::PixelMap> stylePixelMap) : stylePixelMap_(stylePixelMap) {}
+    DrawSVGModifier(std::shared_ptr<Media::PixelMap> stylePixelMap, bool isRTL)
+        : stylePixelMap_(stylePixelMap), isRTL_(isRTL) {}
     ~DrawSVGModifier() = default;
     void Draw(RSDrawingContext& context) const override;
 
 private:
     std::shared_ptr<Media::PixelMap> stylePixelMap_ { nullptr };
+    bool isRTL_ { false };
 };
 
 class DrawPixelMapModifier : public RSContentStyleModifier {
@@ -121,7 +123,8 @@ private:
 class DrawStyleChangeModifier : public RSContentStyleModifier {
 public:
     DrawStyleChangeModifier() = default;
-    explicit DrawStyleChangeModifier(std::shared_ptr<Media::PixelMap> stylePixelMap) : stylePixelMap_(stylePixelMap) {}
+    DrawStyleChangeModifier(std::shared_ptr<Media::PixelMap> stylePixelMap, bool isRTL)
+        : stylePixelMap_(stylePixelMap), isRTL_(isRTL) {}
     ~DrawStyleChangeModifier() = default;
     void Draw(RSDrawingContext &context) const override;
     void SetScale(float scale);
@@ -129,6 +132,7 @@ public:
 private:
     std::shared_ptr<Media::PixelMap> stylePixelMap_ { nullptr };
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> scale_ { nullptr };
+    bool isRTL_ { false };
 };
 
 class DrawStyleScaleModifier : public RSContentStyleModifier {
@@ -270,6 +274,7 @@ public:
     void StopVSyncStation();
     void GetDisplay(int32_t displayId, sptr<Rosen::Display> &display);
     void GetDisplayInfo(int32_t displayId, sptr<Rosen::DisplayInfo> &displayInfo);
+    void SetDragStyleRTL(bool isRTL);
 #else
     void OnDragSuccess();
     void OnDragFail();
@@ -320,6 +325,7 @@ public:
     void LongPressDragZoomOutAnimation();
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
     void ResetAnimationParameter();
+    static int32_t GetSvgTouchPositionX(int32_t currentPixelMapWidth, int32_t stylePixelMapWidth, bool isRTL);
 #ifdef OHOS_ENABLE_PULLTHROW
     void PullThrowAnimation(double tx, double ty, float vx, float vy, std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void SetHovering(double tx, double ty, std::shared_ptr<MMI::PointerEvent> pointerEvent);
@@ -354,7 +360,8 @@ private:
     void UpdateTspanNode(xmlNodePtr curNode);
     int32_t ParseAndAdjustSvgInfo(xmlNodePtr curNode);
     std::shared_ptr<Media::PixelMap> DecodeSvgToPixelMap(const std::string &filePath);
-    int32_t GetFilePath(std::string &filePath);
+    void GetFilePath(std::string &filePath);
+    void GetLTRFilePath(std::string &filePath);
     bool NeedAdjustSvgInfo();
     void SetDecodeOptions(Media::DecodeOptions &decodeOpts);
     bool ParserFilterInfo(const std::string &filterInfoStr, FilterInfo &filterInfo);
@@ -408,6 +415,7 @@ private:
     void LongPressDragAlphaAnimation();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<AppExecFwk::EventHandler> GetSuperHubHandler();
+    void GetRTLFilePath(std::string &filePath);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void RotateCanvasNode(float pivotX, float pivotY, float rotation);
     void FlushDragPosition(uint64_t nanoTimestamp);
@@ -471,6 +479,7 @@ private:
     DragState dragState_ { DragState::STOP };
     int32_t timerId_ { -1 };
     std::shared_mutex receiverMutex_;
+    bool isRTL_ { false };
 #ifdef OHOS_ENABLE_PULLTHROW
     bool pullThrowAnimationXCompleted_  { false };
     bool pullThrowAnimationYCompleted_ { false };
