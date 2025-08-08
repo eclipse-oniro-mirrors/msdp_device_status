@@ -137,6 +137,16 @@
           }
         },
         {
+          "name": "//base/msdp/device_status/interfaces/innerkits:motion_drag_part",
+          "header": {
+            "header_files": [
+              "interaction/include/drag_data.h",
+              "interaction/include/drag_data_util.h"
+            ],
+            "header_base": "//base/msdp/device_status/interfaces/innerkits"
+          }
+        },
+        {
           "name": "//base/msdp/device_status/services/interaction/drag:interaction_drag",
           "header": {
             "header_files": [

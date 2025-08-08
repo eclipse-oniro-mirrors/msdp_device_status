@@ -38,6 +38,46 @@ config("devicestatus_public_config") {
   defines = device_status_default_defines
 }
 
+ohos_source_set("drag_data_util") {
+ sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+ 
+  include_dirs = [
+    "${device_status_utils_path}/include",
+    "${device_status_interfaces_path}/innerkits/interaction/include",
+  ]
+ 
+  branch_protector_ret = "pac_ret"
+ 
+  sources = [
+    "${device_status_frameworks_path}/native/interaction/src/drag_data_util.cpp",
+  ]
+ 
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+ 
+  public_configs = [ ":devicestatus_public_config" ]
+ 
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "ipc:ipc_single",
+    "window_manager:libdm_lite",
+  ]
+ 
+  subsystem_name = "${device_status_subsystem_name}"
+  part_name = "${device_status_part_name}"
+}
+
 ohos_shared_library("devicestatus_client") {
   sanitize = {
     integer_overflow = true
@@ -52,7 +92,6 @@ ohos_shared_library("devicestatus_client") {
 
   version_script = "libdevicestatus_client_map"
   sources = [
-    "${device_status_frameworks_path}/native/interaction/src/drag_data_util.cpp",
     "${device_status_frameworks_path}/native/interaction/src/drag_manager_impl.cpp",
     "${device_status_frameworks_path}/native/interaction/src/interaction_manager.cpp",
     "${device_status_frameworks_path}/native/src/boomerang_callback_proxy.cpp",
@@ -82,6 +121,7 @@ ohos_shared_library("devicestatus_client") {
   deps = [
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",
+    "${device_status_interfaces_path}/innerkits:drag_data_util"
   ]
 
   public_configs = [ ":devicestatus_public_config" ]
@@ -123,6 +163,47 @@ ohos_shared_library("devicestatus_client") {
     "window_manager:libdm",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "${device_status_subsystem_name}"
+  part_name = "${device_status_part_name}"
+}
+
+ohos_shared_library("motion_drag_part") {
+ 
+  include_dirs = [
+    "${device_status_utils_path}/include",
+    "${device_status_interfaces_path}/innerkits/interaction/include",
+  ]
+ 
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+ 
+  branch_protector_ret = "pac_ret"
+ 
+  version_script = "libdevicestatus_client_map"
+ 
+  configs = [ "${device_status_utils_path}:devicestatus_utils_config" ]
+ 
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_interfaces_path}/innerkits:drag_data_util"
+  ]
+ 
+  public_configs = [ ":devicestatus_public_config" ]
+ 
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "ipc:ipc_single",
+  ]
+ 
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "${device_status_subsystem_name}"
   part_name = "${device_status_part_name}"
