@@ -23,3 +23,5 @@ src:*foundation/mulitimodalinput/input/*
 type:*OHOS::MMI::InputDeviceImpl
 type:*OHOS::MMI::InputManager
 type:*OHOS::MMI::InputManagerImpl
+type:*OHOS::DelayedSingleton
+type:*OHOS::MSDP::DeviceStatus::DeviceStatusManager
