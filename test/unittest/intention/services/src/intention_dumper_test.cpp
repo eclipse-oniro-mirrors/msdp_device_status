@@ -45,7 +45,6 @@ using namespace testing::ext;
 namespace {
 int32_t g_fd { 1 };
 StationaryServer stationary;
-ContextService *g_instance = nullptr;
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 } // namespace
 
@@ -79,13 +78,8 @@ int32_t MockDelegateTasks::PostAsyncTask(DTaskCallback callback)
 
 ContextService* ContextService::GetInstance()
 {
-    static std::once_flag flag;
-    std::call_once(flag, [&]() {
-        ContextService *cooContext = new (std::nothrow) ContextService();
-        CHKPL(cooContext);
-        g_instance = cooContext;
-    });
-    return g_instance;
+   static ContextService g_instance;
+    return &g_instance;
 }
 
 ContextService::ContextService()
