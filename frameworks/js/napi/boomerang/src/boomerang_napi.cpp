@@ -49,7 +49,7 @@ constexpr int32_t VALIDATA_OFF_PARAM = 2;
 constexpr int32_t MAX_LENGTH = 128;
 constexpr int32_t MIN_IMAGE_PIXEL = 1080;
 constexpr char const *URL_CHARACTERES =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=|";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=|%";
 }  // namespace
 std::map<int32_t, sptr<IRemoteBoomerangCallback>> BoomerangNapi::callbacks_;
 napi_ref BoomerangNapi::boomerangValueRef_ = nullptr;
