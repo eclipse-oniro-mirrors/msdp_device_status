@@ -33,6 +33,7 @@ declare_args() {
   device_status_pullthrow_enable = false
   device_status_mouse_drawing = true
   device_status_boomerang_onestep = false
+  device_status_boomerang_support_hdr = false
 
   # origin variables sets
   if (!is_arkui_x) {
@@ -155,4 +156,8 @@ if (device_status_mouse_drawing) {
 
 if (device_status_boomerang_onestep) {
   device_status_default_defines += [ "BOOMERANG_ONESTEP" ]
+}
+
+if (device_status_boomerang_support_hdr) {
+  device_status_default_defines += [ "BOOMERANG_SUPPORT_HDR" ]
 }
