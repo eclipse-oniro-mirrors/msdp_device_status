@@ -302,7 +302,7 @@ void DeviceManager::Dispatch(const struct epoll_event &ev)
 {
     CALL_DEBUG_ENTER;
     CHKPV(context_);
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, &ev] {
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, ev] {
         return this->OnEpollDispatch(ev.events);
     });
     if (ret != RET_OK) {
