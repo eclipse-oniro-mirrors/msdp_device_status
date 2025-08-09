@@ -44,26 +44,12 @@ constexpr size_t ARG_3{3};
 inline constexpr size_t MAX_STRING_LEN{1024};
 const std::vector<std::string> vecDeviceStatusValue{"VALUE_ENTER", "VALUE_EXIT"};
 thread_local BoomerangNapi *g_obj = nullptr;
-constexpr uint32_t BITMAP_TRAVERSE_STEP = 4;
-// bitmap green值偏移量
-constexpr uint32_t GREEN_TRAVERSE_STEP = 1;
-// bitmap red值偏移量
-constexpr uint32_t RED_TRAVERSE_STEP = 2;
-// bitmap alpha值偏移量
-constexpr uint32_t ALPHA_TRAVERSE_STEP = 3;
-// 图片的格式,格式为BGRA_8888
-constexpr uint32_t PIXEL_FORMAT = 4;
-// 图片的alpha类型,RGB前乘alpha
-constexpr uint32_t ALPHA_TYPE = 2;
-constexpr uint32_t ALPHA_SHIFT = 24;
-constexpr uint32_t RED_SHIFT = 16;
-constexpr uint32_t GREEN_SHIFT = 8;
 constexpr int32_t VALIDATA_ON_PARAM = 1;
 constexpr int32_t VALIDATA_OFF_PARAM = 2;
 constexpr int32_t MAX_LENGTH = 128;
 constexpr int32_t MIN_IMAGE_PIXEL = 1080;
 constexpr char const *URL_CHARACTERES =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=|";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=|%";
 }  // namespace
 std::map<int32_t, sptr<IRemoteBoomerangCallback>> BoomerangNapi::callbacks_;
 napi_ref BoomerangNapi::boomerangValueRef_ = nullptr;
@@ -176,42 +162,9 @@ void BoomerangNapi::OnEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap>
     CHKPV(pixelMap);
     CHKPV(deferred);
 
-    napi_value pixelMapNapi;
-    uint32_t width = static_cast<uint32_t>(pixelMap->GetWidth());
-    uint32_t height = static_cast<uint32_t>(pixelMap->GetHeight());
-    const unsigned char *data = pixelMap->GetPixels();
-    CHKPV(data);
-    uint32_t rowStride = static_cast<uint32_t>(pixelMap->GetRowStride());
-    uint32_t bufferSize = width * height * BITMAP_TRAVERSE_STEP;
-    uint8_t *pixelArrayBuffer = new (std::nothrow) uint8_t[bufferSize];
-    CHKPV(pixelArrayBuffer);
-    for (uint32_t y = 0; y < height; ++y) {
-        for (uint32_t x = 0; x < width; ++x) {
-            uint32_t pixIndex = y * rowStride + x * BITMAP_TRAVERSE_STEP;
-            uint32_t b = data[pixIndex];
-            uint32_t g = data[pixIndex + GREEN_TRAVERSE_STEP];
-            uint32_t r = data[pixIndex + RED_TRAVERSE_STEP];
-            uint32_t a = data[pixIndex + ALPHA_TRAVERSE_STEP];
-            uint32_t arrayIndex = (y * width + (x)) * BITMAP_TRAVERSE_STEP;
-            uint32_t pixelValue = ((a << ALPHA_SHIFT) | (r << RED_SHIFT) | (g << GREEN_SHIFT) | b);
-            *(reinterpret_cast<uint32_t *>(pixelArrayBuffer + arrayIndex)) = pixelValue;
-        }
-    }
-
-    struct OhosPixelMapCreateOps createOps;
-    createOps.width = width;
-    createOps.height = height;
-    createOps.pixelFormat = PIXEL_FORMAT;
-    createOps.alphaType = ALPHA_TYPE;
-    int32_t res = OH_PixelMap_CreatePixelMap(env, createOps, (uint8_t *)pixelArrayBuffer, bufferSize, &pixelMapNapi);
-    if (res != 0 || pixelMapNapi == nullptr) {
-        FI_HILOGI("wrap create pixelMap failed");
-        delete[] pixelArrayBuffer;
-        return;
-    }
-    if (deferred != nullptr) {
-        napi_resolve_deferred(env, deferred, pixelMapNapi);
-    }
+    napi_value pixelMapNapi = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+    CHKPV(pixelMapNapi);
+    napi_resolve_deferred(env, deferred, pixelMapNapi);
 }
 
 BoomerangNapi *BoomerangNapi::GetDeviceStatusNapi()

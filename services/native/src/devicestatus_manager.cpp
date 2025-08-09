@@ -21,6 +21,9 @@
 #ifdef BOOMERANG_ONESTEP
 #include "wm_common.h"
 #endif
+#ifdef BOOMERANG_SUPPORT_HDR
+#include "vpe_utils.h"
+#endif // BOOMERANG_SUPPORT_HDR
 
 #ifdef BOOMERANG_ONESTEP
 #include "accessibility_manager.h"
@@ -588,11 +591,41 @@ int32_t DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMa
     CHKPR(pixelMap, RET_ERR);
     CHKPR(callback, RET_ERR);
     std::lock_guard lock(mutex_);
-    std::shared_ptr<Media::PixelMap> encodePixelMap;
+
+#ifdef BOOMERANG_SUPPORT_HDR
+    sptr<SurfaceBuffer> surfaceBuf(reinterpret_cast<SurfaceBuffer*>(pixelMap->GetFd()));
+    CHKPR(surfaceBuf, RET_ERR);
+
+    HDI::Display::Graphic::Common::V1_0::CM_ColorSpaceType colorSpaceType;
+    Media::VpeUtils::GetSbColorSpaceType(surfaceBuf, colorSpaceType);
+
+    HDI::Display::Graphic::Common::V1_0::CM_HDR_Metadata_Type metadatType;
+    Media::VpeUtils::GetSbMetadataType(surfaceBuf, metadatType);
+#endif // BOOMERANG_SUPPORT_HDR
+
     auto algo = std::make_shared<BoomerangAlgoImpl>();
     CHKPR(algo, RET_ERR);
+    std::shared_ptr<Media::PixelMap> encodePixelMap;
     algo->EncodeImage(pixelMap, metadata, encodePixelMap);
     CHKPR(encodePixelMap, RET_ERR);
+
+#ifdef BOOMERANG_SUPPORT_HDR
+    sptr<SurfaceBuffer> encodeSurfaceBuf(reinterpret_cast<SurfaceBuffer*>(encodePixelMap->GetFd()));
+    CHKPR(encodeSurfaceBuf, RET_ERR);
+
+    bool ret = Media::VpeUtils::SetSbColorSpaceType(encodeSurfaceBuf, colorSpaceType);
+    if (!ret) {
+        FI_HILOGE("encode iamge faild by SetSbColorSpaceType");
+        return RET_ERR;
+    }
+
+    ret = Media::VpeUtils::SetSbMetadadataType(encodeSurfaceBuf, metadatType);
+    if (!ret) {
+        FI_HILOGE("encode iamge faild by SetSbMetadadataType");
+        return RET_ERR;
+    }
+#endif // BOOMERANG_SUPPORT_HDR
+
     callback->OnEncodeImageResult(encodePixelMap);
     return RET_OK;
 }
