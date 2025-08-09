@@ -307,6 +307,7 @@ ErrCode DeviceStatusMsdpClientImpl::UnregisterAlgo()
 int32_t DeviceStatusMsdpClientImpl::MsdpCallback(const Data &data)
 {
     CALL_DEBUG_ENTER;
+    std::unique_lock lock(mutex_);
     DS_DUMPER->PushDeviceStatus(data);
     SaveObserverData(data);
     if (notifyManagerFlag_) {
@@ -319,7 +320,6 @@ int32_t DeviceStatusMsdpClientImpl::MsdpCallback(const Data &data)
 Data DeviceStatusMsdpClientImpl::SaveObserverData(const Data &data)
 {
     CALL_DEBUG_ENTER;
-    std::unique_lock lock(mutex_);
     for (auto iter = deviceStatusDatas_.begin(); iter != deviceStatusDatas_.end(); ++iter) {
         if (iter->first == data.type) {
             iter->second = data.value;

@@ -214,6 +214,10 @@ std::tuple<bool, napi_value, std::string, int32_t, int32_t> DeviceStatusNapi::Ch
         ThrowErr(env, PARAM_ERROR, "Failed to get string item");
         return result;
     }
+    if (modLen < 0 || modLen > NAPI_BUF_LENGTH) {
+        ThrowErr(env, PARAM_ERROR, "The string length invalid");
+        return result;
+    }
     char mode[NAPI_BUF_LENGTH] = { 0 };
     status = napi_get_value_string_utf8(env, args[ARG_0], mode, modLen + 1, &modLen);
     if (status != napi_ok) {
@@ -256,6 +260,10 @@ std::tuple<bool, napi_value, int32_t> DeviceStatusNapi::CheckGetParam(napi_env e
         ThrowErr(env, PARAM_ERROR, "Failed to get string item");
         return result;
     }
+    if (modLen < 0 || modLen > NAPI_BUF_LENGTH) {
+        ThrowErr(env, PARAM_ERROR, "The string length invalid");
+        return result;
+    }
     char mode[NAPI_BUF_LENGTH] = { 0 };
     napiStatus = napi_get_value_string_utf8(env, args[ARG_0], mode, modLen + 1, &modLen);
     if (napiStatus != napi_ok) {
@@ -277,6 +285,10 @@ napi_value DeviceStatusNapi::GetParameters(napi_env env, size_t argc, const napi
     napi_status status = napi_get_value_string_utf8(env, args[0], nullptr, 0, &modLen);
     if (status != napi_ok) {
         ThrowErr(env, PARAM_ERROR, "Failed to get string item");
+        return nullptr;
+    }
+    if (modLen < 0 || modLen > NAPI_BUF_LENGTH) {
+        ThrowErr(env, PARAM_ERROR, "The string length invalid");
         return nullptr;
     }
     char mode[NAPI_BUF_LENGTH] = { 0 };
