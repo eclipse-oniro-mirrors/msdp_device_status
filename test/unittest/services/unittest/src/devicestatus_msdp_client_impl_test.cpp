@@ -52,7 +52,7 @@ HWTEST_F(DeviceStatusMsdpClientImplTest, DeviceStatusMsdpClientImplTest, TestSiz
 {
     GTEST_LOG_(INFO) << "DeviceStatusMsdpClientImplTest start";
     auto msdpImpl = std::make_shared<DeviceStatusMsdpClientImpl>();
-    Data data = {Type::TYPE_RELATIVE_STILL, OnChangedValue.VALUE_ENTER};
+    Data data = {Type::TYPE_RELATIVE_STILL, OnChangedValue::VALUE_ENTER};
     msdpImpl->MsdpCallback(data);
     ASSERT_NE(msdpImpl, nullptr);
     GTEST_LOG_(INFO) << "DeviceStatusMsdpClientImplTest end";
