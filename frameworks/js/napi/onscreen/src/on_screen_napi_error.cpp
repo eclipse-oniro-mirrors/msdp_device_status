@@ -55,7 +55,6 @@ napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const s
 
 std::optional<std::string> GetOnScreenErrMsg(int32_t errCode)
 {
-    errCode = errCode == ETASKS_WAIT_TIMEOUT ? RET_TIMEOUT : errCode;
     auto iter = ERROR_MESSAGES.find(errCode);
     if (iter != ERROR_MESSAGES.end()) {
         return iter->second;
@@ -66,6 +65,7 @@ std::optional<std::string> GetOnScreenErrMsg(int32_t errCode)
 
 void ThrowOnScreenErr(const napi_env &env, int32_t errCode, const std::string &printMsg)
 {
+    errCode = errCode == ETASKS_WAIT_TIMEOUT ? RET_TIMEOUT : errCode;
     FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", printMsg.c_str(), errCode);
     std::optional<std::string> msg = GetOnScreenErrMsg(errCode);
     if (!msg) {
@@ -79,6 +79,7 @@ void ThrowOnScreenErr(const napi_env &env, int32_t errCode, const std::string &p
 void ThrowOnScreenErrByPromise(const napi_env &env, int32_t errCode, const std::string &printMsg,
     napi_value &value)
 {
+    errCode = errCode == ETASKS_WAIT_TIMEOUT ? RET_TIMEOUT : errCode;
     FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", printMsg.c_str(), errCode);
     std::optional<std::string> msg = GetOnScreenErrMsg(errCode);
     if (!msg) {
