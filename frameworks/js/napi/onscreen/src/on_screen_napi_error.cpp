@@ -37,7 +37,7 @@ std::map<int32_t, std::string> ERROR_MESSAGES = {
                         "screen is splited. 2. passed window id is not on screen or floating." },
     { RET_PAGE_NOT_READY, "The page is not ready." },
     { RET_TARGET_NOT_FOUND, "The target is not found." },
-    { RET_TIME_OUT, "Time out." },
+    { RET_TIMEOUT, "The request is timeout." },
 };
 
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage)
@@ -54,6 +54,7 @@ napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const s
 
 std::optional<std::string> GetOnScreenErrMsg(int32_t errCode)
 {
+    errCode = errCode == ETASKS_WAIT_TIMEOUT ? RET_TIMEOUT : errCode;
     auto iter = ERROR_MESSAGES.find(errCode);
     if (iter != ERROR_MESSAGES.end()) {
         return iter->second;
