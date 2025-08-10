@@ -18,6 +18,7 @@
 #include <atomic>
 
 #include "display_manager.h"
+#include "product_name_definition_parser.h"
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "display_info.h"
 #include "extra_data.h"
@@ -67,7 +68,6 @@ const std::string APP_VERSION_ID {"1.0.0"};
 const std::string DRAG_FRAMEWORK {"DRAG_FRAMEWORK"};
 const std::string START_CROSSING_DRAG {"START_CROSSING_DRAG"};
 const std::string END_CROSSING_DRAG {"END_CROSSING_DRAG"};
-const std::string DEVICE_TYPE_HPR {"HPR"};
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 const std::string LANGUAGE_KEY {"persist.global.language"};
 const std::string DEFAULT_LANGUAGE_KEY {"const.global.language"};
@@ -667,8 +667,8 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style)
         return RET_ERR;
     }
 #ifdef OHOS_ENABLE_PULLTHROW
-    if (isHPR_ && inHoveringState_) {
-        FI_HILOGD("isHPR and inHoveringState, dragstyle set to default");
+    if (isFoldPC_ && inHoveringState_) {
+        FI_HILOGD("isFoldPC and inHoveringState, dragstyle set to default");
         return RET_OK;
     }
 #endif // OHOS_ENABLE_PULLTHROW
@@ -854,8 +854,8 @@ int32_t DragManager::OnPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent
 {
     CHKPR(pointerEvent, RET_ERR);
     dragDrawing_.StopVSyncStation();
-    isHPR_ = PRODUCT_TYPE == DEVICE_TYPE_HPR;
-    if (!isHPR_) {
+    isFoldPC_.store(PRODUCT_TYPE == PRODUCT_NAME_DEFINITION_PARSER.GetProductName("DEVICE_TYPE_FOLD_PC"));
+    if (!isFoldPC_) {
         FI_HILOGW("Fail to pull throw, feature not support");
         return RET_ERR;
     }
@@ -2173,8 +2173,8 @@ void DragManager::UpdateDragStyleCross()
     auto dragStyle = DRAG_DATA_MGR.GetDragStyle();
     FI_HILOGI("OnUpdateDragStyle dragStyle:%{public}s", GetDragStyleName(dragStyle).c_str());
 #ifdef OHOS_ENABLE_PULLTHROW
-    if (isHPR_ && inHoveringState_) {
-        FI_HILOGD("isHPR and inHoveringState, dragstyle set to default");
+    if (isFoldPC_ && inHoveringState_) {
+        FI_HILOGD("isFoldPC and inHoveringState, dragstyle set to default");
         return;
     }
 #endif // OHOS_ENABLE_PULLTHROW

@@ -19,7 +19,7 @@
 #include <cstring>
 #include <regex>
 #include <unistd.h>
-
+#include "special_input_device_parser.h"
 #include <sys/epoll.h>
 #include <sys/stat.h>
 
@@ -42,9 +42,6 @@ namespace DeviceStatus {
 namespace {
 constexpr size_t EXPECTED_N_SUBMATCHES { 2 };
 constexpr size_t EXPECTED_SUBMATCH { 1 };
-const std::string FINGER_PRINT { "hw_fingerprint_mouse" };
-const std::string WATCH { "WATCH" };
-const std::string PENCIL { "Pencil" };
 const std::string VIRTUAL_TRACK_PAD_NAME { "VirtualTrackpad" };
 constexpr int32_t INVALID_DEVICE_ID { -1 };
 } // namespace
@@ -436,21 +433,23 @@ bool DeviceManager::HasLocalPointerDevice()
 {
     return AnyOf([this](std::shared_ptr<IDevice> dev) {
         DeviceInfo(dev);
-        if ((dev == nullptr) || IsSpecialPointerDevice(dev)) {
+        if ((dev == nullptr) || IsFakePointerDevice(dev)) {
             return false;
         }
         return (dev->IsPointerDevice() && !dev->IsRemote());
     });
 }
 
-bool DeviceManager::IsSpecialPointerDevice(std::shared_ptr<IDevice> dev)
+bool DeviceManager::IsFakePointerDevice(std::shared_ptr<IDevice> dev)
 {
     if (dev == nullptr) {
         return false;
     }
-    std::string deviceName = dev->GetName();
-    return (deviceName == FINGER_PRINT || deviceName.find(WATCH) != std::string::npos
-        || deviceName.find(PENCIL) != std::string::npos);
+    bool isPointerDevice { false };
+    if (SPECIAL_INPUT_DEVICE_PARSER.IsPointerDevice(dev->GetName(), isPointerDevice) != RET_OK) {
+        return false;
+    }
+    return !isPointerDevice;
 }
 
 bool DeviceManager::HasLocalKeyboardDevice()
@@ -505,7 +504,8 @@ std::vector<std::shared_ptr<IDevice>> DeviceManager::GetPointerDevice()
     std::vector<std::shared_ptr<IDevice>> pointerDevices;
     for (const auto &dev : devices_) {
         if (dev.second != nullptr) {
-            if (dev.second->IsPointerDevice() && !dev.second->IsRemote() && dev.second->GetName() != FINGER_PRINT) {
+            if (dev.second->IsPointerDevice() && !dev.second->IsRemote() &&
+                !IsFakePointerDevice(dev.second)) {
                 pointerDevices.push_back(dev.second);
             }
         }

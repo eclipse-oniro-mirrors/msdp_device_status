@@ -90,7 +90,7 @@ private:
     std::shared_ptr<IDevice> AddDevice(const std::string &devNode);
     std::shared_ptr<IDevice> RemoveDevice(const std::string &devNode);
     std::shared_ptr<IDevice> FindDevice(const std::string &devPath);
-    bool IsSpecialPointerDevice(std::shared_ptr<IDevice> dev);
+    bool IsFakePointerDevice(std::shared_ptr<IDevice> dev);
     bool IsLocalPointerDevice(std::shared_ptr<MMI::InputDevice> dev);
     bool IsVirtualTrackpad(std::shared_ptr<MMI::InputDevice> dev);
 

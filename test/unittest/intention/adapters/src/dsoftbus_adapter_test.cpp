@@ -561,7 +561,7 @@ HWTEST_F(DsoftbusAdapterTest, TestOnConnectedLocked, TestSize.Level1)
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
     DSoftbusAdapterImpl dSoftbusAdapterImpl;
     std::string networkId("softbus");
-    ASSERT_NO_FATAL_FAILURE(dSoftbusAdapterImpl.OnConnectedLocked(networkId););
+    ASSERT_NO_FATAL_FAILURE(dSoftbusAdapterImpl.OnConnectedLocked(networkId));
     RemovePermission();
 }
 
@@ -578,7 +578,7 @@ HWTEST_F(DsoftbusAdapterTest, TestHandlePacket, TestSize.Level1)
     DSoftbusAdapterImpl dSoftbusAdapterImpl;
     NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE);
     std::string networkId("softbus");
-    ASSERT_NO_FATAL_FAILURE(dSoftbusAdapterImpl.HandlePacket(networkId, packet););
+    ASSERT_NO_FATAL_FAILURE(dSoftbusAdapterImpl.HandlePacket(networkId, packet));
     RemovePermission();
 }
 

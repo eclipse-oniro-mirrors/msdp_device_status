@@ -35,6 +35,7 @@ ohos_source_set("intention_device_manager") {
   include_dirs = [
     "include",
     "${device_status_interfaces_path}/innerkits/interaction/include",
+    "${device_status_root_path}/utils/custom_config/include"
   ]
 
   sources = [
@@ -49,6 +50,8 @@ ohos_source_set("intention_device_manager") {
   deps = [
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_root_path}/utils/custom_config:custom_config_parser",
+    "${device_status_root_path}/utils/json_parser:json_parser"
   ]
 
   public_deps = [
@@ -58,6 +61,7 @@ ohos_source_set("intention_device_manager") {
 
   external_deps = [
     "c_utils:utils",
+    "cJSON:cjson",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
