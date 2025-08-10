@@ -16,6 +16,7 @@
 
 #include <optional>
 
+#include "devicestatus_errors.h"
 #include "fi_log.h"
 #include "on_screen_data.h"
 
