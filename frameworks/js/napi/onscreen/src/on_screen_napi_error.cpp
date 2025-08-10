@@ -16,6 +16,7 @@
 
 #include <optional>
 
+#include "devicestatus_errors.h"
 #include "fi_log.h"
 #include "on_screen_data.h"
 
@@ -37,6 +38,7 @@ std::map<int32_t, std::string> ERROR_MESSAGES = {
                         "screen is splited. 2. passed window id is not on screen or floating." },
     { RET_PAGE_NOT_READY, "The page is not ready." },
     { RET_TARGET_NOT_FOUND, "The target is not found." },
+    { RET_TIMEOUT, "The request is timeout." },
 };
 
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage)
@@ -63,6 +65,7 @@ std::optional<std::string> GetOnScreenErrMsg(int32_t errCode)
 
 void ThrowOnScreenErr(const napi_env &env, int32_t errCode, const std::string &printMsg)
 {
+    errCode = errCode == ETASKS_WAIT_TIMEOUT ? RET_TIMEOUT : errCode;
     FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", printMsg.c_str(), errCode);
     std::optional<std::string> msg = GetOnScreenErrMsg(errCode);
     if (!msg) {
@@ -76,6 +79,7 @@ void ThrowOnScreenErr(const napi_env &env, int32_t errCode, const std::string &p
 void ThrowOnScreenErrByPromise(const napi_env &env, int32_t errCode, const std::string &printMsg,
     napi_value &value)
 {
+    errCode = errCode == ETASKS_WAIT_TIMEOUT ? RET_TIMEOUT : errCode;
     FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", printMsg.c_str(), errCode);
     std::optional<std::string> msg = GetOnScreenErrMsg(errCode);
     if (!msg) {
