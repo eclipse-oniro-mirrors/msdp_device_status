@@ -1317,7 +1317,7 @@ void DragManager::Dump(int32_t fd) const
         udKey = "";
     }
     for (const auto& shadowInfo : dragData.shadowInfos) {
-        dprintf(fd, "dragData = {\n""\tshadowInfoX:%d\n\tshadowInfoY\n", shadowInfo.x, shadowInfo.y);
+        dprintf(fd, "dragData = {\n""\tshadowInfoX:%d\n\tshadowInfoY:%d\n", shadowInfo.x, shadowInfo.y);
     }
     dprintf(fd, "dragData = {\n"
             "\tudKey:%s\n\tfilterInfo:%s\n\textraInfo:%s\n\tsourceType:%d"
