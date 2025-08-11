@@ -28,6 +28,15 @@ config("devicestatus_srv_public_config") {
 }
 
 ohos_shared_library("devicestatus_mock") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  
   sources = [
     "src/devicestatus_data_parse.cpp",
     "src/devicestatus_msdp_mock.cpp",
