@@ -663,7 +663,7 @@ HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest015, TestSize.Lev
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     int32_t deviceId = 0;
-    std::string name = {"hw_fingerprint_mouse"};
+    std::string name = {"fingerprint_mouse"};
     std::shared_ptr<IDevice> dev = std::make_shared<Device>(deviceId);
     dev->SetId(deviceId);
     dev->SetName(name);
@@ -679,7 +679,7 @@ HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest015, TestSize.Lev
     dev1->AddCapability(Device::DEVICE_CAP_POINTER);
     env->devMgr_.devices_.insert_or_assign(dev1->GetId(), dev1);
     int32_t deviceId2 = 2;
-    std::string name2 = {"hw_fingerprint_mouse"};
+    std::string name2 = {"fingerprint_mouse"};
     std::shared_ptr<IDevice> dev2 = std::make_shared<Device>(deviceId2);
     dev2->SetId(deviceId2);
     dev2->SetName(name2);
@@ -700,7 +700,7 @@ HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest016, TestSize.Lev
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     int32_t deviceId = 0;
-    std::string name = {"hw_fingerprint_mouse"};
+    std::string name = {"fingerprint_mouse"};
     std::shared_ptr<IDevice> dev = std::make_shared<Device>(deviceId);
     dev->SetId(deviceId);
     dev->SetName(name);
@@ -714,7 +714,7 @@ HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest016, TestSize.Lev
     dev1->AddCapability(Device::DEVICE_CAP_POINTER);
     env->devMgr_.devices_.insert_or_assign(dev1->GetId(), dev1);
     int32_t deviceId2 = 2;
-    std::string name2 = {"hw_fingerprint_mouse"};
+    std::string name2 = {"fingerprint_mouse"};
     std::shared_ptr<IDevice> dev2 = std::make_shared<Device>(deviceId2);
     dev2->SetId(deviceId2);
     dev2->SetName(name2);
