@@ -312,7 +312,7 @@ private:
     PullThrowListener listener_;
 #endif // OHOS_ENABLE_PULLTHROW
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    std::atomic_bool isFoldPC_ { false };
+    std::atomic_bool isHPR_ { false };
     int32_t timerId_ { -1 };
     int32_t mouseDragMonitorTimerId_ { -1 };
     DragState dragState_ { DragState::STOP };

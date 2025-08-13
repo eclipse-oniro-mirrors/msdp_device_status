@@ -44,8 +44,6 @@ if (!is_arkui_x) {
       "${device_status_service_path}/context/include",
       "${device_status_service_path}/interaction/drag/include",
       "${device_status_service_path}/native/include",
-      "${device_status_root_path}/utils/json_parser/include",
-      "${device_status_root_path}/utils/custom_config/include"
     ]
 
     sources = [
@@ -87,8 +85,6 @@ if (!is_arkui_x) {
       "${device_status_root_path}/intention/prototype:intention_prototype",
       "${device_status_root_path}/utils/ipc:devicestatus_ipc",
       "${device_status_utils_path}:devicestatus_util",
-      "${device_status_root_path}/utils/custom_config:custom_config_parser",
-      "${device_status_root_path}/utils/json_parser:json_parser"
     ]
 
     external_deps = [
@@ -121,7 +117,6 @@ if (!is_arkui_x) {
       "udmf:udmf_client",
       "window_manager:libdm",
       "window_manager:libwm_lite",
-      "icu:shared_icuuc",
     ]
 
     if (device_status_hisysevent_enable) {

@@ -23,7 +23,6 @@ config("devicestatus_srv_public_config") {
     "interface",
     "include/algorithm",
     "include/datahub",
-    "${device_status_root_path}/utils/json_parser/include"
   ]
 }
 
@@ -40,15 +39,11 @@ ohos_shared_library("devicestatus_mock") {
 
   public_configs = [ ":devicestatus_srv_public_config" ]
 
-  deps = [
-    "${device_status_utils_path}:devicestatus_util",
-    "${device_status_root_path}/utils/json_parser:json_parser"
-  ]
+  deps = [ "${device_status_utils_path}:devicestatus_util" ]
 
   external_deps = [
     "c_utils:utils",
     "cJSON:cjson_static",
-    "cJSON:cjson",
     "hilog:libhilog",
   ]
 
@@ -96,7 +91,6 @@ ohos_shared_library("devicestatus_algo") {
   external_deps = [
     "ability_base:base",
     "cJSON:cjson_static",
-    "cJSON:cjson",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",

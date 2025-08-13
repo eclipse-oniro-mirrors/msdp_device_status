@@ -696,12 +696,13 @@ bool DSoftbusAdapterImpl::CheckDeviceOsType(const std::string &networkId)
         FI_HILOGE("Deviceinfo extradata is empty");
         return false;
     }
-    JsonParser extraData(deviceInfo.extraData.c_str());
-    if (!cJSON_IsObject(extraData.Get())) {
+    JsonParser extraData;
+    extraData.json = cJSON_Parse(deviceInfo.extraData.c_str());
+    if (!cJSON_IsObject(extraData.json)) {
         FI_HILOGE("extraData is not json object");
         return false;
     }
-    cJSON *osType = cJSON_GetObjectItemCaseSensitive(extraData.Get(), PARAM_KEY_OS_TYPE);
+    cJSON *osType = cJSON_GetObjectItemCaseSensitive(extraData.json, PARAM_KEY_OS_TYPE);
     if (cJSON_IsNumber(osType)) {
         if (osType->valueint != OS_TYPE_OH) {
             FI_HILOGE("Ostype:%{public}d", osType->valueint);

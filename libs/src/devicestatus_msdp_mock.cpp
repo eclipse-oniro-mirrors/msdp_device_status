@@ -25,7 +25,6 @@
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
 #include "fi_log.h"
-#include "json_parser.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DeviceStatusMsdpMock"
