@@ -31,7 +31,6 @@ declare_args() {
   device_status_device_type = "default"
   device_status_motion_enable = false
   device_status_pullthrow_enable = false
-  device_status_mouse_drawing = true
   device_status_boomerang_onestep = false
   device_status_boomerang_support_hdr = false
 
@@ -41,9 +40,6 @@ declare_args() {
     device_status_drag_enable_monitor = true
     device_status_sensor_enable = true
     device_status_memmgr_enable = false
-    if (is_emulator) {
-      device_status_mouse_drawing = false
-    }
 
     if (defined(global_parts_info)) {
       if (!defined(global_parts_info.sensors_sensor)) {
@@ -148,10 +144,6 @@ if (device_status_device_type == "pc") {
 
 if (device_status_pullthrow_enable) {
   device_status_default_defines += [ "OHOS_ENABLE_PULLTHROW" ]
-}
-
-if (device_status_mouse_drawing) {
-  device_status_default_defines += [ "OHOS_ENABLE_MOUSE_DRAWING" ]
 }
 
 if (device_status_boomerang_onestep) {
