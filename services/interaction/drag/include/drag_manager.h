@@ -315,6 +315,9 @@ private:
     std::atomic_bool isFoldPC_ { false };
     int32_t timerId_ { -1 };
     int32_t mouseDragMonitorTimerId_ { -1 };
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    int32_t internalDropTimerId_ { -1 };
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
     DragState dragState_ { DragState::STOP };
     DragResult dragResult_ { DragResult::DRAG_FAIL };
     std::string appCallee_;

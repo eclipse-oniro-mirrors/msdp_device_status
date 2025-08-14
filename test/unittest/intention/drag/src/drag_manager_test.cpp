@@ -1960,6 +1960,58 @@ HWTEST_F(DragManagerTest, DragManagerTest96, TestSize.Level0)
     g_dragMgr.isRTL_ = isRTL;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+/**
+ * @tc.name: DragManagerTest97
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest97, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.ResetAnimationParameter();
+    g_dragMgr.ResetDragState();
+    std::string animationInfo = "{\"targetPos\": [100, 100]}";
+    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.context_ = g_context;
+    ret = g_dragMgr.PerformInternalDropAnimation();
+    g_dragMgr.context_ = nullptr;
+    g_dragMgr.internalDropTimerId_ = 0;
+    ret = g_dragMgr.PerformInternalDropAnimation();
+    g_dragMgr.context_ = nullptr;
+    g_dragMgr.internalDropTimerId_ = -1;
+    ret = g_dragMgr.PerformInternalDropAnimation();
+    ASSERT_EQ(ret, RET_ERR);
+}
+ 
+/**
+ * @tc.name: DragManagerTest98
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest98, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.context_ = g_context;
+    g_dragMgr.internalDropTimerId_ = 0;
+    g_dragMgr.ResetDragState();
+    g_dragMgr.internalDropTimerId_ = -1;
+    g_dragMgr.ResetDragState();
+    g_dragMgr.context_ = nullptr;
+    g_dragMgr.internalDropTimerId_ = 0;
+    g_dragMgr.ResetDragState();
+    g_dragMgr.context_ = nullptr;
+    g_dragMgr.internalDropTimerId_ = -1;
+    g_dragMgr.ResetDragState();
+    std::string animationInfo = "{\"targetPos\": [100, 100]}";
+    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
+    EXPECT_EQ(ret, RET_OK);
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
