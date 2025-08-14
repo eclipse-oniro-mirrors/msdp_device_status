@@ -55,6 +55,7 @@ struct DragInternalInfo {
     std::shared_ptr<Rosen::RSNode> curvesMaskNode { nullptr };
     std::shared_ptr<Rosen::RSNode> lightNode { nullptr };
     std::shared_ptr<Media::PixelMap> currentPixelMap { nullptr };
+    std::shared_ptr<AppExecFwk::EventHandler> handler { nullptr };
     std::vector<std::shared_ptr<Rosen::RSCanvasNode>> nodes;
     std::vector<std::shared_ptr<Rosen::RSCanvasNode>> multiSelectedNodes;
     std::vector<std::shared_ptr<Media::PixelMap>> multiSelectedPixelMaps;

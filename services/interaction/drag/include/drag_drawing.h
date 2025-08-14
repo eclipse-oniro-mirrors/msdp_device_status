@@ -496,3 +496,4 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 #endif // DRAG_DRAWING_H
+dragInternalInfo.handler = handler_;
