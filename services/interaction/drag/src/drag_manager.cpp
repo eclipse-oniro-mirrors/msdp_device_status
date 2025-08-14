@@ -2374,7 +2374,20 @@ int32_t DragManager::PerformInternalDropAnimation()
     if (enableInternalDropAnimation_) {
         enableInternalDropAnimation_ = false;
     }
-    return internalAnimationWrapper_.PerformInternalDropAnimation(context_);
+    if (context_ != nullptr) {
+        int32_t repeatCount = 1;
+        internalDropTimerId_ = context_->GetTimerManager().AddTimer(TIMEOUT_MS,
+            repeatCount, [this]() {
+            FI_HILOGW("Timeout, automatically ResetDragState");
+            this->ResetDragState();
+        });
+    }
+    int32_t ret = internalAnimationWrapper_.PerformInternalDropAnimation(context_);
+    if ((ret != RET_OK) && (context_ != nullptr) && (internalDropTimerId_ >= 0)) {
+        context_->GetTimerManager().RemoveTimer(internalDropTimerId_);
+        internalDropTimerId_ = -1;
+    }
+    return ret;
 }
 
 void DragManager::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
@@ -2385,6 +2398,10 @@ void DragManager::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
 void DragManager::ResetDragState()
 {
     FI_HILOGI("enter");
+    if ((context_ != nullptr) && (internalDropTimerId_ >= 0)) {
+        context_->GetTimerManager().RemoveTimer(internalDropTimerId_);
+        internalDropTimerId_ = -1;
+    }
     dragDrawing_.DestroyDragWindow();
     dragDrawing_.UpdateDrawingState();
     FI_HILOGI("leave");

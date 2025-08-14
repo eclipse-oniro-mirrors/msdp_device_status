@@ -1167,6 +1167,7 @@ void DragDrawing::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
     dragInternalInfo.multiSelectedNodes = g_drawingInfo.multiSelectedNodes;
     dragInternalInfo.multiSelectedPixelMaps = g_drawingInfo.multiSelectedPixelMaps;
     dragInternalInfo.rotation = GetRotation(g_drawingInfo.displayId);
+    dragInternalInfo.handler = handler_;
  
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
     if (display == nullptr) {
