@@ -27,6 +27,7 @@ ohos_source_set("custom_config_parser") {
 
   include_dirs = [
     "include",
+    "${device_status_root_path}/utils/common/include",
     "${device_status_root_path}/utils/json_parser/include"
   ]
 

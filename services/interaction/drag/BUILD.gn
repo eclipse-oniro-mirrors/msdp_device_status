@@ -121,7 +121,6 @@ if (!is_arkui_x) {
       "udmf:udmf_client",
       "window_manager:libdm",
       "window_manager:libwm_lite",
-      "icu:shared_icuuc",
     ]
 
     if (device_status_hisysevent_enable) {

@@ -88,8 +88,7 @@
         "libuv",
         "data_share",
         "rust_libc",
-        "hiappevent",
-        "icu"
+        "hiappevent"
       ],
       "third_party": [
         "openssl",
