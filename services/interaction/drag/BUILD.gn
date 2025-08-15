@@ -195,6 +195,8 @@ if (!is_arkui_x) {
       "${file_arkui_root_path}/ace_engine",
       "${file_arkui_root_path}/ace_engine/interfaces/inner_api/ace_kit/include",
       "${foundation_graphic_path}/graphic_surface/interfaces/inner_api/surface",
+      "${device_status_root_path}/utils/json_parser/include",
+      "${device_status_root_path}/utils/custom_config/include",
     ]
 
     sources = [
@@ -202,6 +204,9 @@ if (!is_arkui_x) {
       "${device_status_root_path}/utils/common/src/animation_curve.cpp",
       "${device_status_root_path}/utils/common/src/util.cpp",
       "${device_status_root_path}/utils/common/src/utility.cpp",
+      "${device_status_root_path}/utils/custom_config/src/product_name_definition_parser.cpp",
+      "${device_status_root_path}/utils/custom_config/src/special_input_device_parser.cpp",
+      "${device_status_root_path}/utils/json_parser/src/json_parser.cpp",
       "src/drag_data_manager.cpp",
       "src/drag_drawing.cpp",
       "src/drag_manager.cpp",
@@ -225,6 +230,8 @@ if (!is_arkui_x) {
     if (defined(use_rosen_drawing) && use_rosen_drawing) {
       defines += [ "USE_ROSEN_DRAWING" ]
     }
+
+    defines += [ "CROSS_PLATFORM" ]
 
     deps = [
       "${foundation_graphic_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
