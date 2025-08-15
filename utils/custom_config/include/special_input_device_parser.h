@@ -19,10 +19,11 @@
 #include <shared_mutex>
 #include <string>
 #include <map>
- 
+#include <vector>
+
 #include "json_parser.h"
 #include "cJSON.h"
- 
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
