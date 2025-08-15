@@ -775,6 +775,8 @@ void CooperateIn::RelayConfirmation::OnProgress(Context &context, const Cooperat
 {
     std::string remoteNetworkId = parent_.process_.Peer();
     FI_HILOGI("[relay cooperate] Connect \'%{public}s\'", Utility::Anonymize(remoteNetworkId).c_str());
+    CHKPV(parent_.env_);
+    bool needCheckSameAccount = !(parent_.env_->GetDSoftbus().HasSessionExisted(context.Peer()));
     int32_t ret = context.dsoftbus_.OpenSession(remoteNetworkId);
     if (ret != RET_OK) {
         FI_HILOGE("[relay cooperate] Failed to connect to \'%{public}s\'", Utility::Anonymize(remoteNetworkId).c_str());
@@ -788,6 +790,9 @@ void CooperateIn::RelayConfirmation::OnProgress(Context &context, const Cooperat
         .pointerSpeed = context.GetPointerSpeed(),
         .touchPadSpeed = context.GetTouchPadSpeed(),
         .uid = startEvent.uid,
+        .userId = parent_.env_->GetDDM().GetUserId(),
+        .accountId = parent_.env_->GetDDM().GetAccountId(),
+        .needCheckSameAccount = needCheckSameAccount
     };
     context.dsoftbus_.RelayCooperate(context.Peer(), notice);
     timerId_ = parent_.env_->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE,
@@ -808,6 +813,7 @@ void CooperateIn::RelayConfirmation::OnProgressWithOptions(Context &context, con
 {
     std::string remoteNetworkId = parent_.process_.Peer();
     FI_HILOGI("[relay cooperate] Connect \'%{public}s\'", Utility::Anonymize(remoteNetworkId).c_str());
+    bool needCheckSameAccount = !(parent_.env_->GetDSoftbus().HasSessionExisted(context.Peer()));
     int32_t ret = context.dsoftbus_.OpenSession(remoteNetworkId);
     if (ret != RET_OK) {
         FI_HILOGE("[relay cooperate] Failed to connect to \'%{public}s\'", Utility::Anonymize(remoteNetworkId).c_str());
@@ -820,6 +826,9 @@ void CooperateIn::RelayConfirmation::OnProgressWithOptions(Context &context, con
         .targetNetworkId = parent_.process_.Peer(),
         .pointerSpeed = context.GetPointerSpeed(),
         .touchPadSpeed = context.GetTouchPadSpeed(),
+        .userId = parent_.env_->GetDDM().GetUserId(),
+        .accountId = parent_.env_->GetDDM().GetAccountId(),
+        .needCheckSameAccount = needCheckSameAccount
     };
     context.dsoftbus_.RelayCooperateWithOptions(context.Peer(), notice);
     startWithOptionsEvent_ = std::get<StartWithOptionsEvent>(event.event);

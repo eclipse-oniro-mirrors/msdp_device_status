@@ -148,7 +148,7 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
     NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE);
     packet << event.originNetworkId << event.cursorPos.x
         << event.cursorPos.y << event.success << event.extra.priv << event.pointerSpeed
-        << event.touchPadSpeed << event.uid;
+        << event.touchPadSpeed << event.uid << event.userId << event.accountId << event.needCheckSameAccount;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         CooperateRadarInfo radarInfo {
@@ -191,7 +191,7 @@ int32_t DSoftbusHandler::StartCooperateWithOptions(const std::string &networkId,
     NetPacket packet(MessageId::DSOFTBUS_COOPERATE_WITH_OPTIONS);
     packet << event.originNetworkId << event.cooperateOptions.displayX << event.cooperateOptions.displayY
         << event.cooperateOptions.displayId << event.success << event.extra.priv << event.pointerSpeed
-        << event.touchPadSpeed;
+        << event.touchPadSpeed << event.userId << event.accountId << event.needCheckSameAccount;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         CooperateRadarInfo radarInfo {
@@ -279,7 +279,8 @@ int32_t DSoftbusHandler::RelayCooperate(const std::string &networkId, const DSof
     CALL_INFO_TRACE;
     CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE);
-    packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed << event.uid;
+    packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed << event.uid <<
+        event.userId << event.accountId << event.needCheckSameAccount;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         return RET_ERR;
@@ -313,7 +314,8 @@ int32_t DSoftbusHandler::RelayCooperateWithOptions(const std::string &networkId,
     CALL_INFO_TRACE;
     CHKPR(env_, RET_ERR);
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS);
-    packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed;
+    packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed <<
+        event.userId << event.accountId << event.needCheckSameAccount;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         return RET_ERR;
@@ -452,6 +454,18 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     if (packet.ChkRWError()) {
         event.uid = 0;
     }
+    packet >> event.userId;
+    if (packet.ChkRWError()) {
+        event.userId = -1;
+    }
+    packet >> event.accountId;
+    if (packet.ChkRWError()) {
+        event.accountId = "";
+    }
+    packet >> event.needCheckSameAccount;
+    if (packet.ChkRWError()) {
+        event.needCheckSameAccount = false;
+    }
     FI_HILOGI("Cur pointerSpeed:%{public}d, touchPadSpeed:%{public}d, uid:%{public}d",
         event.pointerSpeed, event.touchPadSpeed, event.uid);
     SendEvent(CooperateEvent(
@@ -523,6 +537,18 @@ void DSoftbusHandler::OnStartCooperateWithOptions(const std::string &networkId, 
     packet >> event.touchPadSpeed;
     if (packet.ChkRWError()) {
         event.touchPadSpeed = -1;
+    }
+    packet >> event.userId;
+    if (packet.ChkRWError()) {
+        event.userId = -1;
+    }
+    packet >> event.accountId;
+    if (packet.ChkRWError()) {
+        event.accountId = "";
+    }
+    packet >> event.needCheckSameAccount;
+    if (packet.ChkRWError()) {
+        event.needCheckSameAccount = false;
     }
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_COOPERATE_WITH_OPTIONS,
@@ -607,6 +633,18 @@ void DSoftbusHandler::OnRelayCooperate(const std::string &networkId, NetPacket &
     if (packet.ChkRWError()) {
         event.uid = 0;
     }
+    packet >> event.userId;
+    if (packet.ChkRWError()) {
+        event.userId = -1;
+    }
+    packet >> event.accountId;
+    if (packet.ChkRWError()) {
+        event.accountId = "";
+    }
+    packet >> event.needCheckSameAccount;
+    if (packet.ChkRWError()) {
+        event.needCheckSameAccount = false;
+    }
     FI_HILOGI("Cur uid:%{public}d", event.uid);
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_RELAY_COOPERATE,
@@ -654,6 +692,18 @@ void DSoftbusHandler::OnRelayCooperateWithOptions(const std::string &networkId, 
     packet >> event.touchPadSpeed;
     if (packet.ChkRWError()) {
         event.touchPadSpeed = -1;
+    }
+    packet >> event.userId;
+    if (packet.ChkRWError()) {
+        event.userId = -1;
+    }
+    packet >> event.accountId;
+    if (packet.ChkRWError()) {
+        event.accountId = "";
+    }
+    packet >> event.needCheckSameAccount;
+    if (packet.ChkRWError()) {
+        event.needCheckSameAccount = false;
     }
     FI_HILOGI("Cur touchPadSpeed:%{public}d", event.touchPadSpeed);
     SendEvent(CooperateEvent(

@@ -65,6 +65,29 @@ bool DDMAdapter::CheckSameAccountToLocalWithUid(const std::string &networkId, co
     CALL_DEBUG_ENTER;
     return ddm_->CheckSameAccountToLocalWithUid(networkId, uid);
 }
+
+bool DDMAdapter::CheckSrcIsSameAccount(const std::string &sinkNetworkId)
+{
+    CALL_DEBUG_ENTER;
+    return ddm_->CheckSrcIsSameAccount(sinkNetworkId);
+}
+
+bool DDMAdapter::CheckSinkIsSameAccount(const std::string &srcNetworkId, int32_t srcUserId,
+    const std::string &srcAccountId)
+{
+    CALL_DEBUG_ENTER;
+    return ddm_->CheckSinkIsSameAccount(srcNetworkId, srcUserId, srcAccountId);
+}
+
+int32_t DDMAdapter::GetUserId()
+{
+    return ddm_->GetUserId();
+}
+
+std::string DDMAdapter::GetAccountId()
+{
+    return ddm_->GetAccountId();
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

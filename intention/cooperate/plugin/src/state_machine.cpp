@@ -328,14 +328,8 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
     CALL_INFO_TRACE;
     CHKPV(env_);
     StartCooperateEvent startEvent = std::get<StartCooperateEvent>(event.event);
-    bool checkSameAccount = false;
-    if (startEvent.uid > 0) {
-        checkSameAccount = env_->GetDDM().CheckSameAccountToLocalWithUid(startEvent.remoteNetworkId, startEvent.uid);
-    } else {
-        checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.remoteNetworkId);
-    }
-    if (!checkSameAccount) {
-        FI_HILOGE("CheckSameAccountToLocal failed");
+    if (!env_->GetDDM().CheckSrcIsSameAccount(startEvent.remoteNetworkId)) {
+        FI_HILOGE("CheckSrcIsSameAccount failed");
         startEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
         CooperateRadarInfo radarInfo {
             .funcName =  __FUNCTION__,
@@ -387,8 +381,8 @@ void StateMachine::StartCooperateWithOptions(Context &context, const CooperateEv
     CALL_INFO_TRACE;
     CHKPV(env_);
     StartWithOptionsEvent withOptionsEvent = std::get<StartWithOptionsEvent>(event.event);
-    if (!env_->GetDDM().CheckSameAccountToLocal(withOptionsEvent.remoteNetworkId)) {
-        FI_HILOGE("CheckSameAccountToLocal failed");
+    if (!env_->GetDDM().CheckSrcIsSameAccount(withOptionsEvent.remoteNetworkId)) {
+        FI_HILOGE("CheckSrcIsSameAccount failed");
         withOptionsEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
         CooperateRadarInfo radarInfo {
             .funcName =  __FUNCTION__,
@@ -598,7 +592,13 @@ void StateMachine::OnRemoteStart(Context &context, const CooperateEvent &event)
         .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
         .peerNetId = Utility::DFXRadarAnonymize(startEvent.originNetworkId.c_str())
     };
-    bool checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId);
+    bool checkSameAccount { false };
+    if (startEvent.userId > 0) {
+        checkSameAccount = env_->GetDDM().CheckSinkIsSameAccount(startEvent.originNetworkId, startEvent.userId,
+            startEvent.accountId);
+    } else {
+        checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId);
+    }
     if (!checkSameAccount) {
         radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT);
         radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
@@ -637,7 +637,13 @@ void StateMachine::OnRemoteStartWithOptions(Context &context, const CooperateEve
         .localNetId = Utility::DFXRadarAnonymize(context.Local().c_str()),
         .peerNetId = Utility::DFXRadarAnonymize(startEvent.originNetworkId.c_str())
     };
-    bool checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId);
+    bool checkSameAccount { false };
+    if (startEvent.userId > 0) {
+        checkSameAccount = env_->GetDDM().CheckSinkIsSameAccount(startEvent.originNetworkId, startEvent.userId,
+            startEvent.accountId);
+    } else {
+        checkSameAccount = env_->GetDDM().CheckSameAccountToLocal(startEvent.originNetworkId);
+    }
     if (!checkSameAccount) {
         radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CHECK_SAME_ACCOUNT);
         radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
