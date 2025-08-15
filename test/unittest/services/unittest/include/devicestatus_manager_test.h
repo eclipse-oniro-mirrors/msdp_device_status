@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include "boomerang_callback_stub.h"
+#include "devicestatus_callback_stub.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -38,7 +39,15 @@ public:
         void OnNotifyMetadata(const std::string& metadata) override;
         void OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pixelMap) override;
     };
+
+    class StationaryModuleTestCallback : public DeviceStatusCallbackStub {
+    public:
+        StationaryModuleTestCallback() {};
+        virtual ~StationaryModuleTestCallback() {};
+        void OnDeviceStatusChanged(const Data &value) override;
+    };
     static inline sptr<IRemoteBoomerangCallback> boomerangCallback_ = nullptr;
+    static inline sptr<IRemoteDevStaCallback> stationaryCallback_ = nullptr;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -56,11 +56,13 @@ namespace {
 void DeviceStatusManagerTest::SetUpTestCase()
 {
     boomerangCallback_ = new (std::nothrow) BoomerangModuleTestCallback();
+    stationaryCallback_ = new (std::nothrow) StationaryModuleTestCallback();
 }
 
 void DeviceStatusManagerTest::TearDownTestCase()
 {
     delete boomerangCallback_;
+    delete stationaryCallback_;
 }
 
 void DeviceStatusManagerTest::SetUp() {}
@@ -82,6 +84,16 @@ void DeviceStatusManagerTest::BoomerangModuleTestCallback::OnEncodeImageResult
     (std::shared_ptr<Media::PixelMap> pixelMap)
 {
     EXPECT_NE(pixelMap, nullptr);
+}
+
+void DeviceStatusManagerTest::StationaryModuleTestCallback::OnDeviceStatusChanged(const
+    Data& devicestatusData)
+{
+    GTEST_LOG_(INFO) << "StationaryModuleTestCallback type: " << devicestatusData.type;
+    GTEST_LOG_(INFO) << "StationaryModuleTestCallback value: " << devicestatusData.value;
+    EXPECT_TRUE(devicestatusData.type == Type::TYPE_VERTICAL_POSITION &&
+        devicestatusData.value >= OnChangedValue::VALUE_INVALID &&
+        devicestatusData.value <= OnChangedValue::VALUE_EXIT) << "StationaryModuleTestCallback failed";
 }
 
 namespace {
@@ -404,6 +416,72 @@ HWTEST_F(DeviceStatusManagerTest, HasSubmittedTest, TestSize.Level0) {
     int32_t result = deviceStatusManager->SubmitMetadata("metadata");
     EXPECT_EQ(result, RET_ERR);
     GTEST_LOG_(INFO) << "HasSubmittedTest end";
+}
+
+/**
+ * @tc.name: SubscribeStationaryTest
+ * @tc.desc: test devicestatus SubscribeStationaryTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusManagerTest, SubscribeStationaryTest, TestSize.Level0) {
+    GTEST_LOG_(INFO) << "SubscribeStationaryTest start";
+
+    deviceStatusManager->Subscribe(Type::TYPE_INVALID, ActivityEvent::EVENT_INVALID,
+        ReportLatencyNs::Latency_INVALID, nullptr);
+    EXPECT_EQ(deviceStatusManager->event_, TYPE_INVALID);
+
+    deviceStatusManager->Subscribe(Type::TYPE_INVALID, ActivityEvent::EVENT_INVALID,
+        ReportLatencyNs::Latency_INVALID, stationaryCallback_);
+    EXPECT_TRUE(deviceStatusManager->listeners_.empty());
+
+    deviceStatusManager->Subscribe(Type::TYPE_STAND, ActivityEvent::ENTER,
+        ReportLatencyNs::Latency_INVALID, stationaryCallback_);
+    EXPECT_FALSE(deviceStatusManager->listeners_.empty());
+    GTEST_LOG_(INFO) << "SubscribeStationaryTest end";
+}
+
+/**
+ * @tc.name: UnSubscribeStationaryTest
+ * @tc.desc: test devicestatus UnSubscribeStationaryTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusManagerTest, UnSubscribeStationaryTest, TestSize.Level0) {
+    GTEST_LOG_(INFO) << "UnSubscribeStationaryTest start";
+    deviceStatusManager->Unsubscribe(Type::TYPE_INVALID, ActivityEvent::EVENT_INVALID, nullptr);
+    EXPECT_FALSE(deviceStatusManager->listeners_.empty());
+
+    deviceStatusManager->Unsubscribe(Type::TYPE_STAND, ActivityEvent::ENTER, stationaryCallback_);
+    EXPECT_TRUE(deviceStatusManager->listeners_.empty());
+    GTEST_LOG_(INFO) << "UnSubscribeStationaryTest end";
+}
+
+/**
+ * @tc.name: LoadAlgorithmTest
+ * @tc.desc: test devicestatus LoadAlgorithmTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusManagerTest, LoadAlgorithmTest, TestSize.Level0) {
+    GTEST_LOG_(INFO) << "LoadAlgorithmTest start";
+
+    deviceStatusManager->LoadAlgorithm();
+    EXPECT_EQ(deviceStatusManager->msdpImpl_, nullptr);
+
+    deviceStatusManager->msdpImpl_ = std::make_shared<DeviceStatusMsdpClientImpl>();
+    int32_t result = deviceStatusManager->LoadAlgorithm();
+    EXPECT_EQ(result, RET_OK);
+    GTEST_LOG_(INFO) << "LoadAlgorithmTest end";
+}
+
+/**
+ * @tc.name: UnloadAlgorithmTest
+ * @tc.desc: test devicestatus UnloadAlgorithmTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusManagerTest, UnloadAlgorithmTest, TestSize.Level0) {
+    GTEST_LOG_(INFO) << "UnloadAlgorithmTest start";
+    int32_t result = deviceStatusManager->UnloadAlgorithm();
+    EXPECT_EQ(result, RET_OK);
+    GTEST_LOG_(INFO) << "UnloadAlgorithmTest end";
 }
 } // namespace
 } // namespace DeviceStatus
