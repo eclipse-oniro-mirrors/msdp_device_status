@@ -16,7 +16,6 @@
 #include "display_change_event_listener.h"
 
 #include "devicestatus_define.h"
-#include "product_name_definition_parser.h"
 #include "parameters.h"
 
 #undef LOG_TAG
@@ -30,7 +29,8 @@ constexpr int32_t INDEX_FOLDED { 0 };
 constexpr int32_t INDEX_EXPAND { 1 };
 constexpr size_t MAX_INDEX_LENGTH { 2 };
 const std::string SCREEN_ROTATION { "1" };
-const std::string SYS_PRODUCT_TYPE = OHOS::system::GetParameter("const.build.product", "HYM");
+const std::string DEVICE_TYPE_HPR {"HPR"};
+const std::string HPR_PRODUCT_TYPE = OHOS::system::GetParameter("const.build.product", "HYM");
 } // namespace
 
 DisplayChangeEventListener::DisplayChangeEventListener(IContext *context)
@@ -186,9 +186,9 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     CHKPV(displayChangeEventListener_);
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(displayChangeEventListener_);
 #ifdef OHOS_ENABLE_PULLTHROW
-    isFoldPC_.store(SYS_PRODUCT_TYPE == PRODUCT_NAME_DEFINITION_PARSER.GetProductName("DEVICE_TYPE_FOLD_PC"));
-    if (isFoldPC_) {
-        FI_HILOGI("device foldPC check ok");
+    isHPR_ = HPR_PRODUCT_TYPE == DEVICE_TYPE_HPR;
+    if (isHPR_) {
+        FI_HILOGI("device hpr checkok");
         if (!context_->GetDragManager().RegisterPullThrowListener()) {
             FI_HILOGE("RegisterPullThrowListener fail");
             return;

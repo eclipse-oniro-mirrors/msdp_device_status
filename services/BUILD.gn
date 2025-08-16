@@ -25,7 +25,6 @@ config("devicestatus_services_private_config") {
     "interaction/drag/include",
     "communication/base",
     "communication/service/include",
-    "${device_status_root_path}/utils/json_parser/include"
   ]
 
   if (device_status_intention_framework) {
@@ -45,7 +44,6 @@ config("devicestatus_services_public_config") {
     "delegate_task/include",
     "native/include",
     "interaction/drag/include",
-    "${device_status_root_path}/utils/json_parser/include"
   ]
 
   if (device_status_intention_framework) {
@@ -123,7 +121,6 @@ ohos_shared_library("devicestatus_service") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",
     "interaction/drag:interaction_drag",
-    "${device_status_root_path}/utils/json_parser:json_parser"
   ]
 
   if (device_status_intention_framework) {
@@ -208,7 +205,6 @@ ohos_static_library("devicestatus_static_service") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",
     "interaction/drag:interaction_drag",
-    "${device_status_root_path}/utils/json_parser:json_parser"
   ]
 
   if (device_status_intention_framework) {

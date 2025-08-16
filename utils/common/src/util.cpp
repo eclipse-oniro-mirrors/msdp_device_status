@@ -379,59 +379,6 @@ bool IsSecondaryDevice()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     return false;
 }
-
-bool IsValidJsonPath(const std::string &filePath)
-{
-    return IsValidPath("/system/etc/multimodalinput/", filePath);
-}
-
-bool IsFileExists(const std::string &fileName)
-{
-    return (access(fileName.c_str(), F_OK) == 0);
-}
-
-std::string ReadFile(const std::string &filePath)
-{
-    FILE *fp = fopen(filePath.c_str(), "r");
-    CHKPS(fp);
-    std::string dataStr;
-    char buf[256] = {};
-    while (fgets(buf, sizeof(buf), fp) != nullptr) {
-        dataStr += buf;
-    }
-    if (fclose(fp) != 0) {
-        FI_HILOGW("Close file failed");
-    }
-    return dataStr;
-}
-
-std::string ReadJsonFile(const std::string &filePath)
-{
-    if (filePath.empty()) {
-        FI_HILOGE("FilePath is empty");
-        return "";
-    }
-    char realPath[PATH_MAX] = {};
-    CHKPS(realpath(filePath.c_str(), realPath));
-    if (!IsValidJsonPath(realPath)) {
-        FI_HILOGE("File path is error, filePath:%{private}s", realPath);
-        return "";
-    }
-    if (!CheckFileExtendName(realPath, "json")) {
-        FI_HILOGE("Unable to parse files other than json format");
-        return "";
-    }
-    if (!IsFileExists(realPath)) {
-        FI_HILOGE("File is not existent");
-        return "";
-    }
-    int32_t fileSize = Utility::GetFileSize(realPath);
-    if ((fileSize <= 0) || (fileSize > FILE_SIZE_MAX)) {
-        FI_HILOGE("File size out of read range");
-        return "";
-    }
-    return ReadFile(filePath);
-}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

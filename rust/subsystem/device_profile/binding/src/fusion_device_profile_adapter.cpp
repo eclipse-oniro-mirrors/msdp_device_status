@@ -176,12 +176,13 @@ bool FusionDeviceProfileAdapter::GetCrossSwitchState(const std::string &deviceId
 
     DistributedDeviceProfileClient::GetInstance().GetDeviceProfile(deviceId, SERVICE_ID, profile);
     std::string jsonData = profile.GetCharacteristicProfileJson();
-    JsonParser parser(jsonData.c_str());
-    if (!cJSON_IsObject(parser.Get())) {
+    JsonParser parser;
+    parser.json = cJSON_Parse(jsonData.c_str());
+    if (!cJSON_IsObject(parser.json)) {
         FI_HILOGE("parser json is not object");
         return false;
     }
-    cJSON* state = cJSON_GetObjectItemCaseSensitive(parser.Get(), characteristicsName_.c_str());
+    cJSON* state = cJSON_GetObjectItemCaseSensitive(parser.json, characteristicsName_.c_str());
     if (!cJSON_IsNumber(state)) {
         FI_HILOGE("State is not number type");
         return false;

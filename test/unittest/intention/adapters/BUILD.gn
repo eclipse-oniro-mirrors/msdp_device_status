@@ -63,7 +63,6 @@ ohos_unittest("DsoftbusAdapterTest") {
     "${device_status_utils_path}",
     "${device_status_utils_path}/include",
     "${device_status_root_path}/intention/prototype/include",
-    "${device_status_root_path}/utils/json_parser/include"
   ]
 
   sources = [ "src/dsoftbus_adapter_test.cpp" ]

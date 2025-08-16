@@ -2596,7 +2596,7 @@ void DragDrawing::SetDecodeOptions(Media::DecodeOptions &decodeOpts)
     FI_HILOGD("leave");
 }
 
-void DragDrawing::ParserDragShadowInfo(const cJSON* filterInfoParser, FilterInfo &filterInfo)
+void DragDrawing::ParserDragShadowInfo(cJSON* filterInfoParser, FilterInfo &filterInfo)
 {
     CHKPV(filterInfoParser);
     cJSON *offsetX = cJSON_GetObjectItemCaseSensitive(filterInfoParser, "drag_shadow_offsetX");
@@ -2641,7 +2641,7 @@ void DragDrawing::ParserDragShadowInfo(const cJSON* filterInfoParser, FilterInfo
     }
 }
 
-void DragDrawing::ParserTextDragShadowInfo(const cJSON* filterInfoParser, FilterInfo &filterInfo)
+void DragDrawing::ParserTextDragShadowInfo(cJSON* filterInfoParser, FilterInfo &filterInfo)
 {
     CHKPV(filterInfoParser);
     cJSON *path = cJSON_GetObjectItemCaseSensitive(filterInfoParser, "drag_shadow_path");
@@ -2680,41 +2680,42 @@ bool DragDrawing::ParserFilterInfo(const std::string &filterInfoStr, FilterInfo 
         FI_HILOGD("FilterInfo is empty");
         return false;
     }
-    JsonParser filterInfoParser(filterInfoStr.c_str());
-    if (!cJSON_IsObject(filterInfoParser.Get())) {
+    JsonParser filterInfoParser;
+    filterInfoParser.json = cJSON_Parse(filterInfoStr.c_str());
+    if (!cJSON_IsObject(filterInfoParser.json)) {
         FI_HILOGE("FilterInfo is not json object");
         return false;
     }
-    cJSON *dipScale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.Get(), "dip_scale");
+    cJSON *dipScale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "dip_scale");
     if (cJSON_IsNumber(dipScale)) {
         filterInfo.dipScale = AdjustDoubleValue(dipScale->valuedouble);
     }
-    cJSON *scale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.Get(), "scale");
+    cJSON *scale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "scale");
     if (cJSON_IsNumber(scale)) {
         filterInfo.scale = AdjustDoubleValue(scale->valuedouble);
     }
-    ParserCornerRadiusInfo(filterInfoParser.Get(), g_drawingInfo.filterInfo);
-    cJSON *dragType = cJSON_GetObjectItemCaseSensitive(filterInfoParser.Get(), "drag_type");
+    ParserCornerRadiusInfo(filterInfoParser.json, g_drawingInfo.filterInfo);
+    cJSON *dragType = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "drag_type");
     if (cJSON_IsString(dragType)) {
         filterInfo.dragType = dragType->valuestring;
     }
-    cJSON *shadowEnable = cJSON_GetObjectItemCaseSensitive(filterInfoParser.Get(), "shadow_enable");
+    cJSON *shadowEnable = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "shadow_enable");
     if (cJSON_IsBool(shadowEnable)) {
         filterInfo.shadowEnable = cJSON_IsTrue(shadowEnable);
     }
     if (filterInfo.shadowEnable) {
-        ParserDragShadowInfo(filterInfoParser.Get(), filterInfo);
+        ParserDragShadowInfo(filterInfoParser.json, filterInfo);
         if (filterInfo.dragType == "text") {
-            ParserTextDragShadowInfo(filterInfoParser.Get(), filterInfo);
+            ParserTextDragShadowInfo(filterInfoParser.json, filterInfo);
         }
         PrintDragShadowInfo();
     }
-    ParserBlurInfo(filterInfoParser.Get(), g_drawingInfo.filterInfo);
-    cJSON *dragNodeGrayscale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.Get(), "drag_node_gray_scale");
+    ParserBlurInfo(filterInfoParser.json, g_drawingInfo.filterInfo);
+    cJSON *dragNodeGrayscale = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "drag_node_gray_scale");
     if (cJSON_IsNumber(dragNodeGrayscale)) {
         filterInfo.dragNodeGrayscale = static_cast<float>(dragNodeGrayscale->valuedouble);
     }
-    cJSON *eventId = cJSON_GetObjectItemCaseSensitive(filterInfoParser.Get(), "event_id");
+    cJSON *eventId = cJSON_GetObjectItemCaseSensitive(filterInfoParser.json, "event_id");
     if (cJSON_IsNumber(eventId)) {
         DRAG_DATA_MGR.SetEventId(eventId->valueint);
     }
@@ -2795,34 +2796,35 @@ bool DragDrawing::ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &ex
         FI_HILOGD("ExtraInfo is empty");
         return false;
     }
-    JsonParser extraInfoParser(extraInfoStr.c_str());
-    if (!cJSON_IsObject(extraInfoParser.Get())) {
+    JsonParser extraInfoParser;
+    extraInfoParser.json = cJSON_Parse(extraInfoStr.c_str());
+    if (!cJSON_IsObject(extraInfoParser.json)) {
         FI_HILOGE("ExtraInfo is not json object");
         return false;
     }
-    cJSON *componentType = cJSON_GetObjectItemCaseSensitive(extraInfoParser.Get(), "drag_data_type");
+    cJSON *componentType = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "drag_data_type");
     if (cJSON_IsString(componentType)) {
         extraInfo.componentType = componentType->valuestring;
     }
-    cJSON *blurStyle = cJSON_GetObjectItemCaseSensitive(extraInfoParser.Get(), "drag_blur_style");
+    cJSON *blurStyle = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "drag_blur_style");
     if (cJSON_IsNumber(blurStyle)) {
         extraInfo.blurStyle = blurStyle->valueint;
     }
-    cJSON *cornerRadius = cJSON_GetObjectItemCaseSensitive(extraInfoParser.Get(), "drag_corner_radius");
+    cJSON *cornerRadius = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "drag_corner_radius");
     if (cJSON_IsNumber(cornerRadius)) {
         extraInfo.cornerRadius = static_cast<float>(cornerRadius->valuedouble);
     }
-    cJSON *allowDistributed = cJSON_GetObjectItemCaseSensitive(extraInfoParser.Get(), "drag_allow_distributed");
+    cJSON *allowDistributed = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "drag_allow_distributed");
     if (cJSON_IsBool(allowDistributed)) {
         extraInfo.allowDistributed = cJSON_IsTrue(allowDistributed) ? true : false;
     }
     float tempCoef1 = 0.0f;
-    cJSON *coef1 = cJSON_GetObjectItemCaseSensitive(extraInfoParser.Get(), "blur_coef1");
+    cJSON *coef1 = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "blur_coef1");
     if (cJSON_IsNumber(coef1)) {
         tempCoef1 = static_cast<float>(coef1->valuedouble);
     }
     float tempCoef2 = 0.0f;
-    cJSON *coef2 = cJSON_GetObjectItemCaseSensitive(extraInfoParser.Get(), "blur_coef2");
+    cJSON *coef2 = cJSON_GetObjectItemCaseSensitive(extraInfoParser.json, "blur_coef2");
     if (cJSON_IsNumber(coef2)) {
         tempCoef2 = static_cast<float>(coef2->valuedouble);
     }
