@@ -169,7 +169,7 @@ bool DDMAdapterImpl::CheckSameAccountToLocalWithUid(const std::string &networkId
         return false;
     }
     if (!isForegroundUser) {
-        FI_HILOGE("app userId is not Foreground");
+        FI_HILOGW("app userId is not Foreground");
         return false;
     }
     isForegroundUser = false;
@@ -186,10 +186,131 @@ bool DDMAdapterImpl::CheckSameAccountToLocalWithUid(const std::string &networkId
         }
     }
     if (!isForegroundUser) {
-        FI_HILOGI("app userId is not Foreground");
+        FI_HILOGW("app userId is not Foreground");
         return false;
     }
     return CheckSameAccountToLocal(networkId);
+}
+
+bool DDMAdapterImpl::CheckSrcIsSameAccount(const std::string &sinkNetworkId)
+{
+    CALL_INFO_TRACE;
+    DistributedHardware::DmAccessCaller caller;
+    if (!GetDmAccessCallerSrc(caller)) {
+        FI_HILOGE("GetDmAccessCallerSrc failed");
+        return false;
+    }
+    DistributedHardware::DmAccessCallee callee;
+    if (!GetDmAccessCalleeSrc(callee, sinkNetworkId)) {
+        FI_HILOGE("GetDmAccessCalleeSrc failed");
+        return false;
+    }
+    if (!D_DEV_MGR.CheckSrcIsSameAccount(caller, callee)) {
+        FI_HILOGE("CheckSrcIsSameAccount failed");
+        return false;
+    }
+    return true;
+}
+
+bool DDMAdapterImpl::CheckSinkIsSameAccount(const std::string &srcNetworkId, int32_t srcUserId,
+    const std::string &srcAccountId)
+{
+    CALL_INFO_TRACE;
+    DistributedHardware::DmAccessCaller caller;
+    if (!GetDmAccessCallerSink(caller, srcNetworkId, srcUserId, srcAccountId)) {
+        FI_HILOGE("GetDmAccessCallerSrc failed");
+        return false;
+    }
+    DistributedHardware::DmAccessCallee callee;
+    if (!GetDmAccessCalleeSink(callee)) {
+        FI_HILOGE("GetDmAccessCalleeSink failed");
+        return false;
+    }
+    if (!D_DEV_MGR.CheckSinkIsSameAccount(caller, callee)) {
+        FI_HILOGE("CheckSinkIsSameAccount failed");
+        return false;
+    }
+    return true;
+}
+
+bool DDMAdapterImpl::GetDmAccessCallerSrc(DistributedHardware::DmAccessCaller &caller)
+{
+    std::vector<int32_t> ids;
+    if (int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids); ret != ERR_OK || ids.empty()) {
+        FI_HILOGE("QueryActiveOsAccountIds failed, ret:%{public}d", ret);
+        return false;
+    }
+    OHOS::AccountSA::OhosAccountInfo osAccountInfo;
+    if (int32_t ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(osAccountInfo);
+        ret != RET_OK || osAccountInfo.uid_ == "") {
+        FI_HILOGE("GetOhosAccountInfo failed, ret:%{public}d", ret);
+        return false;
+    }
+    caller = {
+        .accountId = osAccountInfo.uid_,
+        .networkId = IDSoftbusAdapter::GetLocalNetworkId(),
+        .userId = ids[0],
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+    };
+    SetUserId(caller.userId);
+    SetAccountId(caller.accountId);
+    return true;
+}
+
+bool DDMAdapterImpl::GetDmAccessCalleeSrc(DistributedHardware::DmAccessCallee &callee, const std::string &sinkNetworkId)
+{
+    callee.networkId = sinkNetworkId;
+    return true;
+}
+
+bool DDMAdapterImpl::GetDmAccessCallerSink(DistributedHardware::DmAccessCaller &caller, const std::string &srcNetworkId,
+    int32_t srcUserId, const std::string &srcAccountId)
+{
+    caller.networkId = srcNetworkId;
+    caller.userId = srcUserId;
+    caller.accountId = srcAccountId;
+    return true;
+}
+
+bool DDMAdapterImpl::GetDmAccessCalleeSink(DistributedHardware::DmAccessCallee &callee)
+{
+    std::vector<int32_t> ids;
+    if (int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids); ret != RET_OK || ids.empty()) {
+        FI_HILOGE("QueryActiveOsAccountIds failed, ret:%{public}d", ret);
+        return false;
+    }
+    OHOS::AccountSA::OhosAccountInfo osAccountInfo;
+    if (int32_t ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(osAccountInfo);
+        ret != RET_OK || osAccountInfo.uid_ == "") {
+        FI_HILOGE("GetOhosAccountInfo failed, ret:%{public}d", ret);
+        return false;
+    }
+    callee = {
+        .accountId = osAccountInfo.uid_,
+        .networkId = IDSoftbusAdapter::GetLocalNetworkId(),
+        .userId = ids[0],
+    };
+    return true;
+}
+
+void DDMAdapterImpl::SetUserId(int32_t userId)
+{
+    userId_ = userId;
+}
+
+void DDMAdapterImpl::SetAccountId(const std::string &accountId)
+{
+    accountId_ = accountId;
+}
+
+int32_t DDMAdapterImpl::GetUserId()
+{
+    return userId_;
+}
+
+std::string DDMAdapterImpl::GetAccountId()
+{
+    return accountId_;
 }
 
 void DDMAdapterImpl::OnBoardOnline(const std::string &networkId)

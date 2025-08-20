@@ -43,6 +43,11 @@ public:
     virtual bool CheckSameAccountToLocal(const std::string &networkId) = 0;
     virtual bool CheckSameAccountToLocalWithUid(const std::string &networkId,
         const int32_t uid = 0) = 0;
+    virtual bool CheckSrcIsSameAccount(const std::string &sinkNetworkId) = 0;
+    virtual bool CheckSinkIsSameAccount(const std::string &srcNetworkId, int32_t srcUserId,
+        const std::string &srcAccountId) = 0;
+    virtual int32_t GetUserId() = 0;
+    virtual std::string GetAccountId() = 0;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

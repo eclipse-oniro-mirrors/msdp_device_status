@@ -41,9 +41,22 @@ public:
     bool CheckSameAccountToLocal(const std::string &networkId) override;
     bool CheckSameAccountToLocalWithUid(const std::string &networkId,
         const int32_t uid = 0) override;
+    bool CheckSrcIsSameAccount(const std::string &sinkNetworkId) override;
+    bool CheckSinkIsSameAccount(const std::string &srcNetworkId, int32_t srcUserId,
+        const std::string &srcAccountId) override;
+    bool GetDmAccessCallerSrc(DistributedHardware::DmAccessCaller &caller);
+    bool GetDmAccessCalleeSrc(DistributedHardware::DmAccessCallee &callee, const std::string &sinkNetworkId);
+    bool GetDmAccessCallerSink(DistributedHardware::DmAccessCaller &caller, const std::string &srcNetworkId,
+        int32_t srcUserId, const std::string &srcAccountId);
+    bool GetDmAccessCalleeSink(DistributedHardware::DmAccessCallee &callee);
+    int32_t GetUserId() override;
+    std::string GetAccountId() override;
 
 private:
+    void SetUserId(int32_t userId);
+    void SetAccountId(const std::string &accountId);
     int32_t GetTrustedDeviceList(std::vector<DistributedHardware::DmDeviceInfo> &deviceList);
+
 private:
     class Observer final {
     public:
@@ -113,6 +126,8 @@ private:
     std::shared_ptr<DmInitCb> initCb_;
     std::shared_ptr<DmBoardStateCb> boardStateCb_;
     std::set<Observer> observers_;
+    int32_t userId_ { -1 };
+    std::string accountId_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

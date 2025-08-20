@@ -169,6 +169,7 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
         context.eventMgr_.ErrorNotAollowCooperateWhenMotionDragging(result);
         return;
     }
+    bool needCheckSameAccount = !(parent_.env_->GetDSoftbus().HasSessionExisted(context.Peer()));
     int32_t ret = context.dsoftbus_.OpenSession(context.Peer());
     if (ret != RET_OK) {
         CooperateFail(context, ret);
@@ -188,6 +189,9 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
         .pointerSpeed = context.GetPointerSpeed(),
         .touchPadSpeed = context.GetTouchPadSpeed(),
         .uid = notice.uid,
+        .userId = parent_.env_->GetDDM().GetUserId(),
+        .accountId = parent_.env_->GetDDM().GetAccountId(),
+        .needCheckSameAccount = needCheckSameAccount
     };
     context.OnStartCooperate(startNotice.extra);
     ret = context.dsoftbus_.StartCooperate(context.Peer(), startNotice);
@@ -280,6 +284,7 @@ void CooperateFree::Initial::OnStartWithOptions(Context &context, const Cooperat
         context.eventMgr_.ErrorNotAollowCooperateWhenMotionDragging(result);
         return;
     }
+    bool needCheckSameAccount = !(parent_.env_->GetDSoftbus().HasSessionExisted(context.Peer()));
     int32_t ret = context.dsoftbus_.OpenSession(context.Peer());
     if (ret != RET_OK) {
         FI_HILOGE("[start cooperation] Failed to connect\'%{public}s\'", Utility::Anonymize(context.Peer()).c_str());
@@ -297,6 +302,9 @@ void CooperateFree::Initial::OnStartWithOptions(Context &context, const Cooperat
         .cooperateOptions = {notice.displayX, notice.displayY, notice.displayId},
         .pointerSpeed = context.GetPointerSpeed(),
         .touchPadSpeed = context.GetTouchPadSpeed(),
+        .userId = parent_.env_->GetDDM().GetUserId(),
+        .accountId = parent_.env_->GetDDM().GetAccountId(),
+        .needCheckSameAccount = needCheckSameAccount
     };
     context.OnStartCooperate(startNotice.extra);
     context.dsoftbus_.StartCooperateWithOptions(context.Peer(), startNotice);

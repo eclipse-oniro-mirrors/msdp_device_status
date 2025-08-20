@@ -112,6 +112,9 @@ struct StartCooperateEvent {
     int32_t startDeviceId;
     std::shared_ptr<std::promise<int32_t>> errCode;
     int32_t uid { 0 };
+    int32_t userId { -1 };
+    std::string accountId;
+    bool needCheckSameAccount { true };
 };
 
 struct EnableCooperateEvent {
@@ -193,6 +196,9 @@ struct DSoftbusStartCooperate {
     int32_t pointerSpeed { -1 };
     int32_t touchPadSpeed { -1 };
     int32_t uid { 0 };
+    int32_t userId { -1 };
+    std::string accountId;
+    bool needCheckSameAccount { true };
 };
 
 struct DSoftbusCooperateOptions {
@@ -204,6 +210,9 @@ struct DSoftbusCooperateOptions {
     int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
     int32_t pointerSpeed { -1 };
     int32_t touchPadSpeed { -1 };
+    int32_t userId { -1 };
+    std::string accountId;
+    bool needCheckSameAccount { true };
 };
 
 using DSoftbusStartCooperateFinished = DSoftbusStartCooperate;
@@ -220,6 +229,9 @@ struct DSoftbusRelayCooperate {
     int32_t pointerSpeed { -1 };
     int32_t touchPadSpeed { -1 };
     int32_t uid { 0 };
+    int32_t userId { -1 };
+    std::string accountId;
+    bool needCheckSameAccount { true };
 };
 
 struct DSoftbusSubscribeMouseLocation {
@@ -292,6 +304,9 @@ struct StartWithOptionsEvent {
     int32_t displayY { -1 };
     int32_t displayId { -1 };
     std::shared_ptr<std::promise<int32_t>> errCode;
+    int32_t userId { -1 };
+    std::string accountId;
+    bool needCheckSameAccount { true };
 };
 
 struct CooperateEvent {

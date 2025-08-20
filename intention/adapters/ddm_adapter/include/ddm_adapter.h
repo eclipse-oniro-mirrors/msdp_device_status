@@ -41,7 +41,11 @@ public:
     bool CheckSameAccountToLocal(const std::string &networkId) override;
     bool CheckSameAccountToLocalWithUid(const std::string &networkId,
         const int32_t uid = 0) override;
-
+    bool CheckSrcIsSameAccount(const std::string &sinkNetworkId) override;
+    bool CheckSinkIsSameAccount(const std::string &srcNetworkId, int32_t srcUserId,
+        const std::string &srcAccountId) override;
+    int32_t GetUserId() override;
+    std::string GetAccountId() override;
 private:
     std::shared_ptr<IDDMAdapter> ddm_;
 };
