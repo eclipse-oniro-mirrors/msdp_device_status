@@ -234,7 +234,8 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
     TagRemoteEvent(pointerEvent_);
     OnNotifyCrossDrag(pointerEvent_);
     FI_HILOGD("PointerEvent(No:%{public}d, Source:%{public}s, Action:%{public}s, rows:%{public}d)",
-        pointerEvent_->GetId(), pointerEvent_->DumpSourceType(), pointerEvent_->DumpPointerAction(), pointerEvent_->GetScrollRows());
+        pointerEvent_->GetId(), pointerEvent_->DumpSourceType(), pointerEvent_->DumpPointerAction(),
+        pointerEvent_->GetScrollRows());
     if (IsActive(pointerEvent_)) {
         CheckLatency(pointerEvent_->GetActionTime(), curInterceptorTime, curCrossPlatformTime, pointerEvent_);
         if (!UpdatePointerEvent()) {
