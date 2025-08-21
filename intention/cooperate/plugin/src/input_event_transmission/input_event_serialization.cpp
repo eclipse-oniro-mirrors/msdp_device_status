@@ -530,6 +530,7 @@ int32_t InputEventSerialization::DeserializeScrollRows(NetPacket &pkt, std::shar
         FI_HILOGE("Failed to deserialize scrollRows");
         return RET_ERR;
     }
+    CHKPR(event, RET_ERR);
     event->SetScrollRows(scrollRows);
     return RET_OK;
 }
