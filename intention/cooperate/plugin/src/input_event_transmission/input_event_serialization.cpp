@@ -617,7 +617,7 @@ int32_t InputEventSerialization::Unmarshalling(NetPacket &pkt, std::shared_ptr<M
         FI_HILOGE("Failed to deserialize interceptorTime");
     }
     if (DeserializeScrollRows(pkt, event) != RET_OK) {
-        FI_HILOGE("Failed to deserialize ScrollRows");
+        FI_HILOGW("Failed to deserialize ScrollRows");
     }
     return RET_OK;
 }
