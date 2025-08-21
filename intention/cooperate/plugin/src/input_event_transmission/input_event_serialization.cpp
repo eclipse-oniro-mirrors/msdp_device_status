@@ -528,7 +528,7 @@ int32_t InputEventSerialization::DeserializeScrollRows(NetPacket &pkt, std::shar
     pkt >> scrollRows;
     if (pkt.ChkRWError()) {
         FI_HILOGE("Failed to deserialize scrollRows");
-        scrollRows = 0;
+        return RET_ERR;
     }
     event->SetScrollRows(scrollRows);
     return RET_OK;
@@ -574,6 +574,7 @@ int32_t InputEventSerialization::Marshalling(std::shared_ptr<MMI::PointerEvent> 
     }
     if (SerializeScrollRows(event, pkt)) {
         FI_HILOGE("Failed to serialize scrollRows");
+        return RET_ERR;
     }
     return RET_OK;
 }
