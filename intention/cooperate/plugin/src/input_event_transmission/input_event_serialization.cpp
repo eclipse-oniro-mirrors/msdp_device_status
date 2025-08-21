@@ -510,6 +510,31 @@ int32_t InputEventSerialization::DeserializeInterceptorTime(NetPacket &pkt, int6
     return RET_OK;
 }
 
+int32_t InputEventSerialization::SerializeScrollRows(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt)
+{
+    CHKPR(event, RET_ERR);
+    int32_t scrollRows = event->GetScrollRows();
+    pkt << scrollRows;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Failed to serialize buffer");
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+ 
+int32_t InputEventSerialization::DeserializeScrollRows(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event)
+{
+    int32_t scrollRows { -1 };
+    pkt >> scrollRows;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Failed to deserialize scrollRows");
+        return RET_ERR;
+    }
+    CHKPR(event, RET_ERR);
+    event->SetScrollRows(scrollRows);
+    return RET_OK;
+}
+ 
 int32_t InputEventSerialization::Marshalling(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt,
     int64_t interceptorTime)
 {
@@ -546,6 +571,10 @@ int32_t InputEventSerialization::Marshalling(std::shared_ptr<MMI::PointerEvent> 
     }
     if (SerializeInterceptorTime(interceptorTime, pkt)) {
         FI_HILOGE("Failed to serialize interceptorTime");
+        return RET_ERR;
+    }
+    if (SerializeScrollRows(event, pkt)) {
+        FI_HILOGE("Failed to serialize scrollRows");
         return RET_ERR;
     }
     return RET_OK;
@@ -587,6 +616,9 @@ int32_t InputEventSerialization::Unmarshalling(NetPacket &pkt, std::shared_ptr<M
     }
     if (DeserializeInterceptorTime(pkt, interceptorTime) != RET_OK) {
         FI_HILOGE("Failed to deserialize interceptorTime");
+    }
+    if (DeserializeScrollRows(pkt, event) != RET_OK) {
+        FI_HILOGW("Failed to deserialize ScrollRows");
     }
     return RET_OK;
 }

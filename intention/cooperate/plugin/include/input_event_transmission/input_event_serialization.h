@@ -64,6 +64,8 @@ private:
     static int32_t DeserializeBuffer(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event);
     static int32_t SerializeInterceptorTime(int64_t interceptorTime, NetPacket &pkt);
     static int32_t DeserializeInterceptorTime(NetPacket &pkt, int64_t &interceptorTime);
+    static int32_t SerializeScrollRows(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt);
+    static int32_t DeserializeScrollRows(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event);
     static void ReadFunctionKeys(NetPacket &pkt, std::shared_ptr<MMI::KeyEvent> key);
 
 #ifdef OHOS_BUILD_ENABLE_SECURITY_PART
