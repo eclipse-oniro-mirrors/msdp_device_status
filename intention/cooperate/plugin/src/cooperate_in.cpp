@@ -830,7 +830,7 @@ void CooperateIn::RelayConfirmation::OnProgressWithOptions(Context &context, con
         .accountId = parent_.env_->GetDDM().GetAccountId(),
         .needCheckSameAccount = needCheckSameAccount
     };
-    context.dsoftbus_.RelayCooperateWithOptions(context.Peer(), notice);
+    context.dsoftbus_.RelayCooperate(context.Peer(), notice);
     startWithOptionsEvent_ = std::get<StartWithOptionsEvent>(event.event);
     timerId_ = parent_.env_->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE,
         [sender = context.Sender(), remoteNetworkId = context.Peer()]() mutable {
