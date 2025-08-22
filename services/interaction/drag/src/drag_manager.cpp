@@ -1168,6 +1168,8 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         dragDrawing_.UpdateDragWindowDisplay(targetDisplayId);
         dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
         lastDisplayId_ = targetDisplayId;
+    } else {
+        dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
     }
 }
 
