@@ -2193,8 +2193,8 @@ void DragDrawing::CreateWindow()
         }
     }
     uint64_t rsScreenId = screenId_;
-    int32_t displayWidth_ = display->GetWidth();
-    int32_t displayHeight_ = display->GetHeight();
+    displayWidth_ = display->GetWidth();
+    displayHeight_ = display->GetHeight();
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Screen> screen = Rosen::ScreenManager::GetInstance().GetScreenById(screenId_);
     if ((screen != nullptr) && (!screen->IsReal())) {
