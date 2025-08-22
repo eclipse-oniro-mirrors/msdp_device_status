@@ -1958,6 +1958,7 @@ HWTEST_F(DragManagerTest, DragManagerTest96, TestSize.Level0)
     g_dragMgr.isRTL_ = true;
     ASSERT_NO_FATAL_FAILURE(g_dragMgr.UpdateDragStylePositon());
     g_dragMgr.isRTL_ = isRTL;
+    system::SetParameter("persist.global.language", persistLanguage.c_str());
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
