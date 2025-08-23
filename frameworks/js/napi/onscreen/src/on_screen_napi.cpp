@@ -207,6 +207,10 @@ bool OnScreenNapi::ConstructOnScreen(napi_env env, napi_value jsThis)
 
 bool OnScreenNapi::GetContentOption(napi_env env, napi_value *args, size_t argc, ContentOption &option)
 {
+    if (argc == 0) {
+        FI_HILOGD("param is not passed, use default param");
+        return true;
+    }
     if (argc != ARG_1) {
         return false;
     }
@@ -215,7 +219,6 @@ bool OnScreenNapi::GetContentOption(napi_env env, napi_value *args, size_t argc,
     ret = ret && GetBoolFromJs(env, contentOptionObj, "contentUnderstand", option.contentUnderstand, false);
     ret = ret && GetBoolFromJs(env, contentOptionObj, "pageLink", option.pageLink, false);
     ret = ret && GetBoolFromJs(env, contentOptionObj, "textOnly", option.textOnly, false);
-    ret = ret && GetParagraphSizeRange(env, contentOptionObj, "paragraphSizeRange", option.paragraphSizeRange, false);
     if (!ret) {
         FI_HILOGE("get content option failed");
     }
@@ -362,50 +365,6 @@ bool OnScreenNapi::GetBoolFromJs(napi_env env, const napi_value &value, const st
     }
     if (napi_get_value_bool(env, fieldValue, &result) != napi_ok) {
         FI_HILOGE("napi_get_value_bool failed");
-        return false;
-    }
-    return true;
-}
-
-bool OnScreenNapi::GetParagraphSizeRange(napi_env env, const napi_value &value, const std::string &field,
-    ParagraphSizeRange &range, bool isNecessary)
-{
-    bool hasProperty = false;
-    if (napi_has_named_property(env, value, field.c_str(), &hasProperty) != napi_ok) {
-        FI_HILOGE("napi_has_named_property failed");
-        return false;
-    }
-    if (!hasProperty) {
-        FI_HILOGW("napi dont have this property");
-        // 如果是必要的，则返回false，如果不必要，则返回true，使用默认值
-        return !isNecessary;
-    }
-    napi_value fieldValue = nullptr;
-    napi_valuetype valueType = napi_undefined;
-    if (napi_get_named_property(env, value, field.c_str(), &fieldValue) != napi_ok) {
-        FI_HILOGE("napi_get_named_property failed");
-        return false;
-    }
-    if (napi_typeof(env, fieldValue, &valueType) != napi_ok) {
-        FI_HILOGE("typeof failed");
-        return false;
-    }
-    if ((!isNecessary) && valueType == napi_undefined) {
-        FI_HILOGW("isNecessary is false and valueType is undefined");
-        return true;
-    }
-    if (valueType != napi_object) {
-        FI_HILOGE("valueType is not object");
-        return false;
-    }
-    bool ret = GetInt32FromJs(env, fieldValue, "minSize", range.minSize, true);
-    ret = ret && GetInt32FromJs(env, fieldValue, "maxSize", range.maxSize, true);
-    if (!ret) {
-        FI_HILOGE("para size range is not enough to parse");
-        return false;
-    }
-    if (!(range.minSize > 0 && range.maxSize > 0 && range.maxSize > range.minSize)) {
-        FI_HILOGE("para size range is invalid");
         return false;
     }
     return true;

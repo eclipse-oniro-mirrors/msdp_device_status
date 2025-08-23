@@ -25,8 +25,8 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
 namespace {
-constexpr int32_t MIN_PARA_SIZE = 300;
-constexpr int32_t MAX_PARA_SIZE = 500;
+constexpr int32_t MIN_PARA_SIZE = 200;
+constexpr int32_t MAX_PARA_SIZE = 300;
 }
 
 enum class Scenario {

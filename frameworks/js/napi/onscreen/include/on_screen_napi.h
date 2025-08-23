@@ -55,8 +55,6 @@ private:
         int64_t &result, bool isNecessary);
     static bool GetBoolFromJs(napi_env env, const napi_value &value, const std::string &field,
         bool &result, bool isNecessary);
-    static bool GetParagraphSizeRange(napi_env env, const napi_value &value, const std::string &field,
-        ParagraphSizeRange &range, bool isNecessary);
     static bool SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
     static bool ConstructPageContentObj(napi_env env, napi_value &pageContentObj,
         const GetPageContentAsyncContext* ctx);
