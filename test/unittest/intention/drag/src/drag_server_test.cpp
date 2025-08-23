@@ -1864,6 +1864,40 @@ HWTEST_F(DragServerTest, DragServerTest95, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::STOP;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+ 
+/**
+ * @tc.name: DragServerTest96
+ * @tc.desc: Testing deserialization of invalid values
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest96, TestSize.Level1)
+{
+    Parcel parcel;
+    SummaryMap val;
+    int32_t size = -1;
+    parcel.WriteInt32(size);
+    int32_t ret = SummaryPacker::UnMarshalling(parcel, val);
+    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(val.size(), 0);
+}
+ 
+/**
+ * @tc.name: DragServerTest97
+ * @tc.desc: Testing deserialization of maximum values
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest97, TestSize.Level1)
+{
+    Parcel parcel;
+    SummaryMap val;
+    int32_t size = MAX_ANIMATION_INFO_LENGTH;
+    parcel.WriteInt32(size);
+    int32_t ret = SummaryPacker::UnMarshalling(parcel, val);
+    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(val.size(), 0);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
