@@ -51,6 +51,7 @@ constexpr int32_t DISPLAY_ID { 0 };
 constexpr int32_t DISPLAY_X { 50 };
 constexpr int32_t DISPLAY_Y { 50 };
 constexpr int32_t INT32_BYTE { 4 };
+constexpr int32_t MAX_BUF_SIZE { 1024 };
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
 constexpr int32_t MAX_ANIMATION_INFO_LENGTH { 1024 };
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
@@ -1864,6 +1865,40 @@ HWTEST_F(DragServerTest, DragServerTest95, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::STOP;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+ 
+/**
+ * @tc.name: DragServerTest96
+ * @tc.desc: Testing deserialization of invalid values
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest96, TestSize.Level1)
+{
+    Parcel parcel;
+    SummaryMap val;
+    int32_t size = -1;
+    parcel.WriteInt32(size);
+    int32_t ret = SummaryPacker::UnMarshalling(parcel, val);
+    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(val.size(), 0);
+}
+ 
+/**
+ * @tc.name: DragServerTest97
+ * @tc.desc: Testing deserialization of maximum values
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest97, TestSize.Level1)
+{
+    Parcel parcel;
+    SummaryMap val;
+    int32_t size = MAX_BUF_SIZE;
+    parcel.WriteInt32(size);
+    int32_t ret = SummaryPacker::UnMarshalling(parcel, val);
+    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(val.size(), 0);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
