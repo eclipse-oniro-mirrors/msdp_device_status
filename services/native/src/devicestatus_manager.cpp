@@ -397,6 +397,190 @@ void DeviceStatusManager::Unsubscribe(Type type, ActivityEvent event, sptr<IRemo
         FI_HILOGI("Other subscribe exist");
     }
 }
+
+int32_t DeviceStatusManager::Subscribe(int32_t type, const std::string &bundleName,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(callback, RET_ERR);
+    if ((type <= BOOMERANG_TYPE_INVALID) || (type >= BOOMERANG_TYPE_MAX)) {
+        FI_HILOGE("Subscribe boomerangType_:%{public}d is error", boomerangType_);
+        return RET_ERR;
+    }
+    boomerangType_ = type;
+    std::lock_guard lock(mutex_);
+    std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp> listeners;
+    auto object = callback->AsObject();
+    CHKPR(object, RET_ERR);
+    FI_HILOGI("boomerangListeners_.size:%{public}zu", boomerangListeners_.size());
+    auto dtTypeIter = boomerangListeners_.find(bundleName);
+    if (dtTypeIter == boomerangListeners_.end()) {
+        if (listeners.insert(callback).second) {
+            FI_HILOGI("No found set list of type, insert success");
+            object->AddDeathRecipient(boomerangCBDeathRecipient_);
+        }
+        auto [_, ret] = boomerangListeners_.insert(std::make_pair(bundleName, listeners));
+        if (!ret) {
+            FI_HILOGW("type is duplicated");
+        }
+    } else {
+        FI_HILOGI("callbacklist.size:%{public}zu", boomerangListeners_[dtTypeIter->first].size());
+        auto iter = boomerangListeners_[dtTypeIter->first].find(callback);
+        if (iter != boomerangListeners_[dtTypeIter->first].end()) {
+            FI_HILOGI("Subscription information of this type already exists");
+        }
+        if (boomerangListeners_[dtTypeIter->first].insert(callback).second) {
+            FI_HILOGI("Find set list of type, insert success");
+            object->AddDeathRecipient(boomerangCBDeathRecipient_);
+        }
+    }
+    return RET_OK;
+}
+ 
+int32_t DeviceStatusManager::Unsubscribe(int32_t type, const std::string &bundleName,
+    sptr<IRemoteBoomerangCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(callback, RET_ERR);
+    if ((type <= BOOMERANG_TYPE_INVALID) || (type >= BOOMERANG_TYPE_MAX)) {
+        FI_HILOGE("Unsubscribe type_:%{public}d is error", type);
+        return RET_ERR;
+    }
+    auto object = callback->AsObject();
+    CHKPR(object, RET_ERR);
+    std::lock_guard lock(mutex_);
+    auto dtTypeIter = boomerangListeners_.find(bundleName);
+    if (dtTypeIter == boomerangListeners_.end()) {
+        FI_HILOGE("Failed to find listener for type");
+        return RET_ERR;
+    }
+    FI_HILOGI("callbacklist.size:%{public}zu", boomerangListeners_[dtTypeIter->first].size());
+    auto iter = boomerangListeners_[dtTypeIter->first].find(callback);
+    if (iter != boomerangListeners_[dtTypeIter->first].end()) {
+        if (boomerangListeners_[dtTypeIter->first].erase(callback) != 0) {
+            object->RemoveDeathRecipient(boomerangCBDeathRecipient_);
+            if (boomerangListeners_[dtTypeIter->first].empty()) {
+                boomerangListeners_.erase(dtTypeIter);
+            }
+        }
+    }
+    FI_HILOGI("listeners_.size:%{public}zu", boomerangListeners_.size());
+    return RET_OK;
+}
+ 
+int32_t DeviceStatusManager::NotifyMetadata(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    CHKPR(callback, RET_ERR);
+    auto object = callback->AsObject();
+    CHKPR(object, RET_ERR);
+    std::lock_guard lock(mutex_);
+    auto iter = boomerangListeners_.find(bundleName);
+    if (iter == boomerangListeners_.end()) {
+        FI_HILOGE("bundleName:%{public}s is not exits", bundleName.c_str());
+        return RET_ERR;
+    }
+    auto& callbacks = iter->second;
+    if (callbacks.size() == 0) {
+        FI_HILOGE("this hap is not Subscribe envent");
+        return RET_ERR;
+    }
+
+    for (const auto &listener : callbacks) {
+        CHKPR(listener, RET_ERR);
+        BoomerangData data {};
+        data.type = BoomerangType::BOOMERANG_TYPE_BOOMERANG;
+        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREEN_SHOT;
+        listener->OnScreenshotResult(data);
+    }
+    object->AddDeathRecipient(boomerangCBDeathRecipient_);
+    notityListener_ = callback;
+    auto callbackIter = bundleNameCache_.find(callback);
+    if (callbackIter == bundleNameCache_.end()) {
+        bundleNameCache_.emplace(callback, bundleName);
+    }
+    hasSubmitted_.store(false);
+    std::thread timerThread(std::bind(&DeviceStatusManager::TimerTask, this));
+    timerThread.detach();
+    return RET_OK;
+}
+
+int32_t DeviceStatusManager::GetBundleNameByCallback(std::string &bundleName)
+{
+    auto iter = bundleNameCache_.find(notityListener_);
+    if (iter != bundleNameCache_.end()) {
+        bundleName = iter->second;
+        bundleNameCache_.erase(iter);
+        return RET_OK;
+    }
+    return RET_ERR;
+}
+
+int32_t DeviceStatusManager::GetBundleNameByApplink(std::string &bundleName, const std::string &metadata)
+{
+    if (bundleManager_ == nullptr) {
+        sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        CHKPR(systemAbilityManager, E_DEVICESTATUS_GET_SYSTEM_ABILITY_MANAGER_FAILED);
+        sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        CHKPR(remoteObject, E_DEVICESTATUS_GET_SERVICE_FAILED);
+        bundleManager_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+        CHKPR(bundleManager_, RET_ERR);
+    }
+    OHOS::AAFwk::Want want;
+    want.SetUri(metadata);
+    std::vector<int32_t> ids;
+    ErrCode accountRet = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (accountRet != ERR_OK || ids.empty()) {
+        FI_HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", accountRet);
+        return RET_ERR;
+    }
+    int32_t userId = ids[0];
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetAbilityInfoFlag::GET_ABILITY_INFO_WITH_APP_LINKING);
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    bundleManager_->QueryAbilityInfosV9(want, flags, userId, abilityInfos);
+    if (abilityInfos.empty()) {
+        FI_HILOGE("Get abilityInfos fail.");
+        return RET_ERR;
+    }
+    bundleName = abilityInfos[0].bundleName;
+    return RET_OK;
+}
+
+int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard lock(mutex_);
+    if (hasSubmitted_) {
+        FI_HILOGE("get metadata timeout");
+        return RET_ERR;
+    }
+    hasSubmitted_.store(true);
+    CHKPR(notityListener_, RET_ERR);
+    std::string emptyMetadata;
+    std::string callbackBundleName;
+    auto callbackRet = GetBundleNameByCallback(callbackBundleName);
+    if (callbackRet != RET_OK) {
+        FI_HILOGE("Get callbackBundleName fail.");
+        notityListener_->OnNotifyMetadata(emptyMetadata);
+        return RET_OK;
+    }
+
+    std::string applinkBundleName;
+    auto applinkRet = GetBundleNameByApplink(applinkBundleName, metadata);
+    if (applinkRet != RET_OK) {
+        FI_HILOGE("Get applinkBundleName fail.");
+        notityListener_->OnNotifyMetadata(emptyMetadata);
+        return RET_OK;
+    }
+
+    if (callbackBundleName.compare(applinkBundleName) == 0) {
+        notityListener_->OnNotifyMetadata(metadata);
+    } else {
+        notityListener_->OnNotifyMetadata(emptyMetadata);
+    }
+    return RET_OK;
+}
  
 int32_t DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
     const std::string &metadata, sptr<IRemoteBoomerangCallback> callback)
