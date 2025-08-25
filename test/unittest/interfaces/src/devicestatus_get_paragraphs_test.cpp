@@ -106,7 +106,7 @@ void RemovePeriods(const std::string& strIn, std::string& strOut)
     std::wstring wStr;
     ConvertToWStr(strIn, wStr);
     std::wstring wStrOut;
-    const static std::wregex periods(L"[\n\r\t\\./;'`\\[\\]?:\\{\\}~!@#\\$-\\+，。、‘：’“”【】（）\\|]|/n");
+    const static std::wregex periods(L"[\n\r\t\\./;'`\\[\\]?:\\{\\}~!@#\\$-\\+，。、‘：’“”【】（）\\| ]|/n");
     std::regex_replace(std::back_inserter(wStrOut), wStr.begin(), wStr.end(), periods, L"");
     WStrToUtf8(wStrOut, strOut);
 }
