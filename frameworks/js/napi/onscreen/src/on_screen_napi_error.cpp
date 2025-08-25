@@ -38,7 +38,7 @@ std::map<int32_t, std::string> ERROR_MESSAGES = {
                         "screen is splited. 2. passed window id is not on screen or floating." },
     { RET_PAGE_NOT_READY, "The page is not ready." },
     { RET_TARGET_NOT_FOUND, "The target is not found." },
-    { RET_TIMEOUT, "The request is timeout." },
+    { RET_TIMEOUT, "The request timed out." },
 };
 
 napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage)
