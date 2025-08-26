@@ -99,11 +99,11 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest001, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest02 for SubscribeCallback 
+ * @tc.desc: BoomerangServerTest002 for SubscribeCallback
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BoomerangServerTest, BoomerangServerTest02, TestSize.Level1)
+HWTEST_F(BoomerangServerTest, BoomerangServerTest002, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
         CallingContext context {
