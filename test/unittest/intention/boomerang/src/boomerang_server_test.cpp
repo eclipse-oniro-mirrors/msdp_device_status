@@ -76,7 +76,7 @@ public:
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest001
+ * @tc.desc: BoomerangServerTest001 for SubscribeCallback subCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -99,7 +99,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest001, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest02
+ * @tc.desc: BoomerangServerTest02 for SubscribeCallback 
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -121,7 +121,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest02, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest003
+ * @tc.desc: BoomerangServerTest003 for NotifyMetadataBindingEvent notifyCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -142,7 +142,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest003, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest04
+ * @tc.desc: BoomerangServerTest04 for NotifyMetadataBindingEvent
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -163,7 +163,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest04, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest005
+ * @tc.desc: BoomerangServerTest005 for BoomerangEncodeImage encodeCallback and pixelMap is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -185,7 +185,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest005, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest06
+ * @tc.desc: BoomerangServerTest06 for BoomerangEncodeImage
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -207,7 +207,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest06, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest007
+ * @tc.desc: BoomerangServerTest007 for BoomerangDecodeImage decodeCallback and pixelMap is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -228,7 +228,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest007, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest008
+ * @tc.desc: BoomerangServerTest008 for BoomerangDecodeImage
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -249,7 +249,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest008, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest009
+ * @tc.desc: BoomerangServerTest009 for UnsubscribeCallback unsubCallback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -271,7 +271,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest009, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest10
+ * @tc.desc: BoomerangServerTest10 for UnsubscribeCallback
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -293,7 +293,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest10, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest11
+ * @tc.desc: BoomerangServerTest11 for SubmitMetadata
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -313,7 +313,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest11, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest12
+ * @tc.desc: BoomerangServerTest12 for SubmitMetadata
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -333,7 +333,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest12, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest013
+ * @tc.desc: BoomerangServerTest013 for DumpCurrentDeviceStatus
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -341,6 +341,50 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest013, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     ASSERT_NO_FATAL_FAILURE(boomerang_.DumpCurrentDeviceStatus(FD));
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest014 for DumpDeviceStatusSubscriber
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest014, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NO_FATAL_FAILURE(boomerang_.DumpDeviceStatusSubscriber(FD));
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest015 for DumpDeviceStatusChanges
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest015, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NO_FATAL_FAILURE(boomerang_.DumpDeviceStatusChanges(FD));
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest16
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest16, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    boomerang_.ReportSensorSysEvent(context, 2, true);
+    Data data = boomerang_.GetCache(context, Type::TYPE_STILL);
+    EXPECT_EQ(data.status, Status::STATUS_INVALID);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
