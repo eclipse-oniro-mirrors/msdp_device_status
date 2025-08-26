@@ -32,7 +32,7 @@
 #include "parcel.h"
 
 #undef LOG_TAG
-#define LOG_TAG "BoomerangServerTest"
+#define LOG_TAG "BoomerangManagerTest"
 
 namespace OHOS {
 namespace Msdp {
