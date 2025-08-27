@@ -93,7 +93,7 @@ public:
 
 /**
  * @tc.name: BoomerangClientTest_001
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest UnsubscribeCallback
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -112,7 +112,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_001, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangClientTest_002
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest NotifyMetadataBindingEvent
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -130,7 +130,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_002, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangClientTest_003
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest SubmitMetadata
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -150,7 +150,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_003, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangClientTest_004
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest BoomerangEncodeImage
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -167,7 +167,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_004, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangClientTest_005
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest BoomerangDecodeImage
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -184,7 +184,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_005, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangClientTest_006
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest UnsubscribeCallback callback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -204,7 +204,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_006, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangClientTest_007
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest NotifyMetadataBindingEvent callback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -224,7 +224,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_007, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangClientTest_008
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest SubmitMetadata metadata is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -244,7 +244,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_008, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangClientTest_009
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest BoomerangEncodeImage callback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -261,7 +261,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_009, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangClientTest_010
- * @tc.desc: BoomerangClientTest
+ * @tc.desc: BoomerangClientTest BoomerangDecodeImage callback is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
