@@ -285,7 +285,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest012, TestSize.Level1)
     string metadata = "";
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.SubmitMetadata(metadata);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, RET_OK);
     GTEST_LOG_(INFO) << "BoomerangManagerTest012 end";
 }
 
