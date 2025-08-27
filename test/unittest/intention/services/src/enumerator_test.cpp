@@ -34,7 +34,7 @@ namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
-const std::string TEST_DEV_NODE {"TestDeviceNode"};
+const std::string TEST_DEV_NODE { "TestDeviceNode" };
 } // namespace
 
 class EnumeratorTest : public testing::Test {
