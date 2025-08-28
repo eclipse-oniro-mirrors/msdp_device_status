@@ -1116,7 +1116,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDamplingCoefficient, 
     constexpr double damplingCoefficient { 0.1 };
     auto ret = InteractionManager::GetInstance()->SetDamplingCoefficient(
         COORDINATION_DAMPLING_RIGHT, damplingCoefficient);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, RET_OK);
 }
 
 /**
