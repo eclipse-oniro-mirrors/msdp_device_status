@@ -1876,10 +1876,12 @@ HWTEST_F(DragServerTest, DragServerTest96, TestSize.Level1)
 {
     Parcel parcel;
     SummaryMap val;
+    val.clear();
     int32_t size = -1;
-    parcel.WriteInt32(size);
+    bool result = parcel.WriteInt32(size);
+    EXPECT_TRUE(result);
     int32_t ret = SummaryPacker::UnMarshalling(parcel, val);
-    EXPECT_EQ(ret, RET_ERR);
+    ASSERT_EQ(ret, RET_ERR);
     EXPECT_EQ(val.size(), 0);
 }
  
@@ -1893,10 +1895,12 @@ HWTEST_F(DragServerTest, DragServerTest97, TestSize.Level1)
 {
     Parcel parcel;
     SummaryMap val;
+    val.clear();
     int32_t size = MAX_BUF_SIZE;
-    parcel.WriteInt32(size);
+    bool result = parcel.WriteInt32(size);
+    EXPECT_TRUE(result);
     int32_t ret = SummaryPacker::UnMarshalling(parcel, val);
-    EXPECT_EQ(ret, RET_ERR);
+    ASSERT_EQ(ret, RET_ERR);
     EXPECT_EQ(val.size(), 0);
 }
 } // namespace DeviceStatus
