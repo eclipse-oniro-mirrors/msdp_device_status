@@ -1876,7 +1876,7 @@ HWTEST_F(DragServerTest, DragServerTest96, TestSize.Level1)
 {
     Parcel parcel;
     SummaryMap val;
-    var.clear();
+    val.clear();
     int32_t size = -1;
     bool result = parcel.WriteInt32(size);
     EXPECT_TRUE(result);
@@ -1895,7 +1895,7 @@ HWTEST_F(DragServerTest, DragServerTest97, TestSize.Level1)
 {
     Parcel parcel;
     SummaryMap val;
-    var.clear();
+    val.clear();
     int32_t size = MAX_BUF_SIZE;
     bool result = parcel.WriteInt32(size);
     EXPECT_TRUE(result);
