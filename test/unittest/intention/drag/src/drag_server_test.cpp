@@ -1656,6 +1656,12 @@ HWTEST_F(DragServerTest, DragServerTest84, TestSize.Level0)
     DragState dragState;
     int32_t ret = g_dragMgr.GetDragState(dragState);
     EXPECT_EQ(ret, RET_OK);
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     EXPECT_EQ(dragState, DragState::START);
     ret = g_dragServer->SetDragWindowVisible(visible, isForce, rsTransaction);
     EXPECT_EQ(ret, RET_OK);
@@ -1694,6 +1700,37 @@ HWTEST_F(DragServerTest, DragServerTest86, TestSize.Level0)
     int32_t ret = g_dragServer->GetDragSummaryInfo(dragSummaryInfo);
     EXPECT_EQ(ret, RET_OK);
     g_dragMgr.dragState_ = DragState::STOP;
+    MessageParcel reply;
+    MessageParcel datas;
+    g_dragServer->GetPackageName(g_tokenId1);
+    bool ret = g_dragServer->IsSystemHAPCalling(context);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DragServerTest
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    Security::AccessToken::AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = Security::AccessToken::AccessTokenKit::AllocHapToken(g_testInfoParms, g_testPolicyPrams);
+    EXPECT_EQ(0, SetSelfTokenID(tokenIdEx.tokenIdExStruct.tokenID));
+    auto g_tokenId1 = tokenIdEx.tokenIdExStruct.tokenID;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    g_dragServer->GetPackageName(g_tokenId1);
+    bool ret = g_dragServer->IsSystemHAPCalling(context);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -1732,6 +1769,12 @@ HWTEST_F(DragServerTest, DragServerTest88, TestSize.Level1)
     dragData.value().summaryFormat = { { "image", { 0, 1 } } };
     dragData.value().summaryTotalSize = 100;
     Parcel parcel;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     int32_t ret = DragDataUtil::MarshallingSummaryExpanding(dragData.value(), parcel);
     ASSERT_EQ(ret, RET_OK);
     DragData dragDataFromParcel;
@@ -1767,6 +1810,12 @@ HWTEST_F(DragServerTest, DragServerTest90, TestSize.Level1)
     CALL_TEST_DEBUG;
     DragSummaryInfo dragSummaryInfo;
     Parcel parcel;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
     bool ret = sequenceableDragSummaryInfo.Marshalling(parcel);
     EXPECT_TRUE(ret);
@@ -1801,6 +1850,12 @@ HWTEST_F(DragServerTest, DragServerTest92, TestSize.Level1)
     DragSummaryInfo dragSummaryInfo;
     SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
     Parcel parcel;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     parcel.SetMaxCapacity(0);
     auto ret = sequenceableDragSummaryInfo.Unmarshalling(parcel);
     ASSERT_EQ(ret, nullptr);
@@ -1820,6 +1875,12 @@ HWTEST_F(DragServerTest, DragServerTest93, TestSize.Level1)
     parcel.SetMaxCapacity(0);
     DragDataPacker dragDataPacker;
     DragData dragData;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     auto ret = dragDataPacker.UnMarshallingDetailedSummarys(parcel, dragData);
     ASSERT_EQ(ret, RET_ERR);
 }
@@ -1855,6 +1916,12 @@ HWTEST_F(DragServerTest, DragServerTest95, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     g_dragMgr.dragState_ = DragState::START;
     OHOS::AAFwk::Want want;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     EventFwk::CommonEventData event;
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
     event.SetWant(want);
@@ -1877,6 +1944,12 @@ HWTEST_F(DragServerTest, DragServerTest96, TestSize.Level1)
     Parcel parcel;
     SummaryMap val;
     int32_t size = -1;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     parcel.WriteInt32(size);
     int32_t ret = SummaryPacker::UnMarshalling(parcel, val);
     EXPECT_EQ(ret, RET_ERR);
