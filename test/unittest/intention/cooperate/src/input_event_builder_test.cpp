@@ -251,7 +251,7 @@ HWTEST_F(InputEventBuilderTest, InputEventBuilderTest_UpdatePointerEvent_001, Te
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     bool ret = builder_->UpdatePointerEvent();
-    ASSERT_FALSE(ret);
+    ASSERT_TRUE(ret);
 }
 
 

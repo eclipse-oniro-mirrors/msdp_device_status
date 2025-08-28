@@ -41,6 +41,7 @@ std::mutex g_lockSetToken;
 uint64_t g_shellTokenId = 0;
 static constexpr int32_t DEFAULT_API_VERSION = 12;
 static MockHapToken* g_mock = nullptr;
+constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 } // namespace
 void SetTestEvironment(uint64_t shellTokenId)
 {
@@ -224,6 +225,7 @@ void CooperateServerTest::TearDownTestCase()
         delete g_mock;
         g_mock = nullptr;
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
 
 /**

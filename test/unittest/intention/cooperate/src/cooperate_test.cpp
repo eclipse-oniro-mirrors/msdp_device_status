@@ -158,7 +158,7 @@ MockPluginManager::MockPluginManager(IContext *context)
 {
     pluginMgr_ = std::make_unique<PluginManager>(context);
 }
- 
+
 ICooperate* MockPluginManager::LoadCooperate()
 {
     return pluginMgr_->LoadCooperate();
