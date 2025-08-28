@@ -1694,11 +1694,6 @@ HWTEST_F(DragServerTest, DragServerTest86, TestSize.Level0)
     int32_t ret = g_dragServer->GetDragSummaryInfo(dragSummaryInfo);
     EXPECT_EQ(ret, RET_OK);
     g_dragMgr.dragState_ = DragState::STOP;
-    MessageParcel reply;
-    MessageParcel datas;
-    g_dragServer->GetPackageName(g_tokenId1);
-    bool ret = g_dragServer->IsSystemHAPCalling(context);
-    EXPECT_FALSE(ret);
 }
 
 /**
