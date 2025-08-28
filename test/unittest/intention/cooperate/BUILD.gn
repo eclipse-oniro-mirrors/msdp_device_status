@@ -1165,7 +1165,6 @@ group("unittest") {
     ":CooperateFreeTest",
     ":CooperateInTest",
     ":CooperateOutTest",
-    ":CooperateServerTest",
     ":CooperateTest",
     ":DsoftbusHanderTest",
     ":EventManagerTest",
