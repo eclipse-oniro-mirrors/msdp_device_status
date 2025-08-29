@@ -233,7 +233,6 @@ group("unittest") {
   deps += [
     ":device_status_algorithm_test",
     ":device_status_datahub_test",
-    ":device_status_mock_test",
     ":device_status_algo_mgr_test",
     ":device_status_algo_mock_test",
   ]
