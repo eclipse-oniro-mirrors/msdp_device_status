@@ -34,6 +34,8 @@ namespace {
 constexpr int32_t MAX_KEY_SIZE { 395 };
 const std::string HEART_BEAT_PACKET { "heart_beat_packet" };
 constexpr size_t MAX_N_PRESSED_BUTTONS { 10 };
+constexpr size_t MAX_N_PRESSED_KEYS { 10 };
+constexpr size_t MAX_BUFFER_SIZE { 1024 };
 } // namespace
 
 int32_t InputEventSerialization::KeyEventToNetPacket(
@@ -420,6 +422,10 @@ int32_t InputEventSerialization::DeserializePressedKeys(NetPacket &pkt, std::sha
 {
     std::vector<int32_t>::size_type nPressed {};
     pkt >> nPressed;
+    if (nPressed >= MAX_N_PRESSED_KEYS) {
+        FI_HILOGE("Exceed maximum allowed number of nPressed");
+        return RET_ERR;
+    }
 
     std::vector<int32_t> pressedKeys;
     int32_t keyCode {};
@@ -472,6 +478,10 @@ int32_t InputEventSerialization::DeserializeBuffer(NetPacket &pkt, std::shared_p
 {
     std::vector<uint8_t>::size_type bufSize {};
     pkt >> bufSize;
+    if (bufSize >= MAX_BUFFER_SIZE) {
+        FI_HILOGE("Exceed maximum allowed number of bufSize");
+        return RET_ERR;
+    }
 
     std::vector<uint8_t> buffer;
     uint8_t item {};
@@ -676,6 +686,10 @@ int32_t InputEventSerialization::UnmarshallingEnhanceData(NetPacket &pkt, std::s
     if (enHanceDataLen == 0) {
         return RET_OK;
     }
+    if (enHanceDataLen > MAX_HMAC_SIZE) {
+        FI_HILOGE("enHanceDataLen is incalid");
+        return RET_ERR;
+    }
     uint8_t enhanceDataBuf[enHanceDataLen];
     std::vector<uint8_t> enhanceData;
     for (size_t i = 0; i < enHanceDataLen; i++) {
@@ -729,8 +743,12 @@ int32_t InputEventSerialization::UnmarshallingEnhanceData(NetPacket &pkt, std::s
 {
     uint32_t enHanceDataLen;
     pkt >> enHanceDataLen;
-    if (enHanceDataLen == 0 || enHanceDataLen > MAX_HMAC_SIZE) {
+    if (enHanceDataLen == 0) {
         return RET_OK;
+    }
+    if (enHanceDataLen > MAX_HMAC_SIZE) {
+        FI_HILOGE("enHanceDataLen is incalid");
+        return RET_ERR;
     }
     uint8_t enhanceDataBuf[enHanceDataLen];
     std::vector<uint8_t> enhanceData;
