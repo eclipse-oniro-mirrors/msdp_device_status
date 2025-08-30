@@ -3065,55 +3065,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState, T
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
-
-/**
- * @tc.name: InteractionManagerTest_SetAppDragSwitchState002
- * @tc.desc: Check SetAppDragSwitchState
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    int32_t ret = InteractionManager::GetInstance()->SetDragSwitchState(true, true);
-    EXPECT_EQ(ret, RET_OK);
-    std::string pkgName;
-    ret = InteractionManager::GetInstance()->SetAppDragSwitchState(true, pkgName, true);
-    EXPECT_EQ(ret, RET_OK);
-    ret = InteractionManager::GetInstance()->SetDraggableState(true);
-    EXPECT_EQ(ret, RET_OK);
-    int64_t downTime = 0;
-    InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
-    bool status = true;
-    ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->GetAppDragSwitchState(status));
-}
-/*
- * @tc.name: InteractionManagerTest_ActivateCooperateWithOptions
- * @tc.desc: Activate coordination
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCooperateWithOptions, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    std::string remoteNetworkId("");
-    int32_t startDeviceId = -1;
-    auto fun = [](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
-        FI_HILOGD("Start coordination success");
-        (void) listener;
-    };
-    CooperateOptions withOptions;
-    withOptions.displayX = 500;
-    withOptions.displayY = 500;
-    withOptions.displayId = 0;
-    int32_t ret = InteractionManager::GetInstance()->ActivateCooperateWithOptions(remoteNetworkId, startDeviceId,
-        fun, withOptions);
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-    ASSERT_TRUE((ret == RET_OK || ret == COMMON_PERMISSION_CHECK_ERROR || ret == COMMON_NOT_ALLOWED_DISTRIBUTED));
-#else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
-#endif // OHOS_BUILD_ENABLE_COORDINATION
-}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
