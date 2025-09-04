@@ -49,6 +49,7 @@ private:
     bool CheckPermission(const CallingContext &context, const std::string &permission);
     bool IsSystemCalling(const CallingContext &context);
     bool IsSystemServiceCalling(const CallingContext &context);
+    bool CheckDeviceType();
 
     OnScreenAlgorithmHandle handle_;
     std::mutex mtx_;
