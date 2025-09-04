@@ -22,6 +22,7 @@
 
 #include "accesstoken_kit.h"
 #include "devicestatus_define.h"
+#include "parameters.h"
 #include "tokenid_kit.h"
 
 #undef LOG_TAG
@@ -35,6 +36,7 @@ namespace {
 const char *LIB_ON_SCREEN_ALGO_PATH = "/system/lib64/libon_screen.z.so";
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
 const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
+const char *DEVICE_TYPE_PARA_NAME = "const.product.devicetype";
 const std::vector<std::string> SUPPORT_DEVICE_TYPE = { "phone" };
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_PERMISSION = 201;
@@ -204,7 +206,7 @@ bool OnScreenServer::IsSystemServiceCalling(const CallingContext &context)
 
 bool OnScreenServer::CheckDeviceType()
 {
-    std::string deviceType = OHOS::system::GetParameter("const.product.devicetype");
+    std::string deviceType = OHOS::system::GetParameter(DEVICE_TYPE_PARA_NAME, "");
     return std::find(SUPPORT_DEVICE_TYPE.begin(), SUPPORT_DEVICE_TYPE.end(), deviceType) != SUPPORT_DEVICE_TYPE.end();
 }
 } // namespace OnScreen
