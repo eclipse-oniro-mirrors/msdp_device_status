@@ -30,9 +30,7 @@ public:
     virtual int32_t GetPageContent(const OnScreenCallingContext &context, const ContentOption &option,
         PageContent &pageContent) = 0;
     virtual int32_t SendControlEvent(const OnScreenCallingContext &context, const ControlEvent &event) = 0;
-    virtual int32_t DumpPageInfo() = 0;
-    virtual int32_t DumpBundleName(std::string &bundleName) = 0;
-    virtual int32_t DumpParams() = 0;
+    virtual int32_t Dump(int fd, const std::vector<std::u16string> &args) = 0;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

@@ -619,68 +619,7 @@ int IntentionService::Dump(int fd, const std::vector<std::u16string> &args)
         FI_HILOGE("fd is invalid, %{public}d", fd);
         return RET_ERR;
     }
-
-    int errCode = RET_OK;
-    auto size = args.size();
-    if (size == 0) {
-        ShowHelp(fd);
-        return errCode;
-    }
-
-    std::vector<std::string> argsStr;
-    for (auto arg : args) {
-        argsStr.emplace_back(Str16ToStr8(arg));
-    }
-    ProcessMultiParam(fd, argsStr);
-    return RET_OK;
-}
-
-void IntentionService::ProcessMultiParam(int fd, std::vector<std::string> &argsStr)
-{
-    for (auto arg : argsStr) {
-        if (arg == "-h") {
-            ShowHelp(fd);
-        } else if (arg == "-i") {
-            auto ret = onScreen_.DumpPageInfo();
-            if (ret != RET_OK) {
-                dprintf(fd, "Save page information failed.\n");
-                continue;
-            }
-            dprintf(fd, "Save page information successfully.\n");
-        } else if (arg == "-n") {
-            std::string bundleName;
-            auto ret = onScreen_.DumpBundleName(bundleName);
-            if (ret != RET_OK) {
-                dprintf(fd, "Get application name failed.\n");
-                continue;
-            }
-            dprintf(fd, "%s\n", bundleName.c_str());
-        } else if (arg == "-r") {
-            auto ret = onScreen_.DumpParams();
-            if (ret != RET_OK) {
-                dprintf(fd, "Save routing params failed.\n");
-                continue;
-            }
-            dprintf(fd, "Save routing params successfully.\n");
-        } else {
-            dprintf(fd, "The argument %s is illegal and you can enter '-h' for help.\n", arg.c_str());
-        }
-    }
-}
-
-void IntentionService::ShowHelp(int fd)
-{
-    std::string result;
-    result.append("Usage:\n")
-        .append("-h                          ")
-        .append("help text for the tool\n")
-        .append("-i                          ")
-        .append("save page information to file /data/service/el1/public/msdp/pageInfo.json\n")
-        .append("-n                          ")
-        .append("get the name of the foreground application\n")
-        .append("-r                          ")
-        .append("save page routing parameters to file /data/service/el1/public/msdp/params.json\n");
-    dprintf(fd, "%s\n", result.c_str());
+    return onScreen_.Dump(fd, args);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

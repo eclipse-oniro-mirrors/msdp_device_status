@@ -127,8 +127,6 @@ public:
 
     // hidumper
     int Dump(int fd, const std::vector<std::u16string> &args) override;
-    void ProcessMultiParam(int fd, std::vector<std::string>& argsStr);
-    void ShowHelp(int fd);
 
 private:
     CallingContext GetCallingContext();

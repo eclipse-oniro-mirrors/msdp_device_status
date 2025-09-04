@@ -130,7 +130,7 @@ int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const Co
     return RET_OK;
 }
 
-int32_t OnScreenServer::DumpPageInfo()
+int32_t OnScreenServer::Dump(int fd, const std::vector<std::u16string> &args)
 {
     std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
@@ -138,44 +138,10 @@ int32_t OnScreenServer::DumpPageInfo()
         FI_HILOGE("failed to load algo lib");
         return RET_NO_SUPPORT;
     }
-    FI_HILOGI("dump page info invoke algo lib");
-    ret = handle_.pAlgorithm->DumpPageInfo();
+    FI_HILOGI("dump invoke algo lib");
+    ret = handle_.pAlgorithm->Dump(fd, args);
     if (ret != RET_OK) {
-        FI_HILOGE("failed to dump page info, err=%{public}d", ret);
-        return ret;
-    }
-    return RET_OK;
-}
-
-int32_t OnScreenServer::DumpBundleName(std::string &bundleName)
-{
-    std::lock_guard lockGrd(mtx_);
-    int32_t ret = RET_OK;
-    if (ConnectAlgoLib() != RET_OK) {
-        FI_HILOGE("failed to load algo lib");
-        return RET_NO_SUPPORT;
-    }
-    FI_HILOGI("dump bundle name invoke algo lib");
-    ret = handle_.pAlgorithm->DumpBundleName(bundleName);
-    if (ret != RET_OK) {
-        FI_HILOGE("failed to dump bundle name, err=%{public}d", ret);
-        return ret;
-    }
-    return RET_OK;
-}
-
-int32_t OnScreenServer::DumpParams()
-{
-    std::lock_guard lockGrd(mtx_);
-    int32_t ret = RET_OK;
-    if (ConnectAlgoLib() != RET_OK) {
-        FI_HILOGE("failed to load algo lib");
-        return RET_NO_SUPPORT;
-    }
-    FI_HILOGI("dump routing param invoke algo lib");
-    ret = handle_.pAlgorithm->DumpParams();
-    if (ret != RET_OK) {
-        FI_HILOGE("failed to dump routing param, err=%{public}d", ret);
+        FI_HILOGE("failed to dump, err=%{public}d", ret);
         return ret;
     }
     return RET_OK;
