@@ -67,6 +67,7 @@ int32_t OnScreenServer::GetPageContent(const CallingContext &context, const Cont
     std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
     if (!CheckDeviceType()) {
+        FI_HILOGE("device type is not support");
         return RET_NO_SUPPORT;
     }
     if (!CheckPermission(context, PERMISSION_GET_PAGE_CONTENT)) {
@@ -100,6 +101,7 @@ int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const Co
 {
     std::lock_guard lockGrd(mtx_);
     if (!CheckDeviceType()) {
+        FI_HILOGE("device type is not support");
         return RET_NO_SUPPORT;
     }
     int32_t ret = RET_OK;
@@ -130,7 +132,7 @@ int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const Co
     return RET_OK;
 }
 
-int32_t OnScreenServer::Dump(int fd, const std::vector<std::u16string> &args)
+int32_t OnScreenServer::Dump(int32_t fd, const std::vector<std::u16string> &args)
 {
     std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
@@ -142,9 +144,8 @@ int32_t OnScreenServer::Dump(int fd, const std::vector<std::u16string> &args)
     ret = handle_.pAlgorithm->Dump(fd, args);
     if (ret != RET_OK) {
         FI_HILOGE("failed to dump, err=%{public}d", ret);
-        return ret;
     }
-    return RET_OK;
+    return ret;
 }
 
 int32_t OnScreenServer::ConnectAlgoLib()

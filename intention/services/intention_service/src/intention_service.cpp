@@ -613,7 +613,7 @@ ErrCode IntentionService::SendControlEvent(const OnScreen::SequenceableControlEv
     });
 }
 
-int IntentionService::Dump(int fd, const std::vector<std::u16string> &args)
+int32_t IntentionService::Dump(int32_t fd, const std::vector<std::u16string> &args)
 {
     if (fd < 0) {
         FI_HILOGE("fd is invalid, %{public}d", fd);
