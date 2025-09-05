@@ -17,10 +17,12 @@
 
 #include <algorithm>
 #include <dlfcn.h>
+#include <string>
 #include <vector>
 
 #include "accesstoken_kit.h"
 #include "devicestatus_define.h"
+#include "parameters.h"
 #include "tokenid_kit.h"
 
 #undef LOG_TAG
@@ -34,6 +36,8 @@ namespace {
 const char *LIB_ON_SCREEN_ALGO_PATH = "/system/lib64/libon_screen.z.so";
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
 const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
+const char *DEVICE_TYPE_PARA_NAME = "const.product.devicetype";
+const std::vector<std::string> SUPPORT_DEVICE_TYPE = { "phone" };
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_PERMISSION = 201;
 constexpr int32_t RET_NO_SYSTEM_CALLING = 202;
@@ -62,6 +66,10 @@ int32_t OnScreenServer::GetPageContent(const CallingContext &context, const Cont
 {
     std::lock_guard lockGrd(mtx_);
     int32_t ret = RET_OK;
+    if (!CheckDeviceType()) {
+        FI_HILOGE("device type is not support");
+        return RET_NO_SUPPORT;
+    }
     if (!CheckPermission(context, PERMISSION_GET_PAGE_CONTENT)) {
         FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_GET_PAGE_CONTENT);
         return RET_NO_PERMISSION;
@@ -92,6 +100,10 @@ int32_t OnScreenServer::GetPageContent(const CallingContext &context, const Cont
 int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const ControlEvent &event)
 {
     std::lock_guard lockGrd(mtx_);
+    if (!CheckDeviceType()) {
+        FI_HILOGE("device type is not support");
+        return RET_NO_SUPPORT;
+    }
     int32_t ret = RET_OK;
     if (!CheckPermission(context, PERMISSION_SEND_CONTROL_EVENT)) {
         FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_SEND_CONTROL_EVENT);
@@ -118,6 +130,22 @@ int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const Co
         return ret;
     }
     return RET_OK;
+}
+
+int32_t OnScreenServer::Dump(int32_t fd, const std::vector<std::u16string> &args)
+{
+    std::lock_guard lockGrd(mtx_);
+    int32_t ret = RET_OK;
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
+        return RET_NO_SUPPORT;
+    }
+    FI_HILOGI("dump invoke algo lib");
+    ret = handle_.pAlgorithm->Dump(fd, args);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to dump, err=%{public}d", ret);
+    }
+    return ret;
 }
 
 int32_t OnScreenServer::ConnectAlgoLib()
@@ -192,6 +220,12 @@ bool OnScreenServer::IsSystemServiceCalling(const CallingContext &context)
         return true;
     }
     return false;
+}
+
+bool OnScreenServer::CheckDeviceType()
+{
+    std::string deviceType = OHOS::system::GetParameter(DEVICE_TYPE_PARA_NAME, "");
+    return std::find(SUPPORT_DEVICE_TYPE.begin(), SUPPORT_DEVICE_TYPE.end(), deviceType) != SUPPORT_DEVICE_TYPE.end();
 }
 } // namespace OnScreen
 } // namespace DeviceStatus

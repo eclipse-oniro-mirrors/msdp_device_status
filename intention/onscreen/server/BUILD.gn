@@ -56,6 +56,7 @@ ohos_source_set("intention_on_screen_server") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "image_framework:image_native",
+    "init:libbegetutil",
     "ipc:ipc_single",
   ]
 

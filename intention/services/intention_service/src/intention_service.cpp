@@ -612,6 +612,15 @@ ErrCode IntentionService::SendControlEvent(const OnScreen::SequenceableControlEv
         return onScreen_.SendControlEvent(context, event.controlEvent_);
     });
 }
+
+int32_t IntentionService::Dump(int32_t fd, const std::vector<std::u16string> &args)
+{
+    if (fd < 0) {
+        FI_HILOGE("fd is invalid, %{public}d", fd);
+        return RET_ERR;
+    }
+    return onScreen_.Dump(fd, args);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

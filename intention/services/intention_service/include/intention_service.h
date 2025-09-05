@@ -125,6 +125,9 @@ public:
         OnScreen::SequenceablePageContent &pageContent) override;
     ErrCode SendControlEvent(const OnScreen::SequenceableControlEvent &event) override;
 
+    // hidumper
+    int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
+
 private:
     CallingContext GetCallingContext();
     void PrintCallingContext(const CallingContext &context);
