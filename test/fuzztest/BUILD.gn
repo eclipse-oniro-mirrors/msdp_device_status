@@ -28,6 +28,7 @@ group("device_status_fuzztest") {
     "boomerangencodeimage_fuzzer:fuzztest",
     "boomerangsubscribe_fuzzer:fuzztest",
     "boomerangunsubscribe_fuzzer:fuzztest",
+    "ddmadapter_fuzzer:fuzztest",
     "devicegetcachestub_fuzzer:fuzztest",
     "devicestatusagent_fuzzer:fuzztest",
     "devicestatusclient_fuzzer:fuzztest",
