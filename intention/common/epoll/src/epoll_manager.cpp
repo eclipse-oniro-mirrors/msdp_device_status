@@ -92,6 +92,8 @@ void EpollManager::Remove(std::shared_ptr<IEpollEventSource> source)
     if (ret != 0) {
         FI_HILOGE("epoll_ctl failed:%{public}s", ::strerror(errno));
     }
+    FI_HILOGI("Close fd: %{public}d", source->GetFd());
+    fdsan_close_with_tag(source->GetFd(), DOMAIN_ID);
     sources_.erase(iter);
 }
 
