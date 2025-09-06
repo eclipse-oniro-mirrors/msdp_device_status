@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "msdpdevicemanager_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 #include "ddm_adapter.h"
 #include "devicestatus_define.h"
 
@@ -27,10 +28,6 @@ struct DeviceStatusEpollEvent {
     int32_t fd { -1 };
     EpollEventType eventType { EPOLL_EVENT_BEGIN };
 };
-
-const uint8_t *g_baseFuzzData = nullptr;
-size_t g_baseFuzzSize = 0;
-size_t g_baseFuzzPos = 0;
 constexpr size_t STR_LEN = 255;
 ContextService *g_instance = nullptr;
 constexpr int32_t DEFAULT_WAIT_TIME_MS { 1000 };
@@ -420,43 +417,6 @@ void ContextService::OnDelegateTask(const struct epoll_event &ev)
     delegateTasks_.ProcessTasks();
 }
 
-template <class T> T GetData()
-{
-    T objetct{};
-    size_t objetctSize = sizeof(objetct);
-    if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
-        return objetct;
-    }
-    errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
-    if (ret != EOK) {
-        return {};
-    }
-    g_baseFuzzPos += objetctSize;
-    return objetct;
-}
-
-void SetGlobalFuzzData(const uint8_t *data, size_t size)
-{
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-}
-
-std::string GetStringFromData(int strlen)
-{
-    if (strlen < 1) {
-        return "";
-    }
-
-    char cstr[strlen];
-    cstr[strlen - 1] = '\0';
-    for (int i = 0; i < strlen - 1; i++) {
-        cstr[i] = GetData<char>();
-    }
-    std::string str(cstr);
-    return str;
-}
-
 std::shared_ptr<MMI::InputDevice> GetDevice(int32_t deviceId)
 {
     std::shared_ptr<MMI::InputDevice> inputDevice;
@@ -471,15 +431,10 @@ std::shared_ptr<MMI::InputDevice> GetDevice(int32_t deviceId)
     return inputDevice;
 }
 
-bool MsdpDeviceManagerFuzzTest(const uint8_t* data, size_t size)
+bool MsdpDeviceManagerFuzzTest(FuzzedDataProvider &provider)
 {
-    if ((data == nullptr) || (size < 1)) {
-        return false;
-    }
-    SetGlobalFuzzData(data, size);
-
-    std::string devStr = GetStringFromData(STR_LEN);
-    int32_t id = GetData<int32_t>();
+    std::string devStr = provider.ConsumeBytesAsString(STR_LEN);
+    int32_t id = provider.ConsumeIntegral<int32_t>();
 
     std::weak_ptr<IDeviceObserver> weakObserver = std::weak_ptr<IDeviceObserver>();
     auto env = ContextService::GetInstance();
@@ -493,12 +448,6 @@ bool MsdpDeviceManagerFuzzTest(const uint8_t* data, size_t size)
     env->GetDeviceManager().RetriggerHotplug(weakObserver);
     env->GetDeviceManager().AddDeviceObserver(weakObserver);
     env->GetDeviceManager().RemoveDeviceObserver(weakObserver);
-    env->devMgr_.HasLocalPointerDevice();
-    env->devMgr_.HasLocalKeyboardDevice();
-    env->devMgr_.GetPointerDevice();
-    env->devMgr_.HasKeyboard();
-    env->devMgr_.GetKeyboard();
-    env->devMgr_.GetVirTrackPad();
     env->devMgr_.RemoveDevice(devStr);
     env->devMgr_.Disable();
     struct epoll_event ev {};
@@ -513,8 +462,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (data == nullptr) {
         return 0;
     }
-
-    OHOS::Msdp::DeviceStatus::MsdpDeviceManagerFuzzTest(data, size);
+    FuzzedDataProvider provider(data, size);
+    OHOS::Msdp::DeviceStatus::MsdpDeviceManagerFuzzTest(provider);
 
     return 0;
 }
