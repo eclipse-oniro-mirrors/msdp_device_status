@@ -46,12 +46,12 @@ public:
 
     void OnBoardOnline(const std::string &networkId) override
     {
-        FI_HILOGD("\'%{public}s\' is online", networkId.c_str());
+        FI_HILOGD("\'%{public}s\' is online", Utility::Anonymize(networkId).c_str());
     }
 
     void OnBoardOffline(const std::string &networkId) override
     {
-        FI_HILOGD("\'%{public}s\' is offline", networkId.c_str());
+        FI_HILOGD("\'%{public}s\' is offline", Utility::Anonymize(networkId).c_str());
     }
 };
 
