@@ -63,7 +63,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     if (data == nullptr) {
         return 0;
-    } 
+    }
     FuzzedDataProvider provider(data, size);
     OHOS::Msdp::DeviceStatus::SpecialInputDeviceFuzzTest(provider);
     return 0;
