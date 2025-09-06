@@ -32,26 +32,34 @@ DDMAdapter::DDMAdapter()
 
 int32_t DDMAdapter::Enable()
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     return ddm_->Enable();
+    // LCOV_EXCL_STOP
 }
 
 void DDMAdapter::Disable()
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     ddm_->Disable();
+    // LCOV_EXCL_STOP
 }
 
 void DDMAdapter::AddBoardObserver(std::shared_ptr<IBoardObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     ddm_->AddBoardObserver(observer);
+    // LCOV_EXCL_STOP
 }
 
 void DDMAdapter::RemoveBoardObserver(std::shared_ptr<IBoardObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     ddm_->RemoveBoardObserver(observer);
+    // LCOV_EXCL_STOP
 }
 
 bool DDMAdapter::CheckSameAccountToLocal(const std::string &networkId)

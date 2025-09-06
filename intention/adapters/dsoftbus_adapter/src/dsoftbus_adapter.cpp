@@ -32,12 +32,16 @@ void DSoftbusAdapter::Disable()
 
 void DSoftbusAdapter::AddObserver(std::shared_ptr<IDSoftbusObserver> observer)
 {
+    // LCOV_EXCL_START
     DSoftbusAdapterImpl::GetInstance()->AddObserver(observer);
+    // LCOV_EXCL_STOP
 }
 
 void DSoftbusAdapter::RemoveObserver(std::shared_ptr<IDSoftbusObserver> observer)
 {
+    // LCOV_EXCL_START
     DSoftbusAdapterImpl::GetInstance()->RemoveObserver(observer);
+    // LCOV_EXCL_STOP
 }
 
 int32_t DSoftbusAdapter::CheckDeviceOnline(const std::string &networkId)

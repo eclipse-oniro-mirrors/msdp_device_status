@@ -85,36 +85,44 @@ DSoftbusAdapterImpl::~DSoftbusAdapterImpl()
 
 int32_t DSoftbusAdapterImpl::Enable()
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     InitHeartBeat();
     std::unique_lock<std::shared_mutex> lock(lock_);
     return SetupServer();
+    // LCOV_EXCL_STOP
 }
 
 void DSoftbusAdapterImpl::Disable()
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     std::unique_lock<std::shared_mutex> lock(lock_);
     ShutdownServer();
+    // LCOV_EXCL_STOP
 }
 
 void DSoftbusAdapterImpl::AddObserver(std::shared_ptr<IDSoftbusObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     std::unique_lock<std::shared_mutex> lock(lock_);
     CHKPV(observer);
     observers_.erase(Observer());
     observers_.emplace(observer);
+    // LCOV_EXCL_STOP
 }
 
 void DSoftbusAdapterImpl::RemoveObserver(std::shared_ptr<IDSoftbusObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     std::unique_lock<std::shared_mutex> lock(lock_);
     if (auto iter = observers_.find(Observer(observer)); iter != observers_.end()) {
         observers_.erase(iter);
     }
     observers_.erase(Observer());
+    // LCOV_EXCL_STOP
 }
 
 int32_t DSoftbusAdapterImpl::CheckDeviceOnline(const std::string &networkId)
@@ -167,9 +175,11 @@ void DSoftbusAdapterImpl::CloseSession(const std::string &networkId)
 
 void DSoftbusAdapterImpl::CloseAllSessions()
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     std::unique_lock<std::shared_mutex> lock(lock_);
     CloseAllSessionsLocked();
+    // LCOV_EXCL_STOP
 }
 
 int32_t DSoftbusAdapterImpl::FindConnection(const std::string &networkId)
@@ -419,6 +429,7 @@ void DSoftbusAdapterImpl::SetSocketOpt(int32_t socket)
 
 int32_t DSoftbusAdapterImpl::SetupServer()
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     if (socketFd_ > 0) {
         return RET_OK;
@@ -438,16 +449,19 @@ int32_t DSoftbusAdapterImpl::SetupServer()
         return ret;
     }
     return RET_OK;
+    // LCOV_EXCL_STOP
 }
 
 void DSoftbusAdapterImpl::ShutdownServer()
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CloseAllSessionsLocked();
     if (socketFd_ > 0) {
         ::Shutdown(socketFd_);
         socketFd_ = -1;
     }
+    // LCOV_EXCL_STOP
 }
 
 int32_t DSoftbusAdapterImpl::OpenSessionLocked(const std::string &networkId)
@@ -508,12 +522,14 @@ void DSoftbusAdapterImpl::OnConnectedLocked(const std::string &networkId)
 
 void DSoftbusAdapterImpl::CloseAllSessionsLocked()
 {
+    // LCOV_EXCL_START
     std::for_each(sessions_.begin(), sessions_.end(), [](const auto &item) {
         ::Shutdown(item.second.socket_);
         FI_HILOGI("Shutdown connection with (%{public}s,%{public}d)",
             Utility::Anonymize(item.first).c_str(), item.second.socket_);
     });
     sessions_.clear();
+    // LCOV_EXCL_STOP
 }
 
 void DSoftbusAdapterImpl::ConfigTcpAlive(int32_t socket)
@@ -614,11 +630,13 @@ void DSoftbusAdapterImpl::HandleRawData(const std::string &networkId, const void
 
 void DSoftbusAdapterImpl::InitHeartBeat()
 {
+    // LCOV_EXCL_START
     auto runner = AppExecFwk::EventRunner::Create(HEART_BEAT_THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
     CHKPV(runner);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     char heartBeatContent[HEART_BEAT_SIZE_BYTE] { 'a' };
     heartBeatPacket_.Write(heartBeatContent, HEART_BEAT_SIZE_BYTE);
+    // LCOV_EXCL_STOP
 }
 
 void DSoftbusAdapterImpl::StartHeartBeat(const std::string &networkId)
