@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "nativetoken_kit.h"
 #include "singleton.h"
 #include "token_setproc.h"
+#include "utility.h"
 
 #include "ddm_adapter.h"
 #include "devicestatus_define.h"
@@ -39,7 +40,7 @@ constexpr size_t STR_LEN = 255;
 
 class BoardObserverTest final : public IBoardObserver {
 public:
-    explicit BoardObserverTest() {}
+    BoardObserverTest() {}
     ~BoardObserverTest() = default;
     DISALLOW_COPY_AND_MOVE(BoardObserverTest);
 
@@ -83,7 +84,6 @@ void RemovePermission()
     int32_t ret = OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenID);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to remove permission");
-        return;
     }
 }
 
