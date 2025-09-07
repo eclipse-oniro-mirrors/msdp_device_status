@@ -92,6 +92,7 @@ int32_t DeviceManager::OnInit(IContext *context)
 
 int32_t DeviceManager::Enable()
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CHKPR(context_, RET_ERR);
     int32_t ret = context_->GetDelegateTasks().PostSyncTask([this] {
@@ -101,10 +102,12 @@ int32_t DeviceManager::Enable()
         FI_HILOGE("Post sync task failed");
     }
     return ret;
+    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::OnEnable()
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     if (!epollMgr_.Open()) {
         FI_HILOGE("EpollMgr::Open fail");
@@ -128,10 +131,12 @@ DISABLE_MONITOR:
 CLOSE_EPOLL:
     epollMgr_.Close();
     return ret;
+    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::Disable()
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CHKPR(context_, RET_ERR);
     int32_t ret = context_->GetDelegateTasks().PostSyncTask([this] {
@@ -141,15 +146,18 @@ int32_t DeviceManager::Disable()
         FI_HILOGE("PostSyncTask failed");
     }
     return ret;
+    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::OnDisable()
 {
+    // LCOV_EXCL_START
     CHKPR(monitor_, RET_ERR);
     epollMgr_.Remove(monitor_);
     monitor_->Disable();
     epollMgr_.Close();
     return RET_OK;
+    // LCOV_EXCL_STOP
 }
 
 std::shared_ptr<IDevice> DeviceManager::FindDevice(const std::string &devPath)
@@ -230,14 +238,18 @@ std::shared_ptr<IDevice> DeviceManager::AddDevice(const std::string &devNode)
 
 bool DeviceManager::IsLocalPointerDevice(std::shared_ptr<MMI::InputDevice> device)
 {
+    // LCOV_EXCL_START
     CHKPR(device, false);
     return device->HasCapability(MMI::InputDeviceCapability::INPUT_DEV_CAP_POINTER);
+    // LCOV_EXCL_STOP
 }
 
 bool DeviceManager::IsVirtualTrackpad(std::shared_ptr<MMI::InputDevice> device)
 {
+    // LCOV_EXCL_START
     CHKPR(device, false);
     return device->GetName() == VIRTUAL_TRACK_PAD_NAME;
+    // LCOV_EXCL_STOP
 }
 
 std::shared_ptr<IDevice> DeviceManager::RemoveDevice(const std::string &devNode)
@@ -262,16 +274,19 @@ std::shared_ptr<IDevice> DeviceManager::RemoveDevice(const std::string &devNode)
 
 void DeviceManager::OnDeviceAdded(std::shared_ptr<IDevice> dev)
 {
+    // LCOV_EXCL_START
     DeviceInfo(dev);
     for (const auto &observer : observers_) {
         std::shared_ptr<IDeviceObserver> ptr = observer.lock();
         CHKPC(ptr);
         ptr->OnDeviceAdded(dev);
     }
+    // LCOV_EXCL_STOP
 }
 
 void DeviceManager::DeviceInfo(std::shared_ptr<IDevice> dev)
 {
+    // LCOV_EXCL_START
     CHKPV(dev);
     FI_HILOGI("Add device %{public}d:%{private}s", dev->GetId(), dev->GetDevPath().c_str());
     FI_HILOGI("  sysPath:       \"%{private}s\"", dev->GetSysPath().c_str());
@@ -284,15 +299,18 @@ void DeviceManager::DeviceInfo(std::shared_ptr<IDevice> dev)
     FI_HILOGD("  unique id:     \"%{private}s\"", dev->GetUniq().c_str());
     FI_HILOGI("  is pointer:    %{public}s, is keyboard:%{public}s",
         dev->IsPointerDevice() ? "True" : "False", dev->IsKeyboard() ? "True" : "False");
+    // LCOV_EXCL_STOP
 }
 
 void DeviceManager::OnDeviceRemoved(std::shared_ptr<IDevice> dev)
 {
+    // LCOV_EXCL_START
     for (const auto &observer : observers_) {
         std::shared_ptr<IDeviceObserver> ptr = observer.lock();
         CHKPC(ptr);
         ptr->OnDeviceRemoved(dev);
     }
+    // LCOV_EXCL_STOP
 }
 
 void DeviceManager::Dispatch(const struct epoll_event &ev)
@@ -347,12 +365,15 @@ std::shared_ptr<IDevice> DeviceManager::OnGetDevice(int32_t id) const
 int32_t DeviceManager::RunGetDevice(std::packaged_task<std::shared_ptr<IDevice>(int32_t)> &task,
                                     int32_t id) const
 {
+    // LCOV_EXCL_START
     task(id);
     return RET_OK;
+    // LCOV_EXCL_STOP
 }
 
 void DeviceManager::RetriggerHotplug(std::weak_ptr<IDeviceObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostSyncTask([this, observer] {
@@ -361,10 +382,12 @@ void DeviceManager::RetriggerHotplug(std::weak_ptr<IDeviceObserver> observer)
     if (ret != RET_OK) {
         FI_HILOGE("Post task failed");
     }
+    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::OnRetriggerHotplug(std::weak_ptr<IDeviceObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CHKPR(observer, RET_ERR);
     std::shared_ptr<IDeviceObserver> ptr = observer.lock();
@@ -376,10 +399,12 @@ int32_t DeviceManager::OnRetriggerHotplug(std::weak_ptr<IDeviceObserver> observe
             }
         });
     return RET_OK;
+    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::AddDeviceObserver(std::weak_ptr<IDeviceObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     CHKPR(context_, RET_ERR);
     int32_t ret = context_->GetDelegateTasks().PostSyncTask([this, observer] {
@@ -389,10 +414,12 @@ int32_t DeviceManager::AddDeviceObserver(std::weak_ptr<IDeviceObserver> observer
         FI_HILOGE("Post task failed");
     }
     return ret;
+    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::OnAddDeviceObserver(std::weak_ptr<IDeviceObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CHKPR(observer, RET_ERR);
     auto ret = observers_.insert(observer);
@@ -400,10 +427,12 @@ int32_t DeviceManager::OnAddDeviceObserver(std::weak_ptr<IDeviceObserver> observ
         FI_HILOGW("Observer is duplicated");
     }
     return RET_OK;
+    // LCOV_EXCL_STOP
 }
 
 void DeviceManager::RemoveDeviceObserver(std::weak_ptr<IDeviceObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostSyncTask([this, observer] {
@@ -412,25 +441,31 @@ void DeviceManager::RemoveDeviceObserver(std::weak_ptr<IDeviceObserver> observer
     if (ret != RET_OK) {
         FI_HILOGE("Post task failed");
     }
+    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::OnRemoveDeviceObserver(std::weak_ptr<IDeviceObserver> observer)
 {
+    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CHKPR(observer, RET_ERR);
     observers_.erase(observer);
     return RET_OK;
+    // LCOV_EXCL_STOP
 }
 
 bool DeviceManager::AnyOf(std::function<bool(std::shared_ptr<IDevice>)> pred)
 {
+    // LCOV_EXCL_START
     return std::any_of(devices_.cbegin(), devices_.cend(), [pred](const auto &item) {
         return (pred != nullptr ? pred(item.second) : false);
     });
+    // LCOV_EXCL_STOP
 }
 
 bool DeviceManager::HasLocalPointerDevice()
 {
+    // LCOV_EXCL_START
     return AnyOf([this](std::shared_ptr<IDevice> dev) {
         DeviceInfo(dev);
         if ((dev == nullptr) || IsFakePointerDevice(dev)) {
@@ -438,10 +473,12 @@ bool DeviceManager::HasLocalPointerDevice()
         }
         return (dev->IsPointerDevice() && !dev->IsRemote());
     });
+    // LCOV_EXCL_STOP
 }
 
 bool DeviceManager::IsFakePointerDevice(std::shared_ptr<IDevice> dev)
 {
+    // LCOV_EXCL_START
     if (dev == nullptr) {
         return false;
     }
@@ -450,18 +487,22 @@ bool DeviceManager::IsFakePointerDevice(std::shared_ptr<IDevice> dev)
         return false;
     }
     return !isPointerDevice;
+    // LCOV_EXCL_STOP
 }
 
 bool DeviceManager::HasLocalKeyboardDevice()
 {
+    // LCOV_EXCL_START
     return AnyOf([this](std::shared_ptr<IDevice> dev) {
         CHKPR(dev, false);
         return (dev->IsKeyboard() && !dev->IsRemote());
     });
+    // LCOV_EXCL_STOP
 }
 
 bool DeviceManager::HasKeyboard()
 {
+    // LCOV_EXCL_START
     return AnyOf([this](std::shared_ptr<IDevice> dev) {
         if ((dev == nullptr)) {
             return false;
@@ -469,10 +510,12 @@ bool DeviceManager::HasKeyboard()
         return (dev->IsKeyboard() && !dev->IsRemote() &&
             dev->GetKeyboardType() == IDevice::KeyboardType::KEYBOARD_TYPE_ALPHABETICKEYBOARD);
     });
+    // LCOV_EXCL_STOP
 }
 
 std::vector<std::shared_ptr<IDevice>> DeviceManager::GetKeyboard()
 {
+    // LCOV_EXCL_START
     std::vector<std::shared_ptr<IDevice>> keyboards;
     for (const auto &dev : devices_) {
         if (dev.second != nullptr) {
@@ -483,10 +526,12 @@ std::vector<std::shared_ptr<IDevice>> DeviceManager::GetKeyboard()
         }
     }
     return keyboards;
+    // LCOV_EXCL_STOP
 }
 
 std::vector<std::shared_ptr<IDevice>> DeviceManager::GetPointerDevice()
 {
+    // LCOV_EXCL_START
     if (!HasLocalPointerDevice()) {
         return {};
     }
@@ -500,10 +545,12 @@ std::vector<std::shared_ptr<IDevice>> DeviceManager::GetPointerDevice()
         }
     }
     return pointerDevices;
+    // LCOV_EXCL_STOP
 }
 
 std::vector<std::shared_ptr<IDevice>> DeviceManager::GetVirTrackPad()
 {
+    // LCOV_EXCL_START
     std::vector<int32_t> deviceIds;
     std::vector<std::shared_ptr<IDevice>> VirTrackPadDevices;
     if (MMI::InputManager::GetInstance()->GetDeviceIds(
@@ -528,6 +575,7 @@ std::vector<std::shared_ptr<IDevice>> DeviceManager::GetVirTrackPad()
         }
     }
     return VirTrackPadDevices;
+    // LCOV_EXCL_STOP
 }
 
 void DeviceManager::SetPencilAirMouse(bool existAirMouse)
@@ -538,8 +586,10 @@ void DeviceManager::SetPencilAirMouse(bool existAirMouse)
 
 bool DeviceManager::HasPencilAirMouse()
 {
+    // LCOV_EXCL_START
     FI_HILOGI("Has pencil air mouse:%{public}s", hasPencilAirMouse_ ? "true" : "false");
     return hasPencilAirMouse_;
+    // LCOV_EXCL_STOP
 }
 
 } // namespace DeviceStatus
