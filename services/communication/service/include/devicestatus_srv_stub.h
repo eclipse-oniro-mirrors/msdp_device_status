@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,59 +36,6 @@ public:
     virtual ~DeviceStatusSrvStub() = default;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-
-private:
-    int32_t SubscribeStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UnsubscribeStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetLatestDeviceStatusDataStub(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleAllocSocketFdStub(MessageParcel &data, MessageParcel &reply);
-    int32_t RegisterCoordinationMonitorStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UnregisterCoordinationMonitorStub(MessageParcel &data, MessageParcel &reply);
-    int32_t PrepareCoordinationStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UnPrepareCoordinationStub(MessageParcel &data, MessageParcel &reply);
-    int32_t ActivateCoordinationStub(MessageParcel &data, MessageParcel &reply);
-    int32_t DeactivateCoordinationStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetCoordinationStateStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetCoordinationStateSyncStub(MessageParcel &data, MessageParcel &reply);
-    int32_t RegisterCooperateMonitorStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UnregisterCooperateMonitorStub(MessageParcel &data, MessageParcel &reply);
-    int32_t PrepareCooperateStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UnPrepareCooperateStub(MessageParcel &data, MessageParcel &reply);
-    int32_t ActivateCooperateStub(MessageParcel &data, MessageParcel &reply);
-    int32_t DeactivateCooperateStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetCooperateStateStub(MessageParcel &data, MessageParcel &reply);
-    int32_t StartDragStub(MessageParcel &data, MessageParcel &reply);
-    int32_t StopDragStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UpdateDragStyleStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetDragTargetPidStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetUdKeyStub(MessageParcel &data, MessageParcel &reply);
-    int32_t AddDraglistenerStub(MessageParcel &data, MessageParcel &reply);
-    int32_t RemoveDraglistenerStub(MessageParcel &data, MessageParcel &reply);
-    int32_t AddSubscriptListenerStub(MessageParcel &data, MessageParcel &reply);
-    int32_t RemoveSubscriptListenerStub(MessageParcel &data, MessageParcel &reply);
-    int32_t SetDragWindowVisibleStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetShadowOffsetStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UpdateShadowPicStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetDragDataStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetDragStateStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetDragActionStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetExtraInfoStub(MessageParcel &data, MessageParcel &reply);
-    int32_t AddHotAreaListenerStub(MessageParcel &data, MessageParcel &reply);
-    int32_t RemoveHotAreaListenerStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UpdatePreviewStyleStub(MessageParcel &data, MessageParcel &reply);
-    int32_t UpdatePreviewStyleWithAnimationStub(MessageParcel &data, MessageParcel &reply);
-    int32_t GetDragSummaryStub(MessageParcel &data, MessageParcel &reply);
-    bool CheckCooperatePermission();
-    bool IsSystemServiceCalling();
-    bool IsSystemCalling();
-    void InitCoordination();
-    void InitDrag();
-    int32_t EnterTextEditorAreaStub(MessageParcel &data, MessageParcel &reply);
-    int32_t AddPrivilegeStub(MessageParcel &data, MessageParcel &reply);
-    int32_t EraseMouseIconStub(MessageParcel &data, MessageParcel &reply);
-
-private:
-    std::map<uint32_t, std::function<int32_t(MessageParcel &data, MessageParcel &reply)>> connFuncs_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
