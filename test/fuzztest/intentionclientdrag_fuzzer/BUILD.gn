@@ -27,9 +27,9 @@ deps_ex = [
 ]
 
 ###############################fuzztest#################################
-ohos_fuzztest("FuzzIntentionClientSocket") {
+ohos_fuzztest("MsdpIntentionClientDragFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "${device_status_root_path}/test/fuzztest/intentionclient_fuzzer"
+  fuzz_config_file = "${device_status_root_path}/test/fuzztest/intentionclientdrag_fuzzer"
   include_dirs = [
     "${device_status_root_path}/libs/interface",
     "${device_status_service_path}/interaction/drag/include",
@@ -45,7 +45,7 @@ ohos_fuzztest("FuzzIntentionClientSocket") {
     "-Dprotected=public",
   ]
 
-  sources = [ "intention_client_socket_fuzzer.cpp" ]
+  sources = [ "intention_client_drag_fuzzer.cpp" ]
 
   deps = [
     "${device_status_root_path}/intention/prototype:intention_prototype",
@@ -61,5 +61,5 @@ ohos_fuzztest("FuzzIntentionClientSocket") {
 group("fuzztest") {
   testonly = true
   deps = []
-  deps += [ ":FuzzIntentionClientSocket" ]
+  deps += [ ":MsdpIntentionClientDragFuzzTest" ]
 }
