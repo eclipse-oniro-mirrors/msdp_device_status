@@ -41,49 +41,9 @@ public:
     }
     DISALLOW_COPY_AND_MOVE(DeviceStatusClient);
 
-    int32_t SubscribeCallback(Type type, ActivityEvent event, ReportLatencyNs latency,
-        sptr<IRemoteDevStaCallback> callback);
-    int32_t UnsubscribeCallback(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
-    Data GetDeviceStatusData(const Type type);
     void RegisterDeathListener(std::function<void()> deathListener);
-    int32_t RegisterCoordinationListener(bool isCompatible = false);
-    int32_t UnregisterCoordinationListener(bool isCompatible = false);
-    int32_t PrepareCoordination(int32_t userData, bool isCompatible = false);
-    int32_t UnprepareCoordination(int32_t userData, bool isCompatible = false);
-    int32_t ActivateCoordination(int32_t userData,
-        const std::string &remoteNetworkId, int32_t startDeviceId, bool isCompatible = false);
-    int32_t DeactivateCoordination(int32_t userData, bool isUnchained, bool isCompatible = false);
-    int32_t GetCoordinationState(int32_t userData, const std::string &networkId, bool isCompatible = false);
-    int32_t GetCoordinationState(const std::string &udId, bool &state);
-    int32_t StartDrag(const DragData &dragData);
-    int32_t StopDrag(const DragDropResult &dropResult);
-    int32_t UpdateDragStyle(DragCursorStyle style);
-    int32_t GetDragTargetPid();
-    int32_t GetUdKey(std::string &udKey);
-    int32_t AddDraglistener();
-    int32_t RemoveDraglistener();
-    int32_t AddSubscriptListener();
-    int32_t RemoveSubscriptListener();
-    int32_t SetDragWindowVisible(bool visible, bool isForce = false);
-    int32_t GetShadowOffset(ShadowOffset &shadowOffset);
-    int32_t UpdateShadowPic(const ShadowInfo &shadowInfo);
-    int32_t GetDragData(DragData &dragData);
-    int32_t GetDragState(DragState &dragState);
-    int32_t GetDragAction(DragAction &dragAction);
-    int32_t GetExtraInfo(std::string &extraInfo);
     int32_t AllocSocketPair(int32_t moduleType);
     int32_t GetClientSocketFdOfAllocedSocketPair() const;
-    int32_t AddHotAreaListener();
-    int32_t RemoveHotAreaListener();
-    int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
-    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
-    int32_t GetDragSummary(std::map<std::string, int64_t> &summarys);
-    int32_t EnterTextEditorArea(bool enable);
-    int32_t AddPrivilege();
-    int32_t EraseMouseIcon();
-    int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
-    int32_t EnableInternalDropAnimation(const std::string &animationInfo);
-    bool IsDragStart();
 
 private:
     class DeviceStatusDeathRecipient : public IRemoteObject::DeathRecipient {

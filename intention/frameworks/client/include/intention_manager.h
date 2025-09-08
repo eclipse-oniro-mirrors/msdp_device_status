@@ -24,7 +24,6 @@
 #include "cooperate_client.h"
 #include "drag_client.h"
 #include "drag_data.h"
-#include "drag_manager_impl.h"
 #include "i_event_listener.h"
 #include "on_screen_client.h"
 #include "socket_client.h"
