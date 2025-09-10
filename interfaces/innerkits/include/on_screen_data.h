@@ -80,12 +80,6 @@ struct PageContent {
     std::string pageLink;
     // text only = true
     std::vector<Paragraph> paragraphs;
-    // caller: ipc caller
-    std::string caller;
-    std::string navDstName;
-    std::string pageUrl;
-    std::string version;
-    std::string cfgVersion;
 };
 
 struct ControlEvent {
@@ -100,6 +94,13 @@ struct OnScreenCallingContext {
     uint32_t tokenId = 0;
     int32_t uid = -1;
     int32_t pid = -1;
+    // caller: ipc caller
+    std::string caller;
+    std::string navDstName;
+    std::string pageUrl;
+    std::string version;
+    std::string cfgVersion;
+    std::string bundleName;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus
