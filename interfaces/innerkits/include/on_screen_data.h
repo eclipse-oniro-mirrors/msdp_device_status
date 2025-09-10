@@ -80,6 +80,12 @@ struct PageContent {
     std::string pageLink;
     // text only = true
     std::vector<Paragraph> paragraphs;
+    // caller: ipc caller
+    std::string caller;
+    std::string navDstName;
+    std::string pageUrl;
+    std::string version;
+    std::string cfgVersion;
 };
 
 struct ControlEvent {
