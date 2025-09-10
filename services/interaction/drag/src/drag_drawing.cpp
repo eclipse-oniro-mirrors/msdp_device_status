@@ -2898,7 +2898,7 @@ Rosen::Rotation DragDrawing::GetRotation(Rosen::DisplayId displayId)
     if (!rotationMap_.empty()) {
         auto iter = rotationMap_.find(displayId);
         if (iter != rotationMap_.end()) {
-            FI_HILOGI("displayId:%{public}d, rotation:%{public}d",
+            FI_HILOGD("displayId:%{public}d, rotation:%{public}d",
                 static_cast<int32_t>(iter->first), static_cast<int32_t>(iter->second));
             return iter->second;
         }
