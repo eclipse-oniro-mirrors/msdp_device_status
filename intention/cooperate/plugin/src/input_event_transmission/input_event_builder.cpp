@@ -496,8 +496,8 @@ void InputEventBuilder::ResetPressedEvents()
     if (auto pressedButtons = pointerEvent_->GetPressedButtons(); !pressedButtons.empty()) {
         auto dragState = env_->GetDragManager().GetDragState();
         for (auto buttonId : pressedButtons) {
-            if (dragState == DragState::START && buttonId == MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
-                FI_HILOGI("Dragging with mouse_button_left down, skip");
+            if (dragState == DragState::START || dragState == DragState::MOTION_DRAGGING) {
+                FI_HILOGI("Dragging or cross dragging, skip");
                 continue;
             }
             pointerEvent_->SetButtonId(buttonId);
