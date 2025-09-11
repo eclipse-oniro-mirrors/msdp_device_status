@@ -27,7 +27,7 @@ public:
     IOnScreenAlgorithm() = default;
     virtual ~IOnScreenAlgorithm() = default;
 
-    virtual int32_t GetPageContent(const OnScreenCallingContext &context, const ContentOption &option,
+    virtual int32_t GetPageContent(OnScreenCallingContext &context, const ContentOption &option,
         PageContent &pageContent) = 0;
     virtual int32_t SendControlEvent(const OnScreenCallingContext &context, const ControlEvent &event) = 0;
     virtual int32_t Dump(int fd, const std::vector<std::u16string> &args) = 0;
