@@ -55,7 +55,6 @@ public:
 private:
     void SetUserId(int32_t userId);
     void SetAccountId(const std::string &accountId);
-    int32_t GetTrustedDeviceList(std::vector<DistributedHardware::DmDeviceInfo> &deviceList);
 
 private:
     class Observer final {

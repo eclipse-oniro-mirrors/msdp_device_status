@@ -165,6 +165,61 @@ HWTEST_F(DDMAdapterTest, TestOnBoardOffline, TestSize.Level1)
     ASSERT_NO_FATAL_FAILURE(ddmAdapterImpl.OnBoardOffline(""));
     RemovePermission();
 }
+
+/**
+ * @tc.name: DDMAdapterTest
+ * @tc.desc: Test CheckSameAccountToLocalWithUid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DDMAdapterTest, TestCheckSameAccountToLocalWithUid, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    DDMAdapterImpl ddmAdapterImpl;
+    std::string networkId = {"softbus"};
+    int32_t uid = 0;
+    bool ret = ddmAdapterImpl.CheckSameAccountToLocalWithUid(networkId, uid);
+    ASSERT_FALSE(ret);
+    RemovePermission();
+}
+
+/**
+ * @tc.name: DDMAdapterTest
+ * @tc.desc: Test CheckSinkIsSameAccount
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DDMAdapterTest, TestCheckSinkIsSameAccount, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    DDMAdapterImpl ddmAdapterImpl;
+    std::string srcNetworkId = {"softbus"};
+    int32_t srcUserId = 0;
+    std::string srcAccountId = {"softbus"};
+    bool ret = ddmAdapterImpl.CheckSinkIsSameAccount(srcNetworkId, srcUserId, srcAccountId);
+    ASSERT_FALSE(ret);
+    RemovePermission();
+}
+
+/**
+ * @tc.name: DDMAdapterTest
+ * @tc.desc: Test GetDmAccessCalleeSink
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DDMAdapterTest, TestGetDmAccessCalleeSink, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
+    DDMAdapterImpl ddmAdapterImpl;
+    DistributedHardware::DmAccessCallee callee;
+
+    bool ret = ddmAdapterImpl.GetDmAccessCalleeSink(callee);
+    ASSERT_FALSE(ret);
+    RemovePermission();
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
