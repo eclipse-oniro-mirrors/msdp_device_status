@@ -33,6 +33,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
+using namespace OHOS::Security::AccessToken;
 namespace {
 int32_t g_userData { 1 };
 uint64_t g_tokenID1 { 5 };
@@ -60,15 +61,15 @@ uint64_t GetShellTokenId()
     return g_shellTokenId;
 }
 
-uint64_t GetNativeTokenIdFromProcess(const std::string &process)
+AccessTokenID GetNativeTokenIdFromProcess(const std::string &process)
 {
     uint64_t selfTokenId = GetSelfTokenID();
-    EXPECT_EQ(0, SetSelfTokenID(GetShellTokenId()));
+    EXPECT_EQ(0, SetSelfTokenID(GetShellTokenId())); // set shell token
 
     std::string dumpInfo;
-    Security::AccessToken::AtmToolsParamInfo info;
+    AtmToolsParamInfo info;
     info.processName = process;
-    Security::AccessToken::AccessTokenKit::DumpTokenInfo(info, dumpInfo);
+    AccessTokenKit::DumpTokenInfo(info, dumpInfo);
     size_t pos = dumpInfo.find("\"tokenID\": ");
     if (pos == std::string::npos) {
         FI_HILOGE("tokenid not find");
@@ -83,19 +84,17 @@ uint64_t GetNativeTokenIdFromProcess(const std::string &process)
     EXPECT_EQ(0, SetSelfTokenID(selfTokenId));
 
     std::istringstream iss(numStr);
-    Security::AccessToken::AccessTokenID tokenID;
+    AccessTokenID tokenID;
     iss >> tokenID;
     return tokenID;
 }
 
-int32_t AllocTestHapToken(const Security::AccessToken::HapInfoParams& hapInfo,
-    Security::AccessToken::HapPolicyParams& hapPolicy, Security::AccessToken::AccessTokenIDEx& tokenIdEx)
+int32_t AllocTestHapToken(const HapInfoParams& hapInfo, HapPolicyParams& hapPolicy,  AccessTokenIDEx& tokenIdEx)
 {
     uint64_t selfTokenId = GetSelfTokenID();
     for (auto& permissionStateFull : hapPolicy.permStateList) {
-        Security::AccessToken::PermissionDef permDefResult;
-        if (Security::AccessToken::AccessTokenKit::GetDefPermission(permissionStateFull.permissionName, permDefResult)
-            != Security::AccessToken::RET_SUCCESS) {
+        PermissionDef permDefResult;
+        if (AccessTokenKit::GetDefPermission(permissionStateFull.permissionName, permDefResult) != RET_SUCCESS) {
             continue;
         }
         if (permDefResult.availableLevel > hapPolicy.apl) {
@@ -103,30 +102,28 @@ int32_t AllocTestHapToken(const Security::AccessToken::HapInfoParams& hapInfo,
         }
     }
     if (GetNativeTokenIdFromProcess("foundation") == selfTokenId) {
-        return Security::AccessToken::AccessTokenKit::InitHapToken(hapInfo, hapPolicy, tokenIdEx);
+        return AccessTokenKit::InitHapToken(hapInfo, hapPolicy, tokenIdEx);
     }
-
+    // set sh token for self
     MockNativeToken mock("foundation");
-    int32_t ret = Security::AccessToken::AccessTokenKit::InitHapToken(hapInfo, hapPolicy, tokenIdEx);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    EXPECT_EQ(callingUid, AppExecFwk::Constants::ROOT_UID);
+    int32_t ret = AccessTokenKit::InitHapToken(hapInfo, hapPolicy, tokenIdEx);
 
     // restore
     EXPECT_EQ(0, SetSelfTokenID(selfTokenId));
-
     return ret;
 }
 
-int32_t DeleteTestHapToken(Security::AccessToken::AccessTokenID tokenID)
+int32_t DeleteTestHapToken(AccessTokenID tokenID)
 {
     uint64_t selfTokenId = GetSelfTokenID();
     if (GetNativeTokenIdFromProcess("foundation") == selfTokenId) {
-        return Security::AccessToken::AccessTokenKit::DeleteToken(tokenID);
+        return AccessTokenKit::DeleteToken(tokenID);
     }
-
     MockNativeToken mock("foundation");
-
-    int32_t ret = Security::AccessToken::AccessTokenKit::DeleteToken(tokenID);
-
-    EXPECT_EQ(0, SetSelfTokenID(selfTokenId));
+    int32_t ret = AccessTokenKit::DeleteToken(tokenID);
+    SetSelfTokenID(selfTokenId);
     return ret;
 }
 
@@ -134,7 +131,6 @@ MockNativeToken::MockNativeToken(const std::string& process)
 {
     selfToken_ = GetSelfTokenID();
     uint32_t tokenId = GetNativeTokenIdFromProcess(process);
-    FI_HILOGI("selfToken_:%{public}" PRId64 ", tokenId:%{public}u", selfToken_, tokenId);
     SetSelfTokenID(tokenId);
 }
 
@@ -147,7 +143,7 @@ MockHapToken::MockHapToken(
     const std::string& bundle, const std::vector<std::string>& reqPerm, bool isSystemApp)
 {
     selfToken_ = GetSelfTokenID();
-    Security::AccessToken::HapInfoParams infoParams = {
+    HapInfoParams infoParams = {
         .userID = 0,
         .bundleName = bundle,
         .instIndex = 0,
@@ -157,22 +153,21 @@ MockHapToken::MockHapToken(
         .appDistributionType = "",
     };
 
-    Security::AccessToken::HapPolicyParams policyParams = {
-        .apl = Security::AccessToken::APL_NORMAL,
+    HapPolicyParams policyParams = {
+        .apl = APL_NORMAL,
         .domain = "accesstoken_test_domain",
     };
     for (size_t i = 0; i < reqPerm.size(); ++i) {
-        Security::AccessToken::PermissionDef permDefResult;
-        if (Security::AccessToken::AccessTokenKit::GetDefPermission(reqPerm[i], permDefResult)
-            != Security::AccessToken::RET_SUCCESS) {
+        PermissionDef permDefResult;
+        if (AccessTokenKit::GetDefPermission(reqPerm[i], permDefResult) != RET_SUCCESS) {
             continue;
         }
-        Security::AccessToken::PermissionStateFull permState = {
+        PermissionStateFull permState = {
             .permissionName = reqPerm[i],
             .isGeneral = true,
             .resDeviceID = {"local3"},
-            .grantStatus = {Security::AccessToken::PermissionState::PERMISSION_DENIED},
-            .grantFlags = {Security::AccessToken::PermissionFlag::PERMISSION_DEFAULT_FLAG}
+            .grantStatus = {PermissionState::PERMISSION_GRANTED},
+            .grantFlags = {PermissionFlag::PERMISSION_DEFAULT_FLAG}
         };
         policyParams.permStateList.emplace_back(permState);
         if (permDefResult.availableLevel > policyParams.apl) {
@@ -180,16 +175,16 @@ MockHapToken::MockHapToken(
         }
     }
 
-    Security::AccessToken::AccessTokenIDEx tokenIdEx = {0};
-    EXPECT_EQ(Security::AccessToken::RET_SUCCESS, AllocTestHapToken(infoParams, policyParams, tokenIdEx));
+    AccessTokenIDEx tokenIdEx = {0};
+    EXPECT_EQ(RET_SUCCESS, AllocTestHapToken(infoParams, policyParams, tokenIdEx));
     mockToken_= tokenIdEx.tokenIdExStruct.tokenID;
-    EXPECT_NE(mockToken_, Security::AccessToken::INVALID_TOKENID);
+    EXPECT_NE(mockToken_, INVALID_TOKENID);
     EXPECT_EQ(0, SetSelfTokenID(tokenIdEx.tokenIDEx));
 }
 
 MockHapToken::~MockHapToken()
 {
-    if (mockToken_ != Security::AccessToken::INVALID_TOKENID) {
+    if (mockToken_ != INVALID_TOKENID) {
         EXPECT_EQ(0, DeleteTestHapToken(mockToken_));
     }
     EXPECT_EQ(0, SetSelfTokenID(selfToken_));
@@ -209,9 +204,11 @@ void CooperateServerTest::TearDown()
 
 void CooperateServerTest::SetUpTestCase()
 {
+    g_shellTokenId = GetSelfTokenID();
+    SetTestEvironment(g_shellTokenId);
     std::vector<std::string> reqPerm;
     reqPerm.emplace_back(COOPERATE_ACCESS_PERMISSION);
-    g_mock = new (std::nothrow) MockHapToken("MouseLocationListenerTest", reqPerm, true);
+    g_mock = new (std::nothrow) MockHapToken("CooperateServerTest", reqPerm, true);
     CHKPV(g_mock);
     FI_HILOGI("SetUpTestCase ok.");
 }
@@ -238,9 +235,14 @@ HWTEST_F(CooperateServerTest, EnableTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->EnableCooperate(context, g_userData));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -276,9 +278,14 @@ HWTEST_F(CooperateServerTest, DisableTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->DisableCooperate(context, g_userData));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -314,9 +321,14 @@ HWTEST_F(CooperateServerTest, StartTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     int32_t startDeviceId = 0;
     bool isCheckPermission = true;
@@ -360,9 +372,14 @@ HWTEST_F(CooperateServerTest, StartWithOptionsTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     int32_t startDeviceId = 0;
     CooperateOptions options {
@@ -387,9 +404,14 @@ HWTEST_F(CooperateServerTest, StopCooperateTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     bool isUnchained = true;
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->StopCooperate(context, g_userData, isUnchained, isCheckPermission));
@@ -429,9 +451,14 @@ HWTEST_F(CooperateServerTest, RegisterCooperateListenerTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterCooperateListener(context));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -466,9 +493,14 @@ HWTEST_F(CooperateServerTest, UnregisterCooperateListenerTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterCooperateListener(context));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -504,9 +536,14 @@ HWTEST_F(CooperateServerTest, RegisterHotAreaListenerTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterHotAreaListener(context, g_userData, isCheckPermission));
     context_->GetPluginManager().UnloadCooperate();
@@ -544,9 +581,14 @@ HWTEST_F(CooperateServerTest, UnregisterHotAreaListenerTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterHotAreaListener(context));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -582,9 +624,14 @@ HWTEST_F(CooperateServerTest, RegisterMouseEventListenerTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterMouseEventListener(context, networkId));
     context_->GetPluginManager().UnloadCooperate();
@@ -622,9 +669,14 @@ HWTEST_F(CooperateServerTest, UnregisterMouseEventListenerTest1, TestSize.Level0
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterMouseEventListener(context, networkId));
     context_->GetPluginManager().UnloadCooperate();
@@ -662,9 +714,14 @@ HWTEST_F(CooperateServerTest, GetCooperateStateSyncTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     std::string udid = "udid";
     bool state = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateSync(context, udid, state));
@@ -704,9 +761,14 @@ HWTEST_F(CooperateServerTest, GetCooperateStateAsyncTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateAsync(context,
@@ -748,9 +810,14 @@ HWTEST_F(CooperateServerTest, SetDamplingCoefficientTest1, TestSize.Level0)
     CallingContext context {
         .intention = intention_,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
+    bool ret1 = cooperateServer_->IsSystemCalling(context);
+    ASSERT_TRUE(ret1);
+    int32_t ret = cooperateServer_->CheckPermission(context);
+    EXPECT_EQ(RET_OK, ret);
     uint32_t direction = 0;
     double coefficient = 0;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetDamplingCoefficient(context, direction, coefficient));

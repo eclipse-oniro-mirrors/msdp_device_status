@@ -27,6 +27,7 @@ ohos_unittest("OnScreenServerTest") {
 
   module_out_path = module_output_path
   include_dirs = [
+    "include",
     "${device_status_root_path}/intention/onscreen/server/include",
     "${device_status_root_path}/libs/interface",
     "${device_status_service_path}/communication/service/include",
