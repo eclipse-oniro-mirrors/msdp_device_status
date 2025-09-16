@@ -38,7 +38,7 @@ bool StationaryParamFuzzTest(const uint8_t* data, size_t size)
         return false;
     }
     FuzzedDataProvider provider(data, size);
-    int32_t type = provider.PickValueInArray({-1,0, 1, 2, 3, 4, 5, 6, 7, 8});
+    int32_t type = provider.PickValueInArray({-1, 0, 1, 2, 3, 4, 5, 6, 7, 8});
     int32_t event = provider.PickValueInArray({0, 1, 2, 3});
     int32_t latency = provider.PickValueInArray({-1, 1, 2, 3});
     MessageParcel parcel;
