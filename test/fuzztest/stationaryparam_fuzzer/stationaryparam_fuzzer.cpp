@@ -15,6 +15,7 @@
 
 #include "stationaryparam_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
 #include "singleton.h"
 
 #define private public
@@ -33,18 +34,22 @@ const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
 
 bool StationaryParamFuzzTest(const uint8_t* data, size_t size)
 {
-    MessageParcel datas;
-    if (!datas.WriteInterfaceToken(FORMMGR_DEVICE_TOKEN) ||
-        !datas.WriteBuffer(data, size) || !datas.RewindRead(0)) {
+    if ((data == nullptr) || (size < 1)) {
+        return false;
+    }
+    FuzzedDataProvider provider(data, size);
+    int32_t type = provider.PickValueInArray({-1, 0, 1, 2, 3, 4, 5, 6, 7, 8});
+    int32_t event = provider.PickValueInArray({0, 1, 2, 3});
+    int32_t latency = provider.PickValueInArray({-1, 1, 2, 3});
+    MessageParcel parcel;
+    if (!parcel.WriteInterfaceToken(FORMMGR_DEVICE_TOKEN) ||
+        !parcel.WriteBuffer(data, size) || !parcel.RewindRead(0)) {
         FI_HILOGE("Write failed");
         return false;
     }
-    Type type = TYPE_ABSOLUTE_STILL;
-    ActivityEvent event = ENTER;
-    ReportLatencyNs latency = SHORT;
     sptr<IRemoteDevStaCallback> callback = nullptr;
-    SubscribeStationaryParam Param = { type, event, latency, callback };
-    MessageParcel parcel;
+    SubscribeStationaryParam Param = { static_cast<Type>(type), static_cast<ActivityEvent>(event),
+        static_cast<ReportLatencyNs>(latency), callback };
     Param.Marshalling(parcel);
     Param.Unmarshalling(parcel);
     GetStaionaryDataParam param1;

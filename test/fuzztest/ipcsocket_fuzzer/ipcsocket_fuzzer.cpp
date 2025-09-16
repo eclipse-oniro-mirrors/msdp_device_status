@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "ipcsocket_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
 #include "singleton.h"
+#include "ipc_skeleton.h"
 
 #include "devicestatus_define.h"
 #include "socket_client.h"
@@ -23,7 +25,7 @@
 #include "socket_session.h"
 #include "socket_connection.h"
 #include "stream_client.h"
-
+#include "dsoftbus_adapter_impl.h"
 #include "message_parcel.h"
 
 #undef LOG_TAG
@@ -31,70 +33,54 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+#define SERVER_SESSION_NAME "ohos.msdp.device_status.intention.serversession"
+#define FI_PKG_NAME "ohos.msdp.fusioninteraction"
 const std::u16string FORMMGR_INTERFACE_TOKEN { u"ohos.msdp.Idevicestatus" };
 inline constexpr int32_t MAX_EVENT_SIZE { 100 };
-const uint8_t *g_baseFuzzData = nullptr;
-size_t g_baseFuzzSize = 0;
-size_t g_baseFuzzPos = 0;
 
+#define TEST_TEMP_FILE "/data/test/testfile1"
 namespace OHOS {
 
-template <class T> T GetData()
-{
-    T objetct{};
-    size_t objetctSize = sizeof(objetct);
-    if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
-        return objetct;
-    }
-    errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
-    if (ret != EOK) {
-        return {};
-    }
-    g_baseFuzzPos += objetctSize;
-    return objetct;
-}
 
 bool SocketConnectionFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < 1)) {
         return false;
     }
-
+    FuzzedDataProvider provider(data, size);
     auto recv = [](const NetPacket &pkt) {
         return;
     };
     auto onDisconnected = []() {
         return;
     };
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    int32_t fd = GetData<int32_t>();
-    SocketConnection socketConnection(1, recv, onDisconnected);
-    
+
+    int32_t fd = open(TEST_TEMP_FILE, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+    if (write(fd, data, size) != (ssize_t)size) {
+        close(fd);
+        return false;
+    }
+    SocketConnection socketConnection(fd, recv, onDisconnected);
     auto socket = []() {
         return 0;
     };
-    NetPacket packet(MessageId::COORDINATION_ADD_LISTENER);
     struct epoll_event ev{};
     auto client = std::make_unique<SocketClient>();
-    client->Connect();
-    client->Socket();
-    MessageId msgId { MessageId::INVALID };
+    MessageId msgId = static_cast<MessageId>(provider.ConsumeIntegralInRange<int32_t>(0, 31));
     NetPacket pkt(msgId);
     client->OnPacket(pkt);
-    client->Reconnect();
-    client->Stop();
-    client->OnDisconnected();
-    SocketSession socketSession("testProgramName", 1, 1, 1, 1, 1);
-    socketSession.SendMsg(packet);
-    socketSession.ToString();
+    const std::string programName(GetProgramName());
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    SocketSession socketSession(programName, 1, 1, fd, uid, pid);
+    socketSession.SendMsg(pkt);
     socketSession.Dispatch(ev);
     socketConnection.OnReadable(fd);
     socketConnection.OnShutdown(fd);
     socketConnection.OnException(fd);
     Msdp::DeviceStatus::SocketConnection::Connect(socket, recv, onDisconnected);
     client = nullptr;
+    close(fd);
     return true;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include "securec.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "fi_log.h"
 
@@ -31,14 +32,6 @@ namespace DeviceStatus {
 namespace {
 constexpr int32_t WAIT_TIME { 1000 };
 
-bool DeviceStatusClientFuzzTest(const uint8_t* data, size_t size)
-{
-    int32_t idSize = 8;
-    if (static_cast<int32_t>(size) > idSize) {
-        DeviceStatusClientFuzzer::TestSubscribeCallback(data);
-    }
-    return true;
-}
 } // namespace
 
 StationaryManager& stationaryMgr = StationaryManager::GetInstance();
@@ -84,12 +77,16 @@ void DeviceStatusClientFuzzer::TestUnSubscribeCallback(Type type)
 
     stationaryMgr.UnsubscribeCallback(type, ActivityEvent::ENTER_EXIT, cb);
 }
-
+bool DeviceStatusClientFuzzTest(FuzzedDataProvider &provider)
+{
+    return true;
+}
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    DeviceStatusClientFuzzTest(data, size);
+    FuzzedDataProvider provider(data, size);
+    OHOS::Msdp::DeviceStatus::DeviceStatusClientFuzzTest(provider);
     return 0;
 }
 } // namespace DeviceStatus
