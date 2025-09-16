@@ -56,7 +56,7 @@ bool SocketConnectionFuzzTest(const uint8_t* data, size_t size)
     };
 
     int32_t fd = open(TEST_TEMP_FILE, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
-    if(write(fd, data, size) != (ssize_t)size) {
+    if (write(fd, data, size) != (ssize_t)size) {
         close(fd);
         return false;
     }
