@@ -619,7 +619,7 @@ void ResetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
         return;
     }
     std::thread([this, displayId, screenId]() {
-        std::this_thread::sleep_for(std::chrono::microseconds(TIME_WAIT_FOR_DS_MS));
+        std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_DS_MS));
         this->SetDragWindowScreenId(displayId, screenId);
     }).detach();
 }
