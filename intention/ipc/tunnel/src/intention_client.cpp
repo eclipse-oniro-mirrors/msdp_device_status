@@ -31,6 +31,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
+constexpr int32_t TIME_WAIT_FOR_DS_MS { 1000 };
 std::shared_ptr<IntentionClient> IntentionClient::instance_ = std::make_shared<IntentionClient>();
 
 IntentionClient *IntentionClient::GetInstance()
@@ -605,7 +606,22 @@ int32_t IntentionClient::SetDragWindowScreenId(uint64_t displayId, uint64_t scre
         FI_HILOGE("proxy::SetDragWindowScreenId fail");
         return ret;
     }
+    deathDisplayId_.store(displayId);
+    deathScreenId_.store(screenId);
     return RET_OK;
+}
+
+void IntentionClient::ResetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
+{
+    FI_HILOGI("displayId:%{public}" PRId64 ", screenId:%{public}" PRId64 "", displayId, screenId);
+    if (displayId == UINT64_MAX && screenId == UINT64_MAX) {
+        FI_HILOGE("The display ID and screen ID are default maximun values");
+        return;
+    }
+    std::thread([this, displayId, screenId]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_DS_MS));
+        this->SetDragWindowScreenId(displayId, screenId);
+    }).detach();
 }
 
 int32_t IntentionClient::GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller)
@@ -1090,6 +1106,7 @@ void IntentionClient::DeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &re
     CHKPV(remote);
     parent->ResetProxy(remote);
     FI_HILOGD("Recv death notice");
+    parent->ResetDragWindowScreenId(parent->deathDisplayId_.load(), parent->deathScreenId_.load());
 }
 } // namespace DeviceStatus
 } // namespace Msdp
