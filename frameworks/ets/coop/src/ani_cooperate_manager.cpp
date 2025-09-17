@@ -161,9 +161,11 @@ void AniCooperateManager::EmitGetState(std::shared_ptr<AniCallbackInfo> cb)
     auto env = cb->envT_;
     ani_ref  aniNull;
     ani_status status;
-    ani_object aniResult = CooperateCommon::CreateBooleanObject(env, cb->result_);
+    using TraversalSwitchStatus_t = ::ohos::multimodalInput::inputDeviceCooperate::TraversalSwitchStatus;
+    TraversalSwitchStatus_t swithStatus { .state = cb->result_ };
+    auto aniResult = ::taihe::into_ani<TraversalSwitchStatus_t>(env, swithStatus);
     if (aniResult == nullptr) {
-        FI_HILOGE("create boolean object is null");
+        FI_HILOGE("create ani object is null");
         return;
     }
     if ((status = env->GetNull(&aniNull)) != ANI_OK) {
@@ -403,7 +405,7 @@ void AniCooperateManager::EmitCoordinationMessageEvent(std::shared_ptr<AniCallba
             FI_HILOGE("Failed to find the message code");
             return;
     }
-    using AniCoopInfo = ::ohos::multimodalInput::inputDeviceCooperate::Coopinfo;
+    using AniCoopInfo = ::ohos::multimodalInput::inputDeviceCooperate::CooperationCallbackData;
     using AniEvnetMsg = ::ohos::multimodalInput::inputDeviceCooperate::EventMsg;
     AniCoopInfo info {
         .deviceDescriptor = cb->deviceDescriptor_,

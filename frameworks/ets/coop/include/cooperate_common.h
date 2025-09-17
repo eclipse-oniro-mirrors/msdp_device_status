@@ -21,7 +21,8 @@
 
 #include "ohos.multimodalInput.inputDeviceCooperate.proj.hpp"
 #include "ohos.multimodalInput.inputDeviceCooperate.impl.hpp"
-#include "ohos.multimodalInput.inputDeviceCooperate.Coopinfo.ani.1.hpp"
+#include "ohos.multimodalInput.inputDeviceCooperate.CooperationCallbackData.ani.1.hpp"
+#include "ohos.multimodalInput.inputDeviceCooperate.TraversalSwitchStatus.ani.1.hpp"
 #include "taihe/runtime.hpp"
 #include "stdexcept"
 

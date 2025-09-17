@@ -27,6 +27,15 @@ enum EventMsg : i32 {
     MSG_COOPERATE_STATE_OFF = 501,
 }
 
+struct TraversalSwitchStatus {
+	state: bool;
+}
+
+struct CooperationCallbackData {
+	deviceDescriptor: String;
+	eventMsg: EventMsg;
+}
+
 @rename("enable")
 function EnableAsync(enableInput: bool, opq: @sts_type("AsyncCallback<void>") Opaque): void;
 @rename("enable")
@@ -43,17 +52,12 @@ function StopAsync(opq: @sts_type("AsyncCallback<void>") Opaque): void;
 function StopPromise(): @sts_type("Promise<void>") Opaque;
 
 @rename("getState")
-function GetStateAsync(deviceDescriptor: String, opq: @sts_type("AsyncCallback<boolean>") Opaque): void;
+function GetStateAsync(deviceDescriptor: String, opq: @sts_type("AsyncCallback<TraversalSwitchStatus>") Opaque): void;
 @rename("getState")
-function GetStatePromise(deviceDescriptor: String): @sts_type("Promise<boolean>") Opaque;
-
-struct Coopinfo {
-	deviceDescriptor: String;
-	eventMsg: EventMsg;
-}
+function GetStatePromise(deviceDescriptor: String): @sts_type("Promise<TraversalSwitchStatus>") Opaque;
 
 @!sts_inject("""
-	function on(type:'cooperation', callback: AsyncCallback<Coopinfo>) {
+	function on(type:'cooperation', callback: AsyncCallback<CooperationCallbackData>) {
 		return onCooperation(callback);
 	}
 	function off(type: 'cooperation', callback?: AsyncCallback<void>) {
@@ -61,7 +65,7 @@ struct Coopinfo {
 	}
 """)
 
-function onCooperation(opq: @sts_type("AsyncCallback<Coopinfo>") Opaque);
+function onCooperation(opq: @sts_type("AsyncCallback<CooperationCallbackData>") Opaque);
 function offCooperation(opq: Optional<@sts_type("AsyncCallback<void>") Opaque>);
 
 
