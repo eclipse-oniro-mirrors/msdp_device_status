@@ -611,7 +611,7 @@ int32_t IntentionClient::SetDragWindowScreenId(uint64_t displayId, uint64_t scre
     return RET_OK;
 }
 
-void ResetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
+void IntentionClient::ResetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
 {
     FI_HILOGI("displayId:%{public}" PRId64 ", screenId:%{public}" PRId64 "", displayId, screenId);
     if (displayId == UINT64_MAX && screenId == UINT64_MAX) {
