@@ -72,6 +72,7 @@ public:
 	int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
+    void GetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller);
     int32_t SetDragSwitchState(bool enable, bool isJsCaller);
     int32_t SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller);
@@ -133,6 +134,8 @@ private:
     sptr<IIntention> devicestatusProxy_ { nullptr };
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ { nullptr };
     static std::shared_ptr<IntentionClient> instance_;
+    std::atomic_uint64_t deathDisplayId_ { UINT64_MAX };
+    std::atomic_uint64_t deathScreenId_ { UINT64_MAX };
 };
 
 #define INTENTION_CLIENT OHOS::Msdp::DeviceStatus::IntentionClient::GetInstance()
