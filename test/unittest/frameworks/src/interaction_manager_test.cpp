@@ -722,7 +722,389 @@ void InputEventCallbackTest::OnInputEvent(std::shared_ptr<MMI::PointerEvent> poi
     }
 }
 
+/**
+ * @tc.name: InteractionManagerTest_PrepareCoordination
+ * @tc.desc: Prepare coordination
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_PrepareCoordination, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto fun = [&promiseFlag](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
+        FI_HILOGD("Prepare coordination success, listener:%{public}s", listener.c_str());
+        promiseFlag.set_value(true);
+    };
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->PrepareCoordination(fun, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
 
+/**
+ * @tc.name: InteractionManagerTest_RegisterCoordinationListener_001
+ * @tc.desc: Register coordination listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationListener_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<ICoordinationListener> consumer = nullptr;
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->RegisterCoordinationListener(consumer, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_ERR);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+/**
+ * @tc.name: InteractionManagerTest_RegisterCoordinationListener_002
+ * @tc.desc: Register coordination listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationListener_002, TestSize.Level1)
+{
+    CALL_DEBUG_ENTER;
+    class CoordinationListenerTest : public ICoordinationListener {
+    public:
+        CoordinationListenerTest() : ICoordinationListener() {}
+        void OnCoordinationMessage(const std::string &networkId, CoordinationMessage msg) override
+        {
+            FI_HILOGD("Register coordination listener test");
+            (void) networkId;
+        };
+    };
+    std::shared_ptr<CoordinationListenerTest> consumer =
+        std::make_shared<CoordinationListenerTest>();
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->RegisterCoordinationListener(consumer, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+    ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+/**
+ * @tc.name: InteractionManagerTest_RegisterCoordinationListener_003
+ * @tc.desc: Register coordination listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationListener_003, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    FI_HILOGD("InteractionManagerTest_RegisterCoordinationListener_003 enter");
+    class CoordinationListenerTest : public ICoordinationListener {
+    public:
+        CoordinationListenerTest() : ICoordinationListener() {}
+        void OnCoordinationMessage(const std::string &networkId, CoordinationMessage msg) override
+        {
+            FI_HILOGD("Register coordination listener test");
+            (void) networkId;
+        };
+    };
+    std::shared_ptr<CoordinationListenerTest> consumer =
+        std::make_shared<CoordinationListenerTest>();
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->RegisterCoordinationListener(consumer, isCompatible);
+    #ifdef OHOS_BUILD_ENABLE_COORDINATION
+        ASSERT_EQ(ret, RET_OK);
+    #else
+        ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    #endif // OHOS_BUILD_ENABLE_COORDINATION
+        ret = InteractionManager::GetInstance()->RegisterCoordinationListener(consumer, isCompatible);
+    #ifdef OHOS_BUILD_ENABLE_COORDINATION
+        ASSERT_EQ(ret, RET_ERR);
+    #else
+        ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    #endif // OHOS_BUILD_ENABLE_COORDINATION
+        ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer, isCompatible);
+    #ifdef OHOS_BUILD_ENABLE_COORDINATION
+        ASSERT_EQ(ret, RET_OK);
+    #else
+        ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    #endif // OHOS_BUILD_ENABLE_COORDINATION
+    FI_HILOGD("InteractionManagerTest_RegisterCoordinationListener_003 finish");
+}
+
+/**
+ * @tc.name: InteractionManagerTest_ActivateCoordination
+ * @tc.desc: Activate coordination
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCoordination, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::string remoteNetworkId("");
+    int32_t startDeviceId = -1;
+    auto fun = [](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
+        FI_HILOGD("Start coordination success");
+        (void) listener;
+    };
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->ActivateCoordination(remoteNetworkId, startDeviceId,
+        fun, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_TRUE((ret == RET_OK || ret == COMMON_PERMISSION_CHECK_ERROR || ret == COMMON_NOT_ALLOWED_DISTRIBUTED));
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+/**
+ * @tc.name: InteractionManagerTest_DeactivateCoordination
+ * @tc.desc: Deactivate coordination
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_DeactivateCoordination, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto fun = [](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
+        FI_HILOGD("Stop coordination success");
+        (void) listener;
+    };
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->DeactivateCoordination(false, fun, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ret = InteractionManager::GetInstance()->DeactivateCoordination(true, fun, isCompatible);
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+/**
+ * @tc.name: InteractionManagerTest_GetCoordinationState_Abnormal
+ * @tc.desc: Get coordination state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Abnormal, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    const std::string networkId("");
+    auto fun = [](bool state) {
+        FI_HILOGD("Get coordination state failed, state:%{public}d", state);
+    };
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->GetCoordinationState(networkId, fun, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+/**
+ * @tc.name: InteractionManagerTest_GetCoordinationState_Normal
+ * @tc.desc: Get coordination state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Normal, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    const std::string networkId("networkId");
+    auto fun = [&promiseFlag](bool state) {
+        FI_HILOGD("Get coordination state success, state:%{public}d", state);
+        promiseFlag.set_value(true);
+    };
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->GetCoordinationState(networkId, fun, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+/**
+ * @tc.name: InteractionManagerTest_GetCoordinationState_Sync
+ * @tc.desc: Get coordination state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Sync, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    const std::string udId("Default");
+    bool state { false };
+    int32_t ret = InteractionManager::GetInstance()->GetCoordinationState(udId, state);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+/**
+ * @tc.name: InteractionManagerTest_UnregisterCoordinationListener
+ * @tc.desc: Unregister coordination listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_UnregisterCoordinationListener, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<ICoordinationListener> consumer = nullptr;
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+/**
+ * @tc.name: InteractionManagerTest_UnprepareCoordination
+ * @tc.desc: Prepare coordination
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_UnprepareCoordination, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto fun = [&promiseFlag](const std::string &listener, const CoordinationMsgInfo &coordinationMessages) {
+        FI_HILOGD("Prepare coordination success, listener:%{public}s", listener.c_str());
+        promiseFlag.set_value(true);
+    };
+    bool isCompatible = true;
+    int32_t ret = InteractionManager::GetInstance()->UnprepareCoordination(fun, isCompatible);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+
+class HotAreaListenerTest : public IHotAreaListener {
+public:
+    HotAreaListenerTest() {}
+    explicit HotAreaListenerTest(std::string name) : testName_(name) {}
+    void OnHotAreaMessage(int32_t displayX, int32_t displayY, HotAreaType msg, bool isEdge) override
+    {
+        if (testName_.empty()) {
+            testName_ = std::string("HOT_AREA");
+        }
+        FI_HILOGD("%{public}s, type:%{public}s, isEdge:%{public}d, displayX:%{public}d, displayY:%{public}d",
+            testName_.c_str(), ShowMessage(msg).c_str(), isEdge, displayX, displayY);
+    };
+
+private:
+    std::string ShowMessage(HotAreaType msg)
+    {
+        std::string type = "none-area";
+        const std::map<HotAreaType, std::string> areaType = {
+            { HotAreaType::AREA_LEFT, "left-area"},
+            { HotAreaType::AREA_RIGHT, "right-area"},
+            { HotAreaType::AREA_TOP, "top-area"},
+            { HotAreaType::AREA_BOTTOM, "bottom-area"}
+        };
+        auto item = areaType.find(msg);
+        if (item != areaType.end()) {
+            type = item->second;
+        }
+        return type;
+    }
+
+private:
+    std::string testName_;
+};
+
+/**
+ * @tc.name: AddHotAreaListener_001
+ * @tc.desc: Add hot area listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, AddHotAreaListener_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto listener = std::make_shared<HotAreaListenerTest>(std::string("HOT_AREA"));
+    int32_t ret = InteractionManager::GetInstance()->AddHotAreaListener(listener);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+    ret = InteractionManager::GetInstance()->RemoveHotAreaListener(listener);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
+/**
+ * @tc.name: AddHotAreaListener_002
+ * @tc.desc: Add hot area listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, AddHotAreaListener_002, TestSize.Level1)
+{
+    CALL_DEBUG_ENTER;
+#ifndef OHOS_BUILD_PC_PRODUCT
+    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+#else
+    auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
+#endif // OHOS_BUILD_PC_PRODUCT
+    CHKPV(display);
+    g_screenWidth = display->GetWidth();
+    g_screenHeight = display->GetHeight();
+    auto listener = std::make_shared<HotAreaListenerTest>(std::string("HOT_AREA"));
+    int32_t ret = InteractionManager::GetInstance()->AddHotAreaListener(listener);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+    SimulateMovePointerEvent({ HOT_AREA_STEP, HOT_AREA_COOR }, { HOT_AREA_STEP - HOT_AREA_SPAN, HOT_AREA_COOR },
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
+    SimulateMovePointerEvent({ HOT_AREA_COOR, HOT_AREA_STEP }, { HOT_AREA_COOR, HOT_AREA_STEP - HOT_AREA_SPAN },
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
+    SimulateMovePointerEvent({ g_screenWidth - HOT_AREA_STEP, HOT_AREA_COOR },
+        { g_screenWidth - HOT_AREA_SPAN, HOT_AREA_COOR },
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
+    SimulateMovePointerEvent({ HOT_AREA_COOR, g_screenHeight - HOT_AREA_STEP },
+        { HOT_AREA_COOR, g_screenHeight - HOT_AREA_SPAN },
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_TOUCH_DOWN_MS));
+    ret = InteractionManager::GetInstance()->RemoveHotAreaListener(listener);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
 
 /**
  * @tc.name: Set
