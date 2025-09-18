@@ -96,6 +96,296 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest001, TestSize.Level1)
     int32_t ret = boomerang_.SubscribeCallback(context, type, bundleName, subCallback);
     EXPECT_EQ(ret, RET_ERR);
 }
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest002 for SubscribeCallback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest002, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    char bundleName[MAX_STRING_LEN] = {0};
+    int32_t type { BOOMERANG_TYPE_BOOMERANG };
+    sptr<IRemoteBoomerangCallback> subCallback = new (std::nothrow) BoomerangServerTestCallback();
+    int32_t ret = boomerang_.SubscribeCallback(context, type, bundleName, subCallback);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest003 for NotifyMetadataBindingEvent notifyCallback is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest003, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    char bundleName[MAX_STRING_LEN] = {0};
+    sptr<IRemoteBoomerangCallback> notifyCallback { nullptr };
+    int32_t ret = boomerang_.NotifyMetadataBindingEvent(context, bundleName, notifyCallback);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest004 for NotifyMetadataBindingEvent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest004, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    char bundleName[MAX_STRING_LEN] = {0};
+    sptr<IRemoteBoomerangCallback> notifyCallback = new (std::nothrow) BoomerangServerTestCallback();
+    int32_t ret = boomerang_.NotifyMetadataBindingEvent(context, bundleName, notifyCallback);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest005 for BoomerangEncodeImage encodeCallback and pixelMap is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest005, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    char metadata[MAX_STRING_LEN] = {0};
+    sptr<IRemoteBoomerangCallback> encodeCallback = nullptr;
+    std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
+    int32_t ret = boomerang_.BoomerangEncodeImage(context, pixelMap, metadata, encodeCallback);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest006 for BoomerangEncodeImage
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest006, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    string metadata = "test";
+    sptr<IRemoteBoomerangCallback> encodeCallback = new (std::nothrow) BoomerangServerTestCallback();
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
+    int32_t ret = boomerang_.BoomerangEncodeImage(context, pixelMap, metadata, encodeCallback);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest007 for BoomerangDecodeImage decodeCallback and pixelMap is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest007, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    sptr<IRemoteBoomerangCallback> decodeCallback { nullptr };
+    std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
+    int32_t ret = boomerang_.BoomerangDecodeImage(context, pixelMap, decodeCallback);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest008 for BoomerangDecodeImage
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest008, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    sptr<IRemoteBoomerangCallback> decodeCallback = new (std::nothrow) BoomerangServerTestCallback();
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
+    int32_t ret = boomerang_.BoomerangDecodeImage(context, pixelMap, decodeCallback);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest009 for UnsubscribeCallback unsubCallback is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest009, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    int32_t type { BOOMERANG_TYPE_INVALID };
+    char bundleName[MAX_STRING_LEN] = {0};
+    sptr<IRemoteBoomerangCallback> unsubCallback { nullptr };
+    int32_t ret = boomerang_.UnsubscribeCallback(context, type, bundleName, unsubCallback);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest010 for UnsubscribeCallback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest010, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    char bundleName[MAX_STRING_LEN] = {0};
+    BoomerangType type { BOOMERANG_TYPE_BOOMERANG };
+    sptr<IRemoteBoomerangCallback> unsubCallback = new (std::nothrow) BoomerangServerTestCallback();
+    int32_t ret = boomerang_.UnsubscribeCallback(context, type, bundleName, unsubCallback);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest011 for SubmitMetadata
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest011, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    string metadata = "";
+    int32_t ret = boomerang_.SubmitMetadata(context, metadata);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest012 for SubmitMetadata
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest012, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    string metadata = "test";
+    int32_t ret = boomerang_.SubmitMetadata(context, metadata);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest013 for DumpCurrentDeviceStatus
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest013, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NO_FATAL_FAILURE(boomerang_.DumpCurrentDeviceStatus(FD));
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest014 for DumpDeviceStatusSubscriber
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest014, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NO_FATAL_FAILURE(boomerang_.DumpDeviceStatusSubscriber(FD));
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest015 for DumpDeviceStatusChanges
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest015, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NO_FATAL_FAILURE(boomerang_.DumpDeviceStatusChanges(FD));
+}
+
+/**
+ * @tc.name: BoomerangServerTest
+ * @tc.desc: BoomerangServerTest016
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangServerTest, BoomerangServerTest016, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+        CallingContext context {
+        .intention = intention_,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    boomerang_.ReportSensorSysEvent(context, 2, true);
+    Data data = boomerang_.GetCache(context, Type::TYPE_STILL);
+    EXPECT_EQ(data.status, Status::STATUS_INVALID);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
