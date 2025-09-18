@@ -88,7 +88,8 @@
         "libuv",
         "data_share",
         "rust_libc",
-        "hiappevent"
+        "hiappevent",
+        "runtime_core"
       ],
       "third_party": [
         "openssl",
@@ -106,7 +107,8 @@
           "//base/msdp/device_status/frameworks/js/napi/boomerang:metadatabinding_napi",
           "//base/msdp/device_status/frameworks/js/napi/device_status:devicestatus_napi",
           "//base/msdp/device_status/frameworks/js/napi/underage_model:userstatus_napi",
-          "//base/msdp/device_status/frameworks/js/napi/onscreen:onscreen_napi"
+          "//base/msdp/device_status/frameworks/js/napi/onscreen:onscreen_napi",
+          "//base/msdp/device_status/frameworks/ets/drag:dragInteraction"
         ],
         "service_group":[
           "//base/msdp/device_status/libs:devicestatus_algo",
@@ -164,6 +166,9 @@
             ],
             "header_base": "//base/msdp/device_status/intention"
           }
+        },
+        {
+          "name": "//base/msdp/device_status/frameworks/ets/drag:drag_taihe"
         }
       ],
       "test": [
