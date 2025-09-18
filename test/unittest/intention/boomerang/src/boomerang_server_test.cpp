@@ -99,11 +99,11 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest001, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest02 for SubscribeCallback
+ * @tc.desc: BoomerangServerTest002 for SubscribeCallback
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BoomerangServerTest, BoomerangServerTest02, TestSize.Level1)
+HWTEST_F(BoomerangServerTest, BoomerangServerTest002, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
         CallingContext context {
@@ -142,11 +142,11 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest003, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest04 for NotifyMetadataBindingEvent
+ * @tc.desc: BoomerangServerTest004 for NotifyMetadataBindingEvent
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BoomerangServerTest, BoomerangServerTest04, TestSize.Level1)
+HWTEST_F(BoomerangServerTest, BoomerangServerTest004, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
         CallingContext context {
@@ -185,11 +185,11 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest005, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest06 for BoomerangEncodeImage
+ * @tc.desc: BoomerangServerTest006 for BoomerangEncodeImage
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BoomerangServerTest, BoomerangServerTest06, TestSize.Level1)
+HWTEST_F(BoomerangServerTest, BoomerangServerTest006, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
         CallingContext context {
@@ -271,11 +271,11 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest009, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest10 for UnsubscribeCallback
+ * @tc.desc: BoomerangServerTest010 for UnsubscribeCallback
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BoomerangServerTest, BoomerangServerTest10, TestSize.Level1)
+HWTEST_F(BoomerangServerTest, BoomerangServerTest010, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
         CallingContext context {
@@ -293,11 +293,11 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest10, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest11 for SubmitMetadata
+ * @tc.desc: BoomerangServerTest011 for SubmitMetadata
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BoomerangServerTest, BoomerangServerTest11, TestSize.Level1)
+HWTEST_F(BoomerangServerTest, BoomerangServerTest011, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
         CallingContext context {
@@ -313,11 +313,11 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest11, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest12 for SubmitMetadata
+ * @tc.desc: BoomerangServerTest012 for SubmitMetadata
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BoomerangServerTest, BoomerangServerTest12, TestSize.Level1)
+HWTEST_F(BoomerangServerTest, BoomerangServerTest012, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
         CallingContext context {
@@ -369,11 +369,11 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest015, TestSize.Level1)
 
 /**
  * @tc.name: BoomerangServerTest
- * @tc.desc: BoomerangServerTest16
+ * @tc.desc: BoomerangServerTest016
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BoomerangServerTest, BoomerangServerTest16, TestSize.Level1)
+HWTEST_F(BoomerangServerTest, BoomerangServerTest016, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
         CallingContext context {
