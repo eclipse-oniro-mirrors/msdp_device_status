@@ -14,10 +14,8 @@
  */
 
 #include "ani_cooperate_manager.h"
-
 #include "devicestatus_define.h"
 #include "interaction_manager.h"
-
 
 #undef LOG_TAG
 #define LOG_TAG "AniCooperateManager"
@@ -25,11 +23,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-
 namespace {
 const std::string COORDINATION = "cooperation";
 }
-
 AniCooperateManager::AniCooperateManager()
 {
     CALL_DEBUG_ENTER;
