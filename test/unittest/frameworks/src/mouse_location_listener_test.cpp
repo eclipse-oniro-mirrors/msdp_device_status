@@ -84,7 +84,7 @@ uint64_t GetNativeTokenIdFromProcess(const std::string &process)
     Security::AccessToken::AccessTokenKit::DumpTokenInfo(info, dumpInfo);
     size_t pos = dumpInfo.find("\"tokenID\": ");
     if (pos == std::string::npos) {
-        FI_HILOGE("tokenid not find");
+        FI_HILOGE("tokenID not find");
         return 0;
     }
     pos += std::string("\"tokenID\": ").length();
