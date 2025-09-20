@@ -1,0 +1,74 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.multimodalInput.inputDeviceCooperate", "inputDeviceCooperate")
+@!sts_inject("""
+static{ loadLibrary("Cooperate.z")}
+""")
+@!sts_inject_into_module("import { AsyncCallback } from '@ohos.base';")
+
+enum EventMsg : i32 {
+    MSG_COOPERATE_INFO_START = 200,
+    MSG_COOPERATE_INFO_SUCCESS = 201,
+    MSG_COOPERATE_INFO_FAIL = 202,
+    MSG_COOPERATE_STATE_ON = 500,
+    MSG_COOPERATE_STATE_OFF = 501,
+}
+
+struct TraversalSwitchStatus {
+	state: bool;
+}
+
+struct CooperationCallbackData {
+	deviceDescriptor: String;
+	eventMsg: EventMsg;
+}
+
+@rename("enable")
+function EnableAsync(enableInput: bool, opq: @sts_type("AsyncCallback<void>") Opaque): void;
+@rename("enable")
+function EnablePromise(enableInput: bool): @sts_type("Promise<void>") Opaque;
+
+@rename("start")
+function StartAsync(sinkDeviceDescriptor: String, srcInputDeviceId: i32, opq: @sts_type("AsyncCallback<void>") Opaque): void;
+@rename("start")
+function StartPromise(sinkDeviceDescriptor: String, srcInputDeviceId: i32): @sts_type("Promise<void>") Opaque;
+
+@rename("stop")
+function StopAsync(opq: @sts_type("AsyncCallback<void>") Opaque): void;
+@rename("stop")
+function StopPromise(): @sts_type("Promise<void>") Opaque;
+
+@rename("getState")
+function GetStateAsync(deviceDescriptor: String, opq: @sts_type("AsyncCallback<TraversalSwitchStatus>") Opaque): void;
+@rename("getState")
+function GetStatePromise(deviceDescriptor: String): @sts_type("Promise<TraversalSwitchStatus>") Opaque;
+
+@!sts_inject("""
+	function on(type:'cooperation', callback: AsyncCallback<CooperationCallbackData>) {
+		return onCooperation(callback);
+	}
+	function off(type: 'cooperation', callback?: AsyncCallback<void>) {
+		return offCooperation(callback);
+	}
+""")
+
+function onCooperation(opq: @sts_type("AsyncCallback<CooperationCallbackData>") Opaque);
+function offCooperation(opq: Optional<@sts_type("AsyncCallback<void>") Opaque>);
+
+
+
+
+
