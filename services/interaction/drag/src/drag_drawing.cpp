@@ -4674,6 +4674,9 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     }
     screenId_ = display->GetScreenId();
     FI_HILOGI("Get screen id:%{public}llu", static_cast<unsigned long long>(screenId_));
+    Rosen::Rotation currentRotation = GetRotation(displayId);
+    FI_HILOGI("displayId:%{public}d, rotation:%{public}d",
+        static_cast<int32_t>(displayId), static_cast<int32_t>(currentRotation));
 #ifdef OHOS_BUILD_PC_PRODUCT
     uint64_t rsScreenId = screenId_;
     if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {
@@ -4682,6 +4685,8 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     }
     screenId_ = rsScreenId;
 #endif // OHOS_BUILD_PC_PRODUCT
+    RotateDragWindow(currentRotation);
+    SetRotation(displayId, currentRotation);
     displayWidth_ = display->GetWidth();
     displayHeight_ = display->GetHeight();
     FI_HILOGI("Parameter rsScreen number:%{public}llu", static_cast<unsigned long long>(screenId_));
