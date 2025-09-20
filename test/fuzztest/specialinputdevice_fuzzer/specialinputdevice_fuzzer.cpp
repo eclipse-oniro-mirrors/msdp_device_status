@@ -46,6 +46,10 @@ bool SpecialInputDeviceFuzzTest(FuzzedDataProvider &provider)
         .inputDevAlias = alias,
         .inputDevName = name,
     };
+    if (!cJSON_IsObject(parser.Get())) {
+        FI_HILOGE("parser is not json object");
+        return false;
+    }
     cJSON *json = cJSON_GetObjectItemCaseSensitive(parser.Get(), "special_input_device");
     SpecialInputDeviceParser::GetInstance().ParseExactlyMatchItem(json, dev1);
     SpecialInputDeviceParser::GetInstance().ParseContainMatchItem(json, dev2);

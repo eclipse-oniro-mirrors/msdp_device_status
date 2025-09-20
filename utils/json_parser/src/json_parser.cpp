@@ -75,6 +75,10 @@ bool JsonParser::IsInteger(const cJSON *json)
 
 int32_t JsonParser::ParseInt32(const cJSON *json, const std::string &key, int32_t &value)
 {
+    if (!cJSON_IsObject(json)) {
+        FI_HILOGE("json is not json object");
+        return RET_ERR;
+    }
     cJSON *jsonNode = cJSON_GetObjectItemCaseSensitive(json, key.c_str());
     CHKPR(jsonNode, RET_ERR);
     if (!cJSON_IsNumber(jsonNode)) {
@@ -96,6 +100,10 @@ int32_t JsonParser::ParseInt32(const cJSON *json, const std::string &key, int32_
  
 int32_t JsonParser::ParseString(const cJSON *json, const std::string &key, std::string &value)
 {
+    if (!cJSON_IsObject(json)) {
+        FI_HILOGE("json is not json object");
+        return RET_ERR;
+    }
     cJSON *jsonNode = cJSON_GetObjectItemCaseSensitive(json, key.c_str());
     CHKPR(jsonNode, RET_ERR);
     if (!cJSON_IsString(jsonNode)) {
@@ -108,6 +116,10 @@ int32_t JsonParser::ParseString(const cJSON *json, const std::string &key, std::
  
 int32_t JsonParser::ParseBool(const cJSON *json, const std::string &key, bool &value)
 {
+    if (!cJSON_IsObject(json)) {
+        FI_HILOGE("json is not json object");
+        return RET_ERR;
+    }
     cJSON *jsonNode = cJSON_GetObjectItemCaseSensitive(json, key.c_str());
     CHKPR(jsonNode, RET_ERR);
     if (!cJSON_IsBool(jsonNode)) {
@@ -121,6 +133,10 @@ int32_t JsonParser::ParseBool(const cJSON *json, const std::string &key, bool &v
 int32_t JsonParser::ParseStringArray(const cJSON *json, const std::string &key, std::vector<std::string> &value,
     int32_t maxSize)
 {
+    if (!cJSON_IsObject(json)) {
+        FI_HILOGE("json is not json object");
+        return RET_ERR;
+    }
     cJSON *jsonNode = cJSON_GetObjectItemCaseSensitive(json, key.c_str());
     CHKPR(jsonNode, RET_ERR);
     if (!cJSON_IsArray(jsonNode)) {

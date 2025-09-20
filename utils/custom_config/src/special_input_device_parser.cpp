@@ -107,6 +107,10 @@ std::string SpecialInputDeviceParser::GetInputDevName(const std::string &alias)
 
 int32_t SpecialInputDeviceParser::ParseExactlyMatch(const JsonParser &jsonParser)
 {
+    if (!cJSON_IsObject(jsonParser.Get())) {
+        FI_HILOGE("jsonParser is not json object");
+        return RET_ERR;
+    }
     cJSON *exactlyMatchJson = cJSON_GetObjectItemCaseSensitive(jsonParser.Get(), "exactly_match");
     if (!cJSON_IsArray(exactlyMatchJson)) {
         FI_HILOGE("exactlyMatchJson is not array");
@@ -135,6 +139,10 @@ int32_t SpecialInputDeviceParser::ParseExactlyMatch(const JsonParser &jsonParser
 
 int32_t SpecialInputDeviceParser::ParseContainMatch(const JsonParser &jsonParser)
 {
+    if (!cJSON_IsObject(jsonParser.Get())) {
+        FI_HILOGE("jsonParser is not json object");
+        return RET_ERR;
+    }
     cJSON *containMatchJson = cJSON_GetObjectItemCaseSensitive(jsonParser.Get(), "contain_match");
     if (!cJSON_IsArray(containMatchJson)) {
         FI_HILOGE("containMatchJson is not array");
@@ -164,6 +172,10 @@ int32_t SpecialInputDeviceParser::ParseContainMatch(const JsonParser &jsonParser
 
 int32_t SpecialInputDeviceParser::ParseSpecialInputDevice(const JsonParser &jsonParser)
 {
+    if (!cJSON_IsObject(jsonParser.Get())) {
+        FI_HILOGE("jsonParser is not json object");
+        return RET_ERR;
+    }
     cJSON *specialInputDevJson = cJSON_GetObjectItemCaseSensitive(jsonParser.Get(), "special_input_device");
     if (!cJSON_IsArray(specialInputDevJson)) {
         FI_HILOGE("specialInputDevJson is not array");
