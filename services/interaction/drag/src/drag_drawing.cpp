@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1209,7 +1209,7 @@ void DragDrawing::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
     FI_HILOGI("leave");
     return;
 }
- 
+
 void DragDrawing::RemoveStyleNodeAnimations()
 {
     FI_HILOGI("enter");
@@ -2619,6 +2619,10 @@ void DragDrawing::SetDecodeOptions(Media::DecodeOptions &decodeOpts)
 void DragDrawing::ParserDragShadowInfo(const cJSON* filterInfoParser, FilterInfo &filterInfo)
 {
     CHKPV(filterInfoParser);
+    if (!cJSON_IsObject(filterInfoParser)) {
+        FI_HILOGE("FilterInfo is not json object");
+        return;
+    }
     cJSON *offsetX = cJSON_GetObjectItemCaseSensitive(filterInfoParser, "drag_shadow_offsetX");
     if (cJSON_IsNumber(offsetX)) {
         filterInfo.offsetX = static_cast<float>(offsetX->valuedouble);
@@ -2664,6 +2668,10 @@ void DragDrawing::ParserDragShadowInfo(const cJSON* filterInfoParser, FilterInfo
 void DragDrawing::ParserTextDragShadowInfo(const cJSON* filterInfoParser, FilterInfo &filterInfo)
 {
     CHKPV(filterInfoParser);
+    if (!cJSON_IsObject(filterInfoParser)) {
+        FI_HILOGE("FilterInfo is not json object");
+        return;
+    }
     cJSON *path = cJSON_GetObjectItemCaseSensitive(filterInfoParser, "drag_shadow_path");
     if (cJSON_IsString(path)) {
         float dragOriginDpi = DRAG_DATA_MGR.GetDragOriginDpi();
@@ -2748,6 +2756,10 @@ bool DragDrawing::ParserFilterInfo(const std::string &filterInfoStr, FilterInfo 
 void DragDrawing::ParserCornerRadiusInfo(const cJSON *cornerRadiusInfoStr, FilterInfo &filterInfo)
 {
     CHKPV(cornerRadiusInfoStr);
+    if (!cJSON_IsObject(cornerRadiusInfoStr)) {
+        FI_HILOGE("CornerRadiusInfoStr is not json object");
+        return;
+    }
     cJSON *cornerRadius1 = cJSON_GetObjectItemCaseSensitive(cornerRadiusInfoStr, "drag_corner_radius1");
     if (cJSON_IsNumber(cornerRadius1)) {
         filterInfo.cornerRadius1 = static_cast<float>(cornerRadius1->valuedouble);
@@ -2769,6 +2781,10 @@ void DragDrawing::ParserCornerRadiusInfo(const cJSON *cornerRadiusInfoStr, Filte
 void DragDrawing::ParserBlurInfo(const cJSON *BlurInfoInfoStr, FilterInfo &filterInfo)
 {
     CHKPV(BlurInfoInfoStr);
+    if (!cJSON_IsObject(BlurInfoInfoStr)) {
+        FI_HILOGE("BlurInfoInfoStr is not json object");
+        return;
+    }
     cJSON *opacity = cJSON_GetObjectItemCaseSensitive(BlurInfoInfoStr, "dip_opacity");
     if (cJSON_IsNumber(opacity)) {
         if ((opacity->valuedouble) > MAX_OPACITY || (opacity->valuedouble) <= MIN_OPACITY) {
