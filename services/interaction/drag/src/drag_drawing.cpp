@@ -4686,7 +4686,6 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     screenId_ = rsScreenId;
 #endif // OHOS_BUILD_PC_PRODUCT
     RotateDragWindow(currentRotation);
-    g_drawingInfo.displayId = displayId;
     SetRotation(displayId, currentRotation);
     displayWidth_ = display->GetWidth();
     displayHeight_ = display->GetHeight();
