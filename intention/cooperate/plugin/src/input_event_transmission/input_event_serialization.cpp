@@ -32,7 +32,6 @@ namespace DeviceStatus {
 namespace Cooperate {
 namespace {
 constexpr int32_t MAX_KEY_SIZE { 395 };
-const std::string HEART_BEAT_PACKET { "heart_beat_packet" };
 constexpr size_t MAX_N_PRESSED_BUTTONS { 10 };
 constexpr size_t MAX_N_PRESSED_KEYS { 10 };
 constexpr size_t MAX_BUFFER_SIZE { 1024 };
@@ -458,17 +457,6 @@ int32_t InputEventSerialization::SerializeBuffer(std::shared_ptr<MMI::PointerEve
     }
     if (pkt.ChkRWError()) {
         FI_HILOGE("Failed to serialize buffer");
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
-int32_t InputEventSerialization::HeartBeatMarshalling(NetPacket &pkt)
-{
-    CALL_DEBUG_ENTER;
-    pkt << HEART_BEAT_PACKET;
-    if (pkt.ChkRWError()) {
-        FI_HILOGE("Serialize packet is failed");
         return RET_ERR;
     }
     return RET_OK;
