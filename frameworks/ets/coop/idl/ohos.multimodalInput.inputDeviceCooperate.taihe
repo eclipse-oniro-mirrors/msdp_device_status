@@ -57,16 +57,16 @@ function GetStateAsync(deviceDescriptor: String, opq: @sts_type("AsyncCallback<T
 function GetStatePromise(deviceDescriptor: String): @sts_type("Promise<TraversalSwitchStatus>") Opaque;
 
 @!sts_inject("""
-	function on(type:'cooperation', callback: AsyncCallback<CooperationCallbackData>) {
-		return onCooperation(callback);
+	function onCooperationChange(callback: (info: CooperationCallbackData) => void) {
+		return onCooperation(callback, callback);
 	}
-	function off(type: 'cooperation', callback?: AsyncCallback<void>) {
+	function offCooperationChange(callback?: () => void) {
 		return offCooperation(callback);
 	}
 """)
 
-function onCooperation(opq: @sts_type("AsyncCallback<CooperationCallbackData>") Opaque);
-function offCooperation(opq: Optional<@sts_type("AsyncCallback<void>") Opaque>);
+function onCooperation(callback: (info: CooperationCallbackData) => void, opq: Opaque);
+function offCooperation(opq: Optional<Opaque>);
 
 
 

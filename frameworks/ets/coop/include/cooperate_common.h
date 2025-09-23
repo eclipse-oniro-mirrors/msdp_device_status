@@ -33,6 +33,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+using CooperationCallbackData_t = ::ohos::multimodalInput::inputDeviceCooperate::CooperationCallbackData;
 #ifndef RET_OK
     #define RET_OK (0)
 #endif
@@ -107,6 +108,7 @@ public:
     static bool GetErrMsg(const CoordinationMsgInfo &msgInfo, std::string &msg);
     static int32_t GetErrCode(const CoordinationMsgInfo &msgInfo);
     static bool IsSameHandle(ani_env *env, ani_ref localRef, ani_ref inRef);
+    static ani_status ExecCallBack(ani_env *env, ani_object param, ani_object callbackFunc);
 };
 
 class GlobalRefGuard {

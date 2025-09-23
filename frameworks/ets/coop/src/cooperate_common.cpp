@@ -25,6 +25,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
+constexpr int32_t ONE_PARAMS = 1;
 constexpr int32_t TWO_PARAMS = 2;
 }
 
@@ -406,6 +407,31 @@ bool CooperateCommon::IsSameHandle(ani_env *env, ani_ref localRef, ani_ref inRef
         return isSame;
     }
     return isSame;
+}
+
+ani_status CooperateCommon::ExecCallBack(ani_env *env, ani_object param, ani_object callbackFunc)
+{
+    CALL_DEBUG_ENTER;
+    ani_status status = ANI_ERROR;
+    ani_ref ani_argv[] = {param};
+    ani_ref ani_result;
+    ani_class cls;
+    if ((status = env->FindClass("Lstd/core/Function1;", &cls)) != ANI_OK) {
+        FI_HILOGE("find calss is failed, status = %{public}d", status);
+        return status;
+    }
+    ani_boolean ret;
+    env->Object_InstanceOf(callbackFunc, cls, &ret);
+    if (!ret) {
+        FI_HILOGE("callbackFunc is not instance Of Function2.");
+        return status;
+    }
+    if ((status = env->FunctionalObject_Call(static_cast<ani_fn_object>(callbackFunc), ONE_PARAMS,
+        ani_argv, &ani_result)) != ANI_OK) {
+        FI_HILOGE("call ani func failed, status = %{public}d.", status);
+        return status;
+    }
+    return status;
 }
 
 /////////////GlobalRefGuard////////////////////////////////////////////////

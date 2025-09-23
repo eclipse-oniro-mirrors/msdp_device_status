@@ -27,6 +27,7 @@
 namespace {
 using namespace OHOS::Msdp::DeviceStatus;
 using namespace OHOS::Msdp;
+
 void EnableAsync(bool enableInput, uintptr_t opq)
 {
     CALL_DEBUG_ENTER;
@@ -88,14 +89,14 @@ uintptr_t GetStatePromise(::taihe::string_view deviceDescriptor)
     return reinterpret_cast<uintptr_t>(promise);
 }
 
-void onCooperation(uintptr_t opq)
+void onCooperation(
+    ::taihe::callback_view<void(CooperationCallbackData_t const& info)> callback, uintptr_t opq)
 {
     CALL_DEBUG_ENTER;
     ANI_COOPERATE_MGR.OnCooperation(opq);
 }
 
-void offCooperation(::taihe::optional_view<uintptr_t> opq)
-{
+void offCooperation(::taihe::optional_view<uintptr_t> opq) {
     CALL_DEBUG_ENTER;
     ANI_COOPERATE_MGR.OffCooperation(opq);
 }

@@ -409,14 +409,7 @@ void AniCooperateManager::EmitCoordinationMessageEvent(std::shared_ptr<AniCallba
     };
     info.deviceDescriptor = cb->deviceDescriptor_;
     auto param = ::taihe::into_ani<AniCoopInfo>(env, info);
-    ani_ref  aniNull;
-    ani_status status;
-    if ((status = env->GetNull(&aniNull)) != ANI_OK) {
-        FI_HILOGE("get undefined value failed, status = %{public}d", status);
-        return;
-    }
-    CooperateCommon::ExecAsyncCallBack(env, static_cast<ani_object>(aniNull),
-        param, cb->funObject_);
+    CooperateCommon::ExecCallBack(env, param, cb->funObject_);
 }
 
 void AniCooperateManager::OnCoordinationMessage(const std::string &networkId, CoordinationMessage msg)
