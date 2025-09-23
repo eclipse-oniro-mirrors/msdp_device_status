@@ -96,7 +96,8 @@ void onCooperation(
     ANI_COOPERATE_MGR.OnCooperation(opq);
 }
 
-void offCooperation(::taihe::optional_view<uintptr_t> opq) {
+void offCooperation(::taihe::optional_view<uintptr_t> opq)
+{
     CALL_DEBUG_ENTER;
     ANI_COOPERATE_MGR.OffCooperation(opq);
 }

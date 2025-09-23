@@ -103,6 +103,6 @@ group("msdp_cooperate_group") {
   deps = [
      ":coop_etc",
      ":Cooperate",
-     #":coop_taihe_test",
+     ":coop_taihe_test",
   ]
 }
