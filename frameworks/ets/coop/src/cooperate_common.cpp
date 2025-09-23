@@ -32,14 +32,15 @@ constexpr int32_t TWO_PARAMS = 2;
 AniCallbackInfo::~AniCallbackInfo()
 {
     CALL_DEBUG_ENTER;
+     if (attach_ && vm_) {
+        FI_HILOGD("Begin DetachCurrentThread!");
+        vm_->DetachCurrentThread();
+        attach_ = false;
+    }
     if (env_ && ref_) {
         FI_HILOGD("Begin ANI reference delete!");
         env_->GlobalReference_Delete(ref_);
         ref_ = nullptr;
-    }
-    if (attach_ && vm_) {
-        vm_->DetachCurrentThread();
-        attach_ = false;
     }
 }
 

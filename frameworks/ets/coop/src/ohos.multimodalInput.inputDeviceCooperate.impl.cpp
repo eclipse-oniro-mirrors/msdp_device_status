@@ -89,8 +89,7 @@ uintptr_t GetStatePromise(::taihe::string_view deviceDescriptor)
     return reinterpret_cast<uintptr_t>(promise);
 }
 
-void onCooperation(
-    ::taihe::callback_view<void(CooperationCallbackData_t const& info)> callback, uintptr_t opq)
+void onCooperation(uintptr_t opq)
 {
     CALL_DEBUG_ENTER;
     ANI_COOPERATE_MGR.OnCooperation(opq);
