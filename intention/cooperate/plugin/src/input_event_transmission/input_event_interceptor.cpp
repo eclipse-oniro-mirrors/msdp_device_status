@@ -41,8 +41,6 @@ const int32_t RESTORE_SCENE { 0 };
 const int32_t FORBIDDEN_SCENE { 1 };
 const int32_t UPPER_SCENE_FPS { 0 };
 const int32_t UPPER_SCENE_BW { 0 };
-const int32_t INTERVAL_MS { 2000 };
-const int32_t REPEAT_MAX { 10000 };
 const int32_t MODE_ENABLE { 0 };
 const int32_t MODE_DISABLE { 1 };
 const std::string LOW_LATENCY_KEY = "identity";
@@ -101,23 +99,8 @@ int32_t InputEventInterceptor::Enable(Context &context)
         return RET_ERR;
     }
     TurnOffChannelScan();
-    HeartBeatSend();
     ExecuteInner();
     return RET_OK;
-}
-
-void InputEventInterceptor::HeartBeatSend()
-{
-    CALL_DEBUG_ENTER;
-    CHKPV(env_);
-    heartTimer_ = env_->GetTimerManager().AddTimerAsync(INTERVAL_MS, REPEAT_MAX, [this]() {
-        NetPacket packet(MessageId::DSOFTBUS_HEART_BEAT_PACKET);
-        if (InputEventSerialization::HeartBeatMarshalling(packet) != RET_OK) {
-            FI_HILOGE("Failed to serialize packet");
-            return;
-        }
-        env_->GetDSoftbus().SendPacket(remoteNetworkId_, packet);
-    });
 }
 
 void InputEventInterceptor::Disable()
@@ -133,14 +116,6 @@ void InputEventInterceptor::Disable()
         env_->GetTimerManager().RemoveTimerAsync(pointerEventTimer_);
         pointerEventTimer_ = -1;
     }
-    if (heartTimer_ < 0) {
-        FI_HILOGE("Invalid heartTimer_");
-        return;
-    }
-    if (env_->GetTimerManager().RemoveTimerAsync(heartTimer_) != RET_OK) {
-        FI_HILOGE("Failed to RemoveTimer");
-    }
-    heartTimer_ = -1;
 }
 
 void InputEventInterceptor::Update(Context &context)

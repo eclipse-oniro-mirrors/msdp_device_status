@@ -34,7 +34,6 @@ public:
     static int32_t NetPacketToKeyEvent(NetPacket &pkt, std::shared_ptr<MMI::KeyEvent> key);
     static int32_t SwitchEventToNetPacket(const std::shared_ptr<MMI::SwitchEvent> key, NetPacket &pkt);
     static int32_t NetPacketToSwitchEvent(NetPacket &pkt, std::shared_ptr<MMI::SwitchEvent> key);
-    static int32_t HeartBeatMarshalling(NetPacket &pkt);
     static int32_t Marshalling(std::shared_ptr<MMI::PointerEvent> event, NetPacket &pkt,
         int64_t interceptorTime);
     static int32_t Unmarshalling(NetPacket &pkt, std::shared_ptr<MMI::PointerEvent> event,

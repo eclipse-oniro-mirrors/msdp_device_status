@@ -52,12 +52,10 @@ private:
     void HandleStopTimer();
     int32_t SetWifiScene(unsigned int scene);
     void RefreshActivity();
-    void HeartBeatSend();
 
     IContext *env_ { nullptr };
     int32_t interceptorId_ { -1 };
     bool scanState_ { true };
-    std::atomic<int32_t> heartTimer_ { -1 };
     int32_t pointerEventTimer_ { -1 };
     std::string remoteNetworkId_;
     Channel<CooperateEvent>::Sender sender_;
