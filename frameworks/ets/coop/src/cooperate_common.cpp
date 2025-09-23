@@ -32,7 +32,7 @@ constexpr int32_t TWO_PARAMS = 2;
 AniCallbackInfo::~AniCallbackInfo()
 {
     CALL_DEBUG_ENTER;
-     if (attach_ && vm_) {
+    if (attach_ && vm_) {
         FI_HILOGD("Begin DetachCurrentThread!");
         vm_->DetachCurrentThread();
         attach_ = false;
