@@ -172,7 +172,10 @@ ohos_unittest("InputEventSerializationTest") {
 
   defines = []
 
-  sources = [ "src/input_event_serialization_test.cpp" ]
+  sources = [
+    "src/input_event_serialization_test.cpp",
+    "${device_status_root_path}/intention/cooperate/plugin/src/input_event_transmission/input_event_serialization.cpp",
+  ]
 
   cflags = [ "-Dprivate=public" ]
 
