@@ -160,6 +160,10 @@ constexpr int32_t ZOOM_OUT_DURATION { 250 };
 const Rosen::RSAnimationTimingCurve CURVE =
     Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f);
 const Rosen::RSAnimationTimingCurve SPRING = Rosen::RSAnimationTimingCurve::CreateSpring(0.347f, 0.99f, 0.0f);
+constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
+constexpr float MIN_SPRING_RESPONSE = 0.001f;
+constexpr float DEL_SPRING_RESPONSE = 0.005f;
+constexpr float THRESHOLD_DISTANCE_SQUARE = 3.0f;
 constexpr int32_t HEX_FF { 0xFF };
 const std::string RENDER_THREAD_NAME { "os_dargRenderRunner" };
 constexpr float BEZIER_000 { 0.00f };
@@ -329,6 +333,11 @@ int32_t DragDrawing::Init(const DragData &dragData, bool isLongPressDrag)
         g_drawingInfo.isCurrentDefaultStyle = true;
         UpdateDragStyle(DragCursorStyle::MOVE);
     }
+    if (g_drawingInfo.filterInfo.enableAnimation) {
+        preDragPositionX_ = 0.0f;
+        preDragPositionY_ = 0.0f;
+        allAnimationCnt_ = 1;
+    }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     context_ = context;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
@@ -430,6 +439,34 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY, bo
     Rosen::RSTransaction::FlushImplicitTransaction();
 }
 
+void DragDrawing::UpdateDragNodeBoundsAndFrame(float x, float y, float w, float h)
+{
+    auto parentNode = g_drawingInfo.parentNode;
+    CHKPV(parentNode);
+    if (!g_drawingInfo.filterInfo.enableAnimation) {
+        parentNode->SetBounds(x, y, w, h);
+        parentNode->SetFrame(x, y, w, h);
+        return;
+    }
+    allAnimationCnt_++;
+    auto springResponse =
+        std::max(DEFAULT_SPRING_RESPONSE - DEL_SPRING_RESPONSE * allAnimationCnt_, MIN_SPRING_RESPONSE);
+    auto distance = (preDragPositionX_ - x) * (preDragPositionX_ - x) +
+        (preDragPositionY_ - y) * (preDragPositionY_ - y);
+    if (springResponse <= MIN_SPRING_RESPONSE && distance < THRESHOLD_DISTANCE_SQUARE) {
+        g_drawingInfo.filterInfo.enableAnimation = false;
+    }
+    Rosen::RSAnimationTimingProtocol protocol;
+    protocol.SetDuration(ANIMATION_DURATION);
+    const Rosen::RSAnimationTimingCurve curve =
+        Rosen::RSAnimationTimingCurve::CreateSpring(springResponse, 0.99f, 0.0f);
+    Rosen::RSNode::Animate(protocol, curve, [&]() {
+        CHKPV(parentNode);
+        parentNode->SetBounds(x, y, w, h);
+        parentNode->SetFrame(x, y, w, h);
+    });
+}
+
 void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float displayY)
 {
     if (screenRotateState_) {
@@ -466,9 +503,7 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     CHKPV(parentNode);
     CHKPV(currentPixelMap);
-    parentNode->SetBounds(positionX, positionY, currentPixelMap->GetWidth(),
-        currentPixelMap->GetHeight() + adjustSize);
-    parentNode->SetFrame(positionX, positionY, currentPixelMap->GetWidth(),
+    UpdateDragNodeBoundsAndFrame(positionX, positionY, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight() + adjustSize);
 #ifndef OHOS_BUILD_PC_PRODUCT
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
@@ -2699,6 +2734,10 @@ bool DragDrawing::ParserFilterInfo(const std::string &filterInfoStr, FilterInfo 
     cJSON *eventId = cJSON_GetObjectItemCaseSensitive(filterInfoParser.Get(), "event_id");
     if (cJSON_IsNumber(eventId)) {
         DRAG_DATA_MGR.SetEventId(eventId->valueint);
+    }
+    cJSON *enableAnimation = cJSON_GetObjectItemCaseSensitive(filterInfoParser.Get(), "enable_animation");
+    if (cJSON_IsBool(enableAnimation)) {
+        filterInfo.enableAnimation = cJSON_IsTrue(enableAnimation) ? true : false;
     }
     return true;
 }

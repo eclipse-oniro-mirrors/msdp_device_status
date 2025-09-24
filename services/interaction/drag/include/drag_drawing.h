@@ -174,6 +174,7 @@ struct FilterInfo {
     int32_t blurStyle { -1 };
     float dragNodeGrayscale { 0.0f };
     int32_t eventId { -1 };
+    bool enableAnimation { false };
 };
 
 struct ExtraInfo {
@@ -418,6 +419,7 @@ private:
     void RotateCanvasNode(float pivotX, float pivotY, float rotation);
     void FlushDragPosition(uint64_t nanoTimestamp);
     void RotatePosition(float &displayX, float &displayY);
+    void UpdateDragNodeBoundsAndFrame(float x, float y, float w, float h);
     void UpdateDragPosition(int32_t displayId, float displayX, float displayY);
     float AdjustDoubleValue(double doubleValue);
     int32_t UpdatePixelMapsAngleAndAlpha();
@@ -438,9 +440,12 @@ private:
 
 private:
     bool needMultiSelectedAnimation_ { true };
+    float preDragPositionX_ { 0.0f };
+    float preDragPositionY_ { 0.0f };
     int32_t displayWidth_ { -1 };
     int32_t displayHeight_ { -1 };
     int64_t interruptNum_ { -1 };
+    int64_t allAnimationCnt_ { 0 };
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ { nullptr };
     std::shared_ptr<DrawSVGModifier> drawSVGModifier_ { nullptr };
     std::shared_ptr<DrawPixelMapModifier> drawPixelMapModifier_ { nullptr };
