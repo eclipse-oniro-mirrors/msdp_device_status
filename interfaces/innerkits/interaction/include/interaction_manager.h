@@ -36,6 +36,7 @@
 #else
 #include "pointer_event.h"
 #include "virtual_rs_window.h"
+#include "transaction/rs_transaction.h"
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 namespace OHOS {
