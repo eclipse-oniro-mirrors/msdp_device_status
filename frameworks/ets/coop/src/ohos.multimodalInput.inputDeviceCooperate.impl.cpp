@@ -27,6 +27,7 @@
 namespace {
 using namespace OHOS::Msdp::DeviceStatus;
 using namespace OHOS::Msdp;
+
 void EnableAsync(bool enableInput, uintptr_t opq)
 {
     CALL_DEBUG_ENTER;

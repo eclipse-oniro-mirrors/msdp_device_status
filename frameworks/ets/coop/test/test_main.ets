@@ -14,7 +14,7 @@
  */
 
 import inputDeviceCooperate from '@ohos.multimodalInput.inputDeviceCooperate';
-import { BusinessError, AsyncCallback} from '@ohos.base';
+import { BusinessError, Callback, AsyncCallback} from '@ohos.base';
 
 const Tag:String = "inputDeviceCooperate"
 
@@ -152,19 +152,21 @@ function test_start_promise() {
      console.log(Tag, `${fun_name} end`);
 }
 
+
 function test_on_off_change() {
     let fun_name: string = 'test_on_off_change';
-    console.log(Tag, `into func on ${fun_name}`);
+    console.log(Tag, `into func on ${fun_name} -->`);
     try {
-        let fnCallBack = (err: BusinessError<void>|null, info: inputDeviceCooperate.CooperationCallbackData | undefined) => {
+        let fnCallBack: Callback<inputDeviceCooperate.CooperationCallbackData> = (info: inputDeviceCooperate.CooperationCallbackData) => {
             console.log(Tag,  `Monitor ${fun_name} on success`);
             console.log(Tag,  `Monitor ${fun_name} on success ${JSON.stringify(info)}`);
         };
-        inputDeviceCooperate.on('cooperation', fnCallBack);
+        console.log(Tag, `${fun_name} begin run`);
+        inputDeviceCooperate.onCooperationChange(fnCallBack);
         console.log(Tag, `${fun_name} begin wait`);
         wait(WAIT_OPER);
         console.log(Tag, `${fun_name} end wait`);
-        inputDeviceCooperate.off('cooperation', fnCallBack);
+        inputDeviceCooperate.offCooperationChange();
     } catch (err) {
         console.log(Tag, `${fun_name} catch error:`, err);
     }
