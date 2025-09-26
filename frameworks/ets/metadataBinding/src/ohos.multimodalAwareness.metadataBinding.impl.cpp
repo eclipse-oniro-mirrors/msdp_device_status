@@ -16,7 +16,7 @@
 #include "ani_boomerang_manager.h"
 
 #undef LOG_TAG
-#define LOG_TAG "ohos.multimodalAwareness.metadataBinding"
+#define LOG_TAG "metadataBinding"
 
 namespace {
 using namespace ::taihe;
