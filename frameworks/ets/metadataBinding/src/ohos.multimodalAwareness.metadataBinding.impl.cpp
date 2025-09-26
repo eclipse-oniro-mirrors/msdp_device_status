@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include "ani_boomerang_manager.h"
+#include "ani_boomerang_manager.h"
 
 #undef LOG_TAG
 #define LOG_TAG "ohos.multimodalAwareness.metadataBinding"

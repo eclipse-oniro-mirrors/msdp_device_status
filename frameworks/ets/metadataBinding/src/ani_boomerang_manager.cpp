@@ -16,7 +16,7 @@
 #include "ani_boomerang_manager.h"
 
 #undef LOG_TAG
-#define LOG_TAG "ohos.multimodalAwareness.metadataBinding"
+#define LOG_TAG "metadataBinding"
 
 namespace OHOS {
 namespace Msdp {
@@ -65,7 +65,10 @@ void AniBoomerangCallback::OnScreenshotResult(const DeviceStatus::BoomerangData&
 
 void AniBoomerangCallback::OnNotifyMetadata(const std::string &metadata)
 {
-    CALL_DEBUG_ENTER;
+    if (metadata.empty()) {
+        FI_HILOGE("arguments is null");
+        return;
+    }
     std::lock_guard<std::mutex> guard(mutex_);
     this->metadata_ = metadata;
     EmitOnMetadata(*env_, metadata);
@@ -73,6 +76,10 @@ void AniBoomerangCallback::OnNotifyMetadata(const std::string &metadata)
 
 void AniBoomerangCallback::EmitOnMetadata(ani_env env, std::string metadata)
 {
+    if (metadata.empty()) {
+        FI_HILOGE("arguments is null");
+        return;
+    }
     AniBoomerang::GetInstance()->setDeferred(metadata);
 }
 
@@ -152,6 +159,10 @@ void AniBoomerang::onMetadata(std::string bundleName, ::taihe::callback_view<voi
 void AniBoomerang::offMetadata(std::string bundleName, ::taihe::optional_view<uintptr_t> opq)
 {
     FI_HILOGD("%{public}s unRegisterListener enter", LOG_TAG);
+    if (bundleName.empty()) {
+        FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        return;
+    }
     std::lock_guard<std::mutex> lock(mutex_);
     if (!opq.has_value()) {
         FI_HILOGD("%{public}s opq is nullptr!", LOG_TAG);
@@ -179,6 +190,10 @@ void AniBoomerang::offMetadata(std::string bundleName, ::taihe::optional_view<ui
 
 void AniBoomerang::notifyMetadataBindingEvent(std::string bundleName, ani_object& promise)
 {
+    if (bundleName.empty()) {
+        FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        return;
+    }
     FI_HILOGD("%{public}s notifyMetadataBindingEventPromise enter", LOG_TAG);
     std::lock_guard<std::mutex> lock(mutex_);
     OHOS::sptr<AniBoomerangCallback> callback = new (std::nothrow) AniBoomerangCallback();
@@ -203,6 +218,10 @@ void AniBoomerang::notifyMetadataBindingEvent(std::string bundleName, ani_object
 
 void AniBoomerang::submitMetadata(std::string metadata)
 {
+    if (metadata.empty()) {
+        FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        return;
+    }
     FI_HILOGD("%{public}s submitMetadataPromise enter", LOG_TAG);
     std::lock_guard<std::mutex> lock(mutex_);
     int32_t ret = ANI_BOOMERANG_MGR->SubmitMetadata(metadata);
@@ -215,6 +234,10 @@ void AniBoomerang::submitMetadata(std::string metadata)
 
 void AniBoomerang::encodeImage(uintptr_t srcImage, std::string metadata, ani_object& promise)
 {
+    if (!srcImage || metadata.empty()) {
+        FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        return;
+    }
     FI_HILOGD("%{public}s encodeImagePromise enter", LOG_TAG);
     std::lock_guard<std::mutex> lock(mutex_);
     OHOS::sptr<AniBoomerangCallback> callback = new (std::nothrow) AniBoomerangCallback();
@@ -241,6 +264,10 @@ void AniBoomerang::encodeImage(uintptr_t srcImage, std::string metadata, ani_obj
 
 void AniBoomerang::decodeImage(uintptr_t encodedImage, ani_object& promise)
 {
+    if (!encodedImage) {
+        FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        return;
+    }
     std::lock_guard<std::mutex> lock(mutex_);
     ani_object object = reinterpret_cast<ani_object>(encodedImage);
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env_, object);
@@ -269,6 +296,10 @@ void AniBoomerang::decodeImage(uintptr_t encodedImage, ani_object& promise)
 bool AniBoomerang::EncodeImageFunc(std::shared_ptr<OHOS::Media::PixelMap> &pixelMap, const std::string &content,
     std::shared_ptr<OHOS::Media::PixelMap> &resultPixelMap)
 {
+    if (pixelMap == nullptr || content.empty()) {
+        FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        return false;
+    }
     char realPath[PATH_MAX] = {};
     if (realpath(BOOMERANG_ALGO_SO_PATH, realPath) == nullptr) {
         FI_HILOGE("%{public}s %{public}s Path is error", LOG_TAG, realPath);
@@ -294,6 +325,10 @@ bool AniBoomerang::EncodeImageFunc(std::shared_ptr<OHOS::Media::PixelMap> &pixel
 
 bool AniBoomerang::DecodeImageFunc(std::shared_ptr<OHOS::Media::PixelMap> &pixelMap, std::string &content)
 {
+    if (pixelMap == nullptr) {
+        FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        return false;
+    }
     char realPath[PATH_MAX] = {};
     if (realpath(BOOMERANG_ALGO_SO_PATH, realPath) == nullptr) {
         FI_HILOGE("%{public}s %{public}s Path is error", LOG_TAG, realPath);
