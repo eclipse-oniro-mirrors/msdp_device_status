@@ -81,7 +81,7 @@ void CooperateFree::UnchainConnections(Context &context, const StopCooperateEven
     }
 }
 
-void CooperateFree::SimulateShowPointerEvent()
+void CooperateFree::SimulateShowPointerEvent(Context &context)
 {
     CALL_INFO_TRACE;
     CHKPV(env_);
@@ -96,6 +96,14 @@ void CooperateFree::SimulateShowPointerEvent()
     pointerEvent->SetPointerId(0);
     pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     pointerEvent->AddPointerItem(item);
+    auto pointerEventFromBuilder = context.inputEventBuilder_.GetPointerEvent();
+    CHKPV(pointerEventFromBuilder);
+    if (auto pressedButtons = pointerEventFromBuilder->GetPressedButtons(); !pressedButtons.empty()) {
+        FI_HILOGI("Has pressed buttons");
+        for (auto buttonId : pressedButtons) {
+            pointerEvent->SetButtonPressed(buttonId);
+        }
+    }
     env_->GetInput().SimulateInputEvent(pointerEvent);
 }
 
@@ -363,7 +371,7 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
     TransiteTo(context, CooperateState::COOPERATE_STATE_IN);
     context.OnTransitionIn();
     if (!context.NeedFreezeCursor()) {
-        parent_.SimulateShowPointerEvent();
+        parent_.SimulateShowPointerEvent(context);
     }
 }
 
@@ -385,7 +393,7 @@ void CooperateFree::Initial::OnRemoteStartWithOptions(Context &context, const Co
     TransiteTo(context, CooperateState::COOPERATE_STATE_IN);
     context.OnTransitionIn();
     if (!context.NeedFreezeCursor()) {
-        parent_.SimulateShowPointerEvent();
+        parent_.SimulateShowPointerEvent(context);
     }
 }
 

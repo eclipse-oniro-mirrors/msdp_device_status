@@ -249,6 +249,12 @@ void InputEventBuilder::OnPointerEvent(Msdp::NetPacket &packet)
     });
 }
 
+std::shared_ptr<MMI::PointerEvent> InputEventBuilder::GetPointerEvent()
+{
+    CALL_INFO_TRACE;
+    return pointerEvent_;
+}
+
 void InputEventBuilder::CheckLatency(int64_t curDriveActionTime, int64_t curInterceptorTime,
     int64_t curCrossPlatformTime, std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {

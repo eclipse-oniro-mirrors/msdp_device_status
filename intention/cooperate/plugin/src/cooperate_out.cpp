@@ -98,6 +98,12 @@ void CooperateOut::SimulateShowPointerEvent()
     pointerEvent->SetPointerId(0);
     pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     pointerEvent->AddPointerItem(item);
+    if (!pressedButtons_.empty()) {
+        FI_HILOGI("Has pressed buttons");
+        for (auto buttonId : pressedButtons_) {
+            pointerEvent->SetButtonPressed(buttonId);
+        }
+    }
     env_->GetInput().SimulateInputEvent(pointerEvent);
 }
 
@@ -171,6 +177,17 @@ CooperateOut::Initial::Initial(CooperateOut &parent)
         [this](Context &context, const CooperateEvent &event) {
             this->OnStopAboutVirtualTrackpad(context, event);
     });
+    AddHandler(CooperateEventType::INPUT_POINTER_EVENT,
+        [this](Context &context, const CooperateEvent &event) {
+            this->OnPointerEvent(context, event);
+    });
+}
+
+void CooperateOut::Initial::OnPointerEvent(Context &context, const CooperateEvent &event)
+{
+    CALL_DEBUG_ENTER;
+    InputPointerEvent notice = std::get<InputPointerEvent>(event.event);
+    parent_.pressedButtons_ = notice.pressedButtons;
 }
 
 void CooperateOut::Initial::OnDisable(Context &context, const CooperateEvent &event)
