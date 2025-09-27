@@ -15,8 +15,7 @@
  
 @!namespace("@ohos.deviceStatus.dragInteraction", "dragInteraction")
 @!sts_inject("""
-static
-{ loadLibrary("DragInteraction.z") }
+static { loadLibraryWithPermissionCheck("DragInteraction.z", "@ohos.deviceStatus.dragInteraction") }
 """)
 
 enum DragState : i32 {
