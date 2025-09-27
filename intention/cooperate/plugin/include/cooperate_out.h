@@ -62,6 +62,7 @@ private:
         void OnComeBackWithOptions(Context &context, const CooperateEvent &event);
         void OnRelayWithOptions(Context &context, const CooperateEvent &event);
         void OnStopAboutVirtualTrackpad(Context &context, const CooperateEvent &event);
+        void OnPointerEvent(Context &context, const CooperateEvent &event);
 
         CooperateOut &parent_;
     };
@@ -73,6 +74,7 @@ private:
 
     IContext *env_ { nullptr };
     std::shared_ptr<Initial> initial_ { nullptr };
+    std::set<int32_t> pressedButtons_;
 };
 } // namespace Cooperate
 } // namespace DeviceStatus

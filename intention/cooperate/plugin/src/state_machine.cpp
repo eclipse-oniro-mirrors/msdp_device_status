@@ -848,7 +848,8 @@ void StateMachine::AddMonitor(Context &context)
                         .x = pointerItem.GetDisplayX(),
                         .y = pointerItem.GetDisplayY(),
                     },
-                    .currentDisplayId = pointerEvent->GetTargetDisplayId()
+                    .currentDisplayId = pointerEvent->GetTargetDisplayId(),
+                    .pressedButtons = pointerEvent->GetPressedButtons(),
                 }));
             if (ret != Channel<CooperateEvent>::NO_ERROR) {
                 FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);

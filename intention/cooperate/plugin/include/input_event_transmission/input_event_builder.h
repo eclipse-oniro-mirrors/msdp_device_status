@@ -86,6 +86,7 @@ public:
     void Thaw();
     void SetDamplingCoefficient(uint32_t direction, double coefficient);
     void UpdateVirtualDeviceIdMap(const std::unordered_map<int32_t, int32_t> &remote2VirtualIds);
+    std::shared_ptr<MMI::PointerEvent> GetPointerEvent();
 
     static bool IsLocalEvent(const InputPointerEvent &event);
 

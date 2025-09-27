@@ -19,6 +19,7 @@
 #include <future>
 #include <string>
 #include <variant>
+#include <set>
 
 #include "coordination_message.h"
 #include "i_cooperate.h"
@@ -181,6 +182,7 @@ struct InputPointerEvent {
     int32_t sourceType;
     Coordinate position;
     int32_t currentDisplayId { 0 };
+    std::set<int32_t> pressedButtons;
 };
 
 using DSoftbusSessionOpened = DDMBoardOnlineEvent;
