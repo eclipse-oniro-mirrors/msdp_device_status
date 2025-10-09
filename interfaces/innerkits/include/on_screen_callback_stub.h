@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,35 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef ON_SCREEN_CLIENT_H
-#define ON_SCREEN_CLIENT_H
+#ifndef ON_SCREEN_CALLBACK_STUB_H
+#define ON_SCREEN_CALLBACK_STUB_H
 
-#include "nocopyable.h"
+#include <iremote_stub.h>
+#include <nocopyable.h>
+#include <string>
 
 #include "iremote_on_screen_callback.h"
-#include "on_screen_data.h"
+#include "message_option.h"
+#include "message_parcel.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
-class OnScreenClient {
+class OnScreenCallbackStub : public IRemoteStub<IRemoteOnScreenCallback> {
 public:
-    OnScreenClient() = default;
-    virtual ~OnScreenClient() = default;
-    DISALLOW_COPY_AND_MOVE(OnScreenClient);
+    OnScreenCallbackStub() = default;
+    DISALLOW_COPY_AND_MOVE(OnScreenCallbackStub);
+    virtual ~OnScreenCallbackStub() = default;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    virtual void OnScreenChange(const std::string& changeInfo) override {}
 
-    int32_t GetPageContent(const ContentOption& option, PageContent& pageContent);
-    int32_t SendControlEvent(const ControlEvent& event);
-
-    int32_t RegisterScreenEventCallback(int32_t windowId, const std::string& event,
-        const sptr<IRemoteOnScreenCallback>& callback);
-    int32_t UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
-        const sptr<IRemoteOnScreenCallback>& callback);
-    int32_t IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus);
+private:
+    int32_t OnScreenChangeStub(MessageParcel &data);
 };
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // ON_SCREEN_CLIENT_H
+#endif // ON_SCREEN_CALLBACK_STUB_H

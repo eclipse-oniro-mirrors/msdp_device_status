@@ -42,6 +42,24 @@ int32_t OnScreenManager::SendControlEvent(const ControlEvent& event)
 {
     return INTER_MGR_IMPL.SendControlEvent(event);
 }
+
+int32_t OnScreenManager::RegisterScreenEventCallback(int32_t windowId, std::string event,
+    sptr<IRemoteOnScreenCallback> callback)
+{
+    return INTER_MGR_IMPL.RegisterScreenEventCallback(windowId, event, callback);
+}
+
+int32_t OnScreenManager::UnregisterScreenEventCallback(int32_t windowId, std::string event,
+    sptr<IRemoteOnScreenCallback> callback)
+{
+    return INTER_MGR_IMPL.UnregisterScreenEventCallback(windowId, event, callback);
+}
+
+int32_t OnScreenManager::IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus)
+{
+    return INTER_MGR_IMPL.IsParallelFeatureEnabled(windowId, outStatus);
+}
+
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

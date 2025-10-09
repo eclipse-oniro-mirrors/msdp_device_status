@@ -124,6 +124,11 @@ public:
     ErrCode GetPageContent(const OnScreen::SequenceableContentOption &contentOption,
         OnScreen::SequenceablePageContent &pageContent) override;
     ErrCode SendControlEvent(const OnScreen::SequenceableControlEvent &event) override;
+    ErrCode RegisterScreenEventCallback(int32_t windowId, const std::string& event,
+        const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override;
+    ErrCode UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
+        const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override;
+    ErrCode IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus) override;
 
     // hidumper
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;

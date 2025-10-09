@@ -148,6 +148,54 @@ int32_t OnScreenServer::Dump(int32_t fd, const std::vector<std::u16string> &args
     return ret;
 }
 
+int32_t OnScreenServer::RegisterScreenEventCallback(const CallingContext& context,
+    int32_t windowId, const std::string& event, const sptr<IRemoteOnScreenCallback>& callback)
+{
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
+        return RET_NO_SUPPORT;
+    }
+    FI_HILOGI("RegisterScreenEventCallback algo lib");
+    auto ret = handle_.pAlgorithm->RegisterScreenEventCallback(windowId, event, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to RegisterScreenEventCallback, err = %{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t OnScreenServer::UnregisterScreenEventCallback(const CallingContext& context,
+    int32_t windowId, const std::string& event, const sptr<IRemoteOnScreenCallback>& callback)
+{
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
+        return RET_NO_SUPPORT;
+    }
+    FI_HILOGI("RegisterScreenEventCallback algo lib");
+    auto ret = handle_.pAlgorithm->UnregisterScreenEventCallback(windowId, event, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to UnregisterScreenEventCallback, err = %{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t OnScreenServer::IsParallelFeatureEnabled(const CallingContext& context,
+    int32_t windowId, int32_t& outStatus)
+{
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
+        return RET_NO_SUPPORT;
+    }
+
+    auto ret = handle_.pAlgorithm->IsParallelFeatureEnabled(windowId, outStatus);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to check screen change access, err=%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
 int32_t OnScreenServer::ConnectAlgoLib()
 {
     return handle_.pAlgorithm == nullptr ? LoadAlgoLib() : RET_OK;

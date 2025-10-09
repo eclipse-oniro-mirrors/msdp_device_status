@@ -108,6 +108,7 @@
           "//base/msdp/device_status/frameworks/js/napi/device_status:devicestatus_napi",
           "//base/msdp/device_status/frameworks/js/napi/underage_model:userstatus_napi",
           "//base/msdp/device_status/frameworks/js/napi/onscreen:onscreen_napi",
+          "//base/msdp/device_status/frameworks/js/napi/onscreen:screenevent_napi",
           "//base/msdp/device_status/frameworks/ets/drag:dragInteraction"
         ],
         "service_group":[

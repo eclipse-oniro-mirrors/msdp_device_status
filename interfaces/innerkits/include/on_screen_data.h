@@ -41,6 +41,11 @@ enum class EventType {
     END,
 };
 
+enum class ParallelFeatureStatus : int32_t {
+    DISABLED = 0,
+    ENABLED,
+};
+
 struct ParagraphSizeRange {
     int32_t minSize;
     int32_t maxSize;

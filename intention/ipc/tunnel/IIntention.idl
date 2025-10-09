@@ -27,6 +27,7 @@ sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableControlEvent;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceablePageContent;
 interface OHOS.Msdp.DeviceStatus.IRemoteBoomerangCallback;
 interface OHOS.Msdp.DeviceStatus.IRemoteDevStaCallback;
+interface OHOS.Msdp.DeviceStatus.OnScreen.IRemoteOnScreenCallback;
 sequenceable OHOS.Media.PixelMap;
  
 interface OHOS.Msdp.IIntention {
@@ -106,4 +107,7 @@ interface OHOS.Msdp.IIntention {
     // OnScreen
     void GetPageContent([in] SequenceableContentOption contentOption, [out] SequenceablePageContent pageContent);
     void SendControlEvent([in] SequenceableControlEvent event);
+    void RegisterScreenEventCallback([in] int windowId, [in] String event, [in] IRemoteOnScreenCallback onScreenCallback);
+    void UnregisterScreenEventCallback([in] int windowId, [in] String event, [in] IRemoteOnScreenCallback onScreenCallback);
+    void IsParallelFeatureEnabled([in] int windowId, [out] int outStatus);
 }

@@ -43,6 +43,12 @@ public:
     int32_t GetPageContent(const CallingContext &context, const ContentOption &option, PageContent &pageContent);
     int32_t SendControlEvent(const CallingContext &context, const ControlEvent &event);
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args);
+    int32_t RegisterScreenEventCallback(const CallingContext& context, int32_t windowId, const std::string& event,
+        const sptr<IRemoteOnScreenCallback>& callback);
+    int32_t UnregisterScreenEventCallback(const CallingContext& context, int32_t windowId, const std::string& event,
+        const sptr<IRemoteOnScreenCallback>& callback);
+    int32_t IsParallelFeatureEnabled(const CallingContext& context, int32_t windowId, int32_t& outStatus);
+
 private:
     int32_t LoadAlgoLib();
     int32_t UnloadAlgoLib();
