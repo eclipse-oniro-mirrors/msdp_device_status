@@ -132,7 +132,7 @@ void EtsDragManager::OnDragMessage(DeviceStatus::DragState state)
         FI_HILOGE("not found listeners!");
         return;
     }
-    for (const auto &cb : iter->second) {{
+    for (const auto &cb : iter->second) {
         auto &func = std::get<taihe::callback<void(DragState)>>(cb->callback);
         func(ConverDragState(state));
     }
