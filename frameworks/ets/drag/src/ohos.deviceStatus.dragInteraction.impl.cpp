@@ -46,7 +46,7 @@ std::shared_ptr<EtsDragManager> EtsDragManager::GetInstance()
     return instance_;
 }
 
-void EtsDragManager::registerListener(callback_view<void(DragState)> f, uintptr_t opq)
+void EtsDragManager::registerListener(callback_view<void(DragState)> callback, uintptr_t opq)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
@@ -67,7 +67,7 @@ void EtsDragManager::registerListener(callback_view<void(DragState)> f, uintptr_
         FI_HILOGD("callback already registered");
         return;
     }
-    cbVec.emplace_back(std::make_shared<CallbackObject>(f, callbackRef));
+    cbVec.emplace_back(std::make_shared<CallbackObject>(callback, callbackRef));
     FI_HILOGI("register callback success");
     if (!hasRegistered_) {
         FI_HILOGI("  drag listener to server");
@@ -100,8 +100,8 @@ void EtsDragManager::unRegisterListener(optional_view<uintptr_t> opq)
         return;
     }
     const auto pred = [env, targetRef = guard.get()](std::shared_ptr<CallbackObject> &obj) {
-        ani_boolean is_equal = false;
-        return (ANI_OK == env->Reference_StrictEquals(targetRef, obj->ref, &is_equal)) && is_equal;
+        ani_boolean isEqual = false;
+        return (ANI_OK == env->Reference_StrictEquals(targetRef, obj->ref, &isEqual)) && isEqual;
     };
     auto &callbacks = iter->second;
     const auto it = std::find_if(callbacks.begin(), callbacks.end(), pred);
@@ -132,7 +132,7 @@ void EtsDragManager::OnDragMessage(DeviceStatus::DragState state)
         FI_HILOGE("not found listeners!");
         return;
     }
-    for (auto &cb : iter->second) {
+    for (const auto &cb : iter->second) {{
         auto &func = std::get<taihe::callback<void(DragState)>>(cb->callback);
         func(ConverDragState(state));
     }
@@ -159,9 +159,9 @@ array<Summary> EtsDragManager::getDataSummary()
     return array<Summary>(arr);
 }
 
-void registerListener(callback_view<void(DragState)> f, uintptr_t opq)
+void registerListener(callback_view<void(DragState)> callback, uintptr_t opq)
 {
-    return EtsDragManager::GetInstance()->registerListener(f, opq);
+    return EtsDragManager::GetInstance()->registerListener(callback, opq);
 }
 
 void unRegisterListener(optional_view<uintptr_t> opq)
