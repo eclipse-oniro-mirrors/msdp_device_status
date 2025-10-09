@@ -16,8 +16,8 @@
 #include "ohos.deviceStatus.dragInteraction.ani.hpp"
 #include "devicestatus_define.h"
 
-#undef MMI_LOG_TAG
-#define MMI_LOG_TAG "dragInteraction_ani_constructor"
+#undef LOG_TAG
+#define LOG_TAG "dragInteraction_ani_constructor"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
