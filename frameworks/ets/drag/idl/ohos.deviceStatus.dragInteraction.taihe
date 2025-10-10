@@ -39,6 +39,6 @@ struct Summary {
         return unRegisterListener(callback);
       }
 """)
-function registerListener(f: (info: DragState) => void, opq: Opaque);
+function registerListener(callback: (info: DragState) => void, opq: Opaque);
 function unRegisterListener(opq: Optional<Opaque>);
 function getDataSummary(): Array<Summary>;

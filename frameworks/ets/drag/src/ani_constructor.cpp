@@ -14,14 +14,22 @@
  */
 
 #include "ohos.deviceStatus.dragInteraction.ani.hpp"
+#include "devicestatus_define.h"
+
+#undef LOG_TAG
+#define LOG_TAG "dragInteraction_ani_constructor"
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
+    CHKPR(vm, ANI_ERROR);
+    CHKPR(result, ANI_ERROR);
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        FI_HILOGE("Failed to get ANI environment");
         return ANI_ERROR;
     }
     if (ANI_OK != ohos::deviceStatus::dragInteraction::ANIRegister(env)) {
-        std::cerr << "Error from ohos::deviceStatus::dragInteraction::ANIRegister" << std::endl;
+        FI_HILOGE("Error from ohos::deviceStatus::dragInteraction::ANIRegister");
         return ANI_ERROR;
     }
     *result = ANI_VERSION_1;

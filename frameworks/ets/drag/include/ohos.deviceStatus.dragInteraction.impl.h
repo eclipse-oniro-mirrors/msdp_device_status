@@ -56,7 +56,7 @@ public:
     DISALLOW_COPY_AND_MOVE(EtsDragManager);
     ~EtsDragManager() = default;
 
-    void registerListener(callback_view<void(ohos::deviceStatus::dragInteraction::DragState)> f, uintptr_t opq);
+    void registerListener(callback_view<void(ohos::deviceStatus::dragInteraction::DragState)> callback, uintptr_t opq);
     void unRegisterListener(optional_view<uintptr_t> opq);
     void OnDragMessage(DeviceStatus::DragState state) override;
     array<Summary> getDataSummary();
