@@ -25,7 +25,7 @@
 #include "intention_cooperate_fuzzer.h"
 
 #undef LOG_TAG
-#define LOG_TAG "MsdpIntentionCooperateFuzzTest"
+#define LOG_TAG "IntentionCooperateFuzzTest"
 
 namespace {
     constexpr size_t THRESHOLD = 5;

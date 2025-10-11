@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef TEST_INTENTIONCLIENT_FUZZER_H
-#define TEST_INTENTIONCLIENT_FUZZER_H
+#ifndef INTENTION_BUNDLE_INFO_FUZZER_H
+#define INTENTION_BUNDLE_INFO_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "intentionbundleinfo_fuzzer"
 
-#endif // TEST_INTENTIONCLIENT_FUZZER_H
+#endif // INTENTION_BUNDLE_INFO_FUZZER_H

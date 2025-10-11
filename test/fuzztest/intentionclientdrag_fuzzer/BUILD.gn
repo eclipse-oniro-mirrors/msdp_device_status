@@ -27,7 +27,7 @@ deps_ex = [
 ]
 
 ###############################fuzztest#################################
-ohos_fuzztest("MsdpIntentionClientDragFuzzTest") {
+ohos_fuzztest("IntentionClientDragFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "${device_status_root_path}/test/fuzztest/intentionclientdrag_fuzzer"
   include_dirs = [
@@ -61,5 +61,5 @@ ohos_fuzztest("MsdpIntentionClientDragFuzzTest") {
 group("fuzztest") {
   testonly = true
   deps = []
-  deps += [ ":MsdpIntentionClientDragFuzzTest" ]
+  deps += [ ":IntentionClientDragFuzzTest" ]
 }
