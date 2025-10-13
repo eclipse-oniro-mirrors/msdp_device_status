@@ -1082,6 +1082,59 @@ int32_t IntentionClient::SendControlEvent(const OnScreen::ControlEvent& event)
     return RET_OK;
 }
 
+int32_t IntentionClient::RegisterScreenEventCallback(int32_t windowId, const std::string& event,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& callback)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    auto ret = devicestatusProxy_->RegisterScreenEventCallback(windowId, event, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:RegisterScreenEventCallback failed");
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t IntentionClient::UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& callback)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    auto ret = devicestatusProxy_->UnregisterScreenEventCallback(windowId, event, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:UnregisterScreenEventCallback failed");
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t IntentionClient::IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    auto ret = devicestatusProxy_->IsParallelFeatureEnabled(windowId, outStatus);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:IsParallelFeatureEnabled failed");
+        return ret;
+    }
+    return RET_OK;
+}
+
 void IntentionClient::ResetProxy(const wptr<IRemoteObject> &remote)
 {
     CALL_DEBUG_ENTER;

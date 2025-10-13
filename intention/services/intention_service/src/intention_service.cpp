@@ -621,6 +621,33 @@ int32_t IntentionService::Dump(int32_t fd, const std::vector<std::u16string> &ar
     }
     return onScreen_.Dump(fd, args);
 }
+
+ErrCode IntentionService::RegisterScreenEventCallback(int32_t windowId, const std::string& event,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, windowId, &event, &onScreenCallback] {
+        return onScreen_.RegisterScreenEventCallback(context, windowId, event, onScreenCallback);
+    });
+}
+
+ErrCode IntentionService::UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, windowId, &event, &onScreenCallback] {
+        return onScreen_.UnregisterScreenEventCallback(context, windowId, event, onScreenCallback);
+    });
+}
+
+ErrCode IntentionService::IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, windowId, &outStatus] {
+        return onScreen_.IsParallelFeatureEnabled(context, windowId, outStatus);
+    });
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -91,6 +91,9 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_GET_DEVICE_POSTURE_DATA_SYNC,
     IIntentionIpcCode::COMMAND_GET_PAGE_CONTENT,
     IIntentionIpcCode::COMMAND_SEND_CONTROL_EVENT,
+    IIntentionIpcCode::COMMAND_REGISTER_SCREEN_EVENT_CALLBACK,
+    IIntentionIpcCode::COMMAND_UNREGISTER_SCREEN_EVENT_CALLBACK,
+    IIntentionIpcCode::COMMAND_IS_PARALLEL_FEATURE_ENABLED,
 };
 
 class IntentionServiceMock : public IntentionStub {
@@ -511,6 +514,31 @@ ErrCode GetPageContent(const DeviceStatus::OnScreen::SequenceableContentOption &
 ErrCode SendControlEvent(const DeviceStatus::OnScreen::SequenceableControlEvent &event) override
 {
     (void)event;
+    return 0;
+}
+
+ErrCode RegisterScreenEventCallback(int32_t windowId, const std::string& event,
+    const sptr<DeviceStatus::OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override
+{
+    (void)windowId;
+    (void)event;
+    (void)onScreenCallback;
+    return 0;
+}
+
+ErrCode UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
+    const sptr<DeviceStatus::OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override
+{
+    (void)windowId;
+    (void)event;
+    (void)onScreenCallback;
+    return 0;
+}
+
+ErrCode IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus) override
+{
+    (void)windowId;
+    (void)outStatus;
     return 0;
 }
 };

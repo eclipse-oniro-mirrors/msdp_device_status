@@ -22,6 +22,7 @@
 #include "nocopyable.h"
 
 #include "devicestatus_common.h"
+#include "iremote_on_screen_callback.h"
 #include "on_screen_data.h"
 
 namespace OHOS {
@@ -53,6 +54,11 @@ public:
      * @since 20
      */
     int32_t SendControlEvent(const ControlEvent& event);
+
+    int32_t RegisterScreenEventCallback(int32_t windowId, std::string event, sptr<IRemoteOnScreenCallback> callback);
+    int32_t UnregisterScreenEventCallback(int32_t windowId, std::string event, sptr<IRemoteOnScreenCallback> callback);
+    int32_t IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus);
+
 private:
     OnScreenManager() = default;
     DISALLOW_COPY_AND_MOVE(OnScreenManager);

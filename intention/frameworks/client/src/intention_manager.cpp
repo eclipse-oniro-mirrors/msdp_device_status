@@ -636,6 +636,27 @@ int32_t IntentionManager::SendControlEvent(const OnScreen::ControlEvent& event)
     CALL_DEBUG_ENTER;
     return onScreen_.SendControlEvent(event);
 }
+
+int32_t IntentionManager::RegisterScreenEventCallback(int32_t windowId, std::string event,
+    sptr<OnScreen::IRemoteOnScreenCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    return onScreen_.RegisterScreenEventCallback(windowId, event, callback);
+}
+
+int32_t IntentionManager::UnregisterScreenEventCallback(int32_t windowId, std::string event,
+    sptr<OnScreen::IRemoteOnScreenCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    return onScreen_.UnregisterScreenEventCallback(windowId, event, callback);
+}
+
+int32_t IntentionManager::IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus)
+{
+    CALL_DEBUG_ENTER;
+    return onScreen_.IsParallelFeatureEnabled(windowId, outStatus);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

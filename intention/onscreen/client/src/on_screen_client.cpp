@@ -44,6 +44,35 @@ int32_t OnScreenClient::SendControlEvent(const ControlEvent& event)
     }
     return RET_OK;
 }
+
+int32_t OnScreenClient::RegisterScreenEventCallback(int32_t windowId, const std::string& event,
+    const sptr<IRemoteOnScreenCallback>& callback)
+{
+    auto ret = INTENTION_CLIENT->RegisterScreenEventCallback(windowId, event, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("RegisterScreenEventCallback failed, ret = %{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t OnScreenClient::UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
+    const sptr<IRemoteOnScreenCallback>& callback)
+{
+    auto ret = INTENTION_CLIENT->UnregisterScreenEventCallback(windowId, event, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("UnregisterScreenEventCallback failed, ret = %{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
+int32_t OnScreenClient::IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus)
+{
+    auto ret = INTENTION_CLIENT->IsParallelFeatureEnabled(windowId, outStatus);
+    return ret;
+}
+
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

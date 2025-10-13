@@ -100,6 +100,11 @@
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::GetPageContent(OHOS::Msdp::DeviceStatus::OnScreen::ContentOption const&, OHOS::Msdp::DeviceStatus::OnScreen::PageContent&)";
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::SendControlEvent(OHOS::Msdp::DeviceStatus::OnScreen::ControlEvent const&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragSummaryInfo(OHOS::Msdp::DeviceStatus::DragSummaryInfo&)";
+            "VTT for OHOS::Msdp::DeviceStatus::OnScreen::OnScreenCallbackStub";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::RegisterScreenEventCallback(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::OnScreen::IRemoteOnScreenCallback>)";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::UnregisterScreenEventCallback(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::OnScreen::IRemoteOnScreenCallback>)";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::IsParallelFeatureEnabled(int, int&)";
         };
     local:
         *;
