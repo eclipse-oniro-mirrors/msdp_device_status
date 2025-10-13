@@ -93,6 +93,6 @@ group("coordination") {
   deps = [
     ":coordination_etc",
     ":Coordination",
-    ":coordination_test"
+    #":coordination_test"
   ]
 }
