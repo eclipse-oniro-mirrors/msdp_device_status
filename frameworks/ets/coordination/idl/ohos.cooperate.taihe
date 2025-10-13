@@ -45,7 +45,7 @@ struct MouseLocation {
 
 struct CooperateOptions {
     displayX: i32;
-    displayId: i32;
+    displayId: i64;
     displayY: i32;
 }
 
