@@ -92,7 +92,7 @@ generate_static_abc("coordination_test") {
 group("coordination") {
   deps = [
     ":coordination_etc",
-    ":Coordination",
+    ":Coordination"
     #":coordination_test"
   ]
 }
