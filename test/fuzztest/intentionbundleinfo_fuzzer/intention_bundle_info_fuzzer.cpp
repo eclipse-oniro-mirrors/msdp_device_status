@@ -25,7 +25,7 @@
 #include "intention_client.h"
 
 #undef LOG_TAG
-#define LOG_TAG "MsdpIntentionBundleInfoFuzzTest"
+#define LOG_TAG "IntentionBundleInfoFuzzTest"
 
 namespace {
     constexpr size_t THRESHOLD = 5;

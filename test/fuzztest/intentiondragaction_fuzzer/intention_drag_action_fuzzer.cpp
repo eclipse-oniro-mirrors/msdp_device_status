@@ -25,7 +25,7 @@
 #include "intention_drag_action_fuzzer.h"
 
 #undef LOG_TAG
-#define LOG_TAG "MsdpIntentionDragActionFuzzTest"
+#define LOG_TAG "IntentionDragActionFuzzTest"
 
 namespace {
     constexpr size_t THRESHOLD = 5;

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef INTENTION_CLIENT_DRAG_ANIMATION_FUZZER_H
-#define INTENTION_CLIENT_DRAG_ANIMATION_FUZZER_H
+#ifndef INTENTION_CLIENT_SOCKET_FUZZER_H
+#define INTENTION_CLIENT_SOCKET_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "intention_client_drag_animation_fuzzer"
+#define FUZZ_PROJECT_NAME "intention_client_socket_fuzzer"
 
-#endif // INTENTION_CLIENT_DRAG_ANIMATION_FUZZER_H
+#endif // INTENTION_CLIENT_SOCKET_FUZZER_H

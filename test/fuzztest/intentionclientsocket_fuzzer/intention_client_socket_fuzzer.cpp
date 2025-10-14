@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
+#include "intention_client_socket_fuzzer.h"
+
+#include "boomerang_callback_stub.h"
+#include "devicestatus_callback_stub.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <fuzzer/FuzzedDataProvider.h>
 #include <map>
+
 #include <nocopyable.h>
 
-#include "boomerang_callback_stub.h"
-#include "devicestatus_callback_stub.h"
 #include "intention_client.h"
-#include "intention_client_drag_animation_fuzzer.h"
 
 #undef LOG_TAG
-#define LOG_TAG "IntentionClientDragAnimationFuzzTest"
+#define LOG_TAG "IntentionClientSocketFuzzTest"
 
 namespace {
     constexpr size_t THRESHOLD = 5;
@@ -42,13 +45,17 @@ private:
 
 namespace OHOS {
 
-void FuzzIntentionClientDrag(const uint8_t *data, size_t size)
+void FuzzIntentionClientSocket(const uint8_t *data, size_t size)
 {
     FuzzedDataProvider provider(data, size);
-    std::string animationInfo = provider.ConsumeBytesAsString(10); // test value
+    std::string programName = provider.ConsumeBytesAsString(10); // test value
+    int32_t moduleType = provider.ConsumeIntegral<int32_t>();
+    int socketFd = provider.ConsumeIntegral<int>();
+    int32_t tokenType = provider.ConsumeIntegral<int32_t>();
 
-    INTENTION_CLIENT->EnableInternalDropAnimation(animationInfo);
+    INTENTION_CLIENT->Socket(programName, moduleType, socketFd, tokenType);
 }
+
 } // namespace OHOS
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -57,7 +64,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
     /* Run your code on data */
-    OHOS::FuzzIntentionClientDrag(data, size);
+    OHOS::FuzzIntentionClientSocket(data, size);
 
     return 0;
 }
