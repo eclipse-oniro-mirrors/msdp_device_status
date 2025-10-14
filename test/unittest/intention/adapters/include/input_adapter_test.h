@@ -25,6 +25,16 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
+class MockHapToken {
+public:
+    explicit MockHapToken(
+        const std::string& bundle, const std::vector<std::string>& reqPerm, bool isSystemApp = true);
+    ~MockHapToken();
+private:
+    uint64_t selfToken_;
+    uint32_t mockToken_;
+};
+
 class MockNativeToken {
 public:
     explicit MockNativeToken(const std::string& process);
