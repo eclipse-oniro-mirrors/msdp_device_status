@@ -31,8 +31,8 @@ public:
         const std::string& bundle, const std::vector<std::string>& reqPerm, bool isSystemApp = true);
     ~MockHapToken();
 private:
-    uint64_t selfToken_;
-    uint32_t mockToken_;
+    uint64_t selfToken_ { 0 };
+    uint32_t mockToken_ { 0 };
 };
 
 class MockNativeToken {
@@ -40,7 +40,7 @@ public:
     explicit MockNativeToken(const std::string& process);
     ~MockNativeToken();
 private:
-    uint64_t selfToken_;
+    uint64_t selfToken_ { 0 };
 };
 class InputAdapterTest : public testing::Test {
 public:
