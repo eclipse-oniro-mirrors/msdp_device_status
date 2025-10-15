@@ -48,6 +48,11 @@ private:
     napi_env env_ { nullptr };
 };
 
+struct PendingOff {
+    int32_t wid;
+    std::string evt;
+    sptr<OnScreenCallback> cb;
+};
 class ScreenEventNapi {
 public:
     explicit ScreenEventNapi(napi_env env, napi_value thisVar);
@@ -66,9 +71,15 @@ private:
     static void SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
     static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
     static bool IsSameJsHandler(napi_env env, const std::set<napi_ref> &refs, napi_value jsHandler);
-    static sptr<IRemoteOnScreenCallback> UpsertScreenCallback(
+    static sptr<OnScreenCallback> UpsertScreenCallback(
         napi_env env, int32_t windowId, const std::string &event, napi_value jsHandler, napi_ref handlerRef);
     static bool EraseAndDeleteJsHandler(napi_env env, std::set<napi_ref>& refs, napi_value jsHandler);
+    static void CollectAllPendingLocked(std::vector<PendingOff>& pending);
+    static bool CollectWindowAllPendingLocked(int32_t windowId, std::vector<PendingOff>& pending);
+    static bool CollectEventNodePendingLocked(int32_t windowId,
+        const std::string& eventStr, std::vector<PendingOff>& pending);
+    static bool EraseOneHandlerLocked(int32_t windowId, const std::string& eventStr,
+        napi_env env, napi_value jsHandler, std::vector<PendingOff>& pending);
 
     napi_env env_;
 };
