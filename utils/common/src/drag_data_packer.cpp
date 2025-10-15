@@ -53,6 +53,7 @@ int32_t DragDataPacker::MarshallingSummaryExpanding(const DragData &dragData, Pa
     }
     WRITEINT32(data, dragData.summaryVersion, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
     WRITEINT64(data, dragData.summaryTotalSize, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    WRITESTRING(data, dragData.summaryTag, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
     return RET_OK;
 }
 
@@ -70,6 +71,7 @@ int32_t DragDataPacker::UnMarshallingSummaryExpanding(Parcel &data, DragData &dr
         FI_HILOGE("ReadInt64 summaryTotalSize failed");
         return RET_ERR;
     }
+    READSTRING(data, dragData.summaryTag, E_DEVICESTATUS_READ_PARCEL_ERROR);
     return RET_OK;
 }
 

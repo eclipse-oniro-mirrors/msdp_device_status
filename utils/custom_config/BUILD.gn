@@ -32,6 +32,7 @@ ohos_source_set("custom_config_parser") {
   ]
 
   sources = [
+    "src/msdp_bundle_name_parser.cpp",
     "src/product_name_definition_parser.cpp",
     "src/special_input_device_parser.cpp",
   ]

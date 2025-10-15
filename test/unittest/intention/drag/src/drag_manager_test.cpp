@@ -600,7 +600,8 @@ HWTEST_F(DragManagerTest, DragManagerTest15, TestSize.Level0)
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_EQ(ret, RET_OK);
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
-        std::future_status::timeout);}
+        std::future_status::timeout);
+}
 
 /**
  * @tc.name: DragManagerTest16
@@ -632,7 +633,8 @@ HWTEST_F(DragManagerTest, DragManagerTest16, TestSize.Level0)
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_EQ(ret, RET_OK);
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
-        std::future_status::timeout);}
+        std::future_status::timeout);
+}
 
 /**
  * @tc.name: DragManagerTest17
@@ -2153,6 +2155,135 @@ HWTEST_F(DragManagerTest, DragManagerTest104, TestSize.Level1)
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
+/**
+ * @tc.name: DragManagerTest105
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest105, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    dragData->summaryTag = "NEED_FETCH";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = false;
+    g_dragMgr.isCollaborationService_ = true;
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.lastEventId_ = 0;
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    std::map<std::string, int64_t> summarys;
+    DragSummaryInfo dragSummaryInfo;
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = true;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = false;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = false;
+    g_dragMgr.isCollaborationService_ = false;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+ 
+/**
+ * @tc.name: DragManagerTest106
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
+{
+   CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = false;
+    g_dragMgr.isCollaborationService_ = true;
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.lastEventId_ = 0;
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    std::map<std::string, int64_t> summarys;
+    DragSummaryInfo dragSummaryInfo;
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = true;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = false;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = false;
+    g_dragMgr.isCollaborationService_ = false;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
