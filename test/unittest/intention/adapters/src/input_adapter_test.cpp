@@ -209,7 +209,7 @@ void InputAdapterTest::SetUpTestCase()
     reqPerm.emplace_back(FILTER);
     reqPerm.emplace_back(MANAGE);
     g_mock = new (std::nothrow) MockHapToken("InputAdapterTest", reqPerm, true);
-    FI_HILOGI("SetUpTestCase ok.");  
+    FI_HILOGI("SetUpTestCase ok.");
 }
 
 void InputAdapterTest::TearDownTestCase()
@@ -280,7 +280,6 @@ HWTEST_F(InputAdapterTest, AddKeyEventInterceptor, TestSize.Level1)
     int32_t interceptorId = inputAdapter->AddInterceptor(callback);
     ASSERT_TRUE(interceptorId > 0);
     inputAdapter->RemoveInterceptor(interceptorId);
-
 }
 
 /**
@@ -551,7 +550,6 @@ HWTEST_F(InputAdapterTest, RegisterDevListener2, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     inputAdapter->UnregisterDevListener();
 }
-
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
