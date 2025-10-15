@@ -51,7 +51,6 @@ private:
 private:
     std::map<std::string, std::string> bundleNames_;
     std::shared_mutex lock_;
-    std::atomic_bool isInitialized_ { false };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

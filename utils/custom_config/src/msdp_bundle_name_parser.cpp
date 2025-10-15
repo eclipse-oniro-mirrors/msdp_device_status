@@ -41,26 +41,26 @@ MsdpBundleNameParser& MsdpBundleNameParser::GetInstance()
 int32_t MsdpBundleNameParser::Init()
 {
     CALL_DEBUG_ENTER;
-    if (isInitialized_.load()) {
-        return RET_OK;
-    }
-    std::string jsonStr = ReadJsonFile(std::string(bundleNameConfigDir));
-    if (jsonStr.empty()) {
-        FI_HILOGE("Read bundleName failed");
-        return RET_ERR;
-    }
-    JsonParser parser(jsonStr.c_str());
-    if (!cJSON_IsObject(parser.Get())) {
-        FI_HILOGE("Not valid object");
-        return RET_ERR;
-    }
-    if (ParseBundleNameMap(parser) != RET_OK) {
-        FI_HILOGE("ParseBundleNameMap failed");
-        return RET_ERR;
-    }
-    PrintBundleNames();
-    isInitialized_.store(true);
-    return RET_OK;
+    static std::once_flag flag;
+    static int32_t ret = RET_OK;
+    std::call_once(flag, [&]() {
+        std::string jsonStr = ReadJsonFile(std::string(bundleNameConfigDir));
+        if (jsonStr.empty()) {
+            FI_HILOGE("Read bundleName failed");
+            ret = RET_ERR;
+        }
+        JsonParser parser(jsonStr.c_str());
+        if (!cJSON_IsObject(parser.Get())) {
+            FI_HILOGE("Not valid object");
+            ret = RET_ERR;
+        }
+        if (ParseBundleNameMap(parser) != RET_OK) {
+            FI_HILOGE("ParseBundleNameMap failed");
+            ret = RET_ERR;
+        }
+        PrintBundleNames();
+    });
+    return ret;
 }
  
 std::string MsdpBundleNameParser::GetBundleName(const std::string &key)

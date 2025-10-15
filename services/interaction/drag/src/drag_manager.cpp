@@ -325,11 +325,7 @@ bool DragManager::IsCrossDragging()
 
 void DragManager::SetCrossDragging(int32_t pid)
 {
-    if (pid == -1) {
-        isCrossDragging_ = true;
-    } else {
-        isCrossDragging_ = false;
-    }
+    isCrossDragging_ .store(pid == -1);
 }
  
 void DragManager::ProcessExceptionDragStyle(DragCursorStyle &style)
