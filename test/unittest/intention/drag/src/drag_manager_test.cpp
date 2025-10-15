@@ -2198,12 +2198,36 @@ HWTEST_F(DragManagerTest, DragManagerTest105, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
     ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest106
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    dragData->summaryTag = "NEED_FETCH";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = false;
+    std::string udKey;
     ret = g_dragMgr.GetUdKey(udKey);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    std::map<std::string, int64_t> summarys;
+    DragSummaryInfo dragSummaryInfo;
     ret = g_dragMgr.GetDragSummary(summarys);
     ASSERT_EQ(ret, RET_OK);
     ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
@@ -2220,16 +2244,16 @@ HWTEST_F(DragManagerTest, DragManagerTest105, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragState_ = DragState::STOP;
 }
- 
+
 /**
- * @tc.name: DragManagerTest106
+ * @tc.name: DragManagerTest107
  * @tc.desc: Get udkey
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
+HWTEST_F(DragManagerTest, DragManagerTest107, TestSize.Level1)
 {
-   CALL_TEST_DEBUG;
+    CALL_TEST_DEBUG;
     std::optional<DragData> dragData = CreateDragData(
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
     EXPECT_TRUE(dragData);
@@ -2262,12 +2286,35 @@ HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
     ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest108
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest108, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = false;
+    std::string udKey;
     ret = g_dragMgr.GetUdKey(udKey);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    std::map<std::string, int64_t> summarys;
+    DragSummaryInfo dragSummaryInfo;
     ret = g_dragMgr.GetDragSummary(summarys);
     ASSERT_EQ(ret, RET_OK);
     ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
