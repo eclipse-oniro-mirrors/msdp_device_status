@@ -171,7 +171,7 @@ int32_t OnScreenServer::UnregisterScreenEventCallback(const CallingContext& cont
         FI_HILOGE("failed to load algo lib");
         return RET_NO_SUPPORT;
     }
-    FI_HILOGI("RegisterScreenEventCallback algo lib");
+    FI_HILOGI("UnregisterScreenEventCallback algo lib");
     auto ret = handle_.pAlgorithm->UnregisterScreenEventCallback(windowId, event, callback);
     if (ret != RET_OK) {
         FI_HILOGE("failed to UnregisterScreenEventCallback, err = %{public}d", ret);

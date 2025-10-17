@@ -127,18 +127,23 @@ napi_value ScreenEventNapi::RegisterScreenEventCallbackNapi(napi_env env, napi_c
         return nullptr;
     }
 
-    if (!ConstructScreenEventNapi(env, jsThis)) {
-        ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "Failed to get g_screenChangeobj");
-        return nullptr;
-    }
-
     // Get Callback
     napi_ref handlerRef = nullptr;
     if (napi_create_reference(env, args[ARG_2], 1, &handlerRef) != napi_ok) {
         ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get callback");
         return nullptr;
     }
-    auto callback = UpsertScreenCallback(env, windowId, eventStr, args[ARG_2], handlerRef);
+
+    sptr<OnScreenCallback> callback = nullptr;
+    {
+        std::lock_guard<std::mutex> lk(g_mtx);
+        if (!ConstructScreenEventNapi(env, jsThis)) {
+            ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "Failed to get g_screenChangeobj");
+            return nullptr;
+        }
+
+        callback = UpsertScreenCallback(env, windowId, eventStr, args[ARG_2], handlerRef);
+    }
     if (callback != nullptr) {
         OnScreenManager::GetInstance().RegisterScreenEventCallback(windowId, eventStr, callback);
     }
@@ -176,6 +181,11 @@ bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value jsThis)
 bool ScreenEventNapi::TransJsToStr(napi_env env, napi_value in, std::string &out)
 {
     FI_HILOGD("Enter");
+    napi_valuetype type = napi_undefined;
+    if (napi_typeof(env, in, &type) != napi_ok || type != napi_string) {
+        FI_HILOGE("input is not a string");
+        return false;
+    }
     size_t strLen = 0;
     napi_status status = napi_get_value_string_utf8(env, in, nullptr, 0, &strLen);
     if (status != napi_ok) {
@@ -224,7 +234,7 @@ bool ScreenEventNapi::IsSameJsHandler(napi_env env, const std::set<napi_ref> &re
 }
 
 // create/attach callback and update g_screenCallbacks; return nullptr when duplicate
-sptr<IRemoteOnScreenCallback> ScreenEventNapi::UpsertScreenCallback(
+sptr<OnScreenCallback> ScreenEventNapi::UpsertScreenCallback(
     napi_env env, int32_t windowId, const std::string &event, napi_value jsHandler, napi_ref handlerRef)
 {
     FI_HILOGD("enter");
@@ -254,6 +264,77 @@ sptr<IRemoteOnScreenCallback> ScreenEventNapi::UpsertScreenCallback(
     return callback;
 }
 
+// 0参：删除全部
+void ScreenEventNapi::CollectAllPendingLocked(std::vector<PendingOff>& pending)
+{
+    std::lock_guard<std::mutex> lk(g_mtx);
+    for (auto &wIt : g_screenCallbacks) {
+        for (auto &eIt : wIt.second) {
+            pending.push_back({ eIt.second->windowId, eIt.second->event, eIt.second });
+        }
+    }
+    g_screenCallbacks.clear();
+}
+
+// 1参：删除某个 windowId 下全部
+bool ScreenEventNapi::CollectWindowAllPendingLocked(int32_t windowId, std::vector<PendingOff>& pending)
+{
+    std::lock_guard<std::mutex> lk(g_mtx);
+    auto wIt = g_screenCallbacks.find(windowId);
+    if (wIt == g_screenCallbacks.end()) {
+        return false;
+    }
+    for (auto &eIt : wIt->second) {
+        pending.push_back({ eIt.second->windowId, eIt.second->event, eIt.second });
+    }
+    g_screenCallbacks.erase(wIt);
+    return true;
+}
+
+// 2参：删除 (windowId, eventStr) 整个
+bool ScreenEventNapi::CollectEventNodePendingLocked(int32_t windowId,
+    const std::string& eventStr, std::vector<PendingOff>& pending)
+{
+    std::lock_guard<std::mutex> lk(g_mtx);
+    auto wIt = g_screenCallbacks.find(windowId);
+    if (wIt == g_screenCallbacks.end()) {
+        return false;
+    }
+    auto eIt = wIt->second.find(eventStr);
+    if (eIt == wIt->second.end()) {
+        return false;
+    }
+    pending.push_back({ eIt->second->windowId, eIt->second->event, eIt->second });
+    wIt->second.erase(eIt);
+    if (wIt->second.empty()) g_screenCallbacks.erase(wIt);
+    return true;
+}
+
+// 3参：删除 (windowId, eventStr, jsHandler) 指定回调
+bool ScreenEventNapi::EraseOneHandlerLocked(int32_t windowId, const std::string& eventStr,
+    napi_env env, napi_value jsHandler, std::vector<PendingOff>& pending)
+{
+    std::lock_guard<std::mutex> lk(g_mtx);
+    auto wIt = g_screenCallbacks.find(windowId);
+    if (wIt == g_screenCallbacks.end()) {
+        return false;
+    }
+
+    auto eIt = wIt->second.find(eventStr);
+    if (eIt == wIt->second.end()) {
+        return false;
+    }
+    
+    if (!EraseAndDeleteJsHandler(env, eIt->second->onRef, jsHandler)) {
+        return false;
+    }
+    if (eIt->second->onRef.empty()) {
+        pending.push_back({ eIt->second->windowId, eIt->second->event, eIt->second });
+        wIt->second.erase(eIt);
+        if (wIt->second.empty()) g_screenCallbacks.erase(wIt);
+    }
+    return true;
+}
 
 napi_value ScreenEventNapi::UnregisterScreenEventCallbackNapi(napi_env env, napi_callback_info info)
 {
@@ -261,83 +342,55 @@ napi_value ScreenEventNapi::UnregisterScreenEventCallbackNapi(napi_env env, napi
     napi_value args[3] = { nullptr, nullptr, nullptr };
     napi_value jsThis = nullptr;
     napi_value ret = nullptr;
-
+    
     if (napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr) != napi_ok) {
         ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "napi_get_cb_info failed");
         return nullptr;
     }
 
-    if (argc == 0) { // 删除所有
-        for (auto &wIt : g_screenCallbacks) {
-            for (auto &eIt : wIt.second) {
-                OnScreenManager::GetInstance().UnregisterScreenEventCallback(
-                    eIt.second->windowId, eIt.second->event, eIt.second);
+    std::vector<PendingOff> pending;
+    // 0参：删除全部
+    if (argc == 0) {
+        CollectAllPendingLocked(pending);
+    } else {
+        // get windowId
+        int32_t windowId = -1;
+        if (!TransJsToInt32(env, args[ARG_0], windowId)) {
+            ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get windowId");
+            return nullptr;
+        }
+
+        // 1参：删除某个 windowId 下全部（第四个判定）
+        if (argc == 1) {
+            if (!CollectWindowAllPendingLocked(windowId, pending)) { // 不存在时视为幂等，无需报错
+                ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get windowId");
+                return nullptr;
+            }
+        } else {
+            // get event
+            std::string eventStr;
+            if (!TransJsToStr(env, args[ARG_1], eventStr)) { // (4)
+                ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get event");
+                return nullptr;
+            }
+            //  2参：删除 (win,event) 全部 否则 3参删除指定 handler（第五个判定）
+            if (argc == 2) {
+                if (!CollectEventNodePendingLocked(windowId, eventStr, pending)) {
+                    ThrowOnScreenErr(env, RET_PARAM_ERR, "wrong param");
+                    return nullptr;
+                }
+            } else { // argc >= 3
+                if (!EraseOneHandlerLocked(windowId, eventStr, env, args[ARG_2], pending)) {
+                    ThrowOnScreenErr(env, RET_PARAM_ERR, "wrong param");
+                    return nullptr;
+                }
             }
         }
-        g_screenCallbacks.clear();
-        napi_get_undefined(env, &ret);
-        return ret;
     }
 
-    int32_t windowId = -1;
-    if (!TransJsToInt32(env, args[ARG_0], windowId)) {
-        ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get windowId");
-        return nullptr;
-    }
-
-    auto wIt = g_screenCallbacks.find(windowId);
-    if (wIt == g_screenCallbacks.end()) {
-        ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "wrong windowId");
-        napi_get_undefined(env, &ret);
-        return ret;
-    }
-
-    if (argc == 1) { // 删除 windowId 下所有
-        for (auto &eIt : wIt->second) {
-            OnScreenManager::GetInstance().UnregisterScreenEventCallback(
-                eIt.second->windowId, eIt.second->event, eIt.second);
-        }
-        g_screenCallbacks.erase(wIt);
-        napi_get_undefined(env, &ret);
-        return ret;
-    }
-
-    std::string eventStr;
-    if (!TransJsToStr(env, args[ARG_1], eventStr)) {
-        ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get event");
-        return nullptr;
-    }
-
-    auto eIt = wIt->second.find(eventStr);
-    if (eIt == wIt->second.end()) {
-        napi_get_undefined(env, &ret);
-        return ret;
-    }
-
-    if (argc == ARG_2) { // 删除指定 event
-        OnScreenManager::GetInstance().UnregisterScreenEventCallback(
-            eIt->second->windowId, eIt->second->event, eIt->second);
-        wIt->second.erase(eIt);
-        if (wIt->second.empty()) {
-            g_screenCallbacks.erase(wIt);
-        }
-        napi_get_undefined(env, &ret);
-        return ret;
-    }
-
-    // argc == 3 删除指定 callback
-    napi_value target = args[ARG_2];
-    if (EraseAndDeleteJsHandler(env, eIt->second->onRef, target)) {
-        if (eIt->second->onRef.empty()) {
-            OnScreenManager::GetInstance().UnregisterScreenEventCallback(
-                eIt->second->windowId, eIt->second->event, eIt->second);
-            wIt->second.erase(eIt);
-            if (wIt->second.empty()) {
-                g_screenCallbacks.erase(wIt);
-            }
-        }
-        napi_get_undefined(env, &ret);
-        return ret;
+    // 锁外：逐条反注册
+    for (const auto &item : pending) {
+        OnScreenManager::GetInstance().UnregisterScreenEventCallback(item.wid, item.evt, item.cb);
     }
 
     napi_get_undefined(env, &ret);
