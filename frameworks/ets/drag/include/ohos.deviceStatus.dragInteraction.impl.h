@@ -42,7 +42,11 @@ struct CallbackObject {
     }
     ~CallbackObject()
     {
-        if (auto *env = taihe::get_env()) {
+    }
+    void Release()
+    {
+        taihe::env_guard guard;
+        if (auto *env = guard.get_env()) {
             env->GlobalReference_Delete(ref);
         }
     }
@@ -66,7 +70,7 @@ public:
 private:
     std::atomic_bool hasRegistered_ { false };
     std::mutex mutex_;
-    std::map<std::string, std::vector<std::shared_ptr<CallbackObject>>> jsCbMap_;
+    std::map<std::string, std::vector<std::unique_ptr<CallbackObject>>> jsCbMap_;
 };
 
 class GlobalRefGuard {

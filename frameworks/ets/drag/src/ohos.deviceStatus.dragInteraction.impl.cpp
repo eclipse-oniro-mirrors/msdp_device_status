@@ -32,6 +32,8 @@ static DragState ConverDragState(DeviceStatus::DragState state)
             return DragState::key_t::MSG_DRAG_STATE_CANCEL;
         case DeviceStatus::DragState::MOTION_DRAGGING:
             return DragState::key_t::MSG_DRAG_STATE_MOTION_DRAGGING;
+    default:
+        return DragState::key_t::MSG_DRAG_STATE_UNKNOWN;
     }
 }
 
@@ -56,9 +58,14 @@ void EtsDragManager::registerListener(callback_view<void(DragState)> callback, u
         FI_HILOGE("ani_env is nullptr or GlobalReference_Create failed");
         return;
     }
-    auto &cbVec = jsCbMap_["drag"];
+    auto it = jsCbMap_.find("drag");
+    if (it == jsCbMap_.end()) {
+        jsCbMap_["drag"] = std::vector<std::unique_ptr<CallbackObject>>();
+        it = jsCbMap_.find("drag");
+    }
+    auto &cbVec = it->second;
     bool isDuplicate = std::any_of(cbVec.begin(), cbVec.end(), [env, callbackRef](
-        std::shared_ptr<CallbackObject> &obj) {
+        std::unique_ptr<CallbackObject> &obj) {
         ani_boolean isEqual = false;
         return (ANI_OK == env->Reference_StrictEquals(callbackRef, obj->ref, &isEqual)) && isEqual;
     });
@@ -67,10 +74,10 @@ void EtsDragManager::registerListener(callback_view<void(DragState)> callback, u
         FI_HILOGD("callback already registered");
         return;
     }
-    cbVec.emplace_back(std::make_shared<CallbackObject>(callback, callbackRef));
+    cbVec.emplace_back(std::make_unique<CallbackObject>(callback, callbackRef));
     FI_HILOGI("register callback success");
     if (!hasRegistered_) {
-        FI_HILOGI("  drag listener to server");
+        FI_HILOGI("Remove drag listener to server");
         hasRegistered_ = true;
         INTERACTION_MGR->AddDraglistener(shared_from_this(), true);
     }
@@ -85,32 +92,32 @@ void EtsDragManager::unRegisterListener(optional_view<uintptr_t> opq)
         return;
     }
     if (!opq.has_value()) {
+        for (auto &uniquePtr : iter->second) {
+            uniquePtr->Release();
+        }
         jsCbMap_.erase(iter);
-        FI_HILOGD("callback is nullptr!");
-        return;
-    }
-    ani_env *env = taihe::get_env();
-    if (env == nullptr) {
-        FI_HILOGE("ani_env is nullptr!");
-        return;
-    }
-    GlobalRefGuard guard(env, reinterpret_cast<ani_object>(opq.value()));
-    if (!guard) {
-        FI_HILOGE("GlobalRefGuard is false!");
-        return;
-    }
-    const auto pred = [env, targetRef = guard.get()](std::shared_ptr<CallbackObject> &obj) {
-        ani_boolean isEqual = false;
-        return (ANI_OK == env->Reference_StrictEquals(targetRef, obj->ref, &isEqual)) && isEqual;
-    };
-    auto &callbacks = iter->second;
-    const auto it = std::find_if(callbacks.begin(), callbacks.end(), pred);
-    if (it != callbacks.end()) {
-        FI_HILOGI("unRegister callback success");
-        callbacks.erase(it);
-    }
-    if (callbacks.empty()) {
-        jsCbMap_.erase(iter);
+        FI_HILOGD("No opq value provided, removing all listeners");
+    } else {
+        ani_env *env = taihe::get_env();
+        if (env == nullptr) {
+            FI_HILOGE("ani_env is nullptr!");
+            return;
+        }
+        ani_object targetRef = reinterpret_cast<ani_object>(opq.value());
+        const auto pred = [env, targetRef](std::unique_ptr<CallbackObject> &obj) {
+            ani_boolean isEqual = false;
+            return (ANI_OK == env->Reference_StrictEquals(targetRef, obj->ref, &isEqual)) && isEqual;
+        };
+        auto &callbacks = iter->second;
+        const auto it = std::find_if(callbacks.begin(), callbacks.end(), pred);
+        if (it != callbacks.end()) {
+            it->get()->Release();
+            FI_HILOGI("unRegister callback success");
+            callbacks.erase(it);
+        }
+        if (callbacks.empty()) {
+            jsCbMap_.erase(iter);
+        }
     }
     if (hasRegistered_ && jsCbMap_.empty()) {
         FI_HILOGI(" Remove drag listener to server");
