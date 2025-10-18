@@ -32,8 +32,8 @@ static DragState ConverDragState(DeviceStatus::DragState state)
             return DragState::key_t::MSG_DRAG_STATE_CANCEL;
         case DeviceStatus::DragState::MOTION_DRAGGING:
             return DragState::key_t::MSG_DRAG_STATE_MOTION_DRAGGING;
-    default:
-        return DragState::key_t::MSG_DRAG_STATE_UNKNOWN;
+        default:
+            return DragState::key_t::MSG_DRAG_STATE_UNKNOWN;
     }
 }
 
@@ -93,6 +93,9 @@ void EtsDragManager::unRegisterListener(optional_view<uintptr_t> opq)
     }
     if (!opq.has_value()) {
         for (auto &uniquePtr : iter->second) {
+            if (uniquePtr == nullptr) {
+                continue;
+            }
             uniquePtr->Release();
         }
         jsCbMap_.erase(iter);
