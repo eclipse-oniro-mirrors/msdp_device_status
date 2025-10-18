@@ -114,6 +114,7 @@ void EtsDragManager::unRegisterListener(optional_view<uintptr_t> opq)
         auto &callbacks = iter->second;
         const auto it = std::find_if(callbacks.begin(), callbacks.end(), pred);
         if (it != callbacks.end()) {
+            CHKPV(it->get());
             it->get()->Release();
             FI_HILOGI("unRegister callback success");
             callbacks.erase(it);
