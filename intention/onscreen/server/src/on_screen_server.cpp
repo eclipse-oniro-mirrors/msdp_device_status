@@ -155,8 +155,14 @@ int32_t OnScreenServer::RegisterScreenEventCallback(const CallingContext& contex
         FI_HILOGE("failed to load algo lib");
         return RET_NO_SUPPORT;
     }
+    OnScreenCallingContext onScreeContext {
+        .fullTokenId = context.fullTokenId,
+        .tokenId = context.tokenId,
+        .uid = context.uid,
+        .pid = context.pid,
+    };
     FI_HILOGI("RegisterScreenEventCallback algo lib");
-    auto ret = handle_.pAlgorithm->RegisterScreenEventCallback(windowId, event, callback);
+    auto ret = handle_.pAlgorithm->RegisterScreenEventCallback(onScreeContext, windowId, event, callback);
     if (ret != RET_OK) {
         FI_HILOGE("failed to RegisterScreenEventCallback, err = %{public}d", ret);
         return ret;
@@ -171,8 +177,14 @@ int32_t OnScreenServer::UnregisterScreenEventCallback(const CallingContext& cont
         FI_HILOGE("failed to load algo lib");
         return RET_NO_SUPPORT;
     }
+    OnScreenCallingContext onScreeContext {
+        .fullTokenId = context.fullTokenId,
+        .tokenId = context.tokenId,
+        .uid = context.uid,
+        .pid = context.pid,
+    };
     FI_HILOGI("UnregisterScreenEventCallback algo lib");
-    auto ret = handle_.pAlgorithm->UnregisterScreenEventCallback(windowId, event, callback);
+    auto ret = handle_.pAlgorithm->UnregisterScreenEventCallback(onScreeContext, windowId, event, callback);
     if (ret != RET_OK) {
         FI_HILOGE("failed to UnregisterScreenEventCallback, err = %{public}d", ret);
         return ret;
@@ -187,8 +199,13 @@ int32_t OnScreenServer::IsParallelFeatureEnabled(const CallingContext& context,
         FI_HILOGE("failed to load algo lib");
         return RET_NO_SUPPORT;
     }
-
-    auto ret = handle_.pAlgorithm->IsParallelFeatureEnabled(windowId, outStatus);
+    OnScreenCallingContext onScreeContext {
+        .fullTokenId = context.fullTokenId,
+        .tokenId = context.tokenId,
+        .uid = context.uid,
+        .pid = context.pid,
+    };
+    auto ret = handle_.pAlgorithm->IsParallelFeatureEnabled(onScreeContext, windowId, outStatus);
     if (ret != RET_OK) {
         FI_HILOGE("failed to check screen change access, err=%{public}d", ret);
         return ret;
