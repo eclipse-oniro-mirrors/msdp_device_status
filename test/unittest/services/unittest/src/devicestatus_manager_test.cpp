@@ -483,6 +483,18 @@ HWTEST_F(DeviceStatusManagerTest, UnloadAlgorithmTest, TestSize.Level0) {
     EXPECT_EQ(result, RET_OK);
     GTEST_LOG_(INFO) << "UnloadAlgorithmTest end";
 }
+
+/**
+ * @tc.name: GetLatestDeviceStatusDataTest
+ * @tc.desc: test devicestatus GetLatestDeviceStatusDataTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusManagerTest, GetLatestDeviceStatusDataTest, TestSize.Level0) {
+    GTEST_LOG_(INFO) << "GetLatestDeviceStatusDataTest start";
+    Data data = deviceStatusManager->GetLatestDeviceStatusData(Type::TYPE_ABSOLUTE_STILL);
+    EXPECT_EQ(data.value, OnChangedValue::VALUE_INVALID);
+    GTEST_LOG_(INFO) << "GetLatestDeviceStatusDataTest end";
+}
 } // namespace
 } // namespace DeviceStatus
 } // namespace Msdp
