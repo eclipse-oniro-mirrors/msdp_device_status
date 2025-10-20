@@ -1903,6 +1903,45 @@ HWTEST_F(DragServerTest, DragServerTest97, TestSize.Level1)
     ASSERT_EQ(ret, RET_ERR);
     EXPECT_EQ(val.size(), 0);
 }
+
+/**
+ * @tc.name: DragServerTest98
+ * @tc.desc: Test the expansion screen interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest98, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.CreateWindow();
+    g_dragMgr.dragDrawing_.InitCanvas(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    g_dragMgr.dragDrawing_.UpdateDragWindowDisplay(DISPLAY_ID);
+    Rosen::Rotation rotation = g_dragMgr.dragDrawing_.GetRotation(WINDOW_ID);
+    int32_t ret = g_dragMgr.dragDrawing_.RotateDragWindow(rotation);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest99
+ * @tc.desc: Test the expansion screen interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest99, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.CreateWindow();
+    g_dragMgr.dragDrawing_.InitCanvas(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    ASSERT_NE(pixelMap, nullptr);
+    ShadowInfo shadowInfo = { pixelMap, 0, 0 };
+    int32_t ret = g_dragMgr.dragDrawing_.UpdateShadowPic(shadowInfo);
+    ASSERT_EQ(ret, RET_ERR);
+    g_dragMgr.dragDrawing_.UpdateDragWindowDisplay(DISPLAY_ID);
+    Rosen::Rotation rotation = g_dragMgr.dragDrawing_.GetRotation(WINDOW_ID);
+    ret = g_dragMgr.dragDrawing_.RotateDragWindow(rotation);
+    EXPECT_EQ(ret, RET_OK);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
