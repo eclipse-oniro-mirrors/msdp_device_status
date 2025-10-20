@@ -4683,10 +4683,7 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
 #else
         display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
 #endif // OHOS_BUILD_PC_PRODUCT
-        if (display == nullptr) {
-            FI_HILOGE("Get display info failed, display is nullptr");
-            return;
-        }
+        CHKPV(display);
     }
     screenId_ = display->GetScreenId();
     FI_HILOGI("Get screen id:%{public}llu", static_cast<unsigned long long>(screenId_));
