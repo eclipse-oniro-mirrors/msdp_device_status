@@ -41,7 +41,6 @@ inline constexpr int32_t MAX_EVENT_SIZE { 100 };
 #define TEST_TEMP_FILE "/data/test/testfile1"
 namespace OHOS {
 
-
 bool SocketConnectionFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < 1)) {

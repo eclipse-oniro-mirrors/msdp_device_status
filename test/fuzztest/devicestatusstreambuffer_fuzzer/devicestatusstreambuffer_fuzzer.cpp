@@ -15,6 +15,7 @@
 
 #include "devicestatusstreambuffer_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
 #include "singleton.h"
 
 #define private public
@@ -23,33 +24,27 @@
 #include "message_parcel.h"
 
 #undef LOG_TAG
-#define LOG_TAG "DeviceStatusStreamFuzzTest"
+#define LOG_TAG "DeviceStatusStreamBufferFuzzTest"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OHOS {
 const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
+inline constexpr int32_t MAX_STREAM_BUF_SIZE { 4096 };
 
 bool DeviceStatusStreamFuzzTest(const uint8_t* data, size_t size)
 {
-    MessageParcel datas;
-    if (!datas.WriteInterfaceToken(FORMMGR_DEVICE_TOKEN) ||
-        !datas.WriteBuffer(data, size) || !datas.RewindRead(0)) {
-        FI_HILOGE("Write failed");
-        return false;
-    }
+    FuzzedDataProvider provider(data, size);
+    const std::string &buf = provider.ConsumeRandomLengthString();
+    size_t blobSize = provider.ConsumeIntegralInRange<size_t>(1, MAX_STREAM_BUF_SIZE);
     StreamBuffer streamBuffer;
-    int32_t n = 0;
+    int32_t n = provider.ConsumeIntegral<int32_t>();
+    char *buf1 = const_cast<char*>(buf.data());
     streamBuffer.SeekReadPos(n);
-    const char *buf = streamBuffer.ReadBuf();
-    char *buf1 = nullptr;
-    streamBuffer.Write(buf, size);
-    streamBuffer.Read(buf1, size);
+    streamBuffer.Write(buf.c_str(), blobSize);
+    streamBuffer.Read(buf1, blobSize);
     streamBuffer.Write(buf);
-    streamBuffer.Read(buf);
-    streamBuffer.Write(buf1);
-    streamBuffer.Read(buf1);
     streamBuffer.GetErrorStatusRemark();
     streamBuffer.Reset();
     streamBuffer.Clean();
