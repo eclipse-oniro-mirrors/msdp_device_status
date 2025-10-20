@@ -78,6 +78,7 @@ struct DragData {
     std::map<std::string, std::vector<int32_t>> summaryFormat;
     int32_t summaryVersion { 0 };
     int64_t summaryTotalSize { -1 };
+    std::string summaryTag;
     std::string appCallee;
     std::string appCaller;
 
@@ -91,7 +92,8 @@ struct DragData {
                hasCoordinateCorrected == other.hasCoordinateCorrected && summarys == other.summarys &&
                appCallee == other.appCallee && appCaller == other.appCaller && isDragDelay == other.isDragDelay &&
                detailedSummarys == other.detailedSummarys && summaryFormat == other.summaryFormat &&
-               summaryTotalSize == other.summaryTotalSize && summaryVersion == other.summaryVersion;
+               summaryTotalSize == other.summaryTotalSize && summaryVersion == other.summaryVersion &&
+               summaryTag == other.summaryTag;
     }
 
     bool operator != (const DragData &other) const

@@ -39,11 +39,12 @@
 
 #include <dlfcn.h>
 #include "devicestatus_define.h"
+#include "devicestatus_proto.h"
 #include "drag_data.h"
 #include "drag_data_manager.h"
 #include "drag_hisysevent.h"
 #include "fi_log.h"
-#include "devicestatus_proto.h"
+#include "msdp_bundle_name_parser.h"
 #include "utility.h"
 
 #undef LOG_TAG
@@ -283,11 +284,11 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
         " displayX:%{private}d, displayY:%{private}d, dragNum:%{public}d,"
         " hasCanceledAnimation:%{public}d, udKey:%{public}s, hasCoordinateCorrected:%{public}d, summarys:%{public}s,"
         " packageName:%{public}s, isDragDelay:%{public}d, detailedSummarys:%{public}s, summaryFormat:%{public}s,"
-        " summaryVersion:%{public}d, totalSize:%{public} " PRId64 "", dragData.sourceType, dragData.pointerId,
-        dragData.displayId, dragData.displayX, dragData.displayY, dragData.dragNum, dragData.hasCanceledAnimation,
-        GetAnonyString(dragData.udKey).c_str(), dragData.hasCoordinateCorrected, summarys.c_str(),
-        GetAnonyString(packageName).c_str(), dragData.isDragDelay, detailedSummarys.c_str(), summaryFormat.c_str(),
-        dragData.summaryVersion, dragData.summaryTotalSize);
+        " summaryVersion:%{public}d, totalSize:%{public} " PRId64 ", summaryTag:%{public}s", dragData.sourceType,
+        dragData.pointerId, dragData.displayId, dragData.displayX, dragData.displayY, dragData.dragNum,
+        dragData.hasCanceledAnimation, GetAnonyString(dragData.udKey).c_str(), dragData.hasCoordinateCorrected,
+        summarys.c_str(), GetAnonyString(packageName).c_str(), dragData.isDragDelay, detailedSummarys.c_str(),
+        summaryFormat.c_str(), dragData.summaryVersion, dragData.summaryTotalSize, dragData.summaryTag.c_str());
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -322,6 +323,21 @@ bool DragManager::IsCrossDragging()
     return isCrossDragging_;
 }
 
+void DragManager::SetCrossDragging(int32_t pid)
+{
+    isCrossDragging_ .store(pid == -1);
+}
+ 
+void DragManager::ProcessExceptionDragStyle(DragCursorStyle &style)
+{
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if ((style == DragCursorStyle::COPY) && (isCrossDragging_ || isCollaborationService_) &&
+        (dragData.summaryTag == "NEED_FETCH")) {
+        FI_HILOGI("Update drag style is move");
+        style = DragCursorStyle::MOVE;
+    }
+}
+
 DragRadarPackageName DragManager::GetDragRadarPackageName(int32_t pid, const std::string &packageName,
     const std::string &appCaller)
 {
@@ -343,11 +359,7 @@ int32_t DragManager::StartDrag(
 {
     FI_HILOGI("enter");
     ResetMouseDragMonitorTimerId(dragData);
-    if (pid == -1) {
-        isCrossDragging_ = true;
-    } else {
-        isCrossDragging_ = false;
-    }
+    SetCrossDragging(pid);
     if (dragState_ == DragState::START || dragState_ == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Drag instance already exists, no need to start drag again");
         return RET_ERR;
@@ -355,6 +367,10 @@ int32_t DragManager::StartDrag(
     peerNetId_ = peerNetId;
     lastDisplayId_ = dragData.displayId;
     std::string packageName = GetPackageName(pid);
+    if (packageName == MSDP_BUNDLE_NAME_PARSER.GetBundleName("DEVICE_COLLABORATION")) {
+        isCollaborationService_ = true;
+        FI_HILOGI("Drag by device collaboration");
+    }
     DragRadarPackageName dragRadarPackageName = GetDragRadarPackageName(pid, packageName, appCaller);
     dragRadarPackageName.dragNum = dragData.dragNum;
     ReportStartDragRadarInfo(BizState::STATE_BEGIN, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, peerNetId,
@@ -477,6 +493,8 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     bool isStopCooperate, const DragRadarPackageName &inPackageName)
 {
     FI_HILOGI("enter");
+    isCrossDragging_ = false;
+    isCollaborationService_ = false;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     DragRadarPackageName dragRadarPackageName;
     dragRadarPackageName.packageName = packageName;
@@ -591,6 +609,12 @@ int32_t DragManager::GetUdKey(std::string &udKey) const
 {
     FI_HILOGI("enter");
     DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == "NEED_FETCH")) {
+        FI_HILOGI("Clear udKey");
+        udKey = "";
+        FI_HILOGI("leave");
+        return RET_OK;
+    }
     if (dragData.udKey.empty()) {
         FI_HILOGE("Target udKey is empty");
         return RET_ERR;
@@ -638,6 +662,7 @@ int32_t DragManager::UpdateDragStyle(DragCursorStyle style)
         FI_HILOGE("Invalid eventId:%{public}d, lastEvent:%{public}d", eventId, lastEventId_);
         return RET_ERR;
     }
+    ProcessExceptionDragStyle(style);
     lastEventId_ = eventId;
     auto lastTargetPid = DRAG_DATA_MGR.GetTargetPid();
     DRAG_DATA_MGR.SetTargetPid(targetPid);
@@ -1911,6 +1936,10 @@ int32_t DragManager::GetDragSummary(std::map<std::string, int64_t> &summarys)
     if (summarys.empty()) {
         FI_HILOGD("Summarys is empty");
     }
+    if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == "NEED_FETCH")) {
+        FI_HILOGI("Clear summarys");
+        summarys.clear();
+    }
     FI_HILOGI("leave");
     return RET_OK;
 }
@@ -1924,6 +1953,13 @@ int32_t DragManager::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
     DRAG_DATA_MGR.GetSummaryInfo(dragSummaryInfo);
     std::string summaryFormat = GetSummaryFormatStrings(dragSummaryInfo.summaryFormat);
     FI_HILOGI("summaryFormat:%{public}s", summaryFormat.c_str());
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == "NEED_FETCH")) {
+        FI_HILOGI("Clear summarys");
+        dragSummaryInfo.summarys.clear();
+        dragSummaryInfo.detailedSummarys.clear();
+        dragSummaryInfo.summaryFormat.clear();
+    }
     return RET_OK;
 }
 

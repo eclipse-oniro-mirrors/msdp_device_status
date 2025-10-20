@@ -23,6 +23,6 @@ group("device_status_unittest") {
     "intention:intention_test",
     "libs:unittest",
     "services:devicestatussrv_test",
-    "utils:UtilityTest",
+    "utils:unittest",
   ]
 }

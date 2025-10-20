@@ -235,6 +235,8 @@ private:
     std::string GetSummaryFormatStrings(const std::map<std::string, std::vector<int32_t>> &summaryFormat);
     void PrintDragData(const DragData &dragData, const std::string &packageName = "");
     int32_t HandleDragSuccess(bool hasCustomAnimation);
+    void SetCrossDragging(int32_t pid);
+    void ProcessExceptionDragStyle(DragCursorStyle &style);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t AddDragEventHandler(int32_t sourceType);
     int32_t AddPointerEventHandler(uint32_t deviceTags);
@@ -324,7 +326,8 @@ private:
     std::atomic<DragAction> dragAction_ { DragAction::MOVE };
     DragDrawing dragDrawing_;
     bool isControlCollaborationVisible_ { false };
-    bool isCrossDragging_ {false};
+    std::atomic_bool isCrossDragging_ { false };
+    std::atomic_bool isCollaborationService_ { false };
     inline static std::atomic<int32_t> pullId_ { -1 };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     StateChangeNotify stateNotify_;
