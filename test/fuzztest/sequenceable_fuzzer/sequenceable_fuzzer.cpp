@@ -15,6 +15,7 @@
 
 #include "sequenceable_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
 #include "singleton.h"
 
 #define private public
@@ -36,49 +37,81 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OHOS {
-const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
-
 bool SequenceableFuzzTest(const uint8_t* data, size_t size)
 {
-    MessageParcel datas;
-    if (!datas.WriteInterfaceToken(FORMMGR_DEVICE_TOKEN) ||
-        !datas.WriteBuffer(data, size) || !datas.RewindRead(0)) {
-        FI_HILOGE("Write failed");
-        return false;
-    }
-    PreviewStyle previewStyle;
-    PreviewAnimation previewAnimation;
+    FuzzedDataProvider provider(data, size);
     Parcel parcel;
-    SequenceablePreviewAnimation sequenceablePreviewAnimation(previewStyle, previewAnimation);
-    sequenceablePreviewAnimation.Marshalling(parcel);
-    sequenceablePreviewAnimation.Unmarshalling(parcel);
-    SequenceablePreviewStyle sequenceablePreviewStyle(previewStyle);
-    sequenceablePreviewStyle.Marshalling(parcel);
-    sequenceablePreviewStyle.Unmarshalling(parcel);
-    DragDropResult dropResult;
-    SequenceableDragResult sequenceableDragResult(dropResult);
-    sequenceableDragResult.Marshalling(parcel);
-    sequenceableDragResult.Unmarshalling(parcel);
-    bool visible = true;
-    bool isForce = true;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     DragVisibleParam dragVisibleParam;
-    dragVisibleParam.visible = visible;
-    dragVisibleParam.isForce = isForce;
+    dragVisibleParam.visible = provider.ConsumeBool();
+    dragVisibleParam.isForce = provider.ConsumeBool();
     dragVisibleParam.rsTransaction = rsTransaction;
     SequenceableDragVisible sequenceableDragVisible(dragVisibleParam);
-    sequenceableDragVisible.Marshalling(parcel);
-    sequenceableDragVisible.Unmarshalling(parcel);
+    SequenceableDragVisible *sequenceableDragVisible1 = sequenceableDragVisible.Unmarshalling(parcel);
+    if (sequenceableDragVisible1  == nullptr) {
+        sequenceableDragVisible1->Marshalling(parcel);
+    }
     SequenceableRotateWindow sequenceableRotateWindow(rsTransaction);
-    sequenceableRotateWindow.Marshalling(parcel);
-    sequenceableRotateWindow.Unmarshalling(parcel);
+    SequenceableRotateWindow *sequenceableRotateWindow1 = sequenceableRotateWindow.Unmarshalling(parcel);
+    if (sequenceableRotateWindow1  == nullptr) {
+        sequenceableRotateWindow1->Marshalling(parcel);
+    }
     PreviewAnimation animation;
-    SequenceablePreviewAnimation sequenceablePreviewAnimation1(previewStyle, animation);
-    sequenceablePreviewAnimation1.Marshalling(parcel);
-    sequenceablePreviewAnimation1.Unmarshalling(parcel);
+    PreviewStyle previewStyle;
+    previewStyle.foregroundColor = provider.ConsumeIntegral<uint32_t>();
+    previewStyle.opacity = provider.ConsumeIntegral<int32_t>();
+    previewStyle.radius = provider.ConsumeFloatingPointInRange<float>(0, 1);
+    previewStyle.scale = provider.ConsumeFloatingPointInRange<float>(0, 1);
+    animation.curveName = provider.ConsumeRandomLengthString();
+    animation.duration = provider.ConsumeIntegral<int32_t>();
+    SequenceablePreviewAnimation sequenceablePreviewAnimation2(previewStyle, animation);
+    SequenceablePreviewAnimation *sequenceablePreviewAnimation3 = sequenceablePreviewAnimation2.Unmarshalling(parcel);
+    if (sequenceablePreviewAnimation3 != nullptr) {
+        sequenceablePreviewAnimation3->Marshalling(parcel);
+    }
+    DevicePostureData data1;
+    data1.pitchRad = provider.ConsumeFloatingPointInRange<float>(0, 1);
+    data1.rollRad = provider.ConsumeFloatingPointInRange<float>(0, 1);
+    data1.yawRad = provider.ConsumeFloatingPointInRange<float>(0, 1);
     SequenceablePostureData postureData;
-    postureData.Marshalling(parcel);
-    postureData.Unmarshalling(parcel);
+    postureData.SetPostureData(data1);
+    SequenceablePostureData *postureData1 =  postureData.Unmarshalling(parcel);
+    if (postureData1 != nullptr) {
+        postureData1->Marshalling(parcel);
+    }
+    return true;
+}
+
+bool SequenceablePreviewStyleFuzzTest(const uint8_t* data, size_t size)
+{
+    FuzzedDataProvider provider(data, size);
+    Parcel parcel;
+    PreviewStyle previewStyle;
+    previewStyle.foregroundColor = provider.ConsumeIntegral<uint32_t>();
+    previewStyle.opacity = provider.ConsumeIntegral<int32_t>();
+    previewStyle.radius = provider.ConsumeFloatingPointInRange<float>(0, 1);
+    previewStyle.scale = provider.ConsumeFloatingPointInRange<float>(0, 1);
+    PreviewAnimation previewAnimation;
+    previewAnimation.curveName = provider.ConsumeRandomLengthString();
+    previewAnimation.duration = provider.ConsumeIntegral<int32_t>();
+    SequenceablePreviewAnimation sequenceablePreviewAnimation(previewStyle, previewAnimation);
+    SequenceablePreviewAnimation *sequenceablePreviewAnimation1 = sequenceablePreviewAnimation.Unmarshalling(parcel);
+    if (sequenceablePreviewAnimation1 != nullptr) {
+        sequenceablePreviewAnimation1->Marshalling(parcel);
+    }
+    SequenceablePreviewStyle sequenceablePreviewStyle(previewStyle);
+    SequenceablePreviewStyle *sequenceablePreviewStyle1 = sequenceablePreviewStyle.Unmarshalling(parcel);
+    if (sequenceablePreviewStyle1 != nullptr) {
+        sequenceablePreviewStyle1->Marshalling(parcel);
+    }
+    DragDropResult dropResult;
+    dropResult.hasCustomAnimation = provider.ConsumeBool();
+    dropResult.mainWindow = provider.ConsumeIntegral<int32_t>();
+    SequenceableDragResult sequenceableDragResult(dropResult);
+    SequenceableDragResult *sequenceDragResult1 = sequenceableDragResult.Unmarshalling(parcel);
+    if (sequenceDragResult1 != nullptr) {
+        sequenceDragResult1->Marshalling(parcel);
+    }
     return true;
 }
 } // namespace OHOS
@@ -90,6 +123,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
     OHOS::SequenceableFuzzTest(data, size);
+    OHOS::SequenceablePreviewStyleFuzzTest(data, size);
     return 0;
 }
 } // namespace DeviceStatus

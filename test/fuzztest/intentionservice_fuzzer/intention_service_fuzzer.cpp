@@ -15,14 +15,17 @@
 
 #include "intention_service_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
 #include <thread>
 
 #include "intention_service.h"
 
 #undef LOG_TAG
-#define LOG_TAG "MsdpIntentionServiceFuzzTest"
+#define LOG_TAG "IntentionServiceFuzzTest"
 
-
+namespace OHOS {
+namespace Msdp {
+namespace DeviceStatus {
 namespace {
 using namespace OHOS;
 using namespace OHOS::Msdp;
@@ -34,7 +37,6 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_ENABLE_COOPERATE,
     IIntentionIpcCode::COMMAND_DISABLE_COOPERATE,
     IIntentionIpcCode::COMMAND_START_COOPERATE,
-    IIntentionIpcCode::COMMAND_START_COOPERATE_WITH_OPTIONS,
     IIntentionIpcCode::COMMAND_STOP_COOPERATE,
     IIntentionIpcCode::COMMAND_REGISTER_COOPERATE_LISTENER,
     IIntentionIpcCode::COMMAND_UNREGISTER_COOPERATE_LISTENER,
@@ -47,7 +49,6 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_SET_DAMPLING_COEFFICIENT,
     IIntentionIpcCode::COMMAND_START_DRAG,
     IIntentionIpcCode::COMMAND_STOP_DRAG,
-    IIntentionIpcCode::COMMAND_ENABLE_INTERNAL_DROP_ANIMATION,
     IIntentionIpcCode::COMMAND_ADD_DRAGLISTENER,
     IIntentionIpcCode::COMMAND_REMOVE_DRAGLISTENER,
     IIntentionIpcCode::COMMAND_ADD_SUBSCRIPT_LISTENER,
@@ -86,9 +87,10 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_SUBSCRIBE_STATIONARY_CALLBACK,
     IIntentionIpcCode::COMMAND_UNSUBSCRIBE_STATIONARY_CALLBACK,
     IIntentionIpcCode::COMMAND_GET_DEVICE_STATUS_DATA,
+    IIntentionIpcCode::COMMAND_GET_DEVICE_POSTURE_DATA_SYNC,
     IIntentionIpcCode::COMMAND_START_COOPERATE_WITH_OPTIONS,
     IIntentionIpcCode::COMMAND_ENABLE_INTERNAL_DROP_ANIMATION,
-    IIntentionIpcCode::COMMAND_GET_DEVICE_POSTURE_DATA_SYNC,
+    IIntentionIpcCode::COMMAND_IS_DRAG_START,
     IIntentionIpcCode::COMMAND_GET_PAGE_CONTENT,
     IIntentionIpcCode::COMMAND_SEND_CONTROL_EVENT,
     IIntentionIpcCode::COMMAND_REGISTER_SCREEN_EVENT_CALLBACK,
@@ -98,449 +100,456 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
 
 class IntentionServiceMock : public IntentionStub {
 public:
-ErrCode Socket(const std::string& programName, int32_t moduleType, int& socketFd, int32_t& tokenType) override
-{
-    (void)programName;
-    (void)moduleType;
-    (void)socketFd;
-    (void)tokenType;
-    return 0;
-}
+    ErrCode Socket(const std::string& programName, int32_t moduleType, int& socketFd, int32_t& tokenType) override
+    {
+        (void)programName;
+        (void)moduleType;
+        (void)socketFd;
+        (void)tokenType;
+        return 0;
+    }
 
-// Cooperate
-ErrCode EnableCooperate(int32_t userData) override
-{
-    (void)userData;
-    return 0;
-}
+    // Cooperate
+    ErrCode EnableCooperate(int32_t userData) override
+    {
+        (void)userData;
+        return 0;
+    }
 
-ErrCode DisableCooperate(int32_t userData) override
-{
-    (void)userData;
-    return 0;
-}
+    ErrCode DisableCooperate(int32_t userData) override
+    {
+        (void)userData;
+        return 0;
+    }
 
-ErrCode StartCooperate(const std::string& remoteNetworkId, int32_t userData, int32_t startDeviceId,
-    bool checkPermission) override
-{
-    (void)remoteNetworkId;
-    (void)userData;
-    (void)startDeviceId;
-    (void)checkPermission;
-    return 0;
-}
+    ErrCode StartCooperate(const std::string& remoteNetworkId, int32_t userData, int32_t startDeviceId,
+        bool checkPermission) override
+    {
+        (void)remoteNetworkId;
+        (void)userData;
+        (void)startDeviceId;
+        (void)checkPermission;
+        return 0;
+    }
 
-ErrCode StartCooperateWithOptions(const std::string& remoteNetworkId, int32_t userData, int32_t startDeviceId,
-    bool checkPermission, const SequenceableCooperateOptions& options) override
-{
-    (void)remoteNetworkId;
-    (void)userData;
-    (void)startDeviceId;
-    (void)checkPermission;
-    (void)options;
-    return 0;
-}
-
-ErrCode StopCooperate(int32_t userData, bool isUnchained, bool checkPermission) override
-{
-    (void)userData;
-    (void)isUnchained;
-    (void)checkPermission;
-    return 0;
-}
-
-ErrCode RegisterCooperateListener() override
-{
-    return 0;
-}
-
-ErrCode UnregisterCooperateListener() override
-{
-    return 0;
-}
-
-ErrCode RegisterHotAreaListener(int32_t userData, bool checkPermission) override
-{
-    (void)userData;
-    (void)checkPermission;
-    return 0;
-}
-
-ErrCode UnregisterHotAreaListener() override
-{
-    return 0;
-}
-
-ErrCode RegisterMouseEventListener(const std::string& networkId) override
-{
-    (void)networkId;
-    return 0;
-}
-
-ErrCode UnregisterMouseEventListener(const std::string& networkId) override
-{
-    (void)networkId;
-    return 0;
-}
-
-ErrCode GetCooperateStateSync(const std::string& udid, bool& state) override
-{
-    (void)udid;
-    (void)state;
-    return 0;
-}
-
-ErrCode GetCooperateStateAsync(const std::string& networkId, int32_t userData, bool isCheckPermission) override
-{
-    (void)networkId;
-    (void)userData;
-    (void)isCheckPermission;
-    return 0;
-}
-
-ErrCode SetDamplingCoefficient(uint32_t direction, double coefficient) override
-{
-    (void)direction;
-    (void)coefficient;
-    return 0;
-}
-
-// Drag
-ErrCode StartDrag(const SequenceableDragData &sequenceableDragData) override
-{
-    (void)sequenceableDragData;
-    return 0;
-}
-
-ErrCode StopDrag(const SequenceableDragResult &sequenceableDragResult) override
-{
-    (void)sequenceableDragResult;
-    return 0;
-}
-
-ErrCode EnableInternalDropAnimation(const std::string &animationInfo) override
-{
-    (void)animationInfo;
-    return 0;
-}
-
-ErrCode AddDraglistener(bool isJsCaller) override
-{
-    (void)isJsCaller;
-    return 0;
-}
-
-ErrCode RemoveDraglistener(bool isJsCaller) override
-{
-    (void)isJsCaller;
-    return 0;
-}
-
-ErrCode AddSubscriptListener() override
-{
-    return 0;
-}
-
-ErrCode RemoveSubscriptListener() override
-{
-    return 0;
-}
-
-ErrCode SetDragWindowVisible(const SequenceableDragVisible &sequenceableDragVisible) override
-{
-    (void)sequenceableDragVisible;
-    return 0;
-}
+    ErrCode StartCooperateWithOptions(const std::string& remoteNetworkId, int32_t userData, int32_t startDeviceId,
+        bool checkPermission, const SequenceableCooperateOptions& options) override
+    {
+        (void)remoteNetworkId;
+        (void)userData;
+        (void)startDeviceId;
+        (void)checkPermission;
+        (void)options;
+        return 0;
+    }
     
-ErrCode UpdateDragStyle(int32_t style, int32_t eventId) override
-{
-    (void)style;
-    (void)eventId;
-    return 0;
-}
+    ErrCode StopCooperate(int32_t userData, bool isUnchained, bool checkPermission) override
+    {
+        (void)userData;
+        (void)isUnchained;
+        (void)checkPermission;
+        return 0;
+    }
 
-ErrCode UpdateShadowPic(const std::shared_ptr<PixelMap>& pixelMap, int32_t x, int32_t y) override
-{
-    (void)pixelMap;
-    (void)x;
-    (void)y;
-    return 0;
-}
+    ErrCode RegisterCooperateListener() override
+    {
+        return 0;
+    }
 
-ErrCode GetDragTargetPid(int32_t &targetPid) override
-{
-    (void)targetPid;
-    return 0;
-}
+    ErrCode UnregisterCooperateListener() override
+    {
+        return 0;
+    }
 
-ErrCode GetUdKey(std::string &udKey) override
-{
-    (void)udKey;
-    return 0;
-}
+    ErrCode RegisterHotAreaListener(int32_t userData, bool checkPermission) override
+    {
+        (void)userData;
+        (void)checkPermission;
+        return 0;
+    }
 
-ErrCode GetShadowOffset(int32_t &offsetX, int32_t &offsetY, int32_t &width, int32_t &height) override
-{
-    (void)offsetX;
-    (void)offsetY;
-    (void)width;
-    (void)height;
-    return 0;
-}
+    ErrCode UnregisterHotAreaListener() override
+    {
+        return 0;
+    }
 
-ErrCode GetDragData(SequenceableDragData &sequenceableDragData) override
-{
-    (void)sequenceableDragData;
-    return 0;
-}
+    ErrCode RegisterMouseEventListener(const std::string& networkId) override
+    {
+        (void)networkId;
+        return 0;
+    }
 
-ErrCode UpdatePreviewStyle(const SequenceablePreviewStyle &sequenceablePreviewStyle) override
-{
-    (void)sequenceablePreviewStyle;
-    return 0;
-}
+    ErrCode UnregisterMouseEventListener(const std::string& networkId) override
+    {
+        (void)networkId;
+        return 0;
+    }
 
-ErrCode UpdatePreviewStyleWithAnimation(const SequenceablePreviewAnimation &sequenceablePreviewAnimation) override
-{
-    (void)sequenceablePreviewAnimation;
-    return 0;
-}
+    ErrCode GetCooperateStateSync(const std::string& udid, bool& state) override
+    {
+        (void)udid;
+        (void)state;
+        return 0;
+    }
 
-ErrCode RotateDragWindowSync(const SequenceableRotateWindow &sequenceableRotateWindow) override
-{
-    (void)sequenceableRotateWindow;
-    return 0;
-}
+    ErrCode GetCooperateStateAsync(const std::string& networkId, int32_t userData, bool isCheckPermission) override
+    {
+        (void)networkId;
+        (void)userData;
+        (void)isCheckPermission;
+        return 0;
+    }
 
-ErrCode SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) override
-{
-    (void)displayId;
-    (void)screenId;
-    return 0;
-}
+    ErrCode SetDamplingCoefficient(uint32_t direction, double coefficient) override
+    {
+        (void)direction;
+        (void)coefficient;
+        return 0;
+    }
 
-ErrCode GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller) override
-{
-    (void)summarys;
-    (void)isJsCaller;
-    return 0;
-}
+    // Drag
+    ErrCode StartDrag(const SequenceableDragData &sequenceableDragData) override
+    {
+        (void)sequenceableDragData;
+        return 0;
+    }
 
-ErrCode GetDragSummaryInfo(SequenceableDragSummaryInfo &sequenceableDragSummaryInfo) override
-{
-    (void)sequenceableDragSummaryInfo;
-    return 0;
-}
- 
-ErrCode SetDragSwitchState(bool enable, bool isJsCaller) override
-{
-    (void)enable;
-    (void)isJsCaller;
-    return 0;
-}
+    ErrCode StopDrag(const SequenceableDragResult &sequenceableDragResult) override
+    {
+        (void)sequenceableDragResult;
+        return 0;
+    }
 
-ErrCode SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller) override
-{
-    (void)enable;
-    (void)pkgName;
-    (void)isJsCaller;
-    return 0;
-}
+    ErrCode EnableInternalDropAnimation(const std::string &animationInfo) override
+    {
+        (void)animationInfo;
+        return 0;
+    }
 
-ErrCode GetDragState(int32_t &dragState) override
-{
-    (void)dragState;
-    return 0;
-}
+    ErrCode AddDraglistener(bool isJsCaller) override
+    {
+        (void)isJsCaller;
+        return 0;
+    }
 
-ErrCode EnableUpperCenterMode(bool enable) override
-{
-    (void)enable;
-    return 0;
-}
+    ErrCode RemoveDraglistener(bool isJsCaller) override
+    {
+        (void)isJsCaller;
+        return 0;
+    }
 
-ErrCode GetDragAction(int32_t &dragAction) override
-{
-    (void)dragAction;
-    return 0;
-}
+    ErrCode SetDragWindowVisible(const SequenceableDragVisible &sequenceableDragVisible) override
+    {
+        (void)sequenceableDragVisible;
+        return 0;
+    }
 
-ErrCode GetExtraInfo(std::string &extraInfo) override
-{
-    (void)extraInfo;
-    return 0;
-}
+    ErrCode AddSubscriptListener() override
+    {
+        return 0;
+    }
 
-ErrCode AddPrivilege() override
-{
-    return 0;
-}
+    ErrCode RemoveSubscriptListener() override
+    {
+        return 0;
+    }
+        
+    ErrCode UpdateDragStyle(int32_t style, int32_t eventId) override
+    {
+        (void)style;
+        (void)eventId;
+        return 0;
+    }
 
-ErrCode EraseMouseIcon() override
-{
-    return 0;
-}
+    ErrCode UpdateShadowPic(const std::shared_ptr<PixelMap>& pixelMap, int32_t x, int32_t y) override
+    {
+        (void)pixelMap;
+        (void)x;
+        (void)y;
+        return 0;
+    }
 
-ErrCode SetMouseDragMonitorState(bool state) override
-{
-    (void)state;
-    return 0;
-}
+    ErrCode GetDragTargetPid(int32_t &targetPid) override
+    {
+        (void)targetPid;
+        return 0;
+    }
 
-ErrCode SetDraggableState(bool state) override
-{
-    (void)state;
-    return 0;
-}
+    ErrCode GetUdKey(std::string &udKey) override
+    {
+        (void)udKey;
+        return 0;
+    }
 
-ErrCode GetAppDragSwitchState(bool &state) override
-{
-    (void)state;
-    return 0;
-}
+    ErrCode GetShadowOffset(int32_t &offsetX, int32_t &offsetY, int32_t &width, int32_t &height) override
+    {
+        (void)offsetX;
+        (void)offsetY;
+        (void)width;
+        (void)height;
+        return 0;
+    }
 
-ErrCode SetDraggableStateAsync(bool state, int64_t downTime) override
-{
-    (void)state;
-    (void)downTime;
-    return 0;
-}
+    ErrCode GetDragData(SequenceableDragData &sequenceableDragData) override
+    {
+        (void)sequenceableDragData;
+        return 0;
+    }
 
-ErrCode GetDragBundleInfo(std::string &bundleName, bool &state) override
-{
-    (void)bundleName;
-    (void)state;
-    return 0;
-}
+    ErrCode UpdatePreviewStyle(const SequenceablePreviewStyle &sequenceablePreviewStyle) override
+    {
+        (void)sequenceablePreviewStyle;
+        return 0;
+    }
 
-ErrCode IsDragStart(bool &isStart) override
-{
-    (void)isStart;
-    return 0;
-}
+    ErrCode UpdatePreviewStyleWithAnimation(const SequenceablePreviewAnimation &sequenceablePreviewAnimation) override
+    {
+        (void)sequenceablePreviewAnimation;
+        return 0;
+    }
 
-// Boomerang
-ErrCode SubscribeCallback(int32_t type, const std::string& bundleName,
-    const sptr<IRemoteBoomerangCallback>& subCallback) override
-{
-    (void)type;
-    (void)bundleName;
-    (void)subCallback;
-    return 0;
-}
-    
-ErrCode UnsubscribeCallback(int32_t type, const std::string& bundleName,
-    const sptr<IRemoteBoomerangCallback>& unsubCallback) override
-{
-    (void)type;
-    (void)bundleName;
-    (void)unsubCallback;
-    return 0;
-}
-    
-ErrCode NotifyMetadataBindingEvent(const std::string& bundleName,
-    const sptr<IRemoteBoomerangCallback>& notifyCallback) override
-{
-    (void)bundleName;
-    (void)notifyCallback;
-    return 0;
-}
-    
-ErrCode SubmitMetadata(const std::string& metadata) override
-{
-    (void)metadata;
-    return 0;
-}
+    ErrCode RotateDragWindowSync(const SequenceableRotateWindow &sequenceableRotateWindow) override
+    {
+        (void)sequenceableRotateWindow;
+        return 0;
+    }
 
-ErrCode BoomerangEncodeImage(const std::shared_ptr<PixelMap>& pixelMap, const std::string& metadata,
-    const sptr<IRemoteBoomerangCallback>& encodeCallback) override
-{
-    (void)pixelMap;
-    (void)metadata;
-    (void)encodeCallback;
-    return 0;
-}
-    
-ErrCode BoomerangDecodeImage(const std::shared_ptr<PixelMap>& pixelMap,
-    const sptr<IRemoteBoomerangCallback>& decodeCallback) override
-{
-    (void)pixelMap;
-    (void)decodeCallback;
-    return 0;
-}
-    
-// Stationary
-ErrCode SubscribeStationaryCallback(int32_t type, int32_t event,
-    int32_t latency, const sptr<IRemoteDevStaCallback> &subCallback) override
-{
-    (void)type;
-    (void)event;
-    (void)latency;
-    (void)subCallback;
-    return 0;
-}
-    
-ErrCode UnsubscribeStationaryCallback(int32_t type, int32_t event,
-    const sptr<IRemoteDevStaCallback> &unsubCallback) override
-{
-    (void)type;
-    (void)event;
-    (void)unsubCallback;
-    return 0;
-}
-    
-ErrCode GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue) override
-{
-    (void)type;
-    (void)replyType;
-    (void)replyValue;
-    return 0;
-}
+    ErrCode SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) override
+    {
+        (void)displayId;
+        (void)screenId;
+        return 0;
+    }
 
-ErrCode GetDevicePostureDataSync(SequenceablePostureData &data) override
-{
-    (void)data;
-    return 0;
-}
+    ErrCode GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller) override
+    {
+        (void)summarys;
+        (void)isJsCaller;
+        return 0;
+    }
 
-ErrCode GetPageContent(const DeviceStatus::OnScreen::SequenceableContentOption &option,
-    DeviceStatus::OnScreen::SequenceablePageContent &pageContent) override
-{
-    (void)option;
-    (void)pageContent;
-    return 0;
-}
+    ErrCode GetDragSummaryInfo(SequenceableDragSummaryInfo &sequenceableDragSummaryInfo) override
+    {
+        (void)sequenceableDragSummaryInfo;
+        return 0;
+    }
 
-ErrCode SendControlEvent(const DeviceStatus::OnScreen::SequenceableControlEvent &event) override
-{
-    (void)event;
-    return 0;
-}
+    ErrCode SetDragSwitchState(bool enable, bool isJsCaller) override
+    {
+        (void)enable;
+        (void)isJsCaller;
+        return 0;
+    }
 
-ErrCode RegisterScreenEventCallback(int32_t windowId, const std::string& event,
-    const sptr<DeviceStatus::OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override
-{
-    (void)windowId;
-    (void)event;
-    (void)onScreenCallback;
-    return 0;
-}
+    ErrCode SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller) override
+    {
+        (void)enable;
+        (void)pkgName;
+        (void)isJsCaller;
+        return 0;
+    }
 
-ErrCode UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
-    const sptr<DeviceStatus::OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override
-{
-    (void)windowId;
-    (void)event;
-    (void)onScreenCallback;
-    return 0;
-}
+    ErrCode GetDragState(int32_t &dragState) override
+    {
+        (void)dragState;
+        return 0;
+    }
 
-ErrCode IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus) override
-{
-    (void)windowId;
-    (void)outStatus;
-    return 0;
-}
+    ErrCode EnableUpperCenterMode(bool enable) override
+    {
+        (void)enable;
+        return 0;
+    }
+
+    ErrCode GetDragAction(int32_t &dragAction) override
+    {
+        (void)dragAction;
+        return 0;
+    }
+
+    ErrCode GetExtraInfo(std::string &extraInfo) override
+    {
+        (void)extraInfo;
+        return 0;
+    }
+
+    ErrCode AddPrivilege() override
+    {
+        return 0;
+    }
+
+    ErrCode EraseMouseIcon() override
+    {
+        return 0;
+    }
+
+    ErrCode SetMouseDragMonitorState(bool state) override
+    {
+        (void)state;
+        return 0;
+    }
+
+    ErrCode SetDraggableState(bool state) override
+    {
+        (void)state;
+        return 0;
+    }
+
+    ErrCode GetAppDragSwitchState(bool &state) override
+    {
+        (void)state;
+        return 0;
+    }
+
+    ErrCode SetDraggableStateAsync(bool state, int64_t downTime) override
+    {
+        (void)state;
+        (void)downTime;
+        return 0;
+    }
+
+    ErrCode GetDragBundleInfo(std::string &bundleName, bool &state) override
+    {
+        (void)bundleName;
+        (void)state;
+        return 0;
+    }
+
+    ErrCode IsDragStart(bool &isStart) override
+    {
+        (void)isStart;
+        return 0;
+    }
+
+    // Boomerang
+    ErrCode SubscribeCallback(int32_t type, const std::string& bundleName,
+        const sptr<IRemoteBoomerangCallback>& subCallback) override
+    {
+        (void)type;
+        (void)bundleName;
+        (void)subCallback;
+        return 0;
+    }
+        
+    ErrCode UnsubscribeCallback(int32_t type, const std::string& bundleName,
+        const sptr<IRemoteBoomerangCallback>& unsubCallback) override
+    {
+        (void)type;
+        (void)bundleName;
+        (void)unsubCallback;
+        return 0;
+    }
+        
+    ErrCode NotifyMetadataBindingEvent(const std::string& bundleName,
+        const sptr<IRemoteBoomerangCallback>& notifyCallback) override
+    {
+        (void)bundleName;
+        (void)notifyCallback;
+        return 0;
+    }
+        
+    ErrCode SubmitMetadata(const std::string& metadata) override
+    {
+        (void)metadata;
+        return 0;
+    }
+
+    ErrCode BoomerangEncodeImage(const std::shared_ptr<PixelMap>& pixelMap, const std::string& metadata,
+        const sptr<IRemoteBoomerangCallback>& encodeCallback) override
+    {
+        (void)pixelMap;
+        (void)metadata;
+        (void)encodeCallback;
+        return 0;
+    }
+        
+    ErrCode BoomerangDecodeImage(const std::shared_ptr<PixelMap>& pixelMap,
+        const sptr<IRemoteBoomerangCallback>& decodeCallback) override
+    {
+        (void)pixelMap;
+        (void)decodeCallback;
+        return 0;
+    }
+        
+    // Stationary
+    ErrCode SubscribeStationaryCallback(int32_t type, int32_t event,
+        int32_t latency, const sptr<IRemoteDevStaCallback> &subCallback) override
+    {
+        (void)type;
+        (void)event;
+        (void)latency;
+        (void)subCallback;
+        return 0;
+    }
+        
+    ErrCode UnsubscribeStationaryCallback(int32_t type, int32_t event,
+        const sptr<IRemoteDevStaCallback> &unsubCallback) override
+    {
+        (void)type;
+        (void)event;
+        (void)unsubCallback;
+        return 0;
+    }
+        
+    ErrCode GetDeviceStatusData(int32_t type, int32_t &replyType, int32_t &replyValue) override
+    {
+        (void)type;
+        (void)replyType;
+        (void)replyValue;
+        return 0;
+    }
+
+    ErrCode GetDevicePostureDataSync(SequenceablePostureData &data) override
+    {
+        return 0;
+    }
+
+    // OnScreen
+    ErrCode GetPageContent(const DeviceStatus::OnScreen::SequenceableContentOption &option,
+        DeviceStatus::OnScreen::SequenceablePageContent &pageContent) override
+    {
+        (void)option;
+        (void)pageContent;
+        return 0;
+    }
+
+    ErrCode SendControlEvent(const DeviceStatus::OnScreen::SequenceableControlEvent &event) override
+    {
+        (void)event;
+        return 0;
+    }
+
+    ErrCode RegisterScreenEventCallback(int32_t windowId, const std::string& event,
+        const sptr<DeviceStatus::OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override
+    {
+        (void)windowId;
+        (void)event;
+        (void)onScreenCallback;
+        return 0;
+    }
+
+    ErrCode UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
+        const sptr<DeviceStatus::OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override
+    {
+        (void)windowId;
+        (void)event;
+        (void)onScreenCallback;
+        return 0;
+    }
+
+    ErrCode IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus) override
+    {
+        (void)windowId;
+        (void)outStatus;
+        return 0;
+    }
+    // hidumper
+    int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override
+    {
+        (void)fd;
+        (void)args;
+        return 0;
+    }
 };
 
 static inline void DoSleep(void)
@@ -587,23 +596,34 @@ private:
 };
 }
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+bool IIntentionServerFuzzTest(const uint8_t* data, size_t size)
 {
+    if ((data == nullptr) || (size < 1)) {
+        return false;
+    }
+    FuzzedDataProvider provider(data, size);
     static TestEnv env;
     if (!env.IsInited()) {
         return 0;
     }
-
-    if (data == nullptr || size == 0) {
-        return 0;
-    }
-    IIntentionIpcCode code = CODE_LIST[data[0] % CODE_LIST.size()];
-
     OHOS::MessageParcel parcel;
+    int code = provider.ConsumeIntegralInRange<int32_t>(0, 58);
     parcel.WriteInterfaceToken(INTENTION_INTERFACE_TOKEN);
     parcel.WriteBuffer(data + 1, size - 1);
-
-    env.DoRemoteRequest(code, parcel);
+    env.DoRemoteRequest(static_cast<IIntentionIpcCode>(code), parcel);
     DoSleep();
+    return true;
+}
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+{
+    /* Run your code on data */
+    if (data == nullptr) {
+        return 0;
+    }
+
+    OHOS::Msdp::DeviceStatus::IIntentionServerFuzzTest(data, size);
     return 0;
 }
+} // namespace DeviceStatus
+} // namespace Msdp
+} // namespace OHOS

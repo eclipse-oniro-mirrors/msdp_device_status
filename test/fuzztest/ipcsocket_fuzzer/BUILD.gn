@@ -63,7 +63,7 @@ ohos_fuzztest("IpcSocketFuzzTest") {
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-      "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
     "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
     "${device_status_root_path}/intention/ipc/tunnel:intention_client",
