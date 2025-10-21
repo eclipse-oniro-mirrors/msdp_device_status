@@ -32,11 +32,12 @@ public:
         PageContent &pageContent) = 0;
     virtual int32_t SendControlEvent(const OnScreenCallingContext &context, const ControlEvent &event) = 0;
     virtual int32_t Dump(int fd, const std::vector<std::u16string> &args) = 0;
-    virtual int32_t RegisterScreenEventCallback(int32_t windowId, const std::string& event,
-        const sptr<OnScreen::IRemoteOnScreenCallback>& callback) = 0;
-    virtual int32_t UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
-        const sptr<OnScreen::IRemoteOnScreenCallback>& callback) = 0;
-    virtual int32_t IsParallelFeatureEnabled(int32_t windowId, int32_t &outStatus) = 0;
+    virtual int32_t RegisterScreenEventCallback(OnScreenCallingContext &context, int32_t windowId,
+        const std::string& event, const sptr<OnScreen::IRemoteOnScreenCallback>& callback) = 0;
+    virtual int32_t UnregisterScreenEventCallback(OnScreenCallingContext &context, int32_t windowId,
+        const std::string& event, const sptr<OnScreen::IRemoteOnScreenCallback>& callback) = 0;
+    virtual int32_t IsParallelFeatureEnabled(OnScreenCallingContext &context, int32_t windowId,
+        int32_t &outStatus) = 0;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus
