@@ -103,6 +103,7 @@
           "//base/msdp/device_status/frameworks/ets/drag:dragInteraction",
           "//base/msdp/device_status/frameworks/ets/coop:msdp_cooperate_group",
           "//base/msdp/device_status/frameworks/ets/coordination:coordination",
+          "//base/msdp/device_status/frameworks/ets/metadataBinding:metadataBinding",
           "//base/msdp/device_status/frameworks/ets/motion:motion",
           "//base/msdp/device_status/frameworks/ets/stationary:stationary_ani"
         ],
