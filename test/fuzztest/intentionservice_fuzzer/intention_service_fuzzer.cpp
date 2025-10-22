@@ -96,6 +96,7 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_REGISTER_SCREEN_EVENT_CALLBACK,
     IIntentionIpcCode::COMMAND_UNREGISTER_SCREEN_EVENT_CALLBACK,
     IIntentionIpcCode::COMMAND_IS_PARALLEL_FEATURE_ENABLED,
+    IIntentionIpcCode::COMMAND_LISTEN_LIVE_BROADCAST,
 };
 
 class IntentionServiceMock : public IntentionStub {
@@ -543,6 +544,12 @@ public:
         (void)outStatus;
         return 0;
     }
+
+    ErrCode ListenLiveBroadcast() override
+    {
+        return 0;
+    }
+    
     // hidumper
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override
     {
