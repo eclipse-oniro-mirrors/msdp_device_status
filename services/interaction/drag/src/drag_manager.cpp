@@ -69,9 +69,11 @@ const std::string APP_VERSION_ID {"1.0.0"};
 const std::string DRAG_FRAMEWORK {"DRAG_FRAMEWORK"};
 const std::string START_CROSSING_DRAG {"START_CROSSING_DRAG"};
 const std::string END_CROSSING_DRAG {"END_CROSSING_DRAG"};
+const std::string NEED_FETCH {"NEED_FETCH"};
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 const std::string LANGUAGE_KEY {"persist.global.language"};
 const std::string DEFAULT_LANGUAGE_KEY {"const.global.language"};
+const std::string CROSS_DEVICE_DRAG {"Cross-device drag"};
 static std::map<std::string, std::string> g_rtlLanguageMap {
     { "ar", "arabic" },
     { "fa", "persian" },
@@ -306,7 +308,7 @@ std::string DragManager::GetPackageName(int32_t pid)
     CHKPS(context_);
     std::string packageName = std::string();
     if (pid == -1) {
-        packageName = "Cross-device drag";
+        packageName = CROSS_DEVICE_DRAG;
     } else {
         context_->GetSocketSessionManager().AddSessionDeletedCallback(pid,
             [this](SocketSessionPtr session) { this->OnSessionLost(session); });
@@ -332,7 +334,7 @@ void DragManager::ProcessExceptionDragStyle(DragCursorStyle &style)
 {
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     if ((style == DragCursorStyle::COPY) && (isCrossDragging_ || isCollaborationService_) &&
-        (dragData.summaryTag == "NEED_FETCH")) {
+        (dragData.summaryTag == NEED_FETCH)) {
         FI_HILOGI("Update drag style is move");
         style = DragCursorStyle::MOVE;
     }
@@ -509,7 +511,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     ReportStopDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, pid,
         dragRadarPackageName);
     std::string dragOutPkgName =
-        (dragOutSession_ == nullptr) ? "Cross-device drag" : dragOutSession_->GetProgramName();
+        (dragOutSession_ == nullptr) ? CROSS_DEVICE_DRAG : dragOutSession_->GetProgramName();
     FI_HILOGI("mainWindow:%{public}d, dragResult:%{public}d, drop packageName:%{public}s,"
         "drag out packageName:%{public}s", dropResult.mainWindow, dropResult.result, packageName.c_str(),
         dragOutPkgName.c_str());
@@ -566,10 +568,14 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     inHoveringState_ = false;
     throwState_ = ThrowState::NOT_THROW;
 #endif // OHOS_ENABLE_PULLTHROW
-    DRAG_DATA_MGR.ResetDragData();
+
     dragResult_ = static_cast<DragResult>(dropResult.result);
     appCallee_ = dragRadarPackageName.appCallee;
-    StateChangedNotify(DragState::STOP);
+    if (packageName != CROSS_DEVICE_DRAG) {
+        StateChangedNotify(DragState::STOP);
+        FI_HILOGI("State changed notify");
+    }
+    DRAG_DATA_MGR.ResetDragData();
     dragPackageName_ = {};
 #else
     DragBehavior dragBehavior = dropResult.dragBehavior;
@@ -609,7 +615,7 @@ int32_t DragManager::GetUdKey(std::string &udKey) const
 {
     FI_HILOGI("enter");
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == "NEED_FETCH")) {
+    if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == NEED_FETCH)) {
         FI_HILOGI("Clear udKey");
         udKey = "";
         FI_HILOGI("leave");
@@ -1936,7 +1942,7 @@ int32_t DragManager::GetDragSummary(std::map<std::string, int64_t> &summarys)
     if (summarys.empty()) {
         FI_HILOGD("Summarys is empty");
     }
-    if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == "NEED_FETCH")) {
+    if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == NEED_FETCH)) {
         FI_HILOGI("Clear summarys");
         summarys.clear();
     }
@@ -1954,7 +1960,7 @@ int32_t DragManager::GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo)
     std::string summaryFormat = GetSummaryFormatStrings(dragSummaryInfo.summaryFormat);
     FI_HILOGI("summaryFormat:%{public}s", summaryFormat.c_str());
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == "NEED_FETCH")) {
+    if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == NEED_FETCH)) {
         FI_HILOGI("Clear summarys");
         dragSummaryInfo.summarys.clear();
         dragSummaryInfo.detailedSummarys.clear();

@@ -2331,6 +2331,52 @@ HWTEST_F(DragManagerTest, DragManagerTest108, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragState_ = DragState::STOP;
 }
+
+/**
+ * @tc.name: DragManagerTest109
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest109, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
+}
+ 
+/**
+ * @tc.name: DragManagerTest110
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest110, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDropResult dropResult { DragResult::DRAG_EXCEPTION, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    g_dragMgr.dragState_ = DragState::START;
+    int32_t ret = g_dragMgr.StopDrag(dropResult, "Cross-device drag");
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
