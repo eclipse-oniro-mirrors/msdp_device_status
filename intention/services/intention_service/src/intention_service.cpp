@@ -613,10 +613,10 @@ ErrCode IntentionService::SendControlEvent(const OnScreen::SequenceableControlEv
     });
 }
 
-ErrorCode IntentionService::ListenLiveBroadcast()
+ErrCode IntentionService::ListenLiveBroadcast()
 {
     return PostSyncTask([this] {
-        return OnScreen_.ListenLiveBroadcast();
+        return onScreen_.ListenLiveBroadcast();
     });
 }
 
