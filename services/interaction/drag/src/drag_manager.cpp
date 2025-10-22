@@ -568,7 +568,6 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     inHoveringState_ = false;
     throwState_ = ThrowState::NOT_THROW;
 #endif // OHOS_ENABLE_PULLTHROW
-
     dragResult_ = static_cast<DragResult>(dropResult.result);
     appCallee_ = dragRadarPackageName.appCallee;
     if (packageName != CROSS_DEVICE_DRAG) {
