@@ -38,6 +38,7 @@ public:
         const std::string& event, const sptr<OnScreen::IRemoteOnScreenCallback>& callback) = 0;
     virtual int32_t IsParallelFeatureEnabled(OnScreenCallingContext &context, int32_t windowId,
         int32_t &outStatus) = 0;
+    virtual int32_t ListenLiveBroadcast() = 0;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

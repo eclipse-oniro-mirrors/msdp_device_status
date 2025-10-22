@@ -110,4 +110,5 @@ interface OHOS.Msdp.IIntention {
     void RegisterScreenEventCallback([in] int windowId, [in] String event, [in] IRemoteOnScreenCallback onScreenCallback);
     void UnregisterScreenEventCallback([in] int windowId, [in] String event, [in] IRemoteOnScreenCallback onScreenCallback);
     void IsParallelFeatureEnabled([in] int windowId, [out] int outStatus);
+    void ListenLiveBroadcast();
 }

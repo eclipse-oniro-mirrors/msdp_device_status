@@ -109,11 +109,13 @@ void DeviceStatusService::OnStart()
 #endif
     EnableDSoftbus();
     EnableDDM();
+    FI_HILOGI("check live start intention");
     intention_ = sptr<IntentionService>::MakeSptr(this);
     if (!Publish(intention_)) {
         FI_HILOGE("On start register to system ability manager failed");
         return;
     }
+    intention_->ListenLiveBroadcast();
     state_ = ServiceRunningState::STATE_RUNNING;
     ready_ = true;
     worker_ = std::thread([this] { this->OnThread(); });
