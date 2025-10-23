@@ -613,6 +613,13 @@ ErrCode IntentionService::SendControlEvent(const OnScreen::SequenceableControlEv
     });
 }
 
+ErrCode IntentionService::ListenLiveBroadcast()
+{
+    return PostSyncTask([this] {
+        return onScreen_.ListenLiveBroadcast();
+    });
+}
+
 int32_t IntentionService::Dump(int32_t fd, const std::vector<std::u16string> &args)
 {
     if (fd < 0) {

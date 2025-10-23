@@ -132,6 +132,23 @@ int32_t OnScreenServer::SendControlEvent(const CallingContext &context, const Co
     return RET_OK;
 }
 
+int32_t OnScreenServer::ListenLiveBroadcast()
+{
+    FI_HILOGI("check live start");
+    std::lock_guard lockGrd(mtx_);
+    int32_t ret = RET_OK;
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
+        return RET_NO_SUPPORT;
+    }
+    ret = handle_.pAlgorithm->ListenLiveBroadcast();
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to check live, err=%{public}d", ret);
+        return ret;
+    }
+    return RET_OK;
+}
+
 int32_t OnScreenServer::Dump(int32_t fd, const std::vector<std::u16string> &args)
 {
     std::lock_guard lockGrd(mtx_);

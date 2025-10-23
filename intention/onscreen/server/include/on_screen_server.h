@@ -48,6 +48,7 @@ public:
     int32_t UnregisterScreenEventCallback(const CallingContext& context, int32_t windowId, const std::string& event,
         const sptr<IRemoteOnScreenCallback>& callback);
     int32_t IsParallelFeatureEnabled(const CallingContext& context, int32_t windowId, int32_t& outStatus);
+    int32_t ListenLiveBroadcast();
 
 private:
     int32_t LoadAlgoLib();
