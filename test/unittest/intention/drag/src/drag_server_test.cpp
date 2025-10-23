@@ -177,7 +177,7 @@ std::shared_ptr<Media::PixelMap> DragServerTest::CreatePixelMap(int32_t width, i
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        FI_HILOGE("invalid, height:%{public}d, width:%{public}d", height, width);
+        FI_HILOGE("Invalid, height:%{public}d, width:%{public}d", height, width);
         return nullptr;
     }
     Media::InitializationOptions opts;
@@ -1469,6 +1469,478 @@ HWTEST_F(DragServerTest, DragServerTest77, TestSize.Level0)
     std::string animationInfo = "{\"targetPos\": [8, 8]}";
     int32_t ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo);
     EXPECT_EQ(ret1, COMMON_NOT_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: DragServerTest78
+ * @tc.desc: Test
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest78, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    MessageParcel reply;
+    MessageParcel datas;
+    g_dragServer->GetPackageName(IPCSkeleton::GetCallingTokenID());
+    bool ret = g_dragServer->IsSystemHAPCalling(context);
+    EXPECT_TRUE(ret);
+    std::string animationInfo = "{}";
+    int32_t ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo);
+    EXPECT_EQ(ret1, COMMON_PARAMETER_ERROR);
+    std::string animationInfo1;
+    ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo1);
+    EXPECT_EQ(ret1, COMMON_PARAMETER_ERROR);
+    std::string animationInfo2 ="{ \"dip_scale\": 3.5, \"drag_shadow_offsetX\": 50, \"drag_shadow_offsetY\": 50, "
+        "\"drag_shadow_argb\": 872415231, \"drag_shadow_path\": \"M 10 10 H 90 V 90 H 10 L 10 10\", "
+		"\"shadow_color_strategy\": 0, \"shadow_is_hardwareacceleration\": true, \"shadow_elevation\": 120, "
+		"\"drag_type\": \"text\", \"dip_scale\": 3.5, \"drag_shadow_offsetX\": 50, \"drag_shadow_offsetY\": 50, "
+        "\"drag_shadow_argb\": 872415231, \"drag_shadow_path\": \"M 10 10 H 90 V 90 H 10 L 10 10\", "
+		"\"shadow_color_strategy\": 0, \"shadow_is_hardwareacceleration\": true, \"shadow_elevation\": 120, "
+		"\"drag_type\": \"text\",  \"dip_scale\": 3.5, \"drag_shadow_offsetX\": 50, \"drag_shadow_offsetY\": 50, "
+        "\"drag_shadow_argb\": 872415231, \"drag_shadow_path\": \"M 10 10 H 90 V 90 H 10 L 10 10\", "
+		"\"shadow_color_strategy\": 0, \"shadow_is_hardwareacceleration\": true, \"shadow_elevation\": 120, "
+        "\"shadow_color_strategy\": 0, \"shadow_is_hardwareacceleration\": true, \"shadow_elevation\": 120, "
+		"\"drag_type\": \"text\", \"shadow_enable\": true }";
+    EXPECT_FALSE(animationInfo2.length() > MAX_ANIMATION_INFO_LENGTH);
+    ret1 = g_dragServer->EnableInternalDropAnimation(context, animationInfo2);
+    EXPECT_EQ(ret1, COMMON_PARAMETER_ERROR);
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
+
+/**
+ * @tc.name: DragServerTest79
+ * @tc.desc: When dragState_ is MOTION_DRAGGING, FlushDragPosition should skip execution.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest79, TestSize.Level0) {
+    CALL_TEST_DEBUG;
+    g_dragMgr.SetDragState(DragState::MOTION_DRAGGING);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::MOTION_DRAGGING);
+    g_dragMgr.dragDrawing_.dragSmoothProcessor_.InsertEvent({0, 0, -1, 0});
+    g_dragMgr.dragDrawing_.FlushDragPosition(0);
+    g_dragMgr.dragDrawing_.StopVSyncStation();
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest80
+ * @tc.desc: When rsUiDirector_ is nullptr, FlushDragPosition should output an error log and return.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest80, TestSize.Level0) {
+    CALL_TEST_DEBUG;
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
+    g_dragMgr.dragDrawing_.dragSmoothProcessor_.InsertEvent({0, 0, -1, 0});
+    g_dragMgr.dragDrawing_.FlushDragPosition(0);
+    g_dragMgr.dragDrawing_.StopVSyncStation();
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest81
+ * @tc.desc: When DragWindowRotationFlush_ is not equal to the current rotation state.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest81, TestSize.Level0) {
+    CALL_TEST_DEBUG;
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
+    g_dragMgr.dragDrawing_.DragWindowRotationFlush_ = Rosen::Rotation::ROTATION_90;
+    g_dragMgr.dragDrawing_.dragSmoothProcessor_.InsertEvent({0, 0, -1, 0});
+    g_dragMgr.dragDrawing_.FlushDragPosition(0);
+    g_dragMgr.dragDrawing_.StopVSyncStation();
+    Rosen::Rotation rotation = g_dragMgr.dragDrawing_.GetRotation(WINDOW_ID);
+    EXPECT_EQ(g_dragMgr.dragDrawing_.DragWindowRotationFlush_, rotation);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest82
+ * @tc.desc: The drag-and-drop window is controlled by drag manager.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest82, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool visible = true;
+    bool isForce = false;
+    DRAG_DATA_MGR.SetDragWindowVisible(false);
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction { nullptr };
+    g_dragMgr.SetControlCollaborationVisible(false);
+    bool collaborationVisible = g_dragMgr.GetControlCollaborationVisible();
+    EXPECT_FALSE(collaborationVisible);
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
+    ret = g_dragServer->SetDragWindowVisible(visible, isForce, rsTransaction);
+    EXPECT_EQ(ret, RET_OK);
+    bool dragWindowVisible = DRAG_DATA_MGR.GetDragWindowVisible();
+    EXPECT_TRUE(dragWindowVisible);
+    g_dragMgr.SetControlCollaborationVisible(false);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest83
+ * @tc.desc: The drag-and-drop window is controlled by drag manager.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest83, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool visible = true;
+    bool isForce = true;
+    DRAG_DATA_MGR.SetDragWindowVisible(false);
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction { nullptr };
+    g_dragMgr.SetControlCollaborationVisible(false);
+    bool collaborationVisible = g_dragMgr.GetControlCollaborationVisible();
+    EXPECT_FALSE(collaborationVisible);
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
+    ret = g_dragServer->SetDragWindowVisible(visible, isForce, rsTransaction);
+    EXPECT_EQ(ret, RET_OK);
+    bool dragWindowVisible = DRAG_DATA_MGR.GetDragWindowVisible();
+    EXPECT_TRUE(dragWindowVisible);
+    g_dragMgr.SetControlCollaborationVisible(false);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest84
+ * @tc.desc: The drag-and-drop window is controlled by multi-screen collaboration.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest84, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool visible = true;
+    bool isForce = false;
+    DRAG_DATA_MGR.SetDragWindowVisible(false);
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction { nullptr };
+    g_dragMgr.SetControlCollaborationVisible(true);
+    bool collaborationVisible = g_dragMgr.GetControlCollaborationVisible();
+    EXPECT_TRUE(collaborationVisible);
+    g_dragMgr.SetDragState(DragState::START);
+    DragState dragState;
+    int32_t ret = g_dragMgr.GetDragState(dragState);
+    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(dragState, DragState::START);
+    ret = g_dragServer->SetDragWindowVisible(visible, isForce, rsTransaction);
+    EXPECT_EQ(ret, RET_OK);
+    bool dragWindowVisible = DRAG_DATA_MGR.GetDragWindowVisible();
+    EXPECT_FALSE(dragWindowVisible);
+    g_dragMgr.SetControlCollaborationVisible(false);
+    g_dragMgr.SetDragState(DragState::STOP);
+}
+
+/**
+ * @tc.name: DragServerTest85
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest85, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragState_ = DragState::STOP;
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = g_dragServer->GetDragSummaryInfo(dragSummaryInfo);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest86
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest86, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragState_ = DragState::START;
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = g_dragServer->GetDragSummaryInfo(dragSummaryInfo);
+    EXPECT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragServerTest87
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest87, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    const std::string udType = "general.message";
+    constexpr int64_t recordSize = 20;
+    dragData.value().detailedSummarys = { { udType, recordSize } };
+    Parcel parcel;
+    int32_t ret = DragDataUtil::MarshallingDetailedSummarys(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    DragData dragDataFromParcel;
+    ret = DragDataUtil::UnMarshallingDetailedSummarys(parcel, dragDataFromParcel);
+    ASSERT_EQ(ret, RET_OK);
+}
+ 
+/**
+ * @tc.name: DragServerTest88
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest88, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    dragData.value().summaryFormat = { { "image", { 0, 1 } } };
+    dragData.value().summaryTotalSize = 100;
+    Parcel parcel;
+    int32_t ret = DragDataUtil::MarshallingSummaryExpanding(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    DragData dragDataFromParcel;
+    ret = DragDataUtil::UnMarshallingSummaryExpanding(parcel, dragDataFromParcel);
+    ASSERT_EQ(ret, RET_OK);
+}
+ 
+/**
+ * @tc.name: DragServerTest89
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest89, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragSummaryInfo dragSummaryInfo;
+    Parcel parcel;
+    SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
+    bool ret = sequenceableDragSummaryInfo.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(sequenceableDragSummaryInfo.Unmarshalling(parcel));
+}
+ 
+/**
+ * @tc.name: DragServerTest90
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest90, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragSummaryInfo dragSummaryInfo;
+    Parcel parcel;
+    SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
+    bool ret = sequenceableDragSummaryInfo.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ASSERT_NO_FATAL_FAILURE(sequenceableDragSummaryInfo.SetDragSummaryInfo(dragSummaryInfo));
+}
+ 
+/**
+ * @tc.name: DragServerTest91
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest91, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    Parcel parcel;
+    SequenceableDragData sequenceableDragData(dragData);
+    bool ret = sequenceableDragData.Marshalling(parcel);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DragServerTest92
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest92, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragSummaryInfo dragSummaryInfo;
+    SequenceableDragSummaryInfo sequenceableDragSummaryInfo(dragSummaryInfo);
+    Parcel parcel;
+    parcel.SetMaxCapacity(0);
+    auto ret = sequenceableDragSummaryInfo.Unmarshalling(parcel);
+    ASSERT_EQ(ret, nullptr);
+    ASSERT_NO_FATAL_FAILURE(sequenceableDragSummaryInfo.SetDragSummaryInfo(dragSummaryInfo));
+}
+
+/**
+ * @tc.name: DragServerTest93
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest93, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    parcel.SetMaxCapacity(0);
+    DragDataPacker dragDataPacker;
+    DragData dragData;
+    auto ret = dragDataPacker.UnMarshallingDetailedSummarys(parcel, dragData);
+    ASSERT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest94
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest94, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    parcel.SetMaxCapacity(0);
+    DragDataPacker dragDataPacker;
+    DragData dragData;
+    auto ret = dragDataPacker.UnMarshallingSummaryExpanding(parcel, dragData);
+    ASSERT_EQ(ret, RET_ERR);
+}
+
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+/**
+ * @tc.name: DragServerTest95
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest95, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<EventHub> eventHub = EventHub::GetEventHub(g_context);
+    ASSERT_NE(eventHub, nullptr);
+    g_dragMgr.dragState_ = DragState::START;
+    OHOS::AAFwk::Want want;
+    EventFwk::CommonEventData event;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
+    event.SetWant(want);
+    ASSERT_NO_FATAL_FAILURE(eventHub->OnReceiveEvent(event));
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_LOCALE_CHANGED);
+    event.SetWant(want);
+    ASSERT_NO_FATAL_FAILURE(eventHub->OnReceiveEvent(event));
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
+ 
+/**
+ * @tc.name: DragServerTest96
+ * @tc.desc: Testing deserialization of invalid values
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest96, TestSize.Level1)
+{
+    Parcel parcel;
+    SummaryMap val;
+    val.clear();
+    int32_t size = -1;
+    bool result = parcel.WriteInt32(size);
+    EXPECT_TRUE(result);
+    int32_t ret = SummaryPacker::UnMarshalling(parcel, val);
+    ASSERT_EQ(ret, RET_ERR);
+    EXPECT_EQ(val.size(), 0);
+}
+ 
+/**
+ * @tc.name: DragServerTest97
+ * @tc.desc: Testing deserialization of maximum values
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest97, TestSize.Level1)
+{
+    Parcel parcel;
+    SummaryMap val;
+    val.clear();
+    int32_t size = MAX_BUF_SIZE;
+    bool result = parcel.WriteInt32(size);
+    EXPECT_TRUE(result);
+    int32_t ret = SummaryPacker::UnMarshalling(parcel, val);
+    ASSERT_EQ(ret, RET_ERR);
+    EXPECT_EQ(val.size(), 0);
+}
+
+/**
+ * @tc.name: DragServerTest98
+ * @tc.desc: Test the expansion screen interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest98, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.CreateWindow();
+    g_dragMgr.dragDrawing_.InitCanvas(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    g_dragMgr.dragDrawing_.UpdateDragWindowDisplay(DISPLAY_ID);
+    Rosen::Rotation rotation = g_dragMgr.dragDrawing_.GetRotation(WINDOW_ID);
+    int32_t ret = g_dragMgr.dragDrawing_.RotateDragWindow(rotation);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest99
+ * @tc.desc: Test the expansion screen interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest99, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.CreateWindow();
+    g_dragMgr.dragDrawing_.InitCanvas(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    ASSERT_NE(pixelMap, nullptr);
+    ShadowInfo shadowInfo = { pixelMap, 0, 0 };
+    int32_t ret = g_dragMgr.dragDrawing_.UpdateShadowPic(shadowInfo);
+    ASSERT_EQ(ret, RET_ERR);
+    g_dragMgr.dragDrawing_.UpdateDragWindowDisplay(DISPLAY_ID);
+    Rosen::Rotation rotation = g_dragMgr.dragDrawing_.GetRotation(WINDOW_ID);
+    ret = g_dragMgr.dragDrawing_.RotateDragWindow(rotation);
+    EXPECT_EQ(ret, RET_OK);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
