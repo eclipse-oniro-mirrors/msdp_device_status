@@ -177,7 +177,7 @@ std::shared_ptr<Media::PixelMap> DragServerTest::CreatePixelMap(int32_t width, i
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        FI_HILOGE("invalid, height:%{public}d, width:%{public}d", height, width);
+        FI_HILOGE("Invalid, height:%{public}d, width:%{public}d", height, width);
         return nullptr;
     }
     Media::InitializationOptions opts;
