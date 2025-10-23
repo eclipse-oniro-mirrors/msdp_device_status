@@ -1,0 +1,51 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.stationary", "stationary")
+@!sts_inject("""
+static
+{ loadLibrary("Stationary.z") }
+""")
+
+enum ActivityState : i32 {
+    ENTER = 1,
+    EXIT = 2
+}
+
+struct ActivityResponse {
+    state: ActivityState;
+}
+
+enum ActivityEvent : i32 {
+    ENTER = 1,
+    EXIT = 2,
+    ENTER_EXIT = 3
+}
+
+@!sts_inject("""
+    function on(activity: String, event: ActivityEvent, reportLatencyNs: long, callback: (info: ActivityResponse) => void) {
+        return onActivity(activity, event, reportLatencyNs, callback, callback);
+      }
+    function off(activity: String, event: ActivityEvent, callback?: (info: ActivityResponse) => void) {
+        return offActivity(activity, event, callback);
+      }
+    function once(activity: String, callback: (info: ActivityResponse) => void) {
+       return getDeviceStatus(activity, callback, callback);
+    }
+""")
+function onActivity(activityType: String, event: ActivityEvent, reportLatencyNs: i64, f: (info: ActivityResponse) => void, opq: Opaque);
+function offActivity(activityType: String, event: ActivityEvent, opq: Optional<Opaque>);
+function getDeviceStatus(activityType: String, f: (info: ActivityResponse) => void, opq: Opaque);
+
