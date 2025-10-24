@@ -41,7 +41,7 @@ constexpr uint32_t UNSUBSCRIBE_TWO_PARA = 2;
 constexpr int32_t OTHERS = 0;
 constexpr int32_t CHILD = 1;
 constexpr int32_t DEVICE_UNSUPPORT_ERR = 0x3A10028;
-std::mutex g_mutex; // mutex:Subscribe/Unsubscribe/OnListener
+std::mutex g_mutex; // mutex: Subscribe/Unsubscribe/OnListener
 const std::array<napi_valuetype, 2> EXPECTED_SUB_ARG_TYPES = { napi_string, napi_function };
 const std::array<napi_valuetype, 1> EXPECTED_UNSUB_ONE_ARG_TYPES = { napi_string };
 const std::array<napi_valuetype, 2> EXPECTED_UNSUB_TWO_ARG_TYPES = { napi_string, napi_function };
