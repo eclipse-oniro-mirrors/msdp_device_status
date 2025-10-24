@@ -150,15 +150,15 @@ bool MotionNapi::SubscribeCallback(napi_env env, int32_t type)
         }
 
         if (ret == PERMISSION_DENIED) {
-            FI_HILOGE("failed to subscribe");
+            FI_HILOGE("Failed to subscribe");
             ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
             return false;
         } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
-            FI_HILOGE("failed to subscribe");
+            FI_HILOGE("Failed to subscribe");
             ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
             return false;
         } else {
-            FI_HILOGE("failed to subscribe");
+            FI_HILOGE("Failed to subscribe");
             ThrowMotionErr(env, SUBSCRIBE_EXCEPTION, "Subscribe failed");
             return false;
         }
