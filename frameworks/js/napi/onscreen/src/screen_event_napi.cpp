@@ -79,24 +79,31 @@ void ScreenEventNapi::DefParallelFeatureStatus(napi_env env, napi_value exports)
 
 void OnScreenCallback::OnScreenChange(const std::string& changeInfo)
 {
-    auto task = [this, changeInfo]() {
+    std::vector<napi_ref> refSnapshot;
+    {
+        std::lock_guard<std::mutex> lk(g_mtx);
+        refSnapshot.assign(onRef.begin(), onRef.end());
+    }
+
+    sptr<OnScreenCallback> self(this);
+    auto task = [self, refs = std::move(refSnapshot), changeInfo]() {
         napi_value handler = nullptr;
-        for (auto& item : onRef) {
-            if (napi_get_reference_value(env_, item, &handler) != napi_ok) {
+        for (auto& item : refs) {
+            if (napi_get_reference_value(self->env_, item, &handler) != napi_ok) {
                 FI_HILOGE("napi_get_reference_value failed");
                 return;
             }
             napi_value result;
-            if (napi_create_string_utf8(env_, changeInfo.c_str(), NAPI_AUTO_LENGTH, &result) != napi_ok) {
+            if (napi_create_string_utf8(self->env_, changeInfo.c_str(), NAPI_AUTO_LENGTH, &result) != napi_ok) {
                 FI_HILOGE("Failed to napi_create_string_utf8");
                 return;
             }
             FI_HILOGD("changeInfo: %{public}s", changeInfo.c_str());
             napi_value callResult = nullptr;
-            napi_call_function(env_, nullptr, handler, 1, &result, &callResult);
+            napi_call_function(self->env_, nullptr, handler, 1, &result, &callResult);
         }
     };
-    if (napi_send_event(env_, task, napi_eprio_immediate) != napi_ok) {
+    if (napi_send_event(self->env_, task, napi_eprio_immediate) != napi_ok) {
         FI_HILOGE("Failed to SendEvent");
     }
 }
