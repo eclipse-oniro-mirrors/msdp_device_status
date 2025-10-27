@@ -77,6 +77,17 @@ void ScreenEventNapi::DefParallelFeatureStatus(napi_env env, napi_value exports)
     SetPropertyName(env, exports, "ParallelFeatureStatus", parallelFeatureStatus);
 }
 
+ OnScreenCallback::~OnScreenCallback()
+{
+    if (env_ == nullptr) {
+        return;
+    }
+    for (auto ref : onRef) {
+        napi_delete_reference(env_, ref);
+    }
+    onRef.clear();
+}
+
 void OnScreenCallback::OnScreenChange(const std::string& changeInfo)
 {
     std::vector<napi_ref> refSnapshot;
