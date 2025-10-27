@@ -35,7 +35,7 @@ namespace OnScreen {
 class OnScreenCallback : public OnScreenCallbackStub {
 public:
     explicit OnScreenCallback(napi_env env) : env_(env) {}
-    virtual ~OnScreenCallback() {};
+    ~OnScreenCallback();
     void OnScreenChange(const std::string& changeInfo) override;
 
 public:
