@@ -357,7 +357,7 @@ napi_value ScreenEventNapi::UnregisterScreenEventCallbackNapi(napi_env env, napi
 
     std::vector<PendingOff> pending;
     // 0参：删除全部
-    if (argc == 0) {
+    if (argc == ARG_0) {
         CollectAllPendingLocked(pending);
     } else {
         // get windowId
@@ -368,7 +368,7 @@ napi_value ScreenEventNapi::UnregisterScreenEventCallbackNapi(napi_env env, napi
         }
 
         // 1参：删除某个 windowId 下全部（第四个判定）
-        if (argc == 1) {
+        if (argc == ARG_1) {
             if (!CollectWindowAllPendingLocked(windowId, pending)) { // 不存在时视为幂等，无需报错
                 ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get windowId");
                 return nullptr;
@@ -381,16 +381,13 @@ napi_value ScreenEventNapi::UnregisterScreenEventCallbackNapi(napi_env env, napi
                 return nullptr;
             }
             //  2参：删除 (win,event) 全部 否则 3参删除指定 handler（第五个判定）
-            if (argc == 2) {
-                if (!CollectEventNodePendingLocked(windowId, eventStr, pending)) {
-                    ThrowOnScreenErr(env, RET_PARAM_ERR, "wrong param");
-                    return nullptr;
-                }
-            } else { // argc >= 3
-                if (!EraseOneHandlerLocked(windowId, eventStr, env, args[ARG_2], pending)) {
-                    ThrowOnScreenErr(env, RET_PARAM_ERR, "wrong param");
-                    return nullptr;
-                }
+            if (argc == ARG_2 && !CollectEventNodePendingLocked(windowId, eventStr, pending)) {
+                ThrowOnScreenErr(env, RET_PARAM_ERR, "wrong param");
+                return nullptr;
+            }
+            if (argc == ARG_3 && !EraseOneHandlerLocked(windowId, eventStr, env, args[ARG_2], pending)) {
+                ThrowOnScreenErr(env, RET_PARAM_ERR, "wrong param");
+                return nullptr;
             }
         }
     }
