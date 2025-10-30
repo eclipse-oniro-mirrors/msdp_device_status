@@ -20,6 +20,7 @@
 #include "drag_data_manager.h"
 #include "drag_data_packer.h"
 #include "drag_data_util.h"
+#include "drag_drawing.h"
 #include "drag_server.h"
 #include "event_hub.h"
 #include "interaction_manager.h"
