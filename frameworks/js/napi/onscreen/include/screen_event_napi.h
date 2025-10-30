@@ -39,12 +39,10 @@ public:
     void OnScreenChange(const std::string& changeInfo) override;
 
 public:
-    int32_t windowId;
+    int32_t windowId { 0 };
     std::string event;
     sptr<IRemoteOnScreenCallback> callback;
     std::set<napi_ref> onRef;
-
-private:
     napi_env env_ { nullptr };
 };
 
