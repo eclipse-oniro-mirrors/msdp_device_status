@@ -55,7 +55,7 @@ napi_value ScreenEventNapi::Init(napi_env env, napi_value exports)
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_FUNCTION("registerScreenEvent", RegisterScreenEventCallbackNapi),
         DECLARE_NAPI_STATIC_FUNCTION("unregisterScreenEvent", UnregisterScreenEventCallbackNapi),
-        DECLARE_NAPI_STATIC_FUNCTION("IsParallelFeatureEnabled", IsParallelFeatureEnabled),
+        DECLARE_NAPI_STATIC_FUNCTION("isParallelFeatureEnabled", IsParallelFeatureEnabled),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
     DefParallelFeatureStatus(env, exports);
@@ -90,24 +90,30 @@ void ScreenEventNapi::DefParallelFeatureStatus(napi_env env, napi_value exports)
 
 void OnScreenCallback::OnScreenChange(const std::string& changeInfo)
 {
+    sptr<OnScreenCallback> self(this);
     std::vector<napi_ref> refSnapshot;
     {
         std::lock_guard<std::mutex> lk(g_mtx);
         refSnapshot.assign(onRef.begin(), onRef.end());
     }
 
-    sptr<OnScreenCallback> self(this);
     auto task = [self, refs = std::move(refSnapshot), changeInfo]() {
-        napi_value handler = nullptr;
         for (auto& item : refs) {
-            if (napi_get_reference_value(self->env_, item, &handler) != napi_ok) {
-                FI_HILOGE("napi_get_reference_value failed");
-                return;
+            napi_value handler = nullptr;
+            {
+                std::lock_guard<std::mutex> lk(g_mtx);
+                if (self->onRef.find(item) == self->onRef.end()) {
+                    continue;
+                }
+                if (napi_get_reference_value(self->env_, item, &handler) != napi_ok) {
+                    FI_HILOGE("napi_get_reference_value failed");
+                    return;
+                }
             }
             napi_value result;
             if (napi_create_string_utf8(self->env_, changeInfo.c_str(), NAPI_AUTO_LENGTH, &result) != napi_ok) {
                 FI_HILOGE("Failed to napi_create_string_utf8");
-                return;
+                continue;
             }
             FI_HILOGD("changeInfo: %{public}s", changeInfo.c_str());
             napi_value callResult = nullptr;
