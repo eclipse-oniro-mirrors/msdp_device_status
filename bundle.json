@@ -52,6 +52,7 @@
         "ipc",
         "safwk",
         "samgr",
+        "bundle_framework",
         "c_utils",
         "common_event_service",
         "napi",
@@ -105,7 +106,8 @@
           "//base/msdp/device_status/frameworks/ets/coordination:coordination",
           "//base/msdp/device_status/frameworks/ets/metadataBinding:metadataBinding",
           "//base/msdp/device_status/frameworks/ets/motion:motion",
-          "//base/msdp/device_status/frameworks/ets/stationary:stationary_ani"
+          "//base/msdp/device_status/frameworks/ets/stationary:stationary_ani",
+          "//base/msdp/device_status/frameworks/js/napi/room_location:roomlocation_napi"
         ],
         "service_group":[
           "//base/msdp/device_status/libs:devicestatus_algo",
