@@ -174,8 +174,8 @@ napi_value ScreenEventNapi::RegisterScreenEventCallbackNapi(napi_env env, napi_c
     if (callback != nullptr) {
         OnScreenManager::GetInstance().RegisterScreenEventCallback(windowId, eventStr, callback);
     } else {
-        if (handleRef != nullptr) {
-            napi_delete_reference(env, handleRef);
+        if (handlerRef != nullptr) {
+            napi_delete_reference(env, handlerRef);
         }
         return nullptr;
     }
