@@ -77,7 +77,7 @@ void ScreenEventNapi::DefParallelFeatureStatus(napi_env env, napi_value exports)
     SetPropertyName(env, exports, "ParallelFeatureStatus", parallelFeatureStatus);
 }
 
- OnScreenCallback::~OnScreenCallback()
+OnScreenCallback::~OnScreenCallback()
 {
     if (env_ == nullptr) {
         return;
@@ -132,8 +132,8 @@ napi_value ScreenEventNapi::RegisterScreenEventCallbackNapi(napi_env env, napi_c
     napi_value args[ARG_3] = { nullptr };
     napi_value jsThis = nullptr;
     napi_value result = nullptr;
-    if (napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr) != napi_ok) {
-        ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "napi_get_cb_info failed");
+    if (napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr) != napi_ok || argc != ARG_3) {
+        ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "napi_get_cb_info failed, expected 3 args");
         return nullptr;
     }
 
@@ -152,13 +152,8 @@ napi_value ScreenEventNapi::RegisterScreenEventCallbackNapi(napi_env env, napi_c
     }
 
     // Get Callback
-    napi_ref handlerRef = nullptr;
-    if (napi_create_reference(env, args[ARG_2], 1, &handlerRef) != napi_ok) {
-        ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get callback");
-        return nullptr;
-    }
-
     sptr<OnScreenCallback> callback = nullptr;
+    napi_ref handlerRef = nullptr;
     {
         std::lock_guard<std::mutex> lk(g_mtx);
         if (!ConstructScreenEventNapi(env, jsThis)) {
@@ -166,10 +161,23 @@ napi_value ScreenEventNapi::RegisterScreenEventCallbackNapi(napi_env env, napi_c
             return nullptr;
         }
 
+        if (napi_create_reference(env, args[ARG_2], 1, &handlerRef) != napi_ok) {
+            ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get callback");
+            if (handlerRef != nullptr) {
+                napi_delete_reference(env, handlerRef);
+            }
+            return nullptr;
+        }
         callback = UpsertScreenCallback(env, windowId, eventStr, args[ARG_2], handlerRef);
     }
+
     if (callback != nullptr) {
         OnScreenManager::GetInstance().RegisterScreenEventCallback(windowId, eventStr, callback);
+    } else {
+        if (handleRef != nullptr) {
+            napi_delete_reference(env, handleRef);
+        }
+        return nullptr;
     }
     napi_get_undefined(env, &result);
     return result;
@@ -216,7 +224,7 @@ bool ScreenEventNapi::TransJsToStr(napi_env env, napi_value in, std::string &out
         FI_HILOGE("Error string length invalid");
         return false;
     }
-    if (strLen < 0 || strLen > MAX_ARG_STR_LEN) {
+    if (strLen > MAX_ARG_STR_LEN) {
         FI_HILOGE("The string length invalid");
         return false;
     }
@@ -264,15 +272,19 @@ sptr<OnScreenCallback> ScreenEventNapi::UpsertScreenCallback(
     FI_HILOGD("enter");
     sptr<OnScreenCallback> callback = nullptr;
     if (g_screenCallbacks.find(windowId) != g_screenCallbacks.end()) {
-        auto eventCallbacks = g_screenCallbacks[windowId];
+        auto& eventCallbacks = g_screenCallbacks[windowId];
         if (eventCallbacks.find(event) == eventCallbacks.end()) {
             callback = new (std::nothrow) OnScreenCallback(env);
+            if (callback == nullptr) {
+                FI_HILOGE("callback is nullptr");
+                return nullptr;
+            }
             callback->windowId = windowId;
             callback->event = event;
             callback->onRef.insert(handlerRef);
             eventCallbacks.emplace(event, callback);
         } else {
-            auto refs = eventCallbacks[event]->onRef;
+            auto& refs = eventCallbacks[event]->onRef;
             if (IsSameJsHandler(env, refs, jsHandler)) {
                 return nullptr;
             }
@@ -280,6 +292,10 @@ sptr<OnScreenCallback> ScreenEventNapi::UpsertScreenCallback(
         }
     } else {
         callback = new (std::nothrow) OnScreenCallback(env);
+        if (callback == nullptr) {
+            FI_HILOGE("callback is nullptr");
+            return nullptr;
+        }
         callback->windowId = windowId;
         callback->event = event;
         callback->onRef.insert(handlerRef);
@@ -349,7 +365,8 @@ bool ScreenEventNapi::EraseOneHandlerLocked(int32_t windowId, const std::string&
         return false;
     }
     
-    if (!EraseAndDeleteJsHandler(env, eIt->second->onRef, jsHandler)) {
+    napi_env owner = eIt->second->env_;
+    if (!EraseAndDeleteJsHandler(owner, eIt->second->onRef, jsHandler)) {
         return false;
     }
     if (eIt->second->onRef.empty()) {
@@ -467,23 +484,25 @@ void ScreenEventNapi::SetPropertyName(napi_env env, napi_value targetObj, const 
 }
 bool ScreenEventNapi::EraseAndDeleteJsHandler(napi_env env, std::set<napi_ref>& refs, napi_value jsHandler)
 {
-    for (auto it = refs.begin(); it != refs.end(); ++it) {
+    for (auto it = refs.begin(); it != refs.end();) {
         napi_value cur = nullptr;
         if (napi_get_reference_value(env, *it, &cur) != napi_ok) {
+            FI_HILOGE("napi_get_reference_value failed, skip on ref");
+            ++it;
             continue;
         }
         bool same = false;
-        if (napi_strict_equals(env, cur, jsHandler, &same) != napi_ok) {
+        if (napi_strict_equals(env, cur, jsHandler, &same) != napi_ok || !same) {
+            ++it;
             continue;
         }
-        if (same) {
-            napi_ref doomed = *it;
-            if (napi_delete_reference(env, doomed) != napi_ok) {
-                return false;
-            }
-            refs.erase(it);
-            return true;
+        napi_ref doomed = *it;
+        it = refs.erase(it);
+        if (napi_delete_reference(env, doomed) != napi_ok) {
+            FI_HILOGE("napi_delete_reference failed after erase");
+            return false;
         }
+        return true;
     }
     return false;
 }
