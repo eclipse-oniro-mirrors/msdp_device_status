@@ -230,6 +230,17 @@ int32_t OnScreenServer::IsParallelFeatureEnabled(const CallingContext& context,
     return RET_OK;
 }
 
+int32_t OnScreenServer::GetLiveStatus()
+{
+    FI_HILOGI("get live status");
+    std::lock_guard lockGrd(mtx_);
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
+        return RET_NO_SUPPORT;
+    }
+    return handle_.pAlgorithm->GetLiveStatus();
+}
+
 int32_t OnScreenServer::ConnectAlgoLib()
 {
     return handle_.pAlgorithm == nullptr ? LoadAlgoLib() : RET_OK;

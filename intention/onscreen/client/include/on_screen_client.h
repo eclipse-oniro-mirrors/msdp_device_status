@@ -39,6 +39,7 @@ public:
     int32_t UnregisterScreenEventCallback(int32_t windowId, const std::string& event,
         const sptr<IRemoteOnScreenCallback>& callback);
     int32_t IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus);
+    int32_t GetLiveStatus();
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

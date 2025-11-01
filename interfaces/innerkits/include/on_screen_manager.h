@@ -58,6 +58,7 @@ public:
     int32_t RegisterScreenEventCallback(int32_t windowId, std::string event, sptr<IRemoteOnScreenCallback> callback);
     int32_t UnregisterScreenEventCallback(int32_t windowId, std::string event, sptr<IRemoteOnScreenCallback> callback);
     int32_t IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus);
+    int32_t GetLiveStatus();
 
 private:
     OnScreenManager() = default;

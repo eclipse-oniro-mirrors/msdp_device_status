@@ -49,6 +49,7 @@ public:
         const sptr<IRemoteOnScreenCallback>& callback);
     int32_t IsParallelFeatureEnabled(const CallingContext& context, int32_t windowId, int32_t& outStatus);
     int32_t ListenLiveBroadcast();
+    int32_t GetLiveStatus();
 
 private:
     int32_t LoadAlgoLib();

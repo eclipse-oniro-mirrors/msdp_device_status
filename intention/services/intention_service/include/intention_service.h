@@ -130,6 +130,7 @@ public:
         const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override;
     ErrCode IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus) override;
     ErrCode ListenLiveBroadcast() override;
+    int32_t GetLiveStatus() override;
 
     // hidumper
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
