@@ -37,6 +37,13 @@ int32_t OnScreenCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         FI_HILOGE("OnScreenCallbackStub::OnRemoteRequest failed, descriptor is not matched");
         return E_DEVICESTATUS_GET_SERVICE_FAILED;
     }
+    switch (code) {
+        case static_cast<int32_t>(ON_SCREEN_CHANGE): {
+            return OnScreenChangeStub(data);
+        }
+        default:
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
     return OnScreenChangeStub(data);
 }
 
