@@ -105,6 +105,7 @@
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::RegisterScreenEventCallback(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::OnScreen::IRemoteOnScreenCallback>)";
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::UnregisterScreenEventCallback(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::OnScreen::IRemoteOnScreenCallback>)";
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::IsParallelFeatureEnabled(int, int&)";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::GetLiveStatus()";
         };
     local:
         *;

@@ -60,6 +60,7 @@ public:
     static napi_value RegisterScreenEventCallbackNapi(napi_env env, napi_callback_info info);
     static napi_value UnregisterScreenEventCallbackNapi(napi_env env, napi_callback_info info);
     static napi_value IsParallelFeatureEnabled(napi_env env, napi_callback_info info);
+    static napi_value GetLiveStatus(napi_env env, napi_callback_info info);
 
 private:
     static bool ConstructScreenEventNapi(napi_env env, napi_value jsThis);

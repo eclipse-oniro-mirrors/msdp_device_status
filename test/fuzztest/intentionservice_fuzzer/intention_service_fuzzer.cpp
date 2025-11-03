@@ -97,6 +97,7 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_UNREGISTER_SCREEN_EVENT_CALLBACK,
     IIntentionIpcCode::COMMAND_IS_PARALLEL_FEATURE_ENABLED,
     IIntentionIpcCode::COMMAND_LISTEN_LIVE_BROADCAST,
+    IIntentionIpcCode::COMMAND_GET_LIVE_STATUS,
 };
 
 class IntentionServiceMock : public IntentionStub {
@@ -546,6 +547,11 @@ public:
     }
 
     ErrCode ListenLiveBroadcast() override
+    {
+        return 0;
+    }
+
+    ErrCode GetLiveStatus() override
     {
         return 0;
     }

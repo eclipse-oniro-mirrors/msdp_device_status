@@ -73,6 +73,10 @@ int32_t OnScreenClient::IsParallelFeatureEnabled(int32_t windowId, int32_t& outS
     return ret;
 }
 
+int32_t OnScreenClient::GetLiveStatus()
+{
+    return INTENTION_CLIENT->GetLiveStatus();
+}
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

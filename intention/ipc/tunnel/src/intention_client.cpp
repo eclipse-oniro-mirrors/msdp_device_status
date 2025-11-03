@@ -1135,6 +1135,18 @@ int32_t IntentionClient::IsParallelFeatureEnabled(int32_t windowId, int32_t& out
     return RET_OK;
 }
 
+int32_t IntentionClient::GetLiveStatus()
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    return devicestatusProxy_->GetLiveStatus();
+}
+
 void IntentionClient::ResetProxy(const wptr<IRemoteObject> &remote)
 {
     CALL_DEBUG_ENTER;

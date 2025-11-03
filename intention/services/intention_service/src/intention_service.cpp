@@ -655,6 +655,13 @@ ErrCode IntentionService::IsParallelFeatureEnabled(int32_t windowId, int32_t& ou
     });
 }
 
+int32_t IntentionService::GetLiveStatus()
+{
+    return PostSyncTask([this] {
+        return onScreen_.GetLiveStatus();
+    });
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

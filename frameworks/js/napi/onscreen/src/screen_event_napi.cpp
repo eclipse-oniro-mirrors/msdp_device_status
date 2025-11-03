@@ -56,6 +56,7 @@ napi_value ScreenEventNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("registerScreenEvent", RegisterScreenEventCallbackNapi),
         DECLARE_NAPI_STATIC_FUNCTION("unregisterScreenEvent", UnregisterScreenEventCallbackNapi),
         DECLARE_NAPI_STATIC_FUNCTION("isParallelFeatureEnabled", IsParallelFeatureEnabled),
+        DECLARE_NAPI_STATIC_FUNCTION("getLiveStatus", GetLiveStatus),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
     DefParallelFeatureStatus(env, exports);
@@ -464,6 +465,16 @@ napi_value ScreenEventNapi::IsParallelFeatureEnabled(napi_env env, napi_callback
     napi_create_int32(env, res, &out);
     return out;
 }
+
+napi_value ScreenEventNapi::GetLiveStatus(napi_env env, napi_callback_info info)
+{
+    FI_HILOGI("get live status");
+    auto res = OnScreenManager::GetInstance().GetLiveStatus();
+    napi_value out;
+    napi_create_int32(env, res, &out);
+    return out;
+}
+
 void ScreenEventNapi::SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName)
 {
     napi_value prop = nullptr;

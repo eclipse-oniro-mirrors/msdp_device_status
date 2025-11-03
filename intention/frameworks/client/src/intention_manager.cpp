@@ -657,6 +657,11 @@ int32_t IntentionManager::IsParallelFeatureEnabled(int32_t windowId, int32_t& ou
     return onScreen_.IsParallelFeatureEnabled(windowId, outStatus);
 }
 
+int32_t IntentionManager::GetLiveStatus()
+{
+    CALL_DEBUG_ENTER;
+    return onScreen_.GetLiveStatus();
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

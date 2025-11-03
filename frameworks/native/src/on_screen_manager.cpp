@@ -60,6 +60,10 @@ int32_t OnScreenManager::IsParallelFeatureEnabled(int32_t windowId, int32_t& out
     return INTER_MGR_IMPL.IsParallelFeatureEnabled(windowId, outStatus);
 }
 
+int32_t OnScreenManager::GetLiveStatus()
+{
+    return INTER_MGR_IMPL.GetLiveStatus();
+}
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp
