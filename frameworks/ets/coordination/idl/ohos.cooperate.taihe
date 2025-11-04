@@ -1,0 +1,99 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.cooperate", "cooperate")
+@!sts_inject("""
+static { loadLibraryWithPermissionCheck("Coordination_so.z", "@ohos.cooperate") }
+""")
+@!sts_inject_into_module("import { AsyncCallback } from '@ohos.base';")
+
+enum CooperateState : i32 {
+    COOPERATE_PREPARE = 0,
+    COOPERATE_UNPREPARE = 1,
+    COOPERATE_ACTIVATE = 2,
+    COOPERATE_ACTIVATE_SUCCESS = 3,
+    COOPERATE_ACTIVATE_FAILURE = 4,
+    COOPERATE_DEACTIVATE_SUCCESS = 5,
+    COOPERATE_DEACTIVATE_FAILURE = 6,
+    COOPERATE_SESSION_DISCONNECTED = 7
+}
+
+struct CooperateMessage {
+    networkId: String;
+    state: CooperateState;
+}
+
+struct MouseLocation {
+    displayX: i32;
+    displayY: i32;
+    displayWidth: i32;
+    displayHeight: i32;
+}
+
+struct CooperateOptions {
+    displayX: i32;
+    displayId: i64;
+    displayY: i32;
+}
+
+@rename("prepareCooperate")
+function PrepareCooperateAsync(opq: @sts_type("AsyncCallback<void>") Opaque): void;
+@rename("prepareCooperate")
+function PrepareCooperatePromise(): @sts_type("Promise<void>") Opaque;
+
+@rename("unprepareCooperate")
+function UnprepareCooperateAsync(opq: @sts_type("AsyncCallback<void>") Opaque): void;
+@rename("unprepareCooperate")
+function UnprepareCooperatePromise(): @sts_type("Promise<void>") Opaque;
+
+@rename("activateCooperate")
+function ActivateCooperateAsync(targetNetworkId: String, inputDeviceId: i32, opq: @sts_type("AsyncCallback<void>") Opaque): void;
+@rename("activateCooperate")
+function ActivateCooperatePromise(targetNetworkId: String, inputDeviceId: i32): @sts_type("Promise<void>") Opaque;
+
+@rename("deactivateCooperate")
+function DeactivateCooperateAsync(isUnchained: bool, opq: @sts_type("AsyncCallback<void>") Opaque): void;
+@rename("deactivateCooperate")
+function DeactivateCooperatePromise(isUnchained: bool): @sts_type("Promise<void>") Opaque;
+
+@rename("getCooperateSwitchState")
+function GetCooperateSwitchStateAsync(networkId: String, opq: @sts_type("AsyncCallback<boolean>") Opaque): void;
+@rename("getCooperateSwitchState")
+function GetCooperateSwitchStatePromise(networkId: String): @sts_type("Promise<boolean>") Opaque;
+
+@rename("activateCooperateWithOptions")
+function ActivateCooperateWithOptionsPromise(targetNetworkId: String, inputDeviceId: i32, cooperateOptions: Optional<CooperateOptions>): @sts_type("Promise<void>") Opaque;
+
+@!sts_inject("""
+    function onCooperateMessage(callback: (info: CooperateMessage) => void) {
+        return onCooperateMessageInner(callback, callback);
+      }
+    function offCooperateMessage( callback?: (info: CooperateMessage) => void) {
+        return offCooperateMessageInner(callback);
+      }
+""")
+function OnCooperateMessageInner(f: (info: CooperateMessage) => void, opq: Opaque);
+function OffCooperateMessageInner(opq: Optional<Opaque>);
+
+@!sts_inject("""
+    function onCooperateMouseEvent(networkId: string, callback: (info: MouseLocation) => void) {
+        return onCooperateMouseEventInner(networkId, callback, callback);
+      }
+    function offCooperateMouseEvent(networkId: string, callback?: (info: MouseLocation) => void) {
+        return offCooperateMouseEventInner(networkId, callback);
+      }
+""")
+function OnCooperateMouseEventInner(networkId: String, f: (info: MouseLocation) => void, opq: Opaque);
+function OffCooperateMouseEventInner(networkId: String, opq: Optional<Opaque>);
