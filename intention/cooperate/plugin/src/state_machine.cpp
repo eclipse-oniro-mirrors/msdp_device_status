@@ -912,11 +912,10 @@ void StateMachine::RemovePreMonitor(Context &context)
 void StateMachine::RemoveWatches(Context &context)
 {
     CALL_INFO_TRACE;
-    for (auto iter = onlineBoards_.begin();
-         iter != onlineBoards_.end(); iter = onlineBoards_.begin()) {
-        FI_HILOGD("Remove watch \'%{public}s\'", Utility::Anonymize(*iter).c_str());
-        onlineBoards_.erase(iter);
+    for (const auto& board : onlineBoards_) {
+        FI_HILOGD("Remove watch \'%{public}s\'", Utility::Anonymize(board).c_str());
     }
+    onlineBoards_.clear();
 }
 bool StateMachine::IsCooperateEnable()
 {
