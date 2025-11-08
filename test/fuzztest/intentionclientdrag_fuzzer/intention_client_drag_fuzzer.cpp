@@ -128,7 +128,9 @@ void IntentionClientDragFuzzTest(const uint8_t *data, size_t size)
     INTENTION_CLIENT->GetDragData(dragData);
     INTENTION_CLIENT->StopDrag(dragDropResult);
     INTENTION_CLIENT->EnableInternalDropAnimation(animationInfo);
-    INTENTION_CLIENT->UpdateShadowPic(shadowInfo);
+    if (shadowInfo.pixelMap != nullptr) {
+        INTENTION_CLIENT->UpdateShadowPic(shadowInfo);
+    }
 }
 } // namespace OHOS
 

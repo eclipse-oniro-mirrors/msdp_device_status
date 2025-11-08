@@ -72,8 +72,8 @@ void IntentionBundleInfoFuzzTest(const uint8_t *data, size_t size)
         .duration = provider.ConsumeIntegralInRange<int32_t>(1, 5)
     };
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
-    uint64_t displayId = provider.ConsumeIntegral<int64_t >();
-    uint64_t screenId =  provider.ConsumeIntegral<int64_t >();
+    uint64_t displayId = provider.ConsumeIntegral<uint64_t >();
+    uint64_t screenId =  provider.ConsumeIntegral<uint64_t >();
     INTENTION_CLIENT->RemoveSubscriptListener();
     INTENTION_CLIENT->UpdateDragStyle(style, eventId);
     INTENTION_CLIENT->GetDragTargetPid(targetPid);
