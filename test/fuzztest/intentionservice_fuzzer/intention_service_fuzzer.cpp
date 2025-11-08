@@ -620,13 +620,16 @@ bool IIntentionServerFuzzTest(const uint8_t* data, size_t size)
         return 0;
     }
     OHOS::MessageParcel parcel;
-    int code = provider.ConsumeIntegralInRange<int32_t>(0, 58);
+    int code = provider.ConsumeIntegralInRange<int32_t>(0, 20);
+    int code1 = provider.ConsumeIntegralInRange<int32_t>(20, CODE_LIST.size());
     parcel.WriteInterfaceToken(INTENTION_INTERFACE_TOKEN);
     parcel.WriteBuffer(data + 1, size - 1);
     env.DoRemoteRequest(static_cast<IIntentionIpcCode>(code), parcel);
+    env.DoRemoteRequest(static_cast<IIntentionIpcCode>(code1), parcel);
     DoSleep();
     return true;
 }
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */

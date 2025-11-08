@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef DSOFTBUSADAPTER_FUZZER_H
-#define DSOFTBUSADAPTER_FUZZER_H
+#ifndef INTENTION_STATIONARY_FUZZER_H
+#define INTENTION_STATIONARY_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "adapterinitsocket_fuzzer"
+#define FUZZ_PROJECT_NAME "intentionstationary_fuzzer"
 
-#endif // DSOFTBUSADAPTER_FUZZER_H
+#endif // INTENTION_STATIONARY_FUZZER_H

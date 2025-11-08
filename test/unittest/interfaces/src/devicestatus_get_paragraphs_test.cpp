@@ -139,10 +139,6 @@ HWTEST_F(DeviceStatusGetparagraphsTest, SendControlEvent, TestSize.Level0)
     option.textOnly = true;
     OnScreen::PageContent pageContent;
     int32_t ret = OnScreen::OnScreenManager::GetInstance().GetPageContent(option, pageContent);
-    if (ret != RET_OK) {
-        std::cout << "ret: " << ret << std::endl;
-        return;
-    }
     EXPECT_TRUE(ret >= RET_ERR);
     std::string wholeTextFromParagraphs;
     AssemblyWholeText(pageContent.paragraphs, wholeTextFromParagraphs);

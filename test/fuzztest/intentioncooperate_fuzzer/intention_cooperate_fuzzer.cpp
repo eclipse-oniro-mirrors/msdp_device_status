@@ -42,13 +42,34 @@ private:
 
 namespace OHOS {
 
-void FuzzIntentionClientCooperate(const uint8_t *data, size_t size)
+void IntentionCooperateFuzzTest(const uint8_t *data, size_t size)
 {
     FuzzedDataProvider provider(data, size);
     int32_t userData = provider.ConsumeIntegral<int32_t>();
-
+    int32_t startDeviceId = provider.ConsumeIntegral<int32_t>();
+    bool checkPermission = provider.ConsumeBool();
+    bool isUnchained = provider.ConsumeBool();
+    std::string remoteNetworkId = provider.ConsumeRandomLengthString();
+    std::string networkId = provider.ConsumeRandomLengthString();
+    CooperateOptions options  = {
+        .displayX = provider.ConsumeIntegral<int32_t>(),
+        .displayY = provider.ConsumeIntegral<int32_t>(),
+        .displayId = provider.ConsumeIntegral<int32_t>()
+    };
     INTENTION_CLIENT->EnableCooperate(userData);
     INTENTION_CLIENT->DisableCooperate(userData);
+    INTENTION_CLIENT->EnableCooperate(userData);
+    INTENTION_CLIENT->DisableCooperate(userData);
+    INTENTION_CLIENT->StartCooperate(remoteNetworkId, userData, startDeviceId, checkPermission);
+    INTENTION_CLIENT->StartCooperateWithOptions(remoteNetworkId, userData, startDeviceId,
+        checkPermission, options);
+    INTENTION_CLIENT->StopCooperate(userData, isUnchained, checkPermission);
+    INTENTION_CLIENT->RegisterCooperateListener();
+    INTENTION_CLIENT->UnregisterCooperateListener();
+    INTENTION_CLIENT->RegisterHotAreaListener(userData, checkPermission);
+    INTENTION_CLIENT->UnregisterHotAreaListener(userData, checkPermission);
+    INTENTION_CLIENT->RegisterMouseEventListener(networkId);
+    INTENTION_CLIENT->UnregisterMouseEventListener(networkId);
 }
 
 } // namespace OHOS
@@ -59,7 +80,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
     /* Run your code on data */
-    OHOS::FuzzIntentionClientCooperate(data, size);
+    OHOS::IntentionCooperateFuzzTest(data, size);
 
     return 0;
 }

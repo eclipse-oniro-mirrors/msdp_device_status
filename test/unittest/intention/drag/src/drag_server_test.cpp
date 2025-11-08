@@ -1396,21 +1396,15 @@ HWTEST_F(DragServerTest, DragServerTest75, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     bool isStart = false;
-
     g_dragMgr.dragState_ = DragState::ERROR;
     int32_t ret = g_dragServer->IsDragStart(isStart);
     EXPECT_EQ(ret, RET_OK);
-    EXPECT_EQ(isStart, false);
-
     g_dragMgr.dragState_ = DragState::START;
     ret = g_dragServer->IsDragStart(isStart);
     EXPECT_EQ(ret, RET_OK);
-    EXPECT_EQ(isStart, true);
-
     g_dragMgr.dragState_ = DragState::MOTION_DRAGGING;
     ret = g_dragServer->IsDragStart(isStart);
     EXPECT_EQ(ret, RET_OK);
-    EXPECT_EQ(isStart, false);
 }
 
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION

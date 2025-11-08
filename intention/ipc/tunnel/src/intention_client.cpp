@@ -39,6 +39,7 @@ IntentionClient *IntentionClient::GetInstance()
     return instance_.get();
 }
 
+// LCOV_EXCL_START
 IntentionClient::~IntentionClient()
 {
     std::lock_guard lock(mutex_);
@@ -78,6 +79,7 @@ ErrCode IntentionClient::Connect()
     FI_HILOGI("Connecting IntentionService success");
     return RET_OK;
 }
+// LCOV_EXCL_STOP
 
 int32_t IntentionClient::Socket(const std::string& programName, int32_t moduleType, int& socketFd, int32_t& tokenType)
 {

@@ -80,6 +80,7 @@ void FuzzIntentionClientDrag(const uint8_t *data, size_t size)
     INTENTION_CLIENT->GetExtraInfo(extraInfo);
     INTENTION_CLIENT->AddPrivilege();
     INTENTION_CLIENT->EraseMouseIcon();
+    INTENTION_CLIENT->GetDragSummaryInfo(dragSummaryInfo);
 }
 } // namespace OHOS
 

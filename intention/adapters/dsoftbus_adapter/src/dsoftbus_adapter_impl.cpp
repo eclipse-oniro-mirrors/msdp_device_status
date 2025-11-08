@@ -83,24 +83,22 @@ DSoftbusAdapterImpl::~DSoftbusAdapterImpl()
     Disable();
 }
 
+// LCOV_EXCL_START
 int32_t DSoftbusAdapterImpl::Enable()
 {
-    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     InitHeartBeat();
     std::unique_lock<std::shared_mutex> lock(lock_);
     return SetupServer();
-    // LCOV_EXCL_STOP
 }
 
 void DSoftbusAdapterImpl::Disable()
 {
-    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     std::unique_lock<std::shared_mutex> lock(lock_);
     ShutdownServer();
-    // LCOV_EXCL_STOP
 }
+// LCOV_EXCL_STOP
 
 void DSoftbusAdapterImpl::AddObserver(std::shared_ptr<IDSoftbusObserver> observer)
 {

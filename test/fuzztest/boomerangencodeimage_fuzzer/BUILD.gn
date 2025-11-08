@@ -40,7 +40,7 @@ deps_ex = [
 ]
 
 ###############################fuzztest#################################
-ohos_fuzztest("BoomerangEncodeFuzzTest") {
+ohos_fuzztest("BoomerangEncodeImageFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file =
       "${device_status_root_path}/test/fuzztest/boomerangencodeimage_fuzzer"
@@ -71,5 +71,5 @@ ohos_fuzztest("BoomerangEncodeFuzzTest") {
 group("fuzztest") {
   testonly = true
   deps = []
-  deps += [ ":BoomerangEncodeFuzzTest" ]
+  deps += [ ":BoomerangEncodeImageFuzzTest" ]
 }

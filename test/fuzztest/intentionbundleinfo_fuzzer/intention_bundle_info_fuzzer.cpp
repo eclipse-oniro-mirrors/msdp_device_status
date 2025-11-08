@@ -42,16 +42,48 @@ private:
 
 namespace OHOS {
 
-void FuzzIntentionClientDrag(const uint8_t *data, size_t size)
+void IntentionBundleInfoFuzzTest(const uint8_t *data, size_t size)
 {
     FuzzedDataProvider provider(data, size);
     Msdp::DeviceStatus::DragBundleInfo dragBundleInfo = {
         .bundleName = provider.ConsumeBytesAsString(10), // test value
         .isCrossDevice = provider.ConsumeBool()
     };
-    INTENTION_CLIENT->GetDragBundleInfo(dragBundleInfo);
-
     bool isStart = provider.ConsumeBool();
+        Msdp::DeviceStatus::DragCursorStyle style = static_cast<Msdp::DeviceStatus::DragCursorStyle>(
+        provider.ConsumeIntegralInRange<int32_t>(0, 3));
+    int32_t eventId = provider.ConsumeIntegral<int32_t>();
+    int32_t targetPid = provider.ConsumeIntegral<int32_t>();
+    std::string udKey = provider.ConsumeBytesAsString(10);
+    Msdp::DeviceStatus::ShadowOffset shadowOffset = {
+        .offsetX = provider.ConsumeIntegral<int32_t>(),
+        .offsetY = provider.ConsumeIntegral<int32_t>(),
+        .width = provider.ConsumeIntegral<int32_t>(),
+        .height = provider.ConsumeIntegral<int32_t>()
+    };
+    Msdp::DeviceStatus::PreviewStyle previewStyle = {
+    .foregroundColor = provider.ConsumeIntegralInRange<uint32_t>(0, 5),
+    .opacity = provider.ConsumeIntegralInRange<int32_t>(0, 5),
+    .radius = provider.ConsumeFloatingPointInRange<float>(0, 1),
+    .scale = provider.ConsumeFloatingPointInRange<float>(0, 1)
+    };
+    Msdp::DeviceStatus::PreviewAnimation animation = {
+        .curveName = provider.ConsumeRandomLengthString(),
+        .duration = provider.ConsumeIntegralInRange<int32_t>(1, 5)
+    };
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
+    uint64_t displayId = provider.ConsumeIntegral<uint64_t >();
+    uint64_t screenId =  provider.ConsumeIntegral<uint64_t >();
+    INTENTION_CLIENT->RemoveSubscriptListener();
+    INTENTION_CLIENT->UpdateDragStyle(style, eventId);
+    INTENTION_CLIENT->GetDragTargetPid(targetPid);
+    INTENTION_CLIENT->GetUdKey(udKey);
+    INTENTION_CLIENT->UpdatePreviewStyle(previewStyle);
+    INTENTION_CLIENT->UpdatePreviewStyleWithAnimation(previewStyle, animation);
+    INTENTION_CLIENT->RotateDragWindowSync(rsTransaction);
+    INTENTION_CLIENT->SetDragWindowScreenId(displayId, screenId);
+    INTENTION_CLIENT->GetDragBundleInfo(dragBundleInfo);
+    INTENTION_CLIENT->GetShadowOffset(shadowOffset);
     INTENTION_CLIENT->IsDragStart(isStart);
 }
 
@@ -64,7 +96,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     /* Run your code on data */
 
-    OHOS::FuzzIntentionClientDrag(data, size);
+    OHOS::IntentionBundleInfoFuzzTest(data, size);
 
     return 0;
 }

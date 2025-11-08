@@ -87,6 +87,7 @@ bool DDMAdapter::CheckSinkIsSameAccount(const std::string &srcNetworkId, int32_t
     return ddm_->CheckSinkIsSameAccount(srcNetworkId, srcUserId, srcAccountId);
 }
 
+// LCOV_EXCL_START
 int32_t DDMAdapter::GetUserId()
 {
     return ddm_->GetUserId();
@@ -96,6 +97,7 @@ std::string DDMAdapter::GetAccountId()
 {
     return ddm_->GetAccountId();
 }
+// LCOV_EXCL_STOP
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

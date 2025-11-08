@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include <fuzzer/FuzzedDataProvider.h>
-#include "checkdeviceonline_fuzzer.h"
+#include "dsoftbusadapter_fuzzer.h"
 
 #include "accesstoken_kit.h"
+#include <fuzzer/FuzzedDataProvider.h>
 #include "nativetoken_kit.h"
 #include "singleton.h"
 #include "token_setproc.h"
@@ -35,29 +35,48 @@ namespace Msdp {
 namespace DeviceStatus {
 constexpr size_t STR_LEN = 255;
 
-bool CheckDeviceOnlineFuzzTest(const uint8_t* data, size_t size)
+bool CheckDeviceOnlineFuzzTest(FuzzedDataProvider &provider)
 {
-    FuzzedDataProvider provider(data, size);
-    std::string networkId = provider.ConsumeBytesAsString(STR_LEN);
+    std::string networkId = provider.ConsumeBytesAsString(STR_LEN - 1);
     CircleStreamBuffer circleBuffer;
-
+    StreamBuffer streamBuffer;
+    size_t size = 4;
+    streamBuffer.wPos_ = provider.ConsumeIntegral<int32_t>();
+    streamBuffer.rPos_ = provider.ConsumeIntegral<int32_t>();
+    circleBuffer.CheckWrite(size);
     DSoftbusAdapterImpl::GetInstance()->CheckDeviceOnline(networkId);
-    DSoftbusAdapterImpl::GetInstance()->CloseSession(networkId);
     DSoftbusAdapterImpl::GetInstance()->HandleSessionData(networkId, circleBuffer);
     DSoftbusAdapterImpl::GetInstance()->OpenSessionLocked(networkId);
     DSoftbusAdapterImpl::GetInstance()->OnConnectedLocked(networkId);
+    DSoftbusAdapterImpl::GetInstance()->OpenSession(networkId);
+    DSoftbusAdapterImpl::GetInstance()->FindConnection(networkId);
+    DSoftbusAdapterImpl::GetInstance()->CheckDeviceOsType(networkId);
+    DSoftbusAdapterImpl::GetInstance()->CloseSession(networkId);
+    return true;
+}
+
+
+bool SendPacketFuzzTest(FuzzedDataProvider &provider)
+{
+    Parcel parcel;
+    NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE);
+    std::string networkId = provider.ConsumeBytesAsString(STR_LEN - 1);
+    DSoftbusAdapterImpl::GetInstance()->SendPacket(networkId, packet);
+    DSoftbusAdapterImpl::GetInstance()->SendParcel(networkId, parcel);
+    DSoftbusAdapterImpl::GetInstance()->BroadcastPacket(packet);
+    DSoftbusAdapterImpl::GetInstance()->HandlePacket(networkId, packet);
     return true;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    if ((data == nullptr) || (size < 1)) {
+    if (data == nullptr) {
         return 0;
     }
-
-    OHOS::Msdp::DeviceStatus::CheckDeviceOnlineFuzzTest(data, size);
-
+    FuzzedDataProvider provider(data, size);
+    OHOS::Msdp::DeviceStatus::CheckDeviceOnlineFuzzTest(provider);
+    OHOS::Msdp::DeviceStatus::SendPacketFuzzTest(provider);
     return 0;
 }
 } // namespace DeviceStatus

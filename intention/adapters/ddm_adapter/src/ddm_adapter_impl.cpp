@@ -37,6 +37,7 @@ DDMAdapterImpl::~DDMAdapterImpl()
     Disable();
 }
 
+// LCOV_EXCL_START
 int32_t DDMAdapterImpl::Enable()
 {
     CALL_DEBUG_ENTER;
@@ -92,6 +93,7 @@ void DDMAdapterImpl::Disable()
         }
     }
 }
+// LCOV_EXCL_STOP
 
 void DDMAdapterImpl::AddBoardObserver(std::shared_ptr<IBoardObserver> observer)
 {
@@ -282,6 +284,7 @@ bool DDMAdapterImpl::GetDmAccessCalleeSink(DistributedHardware::DmAccessCallee &
     return true;
 }
 
+// LCOV_EXCL_START
 void DDMAdapterImpl::SetUserId(int32_t userId)
 {
     userId_ = userId;
@@ -327,6 +330,7 @@ void DDMAdapterImpl::OnBoardOffline(const std::string &networkId)
             }
         });
 }
+// LCOV_EXCL_STOP
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

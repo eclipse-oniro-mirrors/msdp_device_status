@@ -24,7 +24,7 @@
 #include "message_parcel.h"
 
 #undef LOG_TAG
-#define LOG_TAG "BoomerangDecodeFuzzTest"
+#define LOG_TAG "BoomerangDecodeImageFuzzTest"
 
 namespace OHOS {
 namespace Msdp {
@@ -72,7 +72,7 @@ std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height)
     return pixelMap;
 }
 
-bool BoomerangDecodeFuzzTest(const uint8_t* data, size_t size)
+bool BoomerangDecodeImageFuzzTest(const uint8_t* data, size_t size)
 {
     const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
     MessageParcel datas;
@@ -98,7 +98,7 @@ bool BoomerangDecodeFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool BoomerangDecodeFuzzTest1(const uint8_t* data, size_t size)
+bool BoomerangDecodeImageFuzzTest1(const uint8_t* data, size_t size)
 {
     const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
     MessageParcel datas;
@@ -130,8 +130,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    OHOS::BoomerangDecodeFuzzTest(data, size);
-    OHOS::BoomerangDecodeFuzzTest1(data, size);
+    OHOS::BoomerangDecodeImageFuzzTest(data, size);
+    OHOS::BoomerangDecodeImageFuzzTest1(data, size);
     return 0;
 }
 } // namespace DeviceStatus

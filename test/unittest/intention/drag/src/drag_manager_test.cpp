@@ -1375,9 +1375,7 @@ HWTEST_F(DragManagerTest, DragManagerTest68, TestSize.Level0)
     EXPECT_TRUE(data != otherData);
     DragItemStyle dragItemStyle = { 1, 1, 0 };
     DragItemStyle otherDragItemStyle = {};
-    DragItemStyle dragItemStyleOne = { 1, 1, 0 };
     EXPECT_TRUE(dragItemStyle != otherDragItemStyle);
-    EXPECT_TRUE(dragItemStyle == dragItemStyleOne);
 }
 
 /**

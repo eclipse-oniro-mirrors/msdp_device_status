@@ -18,11 +18,6 @@ group("device_status_fuzztest") {
   deps = []
 
   deps += [
-    "adapterddmadapter_fuzzer:fuzztest",
-    "adapterinitsocket_fuzzer:fuzztest",
-    "adapteropensession_fuzzer:fuzztest",
-    "adaptersendheartbeat_fuzzer:fuzztest",
-    "adaptersendpacket_fuzzer:fuzztest",
     "adddraglistener_fuzzer:fuzztest",
     "addhotarealistener_fuzzer:fuzztest",
     "addhotarealistenerstub_fuzzer:fuzztest",
@@ -33,7 +28,6 @@ group("device_status_fuzztest") {
     "boomerangunsubscribe_fuzzer:fuzztest",
     "boomerangdecodeimage_fuzzer:fuzztest",
     "boomerangencodeimage_fuzzer:fuzztest",
-    "checkdeviceonline_fuzzer:fuzztest",
     "ddmadapter_fuzzer:fuzztest",
     "devicegetcachestub_fuzzer:fuzztest",
     "devicestatusagent_fuzzer:fuzztest",
@@ -42,6 +36,8 @@ group("device_status_fuzztest") {
     "devicestatusstreambuffer_fuzzer:fuzztest",
     "devicesubscribestub_fuzzer:fuzztest",
     "deviceunsubscribestub_fuzzer:fuzztest",
+    "dsoftbusadapter_fuzzer:fuzztest",
+    "dsoftbussession_fuzzer:fuzztest",
     "entertexteditorarea_fuzzer:fuzztest",
     "getdragaction_fuzzer:fuzztest",
     "getdragdata_fuzzer:fuzztest",
@@ -73,6 +69,7 @@ group("device_status_fuzztest") {
     "updatepreviewstyle_fuzzer:fuzztest",
     "updatepreviewstylewithanimationstub_fuzzer:fuzztest",
     "updateshadowpic_fuzzer:fuzztest",
+    "intentionboomerang_fuzzer:fuzztest",
     "intentionbundleinfo_fuzzer:fuzztest",
     "intentionclientdraganimation_fuzzer:fuzztest",
     "intentionclientdrag_fuzzer:fuzztest",
@@ -82,6 +79,8 @@ group("device_status_fuzztest") {
     "intentioncooperate_fuzzer:fuzztest",
     "intentiondragaction_fuzzer:fuzztest",
     "intentionservice_fuzzer:fuzztest",
+    "intentiononscreen_fuzzer:fuzztest",
+    "intentionstationary_fuzzer:fuzztest",
   ]
   if (device_status_interaction_coordination) {
     deps += [
