@@ -13,47 +13,46 @@
  * limitations under the License.
  */
 
-#include "intention_client_socket_fuzzer.h"
-
-#include "boomerang_callback_stub.h"
-#include "devicestatus_callback_stub.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <fuzzer/FuzzedDataProvider.h>
 #include <map>
-
 #include <nocopyable.h>
 
+#include "devicestatus_callback_stub.h"
 #include "intention_client.h"
+#include "intention_stationary_fuzzer.h"
+#include "stationary_data.h"
 
 #undef LOG_TAG
-#define LOG_TAG "MsdpIntentionClientFuzzTest"
+#define LOG_TAG "IntentionStationaryFuzzTest"
 
 namespace {
     constexpr size_t THRESHOLD = 5;
 }
 using namespace OHOS::Media;
-using namespace OHOS::Msdp;
+using namespace OHOS::Msdp::DeviceStatus;
 
-class BoomerangClientTestCallback : public OHOS::Msdp::DeviceStatus::BoomerangCallbackStub {
-public:
-
-private:
-    OHOS::Msdp::DeviceStatus::BoomerangData data_;
-};
+class StationaryServerTestCallback : public OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub {
+    public:
+        void OnDeviceStatusChanged(const Data &value) override {}
+    };
 
 namespace OHOS {
 
-void FuzzIntentionClientSocket(const uint8_t *data, size_t size)
+void IntentionStationaryFuzzTest(const uint8_t *data, size_t size)
 {
     FuzzedDataProvider provider(data, size);
-    std::string programName = provider.ConsumeBytesAsString(10); // test value
-    int32_t moduleType = provider.ConsumeIntegral<int32_t>();
-    int socketFd = provider.ConsumeIntegral<int>();
-    int32_t tokenType = provider.ConsumeIntegral<int32_t>();
-
-    INTENTION_CLIENT->Socket(programName, moduleType, socketFd, tokenType);
+    int32_t type = provider.ConsumeIntegral<int32_t>();
+    int32_t replyType = provider.ConsumeIntegral<int32_t>();
+    int32_t replyValue = provider.ConsumeIntegral<int32_t>();
+    Msdp::DeviceStatus::DevicePostureData postureData = {
+        .rollRad = provider.ConsumeFloatingPoint<float>(),
+        .pitchRad = provider.ConsumeFloatingPoint<float>(),
+        .yawRad = provider.ConsumeFloatingPoint<float>()
+    };
+    INTENTION_CLIENT->GetDeviceStatusData(type, replyType, replyValue);
+    INTENTION_CLIENT->GetDevicePostureDataSync(postureData);
 }
 
 } // namespace OHOS
@@ -64,7 +63,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
     /* Run your code on data */
-    OHOS::FuzzIntentionClientSocket(data, size);
+    OHOS::IntentionStationaryFuzzTest(data, size);
 
     return 0;
 }

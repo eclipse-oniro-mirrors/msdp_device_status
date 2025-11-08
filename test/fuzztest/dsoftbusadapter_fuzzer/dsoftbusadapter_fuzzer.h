@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef TEST_INTENTIONCLIENT_FUZZER_H
-#define TEST_INTENTIONCLIENT_FUZZER_H
+#ifndef DSOFTBUSADAPTER_FUZZER_H
+#define DSOFTBUSADAPTER_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "intentionclient_fuzzer"
+#define FUZZ_PROJECT_NAME "dsoftbusadapter_fuzzer"
 
-#endif // TEST_INTENTIONCLIENT_FUZZER_H
+#endif // DSOFTBUSADAPTER_FUZZER_H

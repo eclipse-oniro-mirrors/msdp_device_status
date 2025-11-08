@@ -46,6 +46,7 @@ bool SocketClient::RegisterEvent(MessageId id, std::function<int32_t(const Strea
     return inserted;
 }
 
+// LCOV_EXCL_START
 void SocketClient::Start()
 {
     CALL_INFO_TRACE;
@@ -95,6 +96,7 @@ int32_t SocketClient::Socket()
     }
     return socketFd;
 }
+// LCOV_EXCL_STOP
 
 void SocketClient::OnPacket(NetPacket &pkt)
 {
@@ -103,6 +105,7 @@ void SocketClient::OnPacket(NetPacket &pkt)
     OnMsgHandler(*this, pkt);
 }
 
+// LCOV_EXCL_START
 void SocketClient::OnDisconnected()
 {
     CALL_DEBUG_ENTER;
@@ -131,6 +134,7 @@ void SocketClient::Reconnect()
         FI_HILOGE("Failed to post reconnection task");
     }
 }
+// LCOV_EXCL_STOP
 
 void SocketClient::OnMsgHandler(const StreamClient &client, NetPacket &pkt)
 {

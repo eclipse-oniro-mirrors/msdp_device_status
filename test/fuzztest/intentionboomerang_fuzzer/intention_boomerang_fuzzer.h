@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef DSOFTBUSADAPTER_FUZZER_H
-#define DSOFTBUSADAPTER_FUZZER_H
+#ifndef INTENTION_BOONERANG_FUZZER_H
+#define INTENTION_BOONERANG_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "checkdeviceonline_fuzzer"
+#define FUZZ_PROJECT_NAME "intentionboomerang_fuzzer"
 
-#endif // DSOFTBUSADAPTER_FUZZER_H
+#endif // INTENTION_BOONERANG_FUZZER_H

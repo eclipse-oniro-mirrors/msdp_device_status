@@ -23,14 +23,14 @@
 #include "message_parcel.h"
 
 #undef LOG_TAG
-#define LOG_TAG "AddHotAreaListenerFuzzStubTest"
+#define LOG_TAG "AddHotAreaListenerStubFuzzTest"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
 namespace OHOS {
-bool AddHotAreaListenerFuzzStubTest(const uint8_t* data, size_t size)
+bool AddHotAreaListenerStubFuzzTest(const uint8_t* data, size_t size)
 {
     const std::u16string FORMMGR_DEVICE_TOKEN { u"ohos.msdp.Idevicestatus" };
     MessageParcel datas;
@@ -53,7 +53,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    OHOS::AddHotAreaListenerFuzzStubTest(data, size);
+    OHOS::AddHotAreaListenerStubFuzzTest(data, size);
     return 0;
 }
 } // namespace DeviceStatus

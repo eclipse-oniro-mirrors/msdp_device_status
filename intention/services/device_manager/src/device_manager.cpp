@@ -90,9 +90,9 @@ int32_t DeviceManager::OnInit(IContext *context)
     return RET_OK;
 }
 
+// LCOV_EXCL_START
 int32_t DeviceManager::Enable()
 {
-    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CHKPR(context_, RET_ERR);
     int32_t ret = context_->GetDelegateTasks().PostSyncTask([this] {
@@ -102,12 +102,10 @@ int32_t DeviceManager::Enable()
         FI_HILOGE("Post sync task failed");
     }
     return ret;
-    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::OnEnable()
 {
-    // LCOV_EXCL_START
     CALL_DEBUG_ENTER;
     if (!epollMgr_.Open()) {
         FI_HILOGE("EpollMgr::Open fail");
@@ -131,12 +129,10 @@ DISABLE_MONITOR:
 CLOSE_EPOLL:
     epollMgr_.Close();
     return ret;
-    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::Disable()
 {
-    // LCOV_EXCL_START
     CALL_INFO_TRACE;
     CHKPR(context_, RET_ERR);
     int32_t ret = context_->GetDelegateTasks().PostSyncTask([this] {
@@ -146,19 +142,17 @@ int32_t DeviceManager::Disable()
         FI_HILOGE("PostSyncTask failed");
     }
     return ret;
-    // LCOV_EXCL_STOP
 }
 
 int32_t DeviceManager::OnDisable()
 {
-    // LCOV_EXCL_START
     CHKPR(monitor_, RET_ERR);
     epollMgr_.Remove(monitor_);
     monitor_->Disable();
     epollMgr_.Close();
     return RET_OK;
-    // LCOV_EXCL_STOP
 }
+// LCOV_EXCL_STOP
 
 std::shared_ptr<IDevice> DeviceManager::FindDevice(const std::string &devPath)
 {

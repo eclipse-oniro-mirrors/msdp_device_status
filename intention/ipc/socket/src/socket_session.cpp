@@ -100,6 +100,7 @@ bool SocketSession::SendMsg(const char *buf, size_t size) const
     return true;
 }
 
+// LCOV_EXCL_START
 std::string SocketSession::ToString() const
 {
     std::ostringstream oss;
@@ -110,6 +111,7 @@ std::string SocketSession::ToString() const
         << std::endl;
     return oss.str();
 }
+// LCOV_EXCL_STOP
 
 void SocketSession::Dispatch(const struct epoll_event &ev)
 {

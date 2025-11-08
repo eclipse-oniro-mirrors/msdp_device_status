@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef DSOFTBUSADAPTER_FUZZER_H
-#define DSOFTBUSADAPTER_FUZZER_H
+#ifndef INTENTION_ONSCREEN_FUZZER_H
+#define INTENTION_ONSCREEN_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "adapterddmadapter_fuzzer"
+#define FUZZ_PROJECT_NAME "intentiononscreen_fuzzer"
 
-#endif // DSOFTBUSADAPTER_FUZZER_H
+#endif // INTENTION_ONSCREEN_FUZZER_H

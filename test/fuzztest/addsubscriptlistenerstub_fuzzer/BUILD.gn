@@ -41,7 +41,7 @@ deps_ex = [
 ]
 
 ###############################fuzztest#################################
-ohos_fuzztest("AddSubscriptListenerFuzzStubTest") {
+ohos_fuzztest("AddSubscriptListenerStubFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file =
       "${device_status_root_path}/test/fuzztest/addsubscriptlistenerstub_fuzzer"
@@ -73,5 +73,5 @@ ohos_fuzztest("AddSubscriptListenerFuzzStubTest") {
 group("fuzztest") {
   testonly = true
   deps = []
-  deps += [ ":AddSubscriptListenerFuzzStubTest" ]
+  deps += [ ":AddSubscriptListenerStubFuzzTest" ]
 }

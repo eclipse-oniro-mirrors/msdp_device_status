@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef DSOFTBUSADAPTER_FUZZER_H
-#define DSOFTBUSADAPTER_FUZZER_H
+#ifndef DSOFTBUSSESSION_FUZZER_H
+#define DSOFTBUSSESSION_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "adaptersendpacket_fuzzer"
+#define FUZZ_PROJECT_NAME "dsoftbussession_fuzzer"
 
-#endif // DSOFTBUSADAPTER_FUZZER_H
+#endif // DSOFTBUSSESSION_FUZZER_H

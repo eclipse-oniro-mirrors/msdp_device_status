@@ -42,12 +42,39 @@ private:
 
 namespace OHOS {
 
-void FuzzIntentionClientDrag(const uint8_t *data, size_t size)
+void IntentionClientDragAnimationFuzzTest(const uint8_t *data, size_t size)
 {
     FuzzedDataProvider provider(data, size);
     std::string animationInfo = provider.ConsumeBytesAsString(10); // test value
-
+    uint64_t displayId = provider.ConsumeIntegral<int64_t >();
+    uint64_t screenId = provider.ConsumeIntegral<int64_t >();
+    std::map<std::string, int64_t> summarys = { {
+        provider.ConsumeBytesAsString(10), provider.ConsumeIntegral<int64_t>()}}; // test value
+    bool isJsCaller = provider.ConsumeBool();
+    bool enable = provider.ConsumeBool();
+    std::string pkgName = provider.ConsumeRandomLengthString();
+    Msdp::DeviceStatus::DragState dragState = static_cast<Msdp::DeviceStatus::DragState>(
+        provider.ConsumeIntegralInRange<int32_t>(0, 4));
+    Msdp::DeviceStatus::DragAction dragAction = static_cast<Msdp::DeviceStatus::DragAction>(
+        provider.ConsumeIntegralInRange<int32_t>(-1, 1));
+    std::string extraInfo = provider.ConsumeRandomLengthString();
+    bool state = provider.ConsumeBool();
+    int64_t downTime = provider.ConsumeIntegral<int64_t >();
+    bool isStart = provider.ConsumeBool();
     INTENTION_CLIENT->EnableInternalDropAnimation(animationInfo);
+    INTENTION_CLIENT->ResetDragWindowScreenId(displayId, screenId);
+    INTENTION_CLIENT->GetDragSummary(summarys, isJsCaller);
+    INTENTION_CLIENT->SetDragSwitchState(enable, isJsCaller);
+    INTENTION_CLIENT->SetAppDragSwitchState(enable, pkgName, isJsCaller);
+    INTENTION_CLIENT->GetDragState(dragState);
+    INTENTION_CLIENT->EnableUpperCenterMode(enable);
+    INTENTION_CLIENT->GetDragAction(dragAction);
+    INTENTION_CLIENT->GetExtraInfo(extraInfo);
+    INTENTION_CLIENT->SetMouseDragMonitorState(state);
+    INTENTION_CLIENT->SetDraggableState(state);
+    INTENTION_CLIENT->GetAppDragSwitchState(state);
+    INTENTION_CLIENT->SetDraggableStateAsync(state, downTime);
+    INTENTION_CLIENT->IsDragStart(isStart);
 }
 } // namespace OHOS
 
@@ -57,7 +84,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
     /* Run your code on data */
-    OHOS::FuzzIntentionClientDrag(data, size);
+    OHOS::IntentionClientDragAnimationFuzzTest(data, size);
 
     return 0;
 }

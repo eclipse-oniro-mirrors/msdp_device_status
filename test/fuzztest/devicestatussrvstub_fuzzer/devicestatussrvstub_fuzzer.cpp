@@ -23,7 +23,7 @@
 #include "message_parcel.h"
 
 #undef LOG_TAG
-#define LOG_TAG "DeviceStatusStubFuzzTest"
+#define LOG_TAG "DeviceStatusStubSrvFuzzTest"
 
 namespace OHOS {
 namespace Msdp {
