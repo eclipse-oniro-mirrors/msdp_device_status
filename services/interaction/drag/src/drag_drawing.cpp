@@ -864,12 +864,10 @@ void DragDrawing::DestroyDragWindow()
     if (g_drawingInfo.parentNode != nullptr) {
         g_drawingInfo.parentNode->ClearChildren();
         g_drawingInfo.parentNode.reset();
-        g_drawingInfo.parentNode = nullptr;
     }
     if (g_drawingInfo.rootNode != nullptr) {
         g_drawingInfo.rootNode->ClearChildren();
         g_drawingInfo.rootNode.reset();
-        g_drawingInfo.rootNode = nullptr;
     }
     if (g_drawingInfo.surfaceNode != nullptr) {
         g_drawingInfo.surfaceNode->DetachFromWindowContainer(screenId_);
@@ -4698,11 +4696,10 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     }
     screenId_ = rsScreenId;
 #endif // OHOS_BUILD_PC_PRODUCT
-    if (int32_t ret = RotateDragWindow(currentRotation); ret != RET_OK) {
+    if (RotateDragWindow(currentRotation) != RET_OK) {
         FI_HILOGE("RotateDragWindow failed");
         return;
     }
-    SetRotation(displayId, currentRotation);
     displayWidth_ = display->GetWidth();
     displayHeight_ = display->GetHeight();
     FI_HILOGI("Parameter rsScreen number:%{public}llu", static_cast<unsigned long long>(screenId_));

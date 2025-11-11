@@ -71,7 +71,7 @@ public:
         : level_ { level }, tag_ { tag }, func_ { func }
     {
         if (HiLogIsLoggable(LOG_DOMAIN, tag_, level_)) {
-            if (func_ != nullptr) {
+            if (func_ != nullptr && tag_ != nullptr) {
                 HILOG_IMPL(LOG_CORE, level_, LOG_DOMAIN, tag_, "in %{public}s, enter", func_);
             }
         }
@@ -79,7 +79,7 @@ public:
     ~InnerFunctionTracer()
     {
         if (HiLogIsLoggable(LOG_DOMAIN, tag_, level_)) {
-            if (func_ != nullptr) {
+            if (func_ != nullptr && tag_ != nullptr) {
                 HILOG_IMPL(LOG_CORE, level_, LOG_DOMAIN, tag_, "in %{public}s, leave", func_);
             }
         }

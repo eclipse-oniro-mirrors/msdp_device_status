@@ -20,6 +20,7 @@
 #include "drag_data_manager.h"
 #include "drag_data_packer.h"
 #include "drag_data_util.h"
+#include "drag_drawing.h"
 #include "drag_server.h"
 #include "event_hub.h"
 #include "interaction_manager.h"
@@ -54,6 +55,9 @@ constexpr int32_t INT32_BYTE { 4 };
 constexpr int32_t MAX_BUF_SIZE { 1024 };
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
 constexpr int32_t MAX_ANIMATION_INFO_LENGTH { 1024 };
+constexpr float POSITION_X { -1.0f };
+constexpr float POSITION_Y { -1.0f };
+constexpr float SCALING_VALUE { 0.0f };
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 int32_t g_shadowinfo_x { 0 };
 int32_t g_shadowinfo_y { 0 };
@@ -1935,6 +1939,58 @@ HWTEST_F(DragServerTest, DragServerTest99, TestSize.Level1)
     Rosen::Rotation rotation = g_dragMgr.dragDrawing_.GetRotation(WINDOW_ID);
     ret = g_dragMgr.dragDrawing_.RotateDragWindow(rotation);
     EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: DragServerTest100
+ * @tc.desc: Test the expansion DoMultiSelectedAnimation interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragServerTest, DragServerTest100, TestSize.Level1)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    g_dragMgr.dragDrawing_.UpdataGlobalPixelMapLocked(pixelMap);
+    g_dragMgr.dragDrawing_.DoMultiSelectedAnimation(POSITION_X, POSITION_Y, SCALING_VALUE);
+    g_dragMgr.dragDrawing_.UpdataGlobalPixelMapLocked(nullptr);
+    ASSERT_NE(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: DragServerTest101
+ * @tc.desc: Test the expansion DoMultiSelectedAnimation interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragServerTest, DragServerTest101, TestSize.Level1)
+{
+    g_dragMgr.dragDrawing_.DoMultiSelectedAnimation(POSITION_X, POSITION_Y, SCALING_VALUE);
+    auto pixelMap = g_dragMgr.dragDrawing_.AccessGlobalPixelMapLocked();
+    EXPECT_EQ(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: DragServerTest102
+ * @tc.desc: Test the expansion DoMultiSelectedAnimation interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragServerTest, DragServerTest102, TestSize.Level1)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    g_dragMgr.dragDrawing_.UpdataGlobalPixelMapLocked(pixelMap);
+    g_dragMgr.dragDrawing_.MultiSelectedAnimation(POSITION_X, POSITION_Y, SCALING_VALUE, false);
+    g_dragMgr.dragDrawing_.UpdataGlobalPixelMapLocked(nullptr);
+    ASSERT_NE(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: DragServerTest103
+ * @tc.desc: Test the expansion MultiSelectedAnimation interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragServerTest, DragServerTest103, TestSize.Level1)
+{
+    g_dragMgr.dragDrawing_.MultiSelectedAnimation(POSITION_X, POSITION_Y, SCALING_VALUE, false);
+    auto pixelMap = g_dragMgr.dragDrawing_.AccessGlobalPixelMapLocked();
+    EXPECT_EQ(pixelMap, nullptr);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
