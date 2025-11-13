@@ -629,8 +629,7 @@ void DSoftbusAdapterImpl::HandleRawData(const std::string &networkId, const void
 void DSoftbusAdapterImpl::InitHeartBeat()
 {
     // LCOV_EXCL_START
-    auto runner = AppExecFwk::EventRunner::Create(HEART_BEAT_THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
-    CHKPV(runner);
+    InitHeartBeatHandler();
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     char heartBeatContent[HEART_BEAT_SIZE_BYTE] { 'a' };
     heartBeatPacket_.Write(heartBeatContent, HEART_BEAT_SIZE_BYTE);
@@ -666,8 +665,12 @@ int32_t DSoftbusAdapterImpl::KeepHeartBeating(const std::string &networkId)
         UpdateHeartBeatState(networkId, false);
         return RET_ERR;
     }
-    CHKPR(eventHandler_, RET_ERR);
-    if (!eventHandler_->PostTask(
+    auto eventHandler = GetHeartBeatHandler();
+    if (eventHandler == nullptr) {
+        FI_HILOGE("eventHandler is null");
+        return RET_ERR;
+    }
+    if (!eventHandler->PostTask(
         [this, networkId]() {
             if (GetHeartBeatState(networkId)) {
                 this->KeepHeartBeating(networkId);
@@ -683,6 +686,20 @@ int32_t DSoftbusAdapterImpl::KeepHeartBeating(const std::string &networkId)
     return RET_OK;
 }
 
+void DSoftbusAdapterImpl::InitHeartBeatHandler()
+{
+    std::unique_lock<std::shared_mutex> lock(heartBeatLock_);
+    if (eventHandler_ != nullptr) {
+        FI_HILOGE("InitHeartBeatHandler failed");
+        return;
+    }
+    auto runner = AppExecFwk::EventRunner::Create(HEART_BEAT_THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
+    if (runner == nullptr) {
+        FI_HILOGE("InitHeartBeatHandler failed");
+        return;
+    }
+    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+}
 void DSoftbusAdapterImpl::UpdateHeartBeatState(const std::string &networkId, bool state)
 {
     std::unique_lock<std::shared_mutex> lock(heartBeatLock_);
