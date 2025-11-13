@@ -700,6 +700,13 @@ void DSoftbusAdapterImpl::InitHeartBeatHandler()
     }
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
+
+std::shared_ptr<AppExecFwk::EventHandler> DSoftbusAdapterImpl::GetHeartBeatHandler()
+{
+    std::shared_lock<std::shared_mutex> lock(heartBeatLock_);
+    return eventHandler_;
+}
+
 void DSoftbusAdapterImpl::UpdateHeartBeatState(const std::string &networkId, bool state)
 {
     std::unique_lock<std::shared_mutex> lock(heartBeatLock_);
