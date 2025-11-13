@@ -690,7 +690,7 @@ void DSoftbusAdapterImpl::InitHeartBeatHandler()
 {
     std::unique_lock<std::shared_mutex> lock(heartBeatLock_);
     if (eventHandler_ != nullptr) {
-        FI_HILOGE("InitHeartBeatHandler failed");
+        FI_HILOGI("eventHandler_ already exists");
         return;
     }
     auto runner = AppExecFwk::EventRunner::Create(HEART_BEAT_THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
