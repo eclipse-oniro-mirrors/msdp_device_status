@@ -630,7 +630,6 @@ void DSoftbusAdapterImpl::InitHeartBeat()
 {
     // LCOV_EXCL_START
     InitHeartBeatHandler();
-    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     char heartBeatContent[HEART_BEAT_SIZE_BYTE] { 'a' };
     heartBeatPacket_.Write(heartBeatContent, HEART_BEAT_SIZE_BYTE);
     // LCOV_EXCL_STOP
