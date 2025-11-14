@@ -118,7 +118,6 @@ private:
     bool CheckDeviceOsType(const std::string &networkId);
     void SetSocketOpt(int32_t socket);
     void InitHeartBeatHandler();
-    std::shared_ptr<AppExecFwk::EventHandler> GetHeartBeatHandler();
     /*
     These four interfaces followed only read members, use shared_lock to avoid dead lock.
         SendPacket

@@ -664,7 +664,11 @@ int32_t DSoftbusAdapterImpl::KeepHeartBeating(const std::string &networkId)
         UpdateHeartBeatState(networkId, false);
         return RET_ERR;
     }
-    auto eventHandler = GetHeartBeatHandler();
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler {nullptr};
+    {
+        std::shared_lock<std::shared_mutex> lock(heartBeatLock_);
+        eventHandler = eventHandler_;
+    }
     if (eventHandler == nullptr) {
         FI_HILOGE("eventHandler is null");
         return RET_ERR;
@@ -698,12 +702,6 @@ void DSoftbusAdapterImpl::InitHeartBeatHandler()
         return;
     }
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-}
-
-std::shared_ptr<AppExecFwk::EventHandler> DSoftbusAdapterImpl::GetHeartBeatHandler()
-{
-    std::shared_lock<std::shared_mutex> lock(heartBeatLock_);
-    return eventHandler_;
 }
 
 void DSoftbusAdapterImpl::UpdateHeartBeatState(const std::string &networkId, bool state)
