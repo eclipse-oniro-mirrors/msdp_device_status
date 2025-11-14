@@ -103,10 +103,52 @@ ohos_unittest("SequencableTest") {
   ]
 }
 
+ohos_unittest("IntentionClientTest") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  branch_protector_ret = "pac_ret"
+  module_out_path = module_output_path
+  include_dirs = [ "include" ]
+
+  defines = []
+
+  sources = [ "src/intention_client_test.cpp" ]
+
+  cflags = [ "-Dprivate=public" ]
+
+  deps = [
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "data_share:datashare_consumer",
+    "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "samgr:samgr_proxy",
+    "window_manager:libdm",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [ 
     ":SocketSessionTest",
     ":SequencableTest",
+    ":IntentionClientTest",
   ]
 }
