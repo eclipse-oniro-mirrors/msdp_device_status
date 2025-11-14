@@ -22,7 +22,6 @@
 #include "devicestatus_common.h"
 #include "i_context.h"
 
-
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
