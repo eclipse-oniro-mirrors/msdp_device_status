@@ -101,7 +101,8 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    char bundleName[MAX_STRING_LEN] = {0};
+    ASSERT_NE(callback, nullptr);
+    char bundleName[MAX_STRING_LEN] = { 0 };
     BoomerangClient boomerangClient;
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
@@ -120,7 +121,8 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_002, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    char bundleName[MAX_STRING_LEN] = {0};
+    ASSERT_NE(callback, nullptr);
+    char bundleName[MAX_STRING_LEN] = { 0 };
     BoomerangClient boomerangClient;
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
@@ -140,7 +142,8 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_003, TestSize.Level1)
     std::string metadata = "test";
     BoomerangClient boomerangClient;
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    char bundleName[MAX_STRING_LEN] = {0};
+    ASSERT_NE(callback, nullptr);
+    char bundleName[MAX_STRING_LEN] = { 0 };
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ASSERT_EQ(ret, RET_OK);
@@ -161,6 +164,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_004, TestSize.Level1)
     BoomerangClient boomerangClient;
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
+    ASSERT_NE(callback, nullptr);
     int32_t ret = boomerangClient.BoomerangEncodeImage(pixelMap, metadata, callback);
     ASSERT_EQ(ret, RET_OK);
 }
@@ -178,6 +182,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_005, TestSize.Level1)
     BoomerangClient boomerangClient;
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
+    ASSERT_NE(callback, nullptr);
     int32_t ret = boomerangClient.BoomerangDecodeImage(pixelMap, callback);
     ASSERT_EQ(ret, RET_OK);
 }
@@ -192,8 +197,9 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_006, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     sptr<IRemoteBoomerangCallback> callback1 = new (std::nothrow) BoomerangClientTestCallback();
+    ASSERT_NE(callback1, nullptr);
     sptr<IRemoteBoomerangCallback> callback2 = nullptr;
-    char bundleName[MAX_STRING_LEN] = {0};
+    char bundleName[MAX_STRING_LEN] = { 0 };
     BoomerangClient boomerangClient;
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
@@ -212,8 +218,9 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_007, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     sptr<IRemoteBoomerangCallback> callback1 = new (std::nothrow) BoomerangClientTestCallback();
+    ASSERT_NE(callback1, nullptr);
     sptr<IRemoteBoomerangCallback> callback2 = nullptr;
-    char bundleName[MAX_STRING_LEN] = {0};
+    char bundleName[MAX_STRING_LEN] = { 0 };
     BoomerangClient boomerangClient;
    int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
@@ -234,7 +241,8 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_008, TestSize.Level1)
     std::string metadata;
     BoomerangClient boomerangClient;
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
-    char bundleName[MAX_STRING_LEN] = {0};
+    ASSERT_NE(callback, nullptr);
+    char bundleName[MAX_STRING_LEN] = { 0 };
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ASSERT_EQ(ret, RET_OK);
@@ -273,6 +281,23 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_010, TestSize.Level1)
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
     sptr<IRemoteBoomerangCallback> callback = nullptr;
     int32_t ret = boomerangClient.BoomerangDecodeImage(pixelMap, callback);
+    ASSERT_NE(ret, RET_OK);
+}
+
+/**
+ * @tc.name: BoomerangClientTest_011
+ * @tc.desc: BoomerangClientTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BoomerangClientTest, BoomerangClientTest_011, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    sptr<IRemoteBoomerangCallback> callback = nullptr;
+    char bundleName[MAX_STRING_LEN] = { 0 };
+    BoomerangClient boomerangClient;
+    int32_t ret = boomerangClient.SubscribeCallback(
+        BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ASSERT_NE(ret, RET_OK);
 }
 } // namespace DeviceStatus

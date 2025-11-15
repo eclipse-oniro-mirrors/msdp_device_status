@@ -21,6 +21,7 @@
 #include "devicestatus_define.h"
 #include "on_screen_data.h"
 #include "on_screen_server.h"
+#include "on_screen_callback_stub.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -51,6 +52,10 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    class OnScreenServerTestCallback : public OnScreenCallbackStub {
+    public:
+        void OnScreenChange(const std::string& changeInfo);
+    };
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

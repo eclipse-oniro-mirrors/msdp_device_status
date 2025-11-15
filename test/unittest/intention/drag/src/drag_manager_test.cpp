@@ -461,6 +461,8 @@ HWTEST_F(DragManagerTest, DragManagerTest8, TestSize.Level0)
     auto listener = std::make_shared<SubscriptListenerTest>("SubscriptListener");
     int32_t ret = InteractionManager::GetInstance()->AddSubscriptListener(listener);
     ASSERT_EQ(ret, RET_OK);
+    ret = InteractionManager::GetInstance()->AddSubscriptListener(listener);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
