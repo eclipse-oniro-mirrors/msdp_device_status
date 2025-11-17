@@ -46,8 +46,8 @@ void IntentionClientDragAnimationFuzzTest(const uint8_t *data, size_t size)
 {
     FuzzedDataProvider provider(data, size);
     std::string animationInfo = provider.ConsumeBytesAsString(10); // test value
-    uint64_t displayId = provider.ConsumeIntegral<int64_t >();
-    uint64_t screenId = provider.ConsumeIntegral<int64_t >();
+    uint64_t displayId = provider.ConsumeIntegral<uint64_t >();
+    uint64_t screenId = provider.ConsumeIntegral<uint64_t >();
     std::map<std::string, int64_t> summarys = { {
         provider.ConsumeBytesAsString(10), provider.ConsumeIntegral<int64_t>()}}; // test value
     bool isJsCaller = provider.ConsumeBool();
