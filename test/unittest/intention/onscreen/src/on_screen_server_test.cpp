@@ -240,6 +240,11 @@ void OnScreenServerTest::TearDownTestCase()
     SetSelfTokenID(g_shellTokenId);
 }
 
+void OnScreenServerTest::OnScreenServerTestCallback::OnScreenChange(const std::string& changeInfo)
+{
+    FI_HILOGI("OnScreenChange");
+}
+
 /**
  * @tc.name: GetPageContent001
  * @tc.desc: Test func named GetPageContent
@@ -278,7 +283,7 @@ HWTEST_F(OnScreenServerTest, GetPageContent002, TestSize.Level0)
     ASSERT_TRUE(ret);
     int32_t ret1 = onScreen_.GetPageContent(context, option, content);
     EXPECT_TRUE(ret1 >= RET_ERR);
-    context.fullTokenId = tokenId_,
+    context.fullTokenId = tokenId_;
     ret = onScreen_.IsSystemCalling(context);
     ASSERT_FALSE(ret);
     ret1 = onScreen_.GetPageContent(context, option, content);
@@ -368,6 +373,112 @@ HWTEST_F(OnScreenServerTest, IsSystemCalling002, TestSize.Level0)
     auto flag = AccessTokenKit::GetTokenTypeFlag(context.tokenId);
     EXPECT_EQ(flag, Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     EXPECT_EQ(onScreen_.IsSystemCalling(context), true);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
+}
+
+/**
+ * @tc.name: RegisterScreenEventCallback001
+ * @tc.desc: Test func named RegisterScreenEventCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerTest, RegisterScreenEventCallback001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    auto flag = AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    EXPECT_EQ(flag, Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    EXPECT_EQ(onScreen_.IsSystemCalling(context), true);
+    int32_t windowId = 1;
+    std::string event = "test";
+    sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerTestCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = onScreen_.RegisterScreenEventCallback(context, windowId, event, callback);
+    EXPECT_EQ(ret, RET_ERR);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
+}
+
+/**
+ * @tc.name: RegisterScreenEventCallback002
+ * @tc.desc: Test func named RegisterScreenEventCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerTest, RegisterScreenEventCallback002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    auto flag = AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    EXPECT_EQ(flag, Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    EXPECT_EQ(onScreen_.IsSystemCalling(context), true);
+    int32_t windowId = 1;
+    std::string event = "test";
+    sptr<IRemoteOnScreenCallback> callback { nullptr };
+    int32_t ret = onScreen_.RegisterScreenEventCallback(context, windowId, event, callback);
+    EXPECT_EQ(ret, RET_ERR);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
+}
+
+/**
+ * @tc.name: UnregisterScreenEventCallback001
+ * @tc.desc: Test func named UnregisterScreenEventCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerTest, UnregisterScreenEventCallback001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    auto flag = AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    EXPECT_EQ(flag, Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    EXPECT_EQ(onScreen_.IsSystemCalling(context), true);
+    int32_t windowId = 1;
+    std::string event = "test";
+    sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerTestCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = onScreen_.UnregisterScreenEventCallback(context, windowId, event, callback);
+    EXPECT_NE(ret, RET_OK);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
+}
+
+/**
+ * @tc.name: UnregisterScreenEventCallback002
+ * @tc.desc: Test func named UnregisterScreenEventCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerTest, UnregisterScreenEventCallback002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    auto flag = AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    EXPECT_EQ(flag, Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    EXPECT_EQ(onScreen_.IsSystemCalling(context), true);
+    int32_t windowId = 1;
+    std::string event = "test";
+    sptr<IRemoteOnScreenCallback> callback { nullptr };
+    int32_t ret = onScreen_.UnregisterScreenEventCallback(context, windowId, event, callback);
+    EXPECT_NE(ret, RET_OK);
     OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
 } // namespace OnScreen

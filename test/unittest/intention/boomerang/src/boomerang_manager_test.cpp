@@ -109,6 +109,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest003, TestSize.Level1)
     char bundleName[MAX_STRING_LEN] = {0};
     BoomerangType type { BOOMERANG_TYPE_BOOMERANG };
     sptr<IRemoteBoomerangCallback> subCallback = new (std::nothrow) BoomerangManagerTestCallback();
+    ASSERT_NE(subCallback, nullptr);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.SubscribeCallback(type, bundleName, subCallback);
     EXPECT_EQ(ret, RET_OK);
@@ -147,6 +148,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest005, TestSize.Level1)
     char bundleName[MAX_STRING_LEN] = {0};
     BoomerangType type { BOOMERANG_TYPE_BOOMERANG };
     sptr<IRemoteBoomerangCallback> unsubCallback = new (std::nothrow) BoomerangManagerTestCallback();
+    ASSERT_NE(unsubCallback, nullptr);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.UnsubscribeCallback(type, bundleName, unsubCallback);
     EXPECT_EQ(ret, RET_OK);
@@ -183,6 +185,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest007, TestSize.Level1)
     GTEST_LOG_(INFO) << "BoomerangManagerTest007 start";
     char bundleName[MAX_STRING_LEN] = {0};
     sptr<IRemoteBoomerangCallback> notifyCallback = new (std::nothrow) BoomerangManagerTestCallback();
+    ASSERT_NE(notifyCallback, nullptr);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.NotifyMetadataBindingEvent(bundleName, notifyCallback);
     EXPECT_EQ(ret, RET_OK);
@@ -224,6 +227,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest009, TestSize.Level1)
     GTEST_LOG_(INFO) << "BoomerangManagerTest009 start";
     string metadata = "test";
     sptr<IRemoteBoomerangCallback> encodeCallback = new (std::nothrow) BoomerangManagerTestCallback();
+    ASSERT_NE(encodeCallback, nullptr);
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangEncodeImage(pixelMap, metadata, encodeCallback);
@@ -262,6 +266,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest011, TestSize.Level1)
     GTEST_LOG_(INFO) << "BoomerangManagerTest011 start";
     string metadata = "test";
     sptr<IRemoteBoomerangCallback> encodeCallback = new (std::nothrow) BoomerangManagerTestCallback();
+    ASSERT_NE(encodeCallback, nullptr);
     Media::InitializationOptions initOptions;
     initOptions.size = {1080, 1920};
     initOptions.pixelFormat = Media::PixelFormat::BGRA_8888;
@@ -338,6 +343,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest015, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "BoomerangManagerTest015 start";
     sptr<IRemoteBoomerangCallback> decodeCallback = new (std::nothrow) BoomerangManagerTestCallback();
+    ASSERT_NE(decodeCallback, nullptr);
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangDecodeImage(pixelMap, decodeCallback);
@@ -374,6 +380,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest017, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "BoomerangManagerTest017 start";
     sptr<IRemoteBoomerangCallback> decodeCallback = new (std::nothrow) BoomerangManagerTestCallback();
+    ASSERT_NE(decodeCallback, nullptr);
     Media::InitializationOptions initOptions;
     initOptions.size = {1080, 1920};
     initOptions.pixelFormat = Media::PixelFormat::BGRA_8888;

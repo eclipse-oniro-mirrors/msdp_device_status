@@ -411,6 +411,20 @@ HWTEST_F(DragClientTest, DragClientTest8, TestSize.Level0)
     CALL_TEST_DEBUG;
     ASSERT_EQ(g_dragClient.IsDragStart(), false);
 }
+
+/**
+ * @tc.name: DragClientTest9
+ * @tc.desc: DragClient
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragClientTest, DragClientTest9, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragState dragState { DragState::ERROR };
+    int32_t ret = g_dragClient.GetDragState(dragState);
+    ASSERT_EQ(ret, RET_OK);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
