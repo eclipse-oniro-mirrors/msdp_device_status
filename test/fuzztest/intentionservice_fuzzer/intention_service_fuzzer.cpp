@@ -30,6 +30,7 @@ namespace {
 using namespace OHOS;
 using namespace OHOS::Msdp;
 
+constexpr int32_t LISTSIZE = 25;
 const std::u16string INTENTION_INTERFACE_TOKEN = u"OHOS.Msdp.IIntention";
 
 const std::vector<IIntentionIpcCode > CODE_LIST = {
@@ -620,12 +621,29 @@ bool IIntentionServerFuzzTest(const uint8_t* data, size_t size)
         return 0;
     }
     OHOS::MessageParcel parcel;
-    int code = provider.ConsumeIntegralInRange<int32_t>(0, 20);
-    int code1 = provider.ConsumeIntegralInRange<int32_t>(20, CODE_LIST.size());
+    int32_t code = provider.ConsumeIntegralInRange<int32_t>(0, LISTSIZE);
     parcel.WriteInterfaceToken(INTENTION_INTERFACE_TOKEN);
-    parcel.WriteBuffer(data + 1, size - 1);
+    parcel.WriteBuffer(data, size);
     env.DoRemoteRequest(static_cast<IIntentionIpcCode>(code), parcel);
-    env.DoRemoteRequest(static_cast<IIntentionIpcCode>(code1), parcel);
+    DoSleep();
+    return true;
+}
+
+bool IIntentionServerFuzzTest1(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < 1)) {
+        return false;
+    }
+    FuzzedDataProvider provider(data, size);
+    static TestEnv env1;
+    if (!env1.IsInited()) {
+        return 0;
+    }
+    OHOS::MessageParcel parcel;
+    int32_t code = provider.ConsumeIntegralInRange<int32_t>(LISTSIZE, CODE_LIST.size());
+    parcel.WriteInterfaceToken(INTENTION_INTERFACE_TOKEN);
+    parcel.WriteBuffer(data, size);
+    env1.DoRemoteRequest(static_cast<IIntentionIpcCode>(code), parcel);
     DoSleep();
     return true;
 }
@@ -638,6 +656,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     OHOS::Msdp::DeviceStatus::IIntentionServerFuzzTest(data, size);
+    OHOS::Msdp::DeviceStatus::IIntentionServerFuzzTest1(data, size);
     return 0;
 }
 } // namespace DeviceStatus
