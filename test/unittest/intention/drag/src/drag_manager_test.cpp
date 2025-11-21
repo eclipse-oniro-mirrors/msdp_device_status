@@ -157,7 +157,7 @@ std::shared_ptr<Media::PixelMap> DragManagerTest::CreatePixelMap(int32_t width, 
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        FI_HILOGE("invalid, height:%{public}d, width:%{public}d", height, width);
+        FI_HILOGE("Invalid, height:%{public}d, width:%{public}d", height, width);
         return nullptr;
     }
     Media::InitializationOptions opts;
@@ -277,7 +277,7 @@ public:
         if (moduleName_.empty()) {
             moduleName_ = std::string("SubscriptListenerTest");
         }
-        FI_HILOGD("subscriptListener, %{public}s, state:%{public}s",
+        FI_HILOGD("SubscriptListener, %{public}s, state:%{public}s",
             moduleName_.c_str(), PrintStyleMessage(style).c_str());
     }
 
@@ -2013,6 +2013,369 @@ HWTEST_F(DragManagerTest, DragManagerTest98, TestSize.Level0)
     std::string animationInfo = "{\"targetPos\": [100, 100]}";
     int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
     EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: DragManagerTest99
+ * @tc.desc: Update drag node bounds and frame
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest99, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    dragData->filterInfo = " { \"enable_animation\": nullptr } ";
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result);
+        promiseFlag.set_value(true);
+    };
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
+}
+ 
+/**
+ * @tc.name: DragManagerTest100
+ * @tc.desc: Update drag node bounds and frame
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest100, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    dragData->filterInfo = " { \"enable_animation\": false } ";
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.allAnimationCnt_ = 100;
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+}
+ 
+/**
+ * @tc.name: DragManagerTest101
+ * @tc.desc: Update drag node bounds and frame
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest101, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    dragData->filterInfo = " { \"enable_animation\": true } ";
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.allAnimationCnt_ = 100;
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+}
+ 
+/**
+ * @tc.name: DragManagerTest102
+ * @tc.desc: Update drag node bounds and frame
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest102, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    dragData->filterInfo = " { \"enable_animation\": true } ";
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.preDragPositionX_ = 100;
+    g_dragMgr.dragDrawing_.preDragPositionY_ = 100;
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+}
+ 
+/**
+ * @tc.name: DragManagerTest103
+ * @tc.desc: Update drag node bounds and frame
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest103, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    dragData->filterInfo = " { \"enable_animation\": true } ";
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.allAnimationCnt_ = 1;
+    g_dragMgr.dragDrawing_.preDragPositionX_ = 0;
+    g_dragMgr.dragDrawing_.preDragPositionY_ = 0;
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+}
+ 
+/**
+ * @tc.name: DragManagerTest104
+ * @tc.desc: Update drag node bounds and frame
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest104, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    dragData->filterInfo = " { \"enable_animation\": true } ";
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.allAnimationCnt_ = 100;
+    g_dragMgr.dragDrawing_.preDragPositionX_ = 0;
+    g_dragMgr.dragDrawing_.preDragPositionY_ = 0;
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
+/**
+ * @tc.name: DragManagerTest105
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest105, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    dragData->summaryTag = "NEED_FETCH";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = false;
+    g_dragMgr.isCollaborationService_ = true;
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.lastEventId_ = 0;
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    std::map<std::string, int64_t> summarys;
+    DragSummaryInfo dragSummaryInfo;
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = true;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest106
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    dragData->summaryTag = "NEED_FETCH";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = false;
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    std::map<std::string, int64_t> summarys;
+    DragSummaryInfo dragSummaryInfo;
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = false;
+    g_dragMgr.isCollaborationService_ = false;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest107
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest107, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = false;
+    g_dragMgr.isCollaborationService_ = true;
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.lastEventId_ = 0;
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    std::map<std::string, int64_t> summarys;
+    DragSummaryInfo dragSummaryInfo;
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = true;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest108
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest108, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = false;
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    std::map<std::string, int64_t> summarys;
+    DragSummaryInfo dragSummaryInfo;
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isCrossDragging_ = false;
+    g_dragMgr.isCollaborationService_ = false;
+    ret = g_dragMgr.GetUdKey(udKey);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
+    g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
+    ret = g_dragMgr.GetDragSummary(summarys);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest109
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest109, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
+}
+ 
+/**
+ * @tc.name: DragManagerTest110
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest110, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDropResult dropResult { DragResult::DRAG_EXCEPTION, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    g_dragMgr.dragState_ = DragState::START;
+    int32_t ret = g_dragMgr.StopDrag(dropResult, "Cross-device drag");
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
