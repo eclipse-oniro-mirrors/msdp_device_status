@@ -30,8 +30,6 @@ namespace DeviceStatus {
 void JsDragManager::ResetEnv()
 {
     CALL_INFO_TRACE;
-    std::lock_guard<std::mutex> guard(mutex_);
-    listeners_.clear();
 }
 
 bool JsDragManager::IsSameHandle(napi_env env, napi_value handle, napi_ref ref)
