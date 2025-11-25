@@ -116,6 +116,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest002, TestSize.Level1)
     char bundleName[MAX_STRING_LEN] = { 0 };
     int32_t type { BOOMERANG_TYPE_BOOMERANG };
     sptr<IRemoteBoomerangCallback> subCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(subCallback, nullptr);
     int32_t ret = boomerang_.SubscribeCallback(context, type, bundleName, subCallback);
     EXPECT_EQ(ret, RET_OK);
 }
@@ -158,6 +159,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest004, TestSize.Level1)
     };
     char bundleName[MAX_STRING_LEN] = { 0 };
     sptr<IRemoteBoomerangCallback> notifyCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(notifyCallback, nullptr);
     int32_t ret = boomerang_.NotifyMetadataBindingEvent(context, bundleName, notifyCallback);
     EXPECT_EQ(ret, RET_OK);
 }
@@ -201,6 +203,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest006, TestSize.Level1)
     };
     string metadata = "test";
     sptr<IRemoteBoomerangCallback> encodeCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(encodeCallback, nullptr);
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
     int32_t ret = boomerang_.BoomerangEncodeImage(context, pixelMap, metadata, encodeCallback);
     EXPECT_EQ(ret, RET_OK);
@@ -243,6 +246,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest008, TestSize.Level1)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     sptr<IRemoteBoomerangCallback> decodeCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(decodeCallback, nullptr);
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = CreateEmptyPixelMap();
     int32_t ret = boomerang_.BoomerangDecodeImage(context, pixelMap, decodeCallback);
     EXPECT_EQ(ret, RET_OK);
@@ -288,6 +292,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest010, TestSize.Level1)
     char bundleName[MAX_STRING_LEN] = { 0 };
     BoomerangType type { BOOMERANG_TYPE_BOOMERANG };
     sptr<IRemoteBoomerangCallback> unsubCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(unsubCallback, nullptr);
     int32_t ret = boomerang_.UnsubscribeCallback(context, type, bundleName, unsubCallback);
     EXPECT_EQ(ret, RET_OK);
 }
@@ -428,6 +433,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest018, TestSize.Level1)
     char bundleName[MAX_STRING_LEN] = { 0 };
     int32_t type { BOOMERANG_TYPE_BOOMERANG };
     sptr<IRemoteBoomerangCallback> subCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(subCallback, nullptr);
     int32_t ret = boomerang_.SubscribeCallback(context, type, bundleName, subCallback);
     EXPECT_EQ(ret, RET_OK);
 }
@@ -514,6 +520,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest022, TestSize.Level1)
     char bundleName[MAX_STRING_LEN] = { 0 };
     int32_t type { BOOMERANG_TYPE_MAX };
     sptr<IRemoteBoomerangCallback> subCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(subCallback, nullptr);
     int32_t ret = boomerang_.SubscribeCallback(context, type, bundleName, subCallback);
     EXPECT_EQ(ret, RET_ERR);
 }
@@ -536,6 +543,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest023, TestSize.Level1)
     char bundleName[MAX_STRING_LEN] = { 0 };
     BoomerangType type { BOOMERANG_TYPE_INVALID };
     sptr<IRemoteBoomerangCallback> unsubCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(unsubCallback, nullptr);
     int32_t ret = boomerang_.UnsubscribeCallback(context, type, bundleName, unsubCallback);
     EXPECT_EQ(ret, RET_ERR);
 }
@@ -557,6 +565,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest024, TestSize.Level1)
     };
     char bundleName[MAX_STRING_LEN] = { TWO_PARAM };
     sptr<IRemoteBoomerangCallback> notifyCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(notifyCallback, nullptr);
     int32_t ret = boomerang_.NotifyMetadataBindingEvent(context, bundleName, notifyCallback);
     EXPECT_EQ(ret, RET_ERR);
 }
@@ -577,6 +586,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest025, TestSize.Level1)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     sptr<IRemoteBoomerangCallback> decodeCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(decodeCallback, nullptr);
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     int32_t ret = boomerang_.BoomerangDecodeImage(context, pixelMap, decodeCallback);
     EXPECT_EQ(ret, RET_ERR);
@@ -599,6 +609,7 @@ HWTEST_F(BoomerangServerTest, BoomerangServerTest026, TestSize.Level1)
     };
     char metaData[MAX_STRING_LEN] = { 0 };
     sptr<IRemoteBoomerangCallback> encodeCallback = new (std::nothrow) BoomerangServerTestCallback();
+    ASSERT_NE(encodeCallback, nullptr);
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     int32_t ret = boomerang_.BoomerangEncodeImage(context, pixelMap, metaData, encodeCallback);
     EXPECT_EQ(ret, RET_ERR);
