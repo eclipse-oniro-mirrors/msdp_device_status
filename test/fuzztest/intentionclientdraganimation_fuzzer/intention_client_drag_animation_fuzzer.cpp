@@ -28,7 +28,8 @@
 #define LOG_TAG "IntentionClientDragAnimationFuzzTest"
 
 namespace {
-    constexpr size_t THRESHOLD = 5;
+constexpr size_t THRESHOLD = 5;
+constexpr int32_t_t TIME_WAIT_FOR_DS_MS { 1000 };
 }
 using namespace OHOS::Media;
 using namespace OHOS::Msdp;
@@ -63,6 +64,7 @@ void IntentionClientDragAnimationFuzzTest(const uint8_t *data, size_t size)
     bool isStart = provider.ConsumeBool();
     INTENTION_CLIENT->EnableInternalDropAnimation(animationInfo);
     INTENTION_CLIENT->ResetDragWindowScreenId(displayId, screenId);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_DS_MS));
     INTENTION_CLIENT->GetDragSummary(summarys, isJsCaller);
     INTENTION_CLIENT->SetDragSwitchState(enable, isJsCaller);
     INTENTION_CLIENT->SetAppDragSwitchState(enable, pkgName, isJsCaller);
