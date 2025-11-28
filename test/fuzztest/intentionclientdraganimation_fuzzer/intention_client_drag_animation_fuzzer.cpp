@@ -29,7 +29,7 @@
 
 namespace {
 constexpr size_t THRESHOLD = 5;
-constexpr int32_t_t TIME_WAIT_FOR_DS_MS { 1000 };
+constexpr int32_t TIME_WAIT_FOR_DS_MS { 1000 };
 }
 using namespace OHOS::Media;
 using namespace OHOS::Msdp;
