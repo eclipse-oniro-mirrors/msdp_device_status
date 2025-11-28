@@ -529,13 +529,16 @@ void DragDrawing::DoMultiSelectedAnimation(float positionX, float positionY, flo
     if (isMultiSelectedAnimation) {
         isMultiSelectedAnimation = needMultiSelectedAnimation_;
     }
+    auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
+    if (currentPixelMap == nullptr) {
+        FI_HILOGE("currentPixelMap is nullptr");
+        return;
+    }
     size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
     size_t multiSelectedPixelMapsSize = g_drawingInfo.multiSelectedPixelMaps.size();
     for (size_t i = 0; (i < multiSelectedNodesSize) && (i < multiSelectedPixelMapsSize); ++i) {
         std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
         std::shared_ptr<Media::PixelMap> multiSelectedPixelMap = g_drawingInfo.multiSelectedPixelMaps[i];
-        auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
-        CHKPV(currentPixelMap);
         CHKPV(multiSelectedNode);
         CHKPV(multiSelectedPixelMap);
         float multiSelectedPositionX = positionX + (static_cast<float>(currentPixelMap->GetWidth()) / TWICE_SIZE) -
@@ -3432,13 +3435,16 @@ int32_t DragDrawing::ModifyMultiPreviewStyle(const std::vector<PreviewStyle> &pr
 void DragDrawing::MultiSelectedAnimation(int32_t positionX, int32_t positionY, int32_t adjustSize,
     bool isMultiSelectedAnimation)
 {
+    auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
+    if (currentPixelMap == nullptr) {
+        FI_HILOGE("currentPixelMap is nullptr");
+        return;
+    }
     size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
     size_t multiSelectedPixelMapsSize = g_drawingInfo.multiSelectedPixelMaps.size();
     for (size_t i = 0; (i < multiSelectedNodesSize) && (i < multiSelectedPixelMapsSize); ++i) {
         std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
         std::shared_ptr<Media::PixelMap> multiSelectedPixelMap = g_drawingInfo.multiSelectedPixelMaps[i];
-        auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
-        CHKPV(currentPixelMap);
         CHKPV(multiSelectedNode);
         CHKPV(multiSelectedPixelMap);
         int32_t multiSelectedPositionX = positionX + (currentPixelMap->GetWidth() / TWICE_SIZE) -
