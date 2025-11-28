@@ -37,12 +37,11 @@ bool DeviceStatusStreamFuzzTest(const uint8_t* data, size_t size)
 {
     FuzzedDataProvider provider(data, size);
     size_t blobSize = provider.ConsumeIntegralInRange<size_t>(1, MAX_STREAM_BUF_SIZE);
-    std::string buf = provider.ConsumeRandomLengthString(blobSize);
+    const std::string &buf = provider.ConsumeRandomLengthString(blobSize);
     StreamBuffer streamBuffer;
     int32_t n = provider.ConsumeIntegral<int32_t>();
     streamBuffer.SeekReadPos(n);
     streamBuffer.Write(buf);
-    streamBuffer.Read(buf);
     streamBuffer.GetErrorStatusRemark();
     streamBuffer.Reset();
     streamBuffer.Clean();
