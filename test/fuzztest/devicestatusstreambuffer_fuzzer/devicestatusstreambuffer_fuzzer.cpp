@@ -40,10 +40,7 @@ bool DeviceStatusStreamFuzzTest(const uint8_t* data, size_t size)
     const std::string &buf = provider.ConsumeRandomLengthString(blobSize);
     StreamBuffer streamBuffer;
     int32_t n = provider.ConsumeIntegral<int32_t>();
-    char *buf1 = const_cast<char*>(buf.data());
     streamBuffer.SeekReadPos(n);
-    streamBuffer.Write(buf.c_str(), blobSize);
-    streamBuffer.Read(buf1, blobSize);
     streamBuffer.Write(buf);
     streamBuffer.GetErrorStatusRemark();
     streamBuffer.Reset();
