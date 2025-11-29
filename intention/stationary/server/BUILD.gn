@@ -67,6 +67,7 @@ ohos_source_set("intention_stationary_server") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "ace_engine:ui_session",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
