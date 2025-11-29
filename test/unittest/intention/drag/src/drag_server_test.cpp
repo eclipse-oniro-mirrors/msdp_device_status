@@ -53,11 +53,11 @@ constexpr int32_t DISPLAY_X { 50 };
 constexpr int32_t DISPLAY_Y { 50 };
 constexpr int32_t INT32_BYTE { 4 };
 constexpr int32_t MAX_BUF_SIZE { 1024 };
-#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
-constexpr int32_t MAX_ANIMATION_INFO_LENGTH { 1024 };
 constexpr float POSITION_X { -1.0f };
 constexpr float POSITION_Y { -1.0f };
 constexpr float SCALING_VALUE { 0.0f };
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+constexpr int32_t MAX_ANIMATION_INFO_LENGTH { 1024 };
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 int32_t g_shadowinfo_x { 0 };
 int32_t g_shadowinfo_y { 0 };
