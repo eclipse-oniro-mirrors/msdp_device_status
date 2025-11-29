@@ -53,7 +53,7 @@ std::map<int32_t, Type> DEVICE_STATUS_TYPE_MAP {
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_SYSTEM_API = 202;
 constexpr int32_t SENSOR_SAMPLING_INTERVAL = 10000000;
-constexpr int32_t WAIT_SENSOR_DATA_TIMEOUT_MS = 200;
+constexpr int32_t WAIT_SENSOR_DATA_TIMEOUT_MS = 1000;
 constexpr int32_t ROTATION_MAT_LEN = 3;
 constexpr int32_t MAT_IDX_0 = 0;
 constexpr int32_t MAT_IDX_1 = 1;
@@ -75,6 +75,7 @@ static void OnReceivedData(SensorEvent *event)
         std::unique_lock lockGrd(g_mtx);
         RotationVectorData *data = reinterpret_cast<RotationVectorData *>(event->data);
         cacheRotVecData_ = std::make_optional(*data);
+        FI_HILOGI("rotation vec collect succ");
         g_cv.notify_all();
     }
 }
@@ -181,6 +182,7 @@ int32_t StationaryServer::GetDevicePostureDataSync(CallingContext &context, Devi
     sensorManager.StopSensor();
     // 数据转换
     if (cacheRotVecData_ == std::nullopt) {
+        FI_HILOGE("get cache data failed, sensor no data, timeout");
         return RET_ERR;
     }
     TransQuaternionsToZXYRot(cacheRotVecData_.value(), data);
