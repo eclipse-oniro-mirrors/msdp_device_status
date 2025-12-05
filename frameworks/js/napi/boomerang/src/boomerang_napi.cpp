@@ -683,6 +683,7 @@ void BoomerangNapi::EncodeImageCompleteCB(napi_env env, napi_status status, void
 
 void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
 {
+    std::lock_guard<std::mutex> guard(mutex_);
     AsyncContext*  innerAsyncContext = static_cast<AsyncContext*>(data);
     auto pixelMap = static_cast<std::shared_ptr<Media::PixelMap>>(innerAsyncContext->pixelMap);
     sptr<IRemoteBoomerangCallback> callback = static_cast<sptr<IRemoteBoomerangCallback>>(innerAsyncContext->callback);
@@ -695,7 +696,7 @@ void BoomerangNapi::DecodeImageExecuteCB(napi_env env, void* data)
  
 void BoomerangNapi::DecodeImageCompleteCB(napi_env env, napi_status status, void* data)
 {
-    std::lock_guard<std::mutex> guard(encodeMutex_);
+    std::lock_guard<std::mutex> guard(mutex_);
     auto outerAsyncContext = static_cast<AsyncContext*>(data);
     int32_t result = static_cast<int32_t>(outerAsyncContext->result);
     if (result != RET_OK) {

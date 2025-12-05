@@ -66,7 +66,7 @@ uint64_t GetShellTokenId()
 AccessTokenID GetNativeTokenIdFromProcess(const std::string &process)
 {
     uint64_t selfTokenId = GetSelfTokenID();
-    EXPECT_EQ(0, SetSelfTokenID(GetShellTokenId())); // set shell token
+    EXPECT_EQ(0, SetSelfTokenID(GetShellTokenId())); // Set shell token
 
     std::string dumpInfo;
     AtmToolsParamInfo info;

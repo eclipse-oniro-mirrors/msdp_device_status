@@ -302,39 +302,20 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest009, TestSize.Level0)
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
     ASSERT_FALSE(dragData == std::nullopt);
     DragDrawing dragDrawing;
+    dragDrawing.InitDrawingInfo(dragData.value());
     int32_t ret = dragDrawing.Init(dragData.value(), nullptr);
-    dragDrawing.UpdateDragWindowState(DRAG_WINDOW_VISIBLE);
-    EXPECT_EQ(ret, INIT_SUCCESS);
-    dragDrawing.DestroyDragWindow();
-    dragDrawing.EraseMouseIcon();
-    dragDrawing.UpdateDragWindowState(!DRAG_WINDOW_VISIBLE);
-}
-
-/**
- * @tc.name: DragDataManagerTest010
- * @tc.desc: normal test DragDrawing initialization
- * @tc.type: FUNC
- */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest010, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    std::optional<DragData> dragData = CreateDragData(
-        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
-    ASSERT_FALSE(dragData == std::nullopt);
-    DragDrawing dragDrawing;
-    int32_t ret = dragDrawing.Init(dragData.value(), nullptr);
-    dragDrawing.UpdateDragWindowState(DRAG_WINDOW_VISIBLE);
     EXPECT_EQ(ret, INIT_CANCEL);
     dragDrawing.DestroyDragWindow();
     dragDrawing.UpdateDragWindowState(!DRAG_WINDOW_VISIBLE);
+    dragDrawing.UpdateDrawingState();
 }
 
  /**
- * @tc.name: DragDataManagerTest011
+ * @tc.name: DragDataManagerTest010
  * @tc.desc: normal test DragDrawing drawing
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level0)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest010, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     auto pointerEvent = MMI::PointerEvent::Create();
@@ -351,11 +332,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level0)
 }
 
 /**
- * @tc.name: InteractionDragDrawingTest_CalculateScale
+ * @tc.name: DragDataManagerTest011
  * @tc.desc: normal test DragDrawing CalculateScale
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level1)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest011, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     DragDrawing dragDrawing;
@@ -366,11 +347,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level1)
 }
 
  /**
- * @tc.name: DragDataManagerTest013
+ * @tc.name: DragDataManagerTest012
  * @tc.desc: normal test DragDrawing drawing
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest012, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t eventId = 1;
@@ -379,11 +360,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragDataManagerTest014
+ * @tc.name: DragDataManagerTest013
  * @tc.desc: normal test DragDrawing RemoveModifier
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest014, TestSize.Level0)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     DragDrawing dragDrawing;
@@ -410,11 +391,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest014, TestSize.Level0)
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 /**
- * @tc.name: DragDataManagerTest015
+ * @tc.name: DragDataManagerTest014
  * @tc.desc: normal test DragDrawing GetFilePath
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest015, TestSize.Level0)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest014, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     DragDrawing dragDrawing;
@@ -434,11 +415,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest015, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragDataManagerTest016
+ * @tc.name: DragDataManagerTest015
  * @tc.desc: normal test DragDrawing GetFilePath
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest015, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     DragDrawing dragDrawing;
@@ -483,11 +464,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragDataManagerTest017
+ * @tc.name: DragDataManagerTest016
  * @tc.desc: normal test DragDrawing Draw
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest017, TestSize.Level0)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest016, TestSize.Level0)
 {
     std::shared_ptr<Media::PixelMap> stylePixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
     bool isRTL = false;
@@ -497,11 +478,11 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest017, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragDataManagerTest018
+ * @tc.name: DragDataManagerTest017
  * @tc.desc: normal test DragDrawing Draw
  * @tc.type: FUNC
  */
-HWTEST_F(DragDataManagerTest, DragDataManagerTest018, TestSize.Level0)
+HWTEST_F(DragDataManagerTest, DragDataManagerTest017, TestSize.Level0)
 {
     std::shared_ptr<Media::PixelMap> stylePixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
     bool isRTL = true;

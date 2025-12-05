@@ -157,7 +157,7 @@ std::shared_ptr<Media::PixelMap> DragManagerTest::CreatePixelMap(int32_t width, 
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        FI_HILOGE("invalid, height:%{public}d, width:%{public}d", height, width);
+        FI_HILOGE("Invalid, height:%{public}d, width:%{public}d", height, width);
         return nullptr;
     }
     Media::InitializationOptions opts;
@@ -277,7 +277,7 @@ public:
         if (moduleName_.empty()) {
             moduleName_ = std::string("SubscriptListenerTest");
         }
-        FI_HILOGD("subscriptListener, %{public}s, state:%{public}s",
+        FI_HILOGD("SubscriptListener, %{public}s, state:%{public}s",
             moduleName_.c_str(), PrintStyleMessage(style).c_str());
     }
 

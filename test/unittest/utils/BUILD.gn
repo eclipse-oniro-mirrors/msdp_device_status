@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -84,11 +84,52 @@ ohos_unittest("CustomConfigTest") {
     "hilog:libhilog",
   ]
 }
- 
+
+ohos_unittest("JsonParserTest") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../ipc_blocklist.txt"
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  module_out_path = module_output_path
+  include_dirs = [
+    "${device_status_interfaces_path}/innerkits/interaction/include",
+    "${device_status_root_path}/utils/custom_config/include",
+    "${device_status_utils_path}/include",
+  ]
+
+  defines = []
+
+  sources = [ "src/json_parser_test.cpp" ]
+
+  cflags = [ "-Dprivate=public" ]
+
+  configs = []
+
+  deps = [
+    "${device_status_root_path}/utils/custom_config:custom_config_parser",
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_root_path}/utils/json_parser:json_parser",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "cJSON:cjson",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":UtilityTest",
     ":CustomConfigTest",
+    ":JsonParserTest",
   ]
 }
