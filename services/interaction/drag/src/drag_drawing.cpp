@@ -1874,8 +1874,8 @@ void DragDrawing::OnDragMove(int32_t displayId, int32_t displayX, int32_t displa
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::chrono::microseconds microseconds(actionTime);
-    TimeStamp time(microseconds);
-    uint64_t actionTimeCount = static_cast<uint64_t>(time.time_since_epoch().count());
+    std::chrono::nanoseconds nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(microseconds);
+    uint64_t actionTimeCount = static_cast<uint64_t>(nanoseconds.count());
     DragMoveEvent event = {
         .displayX = displayX,
         .displayY = displayY,
