@@ -114,7 +114,8 @@
           "//base/msdp/device_status/frameworks/ets/metadataBinding:metadataBinding_ani",
           "//base/msdp/device_status/frameworks/ets/motion:motion_ani",
           "//base/msdp/device_status/frameworks/ets/devicestatus:multimodalawareness_devicestatus_pack",
-          "//base/msdp/device_status/frameworks/js/napi/distance_measurement:spatialawareness_napi"
+          "//base/msdp/device_status/frameworks/js/napi/distance_measurement:spatialawareness_napi",
+          "//base/msdp/device_status/frameworks/ets/spatialAwareness:spatialawareness_pack"
         ],
         "service_group":[
           "//base/msdp/device_status/libs:devicestatus_algo",

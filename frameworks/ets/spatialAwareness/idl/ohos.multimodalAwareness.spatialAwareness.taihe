@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.multimodalAwareness.spatialAwareness", "spatialAwareness")
+@!sts_inject("""
+static { loadLibraryWithPermissionCheck("spatialawareness_ani.z", "@ohos.multimodalAwareness.spatialAwareness") }
+""")
+
+enum TechnologyType : i32 {
+    BLE_RSSI = 0,
+    WIFI_RSSI = 1,
+    ULTRASOUND = 2,
+    NEAR_LINK = 3,
+    WIFI_BLE_RSSI = 4
+}
+
+enum ReportingMode : i32 {
+    REPORT_MODE_PERIODIC_REPORTING = 0,
+    REPORT_MODE_TRIGGERED_REPORTING = 1
+}
+
+struct DistanceMeasurementConfigParams {
+    deviceList: Array<String>;
+    techType: TechnologyType;
+    reportMode: ReportingMode;
+    reportFrequency: i32;
+}
+
+enum DistanceRank : String {
+    RANK_ULTRA_SHORT_RANGE = "rankUltraShort",
+    RANK_SHORT_RANGE = "rankShort",
+    RANK_SHORT_MEDIUM_RANGE = "rankMediumShort",
+    RANK_MEDIUM_RANGE = "rankMedium"
+}
+
+struct DistanceMeasurementResponse {
+    rank: DistanceRank;
+    distance: f32;
+    confidence: f32;
+    deviceId: String;
+}
+
+enum PositionRelativeToDoor : i32 {
+    OUTDOOR = 0,
+    INDOOR = 1
+}
+
+struct DoorPositionResponse {
+    doorLockCode: i32;
+    position: PositionRelativeToDoor;
+    deviceId: String;
+}
+
+@!sts_inject("""
+    function onDistanceMeasure(configParams: DistanceMeasurementConfigParams,
+        callback: (info: DistanceMeasurementResponse) => void) {
+        return onDistanceMeasureInner(configParams, callback, callback);
+      }
+    function offDistanceMeasure(configParams: DistanceMeasurementConfigParams,
+        callback?: (info: DistanceMeasurementResponse) => void) {
+        return offDistanceMeasureInner(configParams, callback);
+      }
+    function onIndoorOrOutdoorIdentify(configParams: DistanceMeasurementConfigParams,
+        callback: (info: DoorPositionResponse) => void) {
+        return onIndoorOrOutdoorIdentifyInner(configParams, callback, callback);
+      }
+    function offIndoorOrOutdoorIdentify(configParams: DistanceMeasurementConfigParams,
+        callback?: (info: DoorPositionResponse) => void) {
+        return offIndoorOrOutdoorIdentifyInner(configParams, callback);
+      }
+""")
+
+function OnDistanceMeasureInner(configParams: DistanceMeasurementConfigParams,
+    callback: (info: DistanceMeasurementResponse) => void, opq: Opaque);
+
+function OffDistanceMeasureInner(configParams: DistanceMeasurementConfigParams,
+    opq: Optional<Opaque>);
+
+function OnIndoorOrOutdoorIdentifyInner(configParams: DistanceMeasurementConfigParams,
+    callback: (info: DoorPositionResponse) => void, opq: Opaque);
+
+function OffIndoorOrOutdoorIdentifyInner(configParams: DistanceMeasurementConfigParams,
+    opq: Optional<Opaque>);
