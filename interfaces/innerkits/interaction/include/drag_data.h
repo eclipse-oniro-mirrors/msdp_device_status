@@ -79,6 +79,7 @@ struct DragData {
     int32_t summaryVersion { 0 };
     int64_t summaryTotalSize { -1 };
     std::string summaryTag;
+    int32_t materialId { -1 };
     std::string appCallee;
     std::string appCaller;
 
