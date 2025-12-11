@@ -45,8 +45,8 @@ constexpr int32_t DISPLAY_Y { 50 };
 constexpr int32_t SHADOW_NUM_ONE { 1 };
 constexpr int32_t INT32_BYTE { 4 };
 constexpr int32_t POINTER_ID { 0 };
-int32_t g_shadowinfo_x { 0 };
-int32_t g_shadowinfo_y { 0 };
+int32_t g_shadowinfoX { 0 };
+int32_t g_shadowinfoY { 0 };
 constexpr bool HAS_CANCELED_ANIMATION { true };
 const std::string UD_KEY { "Unified data key" };
 const std::string FILTER_INFO { "Undefined filter info" };
@@ -187,7 +187,7 @@ std::optional<DragData> DragDrawingTest::CreateDragData(int32_t sourceType,
             FI_HILOGE("pixelMap nullptr");
             return std::nullopt;
         }
-        dragData.shadowInfos.push_back({ pixelMap, g_shadowinfo_x, g_shadowinfo_y });
+        dragData.shadowInfos.push_back({ pixelMap, g_shadowinfoX, g_shadowinfoY });
     }
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
     dragData.extraInfo = FILTER_INFO;
@@ -357,7 +357,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest7, TestSize.Level0)
     g_dragMgr.dragDrawing_.SetCustomDragBlur(filterInfo, filterNode);
     g_dragMgr.dragDrawing_.DestroyDragWindow();
     g_dragMgr.dragDrawing_.UpdateDrawingState();
-      g_dragMgr.dragDrawing_.materialId_ = -1;
+    g_dragMgr.dragDrawing_.materialId_ = -1;
     g_dragMgr.dragDrawing_.materialFilter_  = std::make_shared<Rosen::Filter>();
     ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
     ASSERT_EQ(ret, RET_OK);
@@ -421,7 +421,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest9, TestSize.Level0)
     g_dragMgr.dragDrawing_.SetComponentDragBlur(filterInfo, extraInfo, filterNode);
     g_dragMgr.dragDrawing_.DestroyDragWindow();
     g_dragMgr.dragDrawing_.UpdateDrawingState();
-      g_dragMgr.dragDrawing_.materialId_ = -1;
+    g_dragMgr.dragDrawing_.materialId_ = -1;
     g_dragMgr.dragDrawing_.materialFilter_  = std::make_shared<Rosen::Filter>();
     ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
     ASSERT_EQ(ret, RET_OK);
