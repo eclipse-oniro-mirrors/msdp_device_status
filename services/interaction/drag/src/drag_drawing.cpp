@@ -212,6 +212,7 @@ const std::string FORBID_DRAG_NAME { "/base/media/Forbid_Drag.svg" };
 const std::string FORBID_ONE_DRAG_NAME { "/base/media/Forbid_One_Drag.svg" };
 const std::string MOVE_DRAG_NAME { "/base/media/Move_Drag.svg" };
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+const std::string NEW_MATERIAL_SO_PATH { "/system/lib64/libmaterialeffects.z.so" };
 const std::string MOUSE_DRAG_DEFAULT_PATH { "/system/etc/device_status/drag_icon/Mouse_Drag_Default.svg" };
 const std::string MOUSE_DRAG_MAGIC_DEFAULT_PATH { "/system/etc/device_status/drag_icon/Mouse_Drag_Magic_Default.svg" };
 const std::string MOUSE_DRAG_CURSOR_CIRCLE_PATH { "/system/etc/device_status/drag_icon/Mouse_Drag_Cursor_Circle.png" };
