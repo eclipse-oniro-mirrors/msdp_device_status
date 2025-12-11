@@ -2038,7 +2038,7 @@ HWTEST_F(DragManagerTest, DragManagerTest99, TestSize.Level1)
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_EQ(ret, RET_OK);
@@ -2061,7 +2061,7 @@ HWTEST_F(DragManagerTest, DragManagerTest100, TestSize.Level1)
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragDrawing_.allAnimationCnt_ = 100;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
@@ -2082,7 +2082,7 @@ HWTEST_F(DragManagerTest, DragManagerTest101, TestSize.Level1)
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragDrawing_.allAnimationCnt_ = 100;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
@@ -2104,7 +2104,7 @@ HWTEST_F(DragManagerTest, DragManagerTest102, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragDrawing_.preDragPositionX_ = 100;
     g_dragMgr.dragDrawing_.preDragPositionY_ = 100;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
@@ -2127,7 +2127,7 @@ HWTEST_F(DragManagerTest, DragManagerTest103, TestSize.Level1)
     g_dragMgr.dragDrawing_.allAnimationCnt_ = 1;
     g_dragMgr.dragDrawing_.preDragPositionX_ = 0;
     g_dragMgr.dragDrawing_.preDragPositionY_ = 0;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
@@ -2150,7 +2150,7 @@ HWTEST_F(DragManagerTest, DragManagerTest104, TestSize.Level1)
     g_dragMgr.dragDrawing_.allAnimationCnt_ = 100;
     g_dragMgr.dragDrawing_.preDragPositionX_ = 0;
     g_dragMgr.dragDrawing_.preDragPositionY_ = 0;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }

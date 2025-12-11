@@ -440,7 +440,7 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY, bo
     Rosen::RSTransaction::FlushImplicitTransaction();
 }
 
-void DragDrawing::UpdateDragNodeBoundsAndFrame(float x, float y, float w, float h)
+void DragDrawing::UpdateDragNodeBoundsAndFrame(float x, float y, int32_t w, int32_t h)
 {
     auto parentNode = g_drawingInfo.parentNode;
     CHKPV(parentNode);
@@ -499,7 +499,7 @@ void DragDrawing::UpdateDragPosition(int32_t displayId, float displayX, float di
     if (displayY < 0) {
         g_drawingInfo.displayY = 0;
     }
-    float adjustSize = TWELVE_SIZE * GetScaling();
+    int32_t adjustSize = TWELVE_SIZE * GetScaling();
     float positionX = g_drawingInfo.x + g_drawingInfo.pixelMapX;
     float positionY = g_drawingInfo.y + g_drawingInfo.pixelMapY - adjustSize;
     auto parentNode = g_drawingInfo.parentNode;

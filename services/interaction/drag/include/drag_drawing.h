@@ -419,7 +419,7 @@ private:
     void RotateCanvasNode(float pivotX, float pivotY, float rotation);
     void FlushDragPosition(uint64_t nanoTimestamp);
     void RotatePosition(float &displayX, float &displayY);
-    void UpdateDragNodeBoundsAndFrame(float x, float y, float w, float h);
+    void UpdateDragNodeBoundsAndFrame(float x, float y, int32_t w, int32_t h);
     void UpdateDragPosition(int32_t displayId, float displayX, float displayY);
     float AdjustDoubleValue(double doubleValue);
     int32_t UpdatePixelMapsAngleAndAlpha();
