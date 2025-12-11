@@ -30,7 +30,7 @@ typedef void (*SetAppDragSwitchStateFunc)(const char *, bool);
 typedef int32_t (*GetAppDragSwitchStateFunc)(const char *, bool &);
 typedef void (*SetDraggableStateAsyncFunc)(bool, int64_t);
 typedef void (*StopLongPressDragFunc)();
- 
+
 class UniversalDragWrapper {
 public:
     UniversalDragWrapper(IContext *env)  : env_(env) {}
