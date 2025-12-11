@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -404,6 +404,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest9, TestSize.Level0)
     CALL_TEST_DEBUG;
     FilterInfo filterInfo;
     ExtraInfo extraInfo;
+    g_dragMgr.dragDrawing_.SetComponentDragBlur(filterInfo, extraInfo, nullptr);
     std::shared_ptr<Rosen::RSCanvasNode> filterNode = Rosen::RSCanvasNode::Create();
     g_dragMgr.dragDrawing_.SetComponentDragBlur(filterInfo, extraInfo, filterNode);
     g_dragMgr.dragDrawing_.materialId_ = 1;

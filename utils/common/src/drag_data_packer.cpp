@@ -100,7 +100,7 @@ int32_t DragDataPacker::MarshallingMaterialFilter(const DragData &dragData, Parc
         return RET_ERR;
     }
     if (!dragData.isSetMaterialFilter) {
-        FI_HILOGE("Not need Marshalling materialFilter");
+        FI_HILOGW("Not need Marshalling materialFilter");
         return RET_OK;
     }
     if (dragData.materialFilter == nullptr) {
@@ -121,7 +121,7 @@ int32_t DragDataPacker::UnMarshallingMaterialFilter(Parcel &data, DragData &drag
         return RET_ERR;
     }
     if (!dragData.isSetMaterialFilter) {
-        FI_HILOGE("isSetMaterialFilter is false, not need Unmarshalling materialFilter");
+        FI_HILOGW("isSetMaterialFilter is false, not need Unmarshalling materialFilter");
         return RET_OK;
     }
     if (!Rosen::Filter::Unmarshalling(data, dragData.materialFilter)) {

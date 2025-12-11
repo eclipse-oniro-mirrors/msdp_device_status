@@ -3111,7 +3111,10 @@ void DragDrawing::OnSetCustomDragBlur(const FilterInfo &filterInfo, std::shared_
 
 void DragDrawing::SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_ptr<Rosen::RSCanvasNode> filterNode)
 {
-    CHKPV(filterNode);
+    if (filterNode == nullptr) {
+        FI_HILOGE("filterNode is nullptr");
+        return;
+    }
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     CHKPV(currentPixelMap);
     if (materialId_ != -1) {
@@ -3151,8 +3154,8 @@ void DragDrawing::OnSetComponentDragBlur(const FilterInfo &filterInfo, const Ext
         return;
     }
     std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
-    RadiusVp2Sigma(RADIUS_VP, filterInfo.dipScale),
-    DEFAULT_SATURATION, DEFAULT_BRIGHTNESS, DEFAULT_COLOR_VALUE);
+        RadiusVp2Sigma(RADIUS_VP, filterInfo.dipScale),
+        DEFAULT_SATURATION, DEFAULT_BRIGHTNESS, DEFAULT_COLOR_VALUE);
     if (backFilter == nullptr) {
         FI_HILOGE("Create backgroundFilter failed");
         return;
