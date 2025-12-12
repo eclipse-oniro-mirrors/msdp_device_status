@@ -271,14 +271,14 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
             shadowInfo.pixelMap->GetWidth(), shadowInfo.pixelMap->GetHeight(), shadowInfo.x, shadowInfo.y);
     }
     std::string summarys;
-    for (const auto &[udKey, recordSize] : dragData.summarys) {
-        std::string str = udKey + "-" + std::to_string(recordSize) + ";";
+    for (const auto &[key, recordSize] : dragData.summarys) {
+        std::string str = key + "-" + std::to_string(recordSize) + ";";
         summarys += str;
     }
 
     std::string detailedSummarys;
-    for (const auto &[udKey, recordSize] : dragData.detailedSummarys) {
-        std::string str = udKey + "-" + std::to_string(recordSize) + ";";
+    for (const auto &[key, recordSize] : dragData.detailedSummarys) {
+        std::string str = key + "-" + std::to_string(recordSize) + ";";
         detailedSummarys += str;
     }
     std::string summaryFormat = GetSummaryFormatStrings(dragData.summaryFormat);
@@ -286,11 +286,18 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
         " displayX:%{private}d, displayY:%{private}d, dragNum:%{public}d,"
         " hasCanceledAnimation:%{public}d, udKey:%{public}s, hasCoordinateCorrected:%{public}d, summarys:%{public}s,"
         " packageName:%{public}s, isDragDelay:%{public}d, detailedSummarys:%{public}s, summaryFormat:%{public}s,"
-        " summaryVersion:%{public}d, totalSize:%{public} " PRId64 ", summaryTag:%{public}s", dragData.sourceType,
-        dragData.pointerId, dragData.displayId, dragData.displayX, dragData.displayY, dragData.dragNum,
-        dragData.hasCanceledAnimation, GetAnonyString(dragData.udKey).c_str(), dragData.hasCoordinateCorrected,
-        summarys.c_str(), GetAnonyString(packageName).c_str(), dragData.isDragDelay, detailedSummarys.c_str(),
-        summaryFormat.c_str(), dragData.summaryVersion, dragData.summaryTotalSize, dragData.summaryTag.c_str());
+        " summaryVersion:%{public}d, totalSize:%{public} " PRId64 ", summaryTag:%{public}s, materialId:%{public}d,"
+        " isSetMaterialFilter:%{public}d",
+        dragData.sourceType, dragData.pointerId, dragData.displayId, dragData.displayX, dragData.displayY,
+        dragData.dragNum, dragData.hasCanceledAnimation, GetAnonyString(dragData.udKey).c_str(),
+        dragData.hasCoordinateCorrected, summarys.c_str(), GetAnonyString(packageName).c_str(), dragData.isDragDelay,
+        detailedSummarys.c_str(), summaryFormat.c_str(), dragData.summaryVersion, dragData.summaryTotalSize,
+        dragData.summaryTag.c_str(), dragData.materialId, dragData.isSetMaterialFilter);
+    if (dragData.materialFilter != nullptr) {
+        FI_HILOGI("materialFilter not is nullptr");
+    } else {
+        FI_HILOGI("materialFilter is nullptr");
+    }
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X

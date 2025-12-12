@@ -166,6 +166,7 @@ if (!is_arkui_x) {
       ]
 
       external_deps = [
+        "graphic_2d:librender_service_base",
         "graphic_2d:librender_service_client",
         "input:libmmi-client",
         "window_manager:libdm",

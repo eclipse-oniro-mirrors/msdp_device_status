@@ -212,6 +212,7 @@ const std::string FORBID_DRAG_NAME { "/base/media/Forbid_Drag.svg" };
 const std::string FORBID_ONE_DRAG_NAME { "/base/media/Forbid_One_Drag.svg" };
 const std::string MOVE_DRAG_NAME { "/base/media/Move_Drag.svg" };
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+const std::string NEW_MATERIAL_SO_PATH { "/system/lib64/libmaterialeffects.z.so" };
 const std::string MOUSE_DRAG_DEFAULT_PATH { "/system/etc/device_status/drag_icon/Mouse_Drag_Default.svg" };
 const std::string MOUSE_DRAG_MAGIC_DEFAULT_PATH { "/system/etc/device_status/drag_icon/Mouse_Drag_Magic_Default.svg" };
 const std::string MOUSE_DRAG_CURSOR_CIRCLE_PATH { "/system/etc/device_status/drag_icon/Mouse_Drag_Cursor_Circle.png" };
@@ -314,6 +315,9 @@ int32_t DragDrawing::Init(const DragData &dragData, bool isLongPressDrag)
         return checkDragDataResult;
     }
     InitDrawingInfo(dragData, isLongPressDrag);
+    if (materialId_ != -1) {
+        LoadNewMaterialLib();
+    }
     UpdateDragDataForSuperHub(dragData);
     CreateWindow();
     CHKPR(g_drawingInfo.surfaceNode, INIT_FAIL);
@@ -2066,6 +2070,8 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData, bool isLongPressDrag
         }
         g_drawingInfo.multiSelectedPixelMaps.emplace_back(pixelMap);
     }
+    materialId_ = dragData.materialId;
+    materialFilter_ = dragData.materialFilter;
 }
 
 int32_t DragDrawing::InitDragAnimationData(DragAnimationData &dragAnimationData)
@@ -2937,6 +2943,89 @@ void DragDrawing::RotateCanvasNode(float pivotX, float pivotY, float rotation)
     FI_HILOGD("leave");
 }
 
+void DragDrawing::LoadNewMaterialLib()
+{
+    FI_HILOGI("enter");
+    if (newMaterialHandler_ == nullptr) {
+        char realPath[PATH_MAX] = {};
+        if (realpath(NEW_MATERIAL_SO_PATH.c_str(), realPath) == nullptr) {
+            FI_HILOGE("Drag material path:%{public}s is error", realPath);
+            return;
+        }
+        newMaterialHandler_ = dlopen(realPath, RTLD_LAZY);
+        if (newMaterialHandler_ == nullptr) {
+            FI_HILOGE("Couldn't load new material library with dlopen(). Error: %{public}s", dlerror());
+            return;
+        }
+    }
+    FI_HILOGI("leave");
+}
+
+void DragDrawing::UnloadNewMaterialLib()
+{
+    FI_HILOGI("enter");
+    if (newMaterialHandler_ != nullptr) {
+        dlclose(newMaterialHandler_);
+        newMaterialHandler_ = nullptr;
+        FI_HILOGW("Remove newMaterialHandler success");
+    }
+    FI_HILOGI("leave");
+}
+
+bool DragDrawing::SetNewMaterialId()
+{
+    FI_HILOGI("enter");
+    if (newMaterialHandler_ == nullptr) {
+        FI_HILOGE("newMaterialHandler_ is null");
+        return false;
+    }
+    if (setMaterialEffectByIdFunc_ == nullptr) {
+        setMaterialEffectByIdFunc_ =
+            reinterpret_cast<SetMaterialEffectByIdFunc>(dlsym(newMaterialHandler_, "SetMaterialEffectById"));
+    }
+    if (setMaterialEffectByIdFunc_ == nullptr) {
+        FI_HILOGE("Symbol setMaterialEffectByIdFunc is nullptr");
+        return false;
+    }
+    if (g_drawingInfo.nodes.size() <= BACKGROUND_FILTER_INDEX) {
+        FI_HILOGE("The index is out of bounds, node size is %{public}zu", g_drawingInfo.nodes.size());
+        return false;
+    }
+    std::shared_ptr<Rosen::RSCanvasNode> filterNode = g_drawingInfo.nodes[BACKGROUND_FILTER_INDEX];
+    if (filterNode == nullptr) {
+        FI_HILOGE("filterNode is nullptr");
+        return false;
+    }
+    bool ret = setMaterialEffectByIdFunc_(filterNode.get(), materialId_);
+    if (!ret) {
+        FI_HILOGE("SetMaterialEffectById run failed");
+        return ret;
+    }
+    FI_HILOGI("leave");
+    return true;
+}
+
+bool DragDrawing::SetMaterialFilter()
+{
+    FI_HILOGI("enter");
+    if (materialFilter_ == nullptr) {
+        FI_HILOGE("materialFilter_ is nullptr");
+        return false;
+    }
+    if (g_drawingInfo.nodes.size() <= BACKGROUND_FILTER_INDEX) {
+        FI_HILOGE("The index is out of bounds, node size is %{public}zu", g_drawingInfo.nodes.size());
+        return false;
+    }
+    std::shared_ptr<Rosen::RSCanvasNode> filterNode = g_drawingInfo.nodes[BACKGROUND_FILTER_INDEX];
+    if (filterNode == nullptr) {
+        FI_HILOGE("filterNode is nullptr");
+        return false;
+    }
+    filterNode->SetUIMaterialFilter(materialFilter_.get());
+    FI_HILOGI("leave");
+    return true;
+}
+
 void DragDrawing::SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation)
 {
     FI_HILOGI("displayId:%{public}d, rotation:%{public}d",
@@ -3002,11 +3091,12 @@ void DragDrawing::ProcessFilter()
     FI_HILOGD("leave");
 }
 
-void DragDrawing::SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_ptr<Rosen::RSCanvasNode> filterNode)
+void DragDrawing::OnSetCustomDragBlur(const FilterInfo &filterInfo, std::shared_ptr<Rosen::RSCanvasNode> filterNode)
 {
-    CHKPV(filterNode);
-    auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
-    CHKPV(currentPixelMap);
+    if (filterNode == nullptr) {
+        FI_HILOGE("filterNode is nullptr");
+        return;
+    }
     Rosen::BLUR_COLOR_MODE mode = (Rosen::BLUR_COLOR_MODE)filterInfo.blurStyle;
     std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
         RadiusVp2Sigma(filterInfo.blurRadius, filterInfo.dipScale),
@@ -3018,6 +3108,27 @@ void DragDrawing::SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_pt
     filterNode->SetBackgroundFilter(backFilter);
     filterNode->SetGreyCoef(filterInfo.coef);
     filterNode->SetAlpha(filterInfo.opacity);
+}
+
+void DragDrawing::SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_ptr<Rosen::RSCanvasNode> filterNode)
+{
+    if (filterNode == nullptr) {
+        FI_HILOGE("filterNode is nullptr");
+        return;
+    }
+    auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
+    CHKPV(currentPixelMap);
+    if (materialId_ != -1) {
+        if (!SetNewMaterialId()) {
+            OnSetCustomDragBlur(filterInfo, filterNode);
+        }
+    } else if (materialFilter_ != nullptr) {
+        if (SetMaterialFilter()) {
+            OnSetCustomDragBlur(filterInfo, filterNode);
+        }
+    } else {
+        OnSetCustomDragBlur(filterInfo, filterNode);
+    }
     int32_t adjustSize = TWELVE_SIZE * GetScaling();
     filterNode->SetBounds(DEFAULT_POSITION_X, adjustSize, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight());
@@ -3036,12 +3147,13 @@ void DragDrawing::SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_pt
     FI_HILOGD("Set custom drag blur successfully");
 }
 
-void DragDrawing::SetComponentDragBlur(const FilterInfo &filterInfo, const ExtraInfo &extraInfo,
+void DragDrawing::OnSetComponentDragBlur(const FilterInfo &filterInfo, const ExtraInfo &extraInfo,
     std::shared_ptr<Rosen::RSCanvasNode> filterNode)
 {
-    CHKPV(filterNode);
-    auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
-    CHKPV(currentPixelMap);
+    if (filterNode == nullptr) {
+        FI_HILOGE("filterNode is nullptr");
+        return;
+    }
     std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
         RadiusVp2Sigma(RADIUS_VP, filterInfo.dipScale),
         DEFAULT_SATURATION, DEFAULT_BRIGHTNESS, DEFAULT_COLOR_VALUE);
@@ -3052,6 +3164,25 @@ void DragDrawing::SetComponentDragBlur(const FilterInfo &filterInfo, const Extra
     filterNode->SetBackgroundFilter(backFilter);
     filterNode->SetGreyCoef(extraInfo.coef);
     filterNode->SetAlpha(filterInfo.opacity);
+}
+
+void DragDrawing::SetComponentDragBlur(const FilterInfo &filterInfo, const ExtraInfo &extraInfo,
+    std::shared_ptr<Rosen::RSCanvasNode> filterNode)
+{
+    CHKPV(filterNode);
+    auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
+    CHKPV(currentPixelMap);
+    if (materialId_ != -1) {
+        if (!SetNewMaterialId()) {
+            OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+        }
+    } else if (materialFilter_ != nullptr) {
+        if (!SetMaterialFilter()) {
+            OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+        }
+    } else {
+        OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    }
     int32_t adjustSize = TWELVE_SIZE * GetScaling();
     filterNode->SetBounds(DEFAULT_POSITION_X, adjustSize, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight());
@@ -3749,6 +3880,7 @@ void DragDrawing::ResetParameter()
     isRunningRotateAnimation_ = false;
     screenRotateState_ = false;
     isRTL_ = false;
+    materialId_ = -1;
     FI_HILOGI("leave");
 }
 
@@ -4026,6 +4158,7 @@ DragDrawing::~DragDrawing()
         dragExtHandler_ = nullptr;
     }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+    UnloadNewMaterialLib();
 }
 
 void DrawSVGModifier::Draw(RSDrawingContext& context) const

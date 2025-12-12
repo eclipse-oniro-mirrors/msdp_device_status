@@ -49,6 +49,7 @@ struct DrawingInfo;
 class DragDrawing;
 using DragStartExtFunc = void (*)(DragData &dragData);
 using DragNotifyExtFunc = void (*)(DragEventInfo &dragEventInfo);
+using SetMaterialEffectByIdFunc = bool (*)(OHOS::Rosen::RSNode* node, int32_t id);
 
 using RSContentStyleModifier = Rosen::ModifierNG::RSContentStyleModifier;
 using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
@@ -366,7 +367,10 @@ private:
     bool ParserFilterInfo(const std::string &filterInfoStr, FilterInfo &filterInfo);
     void ParserCornerRadiusInfo(const cJSON *cornerRadiusInfoStr, FilterInfo &filterInfo);
     void ParserBlurInfo(const cJSON *BlurInfoInfoStr, FilterInfo &filterInfo);
+    void OnSetCustomDragBlur(const FilterInfo &filterInfo, std::shared_ptr<Rosen::RSCanvasNode> filterNode);
     void SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_ptr<Rosen::RSCanvasNode> filterNode);
+    void OnSetComponentDragBlur(const FilterInfo &filterInfo, const ExtraInfo &extraInfo,
+        std::shared_ptr<Rosen::RSCanvasNode> filterNode);
     void SetComponentDragBlur(const FilterInfo &filterInfo, const ExtraInfo &extraInfo,
         std::shared_ptr<Rosen::RSCanvasNode> filterNode);
     void ParserDragShadowInfo(const cJSON* filterInfoParser, FilterInfo &filterInfo);
@@ -416,6 +420,10 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> GetSuperHubHandler();
     void GetRTLFilePath(std::string &filePath);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+    void LoadNewMaterialLib();
+    void UnloadNewMaterialLib();
+    bool SetNewMaterialId();
+    bool SetMaterialFilter();
     void RotateCanvasNode(float pivotX, float pivotY, float rotation);
     void FlushDragPosition(uint64_t nanoTimestamp);
     void RotatePosition(float &displayX, float &displayY);
@@ -482,6 +490,10 @@ private:
     int32_t timerId_ { -1 };
     std::shared_mutex receiverMutex_;
     bool isRTL_ { false };
+    int32_t materialId_ { -1 };
+    std::shared_ptr<OHOS::Rosen::Filter> materialFilter_ { nullptr };
+    void* newMaterialHandler_ { nullptr };
+    SetMaterialEffectByIdFunc setMaterialEffectByIdFunc_ { nullptr };
 #ifdef OHOS_ENABLE_PULLTHROW
     bool pullThrowAnimationXCompleted_  { false };
     bool pullThrowAnimationYCompleted_ { false };
