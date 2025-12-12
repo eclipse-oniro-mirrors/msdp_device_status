@@ -97,7 +97,7 @@ bool AniDeviceStatusCallback::SendEventToMainThread(const std::function<void()> 
 
 void AniDeviceStatusCallback::OnDeviceStatusChanged(const DeviceStatus::Data &devicestatusData)
 {
-    FI_HILOGI("OnDeviceStatusChanged &devicestatusData %{public}p", &devicestatusData);
+    FI_HILOGI("OnDeviceStatusChanged devicestatusData");
     wptr<AniDeviceStatusCallback> weakthis = this;
     SendEventToMainThread([devicestatusData, weakthis] {
         auto sptrthis = weakthis.promote();
