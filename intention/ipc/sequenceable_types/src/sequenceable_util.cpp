@@ -39,7 +39,8 @@ bool SequenceableUtil::Marshalling(Parcel &parcel, const std::map<std::string, O
         WRITESTRING(parcel, k, false);
         int32_t typeIndex = v.index();
         WRITEINT32(parcel, typeIndex, false);
-        std::visit([&parcel](auto&& arg){
+        std::visit([&parcel](auto&& arg)
+        {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, bool>) {
                 WRITEBOOL(parcel, arg, false);
@@ -98,7 +99,7 @@ bool SequenceableUtil::Unmarshalling(Parcel &parcel, std::map<std::string, OnScr
         int32_t typeIndex;
         READINT32(parcel, typeIndex, false);
         OnScreen::ValueObj obj;
-        switch(typeIndex) {
+        switch (typeIndex) {
             case OnScreen::BOOL_INDEX: {
                 bool result;
                 READBOOL(parcel, result, false);

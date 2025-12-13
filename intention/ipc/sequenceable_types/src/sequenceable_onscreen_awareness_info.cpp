@@ -22,9 +22,6 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
-namespace {
-// constexpr int32_t MAX_PARA_LEN = 20;
-}
 bool SequenceableOnscreenAwarenessInfo::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, info_.resultCode, false);

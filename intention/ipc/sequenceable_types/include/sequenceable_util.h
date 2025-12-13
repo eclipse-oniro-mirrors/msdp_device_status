@@ -27,10 +27,8 @@ class SequenceableUtil {
 public:
     static bool Marshalling(Parcel &parcel, const std::map<std::string, OnScreen::ValueObj>& entityInfo);
     static bool Unmarshalling(Parcel &parcel, std::map<std::string, OnScreen::ValueObj>& entityInfo);
-
     static bool WriteImageId(Parcel &parcel, std::vector<OnScreen::AwarenessInfoImageId> imageIdArr);
     static std::vector<OnScreen::AwarenessInfoImageId> ReadImageId(Parcel &parcel);
-
 };
 } // namespace DeviceStatus
 } // namespace Msdp

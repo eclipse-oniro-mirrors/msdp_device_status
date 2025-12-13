@@ -78,8 +78,8 @@ int32_t OnScreenClient::GetLiveStatus()
     return INTENTION_CLIENT->GetLiveStatus();
 }
 
-int32_t OnScreenClient::RegisterAwarenessCallback(const AwarenessCap& cap, const sptr<IRemoteOnScreenCallback>& callback,
-        const AwarenessOptions& option)
+int32_t OnScreenClient::RegisterAwarenessCallback(const AwarenessCap& cap,
+    const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option)
 {
     auto ret = INTENTION_CLIENT->RegisterAwarenessCallback(cap, callback, option);
     if (ret != RET_OK) {
@@ -88,7 +88,8 @@ int32_t OnScreenClient::RegisterAwarenessCallback(const AwarenessCap& cap, const
     return ret;
 }
 
-int32_t OnScreenClient::UnregisterAwarenessCallback(const AwarenessCap& cap, const sptr<IRemoteOnScreenCallback>& callback)
+int32_t OnScreenClient::UnregisterAwarenessCallback(const AwarenessCap& cap,
+    const sptr<IRemoteOnScreenCallback>& callback)
 {
     auto ret = INTENTION_CLIENT->UnregisterAwarenessCallback(cap, callback);
     if (ret != RET_OK) {

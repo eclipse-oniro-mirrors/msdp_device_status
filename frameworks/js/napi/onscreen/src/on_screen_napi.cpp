@@ -171,9 +171,11 @@ bool OnScreenNapi::GetStringFromJs(napi_env env, const napi_value &value, const 
     std::string &result)
 {
     bool hasProperty = false;
-    CHKCF(napi_has_named_property(env, value, field.c_str(), &hasProperty) == napi_ok && hasProperty, "napi_has_named_property failed");
+    CHKCF(napi_has_named_property(env, value, field.c_str(), &hasProperty) == napi_ok && hasProperty,
+        "napi_has_named_property failed");
     napi_value fieldValue = nullptr;
-    CHKCF((napi_get_named_property(env, value, field.c_str(), &fieldValue) == napi_ok), "napi_get_named_property failed");
+    CHKCF((napi_get_named_property(env, value, field.c_str(), &fieldValue) == napi_ok),
+        "napi_get_named_property failed");
     return TransJsToStr(env, fieldValue, result);
 }
 
@@ -198,11 +200,13 @@ bool OnScreenNapi::GetAwarenessCap(napi_env env, napi_value awarenessCap, size_t
         std::string strName;
         std::string strValue;
         CHKCF(TransJsToStr(env, elementName, strName), "TransJsToStr name fail");
-        CHKCF(napi_get_named_property(env, capList, strName.c_str(), &elementValue) == napi_ok, "napi_get_named_property fail");
+        CHKCF(napi_get_named_property(env, capList, strName.c_str(), &elementValue) == napi_ok,
+            "napi_get_named_property fail");
         CHKCF(TransJsToStr(env, elementValue, strValue), "TransJsToStr value fail");
         cap.capList.push_back(strValue);
     }
-    CHKCF(napi_has_named_property(env, awarenessCap, "description", &exist) == napi_ok, "napi_has_named_property failed");
+    CHKCF(napi_has_named_property(env, awarenessCap, "description", &exist) == napi_ok,
+        "napi_has_named_property failed");
     if (exist) {
         GetStringFromJs(env, awarenessCap, "description", cap.description);
     }
@@ -293,7 +297,8 @@ bool OnScreenNapi::HandleOptionArray(napi_env env, std::string strName, napi_val
     return true;
 }
 
-bool OnScreenNapi::HandleOptionElement(napi_env env, std::string strName, napi_value elementValue, AwarenessOptions &option)
+bool OnScreenNapi::HandleOptionElement(napi_env env, std::string strName, napi_value elementValue,
+    AwarenessOptions &option)
 {
     napi_valuetype elementType = napi_undefined;
     CHKCF(napi_typeof(env, elementValue, &elementType) == napi_ok, "napi_typeof failed");
@@ -343,7 +348,8 @@ bool OnScreenNapi::GetAwarenessOption(napi_env env, napi_value awarenessOption, 
         CHKCF(napi_get_element(env, valueList, index, &elementName) == napi_ok, "get element fail");
         std::string strName;
         CHKCF(TransJsToStr(env, elementName, strName), "get str name failed");
-        CHKCF(napi_get_named_property(env, awarenessOption, strName.c_str(), &elementValue) == napi_ok, "get named property fail");
+        CHKCF(napi_get_named_property(env, awarenessOption, strName.c_str(), &elementValue) == napi_ok,
+            "get named property fail");
         CHKCF(HandleOptionElement(env, strName, elementValue, option), "handle element failed");
     }
     return true;
@@ -366,7 +372,7 @@ napi_value OnScreenNapi::Trigger(napi_env env, napi_callback_info info)
         return nullptr;
     }
     AwarenessOptions option;
-    if (argc == 2 && !GetAwarenessOption(env, args[ARG_1], option)) {
+    if (argc == ARG_2 && !GetAwarenessOption(env, args[ARG_1], option)) {
         ThrowOnScreenErr(env, RET_PARAM_ERR, "option is invalid");
         return nullptr;
     }
@@ -403,12 +409,14 @@ bool OnScreenNapi::ConstructStringVector(napi_env env, napi_value &jsValue, std:
     CHKCF(napi_create_array_with_length(env, strVector.size(), &jsValue) == napi_ok, "create bool failed");
     for (size_t i = 0; i < strVector.size(); ++i) {
         napi_value strObj;
-        CHKCF(napi_create_string_utf8(env, strVector[i].c_str(), strVector[i].size(), &strObj) == napi_ok, "create str failed");
+        CHKCF(napi_create_string_utf8(env, strVector[i].c_str(), strVector[i].size(), &strObj) == napi_ok,
+            "create str failed");
         CHKCF(napi_set_element(env, jsValue, i, strObj) == napi_ok, "add str to vector failed");
     }
     return true;
 }
-bool OnScreenNapi::ConstructObjectVector(napi_env env, napi_value &jsValue, std::vector<OnScreen::AwarenessInfoImageId> objVector)
+bool OnScreenNapi::ConstructObjectVector(napi_env env, napi_value &jsValue,
+    std::vector<OnScreen::AwarenessInfoImageId> objVector)
 {
     CHKCF(napi_create_array_with_length(env, objVector.size(), &jsValue) == napi_ok, "create bool failed");
     for (size_t i = 0; i < objVector.size(); ++i) {
@@ -423,7 +431,8 @@ bool OnScreenNapi::ConstructObjectVector(napi_env env, napi_value &jsValue, std:
 
 bool OnScreenNapi::ConstructValueObj(napi_env env, napi_value &jsValue, ValueObj valueObj)
 {
-    std::visit([env, &jsValue](auto&& arg){
+    std::visit([env, &jsValue](auto&& arg)
+    {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, bool>) {
             CHKCF(napi_get_boolean(env, arg, &jsValue) == napi_ok, "create bool failed");
@@ -500,7 +509,8 @@ bool OnScreenNapi::ConstructAwarenessInfoObj(napi_env env, napi_value &awareness
     CHKCF(SetInt32Property(env, awarenessInfoObj, info.appIndex, "appIndex"), "create appIndex failed");
     CHKCF(SetStringProperty(env, awarenessInfoObj, info.pageId, "pageId"), "create pageId failed");
     CHKCF(SetStringProperty(env, awarenessInfoObj, info.sampleId, "sampleId"), "create sampleId failed");
-    CHKCF(SetInt32Property(env, awarenessInfoObj, info.collectStrategy, "collectStrategy"), "create collectStrategy failed");
+    CHKCF(SetInt32Property(env, awarenessInfoObj, info.collectStrategy, "collectStrategy"),
+        "create collectStrategy failed");
     CHKCF(SetInt64Property(env, awarenessInfoObj, info.displayId, "displayId"), "create displayId failed");
     CHKCF(SetInt32Property(env, awarenessInfoObj, info.windowId, "windowId"), "create windowId failed");
     CHKCF(ConstructAwarenessEntityInfoVector(env, awarenessInfoObj, info.entityInfo), "EntityInfoVector failed");
@@ -592,7 +602,7 @@ napi_value OnScreenNapi::RegisterAwarenessCallback(napi_env env, napi_callback_i
     napi_value args[ARG_3] = { nullptr };
     napi_value jsThis = nullptr;
     napi_value result = nullptr;
-    if (napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr) != napi_ok || argc < 2) {
+    if (napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr) != napi_ok || argc < ARG_2) {
         ThrowOnScreenErr(env, RET_SERVICE_EXCEPTION, "napi_get_cb_info failed, expected 3 args");
         return nullptr;
     }
@@ -602,7 +612,7 @@ napi_value OnScreenNapi::RegisterAwarenessCallback(napi_env env, napi_callback_i
         return nullptr;
     }
     AwarenessOptions option;
-    if (argc == 3 && !GetAwarenessOption(env, args[ARG_2], option)) {
+    if (argc == ARG_3 && !GetAwarenessOption(env, args[ARG_2], option)) {
         ThrowOnScreenErr(env, RET_PARAM_ERR, "param is invalid");
         return nullptr;
     }

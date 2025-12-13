@@ -371,7 +371,7 @@ void OnScreenServer::FillDumpCommonData(OnscreenAwarenessInfo& info)
 {
     info.resultCode = 0;
     info.timestamp = std::string("605491200000");
-    info.bundleName = std::string("com.huawei.duoxi");
+    info.bundleName = std::string("com.ohos.duoxi");
     info.appID = std::string("wx1d2b3c4d5e6f7g8h9i10j11k12l13");
     info.appIndex = 0;
     info.pageId = std::string("1646132-45646-56465461-654654");
@@ -394,12 +394,12 @@ void OnScreenServer::FillUiTreeData(std::map<std::string, ValueObj> &entityInfo)
             {
                 "id":123,
                 "type":image,
-                "bbox":[x1,y1,x2,y2,x3,y3,x4,y4]
+                "bbox":[x1, y1, x2, y2, x3, y3, x4, y4]
             },
             {
                 "id":456,
                 "type":image,
-                "bbox":[x1,y1,x2,y2,x3,y3,x4,y4]
+                "bbox":[x1, y1, x2, y2, x3, y3, x4, y4]
             },
         ]
     }})";
@@ -440,7 +440,7 @@ void FillDumpInteractionScroll(std::map<std::string, ValueObj> &entityInfo)
 }
 void FillDumpInteractionTextSelection(std::map<std::string, ValueObj> &entityInfo)
 {
-   entityInfo["textSelection"] = std::string("when you listen to the radio,lalalala,lalalala, apei");
+    entityInfo["textSelection"] = std::string("when you listen to the radio,lalalala,lalalala, apei");
 }
 
 void FillDumpScenarioReading(std::map<std::string, ValueObj> &entityInfo)
@@ -471,12 +471,12 @@ void FillDumpScenarioActivity(std::map<std::string, ValueObj> &entityInfo)
 void FillDumpScenarioTodo(std::map<std::string, ValueObj> &entityInfo)
 {
     entityInfo["homeworkAssign"] = true;
-    entityInfo["homeworkName"] =  std::string("find two bears");;
+    entityInfo["homeworkName"] =  std::string("find two bears");
     entityInfo["chatgroupName"] = R"("bear boy 1 group")";
     entityInfo["pageName"] = std::string("web//children's playground.");
     entityInfo["subject"] = std::string("math");
     entityInfo["assigntime"] = std::string("2025-12-03 15:56:60");
-    entityInfo["deadline"] = std::string("2033-12-03 15:56:60");;
+    entityInfo["deadline"] = std::string("2033-12-03 15:56:60");
     entityInfo["description"] = std::string("when can i finish my job.");
     entityInfo["teacherName"] = std::string("Ms. PIPI");
 }

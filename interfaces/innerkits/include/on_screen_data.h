@@ -124,7 +124,7 @@ enum class ControlByPolicy {
 enum class IsCollect {
     ALLOWED_TO_COLLECT = 1 << 0,
     SPLIT_SCREEN = 1 << 1,
-    IN_BLACKLIST = 1 << 2,
+    NOT_ALLOW = 1 << 2,
     PRIVATE_WINDOW = 1 << 3
 };
 

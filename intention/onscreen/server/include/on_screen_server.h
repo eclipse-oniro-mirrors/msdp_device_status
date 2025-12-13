@@ -58,6 +58,11 @@ public:
         const sptr<IRemoteOnScreenCallback>& callback);
     int32_t Trigger(const CallingContext &context, const AwarenessCap& cap, const AwarenessOptions& option,
         OnscreenAwarenessInfo& info);
+    static void FillDumpCommonData(OnscreenAwarenessInfo& info);
+    static void FillUiTreeData(std::map<std::string, ValueObj> &entityInfo);
+    static int32_t FillDumpData(const AwarenessCap& cap,
+        const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option);
+
 
 private:
     int32_t LoadAlgoLib();

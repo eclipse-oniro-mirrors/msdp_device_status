@@ -90,7 +90,8 @@ private:
     // perception
     static bool GetAwarenessCap(napi_env env, napi_value awarenessCap, size_t argc, AwarenessCap &cap);
     static bool GetAwarenessOption(napi_env env, napi_value awarenessOption, AwarenessOptions &option);
-    static bool HandleOptionElement(napi_env env, std::string strName, napi_value elementValue, AwarenessOptions &option);
+    static bool HandleOptionElement(napi_env env, std::string strName, napi_value elementValue,
+        AwarenessOptions &option);
     static bool HandleOptionBool(napi_env env, std::string strName, napi_value boolValue, AwarenessOptions &option);
     static bool HandleOptionInt32(napi_env env, std::string strName, napi_value int32Value, AwarenessOptions &option);
     static bool HandleOptionInt64(napi_env env, std::string strName, napi_value int64Value, AwarenessOptions &option);
@@ -110,11 +111,14 @@ private:
     static void TriggerCompCB(napi_env env, napi_status status, void *data);
     static void UpsertScreenCallback(napi_env env, const AwarenessCap& cap, napi_ref handlerRef);
     static void RemoveScreenCallback(napi_env env, const AwarenessCap& cap, napi_ref handlerRef);
-    static bool ConstructAwarenessEntityInfoVector(napi_env env, napi_value &retObj, const std::vector<OnscreenEntityInfo>& vec);
-    static bool ConstructAwarenessEntityInfo(napi_env env, napi_value &jsEntity, const std::map<std::string, ValueObj>& infoMap);
+    static bool ConstructAwarenessEntityInfoVector(napi_env env, napi_value &retObj,
+        const std::vector<OnscreenEntityInfo>& vec);
+    static bool ConstructAwarenessEntityInfo(napi_env env, napi_value &jsEntity,
+        const std::map<std::string, ValueObj>& infoMap);
     static bool ConstructValueObj(napi_env env, napi_value &jsValue, ValueObj valueObj);
     static bool ConstructStringVector(napi_env env, napi_value &jsValue, std::vector<std::string> strVector);
-    static bool ConstructObjectVector(napi_env env, napi_value &jsValue, std::vector<OnScreen::AwarenessInfoImageId> objVector);
+    static bool ConstructObjectVector(napi_env env, napi_value &jsValue,
+        std::vector<OnScreen::AwarenessInfoImageId> objVector);
 
     napi_env env_;
 };
