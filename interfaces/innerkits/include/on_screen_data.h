@@ -115,12 +115,6 @@ struct OnScreenCallingContext {
     std::string bundleName;
 };
 
-enum class ControlByPolicy {
-    ACTIVITY_POLICY = 0,
-    MANUAL_POLICY = 1,
-    MAX_POLICY
-};
-
 enum class IsCollect {
     ALLOWED_TO_COLLECT = 1 << 0,
     SPLIT_SCREEN = 1 << 1,

@@ -63,7 +63,6 @@ public:
     static int32_t FillDumpData(const AwarenessCap& cap,
         const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option);
 
-
 private:
     int32_t LoadAlgoLib();
     int32_t UnloadAlgoLib();

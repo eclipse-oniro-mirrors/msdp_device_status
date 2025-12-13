@@ -39,8 +39,7 @@ bool SequenceableUtil::Marshalling(Parcel &parcel, const std::map<std::string, O
         WRITESTRING(parcel, k, false);
         int32_t typeIndex = v.index();
         WRITEINT32(parcel, typeIndex, false);
-        std::visit([&parcel](auto&& arg)
-        {
+        std::visit([&parcel](auto&& arg) {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, bool>) {
                 WRITEBOOL(parcel, arg, false);
@@ -68,7 +67,7 @@ bool SequenceableUtil::Marshalling(Parcel &parcel, const std::map<std::string, O
                 WriteImageId(parcel, arg);
                 return true;
             }
-        }, v);
+            }, v);
     }
     return true;
 }
@@ -89,6 +88,60 @@ std::vector<OnScreen::AwarenessInfoImageId> SequenceableUtil::ReadImageId(Parcel
     return imageIdArr;
 }
 
+bool SequenceableUtil::ReadValueObj(int32_t typeIndex, Parcel &parcel, OnScreen::ValueObj& obj)
+{
+    switch (typeIndex) {
+        case OnScreen::BOOL_INDEX: {
+            bool result;
+            READBOOL(parcel, result, false);
+            obj = result;
+            break;
+        }
+        case OnScreen::INT32_INDEX: {
+            int32_t result;
+            READINT32(parcel, result, false);
+            obj = result;
+            break;
+        }
+        case OnScreen::INT64_INDEX: {
+            int64_t result;
+            READINT64(parcel, result, false);
+            obj = result;
+            break;
+        }
+        case OnScreen::STRING_INDEX: {
+            std::string result;
+            READSTRING(parcel, result, false);
+            obj = result;
+            break;
+        }
+        case OnScreen::PAGE_LINK_INDEX: {
+            OnScreen::AwarenessInfoPageLink pageLink;
+            READSTRING(parcel, pageLink.httpLink, false);
+            READSTRING(parcel, pageLink.deepLink, false);
+            obj = pageLink;
+            break;
+        }
+        case OnScreen::PIXEL_MAP_INDEX: {
+            Media::PixelMap *rawPixelMap = OHOS::Media::PixelMap::Unmarshalling(parcel);
+            CHKPF(rawPixelMap);
+            obj = std::shared_ptr<Media::PixelMap>(rawPixelMap);
+            break;
+        }
+        case OnScreen::STRING_ARRAY_INDEX: {
+            std::vector<std::string> strArr;
+            READSTRINGVECTOR(parcel, strArr, false);
+            obj = strArr;
+            break;
+        }
+        case OnScreen::IMAGEID_ARRAY_INDEX: {
+            obj = ReadImageId(parcel);
+            break;
+        }
+    }
+    return true;
+}
+
 bool SequenceableUtil::Unmarshalling(Parcel &parcel, std::map<std::string, OnScreen::ValueObj>& entityInfo)
 {
     int32_t size;
@@ -99,55 +152,7 @@ bool SequenceableUtil::Unmarshalling(Parcel &parcel, std::map<std::string, OnScr
         int32_t typeIndex;
         READINT32(parcel, typeIndex, false);
         OnScreen::ValueObj obj;
-        switch (typeIndex) {
-            case OnScreen::BOOL_INDEX: {
-                bool result;
-                READBOOL(parcel, result, false);
-                obj = result;
-                break;
-            }
-            case OnScreen::INT32_INDEX: {
-                int32_t result;
-                READINT32(parcel, result, false);
-                obj = result;
-                break;
-            }
-            case OnScreen::INT64_INDEX: {
-                int64_t result;
-                READINT64(parcel, result, false);
-                obj = result;
-                break;
-            }
-            case OnScreen::STRING_INDEX: {
-                std::string result;
-                READSTRING(parcel, result, false);
-                obj = result;
-                break;
-            }
-            case OnScreen::PAGE_LINK_INDEX: {
-                OnScreen::AwarenessInfoPageLink pageLink;
-                READSTRING(parcel, pageLink.httpLink, false);
-                READSTRING(parcel, pageLink.deepLink, false);
-                obj = pageLink;
-                break;
-            }
-            case OnScreen::PIXEL_MAP_INDEX: {
-                Media::PixelMap *rawPixelMap = OHOS::Media::PixelMap::Unmarshalling(parcel);
-                CHKPF(rawPixelMap);
-                obj = std::shared_ptr<Media::PixelMap>(rawPixelMap);
-                break;
-            }
-            case OnScreen::STRING_ARRAY_INDEX: {
-                std::vector<std::string> strArr;
-                READSTRINGVECTOR(parcel, strArr, false);
-                obj = strArr;
-                break;
-            }
-            case OnScreen::IMAGEID_ARRAY_INDEX: {
-                obj = ReadImageId(parcel);
-                break;
-            }
-        }
+        CHKCF(ReadValueObj(typeIndex, parcel, obj), "ReadValueObj failed");
         entityInfo[key] = obj;
     }
     return true;

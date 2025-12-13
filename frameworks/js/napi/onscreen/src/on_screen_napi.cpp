@@ -431,8 +431,7 @@ bool OnScreenNapi::ConstructObjectVector(napi_env env, napi_value &jsValue,
 
 bool OnScreenNapi::ConstructValueObj(napi_env env, napi_value &jsValue, ValueObj valueObj)
 {
-    std::visit([env, &jsValue](auto&& arg)
-    {
+    std::visit([env, &jsValue](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, bool>) {
             CHKCF(napi_get_boolean(env, arg, &jsValue) == napi_ok, "create bool failed");
@@ -462,7 +461,7 @@ bool OnScreenNapi::ConstructValueObj(napi_env env, napi_value &jsValue, ValueObj
             CHKCF(ConstructObjectVector(env, jsValue, arg), "set obj vector failed");
             return true;
         }
-    }, valueObj);
+        }, valueObj);
     return true;
 }
 
