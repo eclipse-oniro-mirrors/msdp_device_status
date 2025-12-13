@@ -66,7 +66,7 @@ void OnScreenCallbackProxy::OnScreenAwareness(const OnscreenAwarenessInfo& info)
         return;
     }
     WRITEINT32(data, info.resultCode);
-    WRITESTRING(data, info.timestamp);
+    WRITEINT64(data, info.timestamp);
     WRITESTRING(data, info.bundleName);
     WRITESTRING(data, info.appID);
     WRITEINT32(data, info.appIndex);

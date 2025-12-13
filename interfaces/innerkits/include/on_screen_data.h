@@ -31,9 +31,6 @@ namespace OnScreen {
 namespace {
 constexpr int32_t MIN_PARA_SIZE = 200;
 constexpr int32_t MAX_PARA_SIZE = 300;
-const std::string CLICK = "click";
-const std::string SCROLL = "scroll";
-const std::string TEXT_SELECTION = "textSelection";
 }
 
 enum class Scenario {
@@ -119,7 +116,8 @@ enum class IsCollect {
     ALLOWED_TO_COLLECT = 1 << 0,
     SPLIT_SCREEN = 1 << 1,
     NOT_ALLOW = 1 << 2,
-    PRIVATE_WINDOW = 1 << 3
+    PRIVATE_WINDOW = 1 << 3,
+    DONGHU_APP = 1 << 4
 };
 
 struct AwarenessCap {
@@ -160,7 +158,7 @@ struct OnscreenEntityInfo {
 
 struct OnscreenAwarenessInfo {
     int32_t resultCode;
-    std::string timestamp;
+    int64_t timestamp;
     std::string bundleName;
     std::string appID;
     int32_t appIndex;

@@ -88,6 +88,14 @@ std::vector<OnScreen::AwarenessInfoImageId> SequenceableUtil::ReadImageId(Parcel
     return imageIdArr;
 }
 
+OnScreen::AwarenessInfoPageLink SequenceableUtil::ReadPageLink(Parcel &parcel)
+{
+    OnScreen::AwarenessInfoPageLink pageLink;
+    READSTRING(parcel, pageLink.httpLink, pageLink);
+    READSTRING(parcel, pageLink.deepLink, pageLink);
+    return pageLink;
+}
+
 bool SequenceableUtil::ReadValueObj(int32_t typeIndex, Parcel &parcel, OnScreen::ValueObj& obj)
 {
     switch (typeIndex) {
@@ -116,10 +124,7 @@ bool SequenceableUtil::ReadValueObj(int32_t typeIndex, Parcel &parcel, OnScreen:
             break;
         }
         case OnScreen::PAGE_LINK_INDEX: {
-            OnScreen::AwarenessInfoPageLink pageLink;
-            READSTRING(parcel, pageLink.httpLink, false);
-            READSTRING(parcel, pageLink.deepLink, false);
-            obj = pageLink;
+            obj = ReadPageLink(parcel);
             break;
         }
         case OnScreen::PIXEL_MAP_INDEX: {

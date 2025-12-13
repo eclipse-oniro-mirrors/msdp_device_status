@@ -29,6 +29,7 @@ public:
     static bool Unmarshalling(Parcel &parcel, std::map<std::string, OnScreen::ValueObj>& entityInfo);
     static bool WriteImageId(Parcel &parcel, std::vector<OnScreen::AwarenessInfoImageId> imageIdArr);
     static std::vector<OnScreen::AwarenessInfoImageId> ReadImageId(Parcel &parcel);
+    static OnScreen::AwarenessInfoPageLink ReadPageLink(Parcel &parcel);
     static bool ReadValueObj(int32_t typeIndex, Parcel &parcel, OnScreen::ValueObj& obj);
 };
 } // namespace DeviceStatus

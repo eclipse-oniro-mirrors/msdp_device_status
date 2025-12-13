@@ -41,7 +41,7 @@ constexpr uint8_t ARG_3 = 3;
 constexpr int32_t DEFAULT_WINDOW_ID = -1;
 OnScreenNapi *g_onScreenObj = nullptr;
 std::mutex g_mtx;
-constexpr size_t MAX_ARG_STR_LEN = 100;
+constexpr size_t MAX_ARG_STR_LEN = 64;
 std::unordered_map<std::string, napi_ref>  g_screenCallbacks;
 sptr<OnScreenAwarenessCallback> g_callback = nullptr;
 const std::set<std::string> CAP_LIST = {
@@ -502,7 +502,7 @@ bool OnScreenNapi::ConstructAwarenessInfoObj(napi_env env, napi_value &awareness
 {
     CHKCF(napi_create_object(env, &awarenessInfoObj) == napi_ok, "create OnscreenAwarenessInfo failed");
     CHKCF(SetInt32Property(env, awarenessInfoObj, info.resultCode, "resultCode"), "create resultCode failed");
-    CHKCF(SetStringProperty(env, awarenessInfoObj, info.timestamp, "timestamp"), "create timestamp failed");
+    CHKCF(SetInt64Property(env, awarenessInfoObj, info.timestamp, "timestamp"), "create timestamp failed");
     CHKCF(SetStringProperty(env, awarenessInfoObj, info.bundleName, "bundleName"), "create bundleName failed");
     CHKCF(SetStringProperty(env, awarenessInfoObj, info.appID, "appID"), "create appID failed");
     CHKCF(SetInt32Property(env, awarenessInfoObj, info.appIndex, "appIndex"), "create appIndex failed");

@@ -65,7 +65,7 @@ int32_t OnScreenCallbackStub::OnScreenAwarenessStub(MessageParcel &data)
     CALL_DEBUG_ENTER;
     OnscreenAwarenessInfo info;
     READINT32(data, info.resultCode, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    READSTRING(data, info.timestamp, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READINT64(data, info.timestamp, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READSTRING(data, info.bundleName, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READSTRING(data, info.appID, E_DEVICESTATUS_READ_PARCEL_ERROR);
     READINT32(data, info.appIndex, E_DEVICESTATUS_READ_PARCEL_ERROR);

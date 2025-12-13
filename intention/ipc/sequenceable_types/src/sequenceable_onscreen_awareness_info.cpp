@@ -25,7 +25,7 @@ namespace OnScreen {
 bool SequenceableOnscreenAwarenessInfo::Marshalling(Parcel &parcel) const
 {
     WRITEINT32(parcel, info_.resultCode, false);
-    WRITESTRING(parcel, info_.timestamp, false);
+    WRITEINT64(parcel, info_.timestamp, false);
     WRITESTRING(parcel, info_.bundleName, false);
     WRITESTRING(parcel, info_.appID, false);
     WRITEINT32(parcel, info_.appIndex, false);
@@ -57,7 +57,7 @@ SequenceableOnscreenAwarenessInfo* SequenceableOnscreenAwarenessInfo::Unmarshall
 bool SequenceableOnscreenAwarenessInfo::ReadFromParcel(Parcel &parcel)
 {
     READINT32(parcel, info_.resultCode, false);
-    READSTRING(parcel, info_.timestamp, false);
+    READINT64(parcel, info_.timestamp, false);
     READSTRING(parcel, info_.bundleName, false);
     READSTRING(parcel, info_.appID, false);
     READINT32(parcel, info_.appIndex, false);

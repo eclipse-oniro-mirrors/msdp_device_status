@@ -33,9 +33,9 @@ public:
     virtual int32_t SendControlEvent(const OnScreenCallingContext &context, const ControlEvent &event) = 0;
     virtual int32_t Dump(int fd, const std::vector<std::u16string> &args) = 0;
     virtual int32_t RegisterScreenEventCallback(OnScreenCallingContext &context, int32_t windowId,
-        const std::string& event, const sptr<IRemoteOnScreenCallback> &subCallback) = 0;
+        const std::string& event, const sptr<OnScreen::IRemoteOnScreenCallback>& callback) = 0;
     virtual int32_t UnregisterScreenEventCallback(OnScreenCallingContext &context, int32_t windowId,
-        const std::string& event, const sptr<IRemoteOnScreenCallback> &subCallback) = 0;
+        const std::string& event, const sptr<OnScreen::IRemoteOnScreenCallback>& callback) = 0;
     virtual int32_t IsParallelFeatureEnabled(OnScreenCallingContext &context, int32_t windowId,
         int32_t &outStatus) = 0;
     virtual int32_t ListenLiveBroadcast() = 0;

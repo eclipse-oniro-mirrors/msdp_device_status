@@ -370,7 +370,7 @@ bool OnScreenServer::CheckDeviceType()
 void OnScreenServer::FillDumpCommonData(OnscreenAwarenessInfo& info)
 {
     info.resultCode = 0;
-    info.timestamp = std::string("605491200000");
+    info.timestamp = 605491200000;
     info.bundleName = std::string("com.ohos.duoxi");
     info.appID = std::string("wx1d2b3c4d5e6f7g8h9i10j11k12l13");
     info.appIndex = 0;
