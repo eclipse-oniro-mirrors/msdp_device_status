@@ -1,0 +1,74 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../../device_status.gni")
+
+module_output_path = "${device_status_part_name}/device_status/unit_out"
+
+ohos_unittest("IntentionManagerTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  module_out_path = module_output_path
+  include_dirs = [ 
+    "${device_status_root_path}/intention/frameworks/client/include",
+    "${device_status_interfaces_path}/innerkits/include"
+     ]
+
+  sources = [ 
+    "${device_status_root_path}/intention/frameworks/client/src/intention_manager.cpp",
+    "intention_manager_test.cpp"]
+
+  deps = [
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_root_path}/intention/boomerang/client:intention_boomerang_client",
+    "${device_status_root_path}/intention/cooperate/client:intention_cooperate_client",
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/drag/client:intention_drag_client",
+    "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_root_path}/intention/stationary/client:intention_stationary_client",
+    "${device_status_root_path}/services/interaction/drag:interaction_drag",
+    "${device_status_root_path}/intention/ipc/sequenceable_types:sequenceable_types",
+    "${device_status_root_path}/intention/onscreen/client:intention_on_screen_client",
+  ]
+
+  external_deps = [
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
+    "window_manager:libdm",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy"
+  ]
+}
+
+group("unittest") {
+  testonly = true
+  deps = [
+    ":IntentionManagerTest"
+  ]
+}

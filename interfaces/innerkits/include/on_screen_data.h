@@ -19,6 +19,10 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <variant>
+#include <map>
+
+#include "pixel_map.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -27,6 +31,9 @@ namespace OnScreen {
 namespace {
 constexpr int32_t MIN_PARA_SIZE = 200;
 constexpr int32_t MAX_PARA_SIZE = 300;
+const std::string CLICK = "click";
+const std::string SCROLL = "scroll";
+const std::string TEXT_SELECTION = "textSelection";
 }
 
 enum class Scenario {
@@ -107,6 +114,70 @@ struct OnScreenCallingContext {
     std::string cfgVersion;
     std::string bundleName;
 };
+
+enum class ControlByPolicy {
+    ACTIVITY_POLICY = 0,
+    MANUAL_POLICY = 1,
+    MAX_POLICY
+};
+
+enum class IsCollect {
+    ALLOWED_TO_COLLECT = 1 << 0,
+    SPLIT_SCREEN = 1 << 1,
+    IN_BLACKLIST = 1 << 2,
+    PRIVATE_WINDOW = 1 << 3
+};
+
+struct AwarenessCap {
+    std::vector<std::string> capList;
+    std::string description;
+};
+
+struct AwarenessInfoPageLink {
+    std::string httpLink;
+    std::string deepLink;
+};
+
+struct AwarenessInfoImageId {
+    std::string compId;
+    std::string arkDataId;
+};
+
+const int32_t BOOL_INDEX = 0;
+const int32_t INT32_INDEX = 1;
+const int32_t INT64_INDEX = 2;
+const int32_t STRING_INDEX = 3;
+const int32_t PAGE_LINK_INDEX = 4;
+const int32_t PIXEL_MAP_INDEX = 5;
+const int32_t STRING_ARRAY_INDEX = 6;
+const int32_t IMAGEID_ARRAY_INDEX = 7;
+
+using ValueObj = std::variant<bool, int32_t, int64_t, std::string, AwarenessInfoPageLink,
+    std::shared_ptr<Media::PixelMap>, std::vector<std::string>, std::vector<AwarenessInfoImageId>>;
+
+struct AwarenessOptions {
+    std::map<std::string, ValueObj> entityInfo;
+};
+
+struct OnscreenEntityInfo {
+    std::string entityName;
+    std::map<std::string, ValueObj> entityInfo;
+};
+
+struct OnscreenAwarenessInfo {
+    int32_t resultCode;
+    std::string timestamp;
+    std::string bundleName;
+    std::string appID;
+    int32_t appIndex;
+    std::string pageId;
+    std::string sampleId;
+    int32_t collectStrategy;
+    int64_t displayId;
+    int32_t windowId;
+    std::vector<OnscreenEntityInfo> entityInfo;
+};
+
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

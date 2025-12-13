@@ -40,7 +40,7 @@ ohos_unittest("OnScreenServerTest") {
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
-    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_utils_path}:devicestatus_util"
   ]
 
   external_deps = [

@@ -1149,6 +1149,64 @@ int32_t IntentionClient::GetLiveStatus()
     return devicestatusProxy_->GetLiveStatus();
 }
 
+int32_t IntentionClient::RegisterAwarenessCallback(const OnScreen::AwarenessCap& cap,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& callback, const OnScreen::AwarenessOptions& option)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    OnScreen::SequenceableOnscreenAwarenessCap seqCap(cap);
+    OnScreen::SequenceableOnscreenAwarenessOption seqOption(option);
+    auto ret = devicestatusProxy_->RegisterAwarenessCallback(seqCap, callback, seqOption);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:RegisterAwarenessCallback failed");
+    }
+    return ret;
+}
+
+int32_t IntentionClient::UnregisterAwarenessCallback(const OnScreen::AwarenessCap& cap,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& callback)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    OnScreen::SequenceableOnscreenAwarenessCap seqCap(cap);
+    auto ret = devicestatusProxy_->UnregisterAwarenessCallback(seqCap, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:UnregisterAwarenessCallback failed");
+    }
+    return ret;
+}
+
+int32_t IntentionClient::Trigger(const OnScreen::AwarenessCap& cap, const OnScreen::AwarenessOptions& option,
+    OnScreen::OnscreenAwarenessInfo& info)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    OnScreen::SequenceableOnscreenAwarenessCap seqCap(cap);
+    OnScreen::SequenceableOnscreenAwarenessOption seqOption(option);
+    OnScreen::SequenceableOnscreenAwarenessInfo seqInfo(info);
+    auto ret = devicestatusProxy_->Trigger(seqCap, seqOption, seqInfo);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:Trigger failed");
+    }
+    info = seqInfo.info_;
+    return ret;
+}
+
 void IntentionClient::ResetProxy(const wptr<IRemoteObject> &remote)
 {
     CALL_DEBUG_ENTER;

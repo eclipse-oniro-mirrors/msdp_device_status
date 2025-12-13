@@ -139,6 +139,14 @@ namespace DeviceStatus {
         } \
     } while (0)
 
+#define WRITESTRINGVECTOR(parcel, data, ...) \
+    do { \
+        if (!(parcel).WriteStringVector(data)) { \
+            FI_HILOGE("WriteStringVector "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
+
 #define READBOOL(parcel, data, ...) \
     do { \
         if (!(parcel).ReadBool(data)) { \
@@ -231,6 +239,14 @@ namespace DeviceStatus {
     do { \
         if (!(parcel).ReadFloatVector(&data)) { \
             FI_HILOGE("ReadFloatVector "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
+
+#define READSTRINGVECTOR(parcel, data, ...) \
+    do { \
+        if (!(parcel).ReadStringVector(&data)) { \
+            FI_HILOGE("ReadStringVector "#data" failed"); \
             return __VA_ARGS__; \
         } \
     } while (0)

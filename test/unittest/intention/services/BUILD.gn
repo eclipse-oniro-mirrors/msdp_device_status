@@ -40,7 +40,6 @@ ohos_unittest("IntentionServiceTest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
-    blocklist = "./../../ipc_blocklist.txt"
   }
 
   defines = device_status_default_defines
@@ -63,10 +62,9 @@ ohos_unittest("IntentionServiceTest") {
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
     "${device_status_root_path}/intention/services/intention_service:intention_service",
-    "${device_status_root_path}/intention/stationary/server:intention_stationary_server",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/common:devicestatus_util",
-    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc"
   ]
 
   if (device_status_intention_framework) {
@@ -95,7 +93,6 @@ ohos_unittest("IntentionServiceTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
-    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
@@ -109,6 +106,7 @@ ohos_unittest("IntentionServiceTest") {
 
   if (device_status_sensor_enable) {
     defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
+    defines += [ "SENSOR_ENABLE" ]
     external_deps += [ "sensor:sensor_interface_native" ]
   }
 }
@@ -292,7 +290,6 @@ ohos_unittest("IntentionDeviceManagerTest") {
     "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
@@ -361,8 +358,6 @@ ohos_unittest("IntentionDumperTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
-    "samgr:samgr_proxy",
-    "libxml2:libxml2",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
@@ -431,11 +426,9 @@ ohos_unittest("BoomerangDumperTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
-    "libxml2:libxml2",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
-    "samgr:samgr_proxy",
   ]
 }
 group("unittest") {

@@ -44,6 +44,8 @@ ohos_shared_library("onscreen_napi") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
     "ipc:ipc_single",
     "napi:ace_napi",
   ]
@@ -81,6 +83,7 @@ ohos_shared_library("screenevent_napi") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
     "napi:ace_napi",
   ]

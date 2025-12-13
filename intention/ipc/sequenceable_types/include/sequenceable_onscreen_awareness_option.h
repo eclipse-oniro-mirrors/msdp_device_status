@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef IREMOTE_ON_SCREEN_CALLBACK_H
-#define IREMOTE_ON_SCREEN_CALLBACK_H
+#ifndef SEQUENCEABLE_ONSCREEN_AWARENESS_OPTION_H
+#define SEQUENCEABLE_ONSCREEN_AWARENESS_OPTION_H
 
-#include <iremote_broker.h>
-#include <iremote_object.h>
-
+#include "parcel.h"
 #include "on_screen_data.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
-class IRemoteOnScreenCallback : public IRemoteBroker {
+class SequenceableOnscreenAwarenessOption : public Parcelable {
 public:
-    enum {
-        ON_SCREEN_CHANGE = 0,
-        ON_SCREEN_AWAREENSS = 1,
-    };
+    SequenceableOnscreenAwarenessOption() = default;
+    explicit SequenceableOnscreenAwarenessOption(const AwarenessOptions &option) : option_(option) {}
+    virtual ~SequenceableOnscreenAwarenessOption() = default;
 
-    virtual void OnScreenChange(const std::string& changeInfo) = 0;
-    virtual void OnScreenAwareness(const OnscreenAwarenessInfo& info) = 0;
-
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IRemoteOnScreenCallback");
+    bool Marshalling(Parcel &parcel) const override;
+    static SequenceableOnscreenAwarenessOption* Unmarshalling(Parcel &parcel);
+    bool ReadFromParcel(Parcel &parcel);
+    AwarenessOptions option_;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // IREMOTE_ON_SCREEN_CALLBACK_H
+#endif // SEQUENCEABLE_ONSCREEN_AWARENESS_OPTION_H

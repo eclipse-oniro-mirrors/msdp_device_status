@@ -662,6 +662,40 @@ int32_t IntentionService::GetLiveStatus()
     });
 }
 
+ErrCode IntentionService::RegisterAwarenessCallback(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback,
+    const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, cap, onScreenCallback, awarenessOption] {
+        return onScreen_.RegisterAwarenessCallback(context, cap.cap_, onScreenCallback, awarenessOption.option_);
+    });
+}
+
+ErrCode IntentionService::UnregisterAwarenessCallback(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, cap, onScreenCallback] {
+        return onScreen_.UnregisterAwarenessCallback(context, cap.cap_, onScreenCallback);
+    });
+}
+
+ErrCode IntentionService::Trigger(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
+    const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption,
+    OnScreen::SequenceableOnscreenAwarenessInfo& info)
+{
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, cap, awarenessOption, &info] {
+        OnScreen::OnscreenAwarenessInfo awarenessInfo;
+        int32_t ret = onScreen_.Trigger(context, cap.cap_, awarenessOption.option_, awarenessInfo);
+        if (ret != RET_OK) {
+            return ret;
+        }
+        info.info_ = awarenessInfo;
+        return RET_OK;
+    });
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

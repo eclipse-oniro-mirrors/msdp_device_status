@@ -19,6 +19,7 @@
 
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#include "sequenceable_util.h"
 
 #undef LOG_TAG
 #define LOG_TAG  "OnScreenCallbackStub"
@@ -41,6 +42,9 @@ int32_t OnScreenCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         case static_cast<int32_t>(ON_SCREEN_CHANGE): {
             return OnScreenChangeStub(data);
         }
+        case static_cast<int32_t>(ON_SCREEN_AWAREENSS): {
+            return OnScreenAwarenessStub(data);
+        }
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -53,6 +57,32 @@ int32_t OnScreenCallbackStub::OnScreenChangeStub(MessageParcel &data)
     std::string metadata;
     READSTRING(data, metadata, E_DEVICESTATUS_READ_PARCEL_ERROR);
     OnScreenChange(metadata);
+    return RET_OK;
+}
+
+int32_t OnScreenCallbackStub::OnScreenAwarenessStub(MessageParcel &data)
+{
+    CALL_DEBUG_ENTER;
+    OnscreenAwarenessInfo info;
+    READINT32(data, info.resultCode, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READSTRING(data, info.timestamp, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READSTRING(data, info.bundleName, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READSTRING(data, info.appID, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READINT32(data, info.appIndex, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READSTRING(data, info.pageId, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READSTRING(data, info.sampleId, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READINT32(data, info.collectStrategy, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READINT64(data, info.displayId, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    READINT32(data, info.windowId, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    int32_t size;
+    READINT32(data, size, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    for (int32_t i = 0; i < size; i++) {
+        OnscreenEntityInfo entity;
+        READSTRING(data, entity.entityName, E_DEVICESTATUS_READ_PARCEL_ERROR);
+        SequenceableUtil::Unmarshalling(data, entity.entityInfo);
+        info.entityInfo.push_back(entity);
+    }
+    OnScreenAwareness(info);
     return RET_OK;
 }
 } // namespace OnScreen

@@ -25,6 +25,9 @@ sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragSummaryInfo;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableContentOption;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableControlEvent;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceablePageContent;
+sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessCap;
+sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessInfo;
+sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessOption;
 interface OHOS.Msdp.DeviceStatus.IRemoteBoomerangCallback;
 interface OHOS.Msdp.DeviceStatus.IRemoteDevStaCallback;
 interface OHOS.Msdp.DeviceStatus.OnScreen.IRemoteOnScreenCallback;
@@ -112,4 +115,7 @@ interface OHOS.Msdp.IIntention {
     void IsParallelFeatureEnabled([in] int windowId, [out] int outStatus);
     void ListenLiveBroadcast();
     void GetLiveStatus();
+    void RegisterAwarenessCallback([in] SequenceableOnscreenAwarenessCap cap, [in] IRemoteOnScreenCallback onScreenCallback, [in] SequenceableOnscreenAwarenessOption awarenessOption);
+    void UnregisterAwarenessCallback([in] SequenceableOnscreenAwarenessCap cap, [in] IRemoteOnScreenCallback onScreenCallback);
+    void Trigger([in] SequenceableOnscreenAwarenessCap cap, [in] SequenceableOnscreenAwarenessOption awarenessOption, [out] SequenceableOnscreenAwarenessInfo outInfo);
 }

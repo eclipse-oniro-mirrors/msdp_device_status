@@ -77,6 +77,34 @@ int32_t OnScreenClient::GetLiveStatus()
 {
     return INTENTION_CLIENT->GetLiveStatus();
 }
+
+int32_t OnScreenClient::RegisterAwarenessCallback(const AwarenessCap& cap, const sptr<IRemoteOnScreenCallback>& callback,
+        const AwarenessOptions& option)
+{
+    auto ret = INTENTION_CLIENT->RegisterAwarenessCallback(cap, callback, option);
+    if (ret != RET_OK) {
+        FI_HILOGE("RegisterAwarenessCallback failed, ret = %{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t OnScreenClient::UnregisterAwarenessCallback(const AwarenessCap& cap, const sptr<IRemoteOnScreenCallback>& callback)
+{
+    auto ret = INTENTION_CLIENT->UnregisterAwarenessCallback(cap, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("UnregisterAwarenessCallback failed, ret = %{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t OnScreenClient::Trigger(const AwarenessCap& cap, const AwarenessOptions& option, OnscreenAwarenessInfo& info)
+{
+    auto ret = INTENTION_CLIENT->Trigger(cap, option, info);
+    if (ret != RET_OK) {
+        FI_HILOGE("Trigger failed, ret = %{public}d", ret);
+    }
+    return ret;
+}
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -123,6 +123,14 @@ using TimeStamp = std::chrono::high_resolution_clock::time_point;
         FI_HILOGD("%{public}s, (%{public}d), pid:%{public}d, threadId:%{public}" PRIu64, \
             __FILE__, __LINE__, GetPid(), GetThisThreadId()); \
     } while (0)
+
+#define CHKCF(cond, errDesc) \
+    do { \
+        if (!(cond)) { \
+            FI_HILOGE("%{public}s", errDesc); \
+            return false; \
+        } \
+    } while (0)
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

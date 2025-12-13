@@ -40,6 +40,11 @@ public:
         const sptr<IRemoteOnScreenCallback>& callback);
     int32_t IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus);
     int32_t GetLiveStatus();
+
+    int32_t RegisterAwarenessCallback(const AwarenessCap& cap, const sptr<IRemoteOnScreenCallback>& callback,
+        const AwarenessOptions& option);
+    int32_t UnregisterAwarenessCallback(const AwarenessCap& cap, const sptr<IRemoteOnScreenCallback>& callback);
+    int32_t Trigger(const AwarenessCap& cap, const AwarenessOptions& option, OnscreenAwarenessInfo& info);
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

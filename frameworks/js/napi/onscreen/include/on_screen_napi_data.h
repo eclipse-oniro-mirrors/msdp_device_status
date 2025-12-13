@@ -15,6 +15,9 @@
 #ifndef ONSCREEN_NAPI_DATA_H
 #define ONSCREEN_NAPI_DATA_H
 
+#include <map>
+#include <vector>
+
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
@@ -38,6 +41,16 @@ struct SendControlEventAsyncContext {
     napi_async_work work = nullptr;
     napi_deferred deferred = nullptr;
     ControlEvent event;
+    int32_t result;
+};
+
+struct TriggerAsyncContext {
+    napi_env env = nullptr;
+    napi_async_work work = nullptr;
+    napi_deferred deferred = nullptr;
+    AwarenessCap cap;
+    AwarenessOptions option;
+    OnscreenAwarenessInfo info;
     int32_t result;
 };
 } // namespace OnScreen

@@ -662,6 +662,27 @@ int32_t IntentionManager::GetLiveStatus()
     CALL_DEBUG_ENTER;
     return onScreen_.GetLiveStatus();
 }
+
+int32_t IntentionManager::RegisterAwarenessCallback(const OnScreen::AwarenessCap& cap,
+    sptr<OnScreen::IRemoteOnScreenCallback> callback, const OnScreen::AwarenessOptions& option)
+{
+    CALL_DEBUG_ENTER;
+    return onScreen_.RegisterAwarenessCallback(cap, callback, option);
+}
+
+int32_t IntentionManager::UnregisterAwarenessCallback(const OnScreen::AwarenessCap& cap,
+    sptr<OnScreen::IRemoteOnScreenCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    return onScreen_.UnregisterAwarenessCallback(cap, callback);
+}
+
+int32_t IntentionManager::Trigger(const OnScreen::AwarenessCap& cap, const OnScreen::AwarenessOptions& option,
+    OnScreen::OnscreenAwarenessInfo& info)
+{
+    CALL_DEBUG_ENTER;
+    return onScreen_.Trigger(cap, option, info);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

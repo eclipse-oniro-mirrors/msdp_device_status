@@ -26,6 +26,7 @@
 #include "interaction_manager.h"
 #include "ipc_skeleton.h"
 #include "plugin_manager.h"
+#include "iremote_on_screen_callback.h"
 
 #undef LOG_TAG
 #define LOG_TAG "IntentionServiceTest"
@@ -156,6 +157,16 @@ void IntentionServiceTest::SetUp()
 }
 
 void IntentionServiceTest::TearDown() {}
+
+class IRemoteOnScreenCallbackTest : public OnScreen::IRemoteOnScreenCallback {
+public:
+    void OnScreenChange(const std::string &changeInfo) override{};
+    void OnScreenAwareness(const OnScreen::OnscreenAwarenessInfo &info) override{};
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
 
 std::shared_ptr<Media::PixelMap> IntentionServiceTest::CreatePixelMap(int32_t width, int32_t height)
 {
@@ -938,10 +949,10 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragBundleInfo001, TestSi
     ret = g_intentionServiceNullptr->GetDragBundleInfo(bundleName, state);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest45
  * @tc.desc: Test SubscribeStationaryCallback
- * @tc.desc: Test GetDragBundleInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1052,6 +1063,94 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragSummaryInfo, TestSize
     ErrCode errCode = g_intentionService->GetDragSummaryInfo(sequenceableDragSummaryInfo);
     EXPECT_EQ(errCode, RET_ERR);
 }
-} // namespace DeviceStatus
-} // namespace Msdp
-} // namespace OHOS
+
+/**
+ * @tc.name: IntentionServiceTest_Dump
+ * @tc.desc: Test Dump
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Dump001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg1 = u"-h";
+    std::u16string arg2 = u"-i";
+    std::u16string arg3 = u"-r";
+    std::u16string arg4 = u"-n";
+    args.push_back(arg1);
+    args.push_back(arg2);
+    args.push_back(arg3);
+    args.push_back(arg4);
+    int32_t ret = g_intentionService->Dump(fd, args);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionServiceTest_Dump
+ * @tc.desc: Test Dump
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Dump002, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t fd = -1;
+    std::vector<std::u16string> args;
+    int32_t ret = g_intentionService->Dump(fd, args);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: RegisterAwarenessCallback
+ * @tc.desc: Check RegisterAwarenessCallback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, RegisterAwarenessCallback, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::AwarenessCap option;
+    OnScreen::SequenceableOnscreenAwarenessCap cap(option);
+    OnScreen::SequenceableOnscreenAwarenessOption awarenessOption;
+    sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
+    auto result = g_intentionService->RegisterAwarenessCallback(cap, callback, awarenessOption);
+    EXPECT_EQ(result, RET_OK);
+}
+
+/**
+ * @tc.name: UnregisterAwarenessCallback
+ * @tc.desc: Check UnregisterAwarenessCallback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, UnregisterAwarenessCallback, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::AwarenessCap option;
+    OnScreen::SequenceableOnscreenAwarenessCap cap(option);
+    sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
+    auto result = g_intentionService->UnregisterAwarenessCallback(cap, callback);
+    EXPECT_EQ(result, RET_OK);
+}
+
+/**
+ * @tc.name: Trigger
+ * @tc.desc: Check Trigger
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, Trigger, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::AwarenessCap option;
+    OnScreen::SequenceableOnscreenAwarenessCap cap(option);
+    OnScreen::SequenceableOnscreenAwarenessInfo info;
+    OnScreen::SequenceableOnscreenAwarenessOption awarenessOption;
+    auto result = g_intentionService->Trigger(cap, awarenessOption, info);
+    EXPECT_EQ(result, RET_OK);
+}
+}  // namespace DeviceStatus
+}  // namespace Msdp
+}  // namespace OHOS
