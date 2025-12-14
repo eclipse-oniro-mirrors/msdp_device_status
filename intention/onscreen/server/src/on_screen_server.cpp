@@ -21,8 +21,13 @@
 #include <vector>
 
 #include "accesstoken_kit.h"
+#include "bundle_info.h"
+#include "bundle_mgr_proxy.h"
 #include "devicestatus_define.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
 #include "parameters.h"
+#include "system_ability_definition.h"
 #include "tokenid_kit.h"
 
 #undef LOG_TAG
@@ -41,6 +46,10 @@ const std::vector<std::string> SUPPORT_DEVICE_TYPE = { "phone", "tablet" };
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_PERMISSION = 201;
 constexpr int32_t RET_NO_SYSTEM_CALLING = 202;
+constexpr int32_t RET_NOT_REGISTER = 203;
+const std::map<std::string, std::string> hapWhiteListMap = {
+    {"com.huawei.hmos.vassistant", "1189827130565864320"},
+};
 }
 
 OnScreenAlgorithmHandle::~OnScreenAlgorithmHandle()
@@ -162,6 +171,7 @@ int32_t OnScreenServer::Dump(int32_t fd, const std::vector<std::u16string> &args
     if (ret != RET_OK) {
         FI_HILOGE("failed to dump, err=%{public}d", ret);
     }
+    NotifyClient();
     return ret;
 }
 
@@ -304,6 +314,44 @@ bool OnScreenServer::IsSystemCalling(const CallingContext &context)
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
 }
 
+bool OnScreenServer::GetAppIdentifier(const std::string& bundleName, int32_t userId, std::string& appIdentifier)
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHKCF(systemAbilityManager != nullptr, "get saMgr failed");
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    CHKCF(remoteObject != nullptr, "get remote failed");
+    sptr<AppExecFwk::IBundleMgr> bundleManager = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    CHKCF(bundleManager != nullptr, "get bundleMgr failed");
+    AppExecFwk::BundleInfo bundleInfo;
+    int ret = bundleManager->GetBundleInfoV9(bundleName,
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO), bundleInfo, userId);
+    CHKCF(ret == RET_OK, "get bundle info failed");
+    CHKCF(!bundleInfo.signatureInfo.appIdentifier.empty(), "appIdentifier empty");
+    appIdentifier = bundleInfo.signatureInfo.appIdentifier;
+    return true;
+}
+
+bool OnScreenServer::IsWhitelistAppCalling(const CallingContext &context)
+{
+    std::string packageName = "";
+    int32_t tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        return false;
+    }
+    Security::AccessToken::HapTokenInfo hapInfo;
+    if (Security::AccessToken::AccessTokenKit::GetHapTokenInfo(context.tokenId, hapInfo) != RET_OK) {
+        FI_HILOGE("Get hap token info fail");
+        return false;
+    }
+    auto it = hapWhiteListMap.find(hapInfo.bundleName);
+    CHKCF(it != hapWhiteListMap.end(), "bundleName not in whitelist");
+    std::string appIdentifier = "";
+    CHKCF(GetAppIdentifier(hapInfo.bundleName, hapInfo.userID, appIdentifier), "get appIdentifier failed");
+    CHKCF(it->second == appIdentifier, "appIdentifier not match");
+    return true;
+}
+
 bool OnScreenServer::IsSystemServiceCalling(const CallingContext &context)
 {
     auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
@@ -319,6 +367,283 @@ bool OnScreenServer::CheckDeviceType()
 {
     std::string deviceType = OHOS::system::GetParameter(DEVICE_TYPE_PARA_NAME, "");
     return std::find(SUPPORT_DEVICE_TYPE.begin(), SUPPORT_DEVICE_TYPE.end(), deviceType) != SUPPORT_DEVICE_TYPE.end();
+}
+
+void OnScreenServer::FillDumpCommonData(OnscreenAwarenessInfo& info)
+{
+    info.resultCode = 0;
+    info.timestamp = 605491200000;
+    info.bundleName = std::string("com.ohos.duoxi");
+    info.appID = std::string("wx1d2b3c4d5e6f7g8h9i10j11k12l13");
+    info.appIndex = 0;
+    info.pageId = std::string("1646132-45646-56465461-654654");
+    info.sampleId = std::string("156481-987648-654561-454898");
+    info.collectStrategy = 0;
+    info.displayId = 125;
+    info.windowId = 0;
+}
+void OnScreenServer::FillUiTreeData(std::map<std::string, ValueObj> &entityInfo)
+{
+    entityInfo["uiTree"] = R"({{
+        "version":1.0,
+        "windowid":1,
+        "link":[
+            {"hyperlink":"one http link"},
+            {"deeplink":"one deep link"}
+        ],
+        "title":"hi bro."
+        "componments":[
+            {
+                "id":123,
+                "type":image,
+                "bbox":[x1, y1, x2, y2, x3, y3, x4, y4]
+            },
+            {
+                "id":456,
+                "type":image,
+                "bbox":[x1, y1, x2, y2, x3, y3, x4, y4]
+            },
+        ]
+    }})";
+}
+void FillDumpUiTree(std::map<std::string, ValueObj> &entityInfo)
+{
+    OnScreenServer::FillUiTreeData(entityInfo);
+}
+void FillDumpContentUiTreeWithTree(std::map<std::string, ValueObj> &entityInfo)
+{
+    OnScreenServer::FillUiTreeData(entityInfo);
+    std::vector<std::string> imagesCompID = {"165461615648", "489791849434956"};
+    entityInfo["imagesCompID"] = imagesCompID;
+}
+void FillDumpOcr(std::map<std::string, ValueObj> &entityInfo)
+{
+    OnScreenServer::FillUiTreeData(entityInfo);
+}
+void FillDumpScreenshot(std::map<std::string, ValueObj> &entityInfo)
+{
+    entityInfo["screenshotID"] = R"("156-5654848-541846-454545748")";
+}
+void FillDumpContentLink(std::map<std::string, ValueObj> &entityInfo)
+{
+    AwarenessInfoPageLink link{
+        .httpLink = std::string("one http link"),
+        .deepLink = std::string("one deep link")
+    };
+    entityInfo["pagLink"] = link;
+}
+void FillDumpInteractionClickl(std::map<std::string, ValueObj> &entityInfo)
+{
+    OnScreenServer::FillUiTreeData(entityInfo);
+}
+void FillDumpInteractionScroll(std::map<std::string, ValueObj> &entityInfo)
+{
+    OnScreenServer::FillUiTreeData(entityInfo);
+}
+void FillDumpInteractionTextSelection(std::map<std::string, ValueObj> &entityInfo)
+{
+    entityInfo["textSelection"] = std::string("when you listen to the radio,lalalala,lalalala, apei");
+}
+
+void FillDumpScenarioReading(std::map<std::string, ValueObj> &entityInfo)
+{
+    entityInfo["title"] = std::string("yesterday once more");
+    std::vector<std::string> compID = {"1", "22", "563"};
+    entityInfo["content"] = compID;
+    entityInfo["wordCount"] = 125;
+    entityInfo["lazyLoad"] = false;
+}
+void FillDumpScenarioShortVideo(std::map<std::string, ValueObj> &entityInfo)
+{
+    entityInfo["category"] = 1;
+    entityInfo["hasBackGroundMusic"] = true;
+    entityInfo["imagID"] = R"("156-5654848-541846-454545748")";
+    entityInfo["publisher"] = std::string("who is daddy");
+    entityInfo["description"] = std::string("story about two bears and one man, hha");
+    entityInfo["series"] = std::string("Bears");
+    entityInfo["hotSearch"] = std::string("cartoon");
+    entityInfo["SearchTips"] = std::string("protect forest");
+    std::vector<std::string> position = {"1", "22", "563", "563"};
+    entityInfo["position"] = position;
+}
+void FillDumpScenarioActivity(std::map<std::string, ValueObj> &entityInfo)
+{
+    OnScreenServer::FillUiTreeData(entityInfo);
+}
+void FillDumpScenarioTodo(std::map<std::string, ValueObj> &entityInfo)
+{
+    entityInfo["homeworkAssign"] = true;
+    entityInfo["homeworkName"] =  std::string("find two bears");
+    entityInfo["chatgroupName"] = R"("bear boy 1 group")";
+    entityInfo["pageName"] = std::string("web//children's playground.");
+    entityInfo["subject"] = std::string("math");
+    entityInfo["assigntime"] = std::string("2025-12-03 15:56:60");
+    entityInfo["deadline"] = std::string("2033-12-03 15:56:60");
+    entityInfo["description"] = std::string("when can i finish my job.");
+    entityInfo["teacherName"] = std::string("Ms. PIPI");
+}
+
+using FillDumpDataFunc = std::function<void(std::map<std::string, ValueObj> &)>;
+std::map<std::string, FillDumpDataFunc> fillDataMap = {
+    {"contentUiTree", FillDumpUiTree},
+    {"contentUiOcr", FillDumpOcr},
+    {"contentScreenshot", FillDumpScreenshot},
+    {"contentLink", FillDumpContentLink},
+    {"contentUiTreeWithImage", FillDumpContentUiTreeWithTree},
+    {"interactionTextSelection", FillDumpInteractionTextSelection},
+    {"interactionClick", FillDumpInteractionClickl},
+    {"interactionScroll", FillDumpInteractionScroll},
+    {"scenarioReading", FillDumpScenarioReading},
+    {"scenarioShortVideo", FillDumpScenarioShortVideo},
+    {"scenarioActivity", FillDumpScenarioActivity},
+    {"scenarioTodo", FillDumpScenarioTodo},
+};
+
+OnscreenAwarenessInfo OnScreenServer::FillDumpData(const AwarenessCap& cap, const AwarenessOptions& option)
+{
+    OnscreenAwarenessInfo wholeInfo;
+    wholeInfo.entityInfo.clear();
+
+    FillDumpCommonData(wholeInfo);
+    if (cap.capList.empty()) {
+        FI_HILOGE("capList is null.");
+        return wholeInfo;
+    }
+    for (const auto& key : cap.capList) {
+        auto it = fillDataMap.find(key);
+        if (it == fillDataMap.end()) {
+            continue;
+        }
+        FI_HILOGI("cap is %s.", key.c_str());
+        OnscreenEntityInfo info;
+        info.entityName = key;
+        it->second(info.entityInfo);
+        wholeInfo.entityInfo.emplace_back(info);
+    }
+    return wholeInfo;
+}
+
+void OnScreenServer::NotifyClient()
+{
+    for (auto const &[k, v] : callbackInfo_) {
+        std::vector<std::string> caps(v.begin(), v.end());
+        AwarenessCap cap = {
+            .capList = caps,
+            .description = "",
+        };
+        AwarenessOptions option;
+        k->OnScreenAwareness(FillDumpData(cap, option));
+    }
+}
+
+bool OnScreenServer::SaveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap)
+{
+    auto it = callbackInfo_.find(callback);
+    if (it != callbackInfo_.end()) {
+        for (auto c : cap.capList) {
+            it->second.insert(c);
+        }
+        return true;
+    }
+    std::set<std::string> capSet;
+    for (auto c : cap.capList) {
+        capSet.insert(c);
+    }
+    callbackInfo_[callback] = capSet;
+    return true;
+}
+
+int32_t OnScreenServer::RemoveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap)
+{
+    auto it = callbackInfo_.find(callback);
+    if (it == callbackInfo_.end()) {
+        return RET_NOT_REGISTER;
+    }
+    for (auto c : cap.capList) {
+        it->second.erase(c);
+    }
+    if (it->second.empty()) {
+        callbackInfo_.erase(it);
+    }
+    return RET_OK;
+}
+
+std::vector<std::string> OnScreenServer::GetUnusedCap(const AwarenessCap& cap)
+{
+    std::set<std::string> usingCap;
+    for (const auto& pair : callbackInfo_) {
+        usingCap.insert(pair.second.begin(), pair.second.end());
+    }
+    std::vector<std::string> unusedCap;
+    for (const auto& c : cap.capList) {
+        if (usingCap.find(c) == usingCap.end()) {
+            unusedCap.push_back(c);
+        }
+    }
+    return unusedCap;
+}
+
+int32_t OnScreenServer::RegisterAwarenessCallback(const CallingContext &context, const AwarenessCap& cap,
+    const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option)
+{
+    CALL_INFO_TRACE;
+    if (!CheckDeviceType()) {
+        FI_HILOGE("device type is not support");
+        return RET_NO_SUPPORT;
+    }
+    if (!CheckPermission(context, PERMISSION_GET_PAGE_CONTENT)) {
+        FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_GET_PAGE_CONTENT);
+        return RET_NO_PERMISSION;
+    }
+    if (!IsWhitelistAppCalling(context)) {
+        FI_HILOGE("calling is not system calling");
+        return RET_NO_SYSTEM_CALLING;
+    }
+    return RET_OK;
+}
+
+int32_t OnScreenServer::UnregisterAwarenessCallback(const CallingContext &context, const AwarenessCap& cap,
+    const sptr<IRemoteOnScreenCallback>& callback)
+{
+    CALL_INFO_TRACE;
+    if (!CheckDeviceType()) {
+        FI_HILOGE("device type is not support");
+        return RET_NO_SUPPORT;
+    }
+    if (!CheckPermission(context, PERMISSION_GET_PAGE_CONTENT)) {
+        FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_GET_PAGE_CONTENT);
+        return RET_NO_PERMISSION;
+    }
+    if (!IsWhitelistAppCalling(context)) {
+        FI_HILOGE("calling is not system calling");
+        return RET_NO_SYSTEM_CALLING;
+    }
+    RemoveCallbackInfo(callback, cap);
+    AwarenessCap unusedCap = {
+        .capList = GetUnusedCap(cap),
+        .description = cap.description,
+    };
+    return RET_OK;
+}
+
+int32_t OnScreenServer::Trigger(const CallingContext &context, const AwarenessCap& cap, const AwarenessOptions& option,
+    OnscreenAwarenessInfo& info)
+{
+    CALL_INFO_TRACE;
+    if (!CheckDeviceType()) {
+        FI_HILOGE("device type is not support");
+        return RET_NO_SUPPORT;
+    }
+    if (!CheckPermission(context, PERMISSION_GET_PAGE_CONTENT)) {
+        FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_GET_PAGE_CONTENT);
+        return RET_NO_PERMISSION;
+    }
+    if (!IsWhitelistAppCalling(context)) {
+        FI_HILOGE("calling is not system calling");
+        return RET_NO_SYSTEM_CALLING;
+    }
+    info = FillDumpData(cap, option);
+    return RET_OK;
 }
 } // namespace OnScreen
 } // namespace DeviceStatus

@@ -132,6 +132,15 @@ public:
     ErrCode ListenLiveBroadcast() override;
     int32_t GetLiveStatus() override;
 
+    ErrCode RegisterAwarenessCallback(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
+        const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback,
+        const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption) override;
+    ErrCode UnregisterAwarenessCallback(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
+        const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override;
+    ErrCode Trigger(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
+        const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption,
+        OnScreen::SequenceableOnscreenAwarenessInfo& info) override;
+
     // hidumper
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
 

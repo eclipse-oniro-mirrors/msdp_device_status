@@ -99,6 +99,9 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_IS_PARALLEL_FEATURE_ENABLED,
     IIntentionIpcCode::COMMAND_LISTEN_LIVE_BROADCAST,
     IIntentionIpcCode::COMMAND_GET_LIVE_STATUS,
+    IIntentionIpcCode::COMMAND_REGISTER_AWARENESS_CALLBACK,
+    IIntentionIpcCode::COMMAND_UNREGISTER_AWARENESS_CALLBACK,
+    IIntentionIpcCode::COMMAND_TRIGGER,
 };
 
 class IntentionServiceMock : public IntentionStub {
@@ -557,6 +560,34 @@ public:
         return 0;
     }
     
+    ErrCode RegisterAwarenessCallback(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
+        const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback,
+        const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption) override
+    {
+        (void)cap;
+        (void)onScreenCallback;
+        (void)awarenessOption;
+        return 0;
+    }
+
+    ErrCode UnregisterAwarenessCallback(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
+        const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override
+    {
+        (void)cap;
+        (void)onScreenCallback;
+        return 0;
+    }
+
+    ErrCode Trigger(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
+        const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption,
+        OnScreen::SequenceableOnscreenAwarenessInfo& info) override
+    {
+        (void)cap;
+        (void)awarenessOption;
+        (void)info;
+        return 0;
+    }
+
     // hidumper
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override
     {

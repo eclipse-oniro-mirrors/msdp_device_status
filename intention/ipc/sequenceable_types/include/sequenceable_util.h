@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef IREMOTE_ON_SCREEN_CALLBACK_H
-#define IREMOTE_ON_SCREEN_CALLBACK_H
+#ifndef SEQUENCEABLE_UTIL_H
+#define SEQUENCEABLE_UTIL_H
 
-#include <iremote_broker.h>
-#include <iremote_object.h>
-
+#include "parcel.h"
 #include "on_screen_data.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace OnScreen {
-class IRemoteOnScreenCallback : public IRemoteBroker {
+
+class SequenceableUtil {
 public:
-    enum {
-        ON_SCREEN_CHANGE = 0,
-        ON_SCREEN_AWAREENSS = 1,
-    };
-
-    virtual void OnScreenChange(const std::string& changeInfo) = 0;
-    virtual void OnScreenAwareness(const OnscreenAwarenessInfo& info) = 0;
-
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IRemoteOnScreenCallback");
+    static bool Marshalling(Parcel &parcel, const std::map<std::string, OnScreen::ValueObj>& entityInfo);
+    static bool Unmarshalling(Parcel &parcel, std::map<std::string, OnScreen::ValueObj>& entityInfo);
+    static bool WriteImageId(Parcel &parcel, std::vector<OnScreen::AwarenessInfoImageId> imageIdArr);
+    static std::vector<OnScreen::AwarenessInfoImageId> ReadImageId(Parcel &parcel);
+    static OnScreen::AwarenessInfoPageLink ReadPageLink(Parcel &parcel);
+    static bool ReadValueObj(int32_t typeIndex, Parcel &parcel, OnScreen::ValueObj& obj);
 };
-} // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // IREMOTE_ON_SCREEN_CALLBACK_H
+#endif // SEQUENCEABLE_UTIL_H

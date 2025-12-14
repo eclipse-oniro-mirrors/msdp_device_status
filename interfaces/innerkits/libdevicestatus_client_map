@@ -110,6 +110,9 @@
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::UnregisterScreenEventCallback(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::OnScreen::IRemoteOnScreenCallback>)";
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::IsParallelFeatureEnabled(int, int&)";
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::GetLiveStatus()";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::RegisterAwarenessCallback(OHOS::Msdp::DeviceStatus::OnScreen::AwarenessCap const&, OHOS::sptr<OHOS::Msdp::DeviceStatus::OnScreen::IRemoteOnScreenCallback>, OHOS::Msdp::DeviceStatus::OnScreen::AwarenessOptions const&)";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::UnregisterAwarenessCallback(OHOS::Msdp::DeviceStatus::OnScreen::AwarenessCap const&, OHOS::sptr<OHOS::Msdp::DeviceStatus::OnScreen::IRemoteOnScreenCallback>)";
+            "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::Trigger(OHOS::Msdp::DeviceStatus::OnScreen::AwarenessCap const&, OHOS::Msdp::DeviceStatus::OnScreen::AwarenessOptions const&, OHOS::Msdp::DeviceStatus::OnScreen::OnscreenAwarenessInfo&)";
         };
     local:
         *;

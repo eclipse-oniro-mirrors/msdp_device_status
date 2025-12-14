@@ -64,6 +64,22 @@ int32_t OnScreenManager::GetLiveStatus()
 {
     return INTER_MGR_IMPL.GetLiveStatus();
 }
+
+int32_t OnScreenManager::RegisterAwarenessCallback(const AwarenessCap& cap, sptr<IRemoteOnScreenCallback> callback,
+    const AwarenessOptions& option)
+{
+    return INTER_MGR_IMPL.RegisterAwarenessCallback(cap, callback, option);
+}
+int32_t OnScreenManager::UnregisterAwarenessCallback(const AwarenessCap& cap, sptr<IRemoteOnScreenCallback> callback)
+{
+    return INTER_MGR_IMPL.UnregisterAwarenessCallback(cap, callback);
+}
+
+int32_t OnScreenManager::Trigger(const AwarenessCap& cap, const AwarenessOptions& option,
+    OnscreenAwarenessInfo& info)
+{
+    return INTER_MGR_IMPL.Trigger(cap, option, info);
+}
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

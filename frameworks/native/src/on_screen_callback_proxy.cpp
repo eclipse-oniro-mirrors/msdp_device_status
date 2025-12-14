@@ -22,6 +22,7 @@
 
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#include "sequenceable_util.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenCallbackProxy"
@@ -45,6 +46,42 @@ void OnScreenCallbackProxy::OnScreenChange(const std::string& changeInfo)
     WRITESTRING(data, changeInfo);
 
     int32_t ret = remote->SendRequest(static_cast<int32_t>(IRemoteOnScreenCallback::ON_SCREEN_CHANGE),
+        data, reply, option);
+    if (ret != RET_OK) {
+        FI_HILOGE("SendRequest is failed, error code:%{public}d", ret);
+        return;
+    }
+}
+
+void OnScreenCallbackProxy::OnScreenAwareness(const OnscreenAwarenessInfo& info)
+{
+    sptr<IRemoteObject> remote = Remote();
+    CHKPV(remote);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(OnScreenCallbackProxy::GetDescriptor())) {
+        FI_HILOGE("Write descriptor failed");
+        return;
+    }
+    WRITEINT32(data, info.resultCode);
+    WRITEINT64(data, info.timestamp);
+    WRITESTRING(data, info.bundleName);
+    WRITESTRING(data, info.appID);
+    WRITEINT32(data, info.appIndex);
+    WRITESTRING(data, info.pageId);
+    WRITESTRING(data, info.sampleId);
+    WRITEINT32(data, info.collectStrategy);
+    WRITEINT64(data, info.displayId);
+    WRITEINT32(data, info.windowId);
+    WRITEINT32(data, static_cast<int32_t>(info.entityInfo.size()));
+    for (auto entityItem : info.entityInfo) {
+        WRITESTRING(data, entityItem.entityName);
+        SequenceableUtil::Marshalling(data, entityItem.entityInfo);
+    }
+
+    int32_t ret = remote->SendRequest(static_cast<int32_t>(IRemoteOnScreenCallback::ON_SCREEN_AWAREENSS),
         data, reply, option);
     if (ret != RET_OK) {
         FI_HILOGE("SendRequest is failed, error code:%{public}d", ret);

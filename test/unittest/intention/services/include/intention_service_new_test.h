@@ -12,31 +12,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef DRAG_DRAWING_TEST_H
-#define DRAG_DRAWING_TEST_H
-
+ 
+#ifndef INTENTION_SERVICE_NEW_TEST_H
+#define INTENTION_SERVICE_NEW_TEST_H
+ 
 #include <gtest/gtest.h>
-
-#include "ddm_adapter.h"
+#include "nocopyable.h"
+ 
 #include "delegate_tasks.h"
 #include "device_manager.h"
-#include "drag_client.h"
-#include "drag_data_manager.h"
-#include "drag_data_util.h"
+#include "devicestatus_callback_stub.h"
+#include "devicestatus_define.h"
+#include "devicestatus_delayed_sp_singleton.h"
 #include "drag_manager.h"
 #include "i_context.h"
-#include "socket_session_manager.h"
 #include "timer_manager.h"
-
+ 
+#include "intention_service.h"
+#include "socket_session_manager.h"
+ 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class ContextService final : public IContext {
-    ContextService();
-    ~ContextService();
-    DISALLOW_COPY_AND_MOVE(ContextService);
+class MockDelegateTasks : public IDelegateTasks {
 public:
+    int32_t PostSyncTask(DTaskCallback callback) override;
+    int32_t PostAsyncTask(DTaskCallback callback) override;
+};
+ 
+class ContextService final : public IContext {
+public:
+    ContextService();
+    ~ContextService() = default;
+    DISALLOW_COPY_AND_MOVE(ContextService);
+ 
     IDelegateTasks& GetDelegateTasks() override;
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
@@ -47,21 +56,31 @@ public:
     IInputAdapter& GetInput() override;
     IDSoftbusAdapter& GetDSoftbus() override;
     static ContextService* GetInstance();
-
 private:
-    std::unique_ptr<IDDMAdapter> ddm_;
+    MockDelegateTasks delegateTasks_;
+    DeviceManager devMgr_;
+    TimerManager timerMgr_;
+    DragManager dragMgr_;
+    SocketSessionManager socketSessionMgr_;
+    std::unique_ptr<IDDMAdapter> ddm_ { nullptr };
+    std::unique_ptr<IInputAdapter> input_ { nullptr };
+    std::unique_ptr<IPluginManager> pluginMgr_ { nullptr };
+    std::unique_ptr<IDSoftbusAdapter> dsoftbus_ { nullptr };
+    sptr<IntentionService> intention_ { nullptr };
 };
-
-class DragDrawingTest : public testing::Test {
+ 
+class IntentionServiceNewTest : public testing::Test {
 public:
     static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height);
     static std::optional<DragData> CreateDragData(int32_t sourceType, int32_t pointerId, int32_t dragNum,
         bool hasCoordinateCorrected, int32_t shadowNum);
-    static std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height);
+    void AssignToAnimation(PreviewAnimation &animation);
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // DRAG_DRAWING_TEST_H
+#endif // INTENTION_SERVICE_NEW_TEST_H

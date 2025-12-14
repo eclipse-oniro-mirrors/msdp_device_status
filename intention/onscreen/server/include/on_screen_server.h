@@ -17,6 +17,7 @@
 #define ON_SCREEN_SERVER_H
 
 #include <mutex>
+#include <map>
 
 #include "i_on_screen_algorithm.h"
 #include "i_plugin.h"
@@ -51,15 +52,33 @@ public:
     int32_t ListenLiveBroadcast();
     int32_t GetLiveStatus();
 
+    int32_t RegisterAwarenessCallback(const CallingContext &context, const AwarenessCap& cap,
+        const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option);
+    int32_t UnregisterAwarenessCallback(const CallingContext &context, const AwarenessCap& cap,
+        const sptr<IRemoteOnScreenCallback>& callback);
+    int32_t Trigger(const CallingContext &context, const AwarenessCap& cap, const AwarenessOptions& option,
+        OnscreenAwarenessInfo& info);
+    static void FillDumpCommonData(OnscreenAwarenessInfo& info);
+    static void FillUiTreeData(std::map<std::string, ValueObj> &entityInfo);
+    static OnscreenAwarenessInfo FillDumpData(const AwarenessCap& cap, const AwarenessOptions& option);
+    void NotifyClient();
+
 private:
     int32_t LoadAlgoLib();
     int32_t UnloadAlgoLib();
     int32_t ConnectAlgoLib();
     bool CheckPermission(const CallingContext &context, const std::string &permission);
     bool IsSystemCalling(const CallingContext &context);
+    bool IsWhitelistAppCalling(const CallingContext &context);
+    bool GetAppIdentifier(const std::string& bundleName, int32_t userId, std::string& appIdentifier);
     bool IsSystemServiceCalling(const CallingContext &context);
     bool CheckDeviceType();
+    bool SaveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap);
+    std::vector<std::string> GetUnusedCap(const AwarenessCap& cap);
+    int32_t RemoveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap);
 
+    std::map<sptr<IRemoteOnScreenCallback>, std::set<std::string>> callbackInfo_;
+    std::map<uint32_t, std::string> bundleNames_;
     OnScreenAlgorithmHandle handle_;
     std::mutex mtx_;
 };
