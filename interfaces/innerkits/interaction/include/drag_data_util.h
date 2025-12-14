@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,10 @@ public:
     static int32_t UnMarshallingDetailedSummarys(Parcel &data, DragData &dragData);
     static int32_t MarshallingSummaryExpanding(const DragData &dragData, Parcel &data);
     static int32_t UnMarshallingSummaryExpanding(Parcel &data, DragData &dragData);
+    static int32_t MarshallingMaterialId(const DragData &dragData, Parcel &data);
+    static int32_t UnMarshallingMaterialId(Parcel &data, DragData &dragData);
+    static int32_t MarshallingMaterialFilter(const DragData &dragData, Parcel &data);
+    static int32_t UnMarshallingMaterialFilter(Parcel &data, DragData &dragData);
 };
 
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION

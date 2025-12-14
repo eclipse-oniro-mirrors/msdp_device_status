@@ -53,6 +53,7 @@ ohos_source_set("intention_plugin_manager") {
   external_deps = [
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",

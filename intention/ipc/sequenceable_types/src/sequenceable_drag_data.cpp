@@ -33,6 +33,14 @@ bool SequenceableDragData::Marshalling(Parcel &parcel) const
 
     CHKEF(DragDataPacker::MarshallingDetailedSummarys(dragData_, parcel), "Marshalling detailedSummary failed");
     CHKEF(DragDataPacker::MarshallingSummaryExpanding(dragData_, parcel), "Marshalling summaryExpanding failed");
+    if (DragDataPacker::MarshallingMaterialId(dragData_, parcel) != RET_OK) {
+        FI_HILOGE("Marshalling materialId failed");
+        return false;
+    }
+    if (DragDataPacker::MarshallingMaterialFilter(dragData_, parcel) != RET_OK) {
+        FI_HILOGE("Marshalling materialFilter failed");
+        return false;
+    }
     return true;
 }
 
@@ -52,6 +60,16 @@ SequenceableDragData* SequenceableDragData::Unmarshalling(Parcel &parcel)
     }
     if (DragDataPacker::UnMarshallingSummaryExpanding(parcel, sequenceDragData->dragData_) != RET_OK) {
         FI_HILOGE("UnMarshalling summaryExpanding failed");
+        delete sequenceDragData;
+        return nullptr;
+    }
+    if (DragDataPacker::UnMarshallingMaterialId(parcel, sequenceDragData->dragData_) != RET_OK) {
+        FI_HILOGE("UnMarshalling materialId failed");
+        delete sequenceDragData;
+        return nullptr;
+    }
+    if (DragDataPacker::UnMarshallingMaterialFilter(parcel, sequenceDragData->dragData_) != RET_OK) {
+        FI_HILOGE("UnMarshalling materialFilter failed");
         delete sequenceDragData;
         return nullptr;
     }

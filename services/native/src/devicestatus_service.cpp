@@ -483,7 +483,6 @@ int32_t DeviceStatusService::InitDelegateTasks()
     if (ret != RET_OK) {
         FI_HILOGE("AddEpoll error ret:%{public}d", ret);
     }
-    FI_HILOGI("AddEpoll, epollfd:%{public}d, fd:%{public}d", epollFd_, delegateTasks_.GetReadFd());
     return ret;
 }
 

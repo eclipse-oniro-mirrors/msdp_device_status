@@ -70,6 +70,10 @@
             "OHOS::Msdp::DeviceStatus::DragDataUtil::UnMarshallingDetailedSummarys(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
             "OHOS::Msdp::DeviceStatus::DragDataUtil::MarshallingSummaryExpanding(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&)";
             "OHOS::Msdp::DeviceStatus::DragDataUtil::UnMarshallingSummaryExpanding(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
+            "OHOS::Msdp::DeviceStatus::DragDataUtil::MarshallingMaterialId(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&)";
+            "OHOS::Msdp::DeviceStatus::DragDataUtil::UnMarshallingMaterialId(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
+            "OHOS::Msdp::DeviceStatus::DragDataUtil::MarshallingMaterialFilter(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&)";
+            "OHOS::Msdp::DeviceStatus::DragDataUtil::UnMarshallingMaterialFilter(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::EnterTextEditorArea(bool)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragAction(OHOS::Msdp::DeviceStatus::DragAction&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetExtraInfo(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";

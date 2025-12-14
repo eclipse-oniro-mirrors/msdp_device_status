@@ -58,6 +58,10 @@
             "OHOS::Msdp::DeviceStatus::DragDataPacker::UnMarshallingDetailedSummarys(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
             "OHOS::Msdp::DeviceStatus::DragDataPacker::MarshallingSummaryExpanding(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&)";
             "OHOS::Msdp::DeviceStatus::DragDataPacker::UnMarshallingSummaryExpanding(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
+            "OHOS::Msdp::DeviceStatus::DragDataPacker::MarshallingMaterialId(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&)";
+            "OHOS::Msdp::DeviceStatus::DragDataPacker::UnMarshallingMaterialId(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
+            "OHOS::Msdp::DeviceStatus::DragDataPacker::MarshallingMaterialFilter(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&)";
+            "OHOS::Msdp::DeviceStatus::DragDataPacker::UnMarshallingMaterialFilter(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
             "OHOS::Msdp::DeviceStatus::DragDataPacker::CheckDragData(OHOS::Msdp::DeviceStatus::DragData const&)";
             "OHOS::Msdp::DeviceStatus::ShadowPacker::PackUpShadowInfo(OHOS::Msdp::DeviceStatus::ShadowInfo const&, OHOS::Parcel&, bool)";
             "OHOS::Msdp::DeviceStatus::ShadowPacker::UnPackShadowInfo(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::ShadowInfo&, bool)";

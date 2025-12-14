@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,26 @@ int32_t DragDataUtil::MarshallingSummaryExpanding(const DragData &dragData, Parc
 int32_t DragDataUtil::UnMarshallingSummaryExpanding(Parcel &data, DragData &dragData)
 {
     return DragDataPacker::UnMarshallingSummaryExpanding(data, dragData);
+}
+
+int32_t DragDataUtil::MarshallingMaterialId(const DragData &dragData, Parcel &data)
+{
+    return DragDataPacker::MarshallingMaterialId(dragData, data);
+}
+ 
+int32_t DragDataUtil::UnMarshallingMaterialId(Parcel &data, DragData &dragData)
+{
+    return DragDataPacker::UnMarshallingMaterialId(data, dragData);
+}
+ 
+int32_t DragDataUtil::MarshallingMaterialFilter(const DragData &dragData, Parcel &data)
+{
+    return DragDataPacker::MarshallingMaterialFilter(dragData, data);
+}
+ 
+int32_t DragDataUtil::UnMarshallingMaterialFilter(Parcel &data, DragData &dragData)
+{
+    return DragDataPacker::UnMarshallingMaterialFilter(data, dragData);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
