@@ -571,8 +571,6 @@ void OnScreenNapi::TriggerCompCB(napi_env env, napi_status status, void *data)
         FI_HILOGE("napi pack defer err, result = %{public}d, status = %{public}d", ctx->result, retStatus);
     }
     napi_delete_async_work(env, ctx->work);
-    delete ctx;
-    ctx = nullptr;
 }
 
 void OnScreenNapi::UpsertScreenCallback(napi_env env, const AwarenessCap& cap, napi_ref handlerRef)
