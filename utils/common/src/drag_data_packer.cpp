@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,66 @@ int32_t DragDataPacker::UnMarshallingSummaryExpanding(Parcel &data, DragData &dr
         return RET_ERR;
     }
     READSTRING(data, dragData.summaryTag, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    return RET_OK;
+}
+
+int32_t DragDataPacker::MarshallingMaterialId(const DragData &dragData, Parcel &data)
+{
+    if (!(data).WriteInt32(dragData.materialId)) {
+        FI_HILOGE("WriteInt32 materialId failed");
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+ 
+int32_t DragDataPacker::UnMarshallingMaterialId(Parcel &data, DragData &dragData)
+{
+    if (!(data).ReadInt32(dragData.materialId)) {
+        FI_HILOGE("ReadInt32 materialId failed");
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+ 
+int32_t DragDataPacker::MarshallingMaterialFilter(const DragData &dragData, Parcel &data)
+{
+    if (!(data).WriteBool(dragData.isSetMaterialFilter)) {
+        FI_HILOGE("WriteBool isSetMaterialFilter failed");
+        return RET_ERR;
+    }
+    if (!dragData.isSetMaterialFilter) {
+        FI_HILOGW("Not need Marshalling materialFilter");
+        return RET_OK;
+    }
+    if (dragData.materialFilter == nullptr) {
+        FI_HILOGE("materialFilter is nullptr, not need Marshalling materialFilter");
+        return RET_ERR;
+    }
+    if (!dragData.materialFilter->Marshalling(data)) {
+        FI_HILOGE("Marshalling materialFilter failed");
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+ 
+int32_t DragDataPacker::UnMarshallingMaterialFilter(Parcel &data, DragData &dragData)
+{
+    if (!(data).ReadBool(dragData.isSetMaterialFilter)) {
+        FI_HILOGE("ReadBool isSetMaterialFilter failed");
+        return RET_ERR;
+    }
+    if (!dragData.isSetMaterialFilter) {
+        FI_HILOGW("isSetMaterialFilter is false, not need Unmarshalling materialFilter");
+        return RET_OK;
+    }
+    if (!Rosen::Filter::Unmarshalling(data, dragData.materialFilter)) {
+        FI_HILOGE("Filter Unmarshalling faled");
+        return RET_ERR;
+    }
+    if (dragData.materialFilter == nullptr) {
+        FI_HILOGE("materialFilter is nullptr");
+        return RET_ERR;
+    }
     return RET_OK;
 }
 

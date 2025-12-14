@@ -57,6 +57,7 @@ ohos_source_set("intention_boomerang_server") {
     "eventhandler:libeventhandler",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hisysevent:libhisysevent",

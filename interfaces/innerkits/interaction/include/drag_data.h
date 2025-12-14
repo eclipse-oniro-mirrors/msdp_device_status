@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "ui/rs_node.h"
 #include "pixel_map.h"
 
 namespace OHOS {
@@ -79,6 +80,9 @@ struct DragData {
     int32_t summaryVersion { 0 };
     int64_t summaryTotalSize { -1 };
     std::string summaryTag;
+    int32_t materialId { -1 };
+    bool isSetMaterialFilter { false };
+    std::shared_ptr<Rosen::Filter> materialFilter { nullptr };
     std::string appCallee;
     std::string appCaller;
 
@@ -93,7 +97,8 @@ struct DragData {
                appCallee == other.appCallee && appCaller == other.appCaller && isDragDelay == other.isDragDelay &&
                detailedSummarys == other.detailedSummarys && summaryFormat == other.summaryFormat &&
                summaryTotalSize == other.summaryTotalSize && summaryVersion == other.summaryVersion &&
-               summaryTag == other.summaryTag;
+               summaryTag == other.summaryTag && materialId == other.materialId &&
+               isSetMaterialFilter == other.isSetMaterialFilter;
     }
 
     bool operator != (const DragData &other) const
