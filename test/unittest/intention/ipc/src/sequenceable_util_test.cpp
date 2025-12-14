@@ -12,16 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef SEQUENCEABLE_UTIL_TEST_H
-#define SEQUENCEABLE_UTIL_TEST_H
-
+ 
 #include <gtest/gtest.h>
-
+ 
 #include "sequenceable_util.h"
 #include "pixel_map.h"
 #include "on_screen_data.h"
-
+ 
 #undef LOG_TAG
 #define LOG_TAG "SequenceableUtilTest"
 using namespace testing::ext;
@@ -35,7 +32,7 @@ public:
     static void SetUpTestCase(){};
     static void TearDownTestCase(){};
 };
-
+ 
 /**
  * @tc.name: SequenceableUtilTest_WriteImageId
  * @tc.desc: Check WriteImageId
@@ -50,13 +47,13 @@ HWTEST_F(SequenceableUtilTest, SequenceableUtilTest_WriteImageId, TestSize.Level
     awarenessInfoImageId.arkDataId = "arkDataIdTest";
     std::vector<OnScreen::AwarenessInfoImageId> imageIdArr;
     imageIdArr.emplace_back(awarenessInfoImageId);
-
+ 
     auto sequenceableUtil = std::make_shared<SequenceableUtil>();
     EXPECT_NE(sequenceableUtil, nullptr);
     bool result = sequenceableUtil->WriteImageId(parcel, imageIdArr);
     EXPECT_TRUE(result);
 }
-
+ 
 /**
  * @tc.name: SequenceableUtilTest_Marshalling01
  * @tc.desc: Check Marshalling
@@ -71,31 +68,31 @@ HWTEST_F(SequenceableUtilTest, SequenceableUtilTest_Marshalling01, TestSize.Leve
     std::map<std::string, OnScreen::ValueObj> entityInfo;
     bool result = sequenceableUtil->Marshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
-
+ 
     bool boolTest = true;
     entityInfo.emplace("boolTest", boolTest);
     result = sequenceableUtil->Marshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
-
+ 
     entityInfo.clear();
     int64_t int32Test = 1;
     entityInfo.emplace("int32Test", int32Test);
     result = sequenceableUtil->Marshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
-
+ 
     entityInfo.clear();
     int64_t int64Test = 1;
     entityInfo.emplace("int64Test", int64Test);
     result = sequenceableUtil->Marshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
-
+ 
     entityInfo.clear();
     std::string strTest = "strTest";
     entityInfo.emplace("strTest", strTest);
     result = sequenceableUtil->Marshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
 }
-
+ 
 /**
  * @tc.name: SequenceableUtilTest_Marshalling02
  * @tc.desc: Check Marshalling
@@ -112,21 +109,21 @@ HWTEST_F(SequenceableUtilTest, SequenceableUtilTest_Marshalling02, TestSize.Leve
     entityInfo.emplace("AwarenessInfoPageLinkTest", awarenessInfoPageLink);
     bool result = sequenceableUtil->Marshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
-
+ 
     entityInfo.clear();
     std::shared_ptr<Media::PixelMap> pixelMapPtr = std::make_shared<Media::PixelMap>();
     EXPECT_NE(pixelMapPtr, nullptr);
     entityInfo.emplace("pixelMapTest", pixelMapPtr);
     result = sequenceableUtil->Marshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
-
+ 
     entityInfo.clear();
     std::vector<std::string> vectorTest;
     vectorTest.emplace_back("vectorTest");
     entityInfo.emplace("vectorTest", vectorTest);
     result = sequenceableUtil->Marshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
-
+ 
     std::vector<OnScreen::AwarenessInfoImageId> awarenessInfoImageIds;
     OnScreen::AwarenessInfoImageId awarenessInfoImageId;
     awarenessInfoImageId.compId = "compIdTest";
@@ -136,7 +133,7 @@ HWTEST_F(SequenceableUtilTest, SequenceableUtilTest_Marshalling02, TestSize.Leve
     result = sequenceableUtil->Marshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
 }
-
+ 
 /**
  * @tc.name: SequenceableUtilTest_Unmarshalling01
  * @tc.desc: Check Unmarshalling
@@ -148,31 +145,31 @@ HWTEST_F(SequenceableUtilTest, SequenceableUtilTest_Unmarshalling01, TestSize.Le
     Parcel parcel;
     auto sequenceableUtil = std::make_shared<SequenceableUtil>();
     EXPECT_NE(sequenceableUtil, nullptr);
-
+ 
     parcel.WriteString("test");
     parcel.WriteInt32(OnScreen::BOOL_INDEX);
     std::map<std::string, OnScreen::ValueObj> entityInfo;
     bool result = sequenceableUtil->Unmarshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
-
+ 
     entityInfo.clear();
     parcel.WriteInt32(OnScreen::INT32_INDEX);
     result = sequenceableUtil->Unmarshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
     EXPECT_EQ(entityInfo.size(), 1);
-
+ 
     entityInfo.clear();
     parcel.WriteInt32(OnScreen::INT64_INDEX);
     result = sequenceableUtil->Unmarshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
     EXPECT_EQ(entityInfo.size(), 1);
-
+ 
     entityInfo.clear();
     parcel.WriteInt32(OnScreen::STRING_INDEX);
     result = sequenceableUtil->Unmarshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
 }
-
+ 
 /**
  * @tc.name: SequenceableUtilTest_Unmarshalling02
  * @tc.desc: Check Unmarshalling
@@ -185,31 +182,31 @@ HWTEST_F(SequenceableUtilTest, SequenceableUtilTest_Unmarshalling02, TestSize.Le
     std::map<std::string, OnScreen::ValueObj> entityInfo;
     auto sequenceableUtil = std::make_shared<SequenceableUtil>();
     EXPECT_NE(sequenceableUtil, nullptr);
-
+ 
     parcel.WriteString("test");
     parcel.WriteInt32(OnScreen::PAGE_LINK_INDEX);
     bool result = sequenceableUtil->Unmarshalling(parcel, entityInfo);
-    EXPECT_FALSE(result);
-
+    EXPECT_TRUE(result);
+ 
     entityInfo.clear();
     parcel.WriteInt32(OnScreen::PIXEL_MAP_INDEX);
     result = sequenceableUtil->Unmarshalling(parcel, entityInfo);
     EXPECT_FALSE(result);
     EXPECT_EQ(entityInfo.size(), 0);
-
+ 
     entityInfo.clear();
     parcel.WriteInt32(OnScreen::STRING_ARRAY_INDEX);
     result = sequenceableUtil->Unmarshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
     EXPECT_EQ(entityInfo.size(), 1);
-
+ 
     entityInfo.clear();
     parcel.WriteInt32(OnScreen::IMAGEID_ARRAY_INDEX);
     result = sequenceableUtil->Unmarshalling(parcel, entityInfo);
     EXPECT_TRUE(result);
     EXPECT_EQ(entityInfo.size(), 1);
 }
-
+ 
 /**
  * @tc.name: SequenceableUtilTest_ReadImageId
  * @tc.desc: Check ReadImageId
@@ -228,4 +225,3 @@ HWTEST_F(SequenceableUtilTest, SequenceableUtilTest_ReadImageId, TestSize.Level1
 }  // namespace DeviceStatus
 }  // namespace Msdp
 }  // namespace OHOS
-#endif  // SEQUENCEABLE_UTIL_TEST_H

@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #include <gtest/gtest.h>
-
+ 
 #include "intention_manager.h"
 #include "iremote_on_screen_callback.h"
 #include "on_screen_data.h"
@@ -24,7 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-
+ 
 class IntentionManagerTest : public testing::Test {
 public:
     void SetUp(){};
@@ -32,7 +32,7 @@ public:
     static void SetUpTestCase(){};
     static void TearDownTestCase(){};
 };
-
+ 
 class IRemoteOnScreenCallbackTest : public OnScreen::IRemoteOnScreenCallback {
 public:
     void OnScreenChange(const std::string &changeInfo) override{};
@@ -42,7 +42,7 @@ public:
         return nullptr;
     }
 };
-
+ 
 /**
  * @tc.name: IntentionManagerTest_RegisterAwarenessCallback
  * @tc.desc: Check RegisterAwarenessCallback
@@ -58,7 +58,7 @@ HWTEST_F(IntentionManagerTest, IntentionManagerTest_RegisterAwarenessCallback, T
     int32_t ret = OHOS::Singleton<IntentionManager>::GetInstance().RegisterAwarenessCallback(cap, callback, option);
     EXPECT_NE(ret, 0);
 }
-
+ 
 /**
  * @tc.name: IntentionManagerTest_UnregisterAwarenessCallback
  * @tc.desc: Check UnregisterAwarenessCallback
@@ -73,7 +73,7 @@ HWTEST_F(IntentionManagerTest, IntentionManagerTest_UnregisterAwarenessCallback,
     int32_t ret = OHOS::Singleton<IntentionManager>::GetInstance().UnregisterAwarenessCallback(cap, callback);
     EXPECT_NE(ret, 0);
 }
-
+ 
 /**
  * @tc.name: IntentionManagerTest_UnRegisterAwarenessCallback01
  * @tc.desc: Check UnRegisterAwarenessCallback

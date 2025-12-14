@@ -12,17 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef SEQUENCEABLE_ONSCREEN_AWARENESS_OPTION_TEST_H
-#define SEQUENCEABLE_ONSCREEN_AWARENESS_OPTION_TEST_H
-
+ 
 #include <gtest/gtest.h>
-
+ 
 #include "sequenceable_onscreen_awareness_option.h"
 #include "parcel.h"
 #include "fi_log.h"
 #include "on_screen_data.h"
-
+ 
 #undef LOG_TAG
 #define LOG_TAG "SequenceableOnscreenAwarenessOptionTest"
 using namespace testing::ext;
@@ -36,7 +33,7 @@ public:
     static void SetUpTestCase(){};
     static void TearDownTestCase(){};
 };
-
+ 
 /**
  * @tc.name: SequenceableOnscreenAwarenessOptionTest_Marshalling
  * @tc.desc: Check RegisterAwarenessCallback
@@ -52,7 +49,7 @@ HWTEST_F(SequenceableOnscreenAwarenessOptionTest, SequenceableOnscreenAwarenessO
     bool result = sequenceableOnscreenAwarenessOption->Marshalling(parcel);
     EXPECT_TRUE(result);
 }
-
+ 
 /**
  * @tc.name: SequenceableOnscreenAwarenessOptionTest_Unmarshalling
  * @tc.desc: Check Unmarshalling
@@ -73,4 +70,3 @@ HWTEST_F(
 }  // namespace DeviceStatus
 }  // namespace Msdp
 }  // namespace OHOS
-#endif  // SEQUENCEABLE_ONSCREEN_AWARENESS_OPTION_TEST_H

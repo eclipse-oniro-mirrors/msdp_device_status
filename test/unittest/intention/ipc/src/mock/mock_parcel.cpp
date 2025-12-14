@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #include "parcel.h"
 namespace OHOS {
 static int32_t g_expectInt32Values = 0;
@@ -27,79 +27,79 @@ bool Parcel::WriteStringVector(const std::vector<std::string> &expectVector)
     g_expectVector = expectVector;
     return true;
 }
-
+ 
 bool Parcel::ReadStringVector(std::vector<std::string> *val)
 {
     val = &g_expectVector;
     return true;
 }
-
+ 
 bool Parcel::WriteInt32(int32_t values)
 {
     g_expectInt32Values = values;
     return true;
 }
-
-bool Parcel::ReadInt32(int32_t& values)
+ 
+bool Parcel::ReadInt32(int32_t &values)
 {
     values = g_expectInt32Values;
     return true;
 }
-
+ 
 bool Parcel::WriteUint32(uint32_t values)
 {
     expectUint32Values_ = values;
     return true;
 }
-
-bool Parcel::ReadUint32(uint32_t& values)
+ 
+bool Parcel::ReadUint32(uint32_t &values)
 {
     values = expectUint32Values_;
     return true;
 }
-
-bool Parcel::ReadInt64(int64_t& values)
+ 
+bool Parcel::ReadInt64(int64_t &values)
 {
     values = g_expectInt64Values;
     return true;
 }
-
+ 
 bool Parcel::WriteInt64(int64_t values)
 {
     g_expectInt64Values = values;
     return true;
 }
-
-bool Parcel::ReadUint64(uint64_t& values)
+ 
+bool Parcel::ReadUint64(uint64_t &values)
 {
     values = expectUint64Values_;
     return true;
 }
-
+ 
 bool Parcel::WriteUint64(uint64_t values)
 {
     expectUint64Values_ = values;
     return true;
 }
-
+ 
 bool Parcel::WriteString(const std::string &value)
 {
     g_expectStrValues = value;
     return true;
 }
-
+ 
 bool Parcel::ReadString(std::string &value)
 {
     value = g_expectStrValues;
     return true;
 }
-
+ 
 bool Parcel::ReadBool(bool &value)
 {
     value = g_expectBool;
     return true;
 };
-
+ 
 bool Parcel::WriteBool(bool value)
 {
     g_expectBool = value;

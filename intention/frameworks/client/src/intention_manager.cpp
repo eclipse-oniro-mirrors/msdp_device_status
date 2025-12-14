@@ -574,6 +574,7 @@ void IntentionManager::OnConnected()
     drag_.OnConnected();
     cooperate_.OnConnected();
     stationary_.OnConnected();
+    onScreen_.OnConnected();
 }
 
 void IntentionManager::OnDisconnected()
@@ -667,6 +668,7 @@ int32_t IntentionManager::RegisterAwarenessCallback(const OnScreen::AwarenessCap
     sptr<OnScreen::IRemoteOnScreenCallback> callback, const OnScreen::AwarenessOptions& option)
 {
     CALL_DEBUG_ENTER;
+    InitClient();
     return onScreen_.RegisterAwarenessCallback(cap, callback, option);
 }
 
@@ -674,6 +676,7 @@ int32_t IntentionManager::UnregisterAwarenessCallback(const OnScreen::AwarenessC
     sptr<OnScreen::IRemoteOnScreenCallback> callback)
 {
     CALL_DEBUG_ENTER;
+    InitClient();
     return onScreen_.UnregisterAwarenessCallback(cap, callback);
 }
 

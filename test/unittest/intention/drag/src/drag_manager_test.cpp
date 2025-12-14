@@ -2038,7 +2038,7 @@ HWTEST_F(DragManagerTest, DragManagerTest99, TestSize.Level1)
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_EQ(ret, RET_OK);
@@ -2061,7 +2061,7 @@ HWTEST_F(DragManagerTest, DragManagerTest100, TestSize.Level1)
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragDrawing_.allAnimationCnt_ = 100;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
@@ -2082,7 +2082,7 @@ HWTEST_F(DragManagerTest, DragManagerTest101, TestSize.Level1)
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragDrawing_.allAnimationCnt_ = 100;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
@@ -2104,7 +2104,7 @@ HWTEST_F(DragManagerTest, DragManagerTest102, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragDrawing_.preDragPositionX_ = 100;
     g_dragMgr.dragDrawing_.preDragPositionY_ = 100;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
@@ -2127,7 +2127,7 @@ HWTEST_F(DragManagerTest, DragManagerTest103, TestSize.Level1)
     g_dragMgr.dragDrawing_.allAnimationCnt_ = 1;
     g_dragMgr.dragDrawing_.preDragPositionX_ = 0;
     g_dragMgr.dragDrawing_.preDragPositionY_ = 0;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
@@ -2150,7 +2150,7 @@ HWTEST_F(DragManagerTest, DragManagerTest104, TestSize.Level1)
     g_dragMgr.dragDrawing_.allAnimationCnt_ = 100;
     g_dragMgr.dragDrawing_.preDragPositionX_ = 0;
     g_dragMgr.dragDrawing_.preDragPositionY_ = 0;
-    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0.0f, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragNodeBoundsAndFrame(0.0f, 0.0f, 0, 0);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
@@ -2376,6 +2376,83 @@ HWTEST_F(DragManagerTest, DragManagerTest110, TestSize.Level0)
     int32_t ret = g_dragMgr.StopDrag(dropResult, "Cross-device drag");
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest111
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest111, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    const std::string udType = "general.message";
+    constexpr int64_t recordSize = 20;
+    std::map<std::string, int64_t> summarys = { { udType, recordSize } };
+    dragData.detailedSummarys = summarys;
+    dragData.summaryFormat = { { "image", { 0, 1 } } };
+    dragData.summarys = { { "general.image", 0 }, { "general.video", 1 } };
+    dragData.detailedSummarys = { { "general.image", 0 }, { "general.video", 1 } };
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+}
+ 
+/**
+ * @tc.name: DragManagerTest112
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest112, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    const std::string udType = "general.message";
+    constexpr int64_t recordSize = 20;
+    std::map<std::string, int64_t> summarys = { { udType, recordSize } };
+    dragData.detailedSummarys = summarys;
+    dragData.summaryFormat = { { "image", { 0, 1 } } };
+    dragData.summarys = { { "general.image", 0 }, { "general.video", 1 } };
+    dragData.detailedSummarys = { { "general.image", 0 }, { "general.video", 1 } };
+    dragData.materialFilter = std::make_shared<Rosen::Filter>();
+    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+}
+ 
+/**
+ * @tc.name: DragManagerTest113
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest113, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    dragData.value().summarys = { { "general.image", 0 }, { "general.video", 1 } };
+    dragData.value().detailedSummarys = { { "general.image", 0 }, { "general.video", 1 } };
+    dragData.value().isSetMaterialFilter = true;
+    std::shared_ptr<Rosen::FilterPara> para = std::make_shared<Rosen::FilterPara>();
+    dragData.value().materialFilter = std::make_shared<Rosen::Filter>();
+    dragData.value().materialFilter->AddPara(para);
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

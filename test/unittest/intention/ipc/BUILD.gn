@@ -53,6 +53,7 @@ ohos_unittest("SocketSessionTest") {
     "c_utils:utils",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -94,6 +95,7 @@ ohos_unittest("SequencableTest") {
     "c_utils:utils",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -116,9 +118,10 @@ ohos_unittest("IntentionClientTest") {
 
   branch_protector_ret = "pac_ret"
   module_out_path = module_output_path
-  include_dirs = [ "${device_status_interfaces_path}/innerkits/include",
-                   "include" 
-                   ]
+  include_dirs = [
+    "${device_status_interfaces_path}/innerkits/include",
+    "include" 
+  ]
 
   defines = []
 
@@ -137,6 +140,7 @@ ohos_unittest("IntentionClientTest") {
     "c_utils:utils",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -156,26 +160,26 @@ ohos_unittest("SequenceableOnscreenAwarenessCapTest") {
     debug = false
     blocklist = "./../../ipc_blocklist.txt"
   }
-
+ 
   branch_protector_ret = "pac_ret"
   module_out_path = module_output_path
   include_dirs = [ "include" ]
-
+ 
   defines = []
-
+ 
   sources = [ "src/mock/mock_parcel.cpp",
               "src/sequenceable_onscreen_awareness_cap_test.cpp"
   ]
-
+ 
   cflags = [ "-Dprivate=public" ]
-
+ 
   deps = [
     "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util"
   ]
-
+ 
   external_deps = [
     "ability_runtime:app_manager",
     "data_share:datashare_consumer",
@@ -191,7 +195,7 @@ ohos_unittest("SequenceableOnscreenAwarenessCapTest") {
     "ipc:ipc_single"
   ]
 }
-
+ 
 ohos_unittest("SequenceableOnscreenAwarenessInfoTest") {
   sanitize = {
     integer_overflow = true
@@ -202,28 +206,28 @@ ohos_unittest("SequenceableOnscreenAwarenessInfoTest") {
     debug = false
     blocklist = "./../../ipc_blocklist.txt"
   }
-
+ 
   branch_protector_ret = "pac_ret"
   module_out_path = module_output_path
   include_dirs = [ "${device_status_root_path}/intention/ipc/sequenceable_types/include",
                    "include" 
                  ]
-
+ 
   defines = []
-
+ 
   sources = [ "src/mock/mock_parcel.cpp",
               "src/sequenceable_onscreen_awareness_info_test.cpp"
   ]
-
+ 
   cflags = [ "-Dprivate=public" ]
-
+ 
   deps = [
     "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util"
   ]
-
+ 
   external_deps = [
     "ability_runtime:app_manager",
     "data_share:datashare_consumer",
@@ -239,7 +243,7 @@ ohos_unittest("SequenceableOnscreenAwarenessInfoTest") {
     "ipc:ipc_single"
   ]
 }
-
+ 
 ohos_unittest("SequenceableOnscreenAwarenessOptionTest") {
   sanitize = {
     integer_overflow = true
@@ -250,28 +254,28 @@ ohos_unittest("SequenceableOnscreenAwarenessOptionTest") {
     debug = false
     blocklist = "./../../ipc_blocklist.txt"
   }
-
+ 
   branch_protector_ret = "pac_ret"
   module_out_path = module_output_path
   include_dirs = [ "${device_status_root_path}/intention/ipc/sequenceable_types/include",
                    "include" 
                  ]
-
+ 
   defines = []
-
+ 
   sources = [ "src/mock/mock_parcel.cpp",
               "src/sequenceable_onscreen_awareness_option_test.cpp"
   ]
-
+ 
   cflags = [ "-Dprivate=public" ]
-
+ 
   deps = [
     "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util"
   ]
-
+ 
   external_deps = [
     "ability_runtime:app_manager",
     "data_share:datashare_consumer",
@@ -287,7 +291,7 @@ ohos_unittest("SequenceableOnscreenAwarenessOptionTest") {
     "ipc:ipc_single"
   ]
 }
-
+ 
 ohos_unittest("SequenceableUtilTest") {
   sanitize = {
     integer_overflow = true
@@ -298,28 +302,28 @@ ohos_unittest("SequenceableUtilTest") {
     debug = false
     blocklist = "./../../ipc_blocklist.txt"
   }
-
+ 
   branch_protector_ret = "pac_ret"
   module_out_path = module_output_path
   include_dirs = [ "${device_status_root_path}/intention/ipc/sequenceable_types/include",
                    "include" 
                  ]
-
+ 
   defines = []
-
+ 
   sources = [ "src/mock/mock_parcel.cpp",
               "src/sequenceable_util_test.cpp"
   ]
-
+ 
   cflags = [ "-Dprivate=public" ]
-
+ 
   deps = [
     "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util"
   ]
-
+ 
   external_deps = [
     "ability_runtime:app_manager",
     "data_share:datashare_consumer",

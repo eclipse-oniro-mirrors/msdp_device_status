@@ -60,8 +60,8 @@ public:
         OnscreenAwarenessInfo& info);
     static void FillDumpCommonData(OnscreenAwarenessInfo& info);
     static void FillUiTreeData(std::map<std::string, ValueObj> &entityInfo);
-    static int32_t FillDumpData(const AwarenessCap& cap,
-        const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option);
+    static OnscreenAwarenessInfo FillDumpData(const AwarenessCap& cap, const AwarenessOptions& option);
+    void NotifyClient();
 
 private:
     int32_t LoadAlgoLib();
@@ -75,7 +75,7 @@ private:
     bool CheckDeviceType();
     bool SaveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap);
     std::vector<std::string> GetUnusedCap(const AwarenessCap& cap);
-    bool RemoveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap);
+    int32_t RemoveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap);
 
     std::map<sptr<IRemoteOnScreenCallback>, std::set<std::string>> callbackInfo_;
     std::map<uint32_t, std::string> bundleNames_;

@@ -1992,6 +1992,147 @@ HWTEST_F(DragServerTest, DragServerTest103, TestSize.Level1)
     auto pixelMap = g_dragMgr.dragDrawing_.AccessGlobalPixelMapLocked();
     EXPECT_EQ(pixelMap, nullptr);
 }
+
+/**
+ * @tc.name: DragServerTest104
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest104, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    const std::string udType = "general.message";
+    constexpr int64_t recordSize = 20;
+    dragData.value().detailedSummarys = { { udType, recordSize } };
+    dragData.value().materialId = 1;
+    Parcel parcel;
+    int32_t ret = DragDataUtil::MarshallingMaterialId(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    DragData dragDataFromParcel;
+    ret = DragDataUtil::UnMarshallingMaterialId(parcel, dragDataFromParcel);
+    ASSERT_EQ(ret, RET_OK);
+}
+ 
+/**
+ * @tc.name: DragServerTest105
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest105, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    parcel.SetMaxCapacity(0);
+    DragDataPacker dragDataPacker;
+    DragData dragData;
+    int32_t ret = dragDataPacker.UnMarshallingMaterialId(parcel, dragData);
+    ASSERT_EQ(ret, RET_ERR);
+}
+ 
+/**
+ * @tc.name: DragServerTest106
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest106, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    Parcel parcel;
+    int32_t ret = DragDataUtil::MarshallingMaterialFilter(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    DragData dragDataFromParcel;
+    ret = DragDataUtil::UnMarshallingMaterialFilter(parcel, dragDataFromParcel);
+    ASSERT_EQ(ret, RET_OK);
+}
+ 
+/**
+ * @tc.name: DragServerTest107
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest107, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    DragDataPacker dragDataPacker;
+    DragData dragData;
+    dragData.isSetMaterialFilter = true;
+    dragData.materialFilter = std::make_shared<Rosen::Filter>();
+    int32_t ret = dragDataPacker.MarshallingMaterialFilter(dragData, parcel);
+    ASSERT_EQ(ret, RET_OK);
+    ret = dragDataPacker.UnMarshallingMaterialFilter(parcel, dragData);
+    ASSERT_EQ(ret, RET_OK);
+}
+ 
+/**
+ * @tc.name: DragServerTest108
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest108, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    DragDataPacker dragDataPacker;
+    DragData dragData;
+    auto ret = dragDataPacker.MarshallingMaterialFilter(dragData, parcel);
+    ASSERT_EQ(ret, RET_OK);
+    dragData.isSetMaterialFilter = true;
+    ret = dragDataPacker.MarshallingMaterialFilter(dragData, parcel);
+    ASSERT_EQ(ret, RET_ERR);
+    dragData.materialFilter = std::make_shared<Rosen::Filter>();
+    parcel.SetMaxCapacity(0);
+    ret = dragDataPacker.MarshallingMaterialFilter(dragData, parcel);
+    ASSERT_EQ(ret, RET_OK);
+}
+ 
+/**
+ * @tc.name: DragServerTest109
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest109, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    DragDataPacker dragDataPacker;
+    DragData dragData;
+    int32_t ret = dragDataPacker.UnMarshallingMaterialFilter(parcel, dragData);
+    ASSERT_EQ(ret, RET_ERR);
+}
+ 
+/**
+ * @tc.name: DragServerTest110
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest110, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    DragDataPacker dragDataPacker;
+    DragData dragData;
+    dragData.isSetMaterialFilter = true;
+    dragData.materialFilter = std::make_shared<Rosen::Filter>();
+    std::shared_ptr<Rosen::FilterPara> filterPara = std::make_shared<Rosen::FilterPara>();
+    filterPara->type_ = Rosen::FilterPara::ParaType::CONTENT_LIGHT;
+    dragData.materialFilter->AddPara(filterPara);
+    int32_t ret = dragDataPacker.MarshallingMaterialFilter(dragData, parcel);
+    ASSERT_EQ(ret, RET_ERR);
+    ret = dragDataPacker.UnMarshallingMaterialFilter(parcel, dragData);
+    ASSERT_EQ(ret, RET_ERR);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

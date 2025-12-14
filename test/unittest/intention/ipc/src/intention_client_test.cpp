@@ -130,7 +130,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest5, TestSize.Level1)
     int32_t ret = env->RegisterAwarenessCallback(cap, callback, option);
     ASSERT_NE(ret, RET_OK);
 }
-
+ 
 /**
  * @tc.name: IntentionClientTest6
  * @tc.desc: IntentionClientTest6
@@ -147,7 +147,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest6, TestSize.Level1)
     int32_t ret = env->UnregisterAwarenessCallback(cap, callback);
     ASSERT_NE(ret, RET_OK);
 }
-
+ 
 /**
  * @tc.name: IntentionClientTest7
  * @tc.desc: IntentionClientTest7

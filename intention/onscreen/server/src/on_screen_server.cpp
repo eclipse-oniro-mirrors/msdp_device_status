@@ -46,6 +46,7 @@ const std::vector<std::string> SUPPORT_DEVICE_TYPE = { "phone", "tablet" };
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_PERMISSION = 201;
 constexpr int32_t RET_NO_SYSTEM_CALLING = 202;
+constexpr int32_t RET_NOT_REGISTER = 203;
 const std::map<std::string, std::string> hapWhiteListMap = {
     {"com.huawei.hmos.vassistant", "1189827130565864320"},
 };
@@ -170,6 +171,7 @@ int32_t OnScreenServer::Dump(int32_t fd, const std::vector<std::u16string> &args
     if (ret != RET_OK) {
         FI_HILOGE("failed to dump, err=%{public}d", ret);
     }
+    NotifyClient();
     return ret;
 }
 
@@ -497,8 +499,7 @@ std::map<std::string, FillDumpDataFunc> fillDataMap = {
     {"scenarioTodo", FillDumpScenarioTodo},
 };
 
-int32_t OnScreenServer::FillDumpData(const AwarenessCap& cap,
-    const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option)
+OnscreenAwarenessInfo OnScreenServer::FillDumpData(const AwarenessCap& cap, const AwarenessOptions& option)
 {
     OnscreenAwarenessInfo wholeInfo;
     wholeInfo.entityInfo.clear();
@@ -506,7 +507,7 @@ int32_t OnScreenServer::FillDumpData(const AwarenessCap& cap,
     FillDumpCommonData(wholeInfo);
     if (cap.capList.empty()) {
         FI_HILOGE("capList is null.");
-        return RET_ERR;
+        return wholeInfo;
     }
     for (const auto& key : cap.capList) {
         auto it = fillDataMap.find(key);
@@ -519,8 +520,20 @@ int32_t OnScreenServer::FillDumpData(const AwarenessCap& cap,
         it->second(info.entityInfo);
         wholeInfo.entityInfo.emplace_back(info);
     }
-    callback->OnScreenAwareness(wholeInfo);
-    return 0;
+    return wholeInfo;
+}
+
+void OnScreenServer::NotifyClient()
+{
+    for (auto const &[k, v] : callbackInfo_) {
+        std::vector<std::string> caps(v.begin(), v.end());
+        AwarenessCap cap = {
+            .capList = caps,
+            .description = "",
+        };
+        AwarenessOptions option;
+        k->OnScreenAwareness(FillDumpData(cap, option));
+    }
 }
 
 bool OnScreenServer::SaveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap)
@@ -540,11 +553,11 @@ bool OnScreenServer::SaveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callb
     return true;
 }
 
-bool OnScreenServer::RemoveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap)
+int32_t OnScreenServer::RemoveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap)
 {
     auto it = callbackInfo_.find(callback);
     if (it == callbackInfo_.end()) {
-        return true;
+        return RET_NOT_REGISTER;
     }
     for (auto c : cap.capList) {
         it->second.erase(c);
@@ -552,7 +565,7 @@ bool OnScreenServer::RemoveCallbackInfo(const sptr<IRemoteOnScreenCallback>& cal
     if (it->second.empty()) {
         callbackInfo_.erase(it);
     }
-    return true;
+    return RET_OK;
 }
 
 std::vector<std::string> OnScreenServer::GetUnusedCap(const AwarenessCap& cap)
@@ -586,7 +599,6 @@ int32_t OnScreenServer::RegisterAwarenessCallback(const CallingContext &context,
         FI_HILOGE("calling is not system calling");
         return RET_NO_SYSTEM_CALLING;
     }
-    FillDumpData(cap, callback, option);
     return RET_OK;
 }
 
@@ -630,8 +642,7 @@ int32_t OnScreenServer::Trigger(const CallingContext &context, const AwarenessCa
         FI_HILOGE("calling is not system calling");
         return RET_NO_SYSTEM_CALLING;
     }
-    info.resultCode = 0;
-    info.pageId = "1008611";
+    info = FillDumpData(cap, option);
     return RET_OK;
 }
 } // namespace OnScreen

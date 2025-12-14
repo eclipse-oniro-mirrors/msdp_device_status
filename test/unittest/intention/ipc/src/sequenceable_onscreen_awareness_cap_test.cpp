@@ -12,16 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef SEQUENCEABLE_ONSCREEN_AWARENESS_CAP_TEST_H
-#define SEQUENCEABLE_ONSCREEN_AWARENESS_CAP_TEST_H
-
+ 
 #include <gtest/gtest.h>
 #include "fi_log.h"
 #include "sequenceable_onscreen_awareness_cap.h"
 #include "parcel.h"
 #include "on_screen_data.h"
-
+ 
 #undef LOG_TAG
 #define LOG_TAG "SequenceableOnscreenAwarenessCapTest"
 using namespace testing::ext;
@@ -38,7 +35,7 @@ public:
     static void SetUpTestCase(){};
     static void TearDownTestCase(){};
 };
-
+ 
 /**
  * @tc.name: SequenceableOnscreenAwarenessCapTest_Marshalling01
  * @tc.desc: Check RegisterAwarenessCallback
@@ -57,7 +54,7 @@ HWTEST_F(SequenceableOnscreenAwarenessCapTest, SequenceableOnscreenAwarenessCapT
     bool result = sequenceableOnscreenAwarenessCap->Marshalling(parcel);
     EXPECT_FALSE(result);
 }
-
+ 
 /**
  * @tc.name: SequenceableOnscreenAwarenessCapTest_Marshalling02
  * @tc.desc: Check RegisterAwarenessCallback
@@ -76,7 +73,7 @@ HWTEST_F(SequenceableOnscreenAwarenessCapTest, SequenceableOnscreenAwarenessCapT
     bool result = sequenceableOnscreenAwarenessCap->Marshalling(parcel);
     EXPECT_TRUE(result);
 }
-
+ 
 /**
  * @tc.name: SequenceableOnscreenAwarenessCapTest_Unmarshalling01
  * @tc.desc: Check Unmarshalling
@@ -95,7 +92,7 @@ HWTEST_F(SequenceableOnscreenAwarenessCapTest, SequenceableOnscreenAwarenessCapT
     auto result = sequenceableOnscreenAwarenessCap->Unmarshalling(parcel);
     EXPECT_EQ(result, nullptr);
 }
-
+ 
 /**
  * @tc.name: SequenceableOnscreenAwarenessCapTest_Unmarshalling02
  * @tc.desc: Check Unmarshalling
@@ -114,7 +111,7 @@ HWTEST_F(SequenceableOnscreenAwarenessCapTest, SequenceableOnscreenAwarenessCapT
     auto result = sequenceableOnscreenAwarenessCap->Unmarshalling(parcel);
     EXPECT_EQ(result, nullptr);
 }
-
+ 
 /**
  * @tc.name: SequenceableOnscreenAwarenessCapTest_Unmarshalling03
  * @tc.desc: Check Unmarshalling
@@ -138,4 +135,3 @@ HWTEST_F(SequenceableOnscreenAwarenessCapTest, SequenceableOnscreenAwarenessCapT
 }  // namespace DeviceStatus
 }  // namespace Msdp
 }  // namespace OHOS
-#endif  // SEQUENCEABLE_ONSCREEN_AWARENESS_CAP_TEST_H

@@ -546,7 +546,8 @@ void OnScreenNapi::TriggerCompCB(napi_env env, napi_status status, void *data)
     CHKPV(data);
     CHKPV(env);
     std::lock_guard lockGrd(g_mtx);
-    TriggerAsyncContext* ctx = static_cast<TriggerAsyncContext*>(data);
+    std::unique_ptr<TriggerAsyncContext> ctx(static_cast<TriggerAsyncContext*>(data));
+    CHKPV(ctx);
     CHKPV(ctx->deferred);
     napi_value errVal = nullptr;
     napi_value infoObj = nullptr;
@@ -625,6 +626,7 @@ napi_value OnScreenNapi::RegisterAwarenessCallback(napi_env env, napi_callback_i
         }
         if (g_callback == nullptr) {
             g_callback = new (std::nothrow) OnScreenAwarenessCallback(env);
+            CHKPP(g_callback);
         }
         if (napi_create_reference(env, args[ARG_1], 1, &handlerRef) != napi_ok) {
             ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get callback");

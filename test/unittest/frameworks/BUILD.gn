@@ -120,11 +120,60 @@ ohos_unittest("InteractionMouseLocationTest") {
   ]
 }
 
+ohos_unittest("OnScreenManagerTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+ 
+  branch_protector_ret = "pac_ret"
+  module_out_path = module_output_path
+  include_dirs = [
+    "${device_status_interfaces_path}/innerkits/include"
+  ]
+ 
+  sources = [
+    "src/on_screen_manager_test.cpp"
+  ]
+ 
+   deps = [
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_root_path}/intention/boomerang/client:intention_boomerang_client",
+    "${device_status_root_path}/intention/cooperate/client:intention_cooperate_client",
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/drag/client:intention_drag_client",
+    "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_root_path}/intention/stationary/client:intention_stationary_client",
+    "${device_status_root_path}/services/interaction/drag:interaction_drag",
+    "${device_status_root_path}/intention/ipc/sequenceable_types:sequenceable_types",
+    "${device_status_root_path}/intention/onscreen/client:intention_on_screen_client"
+  ]
+ 
+  external_deps = [
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
+    "window_manager:libdm",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy"
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":InteractionDragDrawingTest",
     ":InteractionMouseLocationTest",
     ":InteractionManagerTest",
+    ":OnScreenManagerTest"
   ]
 }

@@ -10,12 +10,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+ 
 import("//build/test.gni")
 import("../../../../device_status.gni")
-
+ 
 module_output_path = "${device_status_part_name}/device_status/unit_out"
-
+ 
 ohos_unittest("IntentionManagerTest") {
   sanitize = {
     cfi = true
@@ -23,17 +23,17 @@ ohos_unittest("IntentionManagerTest") {
     debug = false
     blocklist = "./../../ipc_blocklist.txt"
   }
-
+ 
   module_out_path = module_output_path
   include_dirs = [ 
     "${device_status_root_path}/intention/frameworks/client/include",
     "${device_status_interfaces_path}/innerkits/include"
      ]
-
+ 
   sources = [ 
     "${device_status_root_path}/intention/frameworks/client/src/intention_manager.cpp",
     "intention_manager_test.cpp"]
-
+ 
   deps = [
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_root_path}/intention/boomerang/client:intention_boomerang_client",
@@ -51,7 +51,7 @@ ohos_unittest("IntentionManagerTest") {
     "${device_status_root_path}/intention/ipc/sequenceable_types:sequenceable_types",
     "${device_status_root_path}/intention/onscreen/client:intention_on_screen_client",
   ]
-
+ 
   external_deps = [
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -65,7 +65,7 @@ ohos_unittest("IntentionManagerTest") {
     "samgr:samgr_proxy"
   ]
 }
-
+ 
 group("unittest") {
   testonly = true
   deps = [
