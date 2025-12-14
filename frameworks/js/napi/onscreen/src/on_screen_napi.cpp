@@ -638,14 +638,7 @@ napi_value OnScreenNapi::RegisterAwarenessCallback(napi_env env, napi_callback_i
         UpsertScreenCallback(env, cap, handlerRef);
     }
 
-    if (g_callback != nullptr) {
-        OnScreenManager::GetInstance().RegisterAwarenessCallback(cap, g_callback, option);
-    } else {
-        if (handlerRef != nullptr) {
-            napi_delete_reference(env, handlerRef);
-        }
-        return nullptr;
-    }
+    OnScreenManager::GetInstance().RegisterAwarenessCallback(cap, g_callback, option);
     napi_get_undefined(env, &result);
     return result;
 }
