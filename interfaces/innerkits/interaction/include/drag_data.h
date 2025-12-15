@@ -256,6 +256,12 @@ struct DragSummaryInfo {
     int32_t version { 0 };
     int64_t totalSize { -1 };
 };
+
+struct DragEventData {
+    uint64_t timestampMs = 0;
+    double coordinateX = 0.0;
+    double coordinateY = 0.0;
+};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

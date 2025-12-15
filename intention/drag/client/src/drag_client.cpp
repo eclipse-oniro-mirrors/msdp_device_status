@@ -339,10 +339,10 @@ int32_t DragClient::GetExtraInfo(std::string &extraInfo)
     return ret;
 }
 
-int32_t DragClient::AddPrivilege()
+int32_t DragClient::AddPrivilege(const std::string &signature, const DragEventData &dragEventData)
 {
     CALL_DEBUG_ENTER;
-    int32_t ret = INTENTION_CLIENT->AddPrivilege();
+    int32_t ret = INTENTION_CLIENT->AddPrivilege(signature, dragEventData);
     if (ret != RET_OK) {
         FI_HILOGE("AddPrivilege fail");
     }

@@ -32,6 +32,7 @@
 #include "datashare_helper.h"
 #include "display_change_event_listener.h"
 #include "display_manager.h"
+#include "drag_auth.h"
 #include "pull_throw_listener.h"
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 #include "devicestatus_define.h"
@@ -116,8 +117,8 @@ public:
         const DragDropResult &dropResult, const std::string &packageName = "",
         int32_t pid = -1, bool isStopCooperate = false, const DragRadarPackageName &inPackageName = {}) override;
     int32_t GetDragTargetPid() const override;
-    int32_t GetUdKey(std::string &udKey) const override;
-    void SendDragData(int32_t targetTid, const std::string &udKey);
+    int32_t GetUdKey(int32_t pid, std::string &udKey) const override;
+    int32_t SendDragData(int32_t targetTid, const std::string &udKey);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void UpdateDragStylePositon() override;
     int32_t UpdateDragStyle(
@@ -174,7 +175,8 @@ public:
     int32_t EnterTextEditorArea(bool enable) override;
     int32_t GetDragAction(DragAction &dragAction) const override;
     int32_t GetExtraInfo(std::string &extraInfo) const override;
-    int32_t AddPrivilege(int32_t tokenId) override;
+    int32_t AddPrivilege(int32_t tokenId, int32_t pid,
+        const std::string &signature, const DragEventData &dragEventData) override;
     int32_t EraseMouseIcon() override;
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo) const override;
     bool IsDragStart() const override;

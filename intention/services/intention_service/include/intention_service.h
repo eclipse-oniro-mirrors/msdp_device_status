@@ -90,7 +90,8 @@ public:
     ErrCode EnableUpperCenterMode(bool enable) override;
     ErrCode GetDragAction(int32_t &dragAction) override;
     ErrCode GetExtraInfo(std::string &extraInfo) override;
-    ErrCode AddPrivilege() override;
+    ErrCode AddPrivilege(const std::string &signature,
+        const SequenceableDragEventData &sequenceableDragEventData) override;
     ErrCode EraseMouseIcon() override;
     ErrCode SetMouseDragMonitorState(bool state) override;
     ErrCode SetDraggableState(bool state) override;

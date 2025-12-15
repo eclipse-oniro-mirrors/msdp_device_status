@@ -93,6 +93,10 @@ Security::AccessToken::HapPolicyParams g_testPolicyPrams = {
     .permList = {},
     .permStateList = {}
 };
+uint64_t g_timestamp { 10000000 };
+double g_coordinateX {1.11 };
+double g_coordinateY {1.11 };
+const std::string SIGNATURE { "signature" };
 } // namespace
 
 ContextService::ContextService()
@@ -417,8 +421,14 @@ HWTEST_F(DragServerTest, DragServerTest5, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest6, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
     std::string udKey { "Unified data key" };
-    int32_t ret = g_dragServer->GetUdKey(udKey);
+    int32_t ret = g_dragServer->GetUdKey(context, udKey);
     EXPECT_EQ(ret, RET_ERR);
 }
 
@@ -912,7 +922,12 @@ HWTEST_F(DragServerTest, DragServerTest31, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    int32_t ret = g_dragServer->AddPrivilege(context);
+    DragEventData dragEventData {
+        .timestampMs = g_timestamp,
+        .coordinateX = g_coordinateX,
+        .coordinateY = g_coordinateY,
+    };
+    int32_t ret = g_dragServer->AddPrivilege(context, SIGNATURE, dragEventData);
     EXPECT_EQ(ret, RET_ERR);
 }
 

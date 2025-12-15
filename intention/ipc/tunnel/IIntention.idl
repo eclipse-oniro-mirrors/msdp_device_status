@@ -28,6 +28,7 @@ sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceablePageContent;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessCap;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessInfo;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessOption;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragEventData;
 interface OHOS.Msdp.DeviceStatus.IRemoteBoomerangCallback;
 interface OHOS.Msdp.DeviceStatus.IRemoteDevStaCallback;
 interface OHOS.Msdp.DeviceStatus.OnScreen.IRemoteOnScreenCallback;
@@ -81,7 +82,7 @@ interface OHOS.Msdp.IIntention {
     void EnableUpperCenterMode([in] boolean enable);
     void GetDragAction([out] int dragAction);
     void GetExtraInfo([out] String extraInfo);
-    void AddPrivilege();
+    void AddPrivilege([in] String signature, [in] SequenceableDragEventData sequenceableDragEventData);
     void EraseMouseIcon();
     void SetMouseDragMonitorState([in] boolean state);
     void SetDraggableState([in] boolean state);

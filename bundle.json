@@ -89,10 +89,10 @@
         "data_share",
         "rust_libc",
         "hiappevent",
-        "runtime_core"
+        "runtime_core",
+        "openssl"
       ],
       "third_party": [
-        "openssl",
         "jsoncpp"
       ]
     },
@@ -176,6 +176,15 @@
         },
         {
           "name": "//base/msdp/device_status/frameworks/ets/drag:drag_taihe"
+        },
+        {
+          "name": "//base/msdp/device_status/services/drag_auth:drag_auth",
+          "header": {
+            "header_files": [
+              "drag_auth/include/drag_auth.h"
+            ],
+            "header_base": "//base/msdp/device_status/services"
+          }
         }
       ],
       "test": [

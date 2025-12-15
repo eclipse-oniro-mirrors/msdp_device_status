@@ -379,7 +379,8 @@ public:
         return 0;
     }
 
-    ErrCode AddPrivilege() override
+    ErrCode AddPrivilege(const std::string &signature,
+        const SequenceableDragEventData &sequenceableDragEventData) override
     {
         return 0;
     }
