@@ -573,7 +573,7 @@ napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("once", GetDeviceStatus)
     };
     DeclareEventTypeInterface(env, exports);
-    IMF_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }
 

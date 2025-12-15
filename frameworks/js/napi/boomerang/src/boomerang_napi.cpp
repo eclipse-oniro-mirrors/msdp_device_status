@@ -760,7 +760,7 @@ napi_value BoomerangNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("encodeImage", BoomerangEncodeImage),
         DECLARE_NAPI_STATIC_FUNCTION("decodeImage", DecodeImage),
     };
-    IMF_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }
 

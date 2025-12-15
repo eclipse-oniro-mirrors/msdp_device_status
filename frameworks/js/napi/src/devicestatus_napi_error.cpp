@@ -31,8 +31,8 @@ napi_value CreateNapiError(const napi_env &env, int32_t errCode, const std::stri
     napi_value businessError = nullptr;
     napi_value msg = nullptr;
     napi_value code = nullptr;
-    IMF_CALL(napi_create_int32(env, errCode, &code));
-    IMF_CALL(napi_create_string_utf8(env, errMessage.c_str(), NAPI_AUTO_LENGTH, &msg));
+    MSDP_CALL(napi_create_int32(env, errCode, &code));
+    MSDP_CALL(napi_create_string_utf8(env, errMessage.c_str(), NAPI_AUTO_LENGTH, &msg));
     napi_create_error(env, nullptr, msg, &businessError);
     napi_set_named_property(env, businessError, "code", code);
     return businessError;

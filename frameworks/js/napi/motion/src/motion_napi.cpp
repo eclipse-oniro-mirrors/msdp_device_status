@@ -424,7 +424,7 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("off", UnSubscribeMotion),
         DECLARE_NAPI_STATIC_FUNCTION("getRecentOperatingHandStatus", GetRecentOptHandStatus),
     };
-    IMF_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
 
     napi_value operatingHandStatus;
     napi_status status = napi_create_object(env, &operatingHandStatus);
