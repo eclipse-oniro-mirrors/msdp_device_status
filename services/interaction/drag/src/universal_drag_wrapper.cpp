@@ -27,7 +27,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-const std::string UNIVERSAL_DRAG_MANAGER_SO_PATH = "system/lib64/libuniversal_drag.z.so";
+const std::string UNIVERSAL_DRAG_MANAGER_SO_PATH = "/system/lib64/libuniversal_drag.z.so";
 }
 
 bool UniversalDragWrapper::InitUniversalDrag()
