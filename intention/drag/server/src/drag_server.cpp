@@ -289,7 +289,7 @@ int32_t DragServer::SetAppDragSwitchState(
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
-    universalDragWrapper_.SetAppDragSwitchState(enable, pkgName);
+    universalDragWrapper_.SetAppDragSwitchState(pkgName, enable);
 #endif // OHOS_BUILD_UNIVERSAL_DRAG
     return RET_OK;
 }
@@ -381,11 +381,12 @@ int32_t DragServer::SetDraggableState(bool state)
     return RET_OK;
 }
 
-int32_t DragServer::GetAppDragSwitchState(bool &state)
+int32_t DragServer::GetAppDragSwitchState(CallingContext &context, bool &state)
 {
     state = false;
 #ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    if (int32_t ret = universalDragWrapper_.GetAppDragSwitchState(state); ret != RET_OK) {
+    if (int32_t ret = universalDragWrapper_.GetAppDragSwitchState(GetPackageName(context.tokenId), state);
+        ret != RET_OK) {
         FI_HILOGE("IDragManager::GetAppDragSwitchState fail, error:%{public}d", ret);
         return ret;
     }

@@ -885,6 +885,8 @@ HWTEST_F(DragServerTest, DragServerTest29, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest30, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
     CallingContext context {
         .intention = g_intention,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
@@ -895,6 +897,7 @@ HWTEST_F(DragServerTest, DragServerTest30, TestSize.Level0)
     bool isJsCaller = false;
     int32_t ret = g_dragServer->SetDragSwitchState(context, enable, isJsCaller);
     EXPECT_EQ(ret, RET_OK);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
 
 /**
@@ -925,9 +928,13 @@ HWTEST_F(DragServerTest, DragServerTest31, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest32, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    Security::AccessToken::AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = Security::AccessToken::AccessTokenKit::AllocHapToken(g_testInfoParms, g_testPolicyPrams);
+    EXPECT_EQ(0, SetSelfTokenID(tokenIdEx.tokenIdExStruct.tokenID));
+    auto g_tokenId1 = tokenIdEx.tokenIdExStruct.tokenID;
     CallingContext context {
         .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .tokenId = g_tokenId1,
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
@@ -944,6 +951,8 @@ HWTEST_F(DragServerTest, DragServerTest32, TestSize.Level0)
 HWTEST_F(DragServerTest, DragServerTest33, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
     CallingContext context {
         .intention = g_intention,
         .tokenId = IPCSkeleton::GetCallingTokenID(),
@@ -955,6 +964,7 @@ HWTEST_F(DragServerTest, DragServerTest33, TestSize.Level0)
     bool isJsCaller = false;
     int32_t ret = g_dragServer->SetAppDragSwitchState(context, enable, pkgName, isJsCaller);
     EXPECT_EQ(ret, RET_OK);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
 
 /**
@@ -2132,6 +2142,122 @@ HWTEST_F(DragServerTest, DragServerTest110, TestSize.Level1)
     ASSERT_EQ(ret, RET_ERR);
     ret = dragDataPacker.UnMarshallingMaterialFilter(parcel, dragData);
     ASSERT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragServerTest111
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest111, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragDataPacker dragDataPacker;
+    Parcel parcel;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    int32_t ret = dragDataPacker.Marshalling(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    auto sequenceableDragData = SequenceableDragData::Unmarshalling(parcel);
+    ASSERT_EQ(sequenceableDragData, nullptr);
+}
+
+/**
+ * @tc.name: DragServerTest112
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest112, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragDataPacker dragDataPacker;
+    Parcel parcel;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    int32_t ret = dragDataPacker.Marshalling(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    ret = dragDataPacker.MarshallingDetailedSummarys(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    auto sequenceableDragData = SequenceableDragData::Unmarshalling(parcel);
+    ASSERT_EQ(sequenceableDragData, nullptr);
+}
+
+/**
+ * @tc.name: DragServerTest113
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest113, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragDataPacker dragDataPacker;
+    Parcel parcel;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    int32_t ret = dragDataPacker.Marshalling(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    ret = dragDataPacker.MarshallingDetailedSummarys(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    ret = dragDataPacker.MarshallingSummaryExpanding(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    auto sequenceableDragData = SequenceableDragData::Unmarshalling(parcel);
+    ASSERT_EQ(sequenceableDragData, nullptr);
+}
+
+/**
+ * @tc.name: DragServerTest114
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest114, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DragDataPacker dragDataPacker;
+    Parcel parcel;
+    std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
+    ASSERT_TRUE(dragData);
+    int32_t ret = dragDataPacker.Marshalling(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    ret = dragDataPacker.MarshallingDetailedSummarys(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    ret = dragDataPacker.MarshallingSummaryExpanding(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    ret = dragDataPacker.MarshallingMaterialId(dragData.value(), parcel);
+    ASSERT_EQ(ret, RET_OK);
+    auto sequenceableDragData = SequenceableDragData::Unmarshalling(parcel);
+    ASSERT_EQ(sequenceableDragData, nullptr);
+}
+
+/**
+ * @tc.name: DragServerTest115
+ * @tc.desc: Test the expansion screen interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragServerTest, DragServerTest115, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    bool state = false;
+    int32_t ret = g_dragServer->GetAppDragSwitchState(context, state);
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    EXPECT_EQ(ret, RET_ERR);
+#else
+    EXPECT_EQ(ret, RET_OK);
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+    EXPECT_EQ(state, false);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

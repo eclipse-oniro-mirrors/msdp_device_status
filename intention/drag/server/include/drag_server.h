@@ -64,7 +64,7 @@ public:
     int32_t EraseMouseIcon(CallingContext &context);
     int32_t SetMouseDragMonitorState(bool state);
     int32_t SetDraggableState(bool state);
-    int32_t GetAppDragSwitchState(bool &state);
+    int32_t GetAppDragSwitchState(CallingContext &context, bool &state);
     int32_t SetDraggableStateAsync(bool state, int64_t downTime);
     int32_t GetDragBundleInfo(DragBundleInfo &dragBundleInfo);
     int32_t IsDragStart(bool &isStart);

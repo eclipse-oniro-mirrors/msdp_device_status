@@ -459,10 +459,12 @@ ErrCode IntentionService::SetDraggableState(bool state)
        return drag_.SetDraggableState(state);
     });
 }
+
 ErrCode IntentionService::GetAppDragSwitchState(bool &state)
 {
-    return PostSyncTask([this, &state] {
-       return drag_.GetAppDragSwitchState(state);
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &state] {
+       return drag_.GetAppDragSwitchState(context, state);
     });
 }
 
