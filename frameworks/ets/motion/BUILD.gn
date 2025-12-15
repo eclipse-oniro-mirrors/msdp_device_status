@@ -48,9 +48,13 @@ taihe_shared_library("motion_so") {
   }
   include_dirs = [
     "include",
+    "${device_status_utils_path}/common/include",
     "${device_status_utils_path}/include",
+    "${device_status_interfaces_path}/inner_api/include",
     "${device_status_interfaces_path}/innerkits/interaction/include",
+    "${device_status_frameworks_path}/ets/devicestatus/include",
     "${device_status_frameworks_path}/native/interaction/include",
+    
   ]
   external_deps = [
     "c_utils:utils",
@@ -69,6 +73,15 @@ taihe_shared_library("motion_so") {
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_utils_path}:devicestatus_util",
   ]
+  defines = [ "LOG_DOMAIN = 0xD002210" ]
+  if (device_status_motion_enable) {
+    defines += [ "MOTION_ENABLE" ]
+    external_deps += [
+      "motion:motion_client",
+      "motion:motion_interface_native",
+      "hiappevent:hiappevent_innerapi"
+    ]
+  }
 }
 
 generate_static_abc("motion_abc") {

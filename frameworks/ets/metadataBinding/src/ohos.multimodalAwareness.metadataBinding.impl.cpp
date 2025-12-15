@@ -12,53 +12,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "ani_boomerang_manager.h"
- 
+#include <sys/types.h>
+#include <unistd.h>
+
 #undef LOG_TAG
-#define LOG_TAG "metadataBinding"
- 
+#define LOG_TAG "metadataBindingImpl"
+
 namespace {
 using namespace ::taihe;
 using namespace OHOS::Msdp::DeviceStatus;
 void onMetadata(::taihe::string_view bundleName, ::taihe::callback_view<void(int32_t info)> callbck, uintptr_t opq)
 {
-    AniBoomerang::GetInstance()->onMetadata(std::string(bundleName), callbck, opq);
+    AniBoomerang::GetInstance()->OnMetadata(std::string(bundleName), callbck, opq);
 }
- 
+
 void offMetadata(::taihe::string_view bundleName, ::taihe::optional_view<uintptr_t> opq)
 {
-    AniBoomerang::GetInstance()->offMetadata(std::string(bundleName), opq);
+    AniBoomerang::GetInstance()->OffMetadata(std::string(bundleName), opq);
 }
- 
+
 uintptr_t notifyMetadataBindingEventPromise(::taihe::string_view bundleName)
 {
     ani_object promise;
-    AniBoomerang::GetInstance()->notifyMetadataBindingEvent(std::string(bundleName), promise);
+    AniBoomerang::GetInstance()->NotifyMetadataBindingEvent(std::string(bundleName), promise);
     return reinterpret_cast<uintptr_t>(promise);
 }
- 
+
 void submitMetadata(::taihe::string_view metadata)
 {
-    AniBoomerang::GetInstance()->submitMetadata(std::string(metadata));
+    FI_HILOGE("%{public}s submitMetadata promise_.", LOG_TAG);
+    AniBoomerang::GetInstance()->SubmitMetadata(std::string(metadata));
+    FI_HILOGE("%{public}s submitMetadata promise_000.", LOG_TAG);
 }
- 
+
 uintptr_t encodeImagePromise(uintptr_t srcImage, ::taihe::string_view metadata)
 {
     ani_object promise;
-    AniBoomerang::GetInstance()->encodeImage(srcImage, std::string(metadata), promise);
+    AniBoomerang::GetInstance()->EncodeImage(srcImage, std::string(metadata), promise);
     return reinterpret_cast<uintptr_t>(promise);
 }
- 
+
 uintptr_t decodeImagePromise(uintptr_t encodedImage)
 {
     ani_object promise;
-    AniBoomerang::GetInstance()->decodeImage(encodedImage, promise);
+    AniBoomerang::GetInstance()->DecodeImage(encodedImage, promise);
     return reinterpret_cast<uintptr_t>(promise);
 }
- 
+
 }  // namespace
- 
+
 // Since these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_onMetadata(onMetadata);

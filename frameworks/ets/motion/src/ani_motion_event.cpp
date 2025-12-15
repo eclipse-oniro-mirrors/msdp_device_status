@@ -18,20 +18,25 @@
 #ifdef MOTION_ENABLE
 #include "motion_client.h"
 #endif
-
+#include "devicestatus_define.h"
 #undef LOG_TAG
 #define LOG_TAG "AniMotionEvent"
 
 namespace OHOS {
 namespace Msdp {
 std::mutex g_mutex;
+#ifdef MOTION_ENABLE
+auto &g_motionClient = MotionClient::GetInstance();
+#endif
 
+ani_env* AniMotionEvent::env_ {nullptr};
+ani_vm* AniMotionEvent::vm_ {nullptr};
 #ifdef MOTION_ENABLE
 void AniMotionCallback::OnMotionChanged(const MotionEvent &event)
 {
     FI_HILOGD("Enter");
     std::lock_guard<std::mutex> guard(g_mutex);
-    auto* data = new (std::nothrow) MotionEvent();
+    auto data = std::make_shared<MotionEvent>();
     CHKPV(data);
     data->type = event.type;
     data->status = event.status;
@@ -41,15 +46,14 @@ void AniMotionCallback::OnMotionChanged(const MotionEvent &event)
     FI_HILOGD("Exit");
 }
 
-void AniMotionCallback::EmitOnEvent(MotionEvent* data)
+void AniMotionCallback::EmitOnEvent(std::shared_ptr<MotionEvent> data)
 {
     if (data == nullptr) {
         FI_HILOGE("data is nullptr");
         return;
     }
  
-    AniMotionEvent::GetInstance()->OnEventOperatingHand(data->type, 1, *data);
-    delete data;
+    AniMotionEvent::GetInstance()->OnEventOperatingHand(data->type, 1, data);
 }
 #endif
 
@@ -85,11 +89,10 @@ bool AniMotionEvent::SubscribeCallback(int32_t type)
     if (iter != callbacks_.end()) {
         return true;
     }
-    FI_HILOGD("Don't find callback, to create");
     sptr<IMotionCallback> callback = new (std::nothrow) AniMotionCallback();
     if (callback == nullptr) {
         FI_HILOGE("callback is null");
-        taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Subscribe failed");
+        taihe::set_business_error(DeviceStatusV1::SUBSCRIBE_EXCEPTION, "Subscribe failed");
         return false;
     }
     int32_t ret = g_motionClient.SubscribeCallback(type, callback);
@@ -101,17 +104,17 @@ bool AniMotionEvent::SubscribeCallback(int32_t type)
         return true;
     }
     
-    if (ret == PERMISSION_DENIED) {
+    if (ret == DeviceStatusV1::PERMISSION_DENIED) {
         FI_HILOGE("failed to subscribe");
-        taihe::set_business_error(PERMISSION_EXCEPTION, "Permission denined");
+        taihe::set_business_error(DeviceStatusV1::PERMISSION_DENIED, "Permission denined");
         return false;
-    } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
+    } else if (ret == DeviceStatusV1::DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
         FI_HILOGE("failed to subscribe");
-        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+        taihe::set_business_error(DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
         return false;
     } else {
         FI_HILOGE("failed to subscribe");
-        taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Subscribe failed");
+        taihe::set_business_error(DeviceStatusV1::SUBSCRIBE_EXCEPTION, "Subscribe failed");
         return false;
     }
 
@@ -120,13 +123,13 @@ bool AniMotionEvent::SubscribeCallback(int32_t type)
 
 bool AniMotionEvent::UnSubscribeCallback(int32_t type)
 {
-    if (!CheckEvents(type)) {
+    if (CheckEvents(type)) {
         return false;
     }
     auto iter = callbacks_.find(type);
     if (iter == callbacks_.end()) {
         FI_HILOGE("faild to find callback");
-        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+        taihe::set_business_error(DeviceStatusV1::UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
         return false;
     }
     
@@ -138,17 +141,17 @@ bool AniMotionEvent::UnSubscribeCallback(int32_t type)
         }
         return true;
     }
-    if (ret == PERMISSION_DENIED) {
+    if (ret == DeviceStatusV1::PERMISSION_DENIED) {
         FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(PERMISSION_EXCEPTION, "Permission denined");
+        taihe::set_business_error(DeviceStatusV1::PERMISSION_DENIED, "Permission denined");
         return false;
-    } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
+    } else if (ret == DeviceStatusV1::DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
         FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+        taihe::set_business_error(DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
         return false;
     } else {
         FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+        taihe::set_business_error(DeviceStatusV1::UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
         return false;
     }
 
@@ -161,10 +164,10 @@ bool AniMotionEvent::InsertRef(std::shared_ptr<MotionEventListener> listener, an
         FI_HILOGE("listener is nullptr");
         return false;
     }
-    for (auto item : listener->onRefSets) {
+    for (const auto &item : listener->onRefSets) {
         ani_boolean isEqual = false;
         auto isDuplicate =
-            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, *item, &isEqual)) && isEqual;
+            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual)) && isEqual;
         if (isDuplicate) {
             taihe::get_env()->GlobalReference_Delete(onHandlerRef);
             FI_HILOGD("callback already registered");
@@ -189,13 +192,14 @@ bool AniMotionEvent::AddCallback(int32_t eventType, taihe::callback_view<void(Op
         FI_HILOGE("ani_env is nullptr");
         return false;
     }
+    env_ = env;
+    vm_ = GetAniVm(env);
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
     if (ANI_OK != env->GlobalReference_Create(callbackObj, &onHandlerRef)) {
         FI_HILOGE("GlobalReference_Create failed");
         return false;
     }
-
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
         FI_HILOGD("found event:%{public}d", eventType);
@@ -248,11 +252,11 @@ bool AniMotionEvent::RemoveAllCallback(int32_t eventType)
         FI_HILOGE("onRefSets is empty");
         return false;
     }
-    iter->second->onRefSets.clear();
-    if (iter->second->onRefSets.empty()) {
-        FI_HILOGE("onRefSets is empty");
-        events_.erase(iter);
+    for (auto item : iter->second->onRefSets) {
+        taihe::get_env()->GlobalReference_Delete(item);
     }
+    iter->second->onRefSets.clear();
+    events_.erase(iter);
     return true;
 }
 
@@ -273,40 +277,141 @@ bool AniMotionEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
         FI_HILOGE("onRefSets is empty");
         return false;
     }
-    for (auto &item : iter->second->onRefSets) {
+    ani_ref onHandlerRef = nullptr;
+    ani_object callbackObj = reinterpret_cast<ani_object>(opq);
+    if (ANI_OK != taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef)) {
+        FI_HILOGE("GlobalReference_Create failed");
+        return false;
+    }
+    auto& refSet = iter->second->onRefSets;
+    for (auto it = refSet.begin(); it != refSet.end();) {
         ani_boolean isEqual = false;
-        ani_ref onHandlerRef = nullptr;
-        ani_object callbackObj = reinterpret_cast<ani_object>(opq);
-        if (ANI_OK != taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef)) {
-            FI_HILOGE("GlobalReference_Create failed");
-            return false;
-        }
         auto isDuplicate =
-            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, *item, &isEqual)) && isEqual;
+            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, *it, &isEqual)) && isEqual;
         if (isDuplicate) {
-            iter->second->onRefSets.erase(item);
+            it = refSet.erase(it);
             FI_HILOGD("callback already remove");
-            break;
+        } else {
+            ++it;
         }
     }
     if (iter->second->onRefSets.empty()) {
         events_.erase(eventType);
     }
+    taihe::get_env()->GlobalReference_Delete(onHandlerRef);
     return true;
 }
 
-void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const MotionEvent &event)
+ani_object AniMotionEvent::CreateAniUndefined(ani_env* env)
+{
+    ani_ref aniRef;
+    if (env == nullptr) {
+        FI_HILOGE("null env");
+        return nullptr;
+    }
+    env->GetUndefined(&aniRef);
+    return static_cast<ani_object>(aniRef);
+}
+
+ani_object AniMotionEvent::CreateAniMotionEventStatus(ani_env* env, int32_t status)
+{
+    if (env == nullptr) {
+        FI_HILOGE("env is nullptr");
+        return CreateAniUndefined(env);
+    }
+    ani_class aniClass;
+    ani_status ret = env->FindClass("std.core.Int", &aniClass);
+    if (ret != ANI_OK) {
+        FI_HILOGE("[ANI] class not found");
+        return CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", "i:", &aniCtor);
+    if (ret != ANI_OK) {
+        FI_HILOGE("[ANI] ctor not found");
+        return CreateAniUndefined(env);
+    }
+    ani_object aniStatus;
+    ret = env->Object_New(aniClass, aniCtor, &aniStatus, ani_int(status));
+    if (ret != ANI_OK) {
+        FI_HILOGE("[ANI] fail to create new obj");
+        return CreateAniUndefined(env);
+    }
+    return aniStatus;
+}
+
+void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const std::shared_ptr<MotionEvent> &event)
 {
     FI_HILOGD("eventType: %{public}d", eventType);
+    std::lock_guard<std::mutex> guard(mutex_);
+    if (vm_ == nullptr) {
+        FI_HILOGE("vm_ is nullptr");
+        return;
+    }
     auto typeIter = events_.find(eventType);
     if (typeIter == events_.end()) {
         FI_HILOGE("eventType: %{public}d not found", eventType);
         return;
     }
-    for (auto item : typeIter->second->onRefSets) {
-        ani_ref handler = *item;
-        handler(event.status);
+    ani_env* env = AttachAniEnv(vm_);
+    if (env == nullptr) {
+        FI_HILOGE("AttachAniEnv get env is nullptr");
+        return;
     }
+    for (auto item : typeIter->second->onRefSets) {
+        ani_ref handler = item;
+        std::vector<ani_ref> args;
+        ani_object statusAni = CreateAniMotionEventStatus(env, event->status);
+        args.push_back(static_cast<ani_ref>(statusAni));
+        ani_ref result;
+        if (taihe::get_env()->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(),
+            &result) != ANI_OK) {
+            HILOG_ERROR(LOG_CORE, "Excute CallBack failed.");
+        }
+    }
+}
+
+ani_vm* AniMotionEvent::GetAniVm(ani_env* env)
+{
+    if (env == nullptr) {
+        FI_HILOGE("null env");
+        return nullptr;
+    }
+    ani_vm* vm = nullptr;
+    if (env->GetVM(&vm) != ANI_OK) {
+        FI_HILOGE("GetVM failed");
+        return nullptr;
+    }
+    return vm;
+}
+
+ani_env* AniMotionEvent::GetAniEnv(ani_vm* vm)
+{
+    if (vm == nullptr) {
+        FI_HILOGE("null vm");
+        return nullptr;
+    }
+    ani_env* env = nullptr;
+    if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
+        FI_HILOGE("GetEnv failed");
+        return nullptr;
+    }
+    return env;
+}
+
+ani_env* AniMotionEvent::AttachAniEnv(ani_vm* vm)
+{
+    if (vm == nullptr) {
+        FI_HILOGE("null vm");
+        return nullptr;
+    }
+    ani_env *workerEnv = nullptr;
+    ani_options aniArgs {0, nullptr};
+    if (vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv) != ANI_OK) {
+        FI_HILOGE("Attach Env failed");
+        return nullptr;
+    }
+    return workerEnv;
 }
 #endif
 } // namespace Msdp

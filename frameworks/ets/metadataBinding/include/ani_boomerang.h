@@ -12,63 +12,80 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef ANI_BOOMERANG_H
 #define ANI_BOOMERANG_H
- 
+
 #include <list>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <vector>
 #include <string>
- 
-#include "taihe/runtime.hpp"
-#include "pixel_map_taihe_ani.h"
-#include "fi_log.h"
+#include <vector>
+
 #include "boomerang_data.h"
- 
+#include "fi_log.h"
+#include "pixel_map_taihe_ani.h"
+#include "taihe/runtime.hpp"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace taihe;
- 
-typedef void (*EncodeImagePtr)(std::shared_ptr<OHOS::Media::PixelMap> &pixelMap, const std::string &content,
-    std::shared_ptr<OHOS::Media::PixelMap> &resultPixelMap);
-typedef void (*DecodeImagePtr)(std::shared_ptr<OHOS::Media::PixelMap> &pixelMap, std::string &content);
- 
+
 struct AniBoomerangEventListener {
     ani_ref onHandlerRef { nullptr };
 };
- 
+
+class AniBoomerangCommon {
+public:
+    AniBoomerangCommon() = default;
+    ~AniBoomerangCommon() = default;
+    static std::shared_ptr<AniBoomerangCommon> GetInstance();
+
+    static ani_vm* GetAniVm(ani_env* env);
+    static ani_env* GetAniEnv(ani_vm* vm);
+    static ani_env* AttachAniEnv(ani_vm* vm);
+    static ani_object CreateAniInt(ani_env* env, int32_t status);
+    static ani_object CreateAniUndefined(ani_env* env);
+    static ani_object Uint8ArrayToObject(ani_env *env, const std::vector<uint8_t> values);
+
+private:
+    static ani_env* env_;
+    static ani_vm* vm_;
+};
+
 class AniBoomerangEvent {
 public:
     AniBoomerangEvent() = default;
     ~AniBoomerangEvent() = default;
- 
+
     bool On(int32_t eventType, ani_ref handler, bool isOnce);
     bool Off(int32_t eventType);
     void OnEvent(int32_t eventType, int32_t value, bool isOnce);
- 
+
 protected:
     bool OffOnce(int32_t eventType, ani_ref handler);
-    
+    void CheckRet(int32_t eventType, size_t argc, int32_t value,
+        std::shared_ptr<AniBoomerangEventListener> &typeHandler);
+
     void ClearEventMap();
-    bool RemoveAllCallback(int32_t eventType);
+    bool RemoveAllCallback(int32_t eventType, bool isEvent);
     bool SaveCallbackByEvent(int32_t eventType, ani_ref handler, bool isOnce,
         std::map<int32_t, std::list<std::shared_ptr<AniBoomerangEventListener>>> &events);
-    bool IsNoExistCallback(std::list<std::shared_ptr<AniBoomerangEventListener>> listeners,
+    bool IsNoExistCallback(const std::list<std::shared_ptr<AniBoomerangEventListener>> &listeners,
         ani_ref handler, int32_t eventType);
     void SaveCallback(int32_t eventType, ani_ref onHandlerRef, bool isOnce);
- 
-    ani_env env_ { nullptr };
+
+    static ani_env* env_;
+    static ani_vm* vm_;
     ani_ref thisVarRef_ { nullptr };
     std::mutex mutex_;
     std::vector<BoomerangData> data_;
     std::map<int32_t, std::list<std::shared_ptr<AniBoomerangEventListener>>> events_;
     std::map<int32_t, std::list<std::shared_ptr<AniBoomerangEventListener>>> eventOnces_;
 };
- 
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

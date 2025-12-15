@@ -23,14 +23,19 @@
 #include "ani.h"
 #include <set>
 #include <map>
+#include "fi_log.h"
+#include "ani_error_utils.h"
 
 #ifdef MOTION_ENABLE
 #include "motion_callback_stub.h"
+#include "motion_agent_type.h"
 #endif
 
 namespace OHOS {
 namespace Msdp {
-
+const int32_t RET_OK = 0;
+constexpr int32_t HOLDING_HAND_FEATURE_DISABLE = 11;
+using OperatingHandStatus_t = ohos::multimodalAwareness::motion::OperatingHandStatus;
 constexpr int32_t MOTION_TYPE_OPERATING_HAND = 3601;
 struct MotionEventListener {
     std::set<ani_ref> onRefSets;
@@ -42,7 +47,7 @@ public:
     AniMotionCallback() = default;
     ~AniMotionCallback() override = default;
     void OnMotionChanged(const MotionEvent& event) override;
-    void EmitOnEvent(MotionEvent* data);
+    void EmitOnEvent(std::shared_ptr<MotionEvent> data);
 };
 #endif
 
@@ -59,13 +64,23 @@ public:
     bool AddCallback(int32_t eventType, taihe::callback_view<void(OperatingHandStatus_t)> f, uintptr_t opq);
     bool RemoveAllCallback(int32_t eventType);
     bool RemoveCallback(int32_t eventType, uintptr_t opq);
-    void OnEventOperatingHand(int32_t eventType, size_t argc, const MotionEvent &event);
+    void OnEventOperatingHand(int32_t eventType, size_t argc, const std::shared_ptr<MotionEvent> &event);
+    static ani_vm* GetAniVm(ani_env* env);
+    static ani_env* GetAniEnv(ani_vm* vm);
+    static ani_env* AttachAniEnv(ani_vm* vm);
+    ani_object CreateAniMotionEventStatus(ani_env* env, int32_t status);
+    ani_object CreateAniUndefined(ani_env* env);
+
 #endif
 public:
 #ifdef MOTION_ENABLE
     std::mutex mutex_;
     std::map<int32_t, sptr<IMotionCallback>> callbacks_;
 #endif
+private:
+    static ani_env* env_;
+    static ani_vm* vm_;
+
 protected:
     std::map<int32_t, std::shared_ptr<MotionEventListener>> events_;
 };
