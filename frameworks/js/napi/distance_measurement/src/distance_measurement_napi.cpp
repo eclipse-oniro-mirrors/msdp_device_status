@@ -363,24 +363,12 @@ void DistanceMeasurementNapi::OnDoorIdentifyChangedDone(const CDoorPositionRespo
         FI_HILOGE("failed to create object");
         return;
     }
-     // 创建一个新的napi_value对象，并将其传递给回调函数
-    napi_value callbackObj = nullptr;
-    status = napi_create_object(env_, &callbackObj);
-    if (status != napi_ok) {
-        FI_HILOGE("failed to create callback object!");
-        return;
-    }
-    status = napi_set_named_property(env_, callbackObj, "identifyObj", identifyObj);
-    if (status != napi_ok) {
-        FI_HILOGE("failed to set named property");
-        return;
-    }
     SetValueInt32(env_, "doorLockCode", identifyRes.pinCode, identifyObj);
     SetValueInt32(env_, "position", static_cast<int32_t>(identifyRes.position), identifyObj);
     SetValueUtf8String(env_, "deviceId", static_cast<std::string>(identifyRes.deviceId), identifyObj);
     FI_HILOGI("callbackIdx_=%{public}d", callbackIdx_);
    
-    OnDistMeasureEvent(callbackIdx_, &callbackObj, INPUT_TYPE_INDOOR_OR_OUTDOOR_IDENTIFY);
+    OnDistMeasureEvent(callbackIdx_, &identifyObj, INPUT_TYPE_INDOOR_OR_OUTDOOR_IDENTIFY);
 }
 
 void DistanceMeasurementNapi::OnDistanceMeasurementChangedDone(const CDistMeasureResponse &distMeasureRes)
@@ -398,18 +386,7 @@ void DistanceMeasurementNapi::OnDistanceMeasurementChangedDone(const CDistMeasur
     SetValueDouble(env_, "distance", static_cast<double>(distMeasureRes.distance), distMeaObj);
     SetValueUtf8String(env_, "deviceId", distMeasureRes.deviceId, distMeaObj);
     FI_HILOGI("callbackIdx_=%{public}d", callbackIdx_);
-    napi_value callbackObj = nullptr;
-    status = napi_create_object(env_, &callbackObj);
-    if (status != napi_ok) {
-        FI_HILOGE("failed to create callback object");
-        return;
-    }
-    status = napi_set_named_property(env_, callbackObj, "distMeaObj", distMeaObj);
-    if (status != napi_ok) {
-        FI_HILOGE("failed to set named property");
-        return;
-    }
-    OnDistMeasureEvent(callbackIdx_, &callbackObj, INPUT_TYPE_RANK_MEASUREMENT);
+    OnDistMeasureEvent(callbackIdx_, &distMeaObj, INPUT_TYPE_RANK_MEASUREMENT);
 }
 
 void DistMeasureListener::UpdateEnv(const napi_env &env)
