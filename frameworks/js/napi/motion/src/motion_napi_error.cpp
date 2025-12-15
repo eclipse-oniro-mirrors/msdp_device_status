@@ -28,8 +28,8 @@ napi_value CreateMotionNapiError(const napi_env &env, int32_t errorCode, const s
     napi_value businessError = nullptr;
     napi_value code = nullptr;
     napi_value msg = nullptr;
-    NAPI_CALL(env, napi_create_int32(env, errorCode, &code));
-    NAPI_CALL(env, napi_create_string_utf8(env, errorMsg.c_str(), NAPI_AUTO_LENGTH, &msg));
+    IMF_CALL(napi_create_int32(env, errorCode, &code));
+    IMF_CALL(napi_create_string_utf8(env, errorMsg.c_str(), NAPI_AUTO_LENGTH, &msg));
     napi_create_error(env, nullptr, msg, &businessError);
     napi_set_named_property(env, businessError, "code", code);
     return businessError;

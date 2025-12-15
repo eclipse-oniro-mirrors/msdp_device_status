@@ -78,7 +78,7 @@ napi_value OnScreenNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("unsubscribe", UnregisterAwarenessCallback),
         DECLARE_NAPI_STATIC_FUNCTION("trigger", Trigger),
     };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
+    IMF_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     // 声明枚举值Scenario
     napi_value napiScenario;
     napi_status status = napi_create_object(env, &napiScenario);

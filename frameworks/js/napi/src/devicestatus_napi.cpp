@@ -24,6 +24,7 @@
 #include "devicestatus_define.h"
 #include "devicestatus_napi_error.h"
 #include "stationary_manager.h"
+#include "fi_log.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DeviceStatusNapi"
@@ -441,7 +442,7 @@ napi_value DeviceStatusNapi::UnsubscribeCallback(napi_env env, int32_t type, int
     std::lock_guard<std::mutex> guard(g_obj->mutex_);
     auto callbackIter = callbacks_.find(type);
     if (callbackIter == callbacks_.end()) {
-        NAPI_ASSERT(env, false, "No existed callback");
+        FI_HILOGE("No existed callback");
         return nullptr;
     }
     int32_t unsubscribeRet = StationaryManager::GetInstance().UnsubscribeCallback(static_cast<Type>(type),
@@ -572,7 +573,7 @@ napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("once", GetDeviceStatus)
     };
     DeclareEventTypeInterface(env, exports);
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    IMF_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }
 
