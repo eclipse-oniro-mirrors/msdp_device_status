@@ -63,6 +63,17 @@
     HILOG_FATAL(LOG_CORE, FI_FUNC_FMT fmt, FI_FUNC_INFO, ##__VA_ARGS__); \
 } while (0)
 
+#define MSDP_CALL_BASE(theCall, retVal)                         \
+    do                                                         \
+    {                                                          \
+        if ((theCall) != napi_ok)                              \
+        {                                                      \
+            FI_HILOGE("theCall is failed");                     \
+            return retVal;                                     \
+        }                                                      \
+    } while (0)
+#define MSDP_CALL(theCall) MSDP_CALL_BASE(theCall, nullptr)
+
 namespace OHOS {
 namespace Msdp {
 class InnerFunctionTracer {

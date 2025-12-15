@@ -46,10 +46,10 @@ napi_value CreateOnScreenNapiError(const napi_env &env, int32_t errCode, const s
     napi_value businessError = nullptr;
     napi_value code = nullptr;
     napi_value msg = nullptr;
-    NAPI_CALL(env, napi_create_int32(env, errCode, &code));
-    NAPI_CALL(env, napi_create_string_utf8(env, errMessage.c_str(), NAPI_AUTO_LENGTH, &msg));
-    NAPI_CALL(env, napi_create_error(env, nullptr, msg, &businessError));
-    NAPI_CALL(env, napi_set_named_property(env, businessError, "code", code));
+    MSDP_CALL(napi_create_int32(env, errCode, &code));
+    MSDP_CALL(napi_create_string_utf8(env, errMessage.c_str(), NAPI_AUTO_LENGTH, &msg));
+    MSDP_CALL(napi_create_error(env, nullptr, msg, &businessError));
+    MSDP_CALL(napi_set_named_property(env, businessError, "code", code));
     return businessError;
 }
 

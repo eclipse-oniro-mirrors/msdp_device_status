@@ -58,7 +58,7 @@ napi_value ScreenEventNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("isParallelFeatureEnabled", IsParallelFeatureEnabled),
         DECLARE_NAPI_STATIC_FUNCTION("getLiveStatus", GetLiveStatus),
     };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
+    MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     DefParallelFeatureStatus(env, exports);
     return exports;
 }

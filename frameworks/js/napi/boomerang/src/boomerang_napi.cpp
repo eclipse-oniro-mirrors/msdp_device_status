@@ -29,7 +29,7 @@
 #include "devicestatus_define.h"
 #include "napi_constants.h"
 #include "util_napi_error.h"
-
+#include "fi_log.h"
 #undef LOG_TAG
 #define LOG_TAG "BoomerangNapi"
 
@@ -440,7 +440,7 @@ napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
     }
     auto callbackIter = callbacks_.find(type);
     if (callbackIter == callbacks_.end()) {
-        NAPI_ASSERT(env, false, "No existed callback");
+        FI_HILOGE("No existed callback");
         return nullptr;
     }
     int32_t unsubscribeRet = BoomerangManager::GetInstance().UnsubscribeCallback(
@@ -760,7 +760,7 @@ napi_value BoomerangNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("encodeImage", BoomerangEncodeImage),
         DECLARE_NAPI_STATIC_FUNCTION("decodeImage", DecodeImage),
     };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }
 

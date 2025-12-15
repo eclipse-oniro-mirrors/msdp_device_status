@@ -947,7 +947,7 @@ napi_value DistanceMeasurementNapi::Init(napi_env env, napi_value exports)
     };
 
     FI_HILOGI("DistanceMeasurementNapi init is called");
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     ModeInit(env, exports);
     return exports;
 }

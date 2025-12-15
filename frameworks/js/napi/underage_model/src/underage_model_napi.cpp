@@ -410,7 +410,7 @@ napi_value UnderageModelNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("on", SubscribeUnderageModel),
         DECLARE_NAPI_STATIC_FUNCTION("off", UnsubscribeUnderageModel),
     };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc)/sizeof(desc[0]), desc));
+    MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     if (!CreateUserAgeGroup(env, exports)) {
         FI_HILOGE("Failed create UserAgeGroup");
     }
