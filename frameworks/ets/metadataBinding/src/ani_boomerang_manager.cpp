@@ -322,7 +322,7 @@ void AniBoomerang::EncodeImage(uintptr_t srcImage, const std::string &metadata, 
             FI_HILOGE("%{public}s get pixelMap failed", LOG_TAG);
             return;
         }
-        size_t pos = metadata.find_first_not_of(URL_CHARACTERES)
+        size_t pos = metadata.find_first_not_of(URL_CHARACTERES);
         if (pos != std::string::npos) {
             FI_HILOGE("%{public}s There are illegal characters present in metadata", LOG_TAG);
             return;
