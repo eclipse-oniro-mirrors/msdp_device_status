@@ -42,9 +42,7 @@ uintptr_t notifyMetadataBindingEventPromise(::taihe::string_view bundleName)
 
 void submitMetadata(::taihe::string_view metadata)
 {
-    FI_HILOGE("%{public}s submitMetadata promise_.", LOG_TAG);
     AniBoomerang::GetInstance()->SubmitMetadata(std::string(metadata));
-    FI_HILOGE("%{public}s submitMetadata promise_000.", LOG_TAG);
 }
 
 uintptr_t encodeImagePromise(uintptr_t srcImage, ::taihe::string_view metadata)
