@@ -564,6 +564,40 @@ napi_value DeviceStatusNapi::DeclareEventTypeInterface(napi_env env, napi_value 
     return exports;
 }
 
+napi_value DeviceStatusNapi::DeclareStateTypeInterface(napi_env env, napi_value exports)
+{
+    CALL_DEBUG_ENTER;
+    napi_value enter = nullptr;
+    napi_status status = napi_create_int32(env, static_cast<int32_t>(ActivityEvent::ENTER), &enter);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to create ENTER item");
+        return nullptr;
+    }
+    napi_value exit = nullptr;
+    status = napi_create_int32(env, static_cast<int32_t>(ActivityEvent::EXIT), &exit);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to create EXIT item");
+        return nullptr;
+    }
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("ENTER", enter),
+        DECLARE_NAPI_STATIC_PROPERTY("EXIT", exit),
+    };
+    napi_value result = nullptr;
+    status = napi_define_class(env, "ActivityState", NAPI_AUTO_LENGTH,
+        EnumActivityEventConstructor, nullptr, sizeof(desc) / sizeof(*desc), desc, &result);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to define_class item");
+        return nullptr;
+    }
+    status = napi_set_named_property(env, exports, "ActivityState", result);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to set_named_property item");
+        return nullptr;
+    }
+    return exports;
+}
+
 napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
 {
     CALL_DEBUG_ENTER;
@@ -573,6 +607,7 @@ napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("once", GetDeviceStatus)
     };
     DeclareEventTypeInterface(env, exports);
+    DeclareStateTypeInterface(env, exports);
     MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }
