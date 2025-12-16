@@ -12,37 +12,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef ANI_BOOMERANG_MANAGER_H
 #define ANI_BOOMERANG_MANAGER_H
- 
-#include <mutex>
-#include <string>
+
+#include <dlfcn.h>
 #include <map>
- 
-#include "ohos.multimodalAwareness.metadataBinding.proj.hpp"
-#include "ohos.multimodalAwareness.metadataBinding.impl.hpp"
+#include <mutex>
+#include <stdexcept>
+#include <string>
+
 #include "ani_boomerang.h"
-#include "taihe/runtime.hpp"
-#include "taihe/callback.hpp"
-#include "taihe/optional.hpp"
-#include "stdexcept"
-#include "boomerang_data.h"
 #include "boomerang_callback_stub.h"
+#include "boomerang_data.h"
+#include "boomerang_manager.h"
 #include "devicestatus_client.h"
 #include "devicestatus_errors.h"
-#include "boomerang_manager.h"
-#include <dlfcn.h>
- 
+#include "ohos.multimodalAwareness.metadataBinding.proj.hpp"
+#include "ohos.multimodalAwareness.metadataBinding.impl.hpp"
+#include "taihe/callback.hpp"
+#include "taihe/optional.hpp"
+#include "taihe/runtime.hpp"
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
- 
+
 using namespace ::taihe;
 #ifndef RET_OK
     #define RET_OK (0)
 #endif
- 
+
+#ifndef RET_ERR
+    #define RET_ERR (-1)
+#endif
+
 const std::map<BoomerangErrCode, std::string> MetadataBindingLogInfo = {
     {SUBSCRIBE_FAILED, "Subscribe Failed. Possible causes: 1. Abnormal system capability;"
         "2. IPC communication abnormality; 3. Algorithm loading exception."},
@@ -52,21 +56,18 @@ const std::map<BoomerangErrCode, std::string> MetadataBindingLogInfo = {
     {ENCODE_FAILED, "encode image error by Create execution"},
     {DECODE_FAILED, "decode image error by Create execution"}
 };
- 
+
 class AniBoomerangCallback : public BoomerangCallbackStub {
 public:
     explicit AniBoomerangCallback() = default;
     virtual ~AniBoomerangCallback() = default;
-    bool init(uintptr_t opq = 0);
- 
-    void OnScreenshotResult(const BoomerangData& screentshotData) override;
+    bool Init(uintptr_t opq = 0);
+
+    void OnScreenshotResult(const BoomerangData& screenshotData) override;
     void OnNotifyMetadata(const std::string& metadata) override;
-    void EmitOnEvent(const DeviceStatus::BoomerangData* data);
-    void EmitOnMetadata(ani_env env, std::string metadata);
-    static void EmitOnEncodeImage(ani_env env, std::shared_ptr<OHOS::Media::PixelMap> pixelMap,
-        ani_resolver deferred);
- 
-    ani_vm* vm_ = nullptr;
+    void OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pixelMap) override;
+
+    static ani_vm* vm_;
     ani_env *env_ = nullptr;
     ani_env* envT_ = nullptr;
     ani_object funObject_ = nullptr;
@@ -75,37 +76,35 @@ public:
     ani_resolver deferred_ = nullptr;
     bool attach_ = false;
     bool result_ = false;
- 
+
     std::mutex mutex_;
     BoomerangData data_;
     std::string metadata_;
 };
- 
+
 class AniBoomerang : public AniBoomerangEvent {
 public:
     AniBoomerang();
     DISALLOW_COPY_AND_MOVE(AniBoomerang);
     ~AniBoomerang();
-    void onMetadata(std::string bundleName, ::taihe::callback_view<void(int32_t info)> callbck, uintptr_t opq);
-    void offMetadata(std::string bundleName, ::taihe::optional_view<uintptr_t> opq);
-    void notifyMetadataBindingEvent(std::string bundleName, ani_object& promise);
-    void submitMetadata(std::string metadata);
-    void encodeImage(uintptr_t srcImage, std::string metadata, ani_object& promise);
-    void decodeImage(uintptr_t encodedImage, ani_object& promise);
+    void OnMetadata(const std::string &bundleName, ::taihe::callback_view<void(int32_t info)> callback, uintptr_t opq);
+    void OffMetadata(const std::string &bundleName, ::taihe::optional_view<uintptr_t> opq);
+    void NotifyMetadataBindingEvent(const std::string &bundleName, ani_object& promise);
+    void SubmitMetadata(const std::string &metadata);
+    void EncodeImage(uintptr_t srcImage, const std::string &metadata, ani_object& promise);
+    void DecodeImage(uintptr_t encodedImage, ani_object& promise);
     static std::shared_ptr<AniBoomerang> GetInstance();
-    void setDeferred(std::string data);
     void OnScreenshot(int32_t type, int32_t status, bool isOnce);
-private:
-    bool EncodeImageFunc(std::shared_ptr<OHOS::Media::PixelMap> &pixelMap, const std::string &content,
-        std::shared_ptr<OHOS::Media::PixelMap> &resultPixelMap);
-    bool DecodeImageFunc(std::shared_ptr<OHOS::Media::PixelMap> &pixelMap, std::string &content);
- 
+    void OnEncodeImage(ani_env *env, std::shared_ptr<Media::PixelMap> pixelMap, ani_resolver deferred);
+    void ProcessErrorResult(ani_env *env, int32_t result, int32_t code, ani_resolver deferred);
+
+public:
     ani_ref ref_;
     ani_env *env_ = nullptr;
     std::string metadata_;
     inline static std::mutex mutex_;
 };
- 
+
 #define ANI_BOOMERANG_MGR BoomerangManager::GetInstance()
 } // namespace DeviceStatus
 } // namespace Msdp
