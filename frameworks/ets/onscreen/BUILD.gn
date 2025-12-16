@@ -1,0 +1,103 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//base/msdp/device_status/device_status.gni")
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//build/ohos/taihe_idl/taihe.gni")
+
+copy_taihe_idl("onScreen_taihe") {
+  sources = [ "idl/ohos.multimodalAwareness.onScreen.taihe" ]
+}
+
+subsystem_name = "msdp"
+part_name = "device_status"
+taihe_generated_file_path =
+    "$taihe_file_path/out/$subsystem_name/$part_name/onscreen"
+
+ohos_taihe("run_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  deps = [ ":onScreen_taihe" ]
+  outputs = [
+    "$taihe_generated_file_path/src/ohos.multimodalAwareness.onScreen.ani.cpp",
+    "$taihe_generated_file_path/src/ohos.multimodalAwareness.onScreen.abi.c",
+  ]
+}
+
+taihe_shared_library("onScreen_so") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  part_name = "$part_name"
+  subsystem_name = "$subsystem_name"
+  sources = get_target_outputs(":run_taihe")
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  include_dirs = [
+    "include",
+    "${device_status_utils_path}/include",
+    "${device_status_interfaces_path}/innerkits/interaction/include",
+    "${device_status_frameworks_path}/native/interaction/include",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "image_framework:image_taihe",
+  ]
+  sources += [
+    "src/ani_constructor.cpp",
+    "src/ani_onscreen_event.cpp",
+    "src/ohos.multimodalAwareness.onScreen.impl.cpp",
+  ]
+  deps = [
+    ":run_taihe",
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+}
+
+generate_static_abc("onScreen_abc") {
+  base_url = "$taihe_generated_file_path"
+  files = [ "$taihe_generated_file_path/@ohos.multimodalAwareness.onScreen.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/onScreen_abc.abc"
+  dependencies = [ ":run_taihe" ]
+}
+
+ohos_prebuilt_etc("onScreen_etc") {
+  source = "$target_out_dir/onScreen_abc.abc"
+  module_install_dir = "framework"
+  part_name = "$part_name"
+  subsystem_name = "$subsystem_name"
+  deps = [ ":onScreen_abc" ]
+}
+
+generate_static_abc("onScreen_test") {
+  base_url = "${device_status_root_path}/frameworks/ets/onScreen"
+  files = [ "$base_url/test/test_main.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/onScreen_test.abc"
+}
+
+group("onScreen_ani") {
+  deps = [
+    ":onScreen_etc",
+    ":onScreen_so",
+  ]
+}
