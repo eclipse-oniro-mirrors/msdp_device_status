@@ -149,7 +149,7 @@ void EtsDragManager::OnDragMessage(DeviceStatus::DragState state)
     }
 }
 
-array<Summary> EtsDragManager::getDataSummary()
+array<Summary> EtsDragManager::GetDataSummary()
 {
     std::map<std::string, int64_t> summarys;
     if (INTERACTION_MGR->GetDragSummary(summarys, true) != RET_OK) {
@@ -170,6 +170,22 @@ array<Summary> EtsDragManager::getDataSummary()
     return array<Summary>(arr);
 }
 
+int32_t EtsDragManager::SetDragSwitchState(bool enable)
+{
+    CALL_INFO_TRACE;
+    return INTERACTION_MGR->SetDragSwitchState(enable, true);
+}
+
+int32_t EtsDragManager::SetAppDragSwitchState(bool enable, const std::string &pkgName)
+{
+    CALL_INFO_TRACE;
+    if (pkgName.empty()) {
+        FI_HILOGE("The pkgName is empty");
+        return OHOS::Msdp::DeviceStatus::COMMON_PARAMETER_ERROR;
+    }
+    return INTERACTION_MGR->SetAppDragSwitchState(enable, pkgName, true);
+}
+
 void registerListener(callback_view<void(DragState)> callback, uintptr_t opq)
 {
     return EtsDragManager::GetInstance()->registerListener(callback, opq);
@@ -180,9 +196,24 @@ void unRegisterListener(optional_view<uintptr_t> opq)
     return EtsDragManager::GetInstance()->unRegisterListener(opq);
 }
 
-array<Summary> getDataSummary()
+array<Summary> GetDataSummary()
 {
-    return EtsDragManager::GetInstance()->getDataSummary();
+    return EtsDragManager::GetInstance()->GetDataSummary();
+}
+
+void SetDragSwitchState(bool enabled)
+{
+    if (EtsDragManager::GetInstance()->SetDragSwitchState(enabled) == OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP) {
+        taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP, "Not system application.");
+    }
+}
+
+void SetAppDragSwitchState(bool enabled, ::taihe::string_view bundleName)
+{
+    if (EtsDragManager::GetInstance()->SetAppDragSwitchState(enabled, std::string(bundleName)) ==
+        OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP) {
+        taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP, "Not system application.");
+    }
 }
 } // namespace
 
@@ -190,5 +221,7 @@ array<Summary> getDataSummary()
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_registerListener(registerListener);
 TH_EXPORT_CPP_API_unRegisterListener(unRegisterListener);
-TH_EXPORT_CPP_API_getDataSummary(getDataSummary);
+TH_EXPORT_CPP_API_GetDataSummary(GetDataSummary);
+TH_EXPORT_CPP_API_SetDragSwitchState(SetDragSwitchState);
+TH_EXPORT_CPP_API_SetAppDragSwitchState(SetAppDragSwitchState);
 // NOLINTEND
