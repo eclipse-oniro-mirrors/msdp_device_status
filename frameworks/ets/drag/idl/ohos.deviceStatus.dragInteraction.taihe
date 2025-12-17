@@ -42,4 +42,6 @@ struct Summary {
 """)
 function registerListener(callback: (info: DragState) => void, opq: Opaque);
 function unRegisterListener(opq: Optional<Opaque>);
-function getDataSummary(): Array<Summary>;
+function GetDataSummary(): Array<Summary>;
+function SetDragSwitchState(enabled: bool): void;
+function SetAppDragSwitchState(enabled: bool, bundleName: String): void;

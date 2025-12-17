@@ -63,8 +63,9 @@ public:
     void registerListener(callback_view<void(ohos::deviceStatus::dragInteraction::DragState)> callback, uintptr_t opq);
     void unRegisterListener(optional_view<uintptr_t> opq);
     void OnDragMessage(DeviceStatus::DragState state) override;
-    array<Summary> getDataSummary();
-
+    array<Summary> GetDataSummary();
+    int32_t SetDragSwitchState(bool enable);
+    int32_t SetAppDragSwitchState(bool enable, const std::string &pkgName);
     static std::shared_ptr<EtsDragManager> GetInstance();
 
 private:
