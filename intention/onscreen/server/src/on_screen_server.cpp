@@ -16,6 +16,7 @@
 #include "on_screen_server.h"
 
 #include <algorithm>
+#include <ctime>
 #include <dlfcn.h>
 #include <string>
 #include <vector>
@@ -42,11 +43,13 @@ const char *LIB_ON_SCREEN_ALGO_PATH = "/system/lib64/libon_screen.z.so";
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
 const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
 const char *DEVICE_TYPE_PARA_NAME = "const.product.devicetype";
+const char *PROACTIVE_SCREEN_SHOT_CAP = "screenshotIntent";
 const std::vector<std::string> SUPPORT_DEVICE_TYPE = { "phone", "tablet" };
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_PERMISSION = 201;
 constexpr int32_t RET_NO_SYSTEM_CALLING = 202;
 constexpr int32_t RET_NOT_REGISTER = 203;
+constexpr int32_t RET_PARAM_ERR = 401;
 const std::map<std::string, std::string> hapWhiteListMap = {
     {"com.huawei.hmos.vassistant", "1189827130565864320"},
 };
@@ -638,11 +641,71 @@ int32_t OnScreenServer::Trigger(const CallingContext &context, const AwarenessCa
         FI_HILOGE("checkpermission failed, premission = %{public}s", PERMISSION_GET_PAGE_CONTENT);
         return RET_NO_PERMISSION;
     }
+    // proactive screenshot reuse interface
+    bool hasScreenshotIntent = std::find(cap.capList.begin(), cap.capList.end(), PROACTIVE_SCREEN_SHOT_CAP) !=
+        cap.capList.end();
+    std::optional<std::vector<ScreenShotIntent>> intentVec = std::nullopt;
+    int32_t ret = RET_OK;
+    OnscreenAwarenessInfo screenshotIntentInfo;
+    int32_t screenshotIntentRet = hasScreenshotIntent ?
+        OnScreenShotIntent(context, option, screenshotIntentInfo) : RET_OK;
     if (!IsWhitelistAppCalling(context)) {
         FI_HILOGE("calling is not system calling");
         return RET_NO_SYSTEM_CALLING;
     }
     info = FillDumpData(cap, option);
+    if (ret == RET_OK) {
+        info.entityInfo.insert(info.entityInfo.end(), screenshotIntentInfo.entityInfo.begin(),
+            screenshotIntentInfo.end());
+    }
+    return RET_OK;
+}
+
+int32_t OnScreenServer::OnScreenShotIntent(const CallingContext &context, const AwarenessOptions& option,
+    OnscreenAwarenessInfo& info)
+{
+    // parse param
+    auto windowIdVar = option.entityInfo["windowId"];
+    auto screenshotVar = option.entityInfo["screenshot"];
+    int32_t windowId = 0;
+    std::shared_ptr<Media::PixelMap> screenshot = nullptr;
+    if (!(std::holds_alternative<int32_t>(windowId) &&
+        std::holds_alternative<std::shared_ptr<Media::PixelMap>>(screenshotVar))) {
+        FI_HILOGE("onscreenshot windowId or screenshot type unmatch");
+        return RET_PARAM_ERR;
+    }
+    windowId = std::get<int32_t>(windowIdVar);
+    screenshot = std::get<std::shared_ptr<Media::PixelMap>>(screenshotVar);
+    // invoke alg
+    std::vector<ScreenShotIntent> intentVec;
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
+        return RET_NO_SUPPORT;
+    }
+    OnScreenCallingContext onScreenContext {
+        .fullTokenId = context.fullTokenId,
+        .tokenId = context.tokenId,
+        .uid = context.uid,
+        .pid = context.pid,
+    };
+    FI_HILOGI("on screenshot intent invoke algo lib");
+    ret = handle_.pAlgorithm->OnScreenShotIntent(onScreenContext, windowId, screenshot, intentVec);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to get on screenshot intent, err=%{public}d", ret);
+    }
+    // convert data to info
+    info.resultCode = ret;
+    info.timestamp = static_cast<int64_t>(std::time(nullptr));
+    for (const auto &i : intentVec) {
+        std::map<std::string, std::string> intentData;
+        intentData["name"] = i.name;
+        intentData["param"] = i.param;
+        OnscreenEntityInfo info = {
+            .entityName = "screenshotIntent",
+            .entityInfo = intentData
+        };
+        info.entityInfo.push_back(info);
+    }
     return RET_OK;
 }
 } // namespace OnScreen

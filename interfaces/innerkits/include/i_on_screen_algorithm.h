@@ -40,6 +40,8 @@ public:
         int32_t &outStatus) = 0;
     virtual int32_t ListenLiveBroadcast() = 0;
     virtual int32_t GetLiveStatus() = 0;
+    virtual int32_t OnScreenShotIntent(const OnScreenCallingContext &context, int32_t windowId,
+        const std::shared_ptr<Media::PixelMap> &image, std::vector<ScreenShotIntent> &intentVec) = 0;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

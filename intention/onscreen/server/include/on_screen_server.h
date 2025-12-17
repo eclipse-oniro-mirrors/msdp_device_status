@@ -51,6 +51,8 @@ public:
     int32_t IsParallelFeatureEnabled(const CallingContext& context, int32_t windowId, int32_t& outStatus);
     int32_t ListenLiveBroadcast();
     int32_t GetLiveStatus();
+    int32_t OnScreenShotIntent(const CallingContext &context, const AwarenessOptions& option,
+        OnscreenAwarenessInfo& info);
 
     int32_t RegisterAwarenessCallback(const CallingContext &context, const AwarenessCap& cap,
         const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option);

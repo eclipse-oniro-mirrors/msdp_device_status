@@ -120,6 +120,21 @@ enum class IsCollect {
     DONGHU_APP = 1 << 4
 };
 
+enum class ControlPolicy {
+    SYSTEM_TRIGGER = 0,
+    USER_TRIGGER = 1,
+    MAX_TRIGGER
+};
+
+enum class LuoshuStatus {
+    NON_LUOSHU_STATE = -1,
+    SMALL_LUOSHU = 0,
+    LARGE_LUOSHU = 1,
+    APP_MINIMAL_LUOSHU = 2,
+    NON_APP_MINIMAL_LUOSHU = 3,
+    MAX_LUOSHU
+};
+
 struct AwarenessCap {
     std::vector<std::string> capList;
     std::string description;
@@ -170,6 +185,10 @@ struct OnscreenAwarenessInfo {
     std::vector<OnscreenEntityInfo> entityInfo;
 };
 
+struct ScreenShotIntent {
+    std::string name;
+    std::string param;
+};
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp
