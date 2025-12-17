@@ -66,14 +66,18 @@ void EtsSpatialAwarenessManager::OnDistanceMeasurementChanged(const CDistMeasure
         return;
     }
     for (auto &item : changeEvent->second) {
-        auto &func = std::get<taihe::callback<void(DistMeasureResponse const&)>>(item->callback);
-        DistMeasureResponse response = {
-            .rank = DistanceRank::from_value(std::string_view("rankMediumShort")),
+        auto *func = std::get_if<taihe::callback<void(JsDistMeasureResponse const&)>>(&item->callback);
+        if (!func) {
+            FI_HILOGE("OnDistanceMeasurementChanged get callback failed");
+            continue;
+        }
+        JsDistMeasureResponse response = {
+            .rank = JsDistanceRank::from_value(std::string_view("rankMediumShort")),
             .distance = distMeasureRes.distance,
             .confidence = distMeasureRes.confidence,
-            .deviceId = std::string_view(distMeasureRes.deviceId)
+            .deviceId = distMeasureRes.deviceId
         };
-        func(response);
+        (*func)(response);
     }
     FI_HILOGI("Exit");
 }
@@ -96,13 +100,17 @@ void EtsSpatialAwarenessManager::OnDoorIdentifyChanged(const CDoorPositionRespon
         return;
     }
     for (auto &item : changeEvent->second) {
-        auto &func = std::get<taihe::callback<void(DoorPositionResponse const&)>>(item->callback);
-        DoorPositionResponse response = {
+        auto *func = std::get_if<taihe::callback<void(JsDoorPositionResponse const&)>>(&item->callback);
+        if (!func) {
+            FI_HILOGE("OnDoorIdentifyChanged get callback failed");
+            continue;
+        }
+        JsDoorPositionResponse response = {
             .doorLockCode = identifyRes.pinCode,
-            .position = PositionRelativeToDoor::from_value(static_cast<int32_t>(identifyRes.position)),
-            .deviceId = std::string_view(identifyRes.deviceId)
+            .position = JsPositionRelativeToDoor::from_value(static_cast<int32_t>(identifyRes.position)),
+            .deviceId = identifyRes.deviceId
         };
-        func(response);
+        (*func)(response);
     }
     FI_HILOGI("Exit");
 }
@@ -133,7 +141,7 @@ bool EtsSpatialAwarenessManager::LoadLibrary()
 }
 
 void EtsSpatialAwarenessManager::OnDistanceMeasure(DistanceMeasurementConfigParams const& configParams,
-    callback_view<void(DistMeasureResponse const&)> callback, uintptr_t opq)
+    callback_view<void(JsDistMeasureResponse const&)> callback, uintptr_t opq)
 {
     FI_HILOGI("Enter");
     Subscribe(configParams, callback, opq, INPUT_TYPE_RANK_MEASUREMENT);
@@ -149,7 +157,7 @@ void EtsSpatialAwarenessManager::OffDistanceMeasure(DistanceMeasurementConfigPar
 }
 
 void EtsSpatialAwarenessManager::OnIndoorOrOutdoorIdentify(DistanceMeasurementConfigParams const& configParams,
-    callback_view<void(DoorPositionResponse const&)> callback, uintptr_t opq)
+    callback_view<void(JsDoorPositionResponse const&)> callback, uintptr_t opq)
 {
     FI_HILOGI("Enter");
     Subscribe(configParams, callback, opq, INPUT_TYPE_INDOOR_OR_OUTDOOR_IDENTIFY);
@@ -176,14 +184,15 @@ void EtsSpatialAwarenessManager::Subscribe(DistanceMeasurementConfigParams const
         return;
     }
 
-    if (!VerifyParams(configParams, distMeasureDataSet_)) {
+    CDistMeasureData distMeasureDataSet;
+    if (!VerifyParams(configParams, distMeasureDataSet)) {
         FI_HILOGE("Subscribe parameter validation failed!");
         return;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        distMeasureDataSet_.type = type;
-        auto &cbVec = jsCbMap_[distMeasureDataSet_];
+        distMeasureDataSet.type = type;
+        auto &cbVec = jsCbMap_[distMeasureDataSet];
         bool isDuplicate = std::any_of(cbVec.begin(), cbVec.end(), [env, callbackRef](
             std::shared_ptr<CallbackObject> &obj) {
             ani_boolean isEqual = false;
@@ -191,16 +200,17 @@ void EtsSpatialAwarenessManager::Subscribe(DistanceMeasurementConfigParams const
         });
         if (isDuplicate) {
             env->GlobalReference_Delete(callbackRef);
-            FI_HILOGD("Subscribe callback already registered");
+            FI_HILOGI("Subscribe callback already registered");
             return;
         }
         cbVec.emplace_back(std::make_shared<CallbackObject>(f, callbackRef));
+        distMeasureDataSet_ = distMeasureDataSet;
     }
     FI_HILOGI("Subscribe add callback success");
 
     InitDependencyLibrary();
-    if (!SubscribeDistanceMeasurement(distMeasureDataSet_)) {
-        RemoveFailCallback(env, distMeasureDataSet_, opq, jsCbMap_);
+    if (!SubscribeDistanceMeasurement(distMeasureDataSet)) {
+        RemoveFailCallback(env, distMeasureDataSet, opq, jsCbMap_);
         taihe::set_business_error(SERVICE_EXCEPTION, "Call subscribeDistanceMeasurement failed.");
         return;
     }
@@ -211,32 +221,33 @@ void EtsSpatialAwarenessManager::Unsubscribe(DistanceMeasurementConfigParams con
     optional_view<uintptr_t> opq, const std::string &type)
 {
     FI_HILOGI("Enter");
-    if (!VerifyParams(configParams, distMeasureDataSet_)) {
+    CDistMeasureData distMeasureDataSet;
+    if (!VerifyParams(configParams, distMeasureDataSet)) {
         FI_HILOGE("Unsubscribe parameter validation failed!");
         return;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        distMeasureDataSet_.type = type;
-        const auto iter = jsCbMap_.find(distMeasureDataSet_);
+        distMeasureDataSet.type = type;
+        const auto iter = jsCbMap_.find(distMeasureDataSet);
         if (iter == jsCbMap_.end()) {
-            FI_HILOGE("Not exist distMeasureDataSet_");
+            FI_HILOGE("Not exist distMeasureDataSet");
             return;
         }
         if (!opq.has_value()) {
             jsCbMap_.erase(iter);
-            FI_HILOGD("Unsubscribe callback is nullptr!");
-            return;
-        }
-        if (!RemoveCallback(iter, opq)) {
-            FI_HILOGD("Remove callback failed!");
-            return;
+            FI_HILOGI("Unsubscribe callback is nullptr!");
+        } else {
+            if (!RemoveCallback(iter, opq)) {
+                FI_HILOGI("Remove callback failed!");
+                return;
+            }
         }
     }
     FI_HILOGI("Unsubscribe delete callback success");
 
     InitDependencyLibrary();
-    if (!UnsubscribeDistanceMeasurement(distMeasureDataSet_)) {
+    if (!UnsubscribeDistanceMeasurement(distMeasureDataSet)) {
         taihe::set_business_error(SERVICE_EXCEPTION, "Call unsubscribeDistanceMeasurement failed.");
         return;
     }

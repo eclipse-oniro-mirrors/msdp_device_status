@@ -27,17 +27,15 @@
 namespace OHOS {
 namespace Msdp {
 using namespace taihe;
-using TechnologyType = ohos::multimodalAwareness::spatialAwareness::TechnologyType;
-using ReportingMode = ohos::multimodalAwareness::spatialAwareness::ReportingMode;
 using DistanceMeasurementConfigParams = ohos::multimodalAwareness::spatialAwareness::DistanceMeasurementConfigParams;
-using DistanceRank = ohos::multimodalAwareness::spatialAwareness::DistanceRank;
-using DistMeasureResponse = ohos::multimodalAwareness::spatialAwareness::DistanceMeasurementResponse;
-using PositionRelativeToDoor = ohos::multimodalAwareness::spatialAwareness::PositionRelativeToDoor;
-using DoorPositionResponse = ohos::multimodalAwareness::spatialAwareness::DoorPositionResponse;
-using callbackType = std::variant<taihe::callback<void(DistMeasureResponse const&)>,
-    taihe::callback<void(DoorPositionResponse const&)>>;
+using JsDistanceRank = ohos::multimodalAwareness::spatialAwareness::DistanceRank;
+using JsDistMeasureResponse = ohos::multimodalAwareness::spatialAwareness::DistanceMeasurementResponse;
+using JsPositionRelativeToDoor = ohos::multimodalAwareness::spatialAwareness::PositionRelativeToDoor;
+using JsDoorPositionResponse = ohos::multimodalAwareness::spatialAwareness::DoorPositionResponse;
+using callbackType = std::variant<taihe::callback<void(JsDistMeasureResponse const&)>,
+    taihe::callback<void(JsDoorPositionResponse const&)>>;
 
-enum CDistanceRank : int32_t {
+enum DistanceRank : int32_t {
     TYPE_RANK_ULTRA_SHORT_RANGE = 0,
     TYPE_RANK_SHORT_RANGE = 1,
     TYPE_RANK_SHORT_MEDIUM_RANGE = 2,
@@ -45,19 +43,19 @@ enum CDistanceRank : int32_t {
     TYPE_RANK_MAX = 4
 };
 struct CDistMeasureResponse {
-    CDistanceRank rank;
+    DistanceRank rank;
     float distance;
     float confidence;
-    const char* deviceId;
+    std::string deviceId;
 };
-enum CPositionRelativeToDoor : int32_t {
+enum PositionRelativeToDoor : int32_t {
     TYPE_OF_OUTDOOR = 0,
     TYPE_OF_INDOOR = 1
 };
 struct CDoorPositionResponse {
     std::uint32_t pinCode;
-    CPositionRelativeToDoor position;
-    const char* deviceId;
+    PositionRelativeToDoor position;
+    std::string deviceId;
 };
 struct CDistMeasureData {
     std::string type;
@@ -164,10 +162,10 @@ public:
     void OnDistanceMeasurementChanged(const CDistMeasureResponse &distMeasureRes);
     void OnDoorIdentifyChanged(const CDoorPositionResponse &identifyRes);
     void OnDistanceMeasure(DistanceMeasurementConfigParams const& configParams,
-        callback_view<void(DistMeasureResponse const&)> callback, uintptr_t opq);
+        callback_view<void(JsDistMeasureResponse const&)> callback, uintptr_t opq);
     void OffDistanceMeasure(DistanceMeasurementConfigParams const& configParams, optional_view<uintptr_t> opq);
     void OnIndoorOrOutdoorIdentify(DistanceMeasurementConfigParams const& configParams,
-        callback_view<void(DoorPositionResponse const&)> callback, uintptr_t opq);
+        callback_view<void(JsDoorPositionResponse const&)> callback, uintptr_t opq);
     void OffIndoorOrOutdoorIdentify(DistanceMeasurementConfigParams const& configParams, optional_view<uintptr_t> opq);
     void Subscribe(DistanceMeasurementConfigParams const& configParams, callbackType &&f, uintptr_t opq,
         const std::string &type);

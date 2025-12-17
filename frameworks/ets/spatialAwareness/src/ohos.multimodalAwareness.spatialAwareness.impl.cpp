@@ -26,7 +26,7 @@ namespace {
 using namespace OHOS::Msdp;
 
 void OnDistanceMeasureInner(DistanceMeasurementConfigParams const& configParams,
-    callback_view<void(DistMeasureResponse const&)> callback, uintptr_t opq)
+    callback_view<void(JsDistMeasureResponse const&)> callback, uintptr_t opq)
 {
     EtsSpatialAwarenessManager::GetInstance()->OnDistanceMeasure(configParams, callback, opq);
 }
@@ -38,7 +38,7 @@ void OffDistanceMeasureInner(DistanceMeasurementConfigParams const& configParams
 }
 
 void OnIndoorOrOutdoorIdentifyInner(DistanceMeasurementConfigParams const& configParams,
-    callback_view<void(DoorPositionResponse const&)> callback, uintptr_t opq)
+    callback_view<void(JsDoorPositionResponse const&)> callback, uintptr_t opq)
 {
     EtsSpatialAwarenessManager::GetInstance()->OnIndoorOrOutdoorIdentify(configParams, callback, opq);
 }
