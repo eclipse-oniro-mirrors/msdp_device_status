@@ -3143,7 +3143,7 @@ void DragDrawing::SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_pt
     }
     Rosen::Vector4f cornerRadiusVector = { filterInfo.cornerRadius1, filterInfo.cornerRadius2,
         filterInfo.cornerRadius3, filterInfo.cornerRadius4 };
-    filterNode->SetCornerRadius(cornerRadiusVector * filterInfo.dipScale);
+    filterNode->SetCornerRadius(cornerRadiusVector * filterInfo.dipScale * filterInfo.scale);
     FI_HILOGD("Set custom drag blur successfully");
 }
 
@@ -3195,7 +3195,7 @@ void DragDrawing::SetComponentDragBlur(const FilterInfo &filterInfo, const Extra
             extraInfo.cornerRadius, filterInfo.dipScale);
         return;
     }
-    filterNode->SetCornerRadius(extraInfo.cornerRadius * filterInfo.dipScale);
+    filterNode->SetCornerRadius(extraInfo.cornerRadius * filterInfo.dipScale * filterInfo.scale);
     FI_HILOGD("Set component drag blur successfully");
     return;
 }
