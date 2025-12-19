@@ -186,8 +186,9 @@ struct OnscreenAwarenessInfo {
 };
 
 struct ScreenShotIntent {
-    std::string name;
-    std::string param;
+    std::string appName;
+    std::string type;
+    std::string content;
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

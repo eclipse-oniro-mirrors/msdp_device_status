@@ -422,6 +422,12 @@ bool OnScreenNapi::GetAwarenessOption(napi_env env, napi_value awarenessOption, 
         std::vector<std::string> imageIds;
         GetStrArrFromJs(env, elementValue, "imageId", imageIds);
         option.entityInfo["imageId"] = imageIds;
+        CHKCF(napi_has_named_property(env, elementValue, "image", &hasProperty) == napi_ok, "napi_has_named_property failed");
+        if (hasProperty) {
+            std::shared_ptr<Media::PixelMap> image;
+            GetPixelMapFromJs(env, elementValue, "image", image);
+            option.entityInfo["image"] = image;
+        }
     }
     return true;
 }

@@ -642,21 +642,24 @@ int32_t OnScreenServer::Trigger(const CallingContext &context, const AwarenessCa
         return RET_NO_PERMISSION;
     }
     // proactive screenshot reuse interface
-    bool hasScreenshotIntent = std::find(cap.capList.begin(), cap.capList.end(), PROACTIVE_SCREEN_SHOT_CAP) !=
-        cap.capList.end();
-    std::optional<std::vector<ScreenShotIntent>> intentVec = std::nullopt;
-    int32_t ret = RET_OK;
-    OnscreenAwarenessInfo screenshotIntentInfo;
-    int32_t screenshotIntentRet = hasScreenshotIntent ?
-        OnScreenShotIntent(context, option, screenshotIntentInfo) : RET_OK;
-    if (!IsWhitelistAppCalling(context)) {
-        FI_HILOGE("calling is not system calling");
-        return RET_NO_SYSTEM_CALLING;
-    }
-    info = FillDumpData(cap, option);
-    if (ret == RET_OK) {
+    bool hasScreenshotIntent = cap.capList.size() == 1 && cap.capList[0] == PROACTIVE_SCREEN_SHOT_CAP;
+    if (hasScreenshotIntent) {
+        std::optional<std::vector<ScreenShotIntent>> intentVec = std::nullopt;
+        OnscreenAwarenessInfo screenshotIntentInfo;
+        int32_t screenshotIntentRet = OnScreenShotIntent(context, option, screenshotIntentInfo);
+        if (screenshotIntentRet != RET_OK) {
+            return screenshotIntentRet;
+        }
         info.entityInfo.insert(info.entityInfo.end(), screenshotIntentInfo.entityInfo.begin(),
-            screenshotIntentInfo.end());
+            screenshotIntentInfo.entityInfo.end());
+        return RET_OK;
+    } else {
+        if (!IsWhitelistAppCalling(context)) {
+            FI_HILOGE("calling is not system calling");
+            return RET_NO_SYSTEM_CALLING;
+        }
+        info = FillDumpData(cap, option);
+        return RET_OK;
     }
     return RET_OK;
 }
@@ -665,8 +668,12 @@ int32_t OnScreenServer::OnScreenShotIntent(const CallingContext &context, const 
     OnscreenAwarenessInfo& info)
 {
     // parse param
-    auto windowIdVar = option.entityInfo["windowId"];
-    auto screenshotVar = option.entityInfo["screenshot"];
+    if (option.entityInfo.count("windowId") == 0 || option.entityInfo.count("image") == 0) {
+        FI_HILOGE("not find windowId or image");
+        return RET_PARAM_ERR;
+    }
+    auto windowIdVar = option.entityInfo.at("windowId");
+    auto screenshotVar = option.entityInfo.at("image");
     int32_t windowId = 0;
     std::shared_ptr<Media::PixelMap> screenshot = nullptr;
     if (!(std::holds_alternative<int32_t>(windowId) &&
@@ -676,6 +683,7 @@ int32_t OnScreenServer::OnScreenShotIntent(const CallingContext &context, const 
     }
     windowId = std::get<int32_t>(windowIdVar);
     screenshot = std::get<std::shared_ptr<Media::PixelMap>>(screenshotVar);
+    FI_HILOGD("windowId = %{public}d", windowId);
     // invoke alg
     std::vector<ScreenShotIntent> intentVec;
     if (ConnectAlgoLib() != RET_OK) {
@@ -698,10 +706,11 @@ int32_t OnScreenServer::OnScreenShotIntent(const CallingContext &context, const 
     info.timestamp = static_cast<int64_t>(std::time(nullptr));
     for (const auto &i : intentVec) {
         std::map<std::string, std::string> intentData;
-        intentData["name"] = i.name;
-        intentData["param"] = i.param;
+        intentData["type"] = i.type;
+        intentData["content"] = i.content;
+        intentData["appName"] = i.appName;
         OnscreenEntityInfo info = {
-            .entityName = "screenshotIntent",
+            .entityName = PROACTIVE_SCREEN_SHOT_CAP,
             .entityInfo = intentData
         };
         info.entityInfo.push_back(info);
