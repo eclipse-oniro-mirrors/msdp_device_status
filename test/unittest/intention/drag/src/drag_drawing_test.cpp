@@ -217,7 +217,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest1, TestSize.Level0)
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
     EXPECT_TRUE(dragData);
     g_dragMgr.dragDrawing_.materialId_ = 1;
-    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context, true);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragDrawing_.LoadNewMaterialLib();
     g_dragMgr.dragDrawing_.materialId_ = -1;

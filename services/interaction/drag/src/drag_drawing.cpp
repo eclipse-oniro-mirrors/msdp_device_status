@@ -2072,6 +2072,9 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData, bool isLongPressDrag
     }
     materialId_ = dragData.materialId;
     materialFilter_ = dragData.materialFilter;
+    if (isLongPressDrag) {
+        RotatePixelMapXY();
+    }
 }
 
 int32_t DragDrawing::InitDragAnimationData(DragAnimationData &dragAnimationData)
