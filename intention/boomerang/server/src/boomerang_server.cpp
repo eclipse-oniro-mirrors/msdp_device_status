@@ -15,10 +15,12 @@
 
 #include "boomerang_server.h"
 
+#include "accesstoken_kit.h"
 #include "hisysevent.h"
 #include "hitrace_meter.h"
+#include "parameters.h"
 #include "tokenid_kit.h"
-#include "accesstoken_kit.h"
+
 
 #include "devicestatus_define.h"
 #include "devicestatus_dumper.h"
@@ -30,6 +32,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+const std::vector<std::string> SUPPORT_DEVICE_TYPE = { "phone", "tablet" };
+}
 
 BoomerangServer::BoomerangServer()
 {
@@ -62,6 +67,10 @@ void BoomerangServer::DumpCurrentDeviceStatus(int32_t fd)
 int32_t BoomerangServer::SubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& subCallback)
 {
+    if (!IsDeviceSupport()) {
+        FI_HILOGE("the device type is not support");
+        return COMMON_CAPABILITY_NOT_SUPPORT;
+    }
     CHKPR(subCallback, RET_ERR);
     BoomerangType boomerangType = static_cast<BoomerangType>(type);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
@@ -83,6 +92,10 @@ int32_t BoomerangServer::SubscribeCallback(CallingContext &context, int32_t type
 int32_t BoomerangServer::UnsubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& unsubCallback)
 {
+    if (!IsDeviceSupport()) {
+        FI_HILOGE("the device type is not support");
+        return COMMON_CAPABILITY_NOT_SUPPORT;
+    }
     CHKPR(unsubCallback, RET_ERR);
     BoomerangType boomerangType = static_cast<BoomerangType>(type);
     auto appInfo = std::make_shared<BoomerangAppInfo>();
@@ -104,6 +117,10 @@ int32_t BoomerangServer::UnsubscribeCallback(CallingContext &context, int32_t ty
 int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& notifyCallback)
 {
+    if (!IsDeviceSupport()) {
+        FI_HILOGE("the device type is not support");
+        return COMMON_CAPABILITY_NOT_SUPPORT;
+    }
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
@@ -126,6 +143,10 @@ int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, con
 int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
     const std::string& metaData, const sptr<IRemoteBoomerangCallback>& encodeCallback)
 {
+    if (!IsDeviceSupport()) {
+        FI_HILOGE("the device type is not support");
+        return COMMON_CAPABILITY_NOT_SUPPORT;
+    }
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
@@ -148,6 +169,10 @@ int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, const std
 int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
     const sptr<IRemoteBoomerangCallback>& decodeCallback)
 {
+    if (!IsDeviceSupport()) {
+        FI_HILOGE("the device type is not support");
+        return COMMON_CAPABILITY_NOT_SUPPORT;
+    }
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
@@ -169,6 +194,10 @@ int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, const std
 
 int32_t BoomerangServer::SubmitMetadata(CallingContext &context, const std::string& metaData)
 {
+    if (!IsDeviceSupport()) {
+        FI_HILOGE("the device type is not support");
+        return COMMON_CAPABILITY_NOT_SUPPORT;
+    }
     int32_t ret = manager_.SubmitMetadata(metaData);
     if (ret != RET_OK) {
         FI_HILOGE("boomerang submit metada failed");
@@ -214,6 +243,12 @@ bool BoomerangServer::IsSystemHAPCalling(CallingContext &context)
         return true;
     }
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
+}
+
+bool BoomerangServer::IsDeviceSupport()
+{
+    std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
+    return std::find(SUPPORT_DEVICE_TYPE.begin(), SUPPORT_DEVICE_TYPE.end(), deviceType) != SUPPORT_DEVICE_TYPE.end();
 }
 } // namespace DeviceStatus
 } // namespace Msdp

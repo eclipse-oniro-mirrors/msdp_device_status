@@ -62,6 +62,7 @@ ohos_source_set("intention_boomerang_server") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "input:libmmi-client",
     "samgr:samgr_proxy",
     "window_manager:libdm",

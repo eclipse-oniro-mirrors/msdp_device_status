@@ -51,6 +51,7 @@ public:
 private:
     Data GetCache(CallingContext &context, const Type &type);
     void ReportSensorSysEvent(CallingContext &context, int32_t type, bool enable);
+    bool IsDeviceSupport();
 
     DeviceStatusManager manager_;
 };
