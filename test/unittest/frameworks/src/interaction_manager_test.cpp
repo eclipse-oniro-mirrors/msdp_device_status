@@ -3087,7 +3087,12 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002
     int64_t downTime = 0;
     InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
     bool status = true;
-    ASSERT_NO_FATAL_FAILURE(InteractionManager::GetInstance()->GetAppDragSwitchState(status));
+    ret = InteractionManager::GetInstance()->GetAppDragSwitchState(status);
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    EXPECT_EQ(ret, RET_ERR);
+#else
+    EXPECT_EQ(ret, RET_OK);
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
 }
 /*
  * @tc.name: InteractionManagerTest_ActivateCooperateWithOptions

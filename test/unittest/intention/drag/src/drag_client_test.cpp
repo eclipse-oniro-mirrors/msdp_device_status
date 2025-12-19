@@ -385,7 +385,11 @@ HWTEST_F(DragClientTest, DragClientTest6, TestSize.Level0)
     CALL_TEST_DEBUG;
     bool state = false;
     int32_t ret = g_dragClient.GetAppDragSwitchState(state);
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    EXPECT_EQ(ret, RET_ERR);
+#else
     EXPECT_EQ(ret, RET_OK);
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
 }
 
 /**
