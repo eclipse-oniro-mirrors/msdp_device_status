@@ -3085,7 +3085,7 @@ void DragDrawing::ProcessFilter()
     CHKPV(currentPixelMap);
     FilterInfo filterInfo = g_drawingInfo.filterInfo;
     ExtraInfo extraInfo = g_drawingInfo.extraInfo;
-    if (filterInfo.blurStyle != -1) {
+    if ((filterInfo.blurStyle != -1) || (materialId_ != -1) || (materialFilter_ != nullptr)) {
         SetCustomDragBlur(filterInfo, filterNode);
     } else if (extraInfo.componentType == BIG_FOLDER_LABEL) {
         SetComponentDragBlur(filterInfo, extraInfo, filterNode);
@@ -3101,6 +3101,13 @@ void DragDrawing::OnSetCustomDragBlur(const FilterInfo &filterInfo, std::shared_
         return;
     }
     filterNode->SetAlpha(filterInfo.opacity);
+    if ((filterInfo.blurStyle < 0) || (filterInfo.blurRadius < 0) || (filterInfo.dipScale < 0) ||
+        (fabs(filterInfo.dipScale) < EPSILON) || ((std::numeric_limits<float>::max()
+        / filterInfo.dipScale) < filterInfo.blurRadius)) {
+        FI_HILOGE("Invalid parameters, cornerRadius:%{public}f, dipScale:%{public}f",
+            filterInfo.blurRadius, filterInfo.dipScale);
+        return;
+    }
     Rosen::BLUR_COLOR_MODE mode = (Rosen::BLUR_COLOR_MODE)filterInfo.blurStyle;
     std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
         RadiusVp2Sigma(filterInfo.blurRadius, filterInfo.dipScale),
@@ -3121,29 +3128,21 @@ void DragDrawing::SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_pt
     }
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     CHKPV(currentPixelMap);
+    OnSetCustomDragBlur(filterInfo, filterNode);
     if (materialId_ != -1) {
         if (!SetNewMaterialId()) {
-            OnSetCustomDragBlur(filterInfo, filterNode);
+            FI_HILOGE("SetNewMaterialId failed");
         }
     } else if (materialFilter_ != nullptr) {
-        if (SetMaterialFilter()) {
-            OnSetCustomDragBlur(filterInfo, filterNode);
+        if (!SetMaterialFilter()) {
+            FI_HILOGE("SetMaterialFilter failed");
         }
-    } else {
-        OnSetCustomDragBlur(filterInfo, filterNode);
     }
     int32_t adjustSize = TWELVE_SIZE * GetScaling();
     filterNode->SetBounds(DEFAULT_POSITION_X, adjustSize, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight());
     filterNode->SetFrame(DEFAULT_POSITION_X, adjustSize, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight());
-    if ((filterInfo.blurRadius < 0) || (filterInfo.dipScale < 0) ||
-        (fabs(filterInfo.dipScale) < EPSILON) || ((std::numeric_limits<float>::max()
-        / filterInfo.dipScale) < filterInfo.blurRadius)) {
-        FI_HILOGE("Invalid parameters, cornerRadius:%{public}f, dipScale:%{public}f",
-            filterInfo.blurRadius, filterInfo.dipScale);
-        return;
-    }
     Rosen::Vector4f cornerRadiusVector = { filterInfo.cornerRadius1, filterInfo.cornerRadius2,
         filterInfo.cornerRadius3, filterInfo.cornerRadius4 };
     filterNode->SetCornerRadius(cornerRadiusVector * filterInfo.dipScale * filterInfo.scale);
@@ -3158,6 +3157,13 @@ void DragDrawing::OnSetComponentDragBlur(const FilterInfo &filterInfo, const Ext
         return;
     }
     filterNode->SetAlpha(filterInfo.opacity);
+    if ((extraInfo.cornerRadius < 0) || (filterInfo.dipScale < 0) ||
+        (fabs(filterInfo.dipScale) < EPSILON) || ((std::numeric_limits<float>::max()
+        / filterInfo.dipScale) < extraInfo.cornerRadius)) {
+        FI_HILOGE("Invalid parameters, cornerRadius:%{public}f, dipScale:%{public}f",
+            extraInfo.cornerRadius, filterInfo.dipScale);
+        return;
+    }
     std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
         RadiusVp2Sigma(RADIUS_VP, filterInfo.dipScale),
         DEFAULT_SATURATION, DEFAULT_BRIGHTNESS, DEFAULT_COLOR_VALUE);
@@ -3175,29 +3181,21 @@ void DragDrawing::SetComponentDragBlur(const FilterInfo &filterInfo, const Extra
     CHKPV(filterNode);
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     CHKPV(currentPixelMap);
+    OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
     if (materialId_ != -1) {
         if (!SetNewMaterialId()) {
-            OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+            FI_HILOGE("SetNewMaterialId failed");
         }
     } else if (materialFilter_ != nullptr) {
         if (!SetMaterialFilter()) {
-            OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+            FI_HILOGE("SetMaterialFilter failed");
         }
-    } else {
-        OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
     }
     int32_t adjustSize = TWELVE_SIZE * GetScaling();
     filterNode->SetBounds(DEFAULT_POSITION_X, adjustSize, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight());
     filterNode->SetFrame(DEFAULT_POSITION_X, adjustSize, currentPixelMap->GetWidth(),
         currentPixelMap->GetHeight());
-    if ((extraInfo.cornerRadius < 0) || (filterInfo.dipScale < 0) ||
-        (fabs(filterInfo.dipScale) < EPSILON) || ((std::numeric_limits<float>::max()
-        / filterInfo.dipScale) < extraInfo.cornerRadius)) {
-        FI_HILOGE("Invalid parameters, cornerRadius:%{public}f, dipScale:%{public}f",
-            extraInfo.cornerRadius, filterInfo.dipScale);
-        return;
-    }
     filterNode->SetCornerRadius(extraInfo.cornerRadius * filterInfo.dipScale * filterInfo.scale);
     FI_HILOGD("Set component drag blur successfully");
     return;
