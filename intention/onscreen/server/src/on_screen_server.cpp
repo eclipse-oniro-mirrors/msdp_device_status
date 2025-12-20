@@ -676,7 +676,7 @@ int32_t OnScreenServer::OnScreenShotIntent(const CallingContext &context, const 
     auto screenshotVar = option.entityInfo.at("image");
     int32_t windowId = 0;
     std::shared_ptr<Media::PixelMap> screenshot = nullptr;
-    if (!(std::holds_alternative<int32_t>(windowId) &&
+    if (!(std::holds_alternative<int32_t>(windowIdVar) &&
         std::holds_alternative<std::shared_ptr<Media::PixelMap>>(screenshotVar))) {
         FI_HILOGE("onscreenshot windowId or screenshot type unmatch");
         return RET_PARAM_ERR;
@@ -697,7 +697,7 @@ int32_t OnScreenServer::OnScreenShotIntent(const CallingContext &context, const 
         .pid = context.pid,
     };
     FI_HILOGI("on screenshot intent invoke algo lib");
-    ret = handle_.pAlgorithm->OnScreenShotIntent(onScreenContext, windowId, screenshot, intentVec);
+    int32_t ret = handle_.pAlgorithm->OnScreenShotIntent(onScreenContext, windowId, screenshot, intentVec);
     if (ret != RET_OK) {
         FI_HILOGE("failed to get on screenshot intent, err=%{public}d", ret);
     }
@@ -705,15 +705,15 @@ int32_t OnScreenServer::OnScreenShotIntent(const CallingContext &context, const 
     info.resultCode = ret;
     info.timestamp = static_cast<int64_t>(std::time(nullptr));
     for (const auto &i : intentVec) {
-        std::map<std::string, std::string> intentData;
+        std::map<std::string, ValueObj> intentData;
         intentData["type"] = i.type;
         intentData["content"] = i.content;
         intentData["appName"] = i.appName;
-        OnscreenEntityInfo info = {
+        OnscreenEntityInfo intentInfo = {
             .entityName = PROACTIVE_SCREEN_SHOT_CAP,
             .entityInfo = intentData
         };
-        info.entityInfo.push_back(info);
+        info.entityInfo.push_back(intentInfo);
     }
     return RET_OK;
 }

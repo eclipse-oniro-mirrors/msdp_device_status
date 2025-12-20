@@ -574,7 +574,6 @@ void IntentionManager::OnConnected()
     drag_.OnConnected();
     cooperate_.OnConnected();
     stationary_.OnConnected();
-    onScreen_.OnConnected();
 }
 
 void IntentionManager::OnDisconnected()

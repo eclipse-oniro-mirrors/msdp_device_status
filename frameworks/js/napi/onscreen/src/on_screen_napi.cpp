@@ -276,7 +276,7 @@ bool OnScreenNapi::HandleOptionInt64(napi_env env, std::string strName, napi_val
 {
     int64_t result;
     CHKCF((napi_get_value_int64(env, int64Value, &result) == napi_ok), "napi value int fail");
-    FI_HILOGI("long is %{public}ld", result);
+    FI_HILOGI("long is %{public}lld", result);
     option.entityInfo[strName] = result;
     return true;
 }
@@ -409,6 +409,7 @@ bool OnScreenNapi::GetAwarenessOption(napi_env env, napi_value awarenessOption, 
         GetInt32FromJs(env, elementValue, "windowId", value, false);
         option.entityInfo["windowId"] = value;
         FI_HILOGI("windowId is %{public}d", value);
+        bool hasProperty = false;
         GetInt32FromJs(env, elementValue, "controlByPolicy", value, false);
         CHKCF(value >= static_cast<int32_t>(ControlPolicy::MAX_TRIGGER) ||
             value < static_cast<int32_t>(ControlPolicy::SYSTEM_TRIGGER), "controlPolicy invalid");
