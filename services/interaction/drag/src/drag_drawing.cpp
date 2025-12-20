@@ -3100,6 +3100,7 @@ void DragDrawing::OnSetCustomDragBlur(const FilterInfo &filterInfo, std::shared_
         FI_HILOGE("filterNode is nullptr");
         return;
     }
+    filterNode->SetAlpha(filterInfo.opacity);
     Rosen::BLUR_COLOR_MODE mode = (Rosen::BLUR_COLOR_MODE)filterInfo.blurStyle;
     std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
         RadiusVp2Sigma(filterInfo.blurRadius, filterInfo.dipScale),
@@ -3110,7 +3111,6 @@ void DragDrawing::OnSetCustomDragBlur(const FilterInfo &filterInfo, std::shared_
     }
     filterNode->SetBackgroundFilter(backFilter);
     filterNode->SetGreyCoef(filterInfo.coef);
-    filterNode->SetAlpha(filterInfo.opacity);
 }
 
 void DragDrawing::SetCustomDragBlur(const FilterInfo &filterInfo, std::shared_ptr<Rosen::RSCanvasNode> filterNode)
@@ -3157,6 +3157,7 @@ void DragDrawing::OnSetComponentDragBlur(const FilterInfo &filterInfo, const Ext
         FI_HILOGE("filterNode is nullptr");
         return;
     }
+    filterNode->SetAlpha(filterInfo.opacity);
     std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(
         RadiusVp2Sigma(RADIUS_VP, filterInfo.dipScale),
         DEFAULT_SATURATION, DEFAULT_BRIGHTNESS, DEFAULT_COLOR_VALUE);
@@ -3166,7 +3167,6 @@ void DragDrawing::OnSetComponentDragBlur(const FilterInfo &filterInfo, const Ext
     }
     filterNode->SetBackgroundFilter(backFilter);
     filterNode->SetGreyCoef(extraInfo.coef);
-    filterNode->SetAlpha(filterInfo.opacity);
 }
 
 void DragDrawing::SetComponentDragBlur(const FilterInfo &filterInfo, const ExtraInfo &extraInfo,
