@@ -57,7 +57,7 @@ public:
         int32_t pid = -1, bool isStopCooperate = false,  const DragRadarPackageName &inPackageName = {}) = 0;
     virtual int32_t GetDragData(DragData &dragData) = 0;
     virtual int32_t GetDragTargetPid() const = 0;
-    virtual int32_t GetUdKey(std::string &udKey) const = 0;
+    virtual int32_t GetUdKey(int32_t pid, std::string &udKey) const = 0;
     virtual int32_t OnGetShadowOffset(ShadowOffset &shadowOffset) = 0;
     virtual DragState GetDragState() const = 0;
     virtual int32_t GetDragState(DragState &dragState) = 0;
@@ -120,7 +120,8 @@ public:
     virtual void RemoveDisplayIdFromMap(Rosen::DisplayId displayId) = 0;
     virtual int32_t ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation) = 0;
     virtual int32_t EnterTextEditorArea(bool enable) = 0;
-    virtual int32_t AddPrivilege(int32_t tokenId) = 0;
+    virtual int32_t AddPrivilege(int32_t tokenId, int32_t pid,
+        const std::string &signature, const DragEventData &dragEventData) = 0;
     virtual int32_t EraseMouseIcon() = 0;
     virtual void SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) = 0;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X

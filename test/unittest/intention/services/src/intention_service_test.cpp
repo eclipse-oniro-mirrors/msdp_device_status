@@ -64,6 +64,10 @@ DragManager g_dragMgr;
 int32_t PERMISSION_EXCEPTION { 201 };
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr float DOUBLEPIMAX = 6.3F;
+uint64_t g_timestamp { 10000000 };
+double g_coordinateX {1.11 };
+double g_coordinateY {1.11 };
+const std::string SIGNATURE { "signature" };
 } // namespace
 
 int32_t MockDelegateTasks::PostSyncTask(DTaskCallback callback)
@@ -848,7 +852,13 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetExtraInfo001, TestSize.Le
 HWTEST_F(IntentionServiceTest, IntentionServiceTest_AddPrivilege001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    ErrCode ret = g_intentionServiceNullptr->AddPrivilege();
+    DragEventData dragEventData {
+        .timestampMs = g_timestamp,
+        .coordinateX = g_coordinateX,
+        .coordinateY = g_coordinateY,
+    };
+    SequenceableDragEventData sequenceableDragEventData(dragEventData);
+    ErrCode ret = g_intentionServiceNullptr->AddPrivilege(SIGNATURE, sequenceableDragEventData);
     EXPECT_EQ(ret, RET_ERR);
 }
 

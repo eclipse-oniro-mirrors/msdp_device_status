@@ -153,10 +153,10 @@ int32_t DragServer::GetDragTargetPid(CallingContext &context, int32_t &targetPid
     return RET_OK;
 }
 
-int32_t DragServer::GetUdKey(std::string &udKey)
+int32_t DragServer::GetUdKey(CallingContext &context, std::string &udKey)
 {
     CHKPR(env_, RET_ERR);
-    if (int32_t ret = env_->GetDragManager().GetUdKey(udKey); ret != RET_OK) {
+    if (int32_t ret = env_->GetDragManager().GetUdKey(context.pid, udKey); ret != RET_OK) {
         FI_HILOGE("IDragManager::GetUdKey fail, error:%{public}d", ret);
         return ret;
     }
@@ -339,10 +339,12 @@ int32_t DragServer::GetExtraInfo(std::string &extraInfo)
     return RET_OK;
 }
 
-int32_t DragServer::AddPrivilege(CallingContext &context)
+int32_t DragServer::AddPrivilege(CallingContext &context,
+    const std::string &signature, const DragEventData &dragEventData)
 {
     CHKPR(env_, RET_ERR);
-    if (int32_t ret = env_->GetDragManager().AddPrivilege(context.tokenId); ret != RET_OK) {
+    if (int32_t ret = env_->GetDragManager().AddPrivilege(context.tokenId,
+        context.pid, signature, dragEventData); ret != RET_OK) {
         FI_HILOGE("IDragManager::AddPrivilege fail, error:%{public}d", ret);
         return ret;
     }

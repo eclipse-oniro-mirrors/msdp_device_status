@@ -34,6 +34,7 @@ ohos_unittest("CooperateClientTest") {
     "${device_status_root_path}/intention/cooperate/client/include",
     "${device_status_root_path}/test/unittest/intention/cooperate/include",
     "${device_status_root_path}/intention/ipc/tunnel/include",
+    "${device_status_service_path}/drag_auth/include"
   ]
 
   sources = [
@@ -55,6 +56,7 @@ ohos_unittest("CooperateClientTest") {
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_service_path}/drag_auth:drag_auth"
   ]
   external_deps = [
     "access_token:libaccesstoken_sdk",
@@ -100,7 +102,8 @@ ohos_unittest("CooperateServerTest") {
     "${device_status_root_path}/services/native/include",
     "${device_status_root_path}/services/communication/service/include",
     "${device_status_root_path}/services/communication/base/",
-    "${device_status_root_path}/utils/json_parser/include"
+    "${device_status_root_path}/utils/json_parser/include",
+    "${device_status_service_path}/drag_auth/include"
   ]
 
   defines = []
@@ -129,7 +132,8 @@ ohos_unittest("CooperateServerTest") {
     "${device_status_root_path}/services/interaction/drag:interaction_drag",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
-    "${device_status_root_path}/utils/json_parser:json_parser"
+    "${device_status_root_path}/utils/json_parser:json_parser",
+    "${device_status_service_path}/drag_auth:drag_auth"
   ]
   external_deps = [
     "ability_runtime:app_manager",

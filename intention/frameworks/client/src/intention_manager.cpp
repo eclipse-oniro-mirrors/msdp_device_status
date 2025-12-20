@@ -549,10 +549,10 @@ int32_t IntentionManager::EnterTextEditorArea(bool enable)
     return drag_.EnableUpperCenterMode(enable);
 }
 
-int32_t IntentionManager::AddPrivilege()
+int32_t IntentionManager::AddPrivilege(const std::string &signature, const DragEventData &dragEventData)
 {
     CALL_DEBUG_ENTER;
-    return drag_.AddPrivilege();
+    return drag_.AddPrivilege(signature, dragEventData);
 }
 
 int32_t IntentionManager::EraseMouseIcon()

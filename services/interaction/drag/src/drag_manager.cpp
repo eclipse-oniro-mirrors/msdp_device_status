@@ -43,6 +43,7 @@
 #include "drag_data.h"
 #include "drag_data_manager.h"
 #include "drag_hisysevent.h"
+#include "drag_security_manager.h"
 #include "fi_log.h"
 #include "msdp_bundle_name_parser.h"
 #include "utility.h"
@@ -57,6 +58,7 @@ constexpr int32_t TIMEOUT_MS { 3000 };
 constexpr int32_t INTERVAL_MS { 500 };
 constexpr int32_t POWER_SQUARED { 2 };
 constexpr int32_t TEN_POWER { 10 * 10 };
+constexpr int32_t DUMP_PID { 0 };
 std::atomic<int64_t> g_startFilterTime { -1 };
 const std::string DRAG_STYLE_DEFAULT {"DEFAULT"};
 const std::string DRAG_STYLE_FORBIDDEN {"FORBIDDEN"};
@@ -405,6 +407,10 @@ int32_t DragManager::StartDrag(
     if (notifyPUllUpCallback_ != nullptr) {
         notifyPUllUpCallback_(false);
     }
+    if (DragSecurityManager::GetInstance().DeliverNonceToInput() == RET_ERR) {
+        FI_HILOGE("Deliver nonce to input failed");
+        return RET_ERR;
+    }
     SetDragState(DragState::START);
     dragDrawing_.OnStartDragExt();
     stateNotify_.StateChangedNotify(DragState::START);
@@ -591,6 +597,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     dragResult_ = static_cast<DragResult>(dropResult.result);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     SetDragState(DragState::STOP);
+    DragSecurityManager::GetInstance().ResetSecurityPid();
     if (GetControlCollaborationVisible()) {
         SetControlCollaborationVisible(false);
     }
@@ -618,9 +625,13 @@ int32_t DragManager::GetDragTargetPid() const
     return DRAG_DATA_MGR.GetTargetPid();
 }
 
-int32_t DragManager::GetUdKey(std::string &udKey) const
+int32_t DragManager::GetUdKey(int32_t pid, std::string &udKey) const
 {
     FI_HILOGI("enter");
+    if (!DragSecurityManager::GetInstance().VerifySecurityPid(pid) && (pid != DUMP_PID)) {
+        FI_HILOGE("Pid:%{public}d security verification is not performed", pid);
+        return RET_ERR;
+    }
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == NEED_FETCH)) {
         FI_HILOGI("Clear udKey");
@@ -1239,7 +1250,7 @@ void DragManager::OnDragCancel(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
-void DragManager::SendDragData(int32_t targetTid, const std::string &udKey)
+int32_t DragManager::SendDragData(int32_t targetTid, const std::string &udKey)
 {
     FI_HILOGI("enter");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -1251,10 +1262,12 @@ void DragManager::SendDragData(int32_t targetTid, const std::string &udKey)
     int32_t ret = UDMF::UdmfClient::GetInstance().AddPrivilege(option, privilege);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to send pid to Udmf client");
+        return RET_ERR;
     }
 #endif // MSDP_FRAMEWORK_UDMF_ENABLED
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     FI_HILOGI("leave");
+    return RET_OK;
 }
 
 int32_t DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
@@ -1387,7 +1400,7 @@ void DragManager::Dump(int32_t fd) const
 #endif // OHOS_DRAG_ENABLE_MONITOR
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     std::string udKey;
-    if (RET_ERR == GetUdKey(udKey)) {
+    if (RET_ERR == GetUdKey(DUMP_PID, udKey)) {
         FI_HILOGE("Target udKey is empty");
         udKey = "";
     }
@@ -2353,7 +2366,8 @@ int32_t DragManager::GetExtraInfo(std::string &extraInfo) const
     return RET_OK;
 }
 
-int32_t DragManager::AddPrivilege(int32_t tokenId)
+int32_t DragManager::AddPrivilege(int32_t tokenId, int32_t pid,
+    const std::string &signature, const DragEventData &dragEventData)
 {
     FI_HILOGD("enter");
     if (dragState_ != DragState::START && dragState_ != DragState::MOTION_DRAGGING) {
@@ -2362,7 +2376,16 @@ int32_t DragManager::AddPrivilege(int32_t tokenId)
     }
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     FI_HILOGD("Target window drag tid:%{public}d", tokenId);
-    SendDragData(tokenId, dragData.udKey);
+    if (!DragSecurityManager::GetInstance().VerifyAndResetNonce(dragEventData, signature)) {
+        FI_HILOGE("Verify sign failed");
+        return RET_ERR;
+    }
+    DragSecurityManager::GetInstance().StoreSecurityPid(pid);
+    int32_t ret = SendDragData(tokenId, dragData.udKey);
+    if (ret != RET_OK) {
+        FI_HILOGE("Failed to send pid to Udmf client:%{public}d", ret);
+        return ret;
+    }
     FI_HILOGD("leave");
     return RET_OK;
 }

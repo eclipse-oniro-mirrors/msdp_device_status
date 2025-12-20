@@ -46,7 +46,7 @@ public:
     int32_t SetDragWindowVisible(bool visible, bool isForce,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     int32_t GetDragTargetPid(CallingContext &context, int32_t &targetPid);
-    int32_t GetUdKey(std::string &udKey);
+    int32_t GetUdKey(CallingContext &context, std::string &udKey);
     int32_t GetShadowOffset(ShadowOffset &shadowOffset);
     int32_t GetDragData(CallingContext &context, DragData &dragData);
     int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
@@ -60,7 +60,7 @@ public:
     int32_t EnableUpperCenterMode(bool enable);
     int32_t GetDragAction(DragAction &dragAction);
     int32_t GetExtraInfo(std::string &extraInfo);
-    int32_t AddPrivilege(CallingContext &context);
+    int32_t AddPrivilege(CallingContext &context, const std::string &signature, const DragEventData &dragEventData);
     int32_t EraseMouseIcon(CallingContext &context);
     int32_t SetMouseDragMonitorState(bool state);
     int32_t SetDraggableState(bool state);

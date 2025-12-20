@@ -45,7 +45,8 @@ if (!is_arkui_x) {
       "${device_status_service_path}/interaction/drag/include",
       "${device_status_service_path}/native/include",
       "${device_status_root_path}/utils/json_parser/include",
-      "${device_status_root_path}/utils/custom_config/include"
+      "${device_status_root_path}/utils/custom_config/include",
+      "${device_status_service_path}/drag_auth/include"
     ]
 
     sources = [
@@ -88,7 +89,8 @@ if (!is_arkui_x) {
       "${device_status_root_path}/utils/ipc:devicestatus_ipc",
       "${device_status_utils_path}:devicestatus_util",
       "${device_status_root_path}/utils/custom_config:custom_config_parser",
-      "${device_status_root_path}/utils/json_parser:json_parser"
+      "${device_status_root_path}/utils/json_parser:json_parser",
+      "${device_status_service_path}/drag_auth:drag_auth"
     ]
 
     external_deps = [
@@ -198,6 +200,7 @@ if (!is_arkui_x) {
       "${foundation_graphic_path}/graphic_surface/interfaces/inner_api/surface",
       "${device_status_root_path}/utils/json_parser/include",
       "${device_status_root_path}/utils/custom_config/include",
+      "${device_status_service_path}/drag_auth/include"
     ]
 
     sources = [
@@ -211,6 +214,7 @@ if (!is_arkui_x) {
       "src/drag_data_manager.cpp",
       "src/drag_drawing.cpp",
       "src/drag_manager.cpp",
+      "${device_status_service_path}/drag_auth/src/drag_auth.cpp"
     ]
 
     defines = device_status_default_defines

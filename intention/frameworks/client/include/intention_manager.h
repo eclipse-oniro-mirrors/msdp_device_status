@@ -86,7 +86,7 @@ public:
     int32_t EnterTextEditorArea(bool enable);
     int32_t GetDragAction(DragAction &dragAction);
     int32_t GetExtraInfo(std::string &extraInfo);
-    int32_t AddPrivilege();
+    int32_t AddPrivilege(const std::string &signature, const DragEventData &dragEventData);
     int32_t EraseMouseIcon();
     int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
     int32_t SetMouseDragMonitorState(bool state);

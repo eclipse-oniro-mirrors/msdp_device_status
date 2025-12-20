@@ -866,7 +866,7 @@ int32_t IntentionClient::GetExtraInfo(std::string &extraInfo)
     return RET_OK;
 }
 
-int32_t IntentionClient::AddPrivilege()
+int32_t IntentionClient::AddPrivilege(const std::string &signature, const DragEventData &dragEventData)
 {
     if (Connect() != RET_OK) {
         FI_HILOGE("Can not connect to IntentionService");
@@ -874,7 +874,8 @@ int32_t IntentionClient::AddPrivilege()
     }
     std::lock_guard lock(mutex_);
     CHKPR(devicestatusProxy_, RET_ERR);
-    if (int32_t ret = devicestatusProxy_->AddPrivilege(); ret != RET_OK) {
+    SequenceableDragEventData sequenceableDragEventData(dragEventData);
+    if (int32_t ret = devicestatusProxy_->AddPrivilege(signature, sequenceableDragEventData); ret != RET_OK) {
         FI_HILOGE("proxy::AddPrivilege fail");
         return ret;
     }

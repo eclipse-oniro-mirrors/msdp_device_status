@@ -77,8 +77,14 @@ void FuzzIntentionClientDrag(const uint8_t *data, size_t size)
     INTENTION_CLIENT->GetDragAction(dragAction);
 
     std::string extraInfo = provider.ConsumeBytesAsString(10); // test value
+    std::string signature = provider.ConsumeBytesAsString(10); // test value
+    Msdp::DeviceStatus::DragEventData dragEventData = {
+        .timestampMs = provider.ConsumeIntegral<uint64_t>(),
+        .coordinateX = provider.ConsumeFloatingPoint<double>(),
+        .coordinateY = provider.ConsumeFloatingPoint<double>()
+    };
     INTENTION_CLIENT->GetExtraInfo(extraInfo);
-    INTENTION_CLIENT->AddPrivilege();
+    INTENTION_CLIENT->AddPrivilege(signature, dragEventData);
     INTENTION_CLIENT->EraseMouseIcon();
     INTENTION_CLIENT->GetDragSummaryInfo(dragSummaryInfo);
 }

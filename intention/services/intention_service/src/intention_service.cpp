@@ -297,8 +297,9 @@ ErrCode IntentionService::GetDragTargetPid(int32_t &targetPid)
 
 ErrCode IntentionService::GetUdKey(std::string &udKey)
 {
-    return PostSyncTask([this, &udKey] {
-        return drag_.GetUdKey(udKey);
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, &udKey] {
+        return drag_.GetUdKey(context, udKey);
     });
 }
 
@@ -430,11 +431,12 @@ ErrCode IntentionService::GetExtraInfo(std::string &extraInfo)
     });
 }
 
-ErrCode IntentionService::AddPrivilege()
+ErrCode IntentionService::AddPrivilege(const std::string &signature,
+    const SequenceableDragEventData &sequenceableDragEventData)
 {
     CallingContext context = GetCallingContext();
-    return PostSyncTask([this, &context] {
-       return drag_.AddPrivilege(context);
+    return PostSyncTask([this, &context, signature, sequenceableDragEventData] {
+       return drag_.AddPrivilege(context, signature, sequenceableDragEventData.dragEventData_);
     });
 }
 

@@ -284,9 +284,9 @@ int32_t InteractionManager::GetExtraInfo(std::string &extraInfo)
     return INTER_MGR_IMPL.GetExtraInfo(extraInfo);
 }
 
-int32_t InteractionManager::AddPrivilege()
+int32_t InteractionManager::AddPrivilege(const std::string &signature, const DragEventData &dragEventData)
 {
-    return INTER_MGR_IMPL.AddPrivilege();
+    return INTER_MGR_IMPL.AddPrivilege(signature, dragEventData);
 }
 
 int32_t InteractionManager::EraseMouseIcon()
