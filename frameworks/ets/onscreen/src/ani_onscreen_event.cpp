@@ -176,7 +176,7 @@ bool AniOnscreenEvent::AniToValueObj(const ani_object aniValue, OnScreen::ValueO
         valueObj = stringContent;
         return true;
     }
-    env->FindClass("escompat.Array", &optionClass);
+    env->FindClass("std.core.Array", &optionClass);
     CHKCF(env->Object_InstanceOf(aniValue, optionClass, &res) == ANI_OK, "create Array failed");
     if (res) {
         valueObj = ANIUtils_ANIArrayToStdVector(env, static_cast<ani_array>(aniValue));

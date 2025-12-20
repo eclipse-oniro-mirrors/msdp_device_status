@@ -101,10 +101,10 @@ ani_object CooperateCommon::WrapBusinessError(ani_env* env, const std::string& m
         return nullptr;
     }
 
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         return nullptr;
     }
@@ -122,11 +122,11 @@ ani_ref CooperateCommon::CreateBusinessError(ani_env* env, ani_int code, const s
     if (env == nullptr) {
         return nullptr;
     }
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("@ohos.base.BusinessError", &cls)) != ANI_OK) {
         return nullptr;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{escompat.Error}:", &ctor)) != ANI_OK) {
         return nullptr;
     }
     ani_object error = CooperateCommon::WrapBusinessError(env, msg);
@@ -193,7 +193,7 @@ ani_status CooperateCommon::ExecAsyncCallBack(ani_env *env, ani_object businessE
         FI_HILOGE("env is null");
         return status;
     }
-    if ((status = env->FindClass("Lstd/core/Function2;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("std.core.Function2", &cls)) != ANI_OK) {
         FI_HILOGE("find calss is failed, status = %{public}d", status);
         return status;
     }
