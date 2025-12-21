@@ -103,8 +103,6 @@ private:
     static bool TransJsToStr(napi_env env, napi_value in, std::string &out);
     static bool IsMatchType(napi_env env, napi_value value, napi_valuetype type);
     static bool GetStringFromJs(napi_env env, const napi_value &value, const std::string &field, std::string &result);
-    static bool GetStrArrFromJs(napi_env env, const napi_value &value, const std::string &field,
-        std::vector<std::string> &result);
     static bool GetPixelMapFromJs(napi_env env, const napi_value &value, const std::string &field,
         std::shared_ptr<Media::PixelMap> &result);
     static bool SetBoolProperty(napi_env env, napi_value targetObj, bool value, const char *propName);

@@ -56,6 +56,7 @@ const std::set<std::string> CAP_LIST = {
     "scenarioShortVideo",
     "scenarioActivity",
     "scenarioTodo",
+    "screenshotIntent",
 };
 } // namespace
 
@@ -176,32 +177,6 @@ bool OnScreenNapi::GetStringFromJs(napi_env env, const napi_value &value, const 
     CHKCF((napi_get_named_property(env, value, field.c_str(), &fieldValue) == napi_ok),
         "napi_get_named_property failed");
     return TransJsToStr(env, fieldValue, result);
-}
-
-bool OnScreenNapi::GetStrArrFromJs(napi_env env, const napi_value &value, const std::string &field,
-    std::vector<std::string> &result)
-{
-    bool hasProperty = false;
-    CHKCF(napi_has_named_property(env, value, field.c_str(), &hasProperty) == napi_ok && hasProperty,
-        "napi_has_named_property failed");
-    napi_value fieldValue = nullptr;
-    CHKCF((napi_get_named_property(env, value, field.c_str(), &fieldValue) == napi_ok),
-        "napi_get_named_property failed");
-    uint32_t length = 0;
-    CHKCF((napi_get_array_length(env, fieldValue, &length) == napi_ok), "napi_get_array_length fail");
-    for (size_t i = 0; i < length; i++) {
-        napi_value element = nullptr;
-        CHKCF((napi_get_element(env, fieldValue, i, &element) == napi_ok), "napi_get_element fail");
-        napi_valuetype valuetype = napi_undefined;
-        CHKCF(napi_typeof(env, element, &valuetype) == napi_ok, "napi typeof failed");
-        if (valuetype == napi_string) {
-            std::string strResult;
-            CHKCF(TransJsToStr(env, element, strResult), "TransJsToStr fail");
-            FI_HILOGI("%{public}s", strResult.c_str());
-            result.push_back(strResult);
-        }
-    }
-    return true;
 }
 
 bool OnScreenNapi::GetPixelMapFromJs(napi_env env, const napi_value &value, const std::string &field,
@@ -403,26 +378,10 @@ bool OnScreenNapi::GetAwarenessOption(napi_env env, napi_value awarenessOption, 
             "get named property fail");
         CHKCF(HandleOptionElement(env, strName, elementValue, option), "handle element failed");
         int32_t value;
-        GetInt32FromJs(env, elementValue, "displayId", value, false);
-        option.entityInfo["displayId"] = value;
-        FI_HILOGI("displayId is %{public}d", value);
         GetInt32FromJs(env, elementValue, "windowId", value, false);
         option.entityInfo["windowId"] = value;
         FI_HILOGI("windowId is %{public}d", value);
-        bool hasProperty = false;
-        GetInt32FromJs(env, elementValue, "controlByPolicy", value, false);
-        CHKCF(value >= static_cast<int32_t>(ControlPolicy::MAX_TRIGGER) ||
-            value < static_cast<int32_t>(ControlPolicy::SYSTEM_TRIGGER), "controlPolicy invalid");
-        option.entityInfo["controlByPolicy"] = value;
-        FI_HILOGI("controlByPolicy is %{public}d", value);
-        GetInt32FromJs(env, elementValue, "luoshuStatus", value, false);
-        CHKCF(value >= static_cast<int32_t>(LuoshuStatus::MAX_LUOSHU) ||
-            value < static_cast<int32_t>(LuoshuStatus::NON_LUOSHU_STATE), "luoshuStatus invalid");
-        option.entityInfo["luoshuStatus"] = value;
-        FI_HILOGI("luoshuStatus is %{public}d", value);
-        std::vector<std::string> imageIds;
-        GetStrArrFromJs(env, elementValue, "imageId", imageIds);
-        option.entityInfo["imageId"] = imageIds;
+        bool hasProperty;
         CHKCF(napi_has_named_property(env, elementValue, "image", &hasProperty) == napi_ok, "napi_has_named_property failed");
         if (hasProperty) {
             std::shared_ptr<Media::PixelMap> image;
