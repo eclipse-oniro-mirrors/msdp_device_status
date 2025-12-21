@@ -382,7 +382,8 @@ bool OnScreenNapi::GetAwarenessOption(napi_env env, napi_value awarenessOption, 
         option.entityInfo["windowId"] = value;
         FI_HILOGI("windowId is %{public}d", value);
         bool hasProperty;
-        CHKCF(napi_has_named_property(env, elementValue, "image", &hasProperty) == napi_ok, "napi_has_named_property failed");
+        CHKCF(napi_has_named_property(env, elementValue, "image", &hasProperty) == napi_ok,
+            "napi_has_named_property failed");
         if (hasProperty) {
             std::shared_ptr<Media::PixelMap> image;
             GetPixelMapFromJs(env, elementValue, "image", image);

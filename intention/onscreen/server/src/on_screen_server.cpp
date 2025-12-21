@@ -696,10 +696,10 @@ int32_t OnScreenServer::OnScreenShotIntent(const CallingContext &context, const 
         .uid = context.uid,
         .pid = context.pid,
     };
-    FI_HILOGI("on screenshot intent invoke algo lib");
+    FI_HILOGI("onscreenshot interface invoke algo lib");
     int32_t ret = handle_.pAlgorithm->OnScreenShotIntent(onScreenContext, windowId, screenshot, intentVec);
     if (ret != RET_OK) {
-        FI_HILOGE("failed to get on screenshot intent, err=%{public}d", ret);
+        FI_HILOGE("failed to invoke onscreenshot interface, err=%{public}d", ret);
     }
     // convert data to info
     info.resultCode = ret;
