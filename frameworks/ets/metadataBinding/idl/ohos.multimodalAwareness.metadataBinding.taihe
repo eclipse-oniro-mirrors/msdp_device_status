@@ -24,21 +24,21 @@ static
 
 @!sts_inject("""
     function on(type: 'operationSubmitMetadata', bundleName: string, callback: (info: int) => void) {
-        return onMetadata(bundleName, callback, callback);
+        return onMetadataInner(bundleName, callback, callback);
       }
     function off(type: 'operationSubmitMetadata', bundleName: string, callback?: (info: int) => void) {
-        return offMetadata(bundleName, callback);
+        return offMetadataInner(bundleName, callback);
       }
 """)
 
-function onMetadata(bundleName: String, callbck: (info: i32) => void, opq: Opaque);
-function offMetadata(bundleName: String, opq: Optional<Opaque>);
+function onMetadataInner(bundleName: String, callbck: (info: i32) => void, opq: Opaque);
+function offMetadataInner(bundleName: String, opq: Optional<Opaque>);
 
 function submitMetadata(metadata: String): void;
 
 @gen_promise("notifyMetadataBindingEvent")
-function notifyMetadataBindingEventPromise(bundleName: String): @sts_type("Promise<String>") Opaque;
+function notifyMetadataBindingEventPromise(bundleName: String): String;
 @gen_promise("encodeImage")
-function encodeImagePromise(srcImage: @sts_type("image.PixelMap") Opaque, metadata: String): @sts_type("Promise<image.PixelMap>") Opaque;
+function encodeImagePromise(srcImage: @sts_type("image.PixelMap") Opaque, metadata: String): @sts_type("image.PixelMap") Opaque;
 @gen_promise("decodeImage")
-function decodeImagePromise(encodedImage: @sts_type("image.PixelMap") Opaque): @sts_type("Promise<String>") Opaque;
+function decodeImagePromise(encodedImage: @sts_type("image.PixelMap") Opaque): String;

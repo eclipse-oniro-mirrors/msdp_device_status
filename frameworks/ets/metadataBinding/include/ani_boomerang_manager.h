@@ -66,7 +66,8 @@ public:
     void OnScreenshotResult(const BoomerangData& screenshotData) override;
     void OnNotifyMetadata(const std::string& metadata) override;
     void OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pixelMap) override;
-
+    bool GetMetadata(std::string &metadata);
+    bool GetEncodeImage(std::shared_ptr<Media::PixelMap> image);
     static ani_vm* vm_;
     ani_env *env_ = nullptr;
     ani_env* envT_ = nullptr;
@@ -78,8 +79,14 @@ public:
     bool result_ = false;
 
     std::mutex mutex_;
+    std::mutex notifyMutex_;
+    std::mutex imageMutex_;
     BoomerangData data_;
     std::string metadata_;
+    std::string decodeImage_;
+    std::shared_ptr<Media::PixelMap> pixelMap_ = nullptr;
+    bool notifyFlag_ = false;
+    bool onEncodeImageFlag_ = false;
 };
 
 class AniBoomerang : public AniBoomerangEvent {
@@ -89,10 +96,10 @@ public:
     ~AniBoomerang();
     void OnMetadata(const std::string &bundleName, ::taihe::callback_view<void(int32_t info)> callback, uintptr_t opq);
     void OffMetadata(const std::string &bundleName, ::taihe::optional_view<uintptr_t> opq);
-    void NotifyMetadataBindingEvent(const std::string &bundleName, ani_object& promise);
+    std::string NotifyMetadataBindingEvent(const std::string &bundleName);
     void SubmitMetadata(const std::string &metadata);
-    void EncodeImage(uintptr_t srcImage, const std::string &metadata, ani_object& promise);
-    void DecodeImage(uintptr_t encodedImage, ani_object& promise);
+    ani_object EncodeImage(uintptr_t srcImage, const std::string &metadata);
+    std::string DecodeImage(uintptr_t encodedImage);
     static std::shared_ptr<AniBoomerang> GetInstance();
     void OnScreenshot(int32_t type, int32_t status, bool isOnce);
     void OnEncodeImage(ani_env *env, std::shared_ptr<Media::PixelMap> pixelMap, ani_resolver deferred);
