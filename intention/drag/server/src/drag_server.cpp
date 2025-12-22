@@ -156,7 +156,8 @@ int32_t DragServer::GetDragTargetPid(CallingContext &context, int32_t &targetPid
 int32_t DragServer::GetUdKey(CallingContext &context, std::string &udKey)
 {
     CHKPR(env_, RET_ERR);
-    if (int32_t ret = env_->GetDragManager().GetUdKey(context.pid, udKey); ret != RET_OK) {
+    bool isSystemService = IsSystemServiceCalling(context);
+    if (int32_t ret = env_->GetDragManager().GetUdKey(context.pid, udKey, isSystemService); ret != RET_OK) {
         FI_HILOGE("IDragManager::GetUdKey fail, error:%{public}d", ret);
         return ret;
     }
