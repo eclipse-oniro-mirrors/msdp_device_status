@@ -23,7 +23,6 @@
 #include "napi_constants.h"
 #include "on_screen_manager.h"
 #include "on_screen_napi_error.h"
-#include "pixel_map_napi.h"
 #include "util_napi.h"
 
 #undef LOG_TAG
@@ -57,6 +56,7 @@ const std::set<std::string> CAP_LIST = {
     "scenarioShortVideo",
     "scenarioActivity",
     "scenarioTodo",
+    "screenshotIntent",
 };
 } // namespace
 
@@ -177,6 +177,22 @@ bool OnScreenNapi::GetStringFromJs(napi_env env, const napi_value &value, const 
     CHKCF((napi_get_named_property(env, value, field.c_str(), &fieldValue) == napi_ok),
         "napi_get_named_property failed");
     return TransJsToStr(env, fieldValue, result);
+}
+
+bool OnScreenNapi::GetPixelMapFromJs(napi_env env, const napi_value &value, const std::string &field,
+    std::shared_ptr<Media::PixelMap> &result)
+{
+    bool hasProperty = false;
+    CHKCF(napi_has_named_property(env, value, field.c_str(), &hasProperty) == napi_ok && hasProperty,
+        "napi_has_named_property failed");
+    napi_value fieldValue = nullptr;
+    CHKCF((napi_get_named_property(env, value, field.c_str(), &fieldValue) == napi_ok),
+        "napi_get_named_property failed");
+    result = Media::PixelMapNapi::GetPixelMap(env, fieldValue);
+    if (result == nullptr) {
+        return false;
+    }
+    return true;
 }
 
 bool OnScreenNapi::GetAwarenessCap(napi_env env, napi_value awarenessCap, size_t argc, AwarenessCap &cap)
@@ -351,6 +367,18 @@ bool OnScreenNapi::GetAwarenessOption(napi_env env, napi_value awarenessOption, 
         CHKCF(napi_get_named_property(env, awarenessOption, strName.c_str(), &elementValue) == napi_ok,
             "get named property fail");
         CHKCF(HandleOptionElement(env, strName, elementValue, option), "handle element failed");
+        int32_t value;
+        GetInt32FromJs(env, elementValue, "windowId", value, false);
+        option.entityInfo["windowId"] = value;
+        FI_HILOGI("windowId is %{public}d", value);
+        bool hasProperty;
+        CHKCF(napi_has_named_property(env, elementValue, "image", &hasProperty) == napi_ok,
+            "napi_has_named_property failed");
+        if (hasProperty) {
+            std::shared_ptr<Media::PixelMap> image;
+            GetPixelMapFromJs(env, elementValue, "image", image);
+            option.entityInfo["image"] = image;
+        }
     }
     return true;
 }

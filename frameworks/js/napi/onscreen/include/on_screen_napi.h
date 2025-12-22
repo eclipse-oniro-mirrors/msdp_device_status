@@ -25,6 +25,7 @@
 #include "on_screen_data.h"
 #include "on_screen_manager.h"
 #include "on_screen_napi_data.h"
+#include "pixel_map_napi.h"
 #include "screen_event_napi.h"
 
 namespace OHOS {
@@ -102,6 +103,8 @@ private:
     static bool TransJsToStr(napi_env env, napi_value in, std::string &out);
     static bool IsMatchType(napi_env env, napi_value value, napi_valuetype type);
     static bool GetStringFromJs(napi_env env, const napi_value &value, const std::string &field, std::string &result);
+    static bool GetPixelMapFromJs(napi_env env, const napi_value &value, const std::string &field,
+        std::shared_ptr<Media::PixelMap> &result);
     static bool SetBoolProperty(napi_env env, napi_value targetObj, bool value, const char *propName);
     static bool IsValidCap(const std::vector<std::string>& capList);
     static bool CheckCapList(const std::vector<std::string>& capList);

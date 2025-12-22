@@ -170,6 +170,11 @@ struct OnscreenAwarenessInfo {
     std::vector<OnscreenEntityInfo> entityInfo;
 };
 
+struct ScreenShotIntent {
+    std::string appName;
+    std::string type;
+    std::string content;
+};
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp
