@@ -61,7 +61,7 @@ HWTEST_F(OnScreenManagerTest, RegisterAwarenessCallback, TestSize.Level1)
 
 /**
  * @tc.name: UnregisterAwarenessCallback
- * @tc.desc: test for UnregisterAwarenessCallback
+ * @tc.desc: Test for UnregisterAwarenessCallback
  * @tc.type: FUNC
  */
 HWTEST_F(OnScreenManagerTest, UnregisterAwarenessCallback, TestSize.Level1)
