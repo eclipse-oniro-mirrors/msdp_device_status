@@ -76,7 +76,7 @@ HWTEST_F(OnScreenManagerTest, UnregisterAwarenessCallback, TestSize.Level1)
 
 /**
  * @tc.name: Trigger
- * @tc.desc: test for Trigger
+ * @tc.desc: Test for Trigger
  * @tc.type: FUNC
  */
 HWTEST_F(OnScreenManagerTest, Trigger, TestSize.Level1)
