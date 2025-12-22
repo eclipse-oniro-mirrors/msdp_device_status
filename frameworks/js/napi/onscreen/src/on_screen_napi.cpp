@@ -189,6 +189,9 @@ bool OnScreenNapi::GetPixelMapFromJs(napi_env env, const napi_value &value, cons
     CHKCF((napi_get_named_property(env, value, field.c_str(), &fieldValue) == napi_ok),
         "napi_get_named_property failed");
     result = Media::PixelMapNapi::GetPixelMap(env, fieldValue);
+    if (result == nullptr) {
+        return false;
+    }
     return true;
 }
 
@@ -216,7 +219,6 @@ bool OnScreenNapi::GetAwarenessCap(napi_env env, napi_value awarenessCap, size_t
         CHKCF(napi_get_named_property(env, capList, strName.c_str(), &elementValue) == napi_ok,
             "napi_get_named_property fail");
         CHKCF(TransJsToStr(env, elementValue, strValue), "TransJsToStr value fail");
-        FI_HILOGI("name %{public}s, value %{public}s", strName.c_str(), strValue.c_str());
         cap.capList.push_back(strValue);
     }
     CHKCF(napi_has_named_property(env, awarenessCap, "description", &exist) == napi_ok,
@@ -231,7 +233,6 @@ bool OnScreenNapi::HandleOptionBool(napi_env env, std::string strName, napi_valu
 {
     bool result;
     CHKCF((napi_get_value_bool(env, boolValue, &result) == napi_ok), "napi value bool fail");
-    FI_HILOGI("bool is %{public}d", result);
     option.entityInfo[strName] = result;
     return true;
 }
@@ -241,7 +242,6 @@ bool OnScreenNapi::HandleOptionInt32(napi_env env, std::string strName, napi_val
 {
     int32_t result;
     CHKCF((napi_get_value_int32(env, int32Value, &result) == napi_ok), "napi value int fail");
-    FI_HILOGI("int is %{public}d", result);
     option.entityInfo[strName] = result;
     return true;
 }
@@ -251,7 +251,6 @@ bool OnScreenNapi::HandleOptionInt64(napi_env env, std::string strName, napi_val
 {
     int64_t result;
     CHKCF((napi_get_value_int64(env, int64Value, &result) == napi_ok), "napi value int fail");
-    FI_HILOGI("long is %{public}lld", result);
     option.entityInfo[strName] = result;
     return true;
 }
@@ -261,7 +260,6 @@ bool OnScreenNapi::HandleOptionString(napi_env env, std::string strName, napi_va
 {
     std::string result;
     CHKCF((TransJsToStr(env, strValue, result) == napi_ok), "napi value int fail");
-    FI_HILOGI("str is %{public}s", result.c_str());
     option.entityInfo[strName] = result;
     return true;
 }
@@ -273,7 +271,6 @@ bool OnScreenNapi::HandleOptionObject(napi_env env, std::string strName, napi_va
     std::string deepLink;
     if (GetStringFromJs(env, objValue, "httpLink", httpLink) == napi_ok && GetStringFromJs(env, objValue, "deepLink",
         deepLink) == napi_ok) {
-        FI_HILOGI("link is %{public}s, %{public}s", httpLink.c_str(), deepLink.c_str());
         AwarenessInfoPageLink result = { httpLink, deepLink};
         option.entityInfo[strName] = result;
     } else {
@@ -286,7 +283,6 @@ bool OnScreenNapi::HandleOptionObject(napi_env env, std::string strName, napi_va
 bool OnScreenNapi::HandleOptionArray(napi_env env, std::string strName, napi_value arrayValue,
     AwarenessOptions &option)
 {
-    FI_HILOGI("option array");
     uint32_t length = 0;
     CHKCF((napi_get_array_length(env, arrayValue, &length) == napi_ok), "napi_get_array_length fail");
     std::vector<std::string> strArr;
@@ -324,27 +320,22 @@ bool OnScreenNapi::HandleOptionElement(napi_env env, std::string strName, napi_v
     CHKCF(napi_typeof(env, elementValue, &elementType) == napi_ok, "napi_typeof failed");
     switch (elementType) {
         case napi_boolean: {
-            FI_HILOGI("option element bool");
             CHKCF(HandleOptionBool(env, strName, elementValue, option), "napi value bool fail");
             break;
         }
         case napi_number: {
-            FI_HILOGI("option element num");
             CHKCF(HandleOptionInt32(env, strName, elementValue, option), "napi value int32 fail");
             break;
         }
         case napi_string: {
-            FI_HILOGI("option element str");
             CHKCF(HandleOptionString(env, strName, elementValue, option), "napi value str fail");
             break;
         }
         case napi_bigint: {
-            FI_HILOGI("option element bigint");
             CHKCF(HandleOptionInt64(env, strName, elementValue, option), "napi value int64 fail");
             break;
         }
         case napi_object: {
-            FI_HILOGI("option element obj");
             bool isArray = false;
             CHKCF((napi_is_array(env, elementValue, &isArray) == napi_ok && isArray), "napi_is_array fail");
             if (isArray) {
@@ -373,7 +364,6 @@ bool OnScreenNapi::GetAwarenessOption(napi_env env, napi_value awarenessOption, 
         CHKCF(napi_get_element(env, valueList, index, &elementName) == napi_ok, "get element fail");
         std::string strName;
         CHKCF(TransJsToStr(env, elementName, strName), "get str name failed");
-        FI_HILOGI("name is %{public}s", strName.c_str());
         CHKCF(napi_get_named_property(env, awarenessOption, strName.c_str(), &elementValue) == napi_ok,
             "get named property fail");
         CHKCF(HandleOptionElement(env, strName, elementValue, option), "handle element failed");
