@@ -50,14 +50,15 @@ public:
     virtual int32_t StartDrag(
         const DragData &dragData, int32_t pid, const std::string &peerNetId = "", bool isLongPressDrag = false,
         const std::string &appCaller = "") = 0;
+    virtual int32_t GetUdKey(int32_t pid, std::string &udKey, bool isSystemService) const = 0;
 #else
     virtual int32_t StartDrag(const DragData &dragData) = 0;
+    virtual int32_t GetUdKey(std::string &udKey) const = 0;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     virtual int32_t StopDrag(const DragDropResult &dropResult, const std::string &packageName = "",
         int32_t pid = -1, bool isStopCooperate = false,  const DragRadarPackageName &inPackageName = {}) = 0;
     virtual int32_t GetDragData(DragData &dragData) = 0;
     virtual int32_t GetDragTargetPid() const = 0;
-    virtual int32_t GetUdKey(int32_t pid, std::string &udKey) const = 0;
     virtual int32_t OnGetShadowOffset(ShadowOffset &shadowOffset) = 0;
     virtual DragState GetDragState() const = 0;
     virtual int32_t GetDragState(DragState &dragState) = 0;
