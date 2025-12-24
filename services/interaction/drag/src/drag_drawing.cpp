@@ -1879,9 +1879,9 @@ void DragDrawing::OnDragMove(int32_t displayId, int32_t displayX, int32_t displa
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::chrono::microseconds microseconds(actionTime);
-    if (microseconds.count() < std::numeric_limits<int64_t>::min() / MICROSECONDS_TO_NANOSECONDS) ||
+    if (microseconds.count() < std::numeric_limits<int64_t>::min() / MICROSECONDS_TO_NANOSECONDS ||
         microseconds.count() > std::numeric_limits<int64_t>::max() / MICROSECONDS_TO_NANOSECONDS) {
-        FI_HILOGE(Microseconds to Nanoseconds overflow);
+        FI_HILOGE("Microseconds to Nanoseconds overflow");
         return;
     }
     std::chrono::nanoseconds nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(microseconds);

@@ -2495,7 +2495,7 @@ HWTEST_F(DragManagerTest, DragManagerTest114, TestSize.Level0)
     item.SetDisplayX(100);
     item.SetDisplayY(100);
     pointerEvent->AddPointerItem(item);
-    g_devMgr.OnDragMove(pointerEvent);
+    g_dragMgr.OnDragMove(pointerEvent);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS,
         HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
@@ -2544,7 +2544,7 @@ HWTEST_F(DragManagerTest, DragManagerTest115, TestSize.Level0)
     item.SetDisplayX(100);
     item.SetDisplayY(100);
     pointerEvent->AddPointerItem(item);
-    g_devMgr.OnDragMove(pointerEvent);
+    g_dragMgr.OnDragMove(pointerEvent);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS,
         HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
@@ -2583,7 +2583,7 @@ HWTEST_F(DragManagerTest, DragManagerTest116, TestSize.Level0)
     pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
     pointerEvent->SetPointerId(1);
     pointerEvent->SetButtonPressed(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-    pointerEvent->SetActionTime(INT64_MIN);
+    pointerEvent->SetActionTime(0);
     MMI::PointerEvent::PointerItem item;
     item.SetPointerId(1);
     item.SetDownTime(downTime);
@@ -2593,7 +2593,6 @@ HWTEST_F(DragManagerTest, DragManagerTest116, TestSize.Level0)
     item.SetDisplayX(100);
     item.SetDisplayY(100);
     pointerEvent->AddPointerItem(item);
-    g_devMgr.OnDragMove(pointerEvent);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS,
         HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
@@ -2632,7 +2631,7 @@ HWTEST_F(DragManagerTest, DragManagerTest117, TestSize.Level0)
     pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
     pointerEvent->SetPointerId(1);
     pointerEvent->SetButtonPressed(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-    pointerEvent->SetActionTime(INT64_MIN);
+    pointerEvent->SetActionTime(downTime);
     MMI::PointerEvent::PointerItem item;
     item.SetPointerId(1);
     item.SetDownTime(downTime);
