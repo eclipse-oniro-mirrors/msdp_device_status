@@ -91,6 +91,7 @@ bool AniBoomerangCallback::GetMetadata(std::string &metadata)
     std::unique_lock lockGrd(notifyMutex_);
     if (g_notify.wait_for(lockGrd, std::chrono::milliseconds(SLEEP_TIME), [this] { return this->notifyFlag_; })) {
         metadata = metadata_;
+        notifyFlag_ = false;
         return true;
     }
     return false;
@@ -110,6 +111,7 @@ bool AniBoomerangCallback::GetEncodeImage(std::shared_ptr<Media::PixelMap> image
     if (g_encodeImage.wait_for(lockGrd, std::chrono::milliseconds(SLEEP_TIME),
         [this] { return this->onEncodeImageFlag_; })) {
         image = pixelMap_;
+        onEncodeImageFlag_ = false;
         return true;
     }
     return false;
