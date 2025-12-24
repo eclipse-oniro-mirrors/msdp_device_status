@@ -186,6 +186,7 @@ constexpr int32_t TIME_STOP { 0 };
 constexpr int64_t TIME_SLEEP { 30000 };
 constexpr int32_t INTERRUPT_SCALE { 15 };
 constexpr int32_t TIMEOUT_MS { 500 };
+constexpr int32_t MICROSECONDS_TO_NANOSECONDS { 1000 };
 constexpr float MAX_SCREEN_WIDTH_SM { 600.0f };
 constexpr float MAX_SCREEN_WIDTH_MD { 840.0f };
 constexpr float MAX_SCREEN_WIDTH_LG { 1440.0f };
@@ -1878,6 +1879,11 @@ void DragDrawing::OnDragMove(int32_t displayId, int32_t displayX, int32_t displa
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::chrono::microseconds microseconds(actionTime);
+    if (microseconds.count() < std::numeric_limits<int64_t>::min() / MICROSECONDS_TO_NANOSECONDS) ||
+        microseconds.count() > std::numeric_limits<int64_t>::max() / MICROSECONDS_TO_NANOSECONDS) {
+        FI_HILOGE(Microseconds to Nanoseconds overflow);
+        return;
+    }
     std::chrono::nanoseconds nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(microseconds);
     uint64_t actionTimeCount = static_cast<uint64_t>(nanoseconds.count());
     DragMoveEvent event = {

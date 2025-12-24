@@ -2332,6 +2332,213 @@ HWTEST_F(DragManagerTest, DragManagerTest108, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::STOP;
 }
 
+void HotAreaTest::CheckInHot()
+{
+    g_context->hotArea_.displayX_ = 0;
+    g_context->hotArea_.height_ = HOTAREA_500;
+    g_context->hotArea_.displayY_ = HOTAREA_250;
+    g_context->hotArea_.CheckInHotArea();
+    g_context->hotArea_.width_ = HOTAREA_200;
+    g_context->hotArea_.displayX_ = HOTAREA_150;
+    g_context->hotArea_.height_ = HOTAREA_500;
+    g_context->hotArea_.displayY_ = HOTAREA_250;
+    g_context->hotArea_.CheckInHotArea();
+    g_context->hotArea_.displayY_ = HOTAREA_50;
+    g_context->hotArea_.width_ = HOTAREA_500;
+    g_context->hotArea_.displayX_ = HOTAREA_250;
+    g_context->hotArea_.CheckInHotArea();
+    g_context->hotArea_.height_ = HOTAREA_500;
+    g_context->hotArea_.displayY_ = HOTAREA_500;
+    g_context->hotArea_.width_ = HOTAREA_500;
+    g_context->hotArea_.displayX_ = HOTAREA_250;
+    g_context->hotArea_.CheckInHotArea();
+    g_context->hotArea_.height_ = HOTAREA_500;
+    g_context->hotArea_.displayY_ = HOTAREA_NEGATIVE_500;
+    g_context->hotArea_.width_ = HOTAREA_500;
+    g_context->hotArea_.displayX_ = HOTAREA_NEGATIVE_200;
+    g_context->hotArea_.CheckInHotArea();
+}
+
+void HotAreaTest::SetUpTestCase() {}
+
+void HotAreaTest::SetUp()
+{
+    g_ddm = std::make_unique<DDMAdapter>();
+    g_input = std::make_unique<InputAdapter>();
+    g_dsoftbus = std::make_unique<DSoftbusAdapter>();
+    g_contextOne = std::make_shared<Context>(g_icontext);
+    auto env = ContextService::GetInstance();
+    g_context = std::make_shared<Context>(env);
+    int32_t moduleType = 1;
+    int32_t tokenType = 1;
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t sockFds[2] { -1, -1 };
+    g_session = std::make_shared<SocketSession>("test", moduleType, tokenType, sockFds[0], uid, pid);
+}
+
+void HotAreaTest::TearDown()
+{
+    g_context = nullptr;
+    g_contextOne = nullptr;
+    g_session = nullptr;
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
+void HotAreaTest::OnThreeStates(const CooperateEvent &event)
+{
+    auto env = ContextService::GetInstance();
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    g_stateMachine->current_ = CooperateState::COOPERATE_STATE_OUT;
+    g_stateMachine->OnEvent(cooperateContext, event);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_stateMachine->current_ = CooperateState::COOPERATE_STATE_IN;
+    g_stateMachine->OnEvent(cooperateContext, event);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_stateMachine->current_ = CooperateState::COOPERATE_STATE_FREE;
+    g_stateMachine->OnEvent(cooperateContext, event);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
+class CooperateObserver final : public ICooperateObserver {
+public:
+    CooperateObserver() = default;
+    virtual ~CooperateObserver() = default;
+
+    virtual bool IsAllowCooperate()
+    {
+        return true;
+    }
+    virtual void OnStartCooperate(StartCooperateData &data) {}
+    virtual void OnRemoteStartCooperate(RemoteStartCooperateData &data) {}
+    virtual void OnStopCooperate(const std::string &remoteNetworkId) {}
+    virtual void OnTransitionOut(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnTransitionIn(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnBack(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnRelay(const std::string &remoteNetworkId, const CooperateInfo &cooperateInfo) {}
+    virtual void OnReset() {}
+    virtual void CloseDistributedFileConnection(const std::string &remoteNetworkId) {}
+};
+
+/**
+ * @tc.name: HotAreaTest1
+ * @tc.desc: HotAreaTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HotAreaTest, HotAreaTest001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    g_socketSessionMgr.Enable();
+    RegisterHotareaListenerEvent registerHotareaListenerEvent{IPCSkeleton::GetCallingPid(), 1};
+    g_context->hotArea_.AddListener(registerHotareaListenerEvent);
+    g_context->hotArea_.OnHotAreaMessage(HotAreaType::AREA_LEFT, true);
+    g_contextOne->hotArea_.AddListener(registerHotareaListenerEvent);
+    g_contextOne->hotArea_.OnHotAreaMessage(HotAreaType::AREA_LEFT, true);
+    g_socketSessionMgr.sessions_.clear();
+    g_context->hotArea_.OnHotAreaMessage(HotAreaType::AREA_LEFT, true);
+    g_context->hotArea_.RemoveListener(registerHotareaListenerEvent);
+    EnableCooperateEvent enableCooperateEvent{1, 1, 1};
+    g_context->hotArea_.EnableCooperate(enableCooperateEvent);
+    CheckInHot();
+    g_context->hotArea_.CheckPointerToEdge(HotAreaType::AREA_LEFT);
+    g_context->hotArea_.CheckPointerToEdge(HotAreaType::AREA_RIGHT);
+    g_context->hotArea_.CheckPointerToEdge(HotAreaType::AREA_TOP);
+    g_context->hotArea_.CheckPointerToEdge(HotAreaType::AREA_BOTTOM);
+    g_context->hotArea_.CheckPointerToEdge(HotAreaType::AREA_NONE);
+    g_context->hotArea_.NotifyMessage();
+
+    int32_t ret = g_context->hotArea_.ProcessData(nullptr);
+    EXPECT_EQ(ret, RET_ERR);
+    ret =  g_context->hotArea_.ProcessData(MMI::PointerEvent::Create());
+    EXPECT_EQ(ret, RET_ERR);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->SetPointerId(1);
+    MMI::PointerEvent::PointerItem curPointerItem = CreatePointerItem(1, 1, { 0, 0 }, true);
+    pointerEvent->AddPointerItem(curPointerItem);
+    ret = g_context->hotArea_.ProcessData(pointerEvent);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+
+/**
+ * @tc.name: TestIsOffsetMatched_04
+ * @tc.desc: Test IsOffsetMatched
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSamplerTest, TestIsOffsetMatched_04, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Cooperate::InputEventSampler sampler;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    sampler.prefixRawDxSum_ = TEMP_MIN_RAW;
+    sampler.prefixRawDySum_ = TEMP_RAW;
+    sampler.rawDxThreshold_ = TEMP_RAW;
+    sampler.rawDyThreshold_ = TEMP_MIN_RAW;
+    int32_t ret = sampler.IsOffsetMatched(pointerEvent);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TestIsRawEventsExpired_01
+ * @tc.desc: Test IsRawEventsExpired
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSamplerTest, TestIsRawEventsExpired_01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Cooperate::InputEventSampler sampler;
+    int32_t ret = sampler.IsRawEventsExpired();
+    ASSERT_EQ(ret, false);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent = nullptr;
+    sampler.rawEvents_.push({pointerEvent, std::chrono::steady_clock::now()});
+    ret = sampler.IsRawEventsExpired();
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TestIsRawEventsExpired_02
+ * @tc.desc: Test IsRawEventsExpired
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InputEventSamplerTest, TestIsRawEventsExpired_02, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Cooperate::InputEventSampler sampler;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    sampler.rawEvents_.push({pointerEvent, std::chrono::steady_clock::now()});
+    int32_t ret = sampler.IsRawEventsExpired();
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TestIsSkipNeeded_01
+ * @tc.desc: Test IsSkipNeeded
+ * @tc.type: FUNC
+ * @tc.require:
+ *
+HWTEST_F(InputEventSamplerTest, TestIsSkipNeeded_01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Cooperate::InputEventSampler sampler;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+    int32_t ret = sampler.IsSkipNeeded(pointerEvent);
+    ASSERT_EQ(ret, true);
+    pointerEvent = nullptr;
+    ret = sampler.IsSkipNeeded(pointerEvent);
+    ASSERT_EQ(ret, true);
+}
+
 /**
  * @tc.name: DragManagerTest109
  * @tc.desc: Drag Manager
@@ -2447,6 +2654,201 @@ HWTEST_F(DragManagerTest, DragManagerTest113, TestSize.Level0)
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
+}
+
+/**
+ * @tc.name: DragManagerTest114
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest114, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    int64_t downTime = GetMillisTime();
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetButtonPressed(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetActionTime(INT64_MIN);
+    MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(1);
+    item.SetDownTime(downTime);
+    item.SetPressed(true);
+    item.SetRawDx(60);
+    item.SetRawDy(60);
+    item.SetDisplayX(100);
+    item.SetDisplayY(100);
+    pointerEvent->AddPointerItem(item);
+    g_devMgr.OnDragMove(pointerEvent);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
+}
+
+/**
+ * @tc.name: DragManagerTest115
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest115, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    int64_t downTime = GetMillisTime();
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetButtonPressed(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetActionTime(INT64_MAX);
+    MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(1);
+    item.SetDownTime(downTime);
+    item.SetPressed(true);
+    item.SetRawDx(60);
+    item.SetRawDy(60);
+    item.SetDisplayX(100);
+    item.SetDisplayY(100);
+    pointerEvent->AddPointerItem(item);
+    g_devMgr.OnDragMove(pointerEvent);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
+}
+
+/**
+ * @tc.name: DragManagerTest116
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest116, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    int64_t downTime = GetMillisTime();
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetButtonPressed(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetActionTime(INT64_MIN);
+    MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(1);
+    item.SetDownTime(downTime);
+    item.SetPressed(true);
+    item.SetRawDx(60);
+    item.SetRawDy(60);
+    item.SetDisplayX(100);
+    item.SetDisplayY(100);
+    pointerEvent->AddPointerItem(item);
+    g_devMgr.OnDragMove(pointerEvent);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS,
+        HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
+        std::future_status::timeout);
+}
+
+/**
+ * @tc.name: DragManagerTest117
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest117, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
+            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
+        promiseFlag.set_value(true);
+    };
+    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+        std::make_shared<TestStartDragListener>(callback));
+    ASSERT_EQ(ret, RET_OK);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    int64_t downTime = GetMillisTime();
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetButtonPressed(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetActionTime(INT64_MIN);
+    MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(1);
+    item.SetDownTime(downTime);
+    item.SetPressed(true);
+    item.SetRawDx(60);
+    item.SetRawDy(60);
+    item.SetDisplayX(100);
+    item.SetDisplayY(100);
+    pointerEvent->AddPointerItem(item);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS,
         HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     ret = InteractionManager::GetInstance()->StopDrag(dropResult);
