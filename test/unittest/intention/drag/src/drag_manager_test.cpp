@@ -2456,12 +2456,12 @@ HWTEST_F(DragManagerTest, DragManagerTest113, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragManagerTest114
+ * @tc.name: DragManagerTest116
  * @tc.desc: Drag Manager
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragManagerTest, DragManagerTest114, TestSize.Level0)
+HWTEST_F(DragManagerTest, DragManagerTest116, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     std::optional<DragData> dragData = CreateDragData(
@@ -2505,12 +2505,12 @@ HWTEST_F(DragManagerTest, DragManagerTest114, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragManagerTest115
+ * @tc.name: DragManagerTest117
  * @tc.desc: Drag Manager
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragManagerTest, DragManagerTest115, TestSize.Level0)
+HWTEST_F(DragManagerTest, DragManagerTest117, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     std::optional<DragData> dragData = CreateDragData(
@@ -2554,12 +2554,12 @@ HWTEST_F(DragManagerTest, DragManagerTest115, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragManagerTest116
+ * @tc.name: DragManagerTest118
  * @tc.desc: Drag Manager
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragManagerTest, DragManagerTest116, TestSize.Level0)
+HWTEST_F(DragManagerTest, DragManagerTest118, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     std::optional<DragData> dragData = CreateDragData(
@@ -2602,12 +2602,12 @@ HWTEST_F(DragManagerTest, DragManagerTest116, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragManagerTest117
+ * @tc.name: DragManagerTest119
  * @tc.desc: Drag Manager
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragManagerTest, DragManagerTest117, TestSize.Level0)
+HWTEST_F(DragManagerTest, DragManagerTest119, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     std::optional<DragData> dragData = CreateDragData(
