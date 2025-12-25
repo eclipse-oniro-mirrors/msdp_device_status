@@ -395,7 +395,7 @@ napi_value OnScreenNapi::Trigger(napi_env env, napi_callback_info info)
         return nullptr;
     }
     AwarenessCap cap;
-    if (!GetAwarenessCap(env, args[ARG_0], argc, cap)) {
+    if ((!GetAwarenessCap(env, args[ARG_0], argc, cap)) || (!IsValidCap(cap.capList)) || cap.capList.empty()) {
         ThrowOnScreenErr(env, RET_PARAM_ERR, "param is invalid");
         return nullptr;
     }
@@ -633,7 +633,7 @@ napi_value OnScreenNapi::RegisterAwarenessCallback(napi_env env, napi_callback_i
         return nullptr;
     }
     AwarenessCap cap;
-    if ((!GetAwarenessCap(env, args[ARG_0], argc, cap)) || (!IsValidCap(cap.capList))) {
+    if ((!GetAwarenessCap(env, args[ARG_0], argc, cap)) || (!IsValidCap(cap.capList)) || cap.capList.empty()) {
         ThrowOnScreenErr(env, RET_PARAM_ERR, "param is invalid");
         return nullptr;
     }
@@ -681,7 +681,7 @@ napi_value OnScreenNapi::UnregisterAwarenessCallback(napi_env env, napi_callback
         return nullptr;
     }
     AwarenessCap cap;
-    if ((!GetAwarenessCap(env, args[ARG_0], argc, cap)) || (!IsValidCap(cap.capList))) {
+    if ((!GetAwarenessCap(env, args[ARG_0], argc, cap)) || (!IsValidCap(cap.capList)) || cap.capList.empty()) {
         ThrowOnScreenErr(env, RET_PARAM_ERR, "param is invalid");
         return nullptr;
     }
