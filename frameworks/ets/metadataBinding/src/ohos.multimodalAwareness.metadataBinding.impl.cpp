@@ -23,21 +23,20 @@
 namespace {
 using namespace ::taihe;
 using namespace OHOS::Msdp::DeviceStatus;
-void onMetadata(::taihe::string_view bundleName, ::taihe::callback_view<void(int32_t info)> callbck, uintptr_t opq)
+void onMetadataInner(::taihe::string_view bundleName, ::taihe::callback_view<void(int32_t info)> callbck, uintptr_t opq)
 {
     AniBoomerang::GetInstance()->OnMetadata(std::string(bundleName), callbck, opq);
 }
 
-void offMetadata(::taihe::string_view bundleName, ::taihe::optional_view<uintptr_t> opq)
+void offMetadataInner(::taihe::string_view bundleName, ::taihe::optional_view<uintptr_t> opq)
 {
     AniBoomerang::GetInstance()->OffMetadata(std::string(bundleName), opq);
 }
 
-uintptr_t notifyMetadataBindingEventPromise(::taihe::string_view bundleName)
+::taihe::string notifyMetadataBindingEventPromise(::taihe::string_view bundleName)
 {
-    ani_object promise;
-    AniBoomerang::GetInstance()->NotifyMetadataBindingEvent(std::string(bundleName), promise);
-    return reinterpret_cast<uintptr_t>(promise);
+    std::string metadata = AniBoomerang::GetInstance()->NotifyMetadataBindingEvent(std::string(bundleName));
+    return ::taihe::string(metadata.c_str());
 }
 
 void submitMetadata(::taihe::string_view metadata)
@@ -47,24 +46,22 @@ void submitMetadata(::taihe::string_view metadata)
 
 uintptr_t encodeImagePromise(uintptr_t srcImage, ::taihe::string_view metadata)
 {
-    ani_object promise;
-    AniBoomerang::GetInstance()->EncodeImage(srcImage, std::string(metadata), promise);
-    return reinterpret_cast<uintptr_t>(promise);
+    ani_object image = AniBoomerang::GetInstance()->EncodeImage(srcImage, std::string(metadata));
+    return reinterpret_cast<uintptr_t>(image);
 }
 
-uintptr_t decodeImagePromise(uintptr_t encodedImage)
+::taihe::string decodeImagePromise(uintptr_t encodedImage)
 {
-    ani_object promise;
-    AniBoomerang::GetInstance()->DecodeImage(encodedImage, promise);
-    return reinterpret_cast<uintptr_t>(promise);
+    std::string imageStr = AniBoomerang::GetInstance()->DecodeImage(encodedImage);
+    return ::taihe::string(imageStr.c_str());
 }
 
 }  // namespace
 
 // Since these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
-TH_EXPORT_CPP_API_onMetadata(onMetadata);
-TH_EXPORT_CPP_API_offMetadata(offMetadata);
+TH_EXPORT_CPP_API_onMetadataInner(onMetadataInner);
+TH_EXPORT_CPP_API_offMetadataInner(offMetadataInner);
 TH_EXPORT_CPP_API_submitMetadata(submitMetadata);
 TH_EXPORT_CPP_API_notifyMetadataBindingEventPromise(notifyMetadataBindingEventPromise);
 TH_EXPORT_CPP_API_encodeImagePromise(encodeImagePromise);

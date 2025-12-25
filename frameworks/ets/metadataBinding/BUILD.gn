@@ -79,7 +79,7 @@ generate_static_abc("metadataBinding_abc") {
 }
 
 ohos_prebuilt_etc("metadataBinding_etc") {
-  source = "$target_out_dir/metadataBinding_abc.abc"           
+  source = "$target_out_dir/metadataBinding_abc.abc"
   module_install_dir = "framework"
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"
