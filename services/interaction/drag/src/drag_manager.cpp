@@ -597,11 +597,11 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     dragResult_ = static_cast<DragResult>(dropResult.result);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     SetDragState(DragState::STOP);
-    DragSecurityManager::GetInstance().ResetSecurityPid();
     if (GetControlCollaborationVisible()) {
         SetControlCollaborationVisible(false);
     }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    DragSecurityManager::GetInstance().ResetSecurityPid();
     ReportStopDragRadarInfo(BizState::STATE_END, StageRes::RES_SUCCESS, DragRadarErrCode::DRAG_SUCCESS, pid,
         dragRadarPackageName);
     if (dragOutSession_ == nullptr) {
@@ -625,13 +625,19 @@ int32_t DragManager::GetDragTargetPid() const
     return DRAG_DATA_MGR.GetTargetPid();
 }
 
-int32_t DragManager::GetUdKey(int32_t pid, std::string &udKey) const
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+int32_t DragManager::GetUdKey(int32_t pid, std::string &udKey, bool isSystemService) const
+#else
+int32_t DragManager::GetUdKey(std::string &udKey) const
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
 {
     FI_HILOGI("enter");
-    if (!DragSecurityManager::GetInstance().VerifySecurityPid(pid) && (pid != DUMP_PID)) {
+    #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    if (!isSystemService && !DragSecurityManager::GetInstance().VerifySecurityPid(pid)) {
         FI_HILOGE("Pid:%{public}d security verification is not performed", pid);
         return RET_ERR;
     }
+    #endif // OHOS_BUILD_ENABLE_ARKUI_X
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     if ((isCrossDragging_ || isCollaborationService_) && (dragData.summaryTag == NEED_FETCH)) {
         FI_HILOGI("Clear udKey");
@@ -1400,7 +1406,7 @@ void DragManager::Dump(int32_t fd) const
 #endif // OHOS_DRAG_ENABLE_MONITOR
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     std::string udKey;
-    if (RET_ERR == GetUdKey(DUMP_PID, udKey)) {
+    if (RET_ERR == GetUdKey(DUMP_PID, udKey, true)) {
         FI_HILOGE("Target udKey is empty");
         udKey = "";
     }
@@ -2376,11 +2382,13 @@ int32_t DragManager::AddPrivilege(int32_t tokenId, int32_t pid,
     }
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     FI_HILOGD("Target window drag tid:%{public}d", tokenId);
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if (!DragSecurityManager::GetInstance().VerifyAndResetNonce(dragEventData, signature)) {
         FI_HILOGE("Verify sign failed");
         return RET_ERR;
     }
     DragSecurityManager::GetInstance().StoreSecurityPid(pid);
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t ret = SendDragData(tokenId, dragData.udKey);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to send pid to Udmf client:%{public}d", ret);

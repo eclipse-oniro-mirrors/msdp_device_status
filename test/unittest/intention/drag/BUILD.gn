@@ -29,7 +29,10 @@ ohos_unittest("DragManagerTest") {
 
   branch_protector_ret = "pac_ret"
   module_out_path = module_output_path
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${device_status_service_path}/drag_auth/include"
+    ]
 
   defines = []
 
@@ -52,6 +55,7 @@ ohos_unittest("DragManagerTest") {
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_utils_path}:devicestatus_util",
+    "${device_status_service_path}/drag_auth:drag_auth"
   ]
   external_deps = [
     "ability_base:want",

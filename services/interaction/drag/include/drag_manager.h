@@ -117,13 +117,14 @@ public:
         const DragDropResult &dropResult, const std::string &packageName = "",
         int32_t pid = -1, bool isStopCooperate = false, const DragRadarPackageName &inPackageName = {}) override;
     int32_t GetDragTargetPid() const override;
-    int32_t GetUdKey(int32_t pid, std::string &udKey) const override;
     int32_t SendDragData(int32_t targetTid, const std::string &udKey);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void UpdateDragStylePositon() override;
     int32_t UpdateDragStyle(
         DragCursorStyle style, int32_t targetPid, int32_t targetTid, int32_t eventId = -1) override;
+    int32_t GetUdKey(int32_t pid, std::string &udKey, bool isSystemService) const override;
 #else
+    int32_t GetUdKey(std::string &udKey) const override;
     int32_t UpdateDragStyle(DragCursorStyle style) override;
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t UpdateShadowPic(const ShadowInfo &shadowInfo) override;
