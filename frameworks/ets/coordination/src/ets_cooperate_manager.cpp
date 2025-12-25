@@ -46,11 +46,6 @@ bool AniCallbackInfo::Init(uintptr_t opq)
     if (opq != 0) {
         FI_HILOGD("beign Init callback");
         funObject_ = reinterpret_cast<ani_object>(opq);
-        if ((status = env_->GlobalReference_Create(funObject_, &ref_)) != ANI_OK) {
-            FI_HILOGE("create callback object failed, status = %{public}d", status);
-            ref_ = nullptr;
-            return false;
-        }
     } else {
         if ((status = env_->Promise_New(&deferred_, &promise_)) != ANI_OK) {
             FI_HILOGE("create promise object failed, status = %{public}d", status);
