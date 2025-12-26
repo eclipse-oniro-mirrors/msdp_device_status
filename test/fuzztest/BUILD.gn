@@ -58,6 +58,8 @@ group("device_status_fuzztest") {
     "removesubscriptlistenerstub_fuzzer:fuzztest",
     "setdragwindowvisible_fuzzer:fuzztest",
     "sequenceable_fuzzer:fuzztest",
+    "sequenceablecooperateoptions_fuzzer:fuzztest",
+    "sequenceablepagecontent_fuzzer:fuzztest",
     "specialinputdevice_fuzzer:fuzztest",
     "startdrag_fuzzer:fuzztest",
     "stationaryparam_fuzzer:fuzztest",

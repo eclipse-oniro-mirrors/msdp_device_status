@@ -123,6 +123,9 @@ void IntentionClientDragFuzzTest(const uint8_t *data, size_t size)
         .x = provider.ConsumeIntegral<int32_t>(),
         .y = provider.ConsumeIntegral<int32_t>()
     };
+    bool visible = provider.ConsumeBool();
+    bool isForce = provider.ConsumeBool();
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     std::string animationInfo = provider.ConsumeBytesAsString(10);
     INTENTION_CLIENT->StartDrag(dragData);
     INTENTION_CLIENT->GetDragData(dragData);
@@ -131,6 +134,7 @@ void IntentionClientDragFuzzTest(const uint8_t *data, size_t size)
     if (shadowInfo.pixelMap != nullptr) {
         INTENTION_CLIENT->UpdateShadowPic(shadowInfo);
     }
+    INTENTION_CLIENT->SetDragWindowVisible(visible, isForce, rsTransaction);
 }
 } // namespace OHOS
 

@@ -439,11 +439,13 @@ bool MsdpDeviceManagerFuzzTest(FuzzedDataProvider &provider)
     std::weak_ptr<IDeviceObserver> weakObserver = std::weak_ptr<IDeviceObserver>();
     auto env = ContextService::GetInstance();
 
-    env->devMgr_.AddDevice(devStr);
+    std::shared_ptr<Msdp::DeviceStatus::IDevice> dev = env->devMgr_.AddDevice(devStr);
     std::shared_ptr<MMI::InputDevice> device = GetDevice(id);
     env->devMgr_.IsLocalPointerDevice(device);
     env->devMgr_.IsVirtualTrackpad(device);
     env->devMgr_.FindDevice(devStr);
+    env->devMgr_.OnDeviceRemoved(dev);
+    env->devMgr_.IsFakePointerDevice(dev);
     env->GetDeviceManager().GetDevice(id);
     env->GetDeviceManager().RetriggerHotplug(weakObserver);
     env->GetDeviceManager().AddDeviceObserver(weakObserver);
