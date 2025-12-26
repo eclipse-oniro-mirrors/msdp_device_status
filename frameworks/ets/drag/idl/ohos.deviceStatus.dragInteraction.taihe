@@ -33,10 +33,10 @@ struct Summary {
 }
 
 @!sts_inject("""
-    function on(type: 'drag', callback: (info: DragState) => void) {
+    function onDragStateChange(callback: (info: DragState) => void) {
         return registerListener(callback, callback);
       }
-    function off(type: 'drag', callback?: (info: DragState) => void) {
+    function offDragStateChange(callback?: (info: DragState) => void) {
         return unRegisterListener(callback);
       }
 """)
