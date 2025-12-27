@@ -789,6 +789,7 @@ void StateMachine::OnCommonEvent(Context &context, const std::string &commonEven
     }
     if (commonEvent == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF ||
         commonEvent == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) {
+        context.inputEventBuilder_.SetStopByScreenOffOrLock(true);
         FI_HILOGD("Receive common event:%{public}s, stop cooperate", commonEvent.c_str());
         auto ret = context.Sender().Send(CooperateEvent(
             CooperateEventType::STOP,
