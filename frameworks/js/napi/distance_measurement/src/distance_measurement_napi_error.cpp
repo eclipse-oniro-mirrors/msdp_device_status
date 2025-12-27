@@ -38,7 +38,7 @@ napi_value CreateDistanceMeasurementNapiError(napi_env env, int32_t errCode, con
     napi_value msg = nullptr;
     MSDP_CALL(napi_create_int32(env, errCode, &code));
     MSDP_CALL(napi_create_string_utf8(env, errMessage.c_str(), NAPI_AUTO_LENGTH, &msg));
-    napi_create_error(env, nullptr, msg, &businessError);
+    MSDP_CALL(napi_create_error(env, nullptr, msg, &businessError));
     napi_set_named_property(env, businessError, "code", code);
     return businessError;
 }
@@ -63,9 +63,15 @@ void ThrowErr(napi_env env, int32_t errCode, const std::string &printMsg)
     }
     napi_value error = CreateDistanceMeasurementNapiError(env, errCode, msg.value());
     if (error == nullptr) {
-        FI_HILOGE("Failed to create NAPI error object");
-        return;
+        FI_HILOGE("Failed to create NAPI error object, creating generic error.");
+        napi_value genericError = nullptr;
+        napi_status status = napi_create_string_utf8(env, "Internal error creating error object",
+            NAPI_AUTO_LENGTH, &genericError);
+        if (status == napi_ok) {
+            napi_throw(env, genericError);
         }
+        return;
+    }
     napi_throw(env, error);
 }
 } // namespace Msdp

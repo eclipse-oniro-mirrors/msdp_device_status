@@ -83,7 +83,7 @@ void DistanceMeasurementNapi::SetValueUtf8String(const napi_env &env,
     napi_handle_scope scope = nullptr;
     napi_status status = napi_open_handle_scope(env, &scope);
     if (status != napi_ok) {
-        FI_HILOGE("Failed to open handle scope, error:%{public}d", status);
+        FI_HILOGE("Failed to open handle scope, error: %{public}d", status);
         return;
     }
     napi_value value = nullptr;
@@ -91,60 +91,82 @@ void DistanceMeasurementNapi::SetValueUtf8String(const napi_env &env,
     if (status != napi_ok) {
         FI_HILOGE("Failed to create UTF-8 string for field: %{public}s, error: %{public}d",
             fieldStr.c_str(), status);
+        napi_close_handle_scope(env, scope);
         return;
     }
     if (napi_set_named_property(env, result, fieldStr.c_str(), value) != napi_ok) {
-        FI_HILOGE("Failed to set the named property for field: %s", fieldStr.c_str());
-        return;
+        FI_HILOGE("Failed to set the named property for field: %{public}s", fieldStr.c_str());
     }
+    napi_close_handle_scope(env, scope);
 }
 
 void DistanceMeasurementNapi::SetValueDouble(const napi_env &env, const std::string &fieldStr,
     const double &doubleValue, napi_value &result)
 {
+    napi_handle_scope scope = nullptr;
+    napi_status status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to open handle scope, error: %{public}d", status);
+        return;
+    }
     napi_value value = nullptr;
-    napi_status status = napi_create_double(env, doubleValue, &value);
+    status = napi_create_double(env, doubleValue, &value);
     if (status != napi_ok) {
         FI_HILOGE("Failed to create double");
+        napi_close_handle_scope(env, scope);
         return;
     }
     status = napi_set_named_property(env, result, fieldStr.c_str(), value);
     if (status != napi_ok) {
         FI_HILOGE("Failed to set the named property");
-        return;
     }
+    napi_close_handle_scope(env, scope);
 }
 
 void DistanceMeasurementNapi::SetValueInt32(const napi_env &env, const std::string &fieldStr,
     const int32_t &intValue, napi_value &result)
 {
+    napi_handle_scope scope = nullptr;
+    napi_status status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to open handle scope, error: %{public}d", status);
+        return;
+    }
     napi_value value = nullptr;
-    napi_status status = napi_create_int32(env, intValue, &value);
+    status = napi_create_int32(env, intValue, &value);
     if (status != napi_ok) {
         FI_HILOGE("Failed to create int32, error: %{public}d", status);
+        napi_close_handle_scope(env, scope);
         return;
     }
     status = napi_set_named_property(env, result, fieldStr.c_str(), value);
     if (status != napi_ok) {
         FI_HILOGE("Failed to set the fieldStr named property, error: %{public}d", status);
-        return;
     }
+    napi_close_handle_scope(env, scope);
 }
 
 void DistanceMeasurementNapi::SetValueBool(const napi_env &env, const std::string &fieldStr,
     const bool &boolValue, napi_value &result)
 {
+    napi_handle_scope scope = nullptr;
+    napi_status status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to open handle scope, error: %{public}d", status);
+        return;
+    }
     napi_value value = nullptr;
-    napi_status status = napi_get_boolean(env, boolValue, &value);
+    status = napi_get_boolean(env, boolValue, &value);
     if (status != napi_ok) {
         FI_HILOGE("Failed to create bool, error: %{public}d", status);
+        napi_close_handle_scope(env, scope);
         return;
     }
     status = napi_set_named_property(env, result, fieldStr.c_str(), value);
     if (status != napi_ok) {
         FI_HILOGE("Failed to set the fieldStr named property, error: %{public}d", status);
-        return;
     }
+    napi_close_handle_scope(env, scope);
 }
 
 bool DistanceMeasurementNapi::ConstructDistanceMeasurement(
@@ -258,27 +280,20 @@ std::string DistanceMeasurementNapi::JsObjectToString(const napi_env &env, const
     FI_HILOGI("JsObjectToString in");
     size_t size = 0;
     if (napi_get_value_string_utf8(env, param, nullptr, 0, &size) != napi_ok) {
+        FI_HILOGE("Failed to get string length from NAPI value.");
         return "";
     }
     if (size == 0) {
         return "";
     }
-    char *buf = new (std::nothrow) char[size + 1];
-    if (buf == nullptr) {
+    std::vector<char> buffer(size + 1, '\0');
+    size_t result = 0;
+    napi_status status = napi_get_value_string_utf8(env, param, buffer.data(), size + 1, &result);
+    if (status != napi_ok || result == 0) {
+        FI_HILOGE("Failed to convert NAPI value to string.");
         return "";
     }
-    memset_s(buf, (size + 1), 0, (size + 1));
-    bool rev = napi_get_value_string_utf8(env, param, buf, size + 1, &size) == napi_ok;
-    
-    std::string value;
-    if (rev) {
-        value = buf;
-    } else {
-        value = "";
-    }
-    delete[] buf;
-    buf = nullptr;
-    return value;
+    return std::string(buffer.data(), result);
 }
 
 bool DistanceMeasurementNapi::GetRankMask(napi_env env, napi_value mask, RankMaskType &rankfilter)
