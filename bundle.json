@@ -41,7 +41,9 @@
       "device_status_boomerang_onestep",
       "device_status_boomerang_support_hdr"
     ],
-    "adapted_system_type": [ "standard" ],
+    "adapted_system_type": [
+      "standard"
+    ],
     "rom": "2048KB",
     "ram": "~4096KB",
     "deps": {
@@ -98,8 +100,8 @@
     },
     "build": {
       "group_type": {
-        "base_group":[],
-        "fwk_group":[
+        "base_group": [],
+        "fwk_group": [
           "//base/msdp/device_status/interfaces/innerkits:devicestatus_client",
           "//base/msdp/device_status/frameworks/js/napi:stationary",
           "//base/msdp/device_status/frameworks/js/napi/interaction:interaction_jsapi_group",
@@ -118,7 +120,7 @@
           "//base/msdp/device_status/frameworks/js/napi/distance_measurement:spatialawareness_napi",
           "//base/msdp/device_status/frameworks/ets/spatialAwareness:spatialawareness_pack"
         ],
-        "service_group":[
+        "service_group": [
           "//base/msdp/device_status/libs:devicestatus_algo",
           "//base/msdp/device_status/libs:devicestatus_mock",
           "//base/msdp/device_status/services:devicestatus_service",
@@ -190,7 +192,9 @@
       ],
       "test": [
         "//base/msdp/device_status:device_status_tests",
-        "//base/msdp/device_status/test/fuzztest:device_status_fuzztest"
+        "//base/msdp/device_status/test/fuzztest:device_status_fuzztest",
+        "//base/msdp/device_status/test/fuzztest/inputevent_fuzzer:fuzztest",
+        "//base/msdp/device_status/test/fuzztest/dragdatautil_fuzzer:fuzztest"
       ]
     }
   }
