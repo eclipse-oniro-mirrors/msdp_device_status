@@ -38,11 +38,16 @@ DistanceMeasurementEventNapi::~DistanceMeasurementEventNapi()
 {
     FI_HILOGI("Enter");
     std::lock_guard<std::mutex> lock(mutex_);
+    if (thisVarRef_ == nullptr) {
+        FI_HILOGE("thisVarRef_ should not be nullptr in destructor");
+        return;
+    }
     napi_status status = napi_delete_reference(env_, thisVarRef_);
     if (status != napi_ok) {
         FI_HILOGE("Failed to delete the reference");
         return;
     }
+    thisVarRef_ = nullptr;
     FI_HILOGI("Exit");
 }
 
