@@ -87,6 +87,7 @@ public:
     void SetDamplingCoefficient(uint32_t direction, double coefficient);
     void UpdateVirtualDeviceIdMap(const std::unordered_map<int32_t, int32_t> &remote2VirtualIds);
     std::shared_ptr<MMI::PointerEvent> GetPointerEvent();
+    void SetStopByScreenOffOrLock(bool stopByScreenOffOrLock);
 
     static bool IsLocalEvent(const InputPointerEvent &event);
 
@@ -128,6 +129,7 @@ private:
     int32_t touchPadSpeed_ { -1 };
     std::string remoteNetworkId_;
     std::string localNetworkId_;
+    std::atomic<bool> isStopByScreenOffOrLock_ { false };
     std::array<double, N_DAMPLING_DIRECTIONS> damplingCoefficients_;
     std::shared_ptr<DSoftbusObserver> observer_;
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;

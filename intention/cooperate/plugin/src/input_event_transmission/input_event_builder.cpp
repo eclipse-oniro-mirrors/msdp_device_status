@@ -86,6 +86,7 @@ void InputEventBuilder::Enable(Context &context)
     env_->GetDSoftbus().AddObserver(observer_);
     Coordinate cursorPos = context.CursorPosition();
     TurnOffChannelScan();
+    isStopByScreenOffOrLock_ = false;
     FI_HILOGI("Cursor transite in (%{private}d, %{private}d)", cursorPos.x, cursorPos.y);
     if (!enable_) {
         CooperateRadarInfo radarInfo {
@@ -113,6 +114,7 @@ void InputEventBuilder::Disable()
         env_->GetDSoftbus().RemoveObserver(observer_);
         TurnOnChannelScan();
         ResetPressedEvents();
+        isStopByScreenOffOrLock_ = false;
     }
     if ((pointerEventTimer_ >= 0)) {
         env_->GetTimerManager().RemoveTimerAsync(pointerEventTimer_);
@@ -507,12 +509,21 @@ void InputEventBuilder::ResetPressedEvents()
                 continue;
             }
             pointerEvent_->SetButtonId(buttonId);
-            pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+            if (isStopByScreenOffOrLock_) {
+                pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+            } else {
+                pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+            }
             env_->GetInput().SimulateInputEvent(pointerEvent_);
             FI_HILOGI("Simulate button-up event, buttonId:%{public}d", buttonId);
         }
         pointerEvent_->Reset();
     }
+}
+
+void InputEventBuilder::SetStopByScreenOffOrLock(bool stopByScreenOffOrLock)
+{
+    isStopByScreenOffOrLock_ = stopByScreenOffOrLock;
 }
 } // namespace Cooperate
 } // namespace DeviceStatus
