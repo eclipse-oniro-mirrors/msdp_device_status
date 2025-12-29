@@ -104,6 +104,7 @@ public:
     void OnScreenshot(int32_t type, int32_t status, bool isOnce);
     void OnEncodeImage(ani_env *env, std::shared_ptr<Media::PixelMap> pixelMap, ani_resolver deferred);
     void ProcessErrorResult(ani_env *env, int32_t result, int32_t code, ani_resolver deferred);
+    bool ValidateEncodeParam(const std::string &metadata, std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
 
 public:
     ani_ref ref_;

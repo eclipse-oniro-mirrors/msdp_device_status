@@ -153,6 +153,7 @@ void AniBoomerang::OnMetadata(const std::string &bundleName, ::taihe::callback_v
 {
     if (bundleName.empty()) {
         FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "bundleName is fail");
         return;
     }
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
@@ -201,6 +202,7 @@ void AniBoomerang::OffMetadata(const std::string &bundleName, ::taihe::optional_
 {
     if (bundleName.empty()) {
         FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "bundleName is fail");
         return;
     }
 
@@ -237,6 +239,7 @@ std::string AniBoomerang::NotifyMetadataBindingEvent(const std::string &bundleNa
 {
     if (bundleName.empty()) {
         FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "bundleName is fail");
         return "";
     }
     sptr<AniBoomerangCallback> callback = new (std::nothrow) AniBoomerangCallback();
@@ -271,11 +274,34 @@ void AniBoomerang::SubmitMetadata(const std::string &metadata)
     }
 }
 
+bool AniBoomerang::ValidateEncodeParam(const std::string &metadata, std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
+{
+    if (metadata.empty() || static_cast<int32_t>(metadata.size()) > MAX_LENGTH) {
+        FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        return false;
+    }
+    if (pixelMap == nullptr) {
+        FI_HILOGE("%{public}s get pixelMap failed", LOG_TAG);
+        return false;
+    }
+    size_t pos = metadata.find_first_not_of(URL_CHARACTERES);
+    if (pos != std::string::npos) {
+        FI_HILOGE("%{public}s There are illegal characters present in metadata", LOG_TAG);
+        return false;
+    }
+    if (pixelMap->GetWidth() < MIN_IMAGE_PIXEL || pixelMap->GetHeight() < MIN_IMAGE_PIXEL) {
+        FI_HILOGE("%{public}s The image size does not meet the requirements", LOG_TAG);
+        return false;
+    }
+    return true;
+}
+
 ani_object AniBoomerang::EncodeImage(uintptr_t srcImage, const std::string &metadata)
 {
     ani_object pixelMapObj = nullptr;
-    if (!srcImage || metadata.empty() || static_cast<int32_t>(metadata.size()) > MAX_LENGTH) {
+    if (!srcImage) {
         FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "srcImage is nullptr");
         return pixelMapObj;
     }
     sptr<AniBoomerangCallback> callback = new (std::nothrow) AniBoomerangCallback();
@@ -291,17 +317,8 @@ ani_object AniBoomerang::EncodeImage(uintptr_t srcImage, const std::string &meta
     }
     ani_object object = reinterpret_cast<ani_object>(srcImage);
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, object);
-    if (pixelMap == nullptr) {
-        FI_HILOGE("%{public}s get pixelMap failed", LOG_TAG);
-        return pixelMapObj;
-    }
-    size_t pos = metadata.find_first_not_of(URL_CHARACTERES);
-    if (pos != std::string::npos) {
-        FI_HILOGE("%{public}s There are illegal characters present in metadata", LOG_TAG);
-        return pixelMapObj;
-    }
-    if (pixelMap->GetWidth() < MIN_IMAGE_PIXEL || pixelMap->GetHeight() < MIN_IMAGE_PIXEL) {
-        FI_HILOGE("%{public}s The image size does not meet the requirements", LOG_TAG);
+    if (!ValidateEncodeParam(metadata, pixelMap)) {
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "The parameters do not meet the requirements");
         return pixelMapObj;
     }
     int32_t ret = ANI_BOOMERANG_MGR.BoomerangEncodeImage(pixelMap, metadata, callback);
@@ -324,6 +341,7 @@ std::string AniBoomerang::DecodeImage(uintptr_t encodedImage)
 {
     if (!encodedImage) {
         FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "encodedImage is fail");
         return "";
     }
     ani_object object = reinterpret_cast<ani_object>(encodedImage);
