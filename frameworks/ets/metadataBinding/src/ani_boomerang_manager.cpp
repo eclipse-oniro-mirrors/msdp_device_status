@@ -153,7 +153,7 @@ void AniBoomerang::OnMetadata(const std::string &bundleName, ::taihe::callback_v
 {
     if (bundleName.empty()) {
         FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
-        taihe::set_business_error(PARAM_ERROR, "bundleName is fail");
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "bundleName is fail");
         return;
     }
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
@@ -202,7 +202,7 @@ void AniBoomerang::OffMetadata(const std::string &bundleName, ::taihe::optional_
 {
     if (bundleName.empty()) {
         FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
-        taihe::set_business_error(PARAM_ERROR, "bundleName is fail");
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "bundleName is fail");
         return;
     }
 
@@ -239,7 +239,7 @@ std::string AniBoomerang::NotifyMetadataBindingEvent(const std::string &bundleNa
 {
     if (bundleName.empty()) {
         FI_HILOGE("%{public}s Failed to get arguments", LOG_TAG);
-        taihe::set_business_error(PARAM_ERROR, "bundleName is fail");
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "bundleName is fail");
         return "";
     }
     sptr<AniBoomerangCallback> callback = new (std::nothrow) AniBoomerangCallback();
