@@ -79,12 +79,7 @@ public:
     }
     ~AniCallbackInfo()
     {
-        if (env_ && ref_) {
-            env_->GlobalReference_Delete(ref_);
-            ref_ = nullptr;
-        }
-        if (attach_ && vm_) {
-            vm_->DetachCurrentThread();
+        if (attach_) {
             attach_ = false;
         }
     };
