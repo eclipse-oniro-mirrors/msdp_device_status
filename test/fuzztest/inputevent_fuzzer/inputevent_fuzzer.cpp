@@ -32,10 +32,10 @@ namespace {
     constexpr uint32_t MAX_TEST_CASE = 3;
 
     enum class TestCase : uint32_t {
-        InputEventSerialization = 0,
-        KeyEventSerialization = 1,
-        InputEventSampler = 2,
-        NetPacketOperations = 3,
+        INPUT_EVENT_SERIALIZATION = 0,
+        KEY_EVENT_SERIALIZATION = 1,
+        INPUT_EVENT_SAMPLER = 2,
+        NET_PACKET_OPERATIONS = 3,
     };
 }
 
@@ -183,16 +183,16 @@ bool InputEventFuzzTest(FuzzedDataProvider &provider)
     TestCase testCase = static_cast<TestCase>(provider.ConsumeIntegralInRange<uint32_t>(0, MAX_TEST_CASE));
 
     switch (testCase) {
-        case TestCase::InputEventSerialization:
+        case TestCase::INPUT_EVENT_SERIALIZATION:
             FuzzInputEventSerialization(provider);
             break;
-        case TestCase::KeyEventSerialization:
+        case TestCase::KEY_EVENT_SERIALIZATION:
             FuzzKeyEventSerialization(provider);
             break;
-        case TestCase::InputEventSampler:
+        case TestCase::INPUT_EVENT_SAMPLER:
             FuzzInputEventSampler(provider);
             break;
-        case TestCase::NetPacketOperations:
+        case TestCase::NET_PACKET_OPERATIONS:
             FuzzNetPacketOperations(provider);
             break;
         default:
