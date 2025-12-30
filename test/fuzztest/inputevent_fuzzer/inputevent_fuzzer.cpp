@@ -30,6 +30,13 @@ namespace {
     constexpr int32_t MAX_KEY_ITEMS = 10;
     constexpr int32_t MAX_BUFFER_SIZE = 100;
     constexpr uint32_t MAX_TEST_CASE = 3;
+
+    enum class TestCase : uint32_t {
+        InputEventSerialization = 0,
+        KeyEventSerialization = 1,
+        InputEventSampler = 2,
+        NetPacketOperations = 3,
+    };
 }
 
 namespace OHOS {
@@ -173,19 +180,19 @@ void FuzzNetPacketOperations(FuzzedDataProvider &provider)
 
 bool InputEventFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t testCase = provider.ConsumeIntegralInRange<uint32_t>(0, MAX_TEST_CASE);
+    TestCase testCase = static_cast<TestCase>(provider.ConsumeIntegralInRange<uint32_t>(0, MAX_TEST_CASE));
 
     switch (testCase) {
-        case 0:
+        case TestCase::InputEventSerialization:
             FuzzInputEventSerialization(provider);
             break;
-        case 1:
+        case TestCase::KeyEventSerialization:
             FuzzKeyEventSerialization(provider);
             break;
-        case 2:
+        case TestCase::InputEventSampler:
             FuzzInputEventSampler(provider);
             break;
-        case 3:
+        case TestCase::NetPacketOperations:
             FuzzNetPacketOperations(provider);
             break;
         default:

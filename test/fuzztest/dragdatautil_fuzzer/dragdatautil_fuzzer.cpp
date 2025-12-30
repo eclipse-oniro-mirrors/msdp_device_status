@@ -41,6 +41,16 @@ namespace {
     constexpr size_t MAX_KEY_LENGTH = 20;
     constexpr int32_t MAX_VECTOR_SIZE = 5;
     constexpr uint32_t MAX_TEST_CASE = 6;
+
+    enum class TestCase {
+        MARSHALLING = 0,
+        DETAILED_SUMMARYS = 1,
+        SUMMARY_EXPANDING = 2,
+        MATERIAL_ID = 3,
+        MATERIAL_FILTER = 4,
+        CHECK_DRAG_DATA = 5,
+        SHADOW_OFFSET = 6,
+    };
 }
 
 namespace OHOS {
@@ -243,28 +253,28 @@ void FuzzShadowOffsetPacker(FuzzedDataProvider &provider)
 
 bool DragDataUtilFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t testCase = provider.ConsumeIntegralInRange<uint32_t>(0, MAX_TEST_CASE);
+    TestCase testCase = static_cast<TestCase>(provider.ConsumeIntegralInRange<uint32_t>(0, MAX_TEST_CASE));
 
     switch (testCase) {
-        case 0:
+        case TestCase::MARSHALLING:
             FuzzDragDataUtilMarshalling(provider);
             break;
-        case 1:
+        case TestCase::DETAILED_SUMMARYS:
             FuzzDragDataUtilDetailedSummarys(provider);
             break;
-        case 2:
+        case TestCase::SUMMARY_EXPANDING:
             FuzzDragDataUtilSummaryExpanding(provider);
             break;
-        case 3:
+        case TestCase::MATERIAL_ID:
             FuzzDragDataUtilMaterialId(provider);
             break;
-        case 4:
+        case TestCase::MATERIAL_FILTER:
             FuzzDragDataUtilMaterialFilter(provider);
             break;
-        case 5:
+        case TestCase::CHECK_DRAG_DATA:
             FuzzDragDataPackerCheckDragData(provider);
             break;
-        case 6:
+        case TestCase::SHADOW_OFFSET:
             FuzzShadowOffsetPacker(provider);
             break;
         default:

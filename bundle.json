@@ -10,14 +10,15 @@
     "name": "device_status",
     "subsystem": "msdp",
     "syscap": [
-      "SystemCapability.Msdp.DeviceStatus.Drag",
-      "SystemCapability.Msdp.DeviceStatus.Cooperate",
-      "SystemCapability.Msdp.DeviceStatus.Stationary",
-      "SystemCapability.MultimodalAwareness.Motion",
-      "SystemCapability.MultimodalAwareness.DeviceStatus",
+      "SystemCapability.MultimodalAwareness.DistanceMeasurement",
       "SystemCapability.MultimodalAwareness.MetadataBinding",
+      "SystemCapability.MultimodalAwareness.Motion",
+      "SystemCapability.Msdp.DeviceStatus.Stationary",
+      "SystemCapability.Msdp.DeviceStatus.Cooperate",
+      "SystemCapability.Msdp.DeviceStatus.Drag",
+      "SystemCapability.MultimodalAwareness.OnScreenAwareness",
       "SystemCapability.MultimodalAwareness.UserStatus",
-      "SystemCapability.MultimodalAwareness.OnScreenAwareness"
+      "SystemCapability.MultimodalAwareness.DeviceStatus"
     ],
     "hisysevent_config": [
       "//base/msdp/device_status/hisysevent.yaml",
