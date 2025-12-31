@@ -450,96 +450,69 @@ HWTEST_F(OnScreenServerNewTest, IsSystemCalling, TestSize.Level0)
 }
 
 /**
- * @tc.name: NotifyClient
- * @tc.desc: Test func named NotifyClient mock
+ * @tc.name: RegisterAwarenessCallback
+ * @tc.desc: Test func named RegisterAwarenessCallback001
  * @tc.type: FUNC
  */
-HWTEST_F(OnScreenServerNewTest, NotifyClient001, TestSize.Level0)
+HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    OnScreenServer onScreen;
-    sptr<IRemoteOnScreenCallback> callbackTest1 = new (std::nothrow) OnScreenServerNewTestCallback();
-    std::set<std::string> sets;
-    sets.insert("contentUiTree");
-    onScreen.callbackInfo_.emplace(callbackTest1, sets);
-    int32_t fd = 1;
-    std::vector<std::u16string> args;
-    std::u16string arg1 = u"-mock";
-    args.push_back(arg1);
-    onScreen.NotifyClient(fd, args);
-
-    ASSERT_FALSE(onScreen.callbackInfo_.empty());
-}
-
-/**
- * @tc.name: NotifyClient
- * @tc.desc: Test func named NotifyClient unmock
- * @tc.type: FUNC
- */
-HWTEST_F(OnScreenServerNewTest, NotifyClient002, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    OnScreenServer onScreen;
-    sptr<IRemoteOnScreenCallback> callbackTest1 = new (std::nothrow) OnScreenServerNewTestCallback();
-    std::set<std::string> sets;
-    sets.insert("contentUiTree");
-    onScreen.callbackInfo_.emplace(callbackTest1, sets);
-    int32_t fd = 1;
-    std::vector<std::u16string> args;
-    std::u16string arg1 = u"-unmock";
-    args.push_back(arg1);
-    onScreen.NotifyClient(fd, args);
-
-    ASSERT_FALSE(onScreen.callbackInfo_.empty());
-}/**
- * @tc.name: RegisterPermissionListener
- * @tc.desc: Test func named RegisterPermissionListener
- * @tc.type: FUNC
- */
-HWTEST_F(OnScreenServerNewTest, RegisterPermissionListener, TestSize.Level0)
-{
-    FI_HILOGI("RegisterPermissionListener enter");
     OnScreenServer onScreen;
     CallingContext context{
-        .tokenId = -1,
-        .uid = -1,
-        .pid = -1,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
     };
     sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
     AwarenessCap cap;
+    cap.capList = std::vector<std::vector>{ "aaa", "bbb" };
     AwarenessOptions option;
-    int32_t ret = onScreen.RegisterPermissionListener(context, callback);
-    EXPECT_NE(ret, RET_OK);
-
-    context.tokenId = 1;
-    ret = onScreen.RegisterPermissionListener(context, callback);
-    EXPECT_NE(ret, RET_OK);
-    FI_HILOGI("RegisterPermissionListener exit");
+    int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
+    EXPECT_NE(ret, RET_ERR);
 }
 
 /**
- * @tc.name: UnregisterPermissionListener
- * @tc.desc: Test func named UnregisterPermissionListener
+ * @tc.name: RegisterAwarenessCallback
+ * @tc.desc: Test func named RegisterAwarenessCallback002
  * @tc.type: FUNC
  */
-HWTEST_F(OnScreenServerNewTest, UnregisterPermissionListener, TestSize.Level0)
+HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback002, TestSize.Level0)
 {
-    FI_HILOGI("UnregisterPermissionListener enter");
+    CALL_TEST_DEBUG;
     OnScreenServer onScreen;
     CallingContext context{
-        .tokenId = -1,
-        .uid = -1,
-        .pid = -1,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
     };
-    AwarenessCap cap;
     sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
-    int32_t ret = onScreen.UnregisterPermissionListener(context, callback);
-    EXPECT_NE(ret, RET_OK);
+    AwarenessCap cap;
+    cap.capList = std::vector<std::vector>{ "ccc", "scenarioTodo" };
+    AwarenessOptions option;
+    int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
+    EXPECT_NE(ret, RET_ERR);
+}
 
-    context.tokenId = 1;
-    ret = onScreen.UnregisterPermissionListener(context, callback);
-    EXPECT_NE(ret, RET_OK);
-    FI_HILOGI("UnregisterPermissionListener exit");
+/**
+ * @tc.name: RegisterAwarenessCallback
+ * @tc.desc: Test func named RegisterAwarenessCallback003
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback003, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreenServer onScreen;
+    CallingContext context{
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
+    AwarenessCap cap;
+    cap.capList = std::vector<std::vector>{ "scenarioActivity", "scenarioShortVideo", "abc" };
+    AwarenessOptions option;
+    int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
+    EXPECT_NE(ret, RET_ERR);
 }
 }  // namespace OnScreen
 }  // namespace DeviceStatus
