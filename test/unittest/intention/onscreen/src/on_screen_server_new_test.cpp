@@ -465,7 +465,7 @@ HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback001, TestSize.Level0)
     };
     sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
     AwarenessCap cap;
-    cap.capList = std::vector<std::vector>{ "aaa", "bbb" };
+    cap.capList = std::vector<std::string>{ "aaa", "bbb" };
     AwarenessOptions option;
     int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
     EXPECT_NE(ret, RET_ERR);
@@ -487,7 +487,7 @@ HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback002, TestSize.Level0)
     };
     sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
     AwarenessCap cap;
-    cap.capList = std::vector<std::vector>{ "ccc", "scenarioTodo" };
+    cap.capList = std::vector<std::string>{ "ccc", "scenarioTodo" };
     AwarenessOptions option;
     int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
     EXPECT_NE(ret, RET_ERR);
@@ -509,7 +509,7 @@ HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback003, TestSize.Level0)
     };
     sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
     AwarenessCap cap;
-    cap.capList = std::vector<std::vector>{ "scenarioActivity", "scenarioShortVideo", "abc" };
+    cap.capList = std::vector<std::string>{ "scenarioActivity", "scenarioShortVideo", "abc" };
     AwarenessOptions option;
     int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
     EXPECT_NE(ret, RET_ERR);
