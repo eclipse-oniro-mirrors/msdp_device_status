@@ -41,6 +41,7 @@ std::mutex g_lockSetToken;
 uint64_t g_shellTokenId = 0;
 static constexpr int32_t DEFAULT_API_VERSION = 12;
 static MockHapToken *g_mock = nullptr;
+uint64_t tokenId_ = 0;
 }  // namespace
 void SetTestEvironment(uint64_t shellTokenId)
 {
@@ -423,6 +424,95 @@ HWTEST_F(OnScreenServerNewTest, GetUnusedCap, TestSize.Level0)
     cap.capList.emplace_back("scenarioActivity");
     auto ret = onScreen.GetUnusedCap(cap);
     EXPECT_EQ(ret.size(), 1);
+}
+
+/**
+ * @tc.name: IsSystemCalling
+ * @tc.desc: Test func named IsSystemCalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, IsSystemCalling, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    OnScreenServer onScreen;
+    bool ret = onScreen.IsSystemCalling(context);
+    ASSERT_TRUE(ret);
+
+    context.fullTokenId = tokenId_;
+    ret = onScreen.IsSystemCalling(context);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: RegisterAwarenessCallback
+ * @tc.desc: Test func named RegisterAwarenessCallback001
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreenServer onScreen;
+    CallingContext context{
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
+    AwarenessCap cap;
+    cap.capList = std::vector<std::string>{ "aaa", "bbb" };
+    AwarenessOptions option;
+    int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
+    EXPECT_NE(ret, RET_OK);
+}
+
+/**
+ * @tc.name: RegisterAwarenessCallback
+ * @tc.desc: Test func named RegisterAwarenessCallback002
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreenServer onScreen;
+    CallingContext context{
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
+    AwarenessCap cap;
+    cap.capList = std::vector<std::string>{ "ccc", "scenarioTodo" };
+    AwarenessOptions option;
+    int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
+    EXPECT_NE(ret, RET_OK);
+}
+
+/**
+ * @tc.name: RegisterAwarenessCallback
+ * @tc.desc: Test func named RegisterAwarenessCallback003
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback003, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreenServer onScreen;
+    CallingContext context{
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
+    AwarenessCap cap;
+    cap.capList = std::vector<std::string>{ "scenarioActivity", "scenarioShortVideo", "abc" };
+    AwarenessOptions option;
+    int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
+    EXPECT_NE(ret, RET_OK);
 }
 }  // namespace OnScreen
 }  // namespace DeviceStatus
