@@ -41,6 +41,7 @@ std::mutex g_lockSetToken;
 uint64_t g_shellTokenId = 0;
 static constexpr int32_t DEFAULT_API_VERSION = 12;
 static MockHapToken *g_mock = nullptr;
+uint64_t tokenId_ = 0;
 }  // namespace
 void SetTestEvironment(uint64_t shellTokenId)
 {
@@ -423,6 +424,122 @@ HWTEST_F(OnScreenServerNewTest, GetUnusedCap, TestSize.Level0)
     cap.capList.emplace_back("scenarioActivity");
     auto ret = onScreen.GetUnusedCap(cap);
     EXPECT_EQ(ret.size(), 1);
+}
+
+/**
+ * @tc.name: IsSystemCalling
+ * @tc.desc: Test func named IsSystemCalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, IsSystemCalling, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    OnScreenServer onScreen;
+    bool ret = onScreen.IsSystemCalling(context);
+    ASSERT_TRUE(ret);
+
+    context.fullTokenId = tokenId_;
+    ret = onScreen.IsSystemCalling(context);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: NotifyClient
+ * @tc.desc: Test func named NotifyClient mock
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, NotifyClient001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreenServer onScreen;
+    sptr<IRemoteOnScreenCallback> callbackTest1 = new (std::nothrow) OnScreenServerNewTestCallback();
+    std::set<std::string> sets;
+    sets.insert("contentUiTree");
+    onScreen.callbackInfo_.emplace(callbackTest1, sets);
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg1 = u"-mock";
+    args.push_back(arg1);
+    onScreen.NotifyClient(fd, args);
+
+    ASSERT_FALSE(onScreen.callbackInfo_.empty());
+}
+
+/**
+ * @tc.name: NotifyClient
+ * @tc.desc: Test func named NotifyClient unmock
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, NotifyClient002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    OnScreenServer onScreen;
+    sptr<IRemoteOnScreenCallback> callbackTest1 = new (std::nothrow) OnScreenServerNewTestCallback();
+    std::set<std::string> sets;
+    sets.insert("contentUiTree");
+    onScreen.callbackInfo_.emplace(callbackTest1, sets);
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg1 = u"-unmock";
+    args.push_back(arg1);
+    onScreen.NotifyClient(fd, args);
+
+    ASSERT_FALSE(onScreen.callbackInfo_.empty());
+}/**
+ * @tc.name: RegisterPermissionListener
+ * @tc.desc: Test func named RegisterPermissionListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, RegisterPermissionListener, TestSize.Level0)
+{
+    FI_HILOGI("RegisterPermissionListener enter");
+    OnScreenServer onScreen;
+    CallingContext context{
+        .tokenId = -1,
+        .uid = -1,
+        .pid = -1,
+    };
+    sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
+    AwarenessCap cap;
+    AwarenessOptions option;
+    int32_t ret = onScreen.RegisterPermissionListener(context, callback);
+    EXPECT_NE(ret, RET_OK);
+
+    context.tokenId = 1;
+    ret = onScreen.RegisterPermissionListener(context, callback);
+    EXPECT_NE(ret, RET_OK);
+    FI_HILOGI("RegisterPermissionListener exit");
+}
+
+/**
+ * @tc.name: UnregisterPermissionListener
+ * @tc.desc: Test func named UnregisterPermissionListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenServerNewTest, UnregisterPermissionListener, TestSize.Level0)
+{
+    FI_HILOGI("UnregisterPermissionListener enter");
+    OnScreenServer onScreen;
+    CallingContext context{
+        .tokenId = -1,
+        .uid = -1,
+        .pid = -1,
+    };
+    AwarenessCap cap;
+    sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
+    int32_t ret = onScreen.UnregisterPermissionListener(context, callback);
+    EXPECT_NE(ret, RET_OK);
+
+    context.tokenId = 1;
+    ret = onScreen.UnregisterPermissionListener(context, callback);
+    EXPECT_NE(ret, RET_OK);
+    FI_HILOGI("UnregisterPermissionListener exit");
 }
 }  // namespace OnScreen
 }  // namespace DeviceStatus
