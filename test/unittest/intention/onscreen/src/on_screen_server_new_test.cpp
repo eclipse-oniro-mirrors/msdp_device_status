@@ -468,7 +468,7 @@ HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback001, TestSize.Level0)
     cap.capList = std::vector<std::string>{ "aaa", "bbb" };
     AwarenessOptions option;
     int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
-    EXPECT_NE(ret, RET_ERR);
+    EXPECT_NE(ret, RET_OK);
 }
 
 /**
@@ -490,7 +490,7 @@ HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback002, TestSize.Level0)
     cap.capList = std::vector<std::string>{ "ccc", "scenarioTodo" };
     AwarenessOptions option;
     int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
-    EXPECT_NE(ret, RET_ERR);
+    EXPECT_NE(ret, RET_OK);
 }
 
 /**
@@ -512,7 +512,7 @@ HWTEST_F(OnScreenServerNewTest, RegisterAwarenessCallback003, TestSize.Level0)
     cap.capList = std::vector<std::string>{ "scenarioActivity", "scenarioShortVideo", "abc" };
     AwarenessOptions option;
     int32_t ret = onScreen.RegisterAwarenessCallback(context, cap, callback, option);
-    EXPECT_NE(ret, RET_ERR);
+    EXPECT_NE(ret, RET_OK);
 }
 }  // namespace OnScreen
 }  // namespace DeviceStatus
