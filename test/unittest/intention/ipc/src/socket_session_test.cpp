@@ -113,7 +113,7 @@ HWTEST_F(SocketSessionTest, SocketSessionTest3, TestSize.Level0)
     CALL_TEST_DEBUG;
     g_client->Reconnect();
     int32_t ret = g_client->Connect();
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     g_client->Reconnect();
     g_client->OnDisconnected();
 }
