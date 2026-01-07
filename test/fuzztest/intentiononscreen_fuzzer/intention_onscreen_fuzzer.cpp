@@ -79,8 +79,11 @@ void IntentionOnscreenFuzzTest(const uint8_t *data, size_t size)
             provider.ConsumeIntegralInRange<int32_t>(0, 2)),
         .hookId = provider.ConsumeIntegral<int64_t>()
     };
+    int32_t windowId = provider.ConsumeIntegral<int32_t>();
+    int32_t outStatus = provider.ConsumeIntegral<int32_t>();
     INTENTION_CLIENT->GetPageContent(option, pageContent);
     INTENTION_CLIENT->SendControlEvent(event);
+    INTENTION_CLIENT->IsParallelFeatureEnabled(windowId, outStatus);
 }
 } // namespace OHOS
 

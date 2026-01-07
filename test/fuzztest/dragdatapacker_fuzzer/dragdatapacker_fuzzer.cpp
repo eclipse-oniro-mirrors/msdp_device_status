@@ -13,34 +13,27 @@
  * limitations under the License.
  */
 
-#include "sequenceablecooperateoptions_fuzzer.h"
+#include "dragdatapacker_fuzzer.h"
 
 #include <fuzzer/FuzzedDataProvider.h>
 #include "singleton.h"
 
 #define private public
-#include "sequenceable_content_option.h"
-#include "sequenceable_control_event.h"
-#include "sequenceable_cooperate_options.h"
-#include "sequenceable_drag_data.h"
-#include "sequenceable_drag_result.h"
-#include "sequenceable_drag_summary_info.h"
-#include "sequenceable_drag_visible.h"
-#include "sequenceable_page_content.h"
-#include "sequenceable_posture_data.h"
-#include "sequenceable_preview_animation.h"
-#include "sequenceable_preview_style.h"
-#include "sequenceable_rotate_window.h"
+#include "drag_data_packer.h"
+
+#include "devicestatus_errors.h"
 #include "fi_log.h"
 #include "message_parcel.h"
 
+
 #undef LOG_TAG
-#define LOG_TAG "SequenceableCooperateOptionsFuzzTest"
+#define LOG_TAG "DragDataPackerFuzzTest"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
+    const int32_t RET_OK = 0;
     constexpr size_t THRESHOLD = 5;
     constexpr int32_t RANGEMAX = 10;
     constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
@@ -76,34 +69,16 @@ std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMap(int32_t width, int32_t hei
     }
     return pixelMap;
 }
-
-bool SequenceableCooperateOptionsFuzzTest(const uint8_t* data, size_t size)
+bool DragDataPackerFuzzTest(const uint8_t* data, size_t size)
 {
     FuzzedDataProvider provider(data, size);
-    Parcel parcel;
-    CooperateOptions options = {
-        .displayX = provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX),
-        .displayY = provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX),
-        .displayId = provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX),
-    };
-    SequenceableCooperateOptions cooperateOptions(options);
-    SequenceableCooperateOptions *cooperateOptions1 = cooperateOptions.Unmarshalling(parcel);
-    if (cooperateOptions1 != nullptr) {
-        cooperateOptions1->Marshalling(parcel);
-    }
-    return true;
-}
-
-bool SequenceableDragDataFuzzTest(const uint8_t* data, size_t size)
-{
-    FuzzedDataProvider provider(data, size);
-    Parcel parcel;
+    Parcel datas;
     int32_t shadowinfo_x = provider.ConsumeIntegralInRange<int32_t>(0, THRESHOLD);
     int32_t shadowinfo_y = provider.ConsumeIntegralInRange<int32_t>(0, THRESHOLD);
-    int32_t width = provider.ConsumeIntegralInRange<int32_t>(0, THRESHOLD);
-    int32_t height = provider.ConsumeIntegralInRange<int32_t>(0, THRESHOLD);
+    int32_t width = provider.ConsumeIntegralInRange<int32_t>(1, THRESHOLD);
+    int32_t height = provider.ConsumeIntegralInRange<int32_t>(1, THRESHOLD);
     std::shared_ptr<PixelMap> pixelMap = CreatePixelMap(width, height);
-    Msdp::DeviceStatus::DragData dragData {
+    DragData dragData {
         .buffer = {
             provider.ConsumeIntegral<uint8_t>(),
             provider.ConsumeIntegral<uint8_t>()
@@ -111,13 +86,13 @@ bool SequenceableDragDataFuzzTest(const uint8_t* data, size_t size)
         .udKey = provider.ConsumeBytesAsString(RANGEMAX), // test value
         .extraInfo = provider.ConsumeBytesAsString(RANGEMAX), // test value
         .filterInfo = provider.ConsumeBytesAsString(RANGEMAX), // test value
-        .sourceType = provider.ConsumeIntegral<int32_t>(),
-        .dragNum = provider.ConsumeIntegral<int32_t>(),
-        .pointerId = provider.ConsumeIntegral<int32_t>(),
-        .displayX = provider.ConsumeIntegral<int32_t>(),
-        .displayY = provider.ConsumeIntegral<int32_t>(),
-        .displayId = provider.ConsumeIntegral<int32_t>(),
-        .mainWindow = provider.ConsumeIntegral<int32_t>(),
+        .sourceType = provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX),
+        .dragNum = provider.ConsumeIntegralInRange<int32_t>(1, RANGEMAX),
+        .pointerId = provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX),
+        .displayX = provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX),
+        .displayY = provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX),
+        .displayId = provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX),
+        .mainWindow = provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX),
         .hasCanceledAnimation = provider.ConsumeBool(),
         .hasCoordinateCorrected = provider.ConsumeBool(),
         .summarys = {{
@@ -131,13 +106,13 @@ bool SequenceableDragDataFuzzTest(const uint8_t* data, size_t size)
         },
         .summaryFormat = {
             {provider.ConsumeBytesAsString(10), // test value
-                {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegral<int32_t>()}},
+                {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX)}},
             {provider.ConsumeBytesAsString(10), // test value
-                {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegral<int32_t>()}},
+                {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX)}},
             {provider.ConsumeBytesAsString(10), // test value
-                {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegral<int32_t>()}},
+                {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX)}},
             {provider.ConsumeBytesAsString(10), // test value
-                {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegral<int32_t>()}},
+                {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX)}},
         },
         .summaryVersion = provider.ConsumeIntegral<int32_t>(),
         .summaryTotalSize = provider.ConsumeIntegral<int64_t>(),
@@ -148,10 +123,63 @@ bool SequenceableDragDataFuzzTest(const uint8_t* data, size_t size)
         .appCaller = provider.ConsumeBytesAsString(RANGEMAX) // test value
     };
     dragData.shadowInfos.push_back({ pixelMap, shadowinfo_x, shadowinfo_y });
-    SequenceableDragData sequenceableDragData(dragData);
-    SequenceableDragData *sequenceableDragData1 =  sequenceableDragData.Unmarshalling(parcel);
-    if (sequenceableDragData1 != nullptr) {
-        sequenceableDragData1->Marshalling(parcel);
+    bool isCross = provider.ConsumeBool();
+    int32_t ret = DragDataPacker::MarshallingDetailedSummarys(dragData, datas);
+    if (ret == RET_OK) {
+        DragDataPacker::UnMarshallingDetailedSummarys(datas, dragData);
+    }
+    ret = DragDataPacker::MarshallingSummaryExpanding(dragData, datas);
+    if (ret == RET_OK) {
+        DragDataPacker::UnMarshallingSummaryExpanding(datas, dragData);
+    }
+    ret = DragDataPacker::MarshallingMaterialId(dragData, datas);
+    if (ret == RET_OK) {
+        DragDataPacker::UnMarshallingMaterialId(datas, dragData);
+    }
+    ret = DragDataPacker::MarshallingMaterialFilter(dragData, datas);
+    if (ret == RET_OK) {
+        DragDataPacker::UnMarshallingMaterialFilter(datas, dragData);
+    }
+    ret = DragDataPacker::Marshalling(dragData, datas, isCross);
+    if (ret == RET_OK) {
+        DragDataPacker::UnMarshalling(datas, dragData, isCross);
+    }
+    DragDataPacker::CheckDragData(dragData);
+    ShadowInfo shadowInfo = { pixelMap, shadowinfo_x, shadowinfo_y};
+    ret = ShadowPacker::PackUpShadowInfo(shadowInfo, datas, isCross);
+    if (ret == RET_OK) {
+        ShadowPacker::UnPackShadowInfo(datas, shadowInfo, isCross);
+    }
+    ShadowPacker::CheckShadowInfo(shadowInfo);
+    SummaryMap val = {{
+        provider.ConsumeBytesAsString(10), provider.ConsumeIntegral<int64_t>()}};
+    ret = SummaryPacker::Marshalling(val, datas);
+    if (ret == RET_OK) {
+        SummaryPacker::UnMarshalling(datas, val);
+    }
+    ShadowOffset shadowOffset = {
+        .offsetX = provider.ConsumeIntegralInRange<int32_t>(0, THRESHOLD),
+        .offsetY = provider.ConsumeIntegralInRange<int32_t>(0, THRESHOLD),
+        .width = provider.ConsumeIntegralInRange<int32_t>(0, THRESHOLD),
+        .height = provider.ConsumeIntegralInRange<int32_t>(0, THRESHOLD),
+    };
+    ret = ShadowOffsetPacker::Marshalling(shadowOffset, datas);
+    if (ret == RET_OK) {
+        ShadowOffsetPacker::UnMarshalling(datas, shadowOffset);
+    }
+    std::map<std::string, std::vector<int32_t>> vals = {
+        {provider.ConsumeBytesAsString(10), // test value
+            {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX)}},
+        {provider.ConsumeBytesAsString(10), // test value
+            {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX)}},
+        {provider.ConsumeBytesAsString(10), // test value
+            {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX)}},
+        {provider.ConsumeBytesAsString(10), // test value
+            {provider.ConsumeIntegral<int32_t>(), provider.ConsumeIntegralInRange<int32_t>(0, RANGEMAX)}},
+    };
+    ret = SummaryFormat::Marshalling(vals, datas);
+    if (ret == RET_OK) {
+        SummaryFormat::UnMarshalling(datas, vals);
     }
     return true;
 }
@@ -162,8 +190,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (data == nullptr) {
         return 0;
     }
-    SequenceableCooperateOptionsFuzzTest(data, size);
-    SequenceableDragDataFuzzTest(data, size);
+    DragDataPackerFuzzTest(data, size);
     return 0;
 }
 } // namespace DeviceStatus
