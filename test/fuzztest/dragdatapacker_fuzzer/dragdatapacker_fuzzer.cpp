@@ -78,6 +78,10 @@ bool DragDataPackerFuzzTest(const uint8_t* data, size_t size)
     int32_t width = provider.ConsumeIntegralInRange<int32_t>(1, THRESHOLD);
     int32_t height = provider.ConsumeIntegralInRange<int32_t>(1, THRESHOLD);
     std::shared_ptr<PixelMap> pixelMap = CreatePixelMap(width, height);
+    if (pixelMap == nullptr) {
+        FI_HILOGE("Create pixelMap failed");
+        return false;
+    }
     DragData dragData {
         .buffer = {
             provider.ConsumeIntegral<uint8_t>(),
