@@ -19,7 +19,6 @@
 #include "singleton.h"
 
 #define private public
-#include "devicestatus_service.h"
 #include "fi_log.h"
 #include "message_parcel.h"
 #include "sequenceable_content_option.h"
