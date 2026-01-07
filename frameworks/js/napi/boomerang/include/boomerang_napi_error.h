@@ -35,6 +35,7 @@ const std::map <int32_t, std::string> ERROR_MESSAGES = {
         "Algorithm loading exception."},
     {UNSUBSCRIBE_FAILED,
         "Unsubscribe Failed. Possible causes: 1. Abnormal system capability; 2. IPC communication abnormality."},
+    {HANDLER_FAILD, "Internal handling failed. Set Meta data to screenshot."},
 };
 
 napi_value CreateNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage);
