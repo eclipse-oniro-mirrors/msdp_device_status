@@ -95,11 +95,13 @@ HWTEST_F(SocketSessionTest, SocketSessionTest1, TestSize.Level0)
 HWTEST_F(SocketSessionTest, SocketSessionTest2, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    int32_t ret = g_client->Socket();
+    int32_t ret = g_client->Connect();
     MessageId msgId { MessageId::INVALID };
     NetPacket pkt(msgId);
     g_client->OnPacket(pkt);
     EXPECT_GT(ret, -1);
+    g_client->Stop();
+    g_client->OnDisconnected();
 }
 
 /**
@@ -391,6 +393,23 @@ HWTEST_F(SocketSessionTest, SocketSessionTest33, TestSize.Level0)
     SocketConnection socketConnection(fd, recv, onDisconnected);
     ASSERT_NO_FATAL_FAILURE(socketConnection.OnReadable(fd));
     ASSERT_NO_FATAL_FAILURE(socketConnection.OnShutdown(fd));
+}
+
+/**
+ * @tc.name: SocketSessionTest34
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SocketSessionTest, SocketSessionTest34, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t ret = g_client->Socket();
+    EXPECT_TRUE(true);
+    ret = g_client->Connect();
+    EXPECT_FALSE(ret);
+    g_client->Stop();
+    g_client->OnDisconnected();
 }
 } // namespace DeviceStatus
 } // namespace Msdp

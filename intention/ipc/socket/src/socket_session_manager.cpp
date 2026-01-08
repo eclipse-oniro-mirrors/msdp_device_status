@@ -86,6 +86,11 @@ int32_t SocketSessionManager::AllocSocketFd(const std::string& programName, int3
                                             int32_t uid, int32_t pid, int32_t& clientFd)
 {
     CALL_INFO_TRACE;
+    auto socketSession = FindSessionByPid(pid);
+    if (socketSession != nullptr) {
+        FI_HILOGW("SocketSession with pid:%{public}d already exists", pid);
+        return RET_ERR;
+    }
     int32_t sockFds[2] { -1, -1 };
 
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sockFds) != 0) {
