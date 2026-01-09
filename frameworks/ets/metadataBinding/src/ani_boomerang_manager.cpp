@@ -173,7 +173,7 @@ void AniBoomerang::OnMetadata(const std::string &bundleName, ::taihe::callback_v
             return;
         }
     }
-    sptr<AniBoomerangCallback> callback = new (std::nothrow) AniBoomerangCallback();
+    auto callback = new (std::nothrow) AniBoomerangCallback();
     if (callback == nullptr) {
         FI_HILOGE("%{public}s callback is nullptr", LOG_TAG);
         taihe::set_business_error(COMMON_PARAMETER_ERROR, "callback is nullptr");
@@ -190,6 +190,7 @@ void AniBoomerang::OnMetadata(const std::string &bundleName, ::taihe::callback_v
     if (ret != RET_OK) {
         FI_HILOGE("%{public}s type:%{public}d return fail,err msg:%{public}s.", LOG_TAG, SUBSCRIBE_FAILED,
             MetadataBindingLogInfo.at(SUBSCRIBE_FAILED).c_str());
+        delete callback;
         taihe::set_business_error(SUBSCRIBE_FAILED, MetadataBindingLogInfo.at(SUBSCRIBE_FAILED));
         return;
     }
@@ -242,7 +243,7 @@ std::string AniBoomerang::NotifyMetadataBindingEvent(const std::string &bundleNa
         taihe::set_business_error(COMMON_PARAMETER_ERROR, "bundleName is fail");
         return "";
     }
-    sptr<AniBoomerangCallback> callback = new (std::nothrow) AniBoomerangCallback();
+    auto callback = new (std::nothrow) AniBoomerangCallback();
     if (callback == nullptr) {
         FI_HILOGE("%{public}s callback is nullptr", LOG_TAG);
         taihe::set_business_error(COMMON_PARAMETER_ERROR, "callback is nullptr");
@@ -252,12 +253,14 @@ std::string AniBoomerang::NotifyMetadataBindingEvent(const std::string &bundleNa
     if (ret != RET_OK) {
         FI_HILOGE("%{public}s type:%{public}d return fail,err msg:%{public}s.", LOG_TAG, HANDLER_FAILD,
             MetadataBindingLogInfo.at(HANDLER_FAILD).c_str());
+        delete callback;
         taihe::set_business_error(HANDLER_FAILD, MetadataBindingLogInfo.at(HANDLER_FAILD));
         return "";
     }
     std::string metadata;
     if (!callback->GetMetadata(metadata)) {
         FI_HILOGE("OnNotifyMetadata not return.");
+        delete callback;
         taihe::set_business_error(HANDLER_FAILD, MetadataBindingLogInfo.at(HANDLER_FAILD));
     }
 
@@ -304,7 +307,7 @@ ani_object AniBoomerang::EncodeImage(uintptr_t srcImage, const std::string &meta
         taihe::set_business_error(COMMON_PARAMETER_ERROR, "srcImage is nullptr");
         return pixelMapObj;
     }
-    sptr<AniBoomerangCallback> callback = new (std::nothrow) AniBoomerangCallback();
+    auto callback = new (std::nothrow) AniBoomerangCallback();
     if (callback == nullptr) {
         FI_HILOGE("%{public}s callback is nullptr", LOG_TAG);
         taihe::set_business_error(COMMON_PARAMETER_ERROR, "callback is nullptr");
@@ -313,6 +316,7 @@ ani_object AniBoomerang::EncodeImage(uintptr_t srcImage, const std::string &meta
     ani_env *env = taihe::get_env();
     if (env == nullptr) {
         FI_HILOGE("get env failed");
+        delete callback;
         return pixelMapObj;
     }
     ani_object object = reinterpret_cast<ani_object>(srcImage);
@@ -325,12 +329,14 @@ ani_object AniBoomerang::EncodeImage(uintptr_t srcImage, const std::string &meta
     if (ret != RET_OK) {
         FI_HILOGE("%{public}s type:%{public}d return fail,err msg:%{public}s.", LOG_TAG, ENCODE_FAILED,
             MetadataBindingLogInfo.at(ENCODE_FAILED).c_str());
+        delete callback;
         taihe::set_business_error(ENCODE_FAILED, MetadataBindingLogInfo.at(ENCODE_FAILED));
         return pixelMapObj;
     }
     std::shared_ptr<Media::PixelMap> image = nullptr;
     if (!callback->GetEncodeImage(image)) {
         FI_HILOGE("OnNotifyMetadata not return.");
+        delete callback;
         taihe::set_business_error(HANDLER_FAILD, MetadataBindingLogInfo.at(HANDLER_FAILD));
     }
     pixelMapObj = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, image);
@@ -346,7 +352,7 @@ std::string AniBoomerang::DecodeImage(uintptr_t encodedImage)
     }
     ani_object object = reinterpret_cast<ani_object>(encodedImage);
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env_, object);
-    sptr<AniBoomerangCallback> callback = new (std::nothrow) AniBoomerangCallback();
+    auto callback = new (std::nothrow) AniBoomerangCallback();
     if (callback == nullptr) {
         FI_HILOGE("%{public}s callback is nullptr", LOG_TAG);
         taihe::set_business_error(COMMON_PARAMETER_ERROR, "callback is nullptr");
@@ -356,12 +362,14 @@ std::string AniBoomerang::DecodeImage(uintptr_t encodedImage)
     if (ret != RET_OK) {
         FI_HILOGE("%{public}s type:%{public}d return fail,err msg:%{public}s.", LOG_TAG, DECODE_FAILED,
             MetadataBindingLogInfo.at(DECODE_FAILED).c_str());
+        delete callback;
         taihe::set_business_error(DECODE_FAILED, MetadataBindingLogInfo.at(DECODE_FAILED));
         return "";
     }
     std::string metadata;
     if (!callback->GetMetadata(metadata)) {
         FI_HILOGE("OnNotifyMetadata not return.");
+        delete callback;
         taihe::set_business_error(DECODE_FAILED, MetadataBindingLogInfo.at(DECODE_FAILED));
     }
     return metadata;
