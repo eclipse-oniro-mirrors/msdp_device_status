@@ -90,6 +90,7 @@
         "rust_libc",
         "hiappevent",
         "runtime_core",
+        "time_service",
         "openssl"
       ],
       "third_party": [

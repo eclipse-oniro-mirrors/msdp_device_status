@@ -57,7 +57,8 @@ ohos_source_set("intention_client") {
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_utils_path}:devicestatus_util",
     "${device_status_root_path}/intention/ipc/sequenceable_types:sequenceable_types",
-    ":intention_interface"
+    ":intention_interface", 
+    ":msdp_kit_report", 
   ]
 
   external_deps = [
@@ -96,6 +97,37 @@ ohos_source_set("intention_server_stub") {
     "samgr:samgr_proxy",
     "image_framework:image_native"
   ]
+  part_name = "${device_status_part_name}"
+  subsystem_name = "msdp"
+}
+
+ohos_source_set("msdp_kit_report") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  public_configs = [ ":intention_tunnel_public_config" ]
+
+   sources = [
+    "src/msdp_timer_info.cpp",
+    "src/msdp_kit_report.cpp",
+  ]
+
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+
+  external_deps = [
+    "hiappevent:hiappevent_innerapi",
+    "hilog:libhilog",
+    "c_utils:utils",
+    "ability_runtime:wantagent_innerkits",
+    "time_service:time_client",
+  ]
+
   part_name = "${device_status_part_name}"
   subsystem_name = "msdp"
 }
