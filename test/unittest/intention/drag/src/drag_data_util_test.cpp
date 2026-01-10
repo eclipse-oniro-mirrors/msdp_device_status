@@ -39,14 +39,12 @@ constexpr int32_t MAX_PIXEL_MAP_HEIGHT { 600 };
 constexpr int32_t DISPLAY_X { 50 };
 constexpr int32_t DISPLAY_ID { 0 };
 constexpr int32_t DISPLAY_Y { 50 };
-constexpr int32_t INT32_BYTE { 4 };
 constexpr bool HAS_CANCELED_ANIMATION { true };
 const std::string UD_KEY { "Unified data key" };
 const std::string FILTER_INFO { "Undefined filter info" };
 const std::string EXTRA_INFO { "Undefined extra info" };
 int32_t g_shadowinfo_x { 0 };
 int32_t g_shadowinfo_y { 0 };
-constexpr int64_t g_recordSize = 20;
 } // namespace
 
 void DragDataUtilTest::SetUpTestCase() {}
@@ -69,7 +67,7 @@ std::shared_ptr<Media::PixelMap> DragDataUtilTest::CreatePixelMap(int32_t width,
         FI_HILOGE("Invalid size, height:%{public}d, width:%{public}d", height, width);
         return nullptr;
     }
-    if (width > 0 && height > INT32_MAX / width) {
+    if (height > 0 && width > INT32_MAX / height) {
         FI_HILOGE("Integer overflow detected");
         return nullptr;
     }
@@ -174,12 +172,13 @@ HWTEST_F(DragDataUtilTest, DragDataUtilTest3, TestSize.Level0)
     CALL_TEST_DEBUG;
     std::optional<DragData> dragData = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_MOUSE, 0, 1, false, 1);
     ASSERT_TRUE(dragData);
+    constexpr int64_t recordSize = 20;
     const std::string udType = "general.message";
-    dragData.value().detailedSummarys = { { udType, g_recordSize } };
+    dragData.value().detailedSummarys = { { udType, recordSize } };
     dragData.value().summaryFormat = { { udType, { 0, 1 } } };
     dragData.value().summaryVersion = 1;
     dragData.value().summaryTotalSize = 1;
-    dragData.value().summaryTag = g_recordSize;
+    dragData.value().summaryTag = recordSize;
     Parcel parcel;
     int32_t ret = DragDataUtil::MarshallingSummaryExpanding(dragData.value(), parcel);
     ASSERT_EQ(ret, RET_OK);
