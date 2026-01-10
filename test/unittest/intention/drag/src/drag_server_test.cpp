@@ -1506,7 +1506,7 @@ HWTEST_F(DragServerTest, DragServerTest80, TestSize.Level0) {
 
 /**
  * @tc.name: DragServerTest81
- * @tc.desc: When dragWindowRotationFlush_ is not equal to the current rotation state.
+ * @tc.desc: When DragWindowRotationFlush_ is not equal to the current rotation state.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1517,12 +1517,12 @@ HWTEST_F(DragServerTest, DragServerTest81, TestSize.Level0) {
     int32_t ret = context_->dragMgr_.GetDragState(dragState);
     EXPECT_EQ(ret, RET_OK);
     EXPECT_EQ(dragState, DragState::START);
-    context_->dragMgr_.dragDrawing_.dragWindowRotationFlush_ = Rosen::Rotation::ROTATION_90;
+    context_->dragMgr_.dragDrawing_.DragWindowRotationFlush_ = Rosen::Rotation::ROTATION_90;
     context_->dragMgr_.dragDrawing_.dragSmoothProcessor_.InsertEvent({0, 0, -1, 0});
     context_->dragMgr_.dragDrawing_.FlushDragPosition(0);
     context_->dragMgr_.dragDrawing_.StopVSyncStation();
     Rosen::Rotation rotation = context_->dragMgr_.dragDrawing_.GetRotation(WINDOW_ID);
-    EXPECT_EQ(context_->dragMgr_.dragDrawing_.dragWindowRotationFlush_, rotation);
+    EXPECT_EQ(context_->dragMgr_.dragDrawing_.DragWindowRotationFlush_, rotation);
     context_->dragMgr_.SetDragState(DragState::STOP);
 }
 

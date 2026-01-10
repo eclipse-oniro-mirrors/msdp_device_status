@@ -85,8 +85,6 @@ class TestContext final : public IContext {
 public:
     TestContext();
     ~TestContext() = default;
-
-
     IDelegateTasks& GetDelegateTasks() override;
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
