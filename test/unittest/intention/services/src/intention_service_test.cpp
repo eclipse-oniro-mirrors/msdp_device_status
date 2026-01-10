@@ -958,7 +958,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragBundleInfo001, TestSi
 /**
  * @tc.name: IntentionServiceTest45
  * @tc.desc: Test SubscribeStationaryCallback
-* @tc.desc: Test GetDragBundleInfo
+ * @tc.desc: Test GetDragBundleInfo
  * @tc.type: FUNC
  * @tc.require:
  */
