@@ -273,6 +273,62 @@ ohos_unittest("DragDrawingTest") {
   ]
 }
 
+ohos_unittest("DragDataUtilTest") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+ 
+  branch_protector_ret = "pac_ret"
+  module_out_path = module_output_path
+  include_dirs = [ "include" ]
+ 
+  defines = []
+ 
+  sources = [ "src/drag_data_util_test.cpp" ]
+ 
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+ 
+  configs = []
+ 
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/cooperate/client:intention_cooperate_client",
+    "${device_status_root_path}/intention/drag/client:intention_drag_client",
+    "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:app_manager",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "data_share:datashare_consumer",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "libxml2:libxml2",
+    "samgr:samgr_proxy",
+    "window_manager:libdm",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -280,5 +336,6 @@ group("unittest") {
     ":DragManagerTest",
     ":DragServerTest",
     ":DragClientTest",
+    ":DragDataUtilTest",
   ]
 }
