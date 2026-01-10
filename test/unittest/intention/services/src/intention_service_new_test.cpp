@@ -154,7 +154,7 @@ class IRemoteOnScreenCallbackTest : public OnScreen::IRemoteOnScreenCallback {
 public:
     void OnScreenChange(const std::string &changeInfo) override{};
     void OnScreenAwareness(const OnScreen::OnscreenAwarenessInfo &info) override{};
-     sptr<IRemoteObject> AsObject() override
+    sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
     }
