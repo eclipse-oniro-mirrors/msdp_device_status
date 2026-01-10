@@ -36,6 +36,7 @@ namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
+constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 constexpr int32_t PIXEL_MAP_WIDTH{3};
 constexpr int32_t PIXEL_MAP_HEIGHT{3};
 constexpr uint32_t DEFAULT_ICON_COLOR{0xFF};
@@ -134,10 +135,20 @@ void IntentionServiceNewTest::TearDownTestCase()
 {}
  
 void IntentionServiceNewTest::SetUp()
-{}
+{
+    intentionService_ = std::make_shared<IntentionService>(ContextService::GetInstance());
+}
  
 void IntentionServiceNewTest::TearDown()
-{}
+{
+    if (intentionService_!= nullptr) {
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+        intentionService_->drag_.universalDragWrapper_.universalDragHandle_ = nullptr;
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+        intentionService_ = nullptr;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
  
 class IRemoteOnScreenCallbackTest : public OnScreen::IRemoteOnScreenCallback {
 public:
@@ -231,10 +242,10 @@ HWTEST_F(IntentionServiceNewTest, RegisterAwarenessCallback, TestSize.Level1)
     OnScreen::SequenceableOnscreenAwarenessCap cap(option);
     OnScreen::SequenceableOnscreenAwarenessOption awarenessOption;
     sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
-    auto intentionService = std::make_shared<IntentionService>(ContextService::GetInstance());
-    EXPECT_NE(intentionService, nullptr);
-    auto result = intentionService->RegisterAwarenessCallback(cap, callback, awarenessOption);
+    EXPECT_NE(intentionService_, nullptr);
+    auto result = intentionService_->RegisterAwarenessCallback(cap, callback, awarenessOption);
     EXPECT_NE(result, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
  
 /**
@@ -249,10 +260,10 @@ HWTEST_F(IntentionServiceNewTest, UnregisterAwarenessCallback, TestSize.Level1)
     OnScreen::AwarenessCap option;
     OnScreen::SequenceableOnscreenAwarenessCap cap(option);
     sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
-    auto intentionService = std::make_shared<IntentionService>(ContextService::GetInstance());
-    EXPECT_NE(intentionService, nullptr);
-    auto result = intentionService->UnregisterAwarenessCallback(cap, callback);
+    EXPECT_NE(intentionService_, nullptr);
+    auto result = intentionService_->UnregisterAwarenessCallback(cap, callback);
     EXPECT_NE(result, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
  
 /**
@@ -268,10 +279,10 @@ HWTEST_F(IntentionServiceNewTest, Trigger, TestSize.Level1)
     OnScreen::SequenceableOnscreenAwarenessCap cap(option);
     OnScreen::SequenceableOnscreenAwarenessInfo info;
     OnScreen::SequenceableOnscreenAwarenessOption awarenessOption;
-    auto intentionService = std::make_shared<IntentionService>(ContextService::GetInstance());
-    EXPECT_NE(intentionService, nullptr);
-    auto result = intentionService->Trigger(cap, awarenessOption, info);
+    EXPECT_NE(intentionService_, nullptr);
+    auto result = intentionService_->Trigger(cap, awarenessOption, info);
     EXPECT_NE(result, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
 }  // namespace DeviceStatus
 }  // namespace Msdp

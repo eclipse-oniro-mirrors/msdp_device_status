@@ -79,6 +79,9 @@ public:
     static std::optional<DragData> CreateDragData(int32_t sourceType, int32_t pointerId, int32_t dragNum,
         bool hasCoordinateCorrected, int32_t shadowNum);
     void AssignToAnimation(PreviewAnimation &animation);
+
+private:
+    std::shared_ptr<IntentionService> intentionService_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

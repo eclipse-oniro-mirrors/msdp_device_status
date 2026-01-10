@@ -215,7 +215,9 @@ void OnScreenServerTest::SetUp()
 {}
 
 void OnScreenServerTest::TearDown()
-{}
+{
+    onScreen_.handle_.pAlgorithm = nullptr;
+}
 
 void OnScreenServerTest::SetUpTestCase()
 {

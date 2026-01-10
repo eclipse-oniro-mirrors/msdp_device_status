@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DRAG_MANAGER_TEST_H
-#define DRAG_MANAGER_TEST_H
+#ifndef DRAG_SERVER_TEST_H
+#define DRAG_SERVER_TEST_H
 
 #include <gtest/gtest.h>
 
@@ -24,35 +24,17 @@
 #include "devicestatus_delayed_sp_singleton.h"
 #include "drag_client.h"
 #include "drag_manager.h"
+#include "drag_server.h"
 #include "i_context.h"
 #include "sequenceable_drag_data.h"
 #include "sequenceable_drag_summary_info.h"
 #include "socket_session_manager.h"
+#include "test_context.h"
 #include "timer_manager.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class ContextService final : public IContext {
-    ContextService();
-    ~ContextService();
-    DISALLOW_COPY_AND_MOVE(ContextService);
-public:
-    IDelegateTasks& GetDelegateTasks() override;
-    IDeviceManager& GetDeviceManager() override;
-    ITimerManager& GetTimerManager() override;
-    IDragManager& GetDragManager() override;
-    IDDMAdapter& GetDDM() override;
-    IPluginManager& GetPluginManager() override;
-    ISocketSessionManager& GetSocketSessionManager() override;
-    IInputAdapter& GetInput() override;
-    IDSoftbusAdapter& GetDSoftbus() override;
-    static ContextService* GetInstance();
-
-private:
-    std::unique_ptr<IDDMAdapter> ddm_;
-};
-
 class DragServerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -62,8 +44,12 @@ public:
     static std::optional<DragData> CreateDragData(int32_t sourceType, int32_t pointerId, int32_t dragNum,
         bool hasCoordinateCorrected, int32_t shadowNum);
     void AssignToAnimation(PreviewAnimation &animation);
+
+private:
+    std::shared_ptr<TestContext> context_ { nullptr };
+    std::shared_ptr<DragServer> dragServer_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // DRAG_MANAGER_TEST_H
+#endif // DRAG_SERVER_TEST_H

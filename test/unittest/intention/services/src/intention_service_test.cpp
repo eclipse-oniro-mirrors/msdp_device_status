@@ -150,8 +150,15 @@ void IntentionServiceTest::SetUpTestCase()
 
 void IntentionServiceTest::TearDownTestCase()
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    if (g_intentionService != nullptr) {
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+        g_intentionService->drag_.universalDragWrapper_.universalDragHandle_ = nullptr;
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+        g_intentionService->onScreen_.handle_.pAlgorithm = nullptr;
+        g_intentionService = nullptr;
+    }
     g_intentionServiceNullptr = nullptr;
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
 
 void IntentionServiceTest::SetUp()

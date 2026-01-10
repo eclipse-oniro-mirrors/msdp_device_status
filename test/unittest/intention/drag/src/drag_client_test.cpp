@@ -60,10 +60,6 @@ constexpr int32_t ANIMATION_DURATION { 500 };
 constexpr int32_t MAX_PIXEL_MAP_WIDTH { 600 };
 constexpr int32_t MAX_PIXEL_MAP_HEIGHT { 600 };
 constexpr bool HAS_CANCELED_ANIMATION { true };
-std::shared_ptr<DragServer> g_dragServer { nullptr };
-std::shared_ptr<DragServer> g_dragServerOne { nullptr };
-IContext *g_context { nullptr };
-IContext *g_contextOne { nullptr };
 Security::AccessToken::HapInfoParams g_testInfoParms = {
     .userID = 1,
     .bundleName = "drag_server_test",
@@ -148,16 +144,10 @@ void DragClientTest::SetUpTestCase() {}
 
 void DragClientTest::SetUp()
 {
-    g_context = ContextService::GetInstance();
-    g_dragServer = std::make_shared<DragServer>(g_context);
-    g_dragServerOne = std::make_shared<DragServer>(g_contextOne);
 }
 
 void DragClientTest::TearDown()
 {
-    g_dragServer = nullptr;
-    g_context = nullptr;
-    g_dragServerOne = nullptr;
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
 
