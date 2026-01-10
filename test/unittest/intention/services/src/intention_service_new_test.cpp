@@ -154,7 +154,7 @@ class IRemoteOnScreenCallbackTest : public OnScreen::IRemoteOnScreenCallback {
 public:
     void OnScreenChange(const std::string &changeInfo) override{};
     void OnScreenAwareness(const OnScreen::OnscreenAwarenessInfo &info) override{};
-        sptr<IRemoteObject> AsObject() override
+     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
     }
@@ -173,7 +173,7 @@ std::shared_ptr<Media::PixelMap> IntentionServiceNewTest::CreatePixelMap(int32_t
     opts.pixelFormat = Media::PixelFormat::BGRA_8888;
     opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
-
+ 
     int32_t colorLen = width * height;
     uint32_t *pixelColors = new (std::nothrow) uint32_t[BUFF_SIZE];
     CHKPP(pixelColors);
