@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #define BUFF_SIZE 100
 #include "intention_service_new_test.h"
- 
+
 #include "ddm_adapter.h"
 #include "drag_data_manager.h"
 #include "drag_server.h"
@@ -27,15 +27,16 @@
 #include "ipc_skeleton.h"
 #include "plugin_manager.h"
 #include "iremote_on_screen_callback.h"
- 
+
 #undef LOG_TAG
 #define LOG_TAG "IntentionServiceNewTest"
- 
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
+constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 constexpr int32_t PIXEL_MAP_WIDTH{3};
 constexpr int32_t PIXEL_MAP_HEIGHT{3};
 constexpr uint32_t DEFAULT_ICON_COLOR{0xFF};
@@ -56,24 +57,24 @@ constexpr bool HAS_CANCELED_ANIMATION{true};
 std::shared_ptr<ContextService> g_context{nullptr};
 DragManager g_dragMgr;
 }  // namespace
- 
+
 int32_t MockDelegateTasks::PostSyncTask(DTaskCallback callback)
 {
     return callback();
 }
- 
+
 int32_t MockDelegateTasks::PostAsyncTask(DTaskCallback callback)
 {
     return callback();
 }
- 
+
 ContextService *ContextService::GetInstance()
 {
     static std::once_flag flag;
     std::call_once(flag, [&]() { g_context = std::make_shared<ContextService>(); });
     return g_context.get();
 }
- 
+
 ContextService::ContextService()
 {
     ddm_ = std::make_unique<DDMAdapter>();
@@ -81,74 +82,84 @@ ContextService::ContextService()
     pluginMgr_ = std::make_unique<PluginManager>(this);
     dsoftbus_ = std::make_unique<DSoftbusAdapter>();
 }
- 
+
 IDelegateTasks &ContextService::GetDelegateTasks()
 {
     return delegateTasks_;
 }
- 
+
 IDeviceManager &ContextService::GetDeviceManager()
 {
     return devMgr_;
 }
- 
+
 ITimerManager &ContextService::GetTimerManager()
 {
     return timerMgr_;
 }
- 
+
 IDragManager &ContextService::GetDragManager()
 {
     return g_dragMgr;
 }
- 
+
 ISocketSessionManager &ContextService::GetSocketSessionManager()
 {
     return socketSessionMgr_;
 }
- 
+
 IDDMAdapter &ContextService::GetDDM()
 {
     return *ddm_;
 }
- 
+
 IPluginManager &ContextService::GetPluginManager()
 {
     return *pluginMgr_;
 }
- 
+
 IInputAdapter &ContextService::GetInput()
 {
     return *input_;
 }
- 
+
 IDSoftbusAdapter &ContextService::GetDSoftbus()
 {
     return *dsoftbus_;
 }
- 
+
 void IntentionServiceNewTest::SetUpTestCase()
 {}
- 
+
 void IntentionServiceNewTest::TearDownTestCase()
 {}
- 
+
 void IntentionServiceNewTest::SetUp()
-{}
- 
+{
+    intentionService_ = std::make_shared<IntentionService>(ContextService::GetInstance());
+}
+
 void IntentionServiceNewTest::TearDown()
-{}
- 
+{
+    if (intentionService_!= nullptr) {
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+        intentionService_->drag_.universalDragWrapper_.universalDragHandle_ = nullptr;
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+        intentionService_ = nullptr;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
 class IRemoteOnScreenCallbackTest : public OnScreen::IRemoteOnScreenCallback {
 public:
     void OnScreenChange(const std::string &changeInfo) override{};
     void OnScreenAwareness(const OnScreen::OnscreenAwarenessInfo &info) override{};
-    sptr<IRemoteObject> AsObject() override
+        sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
     }
 };
- 
+
 std::shared_ptr<Media::PixelMap> IntentionServiceNewTest::CreatePixelMap(int32_t width, int32_t height)
 {
     CALL_DEBUG_ENTER;
@@ -162,7 +173,7 @@ std::shared_ptr<Media::PixelMap> IntentionServiceNewTest::CreatePixelMap(int32_t
     opts.pixelFormat = Media::PixelFormat::BGRA_8888;
     opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     opts.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
- 
+
     int32_t colorLen = width * height;
     uint32_t *pixelColors = new (std::nothrow) uint32_t[BUFF_SIZE];
     CHKPP(pixelColors);
@@ -182,7 +193,7 @@ std::shared_ptr<Media::PixelMap> IntentionServiceNewTest::CreatePixelMap(int32_t
     delete[] pixelColors;
     return pixelMap;
 }
- 
+
 std::optional<DragData> IntentionServiceNewTest::CreateDragData(
     int32_t sourceType, int32_t pointerId, int32_t dragNum, bool hasCoordinateCorrected, int32_t shadowNum)
 {
@@ -210,14 +221,14 @@ std::optional<DragData> IntentionServiceNewTest::CreateDragData(
     dragData.hasCanceledAnimation = HAS_CANCELED_ANIMATION;
     return dragData;
 }
- 
+
 void IntentionServiceNewTest::AssignToAnimation(PreviewAnimation &animation)
 {
     animation.duration = ANIMATION_DURATION;
     animation.curveName = CURVE_NAME;
     animation.curve = {0.33, 0, 0.67, 1};
 }
- 
+
 /**
  * @tc.name: RegisterAwarenessCallback
  * @tc.desc: Check RegisterAwarenessCallback
@@ -231,12 +242,12 @@ HWTEST_F(IntentionServiceNewTest, RegisterAwarenessCallback, TestSize.Level1)
     OnScreen::SequenceableOnscreenAwarenessCap cap(option);
     OnScreen::SequenceableOnscreenAwarenessOption awarenessOption;
     sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
-    auto intentionService = std::make_shared<IntentionService>(ContextService::GetInstance());
-    EXPECT_NE(intentionService, nullptr);
-    auto result = intentionService->RegisterAwarenessCallback(cap, callback, awarenessOption);
+    EXPECT_NE(intentionService_, nullptr);
+    auto result = intentionService_->RegisterAwarenessCallback(cap, callback, awarenessOption);
     EXPECT_NE(result, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
- 
+
 /**
  * @tc.name: UnregisterAwarenessCallback
  * @tc.desc: Check UnregisterAwarenessCallback
@@ -249,12 +260,12 @@ HWTEST_F(IntentionServiceNewTest, UnregisterAwarenessCallback, TestSize.Level1)
     OnScreen::AwarenessCap option;
     OnScreen::SequenceableOnscreenAwarenessCap cap(option);
     sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
-    auto intentionService = std::make_shared<IntentionService>(ContextService::GetInstance());
-    EXPECT_NE(intentionService, nullptr);
-    auto result = intentionService->UnregisterAwarenessCallback(cap, callback);
+    EXPECT_NE(intentionService_, nullptr);
+    auto result = intentionService_->UnregisterAwarenessCallback(cap, callback);
     EXPECT_NE(result, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
- 
+
 /**
  * @tc.name: Trigger
  * @tc.desc: Check Trigger
@@ -268,10 +279,10 @@ HWTEST_F(IntentionServiceNewTest, Trigger, TestSize.Level1)
     OnScreen::SequenceableOnscreenAwarenessCap cap(option);
     OnScreen::SequenceableOnscreenAwarenessInfo info;
     OnScreen::SequenceableOnscreenAwarenessOption awarenessOption;
-    auto intentionService = std::make_shared<IntentionService>(ContextService::GetInstance());
-    EXPECT_NE(intentionService, nullptr);
-    auto result = intentionService->Trigger(cap, awarenessOption, info);
+    EXPECT_NE(intentionService_, nullptr);
+    auto result = intentionService_->Trigger(cap, awarenessOption, info);
     EXPECT_NE(result, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
 }  // namespace DeviceStatus
 }  // namespace Msdp

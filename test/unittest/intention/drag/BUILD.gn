@@ -98,7 +98,10 @@ ohos_unittest("DragServerTest") {
 
   defines = []
 
-  sources = [ "src/drag_server_test.cpp" ]
+  sources = [
+    "src/drag_server_test.cpp",
+    "src/test_context.cpp",
+    ]
 
   cflags = [
     "-Dprivate=public",
@@ -108,6 +111,8 @@ ohos_unittest("DragServerTest") {
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
+    "${device_status_root_path}/intention/scheduler/plugin_manager:intention_plugin_manager",
     "${device_status_root_path}/intention/drag/client:intention_drag_client",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
