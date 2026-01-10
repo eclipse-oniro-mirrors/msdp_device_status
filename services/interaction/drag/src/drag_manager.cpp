@@ -844,7 +844,6 @@ int32_t DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> po
     dragDrawing_.Draw(targetDisplayId, displayX, displayY, isNeedAdjustDisplayXY, isMultiSelectedAnimation);
     dragDrawing_.UpdateDragWindowDisplay(targetDisplayId);
     dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
-    lastDisplayId_ = targetDisplayId;
     return RET_OK;
 }
 
@@ -1156,6 +1155,7 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
             if (ret != RET_OK) {
                 FI_HILOGE("Post async task failed");
             }
+            lastDisplayId_ = targetDisplayId;
         }
     }
     FI_HILOGD("Unknown action, sourceType:%{public}d, pointerId:%{public}d, pointerAction:%{public}d",
