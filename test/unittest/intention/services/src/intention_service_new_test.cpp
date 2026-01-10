@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #define BUFF_SIZE 100
 #include "intention_service_new_test.h"
-
+ 
 #include "ddm_adapter.h"
 #include "drag_data_manager.h"
 #include "drag_server.h"
@@ -27,10 +27,10 @@
 #include "ipc_skeleton.h"
 #include "plugin_manager.h"
 #include "iremote_on_screen_callback.h"
-
+ 
 #undef LOG_TAG
 #define LOG_TAG "IntentionServiceNewTest"
-
+ 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -57,24 +57,24 @@ constexpr bool HAS_CANCELED_ANIMATION{true};
 std::shared_ptr<ContextService> g_context{nullptr};
 DragManager g_dragMgr;
 }  // namespace
-
+ 
 int32_t MockDelegateTasks::PostSyncTask(DTaskCallback callback)
 {
     return callback();
 }
-
+ 
 int32_t MockDelegateTasks::PostAsyncTask(DTaskCallback callback)
 {
     return callback();
 }
-
+ 
 ContextService *ContextService::GetInstance()
 {
     static std::once_flag flag;
     std::call_once(flag, [&]() { g_context = std::make_shared<ContextService>(); });
     return g_context.get();
 }
-
+ 
 ContextService::ContextService()
 {
     ddm_ = std::make_unique<DDMAdapter>();
@@ -82,63 +82,63 @@ ContextService::ContextService()
     pluginMgr_ = std::make_unique<PluginManager>(this);
     dsoftbus_ = std::make_unique<DSoftbusAdapter>();
 }
-
+ 
 IDelegateTasks &ContextService::GetDelegateTasks()
 {
     return delegateTasks_;
 }
-
+ 
 IDeviceManager &ContextService::GetDeviceManager()
 {
     return devMgr_;
 }
-
+ 
 ITimerManager &ContextService::GetTimerManager()
 {
     return timerMgr_;
 }
-
+ 
 IDragManager &ContextService::GetDragManager()
 {
     return g_dragMgr;
 }
-
+ 
 ISocketSessionManager &ContextService::GetSocketSessionManager()
 {
     return socketSessionMgr_;
 }
-
+ 
 IDDMAdapter &ContextService::GetDDM()
 {
     return *ddm_;
 }
-
+ 
 IPluginManager &ContextService::GetPluginManager()
 {
     return *pluginMgr_;
 }
-
+ 
 IInputAdapter &ContextService::GetInput()
 {
     return *input_;
 }
-
+ 
 IDSoftbusAdapter &ContextService::GetDSoftbus()
 {
     return *dsoftbus_;
 }
-
+ 
 void IntentionServiceNewTest::SetUpTestCase()
 {}
-
+ 
 void IntentionServiceNewTest::TearDownTestCase()
 {}
-
+ 
 void IntentionServiceNewTest::SetUp()
 {
     intentionService_ = std::make_shared<IntentionService>(ContextService::GetInstance());
 }
-
+ 
 void IntentionServiceNewTest::TearDown()
 {
     if (intentionService_!= nullptr) {
@@ -149,7 +149,7 @@ void IntentionServiceNewTest::TearDown()
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
-
+ 
 class IRemoteOnScreenCallbackTest : public OnScreen::IRemoteOnScreenCallback {
 public:
     void OnScreenChange(const std::string &changeInfo) override{};
@@ -159,7 +159,7 @@ public:
         return nullptr;
     }
 };
-
+ 
 std::shared_ptr<Media::PixelMap> IntentionServiceNewTest::CreatePixelMap(int32_t width, int32_t height)
 {
     CALL_DEBUG_ENTER;
@@ -193,7 +193,7 @@ std::shared_ptr<Media::PixelMap> IntentionServiceNewTest::CreatePixelMap(int32_t
     delete[] pixelColors;
     return pixelMap;
 }
-
+ 
 std::optional<DragData> IntentionServiceNewTest::CreateDragData(
     int32_t sourceType, int32_t pointerId, int32_t dragNum, bool hasCoordinateCorrected, int32_t shadowNum)
 {
@@ -221,14 +221,14 @@ std::optional<DragData> IntentionServiceNewTest::CreateDragData(
     dragData.hasCanceledAnimation = HAS_CANCELED_ANIMATION;
     return dragData;
 }
-
+ 
 void IntentionServiceNewTest::AssignToAnimation(PreviewAnimation &animation)
 {
     animation.duration = ANIMATION_DURATION;
     animation.curveName = CURVE_NAME;
     animation.curve = {0.33, 0, 0.67, 1};
 }
-
+ 
 /**
  * @tc.name: RegisterAwarenessCallback
  * @tc.desc: Check RegisterAwarenessCallback
@@ -247,7 +247,7 @@ HWTEST_F(IntentionServiceNewTest, RegisterAwarenessCallback, TestSize.Level1)
     EXPECT_NE(result, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
-
+ 
 /**
  * @tc.name: UnregisterAwarenessCallback
  * @tc.desc: Check UnregisterAwarenessCallback
@@ -265,7 +265,7 @@ HWTEST_F(IntentionServiceNewTest, UnregisterAwarenessCallback, TestSize.Level1)
     EXPECT_NE(result, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
-
+ 
 /**
  * @tc.name: Trigger
  * @tc.desc: Check Trigger

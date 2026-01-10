@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #ifndef INTENTION_SERVICE_NEW_TEST_H
 #define INTENTION_SERVICE_NEW_TEST_H
-
+ 
 #include <gtest/gtest.h>
 #include "nocopyable.h"
-
+ 
 #include "delegate_tasks.h"
 #include "device_manager.h"
 #include "devicestatus_callback_stub.h"
@@ -27,10 +27,10 @@
 #include "drag_manager.h"
 #include "i_context.h"
 #include "timer_manager.h"
-
+ 
 #include "intention_service.h"
 #include "socket_session_manager.h"
-
+ 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -39,13 +39,13 @@ public:
     int32_t PostSyncTask(DTaskCallback callback) override;
     int32_t PostAsyncTask(DTaskCallback callback) override;
 };
-
+ 
 class ContextService final : public IContext {
 public:
     ContextService();
     ~ContextService() = default;
     DISALLOW_COPY_AND_MOVE(ContextService);
-
+ 
     IDelegateTasks& GetDelegateTasks() override;
     IDeviceManager& GetDeviceManager() override;
     ITimerManager& GetTimerManager() override;
@@ -68,7 +68,7 @@ private:
     std::unique_ptr<IDSoftbusAdapter> dsoftbus_ { nullptr };
     sptr<IntentionService> intention_ { nullptr };
 };
-
+ 
 class IntentionServiceNewTest : public testing::Test {
 public:
     static void SetUpTestCase();
