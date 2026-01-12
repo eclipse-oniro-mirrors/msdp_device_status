@@ -64,7 +64,7 @@ void BoomerangServer::DumpCurrentDeviceStatus(int32_t fd)
     DS_DUMPER->DumpDeviceStatusCurrentStatus(fd, datas);
 }
 
-int32_t BoomerangServer::SubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
+int32_t BoomerangServer::SubscribeCallback(const CallingContext &context, int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& subCallback)
 {
     if (!IsDeviceSupport()) {
@@ -89,7 +89,7 @@ int32_t BoomerangServer::SubscribeCallback(CallingContext &context, int32_t type
     return ret;
 }
 
-int32_t BoomerangServer::UnsubscribeCallback(CallingContext &context, int32_t type, const std::string& bundleName,
+int32_t BoomerangServer::UnsubscribeCallback(const CallingContext &context, int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& unsubCallback)
 {
     if (!IsDeviceSupport()) {
@@ -114,7 +114,7 @@ int32_t BoomerangServer::UnsubscribeCallback(CallingContext &context, int32_t ty
     return ret;
 }
 
-int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, const std::string& bundleName,
+int32_t BoomerangServer::NotifyMetadataBindingEvent(const CallingContext &context, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& notifyCallback)
 {
     if (!IsDeviceSupport()) {
@@ -140,8 +140,9 @@ int32_t BoomerangServer::NotifyMetadataBindingEvent(CallingContext &context, con
     return ret;
 }
 
-int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
-    const std::string& metaData, const sptr<IRemoteBoomerangCallback>& encodeCallback)
+int32_t BoomerangServer::BoomerangEncodeImage(const CallingContext &context,
+    const std::shared_ptr<Media::PixelMap>& pixelMap, const std::string& metaData,
+    const sptr<IRemoteBoomerangCallback>& encodeCallback)
 {
     if (!IsDeviceSupport()) {
         FI_HILOGE("the device type is not support");
@@ -166,8 +167,8 @@ int32_t BoomerangServer::BoomerangEncodeImage(CallingContext &context, const std
     return ret;
 }
 
-int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
-    const sptr<IRemoteBoomerangCallback>& decodeCallback)
+int32_t BoomerangServer::BoomerangDecodeImage(const CallingContext &context,
+    const std::shared_ptr<Media::PixelMap>& pixelMap, const sptr<IRemoteBoomerangCallback>& decodeCallback)
 {
     if (!IsDeviceSupport()) {
         FI_HILOGE("the device type is not support");
@@ -192,7 +193,7 @@ int32_t BoomerangServer::BoomerangDecodeImage(CallingContext &context, const std
     return ret;
 }
 
-int32_t BoomerangServer::SubmitMetadata(CallingContext &context, const std::string& metaData)
+int32_t BoomerangServer::SubmitMetadata(const CallingContext &context, const std::string& metaData)
 {
     if (!IsDeviceSupport()) {
         FI_HILOGE("the device type is not support");
@@ -205,12 +206,12 @@ int32_t BoomerangServer::SubmitMetadata(CallingContext &context, const std::stri
     return ret;
 }
 
-Data BoomerangServer::GetCache(CallingContext &context, const Type &type)
+Data BoomerangServer::GetCache(const CallingContext &context, const Type &type)
 {
     return manager_.GetLatestDeviceStatusData(type);
 }
 
-void BoomerangServer::ReportSensorSysEvent(CallingContext &context, int32_t type, bool enable)
+void BoomerangServer::ReportSensorSysEvent(const CallingContext &context, int32_t type, bool enable)
 {
     std::string packageName;
     manager_.GetPackageName(context.tokenId, packageName);
@@ -226,7 +227,7 @@ void BoomerangServer::ReportSensorSysEvent(CallingContext &context, int32_t type
     }
 }
 
-bool BoomerangServer::IsSystemServiceCalling(CallingContext &context)
+bool BoomerangServer::IsSystemServiceCalling(const CallingContext &context)
 {
     auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
     if ((flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) ||
@@ -237,7 +238,7 @@ bool BoomerangServer::IsSystemServiceCalling(CallingContext &context)
     return false;
 }
 
-bool BoomerangServer::IsSystemHAPCalling(CallingContext &context)
+bool BoomerangServer::IsSystemHAPCalling(const CallingContext &context)
 {
     if (IsSystemServiceCalling(context)) {
         return true;

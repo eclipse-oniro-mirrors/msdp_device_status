@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,8 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
-void BoomerangCallbackProxy::OnScreenshotResult(const BoomerangData& screentshotData)
+template <typename WriteCallbackDataFunc>
+void BoomerangCallbackProxy::SendRequestCommon(int32_t requestCode, WriteCallbackDataFunc writeCallbackDataFunc)
 {
     sptr<IRemoteObject> remote = Remote();
     CHKPV(remote);
@@ -43,58 +44,39 @@ void BoomerangCallbackProxy::OnScreenshotResult(const BoomerangData& screentshot
         FI_HILOGE("Write descriptor failed");
         return;
     }
-    WRITEINT32(data, static_cast<int32_t>(screentshotData.type));
-    WRITEINT32(data, static_cast<int32_t>(screentshotData.status));
 
-    int32_t ret = remote->SendRequest(static_cast<int32_t>(IRemoteBoomerangCallback::SCREENSHOT),
-        data, reply, option);
+    writeCallbackDataFunc(data);
+
+    int32_t ret = remote->SendRequest(requestCode, data, reply, option);
     if (ret != RET_OK) {
         FI_HILOGE("SendRequest is failed, error code:%{public}d", ret);
         return;
     }
+}
+
+void BoomerangCallbackProxy::OnScreenshotResult(const BoomerangData& screenshotData)
+{
+    SendRequestCommon(static_cast<int32_t>(IRemoteBoomerangCallback::SCREENSHOT),
+        [&screenshotData](MessageParcel& data) {
+            WRITEINT32(data, static_cast<int32_t>(screenshotData.type));
+            WRITEINT32(data, static_cast<int32_t>(screenshotData.status));
+        });
 }
 
 void BoomerangCallbackProxy::OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pixelMap)
 {
-    sptr<IRemoteObject> remote = Remote();
-    CHKPV(remote);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(BoomerangCallbackProxy::GetDescriptor())) {
-        FI_HILOGE("Write descriptor failed");
-        return;
-    }
-    pixelMap->Marshalling(data);
-    int32_t ret = remote->SendRequest(static_cast<int32_t>(IRemoteBoomerangCallback::ENCODE_IMAGE),
-        data, reply, option);
-    if (ret != RET_OK) {
-        FI_HILOGE("SendRequest is failed, error code:%{public}d", ret);
-        return;
-    }
+    SendRequestCommon(static_cast<int32_t>(IRemoteBoomerangCallback::ENCODE_IMAGE),
+        [pixelMap](MessageParcel& data) {
+            pixelMap->Marshalling(data);
+        });
 }
 
 void BoomerangCallbackProxy::OnNotifyMetadata(const std::string& metadata)
 {
-    sptr<IRemoteObject> remote = Remote();
-    CHKPV(remote);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(BoomerangCallbackProxy::GetDescriptor())) {
-        FI_HILOGE("Write descriptor failed");
-        return;
-    }
-    WRITESTRING(data, metadata);
-
-    int32_t ret = remote->SendRequest(static_cast<int32_t>(IRemoteBoomerangCallback::NOTIFY_METADATA),
-        data, reply, option);
-    if (ret != RET_OK) {
-        FI_HILOGE("SendRequest is failed, error code:%{public}d", ret);
-        return;
-    }
+    SendRequestCommon(static_cast<int32_t>(IRemoteBoomerangCallback::NOTIFY_METADATA),
+        [&metadata](MessageParcel& data) {
+            WRITESTRING(data, metadata);
+        });
 }
 } // namespace DeviceStatus
 } // namespace Msdp

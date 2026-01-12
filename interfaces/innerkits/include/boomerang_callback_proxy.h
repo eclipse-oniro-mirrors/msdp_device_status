@@ -37,6 +37,8 @@ public:
     virtual void OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pixelMap) override;
 
 private:
+    template <typename WriteCallbackDataFunc>
+    void SendRequestCommon(int32_t requestCode, WriteCallbackDataFunc writeCallbackDataFunc);
     static inline BrokerDelegator<BoomerangCallbackProxy> delegator_;
 };
 } // namespace DeviceStatus

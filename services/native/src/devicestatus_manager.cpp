@@ -80,9 +80,9 @@ void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wp
             }
         }
     }
-    if (manager_->notityListener_ != nullptr && remote == manager_->notityListener_->AsObject()) {
+    if (manager_->notifyListener_ != nullptr && remote == manager_->notifyListener_->AsObject()) {
         FI_HILOGI("the screenshot app has died");
-        manager_->notityListener_ = nullptr;
+        manager_->notifyListener_ = nullptr;
     }
 }
 
@@ -185,14 +185,13 @@ bool DeviceStatusManager::Init()
 Data DeviceStatusManager::GetLatestDeviceStatusData(Type type)
 {
     CALL_DEBUG_ENTER;
-    Data data = {type, OnChangedValue::VALUE_EXIT};
+    Data data = {type, OnChangedValue::VALUE_INVALID};
     if ((type <= TYPE_INVALID) || (type >= TYPE_MAX)) {
         FI_HILOGE("GetLatestDeviceStatusData type_:%{public}d is error", type);
         return data;
     }
     if (msdpImpl_ == nullptr) {
         FI_HILOGE("msdpImpl_ is nullptr");
-        data.value = OnChangedValue::VALUE_INVALID;
         return data;
     }
     msdpData_ = msdpImpl_->GetObserverData();
@@ -202,7 +201,7 @@ Data DeviceStatusManager::GetLatestDeviceStatusData(Type type)
             return data;
         }
     }
-    return {type, OnChangedValue::VALUE_INVALID};
+    return data;
 }
 
 bool DeviceStatusManager::Enable(Type type)
@@ -212,9 +211,11 @@ bool DeviceStatusManager::Enable(Type type)
         FI_HILOGE("Check type is invalid");
         return false;
     }
-    InitAlgoMngrInterface(type);
-    InitDataCallback();
-    return true;
+    if (!InitAlgoMngrInterface(type)) {
+        FI_HILOGE("Init AlgoMngr Interface error");
+        return false;
+    }
+    return InitDataCallback();
 }
 
 bool DeviceStatusManager::Disable(Type type)
@@ -242,7 +243,7 @@ bool DeviceStatusManager::InitAlgoMngrInterface(Type type)
     return true;
 }
 
-int32_t DeviceStatusManager::InitDataCallback()
+bool DeviceStatusManager::InitDataCallback()
 {
     CALL_DEBUG_ENTER;
     CHKPF(msdpImpl_);
@@ -322,9 +323,13 @@ void DeviceStatusManager::Subscribe(Type type, ActivityEvent event, ReportLatenc
         FI_HILOGE("Subscribe event_:%{public}d is error", event_);
         return;
     }
+    std::lock_guard lock(mutex_);
     event_ = event;
     type_ = type;
-    std::lock_guard lock(mutex_);
+    if (argSize_ < type_ + 1) {
+        FI_HILOGE("Subscribe type is error");
+        return;
+    }
     arrs_ [type_] = event_;
     FI_HILOGI("type_:%{public}d, event:%{public}d", type_, event);
     std::set<const sptr<IRemoteDevStaCallback>, classcomp> listeners;
@@ -494,7 +499,7 @@ int32_t DeviceStatusManager::NotifyMetadata(const std::string &bundleName, sptr<
         listener->OnScreenshotResult(data);
     }
     object->AddDeathRecipient(boomerangCBDeathRecipient_);
-    notityListener_ = callback;
+    notifyListener_ = callback;
     auto callbackIter = bundleNameCache_.find(callback);
     if (callbackIter == bundleNameCache_.end()) {
         bundleNameCache_.emplace(callback, bundleName);
@@ -507,7 +512,7 @@ int32_t DeviceStatusManager::NotifyMetadata(const std::string &bundleName, sptr<
 
 int32_t DeviceStatusManager::GetBundleNameByCallback(std::string &bundleName)
 {
-    auto iter = bundleNameCache_.find(notityListener_);
+    auto iter = bundleNameCache_.find(notifyListener_);
     if (iter != bundleNameCache_.end()) {
         bundleName = iter->second;
         bundleNameCache_.erase(iter);
@@ -556,13 +561,13 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
         return RET_ERR;
     }
     hasSubmitted_.store(true);
-    CHKPR(notityListener_, RET_ERR);
+    CHKPR(notifyListener_, RET_ERR);
     std::string emptyMetadata;
     std::string callbackBundleName;
     auto callbackRet = GetBundleNameByCallback(callbackBundleName);
     if (callbackRet != RET_OK) {
         FI_HILOGE("Get callbackBundleName fail.");
-        notityListener_->OnNotifyMetadata(emptyMetadata);
+        notifyListener_->OnNotifyMetadata(emptyMetadata);
         return RET_OK;
     }
 
@@ -570,14 +575,14 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
     auto applinkRet = GetBundleNameByApplink(applinkBundleName, metadata);
     if (applinkRet != RET_OK) {
         FI_HILOGE("Get applinkBundleName fail.");
-        notityListener_->OnNotifyMetadata(emptyMetadata);
+        notifyListener_->OnNotifyMetadata(emptyMetadata);
         return RET_OK;
     }
 
     if (callbackBundleName.compare(applinkBundleName) == 0) {
-        notityListener_->OnNotifyMetadata(metadata);
+        notifyListener_->OnNotifyMetadata(metadata);
     } else {
-        notityListener_->OnNotifyMetadata(emptyMetadata);
+        notifyListener_->OnNotifyMetadata(emptyMetadata);
     }
     return RET_OK;
 }
@@ -591,7 +596,7 @@ int32_t DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMa
     std::lock_guard lock(mutex_);
 
 #ifdef BOOMERANG_SUPPORT_HDR
-    sptr<SurfaceBuffer> surfaceBuf(reinterpret_cast<SurfaceBuffer*>(pixelMap->GetFd()));
+    sptr<SurfaceBuffer> surfaceBuf(static_cast<SurfaceBuffer*>(pixelMap->GetFd()));
     CHKPR(surfaceBuf, RET_ERR);
 
     HDI::Display::Graphic::Common::V1_0::CM_ColorSpaceType colorSpaceType;
@@ -608,7 +613,7 @@ int32_t DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMa
     CHKPR(encodePixelMap, RET_ERR);
 
 #ifdef BOOMERANG_SUPPORT_HDR
-    sptr<SurfaceBuffer> encodeSurfaceBuf(reinterpret_cast<SurfaceBuffer*>(encodePixelMap->GetFd()));
+    sptr<SurfaceBuffer> encodeSurfaceBuf(static_cast<SurfaceBuffer*>(encodePixelMap->GetFd()));
     CHKPR(encodeSurfaceBuf, RET_ERR);
 
     bool ret = Media::VpeUtils::SetSbColorSpaceType(encodeSurfaceBuf, colorSpaceType);
@@ -646,19 +651,21 @@ int32_t DeviceStatusManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMa
 int32_t DeviceStatusManager::LoadAlgorithm()
 {
     CALL_DEBUG_ENTER;
-    if (msdpImpl_ != nullptr) {
-        msdpImpl_->LoadAlgoLibrary();
+    if (msdpImpl_ == nullptr) {
+        FI_HILOGE("msdpImpl_ is nullptr");
+        return RET_ERR;
     }
-    return RET_OK;
+    return msdpImpl_->LoadAlgoLibrary();
 }
 
 int32_t DeviceStatusManager::UnloadAlgorithm()
 {
     CALL_DEBUG_ENTER;
-    if (msdpImpl_ != nullptr) {
-        msdpImpl_->UnloadAlgoLibrary();
+    if (msdpImpl_ == nullptr) {
+        FI_HILOGE("msdpImpl_ is nullptr");
+        return RET_ERR;
     }
-    return RET_OK;
+    return msdpImpl_->UnloadAlgoLibrary();
 }
 
 int32_t DeviceStatusManager::GetPackageName(AccessTokenID tokenId, std::string &packageName)
@@ -686,7 +693,7 @@ int32_t DeviceStatusManager::GetPackageName(AccessTokenID tokenId, std::string &
         }
         default: {
             FI_HILOGE("token type not match");
-            break;
+            return RET_ERR;
         }
     }
     return RET_OK;
