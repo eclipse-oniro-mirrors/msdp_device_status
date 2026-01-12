@@ -136,6 +136,7 @@ ohos_unittest("CooperateServerTest") {
     "${device_status_service_path}/drag_auth:drag_auth"
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken_shared",
@@ -313,6 +314,7 @@ ohos_unittest("InputEventBuilderTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_core",
@@ -385,6 +387,7 @@ ohos_unittest("InputEventInterceptorTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_core",
@@ -448,6 +451,7 @@ ohos_unittest("CooperateTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -517,6 +521,7 @@ ohos_unittest("CooperateContextTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -586,6 +591,7 @@ ohos_unittest("CooperateFreeTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -655,6 +661,7 @@ ohos_unittest("CooperateInTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -724,6 +731,7 @@ ohos_unittest("CooperateOutTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -793,6 +801,7 @@ ohos_unittest("DsoftbusHanderTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -862,6 +871,7 @@ ohos_unittest("EventManagerTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -931,6 +941,7 @@ ohos_unittest("HotAreaTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -1000,6 +1011,7 @@ ohos_unittest("InputDeviceMgrTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -1069,6 +1081,7 @@ ohos_unittest("MouseLocationTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
@@ -1138,6 +1151,7 @@ ohos_unittest("StateMachineTest") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
