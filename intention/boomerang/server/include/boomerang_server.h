@@ -43,7 +43,7 @@ public:
     int32_t NotifyMetadataBindingEvent(const CallingContext &context, const std::string& bundleName,
         const sptr<IRemoteBoomerangCallback>& notifyCallback);
     int32_t SubmitMetadata(const CallingContext &context, const std::string& metaData);
-    int32_t BoomerangEncodeImage(CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
+    int32_t BoomerangEncodeImage(const CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
         const std::string& metaData, const sptr<IRemoteBoomerangCallback>& encodeCallback);
     int32_t BoomerangDecodeImage(const CallingContext &context, const std::shared_ptr<Media::PixelMap>& pixelMap,
         const sptr<IRemoteBoomerangCallback>& decodeCallback);
