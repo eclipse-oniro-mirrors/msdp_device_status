@@ -89,7 +89,7 @@ public:
     bool Enable(Type type);
     bool InitAlgoMngrInterface(Type type);
     bool Disable(Type type);
-    int32_t InitDataCallback();
+    bool InitDataCallback();
     int32_t NotifyDeviceStatusChange(const Data &devicestatusData);
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
     void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
@@ -142,7 +142,7 @@ private:
     std::map<Type, OnChangedValue> msdpData_;
     std::map<Type, std::set<const sptr<IRemoteDevStaCallback>, classcomp>> listeners_;
     std::map<std::string, std::set<const sptr<IRemoteBoomerangCallback>, boomerangClasscomp>> boomerangListeners_;
-    sptr<IRemoteBoomerangCallback> notityListener_ { nullptr };
+    sptr<IRemoteBoomerangCallback> notifyListener_ { nullptr };
     sptr<IRemoteBoomerangCallback> encodeCallback_ { nullptr };
     std::map<sptr<IRemoteBoomerangCallback>, std::string> bundleNameCache_;
     sptr<AppExecFwk::IBundleMgr> bundleManager_ { nullptr };
