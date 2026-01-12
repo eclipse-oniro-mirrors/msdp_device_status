@@ -290,11 +290,11 @@ HWTEST_F(DeviceStatusManagerTest, BoomerangEncodeImageTest, TestSize.Level0) {
  */
 HWTEST_F(DeviceStatusManagerTest, SubmitMetadataTest, TestSize.Level0) {
     GTEST_LOG_(INFO) << "SubmitMetadataTest start";
-    deviceStatusManager->notityListener_ = nullptr;
+    deviceStatusManager->notifyListener_ = nullptr;
     int32_t result = deviceStatusManager->SubmitMetadata("metadata");
     EXPECT_EQ(result, RET_ERR);
 
-    deviceStatusManager->notityListener_ = boomerangCallback_;
+    deviceStatusManager->notifyListener_ = boomerangCallback_;
     result = deviceStatusManager->SubmitMetadata("metadata");
     EXPECT_EQ(result, RET_OK);
     GTEST_LOG_(INFO) << "SubmitMetadataTest end";
@@ -411,7 +411,7 @@ HWTEST_F(DeviceStatusManagerTest, TimerTaskTest, TestSize.Level0) {
  */
 HWTEST_F(DeviceStatusManagerTest, HasSubmittedTest, TestSize.Level0) {
     GTEST_LOG_(INFO) << "HasSubmittedTest start";
-    deviceStatusManager->notityListener_ = boomerangCallback_;
+    deviceStatusManager->notifyListener_ = boomerangCallback_;
     deviceStatusManager->hasSubmitted_ = true;
     int32_t result = deviceStatusManager->SubmitMetadata("metadata");
     EXPECT_EQ(result, RET_ERR);
