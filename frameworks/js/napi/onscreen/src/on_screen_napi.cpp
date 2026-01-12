@@ -573,7 +573,6 @@ void OnScreenNapi::TriggerCompCB(napi_env env, napi_status status, void *data)
 {
     CHKPV(data);
     CHKPV(env);
-    std::lock_guard lockGrd(g_mtx);
     std::unique_ptr<TriggerAsyncContext> ctx(static_cast<TriggerAsyncContext*>(data));
     CHKPV(ctx);
     CHKPV(ctx->deferred);
