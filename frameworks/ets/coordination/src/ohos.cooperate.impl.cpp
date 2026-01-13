@@ -97,7 +97,7 @@ void GetCooperateSwitchStateAsync(::taihe::string_view networkId, uintptr_t opq)
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
-    EtsCooperateManager::GetInstance()->GetCrossingSwitchState(networkId.c_str(), opq, promise);
+    EtsCooperateManager::GetInstance()->GetCrossingSwitchState(std::string(networkId), opq, promise);
     return;
 }
 
@@ -105,7 +105,7 @@ uintptr_t GetCooperateSwitchStatePromise(::taihe::string_view networkId)
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
-    EtsCooperateManager::GetInstance()->GetCrossingSwitchState(networkId.c_str(), 0, promise);
+    EtsCooperateManager::GetInstance()->GetCrossingSwitchState(std::string(networkId), 0, promise);
     return reinterpret_cast<uintptr_t>(promise);
 }
 

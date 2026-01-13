@@ -282,7 +282,7 @@ void CooperateCommon::HandleExecuteResult(int32_t errCode, const std::string par
             char buf[300] = { 0 };
             int32_t ret = sprintf_s(buf, sizeof(buf), codeMsg.c_str(), param1.c_str(), param2.c_str());
             if (ret > 0) {
-                taihe::set_business_error(ret, buf);
+                taihe::set_business_error(errCode, buf);
             } else {
                 FI_HILOGE("Failed to convert string type to char type, error code:%{public}d", errCode);
             }
@@ -785,6 +785,10 @@ void EtsCooperateManager::Deactivate(bool isUnchained, uintptr_t opq, ani_object
 
 void EtsCooperateManager::GetCrossingSwitchState(const std::string &networkId, uintptr_t opq, ani_object& promise)
 {
+    if (networkId.empty()) {
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "param is invalid");
+        return;
+    }
     std::shared_ptr<AniCallbackInfo> cb = std::make_shared<AniCallbackInfo>(CallbackType::GETSTATE);
     CHKPV(cb);
     if (!cb->Init(opq)) {
