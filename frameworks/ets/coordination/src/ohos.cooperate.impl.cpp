@@ -114,12 +114,13 @@ uintptr_t ActivateCooperateWithOptionsPromise(::taihe::string_view targetNetwork
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
+    std::string networkId(targetNetworkId);
     if (!cooperateOptions.has_value()) {
         FI_HILOGI("CooperateOptions is not assigned, call ActivateCooperate");
-        EtsCooperateManager::GetInstance()->Activate(targetNetworkId.c_str(), inputDeviceId, 0, promise);
+        EtsCooperateManager::GetInstance()->Activate(networkId, inputDeviceId, 0, promise);
         return reinterpret_cast<uintptr_t>(promise);
     }
-    EtsCooperateManager::GetInstance()->ActivateCooperateWithOptions(targetNetworkId.c_str(), inputDeviceId,
+    EtsCooperateManager::GetInstance()->ActivateCooperateWithOptions(networkId, inputDeviceId,
         cooperateOptions.value(), 0, promise);
     return reinterpret_cast<uintptr_t>(promise);
 }
