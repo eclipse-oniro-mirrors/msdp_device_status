@@ -408,8 +408,8 @@ void EtsCooperateManager::EmitAniPromise(std::shared_ptr<AniCallbackInfo> cb)
         FI_HILOGE("cb is nullptr");
         return;
     }
-    if (cb->promise_ != nullptr) {
-        FI_HILOGE("promise is not nullptr");
+    if (cb->promise_ == nullptr) {
+        FI_HILOGE("promise is nullptr");
         return;
     }
     auto env = cb->envT_;
@@ -585,28 +585,27 @@ void EtsCooperateManager::UnRegisterCooperateListener(const std::string &type, o
         }
         if (!opq.has_value()) {
             jsCbMap_.erase(iter);
-            FI_HILOGD("cooperate callback is nullptr!");
-            return;
-        }
-        auto env = taihe::get_env();
-        GlobalRefGuard guard(env, reinterpret_cast<ani_object>(opq.value()));
-        if (env == nullptr || !guard) {
-            FI_HILOGE("env is nullptr or GlobalRefGuard is false!");
-            return;
-        }
-        const auto pred = [env, targetRef = guard.get()](std::shared_ptr<CallbackObject> &obj) {
-            ani_boolean is_equal = false;
-            return (ANI_OK == env->Reference_StrictEquals(targetRef, obj->ref, &is_equal)) && is_equal;
-        };
-        auto &callbacks = iter->second;
-        const auto it = std::find_if(callbacks.begin(), callbacks.end(), pred);
-        if (it != callbacks.end()) {
-            FI_HILOGI("unRegister cooperate callback success");
-            callbacks.erase(it);
-        }
-        if (callbacks.empty()) {
-            jsCbMap_.erase(iter);
             shouldUnregister = true;
+        } else {
+            auto env = taihe::get_env();
+            GlobalRefGuard guard(env, reinterpret_cast<ani_object>(opq.value()));
+            if (env == nullptr || !guard) {
+                FI_HILOGE("env is nullptr or GlobalRefGuard is false!");
+                return;
+            }
+            const auto pred = [env, targetRef = guard.get()](std::shared_ptr<CallbackObject> &obj) {
+                ani_boolean is_equal = false;
+                return (ANI_OK == env->Reference_StrictEquals(targetRef, obj->ref, &is_equal)) && is_equal;
+            };
+            auto &callbacks = iter->second;
+            const auto it = std::find_if(callbacks.begin(), callbacks.end(), pred);
+            if (it != callbacks.end()) {
+                callbacks.erase(it);
+            }
+            if (callbacks.empty()) {
+                jsCbMap_.erase(iter);
+                shouldUnregister = true;
+            }
         }
     }
     if (shouldUnregister && isListeningProcess_) {
@@ -621,6 +620,10 @@ void EtsCooperateManager::UnRegisterCooperateListener(const std::string &type, o
 
 void EtsCooperateManager::RegisterMouseListener(const std::string &networkId, callbackType &&f, uintptr_t opq)
 {
+    if (networkId.empty()) {
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "param is invalid");
+        return;
+    }
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
     ani_ref callbackRef;
     ani_env *env = taihe::get_env();
@@ -657,6 +660,10 @@ void EtsCooperateManager::RegisterMouseListener(const std::string &networkId, ca
 
 void EtsCooperateManager::UnRegisterMouseListener(const std::string &networkId, optional_view<uintptr_t> opq)
 {
+    if (networkId.empty()) {
+        taihe::set_business_error(COMMON_PARAMETER_ERROR, "param is invalid");
+        return;
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         const auto iter = jsCbMap_.find(networkId);
@@ -666,34 +673,32 @@ void EtsCooperateManager::UnRegisterMouseListener(const std::string &networkId, 
         }
         if (!opq.has_value()) {
             jsCbMap_.erase(iter);
-            FI_HILOGD("cooperate mouse callback is nullptr!");
-            return;
-        }
-        auto env = taihe::get_env();
-        GlobalRefGuard guard(env, reinterpret_cast<ani_object>(opq.value()));
-        if (env == nullptr || !guard) {
-            FI_HILOGE("env is nullptr or GlobalRefGuard is false!");
-            return;
-        }
-        const auto pred = [env, targetRef = guard.get()](std::shared_ptr<CallbackObject> &obj) {
-            ani_boolean is_equal = false;
-            return (ANI_OK == env->Reference_StrictEquals(targetRef, obj->ref, &is_equal)) && is_equal;
-        };
-        auto &callbacks = iter->second;
-        const auto it = std::find_if(callbacks.begin(), callbacks.end(), pred);
-        if (it != callbacks.end()) {
-            FI_HILOGI("unRegister cooperate callback success");
-            callbacks.erase(it);
-        }
-        if (callbacks.empty()) {
-            jsCbMap_.erase(iter);
+        } else {
+            auto env = taihe::get_env();
+            GlobalRefGuard guard(env, reinterpret_cast<ani_object>(opq.value()));
+            if (env == nullptr || !guard) {
+                FI_HILOGE("env is nullptr or GlobalRefGuard is false!");
+                return;
+            }
+            const auto pred = [env, targetRef = guard.get()](std::shared_ptr<CallbackObject> &obj) {
+                ani_boolean is_equal = false;
+                return (ANI_OK == env->Reference_StrictEquals(targetRef, obj->ref, &is_equal)) && is_equal;
+            };
+            auto &callbacks = iter->second;
+            const auto it = std::find_if(callbacks.begin(), callbacks.end(), pred);
+            if (it != callbacks.end()) {
+                callbacks.erase(it);
+            }
+            if (callbacks.empty()) {
+                jsCbMap_.erase(iter);
+            }
         }
     }
     int32_t errCode = INTERACTION_MGR->UnregisterEventListener(networkId, shared_from_this());
     if (errCode != RET_OK) {
         FI_HILOGE("UnregisterEventListener for networkId:%{public}s failed, ret:%{public}d",
             Utility::Anonymize(networkId).c_str(), errCode);
-            CooperateCommon::HandleExecuteResult(errCode, "off", COOPERATE_PERMISSION);
+        CooperateCommon::HandleExecuteResult(errCode, "off", COOPERATE_PERMISSION);
     }
 }
 
