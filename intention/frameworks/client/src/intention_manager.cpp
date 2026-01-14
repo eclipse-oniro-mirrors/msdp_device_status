@@ -124,29 +124,30 @@ int32_t IntentionManager::GetDevicePostureDataSync(DevicePostureData &data)
     return stationary_.GetDevicePostureDataSync(data);
 }
 
-int32_t IntentionManager::SubscribeCallback(BoomerangType type, std::string bundleName,
+int32_t IntentionManager::SubscribeCallback(BoomerangType type, const std::string &bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
     return boomerang_.SubscribeCallback(type, bundleName, callback);
 }
  
-int32_t IntentionManager::UnsubscribeCallback(BoomerangType type, std::string bundleName,
+int32_t IntentionManager::UnsubscribeCallback(BoomerangType type, const std::string &bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
     return boomerang_.UnsubscribeCallback(type, bundleName, callback);
 }
  
-int32_t IntentionManager::NotifyMetadataBindingEvent(std::string bundleName, sptr<IRemoteBoomerangCallback> callback)
+int32_t IntentionManager::NotifyMetadataBindingEvent(const std::string &bundleName,
+    sptr<IRemoteBoomerangCallback> callback)
 {
     return boomerang_.NotifyMetadataBindingEvent(bundleName, callback);
 }
  
-int32_t IntentionManager::SubmitMetadata(std::string metadata)
+int32_t IntentionManager::SubmitMetadata(const std::string &metadata)
 {
     return boomerang_.SubmitMetadata(metadata);
 }
  
-int32_t IntentionManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
+int32_t IntentionManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, const std::string &matedata,
     sptr<IRemoteBoomerangCallback> callback)
 {
     return boomerang_.BoomerangEncodeImage(pixelMap, matedata, callback);
@@ -637,14 +638,14 @@ int32_t IntentionManager::SendControlEvent(const OnScreen::ControlEvent& event)
     return onScreen_.SendControlEvent(event);
 }
 
-int32_t IntentionManager::RegisterScreenEventCallback(int32_t windowId, std::string event,
+int32_t IntentionManager::RegisterScreenEventCallback(int32_t windowId, const std::string &event,
     sptr<OnScreen::IRemoteOnScreenCallback> callback)
 {
     CALL_DEBUG_ENTER;
     return onScreen_.RegisterScreenEventCallback(windowId, event, callback);
 }
 
-int32_t IntentionManager::UnregisterScreenEventCallback(int32_t windowId, std::string event,
+int32_t IntentionManager::UnregisterScreenEventCallback(int32_t windowId, const std::string &event,
     sptr<OnScreen::IRemoteOnScreenCallback> callback)
 {
     CALL_DEBUG_ENTER;

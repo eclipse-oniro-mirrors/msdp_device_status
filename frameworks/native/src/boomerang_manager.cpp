@@ -32,31 +32,31 @@ BoomerangManager& BoomerangManager::GetInstance()
     return instance;
 }
 
-int32_t BoomerangManager::SubscribeCallback(BoomerangType type, std::string bundleName,
+int32_t BoomerangManager::SubscribeCallback(BoomerangType type, const std::string &bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
     return INTER_MGR_IMPL.SubscribeCallback(type, bundleName, callback);
 }
 
-int32_t BoomerangManager::UnsubscribeCallback(BoomerangType type, std::string bundleName,
+int32_t BoomerangManager::UnsubscribeCallback(BoomerangType type, const std::string &bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
     return INTER_MGR_IMPL.UnsubscribeCallback(type, bundleName, callback);
 }
 
-int32_t BoomerangManager::NotifyMetadataBindingEvent(std::string bundleName,
+int32_t BoomerangManager::NotifyMetadataBindingEvent(const std::string &bundleName,
     sptr<IRemoteBoomerangCallback> callback)
 {
     return INTER_MGR_IMPL.NotifyMetadataBindingEvent(bundleName, callback);
 }
 
-int32_t BoomerangManager::SubmitMetadata(std::string metadata)
+int32_t BoomerangManager::SubmitMetadata(const std::string &metadata)
 {
     return INTER_MGR_IMPL.SubmitMetadata(metadata);
 }
 
-int32_t BoomerangManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
-    sptr<IRemoteBoomerangCallback> callback)
+int32_t BoomerangManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
+    const std::string &matedata, sptr<IRemoteBoomerangCallback> callback)
 {
     return INTER_MGR_IMPL.BoomerangEncodeImage(pixelMap, matedata, callback);
 }

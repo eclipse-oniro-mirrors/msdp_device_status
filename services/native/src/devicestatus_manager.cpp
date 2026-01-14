@@ -271,17 +271,17 @@ int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data &devicestatusDa
     auto iter = listeners_.find(devicestatusData.type);
     if (iter == listeners_.end()) {
         FI_HILOGE("type:%{public}d is not exits", devicestatusData.type);
-        return false;
+        return RET_ERR;
     }
     if ((devicestatusData.type <= TYPE_INVALID) || (devicestatusData.type >= TYPE_MAX)) {
         FI_HILOGE("Check devicestatusData.type is invalid");
-        return false;
+        return RET_ERR;
     }
     listeners = (std::set<const sptr<IRemoteDevStaCallback>, classcomp>)(iter->second);
     for (const auto &listener : listeners) {
         if (listener == nullptr) {
             FI_HILOGE("listener is nullptr");
-            return false;
+            return RET_ERR;
         }
         FI_HILOGI("type:%{public}d, arrs_:%{public}d", devicestatusData.type, arrs_[devicestatusData.type]);
         switch (arrs_[devicestatusData.type]) {
@@ -303,7 +303,7 @@ int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data &devicestatusDa
             }
             default: {
                 FI_HILOGE("OnChangedValue is unknown");
-                break;
+                return RET_ERR;
             }
         }
     }
