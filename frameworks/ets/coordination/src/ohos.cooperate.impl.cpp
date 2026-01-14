@@ -65,7 +65,7 @@ void ActivateCooperateAsync(taihe::string_view targetNetworkId, int32_t inputDev
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
-    EtsCooperateManager::GetInstance()->Activate(targetNetworkId.c_str(), inputDeviceId, opq, promise);
+    EtsCooperateManager::GetInstance()->Activate(std::string(targetNetworkId), inputDeviceId, opq, promise);
     return;
 }
 
@@ -73,7 +73,7 @@ uintptr_t ActivateCooperatePromise(::taihe::string_view targetNetworkId, int32_t
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
-    EtsCooperateManager::GetInstance()->Activate(targetNetworkId.c_str(), inputDeviceId, 0, promise);
+    EtsCooperateManager::GetInstance()->Activate(std::string(targetNetworkId), inputDeviceId, 0, promise);
     return reinterpret_cast<uintptr_t>(promise);
 }
 
@@ -97,7 +97,7 @@ void GetCooperateSwitchStateAsync(::taihe::string_view networkId, uintptr_t opq)
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
-    EtsCooperateManager::GetInstance()->GetCrossingSwitchState(networkId.c_str(), opq, promise);
+    EtsCooperateManager::GetInstance()->GetCrossingSwitchState(std::string(networkId), opq, promise);
     return;
 }
 
@@ -105,7 +105,7 @@ uintptr_t GetCooperateSwitchStatePromise(::taihe::string_view networkId)
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
-    EtsCooperateManager::GetInstance()->GetCrossingSwitchState(networkId.c_str(), 0, promise);
+    EtsCooperateManager::GetInstance()->GetCrossingSwitchState(std::string(networkId), 0, promise);
     return reinterpret_cast<uintptr_t>(promise);
 }
 
@@ -114,12 +114,13 @@ uintptr_t ActivateCooperateWithOptionsPromise(::taihe::string_view targetNetwork
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
+    std::string networkId(targetNetworkId);
     if (!cooperateOptions.has_value()) {
         FI_HILOGI("CooperateOptions is not assigned, call ActivateCooperate");
-        EtsCooperateManager::GetInstance()->Activate(targetNetworkId.c_str(), inputDeviceId, 0, promise);
+        EtsCooperateManager::GetInstance()->Activate(networkId, inputDeviceId, 0, promise);
         return reinterpret_cast<uintptr_t>(promise);
     }
-    EtsCooperateManager::GetInstance()->ActivateCooperateWithOptions(targetNetworkId.c_str(), inputDeviceId,
+    EtsCooperateManager::GetInstance()->ActivateCooperateWithOptions(networkId, inputDeviceId,
         cooperateOptions.value(), 0, promise);
     return reinterpret_cast<uintptr_t>(promise);
 }
@@ -137,12 +138,12 @@ void OffCooperateMessageInner(::taihe::optional_view<uintptr_t> opq)
 void OnCooperateMouseEventInner(::taihe::string_view networkId,
     ::taihe::callback_view<void(MouseLocation_t const&)> f, uintptr_t opq)
 {
-    EtsCooperateManager::GetInstance()->RegisterMouseListener(networkId.c_str(), f, opq);
+    EtsCooperateManager::GetInstance()->RegisterMouseListener(std::string(networkId), f, opq);
 }
 
 void OffCooperateMouseEventInner(::taihe::string_view networkId, ::taihe::optional_view<uintptr_t> opq)
 {
-    EtsCooperateManager::GetInstance()->UnRegisterMouseListener(networkId.c_str(), opq);
+    EtsCooperateManager::GetInstance()->UnRegisterMouseListener(std::string(networkId), opq);
 }
 }  // namespace
 
