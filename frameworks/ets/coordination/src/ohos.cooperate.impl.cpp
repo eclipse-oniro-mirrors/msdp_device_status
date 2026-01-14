@@ -65,7 +65,7 @@ void ActivateCooperateAsync(taihe::string_view targetNetworkId, int32_t inputDev
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
-    EtsCooperateManager::GetInstance()->Activate(targetNetworkId.c_str(), inputDeviceId, opq, promise);
+    EtsCooperateManager::GetInstance()->Activate(std::string(targetNetworkId), inputDeviceId, opq, promise);
     return;
 }
 
@@ -73,7 +73,7 @@ uintptr_t ActivateCooperatePromise(::taihe::string_view targetNetworkId, int32_t
 {
     CALL_DEBUG_ENTER;
     ani_object promise;
-    EtsCooperateManager::GetInstance()->Activate(targetNetworkId.c_str(), inputDeviceId, 0, promise);
+    EtsCooperateManager::GetInstance()->Activate(std::string(targetNetworkId), inputDeviceId, 0, promise);
     return reinterpret_cast<uintptr_t>(promise);
 }
 
@@ -138,12 +138,12 @@ void OffCooperateMessageInner(::taihe::optional_view<uintptr_t> opq)
 void OnCooperateMouseEventInner(::taihe::string_view networkId,
     ::taihe::callback_view<void(MouseLocation_t const&)> f, uintptr_t opq)
 {
-    EtsCooperateManager::GetInstance()->RegisterMouseListener(networkId.c_str(), f, opq);
+    EtsCooperateManager::GetInstance()->RegisterMouseListener(std::string(networkId), f, opq);
 }
 
 void OffCooperateMouseEventInner(::taihe::string_view networkId, ::taihe::optional_view<uintptr_t> opq)
 {
-    EtsCooperateManager::GetInstance()->UnRegisterMouseListener(networkId.c_str(), opq);
+    EtsCooperateManager::GetInstance()->UnRegisterMouseListener(std::string(networkId), opq);
 }
 }  // namespace
 
