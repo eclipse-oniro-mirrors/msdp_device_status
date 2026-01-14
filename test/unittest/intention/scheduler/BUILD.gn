@@ -66,6 +66,7 @@ ohos_unittest("TimerManagerTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_core",
