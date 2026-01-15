@@ -519,6 +519,23 @@ void InputEventBuilder::ResetPressedEvents()
         }
         pointerEvent_->Reset();
     }
+    CHKPV(keyEvent_);
+    if (auto pressedKeys = keyEvent_->GetPressedKeys(); !pressedKeys.empty()) {
+        for (auto pressedKey : pressedKeys) {
+            keyEvent_->SetKeyCode(pressedKey);
+            keyEvent_->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+            auto keyItem = keyEvent_->GetKeyItem(pressedKey);
+            if (keyItem.has_value()) {
+                keyItem->SetPressed(false);
+                keyEvent_->AddReleasedKeyItems(*keyItem);
+            } else {
+                FI_HILOGE("keyItem is null");
+            }
+            env_->GetInput().SimulateInputEvent(keyEvent_);
+            FI_HILOGI("Simulate key-up event, pressedKey:%{private}d", pressedKey);
+        }
+        keyEvent_->Reset();
+    }
 }
 
 void InputEventBuilder::SetStopByScreenOffOrLock(bool stopByScreenOffOrLock)
