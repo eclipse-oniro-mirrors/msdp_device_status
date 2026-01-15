@@ -353,10 +353,15 @@ ErrCode IntentionService::RotateDragWindowSync(const SequenceableRotateWindow &s
 
 ErrCode IntentionService::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
 {
+    CHKPR(context_, RET_ERR);
     CallingContext context = GetCallingContext();
-    return PostSyncTask([this, &context, displayId, screenId] {
-        return drag_.SetDragWindowScreenId(context, displayId, screenId);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, &context, displayId, screenId] {
+        return this->drag_.SetDragWindowScreenId(context, displayId, screenId);
     });
+    if (ret != RET_OK) {
+        FI_HILOGE("Post async task failed");
+    }
+    return ret;
 }
 
 ErrCode IntentionService::GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller)
