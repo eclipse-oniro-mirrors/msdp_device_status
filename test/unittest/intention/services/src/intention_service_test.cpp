@@ -749,6 +749,19 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragWindowScreenId001, Te
 }
 
 /**
+ * @tc.name: IntentionServiceTest_SetDragWindowScreenId002
+ * @tc.desc: Test SetDragWindowScreenId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragWindowScreenId002, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ErrCode ret = g_intentionService->SetDragWindowScreenId(0, 0);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
  * @tc.name: IntentionServiceTest31
  * @tc.desc: Test GetDragSummary
  * @tc.type: FUNC

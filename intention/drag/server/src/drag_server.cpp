@@ -245,7 +245,7 @@ int32_t DragServer::RotateDragWindowSync(CallingContext &context,
     return RET_OK;
 }
 
-int32_t DragServer::SetDragWindowScreenId(CallingContext &context, uint64_t displayId, uint64_t screenId)
+int32_t DragServer::SetDragWindowScreenId(CallingContext context, uint64_t displayId, uint64_t screenId)
 {
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
