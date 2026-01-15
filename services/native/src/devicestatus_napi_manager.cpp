@@ -17,6 +17,8 @@
 
 #include <cstdlib>
 #include <dlfcn.h>
+
+#include "devicestatus_define.h"
 #include "fi_log.h"
 
 #undef LOG_TAG
@@ -51,6 +53,7 @@ bool BoomerangAlgoManager::EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMa
     }
     if (boomerangAlgoEncodeImageHandle_ == nullptr) {
         boomerangAlgoEncodeImageHandle_ = reinterpret_cast<EncodeImageFunc>(dlsym(boomerangAlgoHandle_, "EncodeImage"));
+        CHKPF(boomerangAlgoEncodeImageHandle_);
         char *error = nullptr;
         if ((error = dlerror()) != nullptr) {
             FI_HILOGE("Boomerang Algo Encode find symbol failed, error: %{public}s", error);
@@ -80,6 +83,7 @@ bool BoomerangAlgoManager::DecodeImage(std::shared_ptr<Media::PixelMap> &pixelMa
     }
     if (boomerangAlgoDecodeImageHandle_ == nullptr) {
         boomerangAlgoDecodeImageHandle_ = reinterpret_cast<DecodeImageFunc>(dlsym(boomerangAlgoHandle_, "DecodeImage"));
+        CHKPF(boomerangAlgoDecodeImageHandle_);
         char *error = nullptr;
         if (((error = dlerror()) != nullptr) || (boomerangAlgoDecodeImageHandle_ == nullptr)) {
             FI_HILOGE("Boomerang Algo Decode find symbol failed, error: %{public}s", error);

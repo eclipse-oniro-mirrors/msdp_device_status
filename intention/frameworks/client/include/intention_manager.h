@@ -90,11 +90,13 @@ public:
     int32_t EraseMouseIcon();
     int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
     int32_t SetMouseDragMonitorState(bool state);
-    int32_t SubscribeCallback(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
-    int32_t UnsubscribeCallback(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
-    int32_t NotifyMetadataBindingEvent(std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
-    int32_t SubmitMetadata(std::string metadata);
-    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
+    int32_t SubscribeCallback(BoomerangType type, const std::string &bundleName,
+        sptr<IRemoteBoomerangCallback> callback);
+    int32_t UnsubscribeCallback(BoomerangType type, const std::string &bundleName,
+        sptr<IRemoteBoomerangCallback> callback);
+    int32_t NotifyMetadataBindingEvent(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t SubmitMetadata(const std::string &metadata);
+    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, const std::string &matedata,
         sptr<IRemoteBoomerangCallback> callback);
     int32_t BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
     void OnConnected();
@@ -109,9 +111,9 @@ public:
     int32_t SendControlEvent(const OnScreen::ControlEvent& event);
     int32_t GetDragSummaryInfo(DragSummaryInfo &dragSummaryInfo);
 
-    int32_t RegisterScreenEventCallback(int32_t windowId, std::string event,
+    int32_t RegisterScreenEventCallback(int32_t windowId, const std::string &event,
         sptr<OnScreen::IRemoteOnScreenCallback> callback);
-    int32_t UnregisterScreenEventCallback(int32_t windowId, std::string event,
+    int32_t UnregisterScreenEventCallback(int32_t windowId, const std::string &event,
         sptr<OnScreen::IRemoteOnScreenCallback> callback);
     int32_t IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus);
     int32_t GetLiveStatus();

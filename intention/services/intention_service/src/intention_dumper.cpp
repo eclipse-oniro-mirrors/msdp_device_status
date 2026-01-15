@@ -64,7 +64,7 @@ void IntentionDumper::Dump(int32_t fd, const std::vector<std::string> &args)
     optind = 0;
     int32_t opt = -1;
 
-    while ((opt = getopt_long(argv.size(), argv.data(), "+hslcodm", dumpOptions, nullptr)) >= 0) {
+    while ((opt = getopt_long(argv.size(), argv.data(), "+hslcdm", dumpOptions, nullptr)) >= 0) {
         DumpOnce(fd, opt);
     }
 }

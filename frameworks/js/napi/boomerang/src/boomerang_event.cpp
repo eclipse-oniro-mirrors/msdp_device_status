@@ -42,6 +42,7 @@ BoomerangEvent::BoomerangEvent(napi_env env)
 
 BoomerangEvent::~BoomerangEvent()
 {
+    std::lock_guard<std::mutex> guard(mutex_);
     for (auto& eventPair : events_) {
         for (auto& listener : eventPair.second) {
             napi_status status = napi_delete_reference(env_, listener->onHandlerRef);

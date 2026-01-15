@@ -47,7 +47,7 @@ private:
     std::mutex mutex_;
     BoomerangData data_;
     std::string metadata_;
-    std::shared_ptr<Media::PixelMap> pixelMap_;
+    std::shared_ptr<Media::PixelMap> pixelMap_ = nullptr;
 };
 
 struct AsyncContext {

@@ -16,20 +16,20 @@
 #include "boomerang_napi.h"
 
 #include <js_native_api.h>
-
+#include "image_pixel_map_mdk.h"
+#include "image_pixel_map_napi.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "image_pixel_map_napi.h"
-#include "image_pixel_map_mdk.h"
 #include "pixel_map_napi.h"
 
 #include "boomerang_manager.h"
 #include "boomerang_napi_error.h"
 #include "devicestatus_client.h"
 #include "devicestatus_define.h"
+#include "fi_log.h"
 #include "napi_constants.h"
 #include "util_napi_error.h"
-#include "fi_log.h"
+
 #undef LOG_TAG
 #define LOG_TAG "BoomerangNapi"
 
@@ -98,6 +98,7 @@ void BoomerangCallback::OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pix
 
 void BoomerangCallback::EmitOnEvent(BoomerangData *data)
 {
+    CHKPV(data);
     BoomerangNapi *boomerangNapi = BoomerangNapi::GetDeviceStatusNapi();
     CHKPV(boomerangNapi);
     int32_t type = static_cast<int32_t>(data->type);
@@ -133,26 +134,21 @@ void BoomerangNapi::OnScreenshot(int32_t type, int32_t status, bool isOnce)
 void BoomerangNapi::OnMetadata(napi_env env, std::string metadata, bool isOnce, napi_deferred deferred)
 {
     CALL_DEBUG_ENTER;
-    auto processContext = [](napi_env env, napi_deferred deferred, const std::string &metadata) -> void {
-        if (env == nullptr || deferred == nullptr) {
-            return;
-        }
+    if (env == nullptr || deferred == nullptr) {
+        return;
+    }
 
-        napi_value result;
-        napi_status status = napi_create_string_utf8(env, metadata.c_str(), NAPI_AUTO_LENGTH, &result);
-        if (status != napi_ok) {
-            FI_HILOGE("Failed to create string utf8");
-            return;
-        }
+    napi_value result;
+    napi_status status = napi_create_string_utf8(env, metadata.c_str(), NAPI_AUTO_LENGTH, &result);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to create string utf8");
+        return;
+    }
 
-        status = napi_resolve_deferred(env, deferred, result);
-        if (status != napi_ok) {
-            FI_HILOGE("Failed to resolve deferred");
-            return;
-        }
-    };
-
-    processContext(env, deferred, metadata);
+    status = napi_resolve_deferred(env, deferred, result);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to resolve deferred");
+    }
 }
 
 void BoomerangNapi::OnEncodeImage(napi_env env, std::shared_ptr<Media::PixelMap> pixelMap, napi_deferred deferred)
@@ -241,6 +237,7 @@ napi_value BoomerangNapi::SubscribeMeatadataCallback(
     int32_t subscribeRet =
         BoomerangManager::GetInstance().SubscribeCallback(static_cast<BoomerangType>(type), bundleName, callback);
     if (subscribeRet != RET_OK) {
+        delete callback;
         ThrowErr(env,
             SUBSCRIBE_FAILED,
             "Subscribe Failed. Possible causes: 1. Abnormal system capability; 2. IPC communication abnormality; 3. "
@@ -249,6 +246,7 @@ napi_value BoomerangNapi::SubscribeMeatadataCallback(
     }
     auto ret = callbacks_.insert(std::pair<int32_t, sptr<IRemoteBoomerangCallback>>(type, callback));
     if (!ret.second) {
+        delete callback;
         FI_HILOGE("Failed to insert");
     }
     return nullptr;

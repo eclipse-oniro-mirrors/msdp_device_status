@@ -40,7 +40,7 @@ void BoomerangDumper::Dump(int32_t fd, const std::vector<std::string> &args)
 
     for (size_t index = 0, cnt = args.size(); index < cnt; ++index) {
         size_t argLen = args[index].size();
-        if (argLen + 1 > bufLen) {
+        if (argLen >= bufLen) {
             FI_HILOGE("Buffer overflow");
             return;
         }
@@ -68,7 +68,7 @@ void BoomerangDumper::Dump(int32_t fd, const std::vector<std::string> &args)
     optind = 0;
     int32_t opt = -1;
 
-    while ((opt = getopt_long(argv.size(), argv.data(), "+hslcodm", dumpOptions, nullptr)) >= 0) {
+    while ((opt = getopt_long(argv.size(), argv.data(), "+hslcdm", dumpOptions, nullptr)) >= 0) {
         DumpOnce(fd, opt);
     }
 }
@@ -183,7 +183,9 @@ void BoomerangDumper::CheckDefineOutput(int32_t fd, const char* fmt, Ts... args)
         FI_HILOGE("snprintf_s fail, error:%{public}d", ret);
         return;
     }
-    dprintf(fd, "%s", buf);
+    if (fd >= 0) {
+        dprintf(fd, "%s", buf);
+    }
 }
 } // namespace DeviceStatus
 } // namespace Msdp

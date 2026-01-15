@@ -47,7 +47,8 @@ public:
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 9
      */
-    int32_t SubscribeCallback(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t SubscribeCallback(BoomerangType type, const std::string &bundleName,
+        sptr<IRemoteBoomerangCallback> callback);
 
     /**
      * @brief Unsubscribes from device status changes.
@@ -57,7 +58,8 @@ public:
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 9
      */
-    int32_t UnsubscribeCallback(BoomerangType type, std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t UnsubscribeCallback(BoomerangType type, const std::string &bundleName,
+        sptr<IRemoteBoomerangCallback> callback);
 
     /**
      * @brief Unsubscribes from device status changes.
@@ -67,7 +69,7 @@ public:
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 9
      */
-    int32_t NotifyMetadataBindingEvent(std::string bundleName, sptr<IRemoteBoomerangCallback> callback);
+    int32_t NotifyMetadataBindingEvent(const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
 
     /**
      * @brief Unsubscribes from device status changes.
@@ -77,7 +79,7 @@ public:
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 9
      */
-    int32_t SubmitMetadata(std::string metadata);
+    int32_t SubmitMetadata(const std::string &metadata);
 
     /**
      * @brief Unsubscribes from device status changes.
@@ -87,7 +89,7 @@ public:
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 9
      */
-    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, std::string matedata,
+    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, const std::string &matedata,
         sptr<IRemoteBoomerangCallback> callback);
 
         /**

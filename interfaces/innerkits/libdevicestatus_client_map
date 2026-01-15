@@ -91,11 +91,11 @@
             "OHOS::Msdp::DeviceStatus::InteractionManager::EnableInternalDropAnimation(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::IsDragStart()";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::GetInstance()";
-            "OHOS::Msdp::DeviceStatus::BoomerangManager::SubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
-            "OHOS::Msdp::DeviceStatus::BoomerangManager::UnsubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
-            "OHOS::Msdp::DeviceStatus::BoomerangManager::SubmitMetadata(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
-            "OHOS::Msdp::DeviceStatus::BoomerangManager::NotifyMetadataBindingEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
-            "OHOS::Msdp::DeviceStatus::BoomerangManager::BoomerangEncodeImage(std::__h::shared_ptr<OHOS::Media::PixelMap>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::SubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::UnsubscribeCallback(OHOS::Msdp::DeviceStatus::BoomerangType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::SubmitMetadata(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::NotifyMetadataBindingEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
+            "OHOS::Msdp::DeviceStatus::BoomerangManager::BoomerangEncodeImage(std::__h::shared_ptr<OHOS::Media::PixelMap>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
             "OHOS::Msdp::DeviceStatus::BoomerangManager::BoomerangDecodeImage(std::__h::shared_ptr<OHOS::Media::PixelMap>, OHOS::sptr<OHOS::Msdp::DeviceStatus::IRemoteBoomerangCallback>)";
             "VTT for OHOS::Msdp::DeviceStatus::BoomerangCallbackStub";
             "vtable for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackStub";
