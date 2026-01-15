@@ -355,7 +355,7 @@ ErrCode IntentionService::SetDragWindowScreenId(uint64_t displayId, uint64_t scr
 {
     CHKPR(context_, RET_ERR);
     CallingContext context = GetCallingContext();
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, &context, displayId, screenId] {
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, context, displayId, screenId] {
         return this->drag_.SetDragWindowScreenId(context, displayId, screenId);
     });
     if (ret != RET_OK) {

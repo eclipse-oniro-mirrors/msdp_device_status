@@ -52,7 +52,7 @@ public:
     int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
     int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
     int32_t RotateDragWindowSync(CallingContext &context, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
-    int32_t SetDragWindowScreenId(CallingContext &context, uint64_t displayId, uint64_t screenId);
+    int32_t SetDragWindowScreenId(CallingContext context, uint64_t displayId, uint64_t screenId);
     int32_t GetDragSummary(CallingContext &context, std::map<std::string, int64_t> &summarys, bool isJsCaller);
     int32_t SetDragSwitchState(CallingContext &context, bool enable, bool isJsCaller);
     int32_t SetAppDragSwitchState(CallingContext &context, bool enable, const std::string &pkgName, bool isJsCaller);
