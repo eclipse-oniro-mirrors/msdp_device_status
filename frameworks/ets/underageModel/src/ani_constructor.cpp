@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ohos.multimodalAwareness.motion.ani.hpp"
+#include "ohos.multimodalAwareness.underageModel.ani.hpp"
 #if __has_include(<ani.h>)
 #include <ani.h>
 #elif __has_include(<ani/ani.h>)
@@ -25,15 +25,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
     if (vm == nullptr || result == nullptr) {
-        std::cerr << "Error from ohos::multimodalAwareness::motion::ANIRegister, vm or result is null" << std::endl;
+        std::cerr << "Error from ohos::multimodalAwareness::underageModel::ANIRegister, vm or result is null"
+                  << std::endl;
         return ANI_ERROR;
     }
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
     }
 
-    if (ANI_OK != ohos::multimodalAwareness::motion::ANIRegister(env)) {
-        std::cerr << "Error from ohos::multimodalAwareness::motion::ANIRegister" << std::endl;
+    if (ANI_OK != ohos::multimodalAwareness::underageModel::ANIRegister(env)) {
+        std::cerr << "Error from ohos::multimodalAwareness::underageModel::ANIRegister" << std::endl;
         return ANI_ERROR;
     }
     *result = ANI_VERSION_1;

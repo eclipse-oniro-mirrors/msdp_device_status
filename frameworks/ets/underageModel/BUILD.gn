@@ -14,25 +14,25 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//build/ohos/taihe_idl/taihe.gni")
 
-copy_taihe_idl("motion_taihe") {
-  sources = [ "idl/ohos.multimodalAwareness.motion.taihe" ]
+copy_taihe_idl("underageModel_taihe") {
+  sources = [ "idl/ohos.multimodalAwareness.underageModel.taihe" ]
 }
 
 subsystem_name = "msdp"
 part_name = "device_status"
 taihe_generated_file_path =
-    "$taihe_file_path/out/$subsystem_name/$part_name/motion"
+    "$taihe_file_path/out/$subsystem_name/$part_name/underageModel"
 
 ohos_taihe("run_taihe") {
   taihe_generated_file_path = "$taihe_generated_file_path"
-  deps = [ ":motion_taihe" ]
+  deps = [ ":underageModel_taihe" ]
   outputs = [
-    "$taihe_generated_file_path/src/ohos.multimodalAwareness.motion.ani.cpp",
-    "$taihe_generated_file_path/src/ohos.multimodalAwareness.motion.abi.c",
+    "$taihe_generated_file_path/src/ohos.multimodalAwareness.underageModel.ani.cpp",
+    "$taihe_generated_file_path/src/ohos.multimodalAwareness.underageModel.abi.c",
   ]
 }
 
-taihe_shared_library("motion_so") {
+taihe_shared_library("underageModel_so") {
   taihe_generated_file_path = "$taihe_generated_file_path"
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"
@@ -65,51 +65,42 @@ taihe_shared_library("motion_so") {
   ]
   sources += [
     "src/ani_constructor.cpp",
-    "src/ani_motion_event.cpp",
-    "src/ohos.multimodalAwareness.motion.impl.cpp",
+    "src/ani_underage_model_event.cpp",
+    "src/ohos.multimodalAwareness.underageModel.impl.cpp",
   ]
   deps = [
     ":run_taihe",
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_utils_path}:devicestatus_util",
   ]
-  defines = [ "LOG_DOMAIN = 0xD002210" ]
-  if (device_status_motion_enable) {
-    defines += [ "MOTION_ENABLE" ]
-    external_deps += [
-      "motion:motion_client",
-      "motion:motion_interface_native",
-      "hiappevent:hiappevent_innerapi"
-    ]
-  }
 }
 
-generate_static_abc("motion_abc") {
+generate_static_abc("underageModel_abc") {
   base_url = "$taihe_generated_file_path"
-  files = [ "$taihe_generated_file_path/@ohos.multimodalAwareness.motion.ets" ]
+  files = [ "$taihe_generated_file_path/@ohos.multimodalAwareness.userStatus.ets" ]
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/motion_abc.abc"
+  device_dst_file = "/system/framework/underageModel_abc.abc"
   dependencies = [ ":run_taihe" ]
 }
 
-ohos_prebuilt_etc("motion_etc") {
-  source = "$target_out_dir/motion_abc.abc"
+ohos_prebuilt_etc("underageModel_etc") {
+  source = "$target_out_dir/underageModel_abc.abc"
   module_install_dir = "framework"
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"
-  deps = [ ":motion_abc" ]
+  deps = [ ":underageModel_abc" ]
 }
 
-generate_static_abc("motion_test") {
-  base_url = "${device_status_root_path}/frameworks/ets/motion"
+generate_static_abc("underageModel_test") {
+  base_url = "${device_status_root_path}/frameworks/ets/underageModel"
   files = [ "$base_url/test/test_main.ets" ]
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/motion_test.abc"
+  device_dst_file = "/system/framework/underageModel_test.abc"
 }
 
-group("motion_ani") {
+group("underageModel_ani") {
   deps = [
-    ":motion_etc",
-    ":motion_so",
+    ":underageModel_etc",
+    ":underageModel_so",
   ]
 }
