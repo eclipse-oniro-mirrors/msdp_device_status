@@ -127,15 +127,15 @@ ohos_shared_library("devicestatus_service") {
     "${device_status_utils_path}:devicestatus_util",
     "interaction/drag:interaction_drag",
     "${device_status_root_path}/utils/json_parser:json_parser",
-    "${device_status_service_path}/drag_auth:drag_auth"
+    "${device_status_service_path}/drag_auth:drag_auth",
+    "${device_status_root_path}/intention/adapters/input_adapter:intention_input_adapter",
+    "${device_status_root_path}/intention/scheduler/plugin_manager:intention_plugin_manager",
   ]
 
-  if (device_status_intention_framework) {
+  if (device_status_interaction_coordination) {
     deps += [
       "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
       "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
-      "${device_status_root_path}/intention/adapters/input_adapter:intention_input_adapter",
-      "${device_status_root_path}/intention/scheduler/plugin_manager:intention_plugin_manager",
     ]
   }
 
@@ -213,15 +213,15 @@ ohos_static_library("devicestatus_static_service") {
     "${device_status_utils_path}:devicestatus_util",
     "interaction/drag:interaction_drag",
     "${device_status_root_path}/utils/json_parser:json_parser",
-    "${device_status_service_path}/drag_auth:drag_auth"
+    "${device_status_service_path}/drag_auth:drag_auth",
+    "${device_status_root_path}/intention/adapters/input_adapter:intention_input_adapter",
+    "${device_status_root_path}/intention/scheduler/plugin_manager:intention_plugin_manager",
   ]
 
-  if (device_status_intention_framework) {
+  if (device_status_interaction_coordination) {
     deps += [
       "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
       "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
-      "${device_status_root_path}/intention/adapters/input_adapter:intention_input_adapter",
-      "${device_status_root_path}/intention/scheduler/plugin_manager:intention_plugin_manager",
     ]
   }
 

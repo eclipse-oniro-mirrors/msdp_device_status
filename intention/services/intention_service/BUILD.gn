@@ -60,7 +60,6 @@ ohos_shared_library("intention_service") {
 
   deps = [
     "${device_status_root_path}/intention/boomerang/server:intention_boomerang_server",
-    "${device_status_root_path}/intention/cooperate/server:intention_cooperate_server",
     "${device_status_root_path}/intention/drag/server:intention_drag_server",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_server",
     "${device_status_root_path}/intention/ipc/tunnel:intention_server_stub",
@@ -70,6 +69,10 @@ ohos_shared_library("intention_service") {
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_root_path}/intention/onscreen/server:intention_on_screen_server"
   ]
+
+  if (device_status_interaction_coordination) {
+    deps += [ "${device_status_root_path}/intention/cooperate/server:intention_cooperate_server" ]
+  }
 
   external_deps = [
     "access_token:libaccesstoken_sdk",

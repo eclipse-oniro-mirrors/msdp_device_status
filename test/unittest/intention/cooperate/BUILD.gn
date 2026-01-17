@@ -1180,23 +1180,26 @@ ohos_unittest("StateMachineTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":CooperateClientTest",
-    ":CooperateContextTest",
-    ":CooperateFreeTest",
-    ":CooperateInTest",
-    ":CooperateOutTest",
-    ":CooperateServerTest",
-    ":CooperateTest",
-    ":DsoftbusHanderTest",
-    ":EventManagerTest",
-    ":HotAreaTest",
-    ":InputDeviceMgrTest",
-    ":MouseLocationTest",
-    ":StateMachineTest",
-    ":InputEventBuilderTest",
-    ":InputEventInterceptorTest",
-    ":InputEventSamplerTest",
-    ":InputEventSerializationTest",
-  ]
+  deps = []
+  if (device_status_interaction_coordination) {
+    deps += [
+      ":CooperateClientTest",
+      ":CooperateContextTest",
+      ":CooperateFreeTest",
+      ":CooperateInTest",
+      ":CooperateOutTest",
+      ":CooperateServerTest",
+      ":CooperateTest",
+      ":DsoftbusHanderTest",
+      ":EventManagerTest",
+      ":HotAreaTest",
+      ":InputDeviceMgrTest",
+      ":MouseLocationTest",
+      ":StateMachineTest",
+      ":InputEventBuilderTest",
+      ":InputEventInterceptorTest",
+      ":InputEventSamplerTest",
+      ":InputEventSerializationTest",
+    ]
+  }
 }
