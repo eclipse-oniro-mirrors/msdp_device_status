@@ -111,6 +111,7 @@ bool DeviceStatusNapi::SubscribeCallback(napi_env env, DeviceStatus::Type type)
     if (iter == g_deviceStatusObj->callbacks_.end()) {
         FI_HILOGD("Don't find callback, to create");
         sptr<DeviceStatus::IRemoteDevStaCallback> callback = new (std::nothrow) DeviceStatusCallback(env);
+        CHKPF(callback);
         ret = DeviceStatus::StationaryManager::GetInstance().SubscribeCallback(type,
             DeviceStatus::ActivityEvent::EVENT_INVALID, DeviceStatus::ReportLatencyNs::Latency_INVALID, callback);
         if (ret == RET_OK) {

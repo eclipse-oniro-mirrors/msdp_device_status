@@ -40,7 +40,7 @@ using StationaryServerEvent = std::function<void(const wptr<IRemoteObject> &)>;
 #ifdef MOTION_ENABLE
 class MotionCallback : public MotionCallbackStub {
 public:
-    MotionCallback(DeviceStatusMotionEvent event) : event_(event) {}
+    explicit MotionCallback(DeviceStatusMotionEvent event) : event_(event) {}
     virtual ~MotionCallback() = default;
     void OnMotionChanged(const MotionEvent &motionEvent) override;
 private:

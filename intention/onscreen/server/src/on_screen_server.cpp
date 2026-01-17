@@ -275,6 +275,7 @@ int32_t OnScreenServer::LoadAlgoLib()
     handle_.destroy = reinterpret_cast<void(*)(const IOnScreenAlgorithm*)>(dlsym(handle_.handle, "Destroy"));
     if (handle_.create == nullptr || handle_.destroy == nullptr) {
         FI_HILOGE("create is null or destoy is null");
+        dlclose(handle_.handle);
         return RET_ERR;
     }
     if (handle_.pAlgorithm == nullptr) {

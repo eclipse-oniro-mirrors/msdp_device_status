@@ -143,6 +143,7 @@ bool MotionNapi::SubscribeCallback(napi_env env, int32_t type)
     if (iter == g_motionObj->callbacks_.end()) {
         FI_HILOGD("Don't find callback, to create");
         sptr<IMotionCallback> callback = new (std::nothrow) MotionCallback(env);
+        CHKPF(callback);
         int32_t ret = g_motionClient.SubscribeCallback(type, callback);
         if (ret == RET_OK) {
             g_motionObj->callbacks_.insert(std::make_pair(type, callback));

@@ -67,6 +67,7 @@ public:
 
 private:
     OnScreenManager() = default;
+    ~OnScreenManager() = default;
     DISALLOW_COPY_AND_MOVE(OnScreenManager);
 };
 } // namespace OnScreen
