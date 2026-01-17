@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,6 @@ std::shared_ptr<AniMotionEvent> AniMotionEvent::GetInstance()
 {
     static std::once_flag flag;
     static std::shared_ptr<AniMotionEvent> instance_;
- 
     std::call_once(flag, []() {
         instance_ = std::make_shared<AniMotionEvent>();
     });
@@ -77,10 +76,7 @@ bool AniMotionEvent::CheckEvents(int32_t eventType)
         FI_HILOGD("eventType not find");
         return true;
     }
-    if (typeIter->second->onRefSets.empty()) {
-        return true;
-    }
-    return false;
+    return typeIter->second->onRefSets.empty();
 }
 
 bool AniMotionEvent::SubscribeCallback(int32_t type)
@@ -92,7 +88,7 @@ bool AniMotionEvent::SubscribeCallback(int32_t type)
     sptr<IMotionCallback> callback = new (std::nothrow) AniMotionCallback();
     if (callback == nullptr) {
         FI_HILOGE("callback is null");
-        taihe::set_business_error(DeviceStatusV1::SUBSCRIBE_EXCEPTION, "Subscribe failed");
+        taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Subscribe failed");
         return false;
     }
     int32_t ret = g_motionClient.SubscribeCallback(type, callback);
@@ -104,17 +100,17 @@ bool AniMotionEvent::SubscribeCallback(int32_t type)
         return true;
     }
     
-    if (ret == DeviceStatusV1::PERMISSION_DENIED) {
+    if (ret == PERMISSION_DENIED) {
         FI_HILOGE("failed to subscribe");
-        taihe::set_business_error(DeviceStatusV1::PERMISSION_DENIED, "Permission denined");
+        taihe::set_business_error(PERMISSION_DENIED, "Permission denined");
         return false;
-    } else if (ret == DeviceStatusV1::DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
+    } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
         FI_HILOGE("failed to subscribe");
-        taihe::set_business_error(DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
+        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
         return false;
     } else {
         FI_HILOGE("failed to subscribe");
-        taihe::set_business_error(DeviceStatusV1::SUBSCRIBE_EXCEPTION, "Subscribe failed");
+        taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Subscribe failed");
         return false;
     }
 
@@ -129,7 +125,7 @@ bool AniMotionEvent::UnSubscribeCallback(int32_t type)
     auto iter = callbacks_.find(type);
     if (iter == callbacks_.end()) {
         FI_HILOGE("faild to find callback");
-        taihe::set_business_error(DeviceStatusV1::UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
         return false;
     }
     
@@ -141,17 +137,17 @@ bool AniMotionEvent::UnSubscribeCallback(int32_t type)
         }
         return true;
     }
-    if (ret == DeviceStatusV1::PERMISSION_DENIED) {
+    if (ret == PERMISSION_DENIED) {
         FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(DeviceStatusV1::PERMISSION_DENIED, "Permission denined");
+        taihe::set_business_error(PERMISSION_DENIED, "Permission denined");
         return false;
-    } else if (ret == DeviceStatusV1::DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
+    } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
         FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
+        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
         return false;
     } else {
         FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(DeviceStatusV1::UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
         return false;
     }
 
@@ -167,7 +163,7 @@ bool AniMotionEvent::InsertRef(std::shared_ptr<MotionEventListener> listener, an
     for (const auto &item : listener->onRefSets) {
         ani_boolean isEqual = false;
         auto isDuplicate =
-            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual)) && isEqual;
+            (taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
             taihe::get_env()->GlobalReference_Delete(onHandlerRef);
             FI_HILOGD("callback already registered");
@@ -184,25 +180,19 @@ bool AniMotionEvent::InsertRef(std::shared_ptr<MotionEventListener> listener, an
     return true;
 }
 
-bool AniMotionEvent::AddCallback(int32_t eventType, taihe::callback_view<void(OperatingHandStatus_t)> f, uintptr_t opq)
+bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
 {
     FI_HILOGD("Enter");
-    ani_env *env = taihe::get_env();
-    if (env == nullptr) {
-        FI_HILOGE("ani_env is nullptr");
-        return false;
-    }
-    env_ = env;
-    vm_ = GetAniVm(env);
+    vm_ = vm;
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
-    if (ANI_OK != env->GlobalReference_Create(callbackObj, &onHandlerRef)) {
+    if (taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef) != ANI_OK) {
         FI_HILOGE("GlobalReference_Create failed");
         return false;
     }
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
-        FI_HILOGD("found event:%{public}d", eventType);
+        FI_HILOGD("found event: %{public}d", eventType);
         std::shared_ptr<MotionEventListener> listener = std::make_shared<MotionEventListener>();
         std::set<ani_ref> onRefSets;
         listener->onRefSets = onRefSets;
@@ -210,11 +200,9 @@ bool AniMotionEvent::AddCallback(int32_t eventType, taihe::callback_view<void(Op
         auto ret = listener->onRefSets.insert(onHandlerRef);
         if (!ret.second) {
             FI_HILOGE("Failed to insert refs");
+            taihe::get_env()->GlobalReference_Delete(onHandlerRef);
             return false;
         }
-        std::lock_guard<std::mutex> guard(mutex_);
-        events_.insert(std::make_pair(eventType, listener));
-        FI_HILOGD("Insert finish");
         return true;
     }
     FI_HILOGD("found event: %{public}d", eventType);
@@ -226,7 +214,6 @@ bool AniMotionEvent::AddCallback(int32_t eventType, taihe::callback_view<void(Op
         FI_HILOGE("Refs is empty()");
         return false;
     }
-
     FI_HILOGD("Check type: %{public}d same handle", eventType);
     if (!InsertRef(iter->second, onHandlerRef)) {
         FI_HILOGE("Failed to insert ref");
@@ -237,11 +224,11 @@ bool AniMotionEvent::AddCallback(int32_t eventType, taihe::callback_view<void(Op
 
 bool AniMotionEvent::RemoveAllCallback(int32_t eventType)
 {
-    FI_HILOGD("RemoveAllCallback in, event:%{public}d", eventType);
+    FI_HILOGI("RemoveAllCallback in, event: %{public}d", eventType);
     std::lock_guard<std::mutex> guard(mutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
-        FI_HILOGE("EventType %{public}d not found", eventType);
+        FI_HILOGE("EventType: %{public}d not found", eventType);
         return false;
     }
     if (iter->second == nullptr) {
@@ -252,7 +239,7 @@ bool AniMotionEvent::RemoveAllCallback(int32_t eventType)
         FI_HILOGE("onRefSets is empty");
         return false;
     }
-    for (auto item : iter->second->onRefSets) {
+    for (const auto item : iter->second->onRefSets) {
         taihe::get_env()->GlobalReference_Delete(item);
     }
     iter->second->onRefSets.clear();
@@ -262,11 +249,11 @@ bool AniMotionEvent::RemoveAllCallback(int32_t eventType)
 
 bool AniMotionEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
 {
-    FI_HILOGD("RemoveCallback in, event:%{public}d", eventType);
+    FI_HILOGI("RemoveCallback in, event: %{public}d", eventType);
     std::lock_guard<std::mutex> guard(mutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
-        FI_HILOGE("EventType %{public}d not found", eventType);
+        FI_HILOGE("EventType: %{public}d not found", eventType);
         return false;
     }
     if (iter->second == nullptr) {
@@ -279,7 +266,7 @@ bool AniMotionEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     }
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
-    if (ANI_OK != taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef)) {
+    if (taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef) != ANI_OK) {
         FI_HILOGE("GlobalReference_Create failed");
         return false;
     }
@@ -287,7 +274,7 @@ bool AniMotionEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     for (auto it = refSet.begin(); it != refSet.end();) {
         ani_boolean isEqual = false;
         auto isDuplicate =
-            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, *it, &isEqual)) && isEqual;
+            (taihe::get_env()->Reference_StrictEquals(onHandlerRef, *it, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
             it = refSet.erase(it);
             FI_HILOGD("callback already remove");
@@ -313,36 +300,43 @@ ani_object AniMotionEvent::CreateAniUndefined(ani_env* env)
     return static_cast<ani_object>(aniRef);
 }
 
-ani_object AniMotionEvent::CreateAniMotionEventStatus(ani_env* env, int32_t status)
+ani_enum_item AniMotionEvent::CreateAniOperatingHandStatus(ani_env* env, int32_t status)
 {
-    if (env == nullptr) {
-        FI_HILOGE("env is nullptr");
-        return CreateAniUndefined(env);
-    }
-    ani_class aniClass;
-    ani_status ret = env->FindClass("std.core.Int", &aniClass);
+    ani_enum enumType;
+    ani_enum_item enumItem;
+    ani_status ret = env->FindEnum("@ohos.multimodalAwareness.motion.motion.OperatingHandStatus", &enumType);
     if (ret != ANI_OK) {
-        FI_HILOGE("[ANI] class not found");
-        return CreateAniUndefined(env);
+        FI_HILOGE("[ANI] WindowStatusType not found");
+        return enumItem;
     }
-    ani_method aniCtor;
-    ret = env->Class_FindMethod(aniClass, "<ctor>", "i:", &aniCtor);
+    ret = env->Enum_GetEnumItemByIndex(enumType, ani_int(status), &enumItem);
     if (ret != ANI_OK) {
-        FI_HILOGE("[ANI] ctor not found");
-        return CreateAniUndefined(env);
+        FI_HILOGE("env Enum_GetEnumItemByIndex failed");
+        return enumItem;
     }
-    ani_object aniStatus;
-    ret = env->Object_New(aniClass, aniCtor, &aniStatus, ani_int(status));
+    return enumItem;
+}
+
+ani_enum_item AniMotionEvent::CreateAniHoldingHandStatus(ani_env* env, int32_t status)
+{
+    ani_enum enumType;
+    ani_enum_item enumItem;
+    ani_status ret = env->FindEnum("@ohos.multimodalAwareness.motion.motion.HoldingHandStatus", &enumType);
     if (ret != ANI_OK) {
-        FI_HILOGE("[ANI] fail to create new obj");
-        return CreateAniUndefined(env);
+        FI_HILOGE("[ANI] WindowStatusType not found");
+        return enumItem;
     }
-    return aniStatus;
+    ret = env->Enum_GetEnumItemByIndex(enumType, ani_int(status), &enumItem);
+    if (ret != ANI_OK) {
+        FI_HILOGE("env Enum_GetEnumItemByIndex failed");
+        return enumItem;
+    }
+    return enumItem;
 }
 
 void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const std::shared_ptr<MotionEvent> &event)
 {
-    FI_HILOGD("eventType: %{public}d", eventType);
+    FI_HILOGD("eventType: %{public}d,%{public}d", eventType, event->status);
     std::lock_guard<std::mutex> guard(mutex_);
     if (vm_ == nullptr) {
         FI_HILOGE("vm_ is nullptr");
@@ -353,6 +347,7 @@ void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const 
         FI_HILOGE("eventType: %{public}d not found", eventType);
         return;
     }
+
     ani_env* env = AttachAniEnv(vm_);
     if (env == nullptr) {
         FI_HILOGE("AttachAniEnv get env is nullptr");
@@ -361,14 +356,27 @@ void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const 
     for (auto item : typeIter->second->onRefSets) {
         ani_ref handler = item;
         std::vector<ani_ref> args;
-        ani_object statusAni = CreateAniMotionEventStatus(env, event->status);
-        args.push_back(static_cast<ani_ref>(statusAni));
+        if (eventType == MOTION_TYPE_HOLDING_HAND) {
+            auto statusAni = CreateAniHoldingHandStatus(env, event->status);
+            args.push_back(static_cast<ani_ref>(statusAni));
+        } else if (eventType == MOTION_TYPE_OPERATING_HAND) {
+            auto statusAni = CreateAniOperatingHandStatus(env, event->status);
+            args.push_back(static_cast<ani_ref>(statusAni));
+        } else {
+            FI_HILOGE("status is err. eventType: %{public}d ", eventType);
+            return;
+        }
         ani_ref result;
-        if (taihe::get_env()->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(),
+        if (env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(),
             &result) != ANI_OK) {
-            HILOG_ERROR(LOG_CORE, "Excute CallBack failed.");
+            HILOG_ERROR(LOG_CORE, "Excute CallBack failed. %{public}d",
+                env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(),
+                &result));
+            vm_->DetachCurrentThread();
+            return;
         }
     }
+    vm_->DetachCurrentThread();
 }
 
 ani_vm* AniMotionEvent::GetAniVm(ani_env* env)
@@ -393,7 +401,7 @@ ani_env* AniMotionEvent::GetAniEnv(ani_vm* vm)
     }
     ani_env* env = nullptr;
     if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
-        FI_HILOGE("GetEnv failed");
+        FI_HILOGE("GetEnv failed: %{public}d", vm->GetEnv(ANI_VERSION_1, &env));
         return nullptr;
     }
     return env;
@@ -408,7 +416,7 @@ ani_env* AniMotionEvent::AttachAniEnv(ani_vm* vm)
     ani_env *workerEnv = nullptr;
     ani_options aniArgs {0, nullptr};
     if (vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv) != ANI_OK) {
-        FI_HILOGE("Attach Env failed");
+        FI_HILOGE("Attach Env failed: %{public}d", vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv));
         return nullptr;
     }
     return workerEnv;
