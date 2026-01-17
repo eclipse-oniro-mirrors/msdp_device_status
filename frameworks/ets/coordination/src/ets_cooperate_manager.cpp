@@ -311,8 +311,7 @@ void CooperateCommon::HandleExecuteResult(int32_t errCode, const std::string par
             break;
         }
         default: {
-            FI_HILOGW("Unknown error throwcode:%{public}d", errCode);
-            taihe::set_business_error(COMMON_PARAMETER_ERROR, "unknown error");
+            FI_HILOGW("This error code does not require a synchronous exception throw");
             break;
         }
     }
