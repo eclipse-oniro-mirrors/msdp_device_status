@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,11 +28,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         std::cerr << "Error from ohos::multimodalAwareness::motion::ANIRegister, vm or result is null" << std::endl;
         return ANI_ERROR;
     }
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+    if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
         return ANI_ERROR;
     }
 
-    if (ANI_OK != ohos::multimodalAwareness::motion::ANIRegister(env)) {
+    if (ohos::multimodalAwareness::motion::ANIRegister(env) != ANI_OK) {
         std::cerr << "Error from ohos::multimodalAwareness::motion::ANIRegister" << std::endl;
         return ANI_ERROR;
     }

@@ -16,20 +16,22 @@
 #ifndef ANI_UNDERAGE_MODEL_EVENT_H
 #define ANI_UNDERAGE_MODEL_EVENT_H
 
+#include <map>
+#include <set>
+#include <stdexcept>
+
+#include "ani.h"
+#include "ani_error_utils.h"
+#include "fi_log.h"
 #include "ohos.multimodalAwareness.underageModel.proj.hpp"
 #include "ohos.multimodalAwareness.underageModel.impl.hpp"
 #include "taihe/runtime.hpp"
-#include <stdexcept>
-#include "ani.h"
-#include <set>
-#include <map>
-#include "fi_log.h"
-#include "ani_error_utils.h"
+
 namespace OHOS {
 namespace Msdp {
 const int32_t RET_OK = 0;
 using UserClassification_t = ohos::multimodalAwareness::underageModel::UserClassification;
-constexpr uint32_t UNDERAGE_MODEL_TYPE_KID = 16;
+constexpr int32_t UNDERAGE_MODEL_TYPE_KID = 16;
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
 constexpr int32_t PARAM_EXCEPTION { 401 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
@@ -55,7 +57,7 @@ typedef int32_t (*UnsubscribeFunc)(uint32_t feature);
 
 class UnderageModelListener : public IUnderageModelListener {
 public:
-    explicit UnderageModelListener() {}
+    UnderageModelListener() {}
     ~UnderageModelListener() {};
     void OnUnderageModelListener(uint32_t eventType, int32_t result, float confidence) const override;
 };
@@ -90,12 +92,12 @@ private:
 private:
     static ani_env* env_;
     static ani_vm* vm_;
+    void* g_userStatusHandle { nullptr };
 
 protected:
     std::map<int32_t, std::shared_ptr<UnderageModelEventListener>> events_;
 
 public:
-    void* g_userStatusHandle { nullptr };
     RegisterListenerFunc g_registerListenerFunc { nullptr };
     SubscribeFunc g_subscribeFunc { nullptr };
     UnsubscribeFunc g_unsubscribeFunc { nullptr };

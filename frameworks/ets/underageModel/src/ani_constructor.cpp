@@ -29,11 +29,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
                   << std::endl;
         return ANI_ERROR;
     }
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+    if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
         return ANI_ERROR;
     }
 
-    if (ANI_OK != ohos::multimodalAwareness::underageModel::ANIRegister(env)) {
+    if (ohos::multimodalAwareness::underageModel::ANIRegister(env) != ANI_OK) {
         std::cerr << "Error from ohos::multimodalAwareness::underageModel::ANIRegister" << std::endl;
         return ANI_ERROR;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,10 +76,7 @@ bool AniMotionEvent::CheckEvents(int32_t eventType)
         FI_HILOGD("eventType not find");
         return true;
     }
-    if (typeIter->second->onRefSets.empty()) {
-        return true;
-    }
-    return false;
+    return typeIter->second->onRefSets.empty();
 }
 
 bool AniMotionEvent::SubscribeCallback(int32_t type)
@@ -166,7 +163,7 @@ bool AniMotionEvent::InsertRef(std::shared_ptr<MotionEventListener> listener, an
     for (const auto &item : listener->onRefSets) {
         ani_boolean isEqual = false;
         auto isDuplicate =
-            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual)) && isEqual;
+            (taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
             taihe::get_env()->GlobalReference_Delete(onHandlerRef);
             FI_HILOGD("callback already registered");
@@ -189,13 +186,13 @@ bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
     vm_ = vm;
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
-    if (ANI_OK != taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef)) {
+    if (taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef) != ANI_OK) {
         FI_HILOGE("GlobalReference_Create failed");
         return false;
     }
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
-        FI_HILOGD("found event:%{public}d", eventType);
+        FI_HILOGD("found event: %{public}d", eventType);
         std::shared_ptr<MotionEventListener> listener = std::make_shared<MotionEventListener>();
         std::set<ani_ref> onRefSets;
         listener->onRefSets = onRefSets;
@@ -206,9 +203,6 @@ bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
             taihe::get_env()->GlobalReference_Delete(onHandlerRef);
             return false;
         }
-        std::lock_guard<std::mutex> guard(mutex_);
-        events_.insert(std::make_pair(eventType, listener));
-        FI_HILOGD("Insert finish");
         return true;
     }
     FI_HILOGD("found event: %{public}d", eventType);
@@ -230,11 +224,11 @@ bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
 
 bool AniMotionEvent::RemoveAllCallback(int32_t eventType)
 {
-    FI_HILOGI("RemoveAllCallback in, event:%{public}d", eventType);
+    FI_HILOGI("RemoveAllCallback in, event: %{public}d", eventType);
     std::lock_guard<std::mutex> guard(mutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
-        FI_HILOGE("EventType %{public}d not found", eventType);
+        FI_HILOGE("EventType: %{public}d not found", eventType);
         return false;
     }
     if (iter->second == nullptr) {
@@ -245,7 +239,7 @@ bool AniMotionEvent::RemoveAllCallback(int32_t eventType)
         FI_HILOGE("onRefSets is empty");
         return false;
     }
-    for (auto item : iter->second->onRefSets) {
+    for (const auto item : iter->second->onRefSets) {
         taihe::get_env()->GlobalReference_Delete(item);
     }
     iter->second->onRefSets.clear();
@@ -255,11 +249,11 @@ bool AniMotionEvent::RemoveAllCallback(int32_t eventType)
 
 bool AniMotionEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
 {
-    FI_HILOGI("RemoveCallback in, event:%{public}d", eventType);
+    FI_HILOGI("RemoveCallback in, event: %{public}d", eventType);
     std::lock_guard<std::mutex> guard(mutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
-        FI_HILOGE("EventType %{public}d not found", eventType);
+        FI_HILOGE("EventType: %{public}d not found", eventType);
         return false;
     }
     if (iter->second == nullptr) {
@@ -272,7 +266,7 @@ bool AniMotionEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     }
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
-    if (ANI_OK != taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef)) {
+    if (taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef) != ANI_OK) {
         FI_HILOGE("GlobalReference_Create failed");
         return false;
     }
@@ -280,7 +274,7 @@ bool AniMotionEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     for (auto it = refSet.begin(); it != refSet.end();) {
         ani_boolean isEqual = false;
         auto isDuplicate =
-            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, *it, &isEqual)) && isEqual;
+            (taihe::get_env()->Reference_StrictEquals(onHandlerRef, *it, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
             it = refSet.erase(it);
             FI_HILOGD("callback already remove");
@@ -309,24 +303,34 @@ ani_object AniMotionEvent::CreateAniUndefined(ani_env* env)
 ani_enum_item AniMotionEvent::CreateAniOperatingHandStatus(ani_env* env, int32_t status)
 {
     ani_enum enumType;
+    ani_enum_item enumItem;
     ani_status ret = env->FindEnum("@ohos.multimodalAwareness.motion.motion.OperatingHandStatus", &enumType);
     if (ret != ANI_OK) {
         FI_HILOGE("[ANI] WindowStatusType not found");
+        return enumItem;
     }
-    ani_enum_item enumItem;
     ret = env->Enum_GetEnumItemByIndex(enumType, ani_int(status), &enumItem);
+    if (ret != ANI_OK) {
+        FI_HILOGE("env Enum_GetEnumItemByIndex failed");
+        return enumItem;
+    }
     return enumItem;
 }
 
 ani_enum_item AniMotionEvent::CreateAniHoldingHandStatus(ani_env* env, int32_t status)
 {
     ani_enum enumType;
+    ani_enum_item enumItem;
     ani_status ret = env->FindEnum("@ohos.multimodalAwareness.motion.motion.HoldingHandStatus", &enumType);
     if (ret != ANI_OK) {
         FI_HILOGE("[ANI] WindowStatusType not found");
+        return enumItem;
     }
-    ani_enum_item enumItem;
     ret = env->Enum_GetEnumItemByIndex(enumType, ani_int(status), &enumItem);
+    if (ret != ANI_OK) {
+        FI_HILOGE("env Enum_GetEnumItemByIndex failed");
+        return enumItem;
+    }
     return enumItem;
 }
 
@@ -359,13 +363,13 @@ void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const 
             auto statusAni = CreateAniOperatingHandStatus(env, event->status);
             args.push_back(static_cast<ani_ref>(statusAni));
         } else {
-            FI_HILOGE("status is err.");
+            FI_HILOGE("status is err. eventType: %{public}d ", eventType);
             return;
         }
         ani_ref result;
         if (env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(),
             &result) != ANI_OK) {
-            HILOG_ERROR(LOG_CORE, "Excute CallBack failed.%{public}d",
+            HILOG_ERROR(LOG_CORE, "Excute CallBack failed. %{public}d",
                 env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(),
                 &result));
             vm_->DetachCurrentThread();
@@ -397,7 +401,7 @@ ani_env* AniMotionEvent::GetAniEnv(ani_vm* vm)
     }
     ani_env* env = nullptr;
     if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
-        FI_HILOGE("GetEnv failed%{public}d", vm->GetEnv(ANI_VERSION_1, &env));
+        FI_HILOGE("GetEnv failed: %{public}d", vm->GetEnv(ANI_VERSION_1, &env));
         return nullptr;
     }
     return env;
@@ -412,7 +416,7 @@ ani_env* AniMotionEvent::AttachAniEnv(ani_vm* vm)
     ani_env *workerEnv = nullptr;
     ani_options aniArgs {0, nullptr};
     if (vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv) != ANI_OK) {
-        FI_HILOGE("Attach Env failed%{public}d", vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv));
+        FI_HILOGE("Attach Env failed: %{public}d", vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv));
         return nullptr;
     }
     return workerEnv;

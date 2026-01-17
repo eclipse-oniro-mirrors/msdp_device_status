@@ -12,10 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <dlfcn.h>
+
 #include "ani_underage_model_event.h"
 #include "devicestatus_define.h"
-#include <dlfcn.h>
 #include "ohos.multimodalAwareness.underageModel.UserClassification.ani.1.hpp"
+
 #undef LOG_TAG
 #define LOG_TAG "AniUnderageModelEvent"
 
@@ -35,8 +37,6 @@ const std::string_view UNSUBSCRIBE_FUNC_NAME = { "Unsubscribe" };
 void UnderageModelListener::OnUnderageModelListener(uint32_t eventType, int32_t result, float confidence) const
 {
     FI_HILOGI("Enter");
-    std::lock_guard<std::mutex> guard(g_mutex);
-    CHKPV(AniUnderageModelEvent::GetInstance());
     AniUnderageModelEvent::GetInstance()->OnEventChanged(eventType, result, confidence);
     FI_HILOGI("Exit");
 }
@@ -96,11 +96,6 @@ bool AniUnderageModelEvent::SubscribeCallback(int32_t type)
     if (iter != callbacks_.end()) {
         return true;
     }
-    if (AniUnderageModelEvent::GetInstance() == nullptr) {
-        FI_HILOGE("GetInstance is null");
-        taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Subscribe failed");
-        return false;
-    }
     if (g_userStatusHandle == nullptr && !LoadLibrary()) {
         taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
         return false;
@@ -108,7 +103,6 @@ bool AniUnderageModelEvent::SubscribeCallback(int32_t type)
     if (AniUnderageModelEvent::GetInstance()->g_registerListenerFunc == nullptr) {
         AniUnderageModelEvent::GetInstance()->g_registerListenerFunc = reinterpret_cast<RegisterListenerFunc>(
             dlsym(AniUnderageModelEvent::GetInstance()->g_userStatusHandle, REGISTER_LISTENER_FUNC_NAME.data()));
-    FI_HILOGI("pjl  test111");
         if (AniUnderageModelEvent::GetInstance()->g_registerListenerFunc == nullptr) {
             FI_HILOGE("RegisterListener find symbol failed, error: %{public}s", dlerror());
             taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Find symbol failed");
@@ -118,12 +112,13 @@ bool AniUnderageModelEvent::SubscribeCallback(int32_t type)
     auto listener = std::make_shared<UnderageModelListener>();
     int32_t ret = std::abs(AniUnderageModelEvent::GetInstance()->g_registerListenerFunc(type, listener));
     if (ret < MAX_ERROR_CODE) {
-        FI_HILOGE("RegisterListener failed, ret:%{public}d", ret);
+        FI_HILOGE("RegisterListener failed, ret: %{public}d", ret);
         taihe::set_business_error(SUBSCRIBE_EXCEPTION, "RegisterListener failed");
         return false;
     }
-    FI_HILOGI("RegisterListener failed, ret:%{public}d", ret);
+    FI_HILOGI("RegisterListener failed, ret: %{public}d", ret);
     if (!Subscribe(type)) {
+        FI_HILOGE("Subscribe type failed");
         return false;
     }
     AniUnderageModelEvent::GetInstance()->callbacks_.insert(std::make_pair(type, listener));
@@ -145,22 +140,17 @@ bool AniUnderageModelEvent::Subscribe(uint32_t type)
     if (ret == RET_OK) {
         return true;
     } else if (ret == DEVICE_UNSUPPORT_ERR) {
-        FI_HILOGE("failed to subscribe0000%{public}d", ret);
+        FI_HILOGE("failed to subscribe: %{public}d", ret);
         taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Device not support");
         return false;
     }
-    FI_HILOGE("failed to subscribe111111  %{public}d", ret);
+    FI_HILOGE("failed to subscribe: %{public}d", ret);
     taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Subscribe failed");
     return false;
 }
 
 bool AniUnderageModelEvent::UnSubscribeCallback(int32_t type)
 {
-    if (AniUnderageModelEvent::GetInstance() == nullptr) {
-        FI_HILOGE("GetInstance is null");
-        taihe::set_business_error(SUBSCRIBE_EXCEPTION, "UnSubscribeCallback failed");
-        return false;
-    }
     if (CheckEvents(type)) {
         return false;
     }
@@ -202,7 +192,7 @@ bool AniUnderageModelEvent::InsertRef(std::shared_ptr<UnderageModelEventListener
     for (const auto &item : listener->onRefSets) {
         ani_boolean isEqual = false;
         auto isDuplicate =
-            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual)) && isEqual;
+            (taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
             taihe::get_env()->GlobalReference_Delete(onHandlerRef);
             FI_HILOGD("callback already registered");
@@ -231,14 +221,14 @@ bool AniUnderageModelEvent::AddCallback(int32_t eventType, uintptr_t opq)
     vm_ = GetAniVm(env);
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
-    if (ANI_OK != env->GlobalReference_Create(callbackObj, &onHandlerRef)) {
+    if (env->GlobalReference_Create(callbackObj, &onHandlerRef) != ANI_OK) {
         FI_HILOGE("GlobalReference_Create failed");
         return false;
     }
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
-        FI_HILOGD("found event:%{public}d", eventType);
-        std::shared_ptr<UnderageModelEventListener> listener = std::make_shared<UnderageModelEventListener>();
+        FI_HILOGD("found event: %{public}d", eventType);
+        auto listener = std::make_shared<UnderageModelEventListener>();
         std::set<ani_ref> onRefSets;
         listener->onRefSets = onRefSets;
 
@@ -271,11 +261,11 @@ bool AniUnderageModelEvent::AddCallback(int32_t eventType, uintptr_t opq)
 
 bool AniUnderageModelEvent::RemoveAllCallback(int32_t eventType)
 {
-    FI_HILOGI("RemoveAllCallback in, event:%{public}d", eventType);
+    FI_HILOGI("RemoveAllCallback in, event: %{public}d", eventType);
     std::lock_guard<std::mutex> guard(mutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
-        FI_HILOGE("EventType %{public}d not found", eventType);
+        FI_HILOGE("EventType: %{public}d not found", eventType);
         return false;
     }
     if (iter->second == nullptr) {
@@ -296,11 +286,11 @@ bool AniUnderageModelEvent::RemoveAllCallback(int32_t eventType)
 
 bool AniUnderageModelEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
 {
-    FI_HILOGI("RemoveCallback in, event:%{public}d", eventType);
+    FI_HILOGI("RemoveCallback in, event: %{public}d", eventType);
     std::lock_guard<std::mutex> guard(mutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
-        FI_HILOGE("EventType %{public}d not found", eventType);
+        FI_HILOGE("EventType: %{public}d not found", eventType);
         return false;
     }
     if (iter->second == nullptr) {
@@ -313,7 +303,7 @@ bool AniUnderageModelEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     }
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
-    if (ANI_OK != taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef)) {
+    if (taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef) != ANI_OK) {
         FI_HILOGE("GlobalReference_Create failed");
         return false;
     }
@@ -321,7 +311,7 @@ bool AniUnderageModelEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     for (auto it = refSet.begin(); it != refSet.end();) {
         ani_boolean isEqual = false;
         auto isDuplicate =
-            (ANI_OK == taihe::get_env()->Reference_StrictEquals(onHandlerRef, *it, &isEqual)) && isEqual;
+            (taihe::get_env()->Reference_StrictEquals(onHandlerRef, *it, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
             it = refSet.erase(it);
             FI_HILOGD("callback already remove");

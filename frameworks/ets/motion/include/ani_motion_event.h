@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,15 @@
 #ifndef ANI_MOTION_EVENT_H
 #define ANI_MOTION_EVENT_H
 
+#include <map>
+#include <set>
+#include <stdexcept>
+
+#include "ani.h"
+#include "fi_log.h"
 #include "ohos.multimodalAwareness.motion.proj.hpp"
 #include "ohos.multimodalAwareness.motion.impl.hpp"
 #include "taihe/runtime.hpp"
-#include <stdexcept>
-#include "ani.h"
-#include <set>
-#include <map>
-#include "fi_log.h"
 
 #ifdef MOTION_ENABLE
 #include "motion_callback_stub.h"

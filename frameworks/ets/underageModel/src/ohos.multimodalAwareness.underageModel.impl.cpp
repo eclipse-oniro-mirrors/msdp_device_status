@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdexcept>
+
+#include "ani_underage_model_event.h"
+#include "fi_log.h"
 #include "ohos.multimodalAwareness.underageModel.proj.hpp"
 #include "ohos.multimodalAwareness.underageModel.impl.hpp"
 #include "taihe/runtime.hpp"
-#include <stdexcept>
-#include "fi_log.h"
-#include "ani_underage_model_event.h"
+
 #undef LOG_TAG
 #define LOG_TAG "ANIUnderageModel"
 namespace {
@@ -32,10 +34,10 @@ void OnUserAgeGroupDetectedInner(::taihe::callback_view<void(UserClassification_
         return;
     }
     if (!AniUnderageModelEvent::GetInstance()->AddCallback(UNDERAGE_MODEL_TYPE_KID, opq)) {
+        FI_HILOGE("AddCallback failed");
         taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
         return;
     }
-    return;
 }
 
 void OffUserAgeGroupDetectedInner(::taihe::optional_view<uintptr_t> opq)
@@ -50,11 +52,11 @@ void OffUserAgeGroupDetectedInner(::taihe::optional_view<uintptr_t> opq)
     } else {
         if (!AniUnderageModelEvent::GetInstance()->RemoveCallback(UNDERAGE_MODEL_TYPE_KID,
             opq.value())) {
+            FI_HILOGE("RemoveCallback failed");
             taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
             return;
         }
     }
-    return;
 }
 }  // namespace
 
