@@ -371,7 +371,6 @@ int32_t StationaryServer::UnsubscribeMotion(Type type, sptr<IRemoteDevStaCallbac
 {
     FI_HILOGI("Enter");
     std::lock_guard lockGrd(mtx_);
-    int32_t ret = 0;
     auto iter = deviceStatusMotionCallbacks_.find(type);
     if (iter == deviceStatusMotionCallbacks_.end()) {
         FI_HILOGE("dont find callback set in callbacks, failed");
@@ -386,11 +385,11 @@ int32_t StationaryServer::UnsubscribeMotion(Type type, sptr<IRemoteDevStaCallbac
     auto object = callback->AsObject();
     object->RemoveDeathRecipient(devStaCBDeathRecipient_);
     if (deviceStatusMotionCallbacks_[type].size() == 0) {
-        ret = UnsubscribeCallback(MOTION_TYPE_MAP[type], motionCallback_);
+        int32_t ret = UnsubscribeCallback(MOTION_TYPE_MAP[type], motionCallback_);
         motionCallback_ = nullptr;
         if (ret != RET_OK) {
             FI_HILOGE("unsubscribe motion failed, ret = %{public}d", ret);
-            return ret;
+            return RET_ERR;
         }
         FI_HILOGI("unsubscribe motion succ");
         auto cacheIter = cacheData_.find(type);
@@ -399,7 +398,7 @@ int32_t StationaryServer::UnsubscribeMotion(Type type, sptr<IRemoteDevStaCallbac
             FI_HILOGI("cache data clear");
         }
     }
-    return ret;
+    return RET_OK;
 }
 
 void StationaryServer::StationaryServerDeathRecipient(const wptr<IRemoteObject> &remote)

@@ -73,6 +73,10 @@ ErrCode DeviceStatusMsdpClientImpl::InitMsdpImpl(Type type)
 
 ErrCode DeviceStatusMsdpClientImpl::MockHandle(Type type)
 {
+    if (type > TYPE_MAX || type < TYPE_INVALID) {
+        FI_HILOGE("Type invalid");
+        return RET_ERR;
+    }
     if (StartMock(type) == RET_ERR) {
         FI_HILOGE("Start mock Library failed");
         return RET_ERR;
@@ -91,10 +95,6 @@ ErrCode DeviceStatusMsdpClientImpl::MockHandle(Type type)
         iter->second++;
     }
     RegisterMock();
-    if (type > TYPE_MAX || type < TYPE_INVALID) {
-        FI_HILOGE("Type invalid");
-        return RET_ERR;
-    }
     FI_HILOGI("mockCallCounts_:%{public}d", mockCallCounts_[type]);
     return RET_OK;
 }
@@ -360,7 +360,7 @@ ErrCode DeviceStatusMsdpClientImpl::LoadMockLibrary()
     }
     std::string dlName = DEVICESTATUS_MOCK_LIB_PATH;
     char libRealPath[PATH_MAX] = { 0 };
-    if (realpath(dlName .c_str(), libRealPath) == nullptr) {
+    if (realpath(dlName.c_str(), libRealPath) == nullptr) {
         FI_HILOGE("Get absolute algoPath is error, errno:%{public}d", errno);
         return RET_ERR;
     }
@@ -426,7 +426,7 @@ ErrCode DeviceStatusMsdpClientImpl::LoadAlgoLibrary()
     }
     std::string dlName = DEVICESTATUS_ALGO_LIB_PATH;
     char libRealPath[PATH_MAX] = { 0 };
-    if (realpath(dlName .c_str(), libRealPath) == nullptr) {
+    if (realpath(dlName.c_str(), libRealPath) == nullptr) {
         FI_HILOGE("Get absolute algoPath is error, errno:%{public}d", errno);
         return RET_ERR;
     }
@@ -475,6 +475,7 @@ IMsdp* DeviceStatusMsdpClientImpl::GetAlgoInst(Type type)
     if (algo_.pAlgorithm == nullptr) {
         algo_.pAlgorithm = algo_.create();
     }
+    CHKPP(algo_.pAlgorithm);
     return algo_.pAlgorithm;
 }
 } // namespace DeviceStatus

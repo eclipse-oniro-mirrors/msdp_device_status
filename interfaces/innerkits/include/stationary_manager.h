@@ -76,6 +76,7 @@ public:
     int32_t GetDevicePostureDataSync(DevicePostureData &data);
 private:
     StationaryManager() = default;
+    ~StationaryManager() = default;
     DISALLOW_COPY_AND_MOVE(StationaryManager);
 };
 } // namespace DeviceStatus

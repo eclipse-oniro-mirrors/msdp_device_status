@@ -90,7 +90,7 @@ public:
     bool InitAlgoMngrInterface(Type type);
     bool Disable(Type type);
     bool InitDataCallback();
-    int32_t NotifyDeviceStatusChange(const Data &devicestatusData);
+    int32_t NotifyDeviceStatusChange(const Data &deviceStatusData);
     void Subscribe(Type type, ActivityEvent event, ReportLatencyNs latency, sptr<IRemoteDevStaCallback> callback);
     void Unsubscribe(Type type, ActivityEvent event, sptr<IRemoteDevStaCallback> callback);
     int32_t Subscribe(int32_t type, const std::string &bundleName, sptr<IRemoteBoomerangCallback> callback);
