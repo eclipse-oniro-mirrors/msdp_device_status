@@ -29,7 +29,7 @@
 namespace OHOS {
 namespace Msdp {
 constexpr const char MSDP_KIT_DOMAIN[] = "api_diagnostic";
-constexpr const char MSDP_KIT_NAME[] = "api_exec_end";
+constexpr const char MSDP_KIT_NAME[] = "api_called_stat";
 constexpr const char CONFIG_NAME[] = "ha_app_event";
 constexpr const char CONFIG_CONFIG_NAME[] = "SDK_OCG";
 constexpr int32_t TIMER_TYPE_WAKEUP = 1 << 1;
@@ -75,6 +75,12 @@ MsdpKitReport::MsdpKitReport()
 MsdpKitReport::~MsdpKitReport()
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    // Prevent data loss when the timer does not trigger
+    if (processorId_ != -1 && processorId_ != NON_APP_PROCESSOR_ID) {
+        MsdpInterfaceEventReport();
+    }
+
+    // If it's not an application, this data should also be cleared.
     msdpInterfaceEventInfos_.clear();
     if (!isWatching_) {
         return;
@@ -87,7 +93,6 @@ MsdpKitReport::~MsdpKitReport()
 
 void MsdpKitReport::AddEventProcessor()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     HiviewDFX::HiAppEvent::ReportConfig config;
     config.name = std::string(CONFIG_NAME);
     config.configName = std::string(CONFIG_CONFIG_NAME);
@@ -96,6 +101,7 @@ void MsdpKitReport::AddEventProcessor()
 
 void MsdpKitReport::SchedulerUpload()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     FI_HILOGI("SchedulerUpload start");
     // Add data processor
     if (processorId_ == -1) {
@@ -131,7 +137,6 @@ bool MsdpKitReport::UpdateMsdpInterfaceEvent(const MsdpInterfaceEventInfo &msdpI
 
 void MsdpKitReport::MsdpInterfaceEventReport()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (msdpInterfaceEventInfos_.size() == 0) {
         FI_HILOGI("msdpInterfaceEventInfos_ is empty");
         return;
