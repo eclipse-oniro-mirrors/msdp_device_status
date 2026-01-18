@@ -31,6 +31,7 @@ ohos_unittest("InputAdapterTest") {
     "${device_status_utils_path}",
     "${device_status_utils_path}/include",
     "${device_status_root_path}/intention/prototype/include",
+    "${device_status_root_path}/intention/adapters/input_adapter/include"
   ]
 
   sources = [ "src/input_adapter_test.cpp" ]
@@ -159,9 +160,13 @@ ohos_unittest("CommonEventAdapterTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":CommonEventAdapterTest",
-    ":DDMAdapterTest",
-    ":DsoftbusAdapterTest",
-    ":InputAdapterTest",
+    ":InputAdapterTest"
   ]
+  if (device_status_interaction_coordination) {
+    deps += [
+      ":CommonEventAdapterTest",
+      ":DDMAdapterTest",
+      ":DsoftbusAdapterTest"
+    ]
+  }
 }

@@ -39,7 +39,9 @@ using namespace testing;
 namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 const std::string SYSTEM_BASIC { "system_basic" };
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
 int32_t PERMISSION_EXCEPTION { 201 };
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 } // namespace
 
 class CooperateClientTest : public testing::Test {
@@ -105,6 +107,7 @@ public:
     }
 };
 
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
 /**
  * @tc.name: CooperateClientTest_RegisterListener
  * @tc.desc: On Coordination Listener
@@ -490,6 +493,7 @@ HWTEST_F(CooperateClientTest, CooperateClientTest_DumpPerformanceInfo_01, TestSi
     cooperateClient.DumpPerformanceInfo();
 #endif // ENABLE_PERFORMANCE_CHECK
 }
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
