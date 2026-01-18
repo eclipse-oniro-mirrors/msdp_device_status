@@ -19,6 +19,7 @@
 #define LOG_TAG "ohos.deviceStatus.dragInteraction"
 
 namespace {
+inline constexpr size_t MAX_PKG_NAME_LEN { 128 };
 static DragState ConverDragState(DeviceStatus::DragState state)
 {
     switch (state) {
@@ -182,16 +183,7 @@ int32_t EtsDragManager::SetDragSwitchState(bool enable)
 
 int32_t EtsDragManager::SetAppDragSwitchState(bool enable, const std::string &pkgName)
 {
-    CALL_INFO_TRACE;
-    if (pkgName.empty()) {
-        FI_HILOGE("The pkgName is empty");
-        return OHOS::Msdp::DeviceStatus::COMMON_PARAMETER_ERROR;
-    }
-    int32_t retCode = RET_OK;
-#ifndef OHOS_BUILD_PC_PRODUCT
-    retCode = INTERACTION_MGR->SetAppDragSwitchState(enable, pkgName, true);
-#endif // OHOS_BUILD_PC_PRODUCT
-    return retCode;
+    return INTERACTION_MGR->SetAppDragSwitchState(enable, pkgName, true);
 }
 
 void registerListener(callback_view<void(DragState)> callback, uintptr_t opq)
@@ -218,7 +210,13 @@ void SetDragSwitchState(bool enabled)
 
 void SetAppDragSwitchState(bool enabled, ::taihe::string_view bundleName)
 {
-    if (EtsDragManager::GetInstance()->SetAppDragSwitchState(enabled, std::string(bundleName)) ==
+    std::string pkgName(bundleName);
+    if (pkgName.empty() || pkgName.length() > MAX_PKG_NAME_LEN) {
+        FI_HILOGE("The pkgName is empty or pkgName len ");
+        taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_PARAMETER_ERROR, "Invalid pkgName length.");
+        return;
+    }
+    if (EtsDragManager::GetInstance()->SetAppDragSwitchState(enabled, pkgName) ==
         OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP) {
         taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP, "Not system application.");
     }
