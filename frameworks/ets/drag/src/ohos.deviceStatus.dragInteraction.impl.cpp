@@ -174,7 +174,7 @@ int32_t EtsDragManager::SetDragSwitchState(bool enable)
 {
     CALL_INFO_TRACE;
     int32_t retCode = RET_OK;
-#ifdef OHOS_BUILD_PC_PRODUCT
+#ifndef OHOS_BUILD_PC_PRODUCT
     retCode = INTERACTION_MGR->SetDragSwitchState(enable, true);
 #endif // OHOS_BUILD_PC_PRODUCT
     return retCode;
@@ -188,7 +188,7 @@ int32_t EtsDragManager::SetAppDragSwitchState(bool enable, const std::string &pk
         return OHOS::Msdp::DeviceStatus::COMMON_PARAMETER_ERROR;
     }
     int32_t retCode = RET_OK;
-#ifdef OHOS_BUILD_PC_PRODUCT
+#ifndef OHOS_BUILD_PC_PRODUCT
     retCode = INTERACTION_MGR->SetAppDragSwitchState(enable, pkgName, true);
 #endif // OHOS_BUILD_PC_PRODUCT
     return retCode;
