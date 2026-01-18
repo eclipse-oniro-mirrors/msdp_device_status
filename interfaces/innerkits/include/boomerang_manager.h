@@ -103,6 +103,7 @@ public:
     int32_t BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap, sptr<IRemoteBoomerangCallback> callback);
 private:
     BoomerangManager() = default;
+    ~BoomerangManager() = default;
     DISALLOW_COPY_AND_MOVE(BoomerangManager);
 };
 } // namespace DeviceStatus

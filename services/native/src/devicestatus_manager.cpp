@@ -262,19 +262,19 @@ int32_t DeviceStatusManager::MsdpDataCallback(const Data &data)
     return RET_OK;
 }
 
-int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data &devicestatusData)
+int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data &deviceStatusData)
 {
     CALL_DEBUG_ENTER;
-    FI_HILOGI("type:%{public}d, value:%{public}d", devicestatusData.type, devicestatusData.value);
+    FI_HILOGI("type:%{public}d, value:%{public}d", deviceStatusData.type, deviceStatusData.value);
     std::set<const sptr<IRemoteDevStaCallback>, classcomp> listeners;
     std::lock_guard lock(mutex_);
-    auto iter = listeners_.find(devicestatusData.type);
+    auto iter = listeners_.find(deviceStatusData.type);
     if (iter == listeners_.end()) {
-        FI_HILOGE("type:%{public}d is not exits", devicestatusData.type);
+        FI_HILOGE("type:%{public}d is not exits", deviceStatusData.type);
         return RET_ERR;
     }
-    if ((devicestatusData.type <= TYPE_INVALID) || (devicestatusData.type >= TYPE_MAX)) {
-        FI_HILOGE("Check devicestatusData.type is invalid");
+    if ((deviceStatusData.type <= TYPE_INVALID) || (deviceStatusData.type >= TYPE_MAX)) {
+        FI_HILOGE("Check deviceStatusData.type is invalid");
         return RET_ERR;
     }
     listeners = (std::set<const sptr<IRemoteDevStaCallback>, classcomp>)(iter->second);
@@ -283,22 +283,22 @@ int32_t DeviceStatusManager::NotifyDeviceStatusChange(const Data &devicestatusDa
             FI_HILOGE("listener is nullptr");
             return RET_ERR;
         }
-        FI_HILOGI("type:%{public}d, arrs_:%{public}d", devicestatusData.type, arrs_[devicestatusData.type]);
-        switch (arrs_[devicestatusData.type]) {
+        FI_HILOGI("type:%{public}d, arrs_:%{public}d", deviceStatusData.type, arrs_[deviceStatusData.type]);
+        switch (arrs_[deviceStatusData.type]) {
             case ENTER: {
-                if (devicestatusData.value == VALUE_ENTER) {
-                    listener->OnDeviceStatusChanged(devicestatusData);
+                if (deviceStatusData.value == VALUE_ENTER) {
+                    listener->OnDeviceStatusChanged(deviceStatusData);
                 }
                 break;
             }
             case EXIT: {
-                if (devicestatusData.value == VALUE_EXIT) {
-                    listener->OnDeviceStatusChanged(devicestatusData);
+                if (deviceStatusData.value == VALUE_EXIT) {
+                    listener->OnDeviceStatusChanged(deviceStatusData);
                 }
                 break;
             }
             case ENTER_EXIT: {
-                listener->OnDeviceStatusChanged(devicestatusData);
+                listener->OnDeviceStatusChanged(deviceStatusData);
                 break;
             }
             default: {

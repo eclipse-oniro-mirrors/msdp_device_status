@@ -17,6 +17,8 @@
 
 #include <atomic>
 
+#include "nocopyable.h"
+
 #include "sensor_agent.h"
 #include "sensor_agent_type.h"
 
@@ -27,9 +29,8 @@ class SensorManager {
 public:
     // forbid copy and default constuctor
     SensorManager() = delete;
-    SensorManager(const SensorManager &) = delete;
     virtual ~SensorManager();
-    SensorManager& operator =(const SensorManager &) = delete;
+    DISALLOW_COPY_AND_MOVE(SensorManager);
     SensorManager(const int32_t sensorTypeId, const int32_t sensorSamplingInterval);
     void SetCallback(RecordSensorCallback callback);
     static bool IsSupportedSensor(const int32_t sensorTypeId);

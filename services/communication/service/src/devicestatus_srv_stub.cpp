@@ -26,12 +26,12 @@
 #include "devicestatus_callback_proxy.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
-#include "drag_data_packer.h"
-#include "preview_style_packer.h"
 #include "devicestatus_proto.h"
+#include "drag_data_packer.h"
 #include "iremote_dev_sta_callback.h"
 #include "stationary_data.h"
 #include "include/util.h"
+#include "preview_style_packer.h"
 #include "utility.h"
 
 #undef LOG_TAG

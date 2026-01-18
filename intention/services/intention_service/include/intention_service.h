@@ -153,7 +153,9 @@ private:
     IContext *context_ { nullptr };
     SocketServer socketServer_;
     StationaryServer stationary_;
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CooperateServer cooperate_;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
     DragServer drag_;
     IntentionDumper dumper_;
     BoomerangServer boomerang_;

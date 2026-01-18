@@ -33,12 +33,15 @@
 #include <system_ability_definition.h>
 
 #include "concurrent_task_client.h"
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
 #include "ddm_adapter.h"
+#include "dsoftbus_adapter.h"
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 #include "devicestatus_common.h"
 #ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 #include "devicestatus_hisysevent.h"
 #endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-#include "dsoftbus_adapter.h"
+
 #include "input_adapter.h"
 #include "plugin_manager.h"
 #include "qos.h"
@@ -66,10 +69,12 @@ const bool REGISTER_RESULT =
 DeviceStatusService::DeviceStatusService()
     : SystemAbility(MSDP_DEVICESTATUS_SERVICE_ID, true)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     ddm_ = std::make_unique<DDMAdapter>();
+    dsoftbus_ = std::make_unique<DSoftbusAdapter>();
+#endif // OHOS_BUILD_ENABLE_COORDINATION
     input_ = std::make_unique<InputAdapter>();
     pluginMgr_ = std::make_unique<PluginManager>(this);
-    dsoftbus_ = std::make_unique<DSoftbusAdapter>();
 }
 
 DeviceStatusService::~DeviceStatusService()
@@ -107,8 +112,10 @@ void DeviceStatusService::OnStart()
 #ifdef MEMMGR_ENABLE
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
 #endif
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     EnableDSoftbus();
     EnableDDM();
+#endif // OHOS_BUILD_ENABLE_COORDINATION
     FI_HILOGI("check live start intention");
     intention_ = sptr<IntentionService>::MakeSptr(this);
     if (!Publish(intention_)) {

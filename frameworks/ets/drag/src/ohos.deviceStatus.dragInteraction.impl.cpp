@@ -174,7 +174,11 @@ array<Summary> EtsDragManager::GetDataSummary()
 int32_t EtsDragManager::SetDragSwitchState(bool enable)
 {
     CALL_INFO_TRACE;
-    return INTERACTION_MGR->SetDragSwitchState(enable, true);
+    int32_t retCode = RET_OK;
+#ifndef OHOS_BUILD_PC_PRODUCT
+    retCode = INTERACTION_MGR->SetDragSwitchState(enable, true);
+#endif // OHOS_BUILD_PC_PRODUCT
+    return retCode;
 }
 
 int32_t EtsDragManager::SetAppDragSwitchState(bool enable, const std::string &pkgName)

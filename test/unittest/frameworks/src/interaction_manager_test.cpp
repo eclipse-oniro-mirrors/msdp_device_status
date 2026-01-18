@@ -1118,7 +1118,11 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDamplingCoefficient, 
     constexpr double damplingCoefficient { 0.1 };
     auto ret = InteractionManager::GetInstance()->SetDamplingCoefficient(
         COORDINATION_DAMPLING_RIGHT, damplingCoefficient);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
+#else
+    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 /**

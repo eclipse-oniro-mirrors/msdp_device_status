@@ -61,7 +61,9 @@ std::shared_ptr<IntentionService> g_intentionServiceNullptr { nullptr };
 sptr<IRemoteDevStaCallback> stationaryCallback_;
 IContext *g_contextNullptr { nullptr };
 DragManager g_dragMgr;
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
 int32_t PERMISSION_EXCEPTION { 201 };
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr float DOUBLEPIMAX = 6.3F;
 uint64_t g_timestamp { 10000000 };
@@ -305,6 +307,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_Socket001, TestSize.Level0)
     EXPECT_EQ(ret, RET_ERR);
 }
 
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
 /**
  * @tc.name: IntentionServiceTest2
  * @tc.desc: Test EnableCooperate
@@ -500,6 +503,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDamplingCoefficient001, T
     ErrCode ret = g_intentionServiceNullptr->RegisterHotAreaListener(direction, coefficient);
     EXPECT_EQ(ret, RET_ERR);
 }
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 
 /**
  * @tc.name: IntentionServiceTest14

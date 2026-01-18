@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,15 @@
 #ifndef ANI_MOTION_EVENT_H
 #define ANI_MOTION_EVENT_H
 
+#include <map>
+#include <set>
+#include <stdexcept>
+
+#include "ani.h"
+#include "fi_log.h"
 #include "ohos.multimodalAwareness.motion.proj.hpp"
 #include "ohos.multimodalAwareness.motion.impl.hpp"
 #include "taihe/runtime.hpp"
-#include <stdexcept>
-#include "ani.h"
-#include <set>
-#include <map>
-#include "fi_log.h"
-#include "ani_error_utils.h"
 
 #ifdef MOTION_ENABLE
 #include "motion_callback_stub.h"
@@ -34,6 +34,13 @@
 namespace OHOS {
 namespace Msdp {
 const int32_t RET_OK = 0;
+constexpr int32_t PERMISSION_DENIED { 201 };
+constexpr int32_t NO_SYSTEM_API { 202 };
+constexpr int32_t PARAM_EXCEPTION { 401 };
+constexpr int32_t DEVICE_EXCEPTION { 801 };
+constexpr int32_t SERVICE_EXCEPTION { 31500001 };
+constexpr int32_t SUBSCRIBE_EXCEPTION { 31500002 };
+constexpr int32_t UNSUBSCRIBE_EXCEPTION { 31500003 };
 constexpr int32_t HOLDING_HAND_FEATURE_DISABLE = 11;
 using OperatingHandStatus_t = ohos::multimodalAwareness::motion::OperatingHandStatus;
 constexpr int32_t MOTION_TYPE_OPERATING_HAND = 3601;
@@ -61,26 +68,28 @@ public:
     bool SubscribeCallback(int32_t type);
     bool UnSubscribeCallback(int32_t type);
     bool InsertRef(std::shared_ptr<MotionEventListener> listener, ani_ref onHandlerRef);
-    bool AddCallback(int32_t eventType, taihe::callback_view<void(OperatingHandStatus_t)> f, uintptr_t opq);
+    bool AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm);
     bool RemoveAllCallback(int32_t eventType);
     bool RemoveCallback(int32_t eventType, uintptr_t opq);
     void OnEventOperatingHand(int32_t eventType, size_t argc, const std::shared_ptr<MotionEvent> &event);
     static ani_vm* GetAniVm(ani_env* env);
     static ani_env* GetAniEnv(ani_vm* vm);
     static ani_env* AttachAniEnv(ani_vm* vm);
-    ani_object CreateAniMotionEventStatus(ani_env* env, int32_t status);
+    ani_enum_item CreateAniHoldingHandStatus(ani_env* env, int32_t status);
+    ani_enum_item CreateAniOperatingHandStatus(ani_env* env, int32_t status);
     ani_object CreateAniUndefined(ani_env* env);
-
 #endif
+
 public:
 #ifdef MOTION_ENABLE
     std::mutex mutex_;
     std::map<int32_t, sptr<IMotionCallback>> callbacks_;
 #endif
+
 private:
     static ani_env* env_;
     static ani_vm* vm_;
-
+    
 protected:
     std::map<int32_t, std::shared_ptr<MotionEventListener>> events_;
 };

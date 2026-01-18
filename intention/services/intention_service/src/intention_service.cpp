@@ -31,8 +31,11 @@ namespace Msdp {
 namespace DeviceStatus {
 
 IntentionService::IntentionService(IContext *context)
-    : context_(context), socketServer_(context), cooperate_(context), drag_(context), dumper_(context, stationary_),
-    boomerangDumper_(context, boomerang_)
+    : context_(context), socketServer_(context),
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    cooperate_(context),
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+    drag_(context), dumper_(context, stationary_), boomerangDumper_(context, boomerang_)
 {
     (void) context_;
 }
@@ -90,117 +93,173 @@ ErrCode IntentionService::Socket(const std::string& programName, int32_t moduleT
 
 ErrCode IntentionService::EnableCooperate(int32_t userData)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, userData] {
         return cooperate_.EnableCooperate(context, userData);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::DisableCooperate(int32_t userData)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, userData] {
         return cooperate_.DisableCooperate(context, userData);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::StartCooperate(const std::string& remoteNetworkId, int32_t userData, int32_t startDeviceId,
     bool checkPermission)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, &remoteNetworkId, userData, startDeviceId, checkPermission] {
         return cooperate_.StartCooperate(context, remoteNetworkId, userData, startDeviceId, checkPermission);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::StartCooperateWithOptions(const std::string& remoteNetworkId, int32_t userData,
     int32_t startDeviceId, bool checkPermission, const SequenceableCooperateOptions& options)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, &remoteNetworkId, userData, startDeviceId, checkPermission, &options] {
         return cooperate_.StartCooperateWithOptions(context, remoteNetworkId, userData,
             startDeviceId, options.options_);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::StopCooperate(int32_t userData, bool isUnchained, bool checkPermission)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, userData, isUnchained, checkPermission] {
         return cooperate_.StopCooperate(context, userData, isUnchained, checkPermission);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::RegisterCooperateListener()
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context] {
         return cooperate_.RegisterCooperateListener(context);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::UnregisterCooperateListener()
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context] {
         return cooperate_.UnregisterCooperateListener(context);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::RegisterHotAreaListener(int32_t userData, bool checkPermission)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, userData, checkPermission] {
         return cooperate_.RegisterHotAreaListener(context, userData, checkPermission);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::UnregisterHotAreaListener()
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context] {
         return cooperate_.UnregisterHotAreaListener(context);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::RegisterMouseEventListener(const std::string& networkId)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, &networkId] {
         return cooperate_.RegisterMouseEventListener(context, networkId);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::UnregisterMouseEventListener(const std::string& networkId)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, &networkId] {
         return cooperate_.UnregisterMouseEventListener(context, networkId);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::GetCooperateStateSync(const std::string& udid, bool& state)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, &udid, &state] {
         return cooperate_.GetCooperateStateSync(context, udid, state);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::GetCooperateStateAsync(const std::string& networkId, int32_t userData, bool isCheckPermission)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, &networkId, userData, isCheckPermission] {
         return cooperate_.GetCooperateStateAsync(context, networkId, userData, isCheckPermission);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::SetDamplingCoefficient(uint32_t direction, double coefficient)
 {
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, direction, coefficient] {
         return cooperate_.SetDamplingCoefficient(context, direction, coefficient);
     });
+#else
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::StartDrag(const SequenceableDragData &sequenceableDragData)
