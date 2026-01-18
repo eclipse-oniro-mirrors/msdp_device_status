@@ -173,7 +173,11 @@ array<Summary> EtsDragManager::GetDataSummary()
 int32_t EtsDragManager::SetDragSwitchState(bool enable)
 {
     CALL_INFO_TRACE;
-    return INTERACTION_MGR->SetDragSwitchState(enable, true);
+    int32_t retCode = RET_OK;
+#ifdef OHOS_BUILD_PC_PRODUCT
+    retCode = INTERACTION_MGR->SetDragSwitchState(enable, true);
+#endif // OHOS_BUILD_PC_PRODUCT
+    return retCode;
 }
 
 int32_t EtsDragManager::SetAppDragSwitchState(bool enable, const std::string &pkgName)
@@ -183,7 +187,11 @@ int32_t EtsDragManager::SetAppDragSwitchState(bool enable, const std::string &pk
         FI_HILOGE("The pkgName is empty");
         return OHOS::Msdp::DeviceStatus::COMMON_PARAMETER_ERROR;
     }
-    return INTERACTION_MGR->SetAppDragSwitchState(enable, pkgName, true);
+    int32_t retCode = RET_OK;
+#ifdef OHOS_BUILD_PC_PRODUCT
+    retCode = INTERACTION_MGR->SetAppDragSwitchState(enable, pkgName, true);
+#endif // OHOS_BUILD_PC_PRODUCT
+    return retCode;
 }
 
 void registerListener(callback_view<void(DragState)> callback, uintptr_t opq)
