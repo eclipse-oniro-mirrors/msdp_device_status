@@ -419,6 +419,25 @@ HWTEST_F(DragClientTest, DragClientTest9, TestSize.Level0)
     int32_t ret = g_dragClient.GetDragState(dragState);
     ASSERT_EQ(ret, RET_OK);
 }
+
+/**
+ * @tc.name: DragClientTest10
+ * @tc.desc: DragClient
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragClientTest, DragClientTest10, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        promiseFlag.set_value(true);
+    };
+    g_dragClient.startDragListener_ = std::make_shared<TestStartDragListener>(callback);
+    g_dragClient.OnDisconnected();
+    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
