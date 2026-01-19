@@ -518,8 +518,8 @@ void DragClient::OnDisconnected()
         DragNotifyMsg notifyMsg;
         notifyMsg.result = DragResult::DRAG_CANCEL;
         startDragListener_->OnDragEndMessage(notifyMsg);
-        FI_HILOGI("startDragListener OnDragEndMessage");
         startDragListener_ = nullptr;
+        FI_HILOGI("startDragListener OnDragEndMessage");
     }
     if (dragListeners_.empty()) {
         FI_HILOGE("The drag listener set is empty");
