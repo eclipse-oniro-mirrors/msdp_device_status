@@ -35,6 +35,7 @@ namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 constexpr int32_t PIXEL_MAP_WIDTH { 3 };
 constexpr int32_t PIXEL_MAP_HEIGHT { 3 };
+constexpr int32_t PROMISE_WAIT_SPAN_MS { 2000 };
 constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
 const std::string FILTER_INFO { "Undefined filter info" };
 const std::string UD_KEY { "Unified data key" };
