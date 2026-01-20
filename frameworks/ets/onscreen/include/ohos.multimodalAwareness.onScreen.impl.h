@@ -38,5 +38,8 @@ void UnregisterAwarenessCallback(ohos::multimodalAwareness::onScreen::OnscreenAw
 ohos::multimodalAwareness::onScreen::OnscreenAwarenessInfo TriggerSync(
     ohos::multimodalAwareness::onScreen::OnscreenAwarenessCap capability,
     taihe::optional_view<ohos::multimodalAwareness::onScreen::OnscreenAwarenessOptions> options);
+void SendControlEventSync(ohos::multimodalAwareness::onScreen::ControlEvent event);
+ohos::multimodalAwareness::onScreen::PageContent GetPageContentSync(
+    ::taihe::optional<ohos::multimodalAwareness::onScreen::ContentOptions> options);
 } // namespace ANI::MultimodalAwareness
 #endif // OHOS_ANI_ONSCREENAWARENESS_H

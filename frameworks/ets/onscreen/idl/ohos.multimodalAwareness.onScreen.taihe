@@ -67,4 +67,51 @@ function UnregisterAwarenessCallback(
 @gen_promise("trigger")
 function TriggerSync(
     capability: OnscreenAwarenessCap,
-    options: Optional<OnscreenAwarenessOptions>): OnscreenAwarenessInfo;
+    options: Optional<OnscreenAwarenessOptions>): OnscreenAwarenessInfo;
+
+enum EventType : i32 {
+    SCROLL_TO_HOOK = 1,
+}
+
+struct ControlEvent {
+    windowId: i32;
+    sessionId: i64;
+    eventType: EventType;
+    hookId: Optional<i64>;
+}
+
+@gen_promise("sendControlEvent")
+function SendControlEventSync(event: ControlEvent): void;
+
+struct ContentOptions {
+    windowId: Optional<i32>;
+    contentUnderstand: Optional<bool>;
+    pageLink: Optional<bool>;
+    textOnly: Optional<bool>;
+}
+
+enum Scenario : i32 {
+    UNKNOWN = 0,
+    ARTICLE = 1,
+}
+
+struct Paragraph {
+    hookId: Optional<i64>;
+    chapterId: Optional<i32>;
+    title: Optional<String>;
+    text: Optional<String>;
+}
+
+struct PageContent {
+    windowId: i32;
+    sessionId: i64;
+    bundleName: String;
+    scenario: Optional<Scenario>;
+    title: Optional<String>;
+    content: Optional<String>;
+    pageLink: Optional<String>;
+    paragraphs: Optional<Array<Paragraph>>;
+}
+
+@gen_promise("getPageContent")
+function GetPageContentSync(options: Optional<ContentOptions>): PageContent;
