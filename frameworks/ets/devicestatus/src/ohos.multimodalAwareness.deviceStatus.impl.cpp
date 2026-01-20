@@ -203,10 +203,39 @@ void OffSteadyStandingDetect(::taihe::optional_view<
     }
 }
 
+::ohos::multimodalAwareness::deviceStatus::DeviceRotationRadian getDeviceRotationRadianSync()
+{
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
+    DeviceStatus::DevicePostureData postureData;
+    auto result = DeviceStatus::StationaryManager::
+        GetInstance().GetDevicePostureDataSync(postureData);
+    if (result != RET_OK) {
+        FI_HILOGE("GetDevicePostureDataSync err, result:%{public}d", result);
+        if (result == NO_SYSTEM_API || result == DEVICE_EXCEPTION) {
+            ani_errorutils::ThrowDeviceStatusErr(result);
+        } else {
+            ani_errorutils::ThrowDeviceStatusErr(SERVICE_EXCEPTION);
+        }
+    } else {
+        x = postureData.rollRad;
+        y = postureData.pitchRad;
+        z = postureData.yawRad;
+    }
+    auto deviceRotationRadian = ::ohos::multimodalAwareness::deviceStatus::DeviceRotationRadian {
+        std::move(x),
+        std::move(y),
+        std::move(z),
+    };
+    return deviceRotationRadian;
+}
+
 }  // namespace
 
 // Since these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_OnSteadyStandingDetect(OnSteadyStandingDetect);
 TH_EXPORT_CPP_API_OffSteadyStandingDetect(OffSteadyStandingDetect);
+TH_EXPORT_CPP_API_getDeviceRotationRadianSync(getDeviceRotationRadianSync);
 // NOLINTEND

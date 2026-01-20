@@ -31,3 +31,12 @@ enum SteadyStandingStatus : i32 {
 
 function OnSteadyStandingDetect(f: (info: SteadyStandingStatus) => void) : void;
 function OffSteadyStandingDetect(callbackOpt: Optional<(info: SteadyStandingStatus) => void>) : void;
+
+struct DeviceRotationRadian {
+  x: f64;
+  y: f64;
+  z: f64;
+}
+
+@gen_promise("getDeviceRotationRadian")
+function getDeviceRotationRadianSync(): DeviceRotationRadian;
