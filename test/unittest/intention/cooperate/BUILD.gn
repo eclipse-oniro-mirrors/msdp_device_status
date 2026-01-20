@@ -1178,6 +1178,75 @@ ohos_unittest("StateMachineTest") {
   ]
 }
 
+ohos_unittest("CooperateFreeModifyTest") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  branch_protector_ret = "pac_ret"
+  module_out_path = module_output_path
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/intention/adapters/common_event_adapter/include",
+    "${device_status_root_path}/intention/services/device_manager/include",
+    "${device_status_root_path}/libs/interface",
+    "${device_status_service_path}/communication/service/include",
+  ]
+
+  defines = []
+
+  sources = [ "src/cooperate_free_modify_test.cpp" ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
+    "${device_status_root_path}/intention/adapters/input_adapter:intention_input_adapter",
+    "${device_status_root_path}/intention/common/channel:intention_channel",
+    "${device_status_root_path}/intention/cooperate/plugin:intention_cooperate",
+    "${device_status_root_path}/intention/services/device_manager:intention_device_manager",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_root_path}/utils/common:devicestatus_util",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+  ]
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:app_manager",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
+    "common_event_service:cesfwk_innerkits",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "data_share:datashare_consumer",
+    "device_manager:devicemanagersdk",
+    "eventhandler:libeventhandler",
+    "graphic_2d:libcomposer",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "image_framework:image_native",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "libxml2:libxml2",
+    "samgr:samgr_proxy",
+    "window_manager:libdm",
+    "window_manager:libwm",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = []
@@ -1186,6 +1255,7 @@ group("unittest") {
       ":CooperateClientTest",
       ":CooperateContextTest",
       ":CooperateFreeTest",
+	  ":CooperateFreeModifyTest",
       ":CooperateInTest",
       ":CooperateOutTest",
       ":CooperateServerTest",
