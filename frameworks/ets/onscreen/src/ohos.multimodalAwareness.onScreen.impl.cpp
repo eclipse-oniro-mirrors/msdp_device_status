@@ -113,7 +113,8 @@ ohos::multimodalAwareness::onScreen::PageContent ConvertPageContent(
         paragraphsArray.emplace_back(paragraphTaihe);
     }
     taihe::array<::ohos::multimodalAwareness::onScreen::Paragraph> paragraphsTaihe{paragraphsArray};
-    pageContentTaihe.paragraphs = ::taihe::optional<::taihe::array<::ohos::multimodalAwareness::onScreen::Paragraph>>::make(paragraphsTaihe);   
+    pageContentTaihe.paragraphs = ::taihe::optional<::taihe::array<::ohos::multimodalAwareness::onScreen::Paragraph>>
+                                  ::make(paragraphsTaihe);
     return pageContentTaihe;
 }
 

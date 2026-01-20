@@ -211,7 +211,7 @@ void OffSteadyStandingDetect(::taihe::optional_view<
     DeviceStatus::DevicePostureData postureData;
     auto result = DeviceStatus::StationaryManager::
         GetInstance().GetDevicePostureDataSync(postureData);
-    if (result != RET_OK ) {
+    if (result != RET_OK) {
         FI_HILOGE("GetDevicePostureDataSync err, result:%{public}d", result);
         if (result == NO_SYSTEM_API || result == DEVICE_EXCEPTION) {
             ani_errorutils::ThrowDeviceStatusErr(result);
