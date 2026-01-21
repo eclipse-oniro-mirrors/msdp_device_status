@@ -203,6 +203,9 @@ bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
             taihe::get_env()->GlobalReference_Delete(onHandlerRef);
             return false;
         }
+        std::lock_guard<std::mutex> guard(mutex_); 
+        events_.insert(std::make_pair(eventType, listener)); 
+        FI_HILOGD("Insert finish");
         return true;
     }
     FI_HILOGD("found event: %{public}d", eventType);
@@ -303,7 +306,7 @@ ani_object AniMotionEvent::CreateAniUndefined(ani_env* env)
 ani_enum_item AniMotionEvent::CreateAniOperatingHandStatus(ani_env* env, int32_t status)
 {
     ani_enum enumType;
-    ani_enum_item enumItem;
+    ani_enum_item enumItem = nullptr;
     ani_status ret = env->FindEnum("@ohos.multimodalAwareness.motion.motion.OperatingHandStatus", &enumType);
     if (ret != ANI_OK) {
         FI_HILOGE("[ANI] WindowStatusType not found");
@@ -320,7 +323,7 @@ ani_enum_item AniMotionEvent::CreateAniOperatingHandStatus(ani_env* env, int32_t
 ani_enum_item AniMotionEvent::CreateAniHoldingHandStatus(ani_env* env, int32_t status)
 {
     ani_enum enumType;
-    ani_enum_item enumItem;
+    ani_enum_item enumItem = nullptr;
     ani_status ret = env->FindEnum("@ohos.multimodalAwareness.motion.motion.HoldingHandStatus", &enumType);
     if (ret != ANI_OK) {
         FI_HILOGE("[ANI] WindowStatusType not found");
