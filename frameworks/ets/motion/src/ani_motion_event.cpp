@@ -203,8 +203,8 @@ bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
             taihe::get_env()->GlobalReference_Delete(onHandlerRef);
             return false;
         }
-        std::lock_guard<std::mutex> guard(mutex_); 
-        events_.insert(std::make_pair(eventType, listener)); 
+        std::lock_guard<std::mutex> guard (mutex_);
+        events_.insert(std::make_pair(eventType, listener));
         FI_HILOGD("Insert finish");
         return true;
     }
