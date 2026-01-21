@@ -34,16 +34,35 @@ namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 using namespace Cooperate;
-
-void CooperateFreeTest::TearDown()
-{
-    g_context.reset();
-    g_contextOne.reset();
-    g_session.reset();
-    g_stateMachine.reset();
-    g_dragMgr.SetDragState(DragState::STOP); // Reset drag state
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
-}
+namespace {
+const std::string TEST_DEV_NODE { "/dev/input/TestDeviceNode" };
+constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
+constexpr int32_t HOTAREA_500 { 500 };
+constexpr int32_t HOTAREA_NEGATIVE_500 { -500 };
+constexpr int32_t HOTAREA_NEGATIVE_200 { -200 };
+constexpr int32_t HOTAREA_250 { 250 };
+constexpr int32_t HOTAREA_200 { 200 };
+constexpr int32_t HOTAREA_150 { 150 };
+constexpr int32_t HOTAREA_50 { 50 };
+std::shared_ptr<Context> g_context { nullptr };
+std::shared_ptr<Context> g_contextOne { nullptr };
+std::shared_ptr<HotplugObserver> g_observer { nullptr };
+ContextService *g_instance = nullptr;
+IContext *g_icontext { nullptr };
+std::shared_ptr<SocketSession> g_session { nullptr };
+DelegateTasks g_delegateTasks;
+DeviceManager g_devMgr;
+TimerManager g_timerMgr;
+DragManager g_dragMgr;
+SocketSessionManager g_socketSessionMgr;
+std::unique_ptr<IDDMAdapter> g_ddm { nullptr };
+std::unique_ptr<IInputAdapter> g_input { nullptr };
+std::unique_ptr<IPluginManager> g_pluginMgr { nullptr };
+std::unique_ptr<IDSoftbusAdapter> g_dsoftbus { nullptr };
+std::shared_ptr<Cooperate::StateMachine> g_stateMachine { nullptr };
+const std::string LOCAL_NETWORKID { "testLocalNetworkId" };
+const std::string REMOTE_NETWORKID { "testRemoteNetworkId" };
+} // namespace
 
 ContextService::ContextService()
 {
@@ -152,15 +171,9 @@ void CooperateFreeTest::SetUpTestCase() {}
 
 void CooperateFreeTest::SetUp()
 {
-    ddm_ = std::make_unique<DDMAdapter>();
-    input_ = std::make_unique<InputAdapter>();
-    dsoftbus_ = std::make_unique<DSoftbusAdapter>();
-    
-    // 更新全局变量（为了兼容现有代码）
-    g_ddm = ddm_.get();
-    g_input = input_.get();
-    g_dsoftbus = dsoftbus_.get();
-    
+    g_ddm = std::make_unique<DDMAdapter>();
+    g_input = std::make_unique<InputAdapter>();
+    g_dsoftbus = std::make_unique<DSoftbusAdapter>();
     g_contextOne = std::make_shared<Context>(g_icontext);
     auto env = ContextService::GetInstance();
     g_context = std::make_shared<Context>(env);
@@ -172,6 +185,14 @@ void CooperateFreeTest::SetUp()
     g_session = std::make_shared<SocketSession>("test", moduleType, tokenType, sockFds[0], uid, pid);
 }
 
+void CooperateFreeTest::TearDown()
+{
+    g_context = nullptr;
+    g_contextOne = nullptr;
+    g_session = nullptr;
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
 void CooperateFreeTest::OnThreeStates(const CooperateEvent &event)
 {
     auto env = ContextService::GetInstance();
@@ -179,23 +200,12 @@ void CooperateFreeTest::OnThreeStates(const CooperateEvent &event)
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
     g_stateMachine->current_ = CooperateState::COOPERATE_STATE_OUT;
     g_stateMachine->OnEvent(cooperateContext, event);
-    
-    // 使用条件变量或信号量等待状态变更（建议优化）
-    // std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
-    
     g_stateMachine->current_ = CooperateState::COOPERATE_STATE_IN;
     g_stateMachine->OnEvent(cooperateContext, event);
-    
-    // 使用条件变量或信号量等待状态变更（建议优化）
-    // std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
-    
     g_stateMachine->current_ = CooperateState::COOPERATE_STATE_FREE;
     g_stateMachine->OnEvent(cooperateContext, event);
-    
-    // 使用条件变量或信号量等待状态变更（建议优化）
-    // std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
 
