@@ -23,10 +23,10 @@ static
 """)
 
 @!sts_inject("""
-    function on(type: 'operationSubmitMetadata', bundleName: string, callback: (info: int) => void) {
+    function onOperationSubmitMetadata(bundleName: string, callback: (info: int) => void) {
         return onMetadataInner(bundleName, callback, callback);
       }
-    function off(type: 'operationSubmitMetadata', bundleName: string, callback?: (info: int) => void) {
+    function offOperationSubmitMetadata(bundleName: string, callback?: (info: int) => void) {
         return offMetadataInner(bundleName, callback);
       }
 """)
