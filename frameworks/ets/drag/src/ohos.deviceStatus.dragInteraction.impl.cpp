@@ -75,12 +75,19 @@ void EtsDragManager::registerListener(callback_view<void(DragState)> callback, u
         FI_HILOGD("callback already registered");
         return;
     }
-    cbVec.emplace_back(std::make_unique<CallbackObject>(callback, callbackRef));
-    FI_HILOGI("register callback success");
     if (!hasRegistered_) {
         FI_HILOGI("Remove drag listener to server");
+        int32_t ret = INTERACTION_MGR->AddDraglistener(shared_from_this(), true);
+        if (ret != RET_OK) {
+            if (ret == OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP) {
+                taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP, "Not system application.");
+            }
+            FI_HILOGE("AddDraglistener drag listener to server fail, ret:%{public}d.", ret);
+            return;
+        }
         hasRegistered_ = true;
-        INTERACTION_MGR->AddDraglistener(shared_from_this(), true);
+        cbVec.emplace_back(std::make_unique<CallbackObject>(callback, callbackRef));
+        FI_HILOGI("register callback success");
     }
 }
 
@@ -127,7 +134,10 @@ void EtsDragManager::unRegisterListener(optional_view<uintptr_t> opq)
     if (hasRegistered_ && jsCbMap_.empty()) {
         FI_HILOGI(" Remove drag listener to server");
         hasRegistered_ = false;
-        INTERACTION_MGR->RemoveDraglistener(shared_from_this(), true);
+        if (INTERACTION_MGR->RemoveDraglistener(shared_from_this(), true) ==
+            OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP) {
+            taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP, "Not system application.");
+        }
     }
 }
 
@@ -153,7 +163,11 @@ void EtsDragManager::OnDragMessage(DeviceStatus::DragState state)
 array<Summary> EtsDragManager::GetDataSummary()
 {
     std::map<std::string, int64_t> summarys;
-    if (INTERACTION_MGR->GetDragSummary(summarys, true) != RET_OK) {
+    int32_t ret = INTERACTION_MGR->GetDragSummary(summarys, true);
+    if (ret != RET_OK) {
+        if (ret == OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP) {
+            taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP, "Not system application.");
+        }
         FI_HILOGE("Failed to GetDragSummary");
         return array<Summary>(nullptr, 0);
     }
@@ -174,11 +188,7 @@ array<Summary> EtsDragManager::GetDataSummary()
 int32_t EtsDragManager::SetDragSwitchState(bool enable)
 {
     CALL_INFO_TRACE;
-    int32_t retCode = RET_OK;
-#ifndef OHOS_BUILD_PC_PRODUCT
-    retCode = INTERACTION_MGR->SetDragSwitchState(enable, true);
-#endif // OHOS_BUILD_PC_PRODUCT
-    return retCode;
+    return INTERACTION_MGR->SetDragSwitchState(enable, true);
 }
 
 int32_t EtsDragManager::SetAppDragSwitchState(bool enable, const std::string &pkgName)
