@@ -437,7 +437,7 @@ group("unittest") {
     ":SequenceableOnscreenAwarenessCapTest",
     ":SequenceableOnscreenAwarenessInfoTest",
     ":SequenceableOnscreenAwarenessOptionTest",
-	":SequenceableDragDataModifyTest",
+    ":SequenceableDragDataModifyTest",
     ":SequenceableUtilTest",
     ":MsdpKitReportTest"
   ]
