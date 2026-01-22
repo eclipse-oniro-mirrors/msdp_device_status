@@ -103,10 +103,22 @@ ohos_unittest("BoomerangServerTest") {
     "${device_status_root_path}/services/native/include",
     "${device_status_root_path}/services/communication/service/include",
     "${device_status_root_path}/services/communication/base/",
+    "${device_status_root_path}/intention/frameworks/client/include",
+    "${device_status_root_path}/intention/boomerang/client/include",
+    "${device_status_root_path}/intention/cooperate/client/include",
+    "${device_status_root_path}/intention/drag/client/include",
+    "${device_status_root_path}/intention/stationary/client/include",
+    "${device_status_root_path}/intention/stationary/data/include",
+    "${device_status_root_path}/intention/ipc/tunnel/incluede",
   ]
 
   sources = [
     "src/boomerang_server_test.cpp",
+    "${device_status_root_path}/frameworks/native/src/boomerang_callback_stub.cpp",
+    "${device_status_root_path}/frameworks/native/src/boomerang_manager.cpp",
+    "${device_status_root_path}/intention/frameworks/client/src/intention_manager.cpp",
+    "${device_status_root_path}/intention/boomerang/client/src/boomerang_client.cpp",
+    "${device_status_root_path}/intention/ipc/tunnel/src/intention_client.cpp",
   ]
 
   cflags = [
@@ -115,6 +127,7 @@ ohos_unittest("BoomerangServerTest") {
   ]
 
   deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
@@ -173,10 +186,22 @@ ohos_unittest("BoomerangManagerTest") {
     "${device_status_root_path}/services/native/include",
     "${device_status_root_path}/services/communication/service/include",
     "${device_status_root_path}/services/communication/base/",
+    "${device_status_root_path}/intention/frameworks/client/include",
+    "${device_status_root_path}/intention/boomerang/client/include",
+    "${device_status_root_path}/intention/cooperate/client/include",
+    "${device_status_root_path}/intention/drag/client/include",
+    "${device_status_root_path}/intention/stationary/client/include",
+    "${device_status_root_path}/intention/stationary/data/include",
+    "${device_status_root_path}/intention/ipc/tunnel/incluede",
   ]
 
   sources = [
     "src/boomerang_manager_test.cpp",
+    "${device_status_root_path}/frameworks/native/src/boomerang_callback_stub.cpp",
+    "${device_status_root_path}/frameworks/native/src/boomerang_manager.cpp",
+    "${device_status_root_path}/intention/frameworks/client/src/intention_manager.cpp",
+    "${device_status_root_path}/intention/boomerang/client/src/boomerang_client.cpp",
+    "${device_status_root_path}/intention/ipc/tunnel/src/intention_client.cpp",
   ]
 
   cflags = [
@@ -188,6 +213,7 @@ ohos_unittest("BoomerangManagerTest") {
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
   ]
   external_deps = [
     "ability_runtime:app_manager",

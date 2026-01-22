@@ -49,6 +49,7 @@ ohos_source_set("intention_stationary_server") {
     "${device_status_root_path}/services/native/src/devicestatus_manager.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_msdp_client_impl.cpp",
     "${device_status_root_path}/services/native/src/devicestatus_napi_manager.cpp",
+    "${device_status_frameworks_path}/native/src/devicestatus_callback_proxy.cpp",
     "src/stationary_server.cpp",
     "src/sensor_manager.cpp",
   ]

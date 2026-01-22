@@ -30,8 +30,6 @@
             "OHOS::Msdp::DeviceStatus::InteractionManager::RemoveDraglistener(std::__h::shared_ptr<OHOS::Msdp::DeviceStatus::IDragListener>, bool)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::AddSubscriptListener(std::__h::shared_ptr<OHOS::Msdp::DeviceStatus::ISubscriptListener>)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::RemoveSubscriptListener(std::__h::shared_ptr<OHOS::Msdp::DeviceStatus::ISubscriptListener>)";
-            "VTT for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackProxy";
-            "vtable for OHOS::Msdp::DeviceStatus::DeviceStatusCallbackProxy";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragTargetPid()";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetUdKey(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::RegisterCoordinationListener(std::__h::shared_ptr<OHOS::Msdp::ICoordinationListener>, bool)";

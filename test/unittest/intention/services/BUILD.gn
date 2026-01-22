@@ -48,7 +48,10 @@ ohos_unittest("IntentionServiceTest") {
   module_out_path = module_output_path
   include_dirs = [ "${device_status_interfaces_path}/innerkits/include" ]
 
-  sources = [ "src/intention_service_test.cpp" ]
+  sources = [
+    "src/intention_service_test.cpp",
+    "${device_status_frameworks_path}/native/src/devicestatus_callback_stub.cpp",
+    ]
 
   cflags = [ "-Dprivate=public" ]
 
@@ -130,7 +133,10 @@ ohos_unittest("IntentionServiceCoverTest") {
   module_out_path = module_output_path
   include_dirs = [ "${device_status_interfaces_path}/innerkits/include" ]
 
-  sources = [ "src/intention_service_cover_test.cpp" ]
+  sources = [
+    "src/intention_service_cover_test.cpp",
+    "${device_status_root_path}/frameworks/native/src/devicestatus_callback_stub.cpp"
+    ]
 
   cflags = [ "-Dprivate=public" ]
 
