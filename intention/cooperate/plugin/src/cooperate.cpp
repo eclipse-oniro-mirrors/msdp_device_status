@@ -44,6 +44,7 @@ Cooperate::Cooperate(IContext *env)
 
 Cooperate::~Cooperate()
 {
+    CALL_INFO_TRACE;
     StopWorker();
     context_.Disable();
 }
@@ -405,7 +406,7 @@ void Cooperate::Loop()
 
 void Cooperate::StartWorker()
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(lock_);
     if (!workerStarted_) {
         workerStarted_ = true;
@@ -415,7 +416,7 @@ void Cooperate::StartWorker()
 
 void Cooperate::StopWorker()
 {
-    CALL_DEBUG_ENTER;
+    CALL_INFO_TRACE;
     std::lock_guard guard(lock_);
     if (workerStarted_) {
         auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::QUIT));
