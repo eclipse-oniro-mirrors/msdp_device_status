@@ -39,7 +39,7 @@ ICooperate* PluginManager::LoadCooperate()
 {
     CALL_DEBUG_ENTER;
     if (!Utility::DoesFileExist(LIB_COOPERATE_PATH.data())) {
-        FI_HILOGE("'%{public}s' does't exist", LIB_COOPERATE_PATH.data());
+        FI_HILOGE("'%{public}s' doesn't exist", LIB_COOPERATE_PATH.data());
         return nullptr;
     }
     std::lock_guard guard(lock_);
