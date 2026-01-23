@@ -102,8 +102,8 @@ ohos::multimodalAwareness::onScreen::PageContent ConvertPageContent(
     for (auto paragraph: value.paragraphs) {
         auto hookId = ::taihe::optional<int64_t>::make(paragraph.hookId);
         auto chapterId = ::taihe::optional<int32_t>::make(paragraph.chapterId);
-        auto title = ::taihe::optional<::taihe::string>::make(::taihe::string(value.title));
-        auto text = ::taihe::optional<::taihe::string>::make(::taihe::string(value.content));
+        auto title = ::taihe::optional<::taihe::string>::make(::taihe::string(paragraph.title));
+        auto text = ::taihe::optional<::taihe::string>::make(::taihe::string(paragraph.content));
         auto paragraphTaihe = ohos::multimodalAwareness::onScreen::Paragraph {
             std::move(hookId),
             std::move(chapterId),
