@@ -350,7 +350,10 @@ ohos_unittest("DisplayChangeEventListenerTest") {
 
   defines = []
 
-  sources = [ "src/display_change_event_listener_test.cpp" ]
+  sources = [
+    "src/display_change_event_listener_test.cpp",
+    "src/test_context.cpp"
+  ]
 
   cflags = [
     "-Dprivate=public",
