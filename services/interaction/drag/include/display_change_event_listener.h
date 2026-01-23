@@ -32,15 +32,23 @@ public:
     void OnCreate(Rosen::DisplayId displayId) override;
     void OnDestroy(Rosen::DisplayId displayId) override;
     void OnChange(Rosen::DisplayId displayId) override;
+    void GetAllScreenAngles();
+    bool IsRotateDragScreen();
+    bool IsFoldPC() const { return isFoldPC_.load(); }
+    void SetFoldPC(bool value) { isFoldPC_.store(value); }
 
 private:
     void RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation);
     void ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation);
     Rosen::Rotation GetRotation(Rosen::DisplayId displayId);
     bool IsRotation(Rosen::DisplayId displayId, Rosen::Rotation CurrentRotation);
+    sptr<Rosen::DisplayInfo> GetDisplayInfoById(Rosen::DisplayId displayId);
+    sptr<Rosen::DisplayInfo> GetDisplayInfo(Rosen::DisplayId displayId);
+    void HandleScreenRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation);
 
 private:
     IContext *context_ { nullptr };
+    std::atomic_bool isFoldPC_ { false };
 };
 
 class DisplayAbilityStatusChange : public SystemAbilityStatusChangeStub {
@@ -53,7 +61,6 @@ public:
 private:
     sptr<DisplayChangeEventListener> displayChangeEventListener_ { nullptr };
     IContext *context_ { nullptr };
-    std::atomic_bool isFoldPC_ { false };
 };
 
 class AppStateObserverStatusChange : public SystemAbilityStatusChangeStub {
