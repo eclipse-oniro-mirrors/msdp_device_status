@@ -142,24 +142,24 @@ int32_t StreamServer::SetSockOpt(int32_t &serverFd, int32_t &toReturnClientFd, i
     }
     if (tokenType == TokenType::TOKEN_NATIVE) {
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_SNDBUF, &nativeBufferSize, sizeof(nativeBufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, parameter is SO_SNDBUF and nativeBufferSize, 
-            errno:%{public}d", errno);
+            FI_HILOGE("setsockopt toReturnClientFd failed, parameter is SO_SNDBUF and nativeBufferSize,
+                errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_RCVBUF, &nativeBufferSize, sizeof(nativeBufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, parameter is SO_RCVBUF and nativeBufferSize, 
-            errno:%{public}d", errno);
+            FI_HILOGE("setsockopt toReturnClientFd failed, parameter is SO_RCVBUF and nativeBufferSize,
+                errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
     } else {
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, parameter is SO_SNDBUF and bufferSize, 
-            errno:%{public}d", errno);
+            FI_HILOGE("setsockopt toReturnClientFd failed, parameter is SO_SNDBUF and bufferSize,
+                errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_RCVBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, parameter is SO_RCVBUF and bufferSize, 
-            errno:%{public}d", errno);
+            FI_HILOGE("setsockopt toReturnClientFd failed, parameter is SO_RCVBUF and bufferSize,
+                errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
     }
