@@ -584,10 +584,8 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     dragResult_ = static_cast<DragResult>(dropResult.result);
     appCallee_ = dragRadarPackageName.appCallee;
     // StateChangedNotify mast before ResetDragData
-    if (packageName != CROSS_DEVICE_DRAG) {
-        StateChangedNotify(DragState::STOP);
-        FI_HILOGI("State changed notify");
-    }
+    StateChangedNotify(DragState::STOP);
+    FI_HILOGI("State changed notify");
     DRAG_DATA_MGR.ResetDragData();
     dragPackageName_ = {};
 #else
