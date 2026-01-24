@@ -41,18 +41,6 @@ DisplayChangeEventListener::DisplayChangeEventListener(IContext *context)
 void DisplayChangeEventListener::OnCreate(Rosen::DisplayId displayId)
 {
     FI_HILOGI("display:%{public}" PRIu64"", displayId);
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    if (display == nullptr) {
-        FI_HILOGW("Get display info failed, display:%{public}" PRIu64"", displayId);
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-        if (display == nullptr) {
-            FI_HILOGE("Get display info failed, display is nullptr");
-            return;
-        }
-    }
-    Rosen::Rotation rotation = display->GetRotation();
-    CHKPV(context_);
-    context_->GetDragManager().SetRotation(displayId, rotation);
 }
 
 void DisplayChangeEventListener::OnDestroy(Rosen::DisplayId displayId)
@@ -66,13 +54,46 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
 {
     CHKPV(context_);
     Rosen::Rotation lastRotation = context_->GetDragManager().GetRotation(displayId);
+    if (IsRotateDragScreen()) {
+        HandleScreenRotation(displayId, lastRotation);
+        return;
+    }
+    sptr<Rosen::DisplayInfo> displayInfo = GetDisplayInfo(displayId);
+    if (displayInfo == nullptr) {
+        FI_HILOGE("displayInfo is nullptr");
+        return;
+    }
+    Rosen::Rotation currentRotation = displayInfo->GetRotation();
+    if (!IsRotation(displayId, currentRotation)) {
+        return;
+    }
+
+    bool isScreenRotation = false;
+    std::vector<std::string> foldRotatePolicys;
+    GetRotatePolicy(isScreenRotation, foldRotatePolicys);
+    FI_HILOGI("Current rotation:%{public}d, lastRotation:%{public}d",
+        static_cast<int32_t>(currentRotation), static_cast<int32_t>(lastRotation));
+    if (isScreenRotation) {
+        ScreenRotate(currentRotation, lastRotation);
+        return;
+    }
+    RotateDragWindow(displayId, currentRotation);
+}
+
+bool DisplayChangeEventListener::IsRotateDragScreen()
+{
     if (Rosen::DisplayManager::GetInstance().IsFoldable()) {
+#ifdef OHOS_ENABLE_PULLTHROW
+        if (IsFoldPC()) {
+            return true;
+        }
+#endif // OHOS_ENABLE_PULLTHROW
         bool isScreenRotation = false;
         std::vector<std::string> foldRotatePolicys;
         GetRotatePolicy(isScreenRotation, foldRotatePolicys);
         if (foldRotatePolicys.size() < MAX_INDEX_LENGTH) {
             FI_HILOGE("foldRotatePolicys is invalid");
-            return;
+            return false;
         }
         Rosen::FoldStatus foldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
         bool isExpand = (foldStatus == Rosen::FoldStatus::EXPAND || foldStatus == Rosen::FoldStatus::HALF_FOLD);
@@ -89,46 +110,88 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
         }
         if ((isExpand && (foldRotatePolicys[INDEX_EXPAND] == SCREEN_ROTATION)) ||
             (isFold && (foldRotatePolicys[INDEX_FOLDED] == SCREEN_ROTATION))) {
-            if (lastRotation == Rosen::Rotation::ROTATION_0) {
-                FI_HILOGD("Last rotation is zero");
-                return;
-            }
-            CHKPV(context_);
-            context_->GetDragManager().SetRotation(displayId, Rosen::Rotation::ROTATION_0);
-            int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, displayId] {
-                CHKPR(this->context_, RET_ERR);
-                return this->context_->GetDragManager().RotateDragWindow(displayId, Rosen::Rotation::ROTATION_0);
-            });
-            if (ret != RET_OK) {
-                FI_HILOGE("Post async task failed");
-            }
-            return;
+            return true;
         }
     }
+    return false;
+}
+
+void DisplayChangeEventListener::HandleScreenRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation)
+{
+    FI_HILOGI("Handleing Screen Rotation for displayId:%{public}" PRIu64", current rotation:%{public}d",
+        displayId, rotation);
+    if (rotation == Rosen::Rotation::ROTATION_0) {
+        FI_HILOGD("Last rotation is zero");
+        return;
+    }
+    if (context_ == nullptr) {
+        FI_HILOGE("context_ is nullptr");
+        return;
+    }
+    context_->GetDragManager().SetRotation(displayId, Rosen::Rotation::ROTATION_0);
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, displayId] {
+        if (this->context_ == nullptr) {
+            FI_HILOGE("this context_ is nullptr");
+            return RET_ERR;
+        }
+        return this->context_->GetDragManager().RotateDragWindow(displayId, Rosen::Rotation::ROTATION_0);
+    });
+    if (ret != RET_OK) {
+        FI_HILOGE("Post async task failed:%{public}d", ret);
+    }
+    return;
+}
+
+void DisplayChangeEventListener::GetAllScreenAngles()
+{
+    if (context_ == nullptr) {
+        FI_HILOGE("context_ is nullptr");
+        return;
+    }
+    std::vector<Rosen::DisplayId> displayIds = Rosen::DisplayManager::GetInstance().GetAllDisplayIds();
+    for (const auto& displayId : displayIds) {
+        sptr<Rosen::DisplayInfo> displayInfo = GetDisplayInfo(displayId);
+        if (displayInfo == nullptr) {
+            FI_HILOGE("displayInfo is nullptr");
+            continue;
+        }
+        Rosen::Rotation rotation = displayInfo->GetRotation();
+        FI_HILOGI("Get displayId:%{public}" PRIu64 ", rotation:%{public}d", displayId, rotation);
+        context_->GetDragManager().SetRotation(displayId, rotation);
+    }
+}
+
+sptr<Rosen::DisplayInfo> DisplayChangeEventListener::GetDisplayInfoById(Rosen::DisplayId displayId)
+{
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        FI_HILOGW("Get display info failed, display:%{public}" PRIu64"", displayId);
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-        if (display == nullptr) {
-            FI_HILOGE("Get display info failed, display is nullptr");
-            return;
+        FI_HILOGE("Get display failed, display is nullptr");
+        return nullptr;
+    }
+    return display->GetDisplayInfo();
+}
+
+sptr<Rosen::DisplayInfo> DisplayChangeEventListener::GetDisplayInfo(Rosen::DisplayId displayId)
+{
+    sptr<Rosen::DisplayInfo> displayInfo = nullptr;
+#ifndef OHOS_BUILD_PC_PRODUCT
+    displayInfo = GetDisplayInfoById(displayId);
+#else
+    displayInfo = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
+#endif // OHOS_BUILD_PC_PRODUCT
+    if (displayInfo == nullptr) {
+        FI_HILOGE("Get display info failed, display id:%{public}" PRIu64 "", displayId);
+#ifndef OHOS_BUILD_PC_PRODUCT
+        displayInfo = GetDisplayInfoById(0);
+#else
+        displayInfo = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
+#endif // OHOS_BUILD_PC_PRODUCT
+        if (displayInfo == nullptr) {
+            FI_HILOGE("Get display info failed, displayInfo is nullptr");
+            return nullptr;
         }
     }
-    Rosen::Rotation currentRotation = display->GetRotation();
-    if (!IsRotation(displayId, currentRotation)) {
-        return;
-    }
-
-    bool isScreenRotation = false;
-    std::vector<std::string> foldRotatePolicys;
-    GetRotatePolicy(isScreenRotation, foldRotatePolicys);
-    FI_HILOGI("Current rotation:%{public}d, lastRotation:%{public}d",
-        static_cast<int32_t>(currentRotation), static_cast<int32_t>(lastRotation));
-    if (isScreenRotation) {
-        ScreenRotate(currentRotation, lastRotation);
-        return;
-    }
-    RotateDragWindow(displayId, currentRotation);
+    return displayInfo;
 }
 
 void DisplayChangeEventListener::RotateDragWindow(Rosen::DisplayId displayId, Rosen::Rotation rotation)
@@ -186,8 +249,9 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     CHKPV(displayChangeEventListener_);
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(displayChangeEventListener_);
 #ifdef OHOS_ENABLE_PULLTHROW
-    isFoldPC_.store(SYS_PRODUCT_TYPE == PRODUCT_NAME_DEFINITION_PARSER.GetProductName("DEVICE_TYPE_FOLD_PC"));
-    if (isFoldPC_) {
+    displayChangeEventListener_->SetFoldPC(
+        SYS_PRODUCT_TYPE == PRODUCT_NAME_DEFINITION_PARSER.GetProductName("DEVICE_TYPE_FOLD_PC"));
+    if (displayChangeEventListener_->IsFoldPC()) {
         FI_HILOGI("device foldPC check ok");
         if (!context_->GetDragManager().RegisterPullThrowListener()) {
             FI_HILOGE("RegisterPullThrowListener fail");
@@ -195,6 +259,9 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
         }
     }
 #endif // OHOS_ENABLE_PULLTHROW
+    if (!displayChangeEventListener_->IsRotateDragScreen()) {
+        displayChangeEventListener_->GetAllScreenAngles();
+    }
 }
 
 void DisplayAbilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)

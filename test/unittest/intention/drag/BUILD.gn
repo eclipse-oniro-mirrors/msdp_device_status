@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -333,6 +333,66 @@ ohos_unittest("DragDataUtilTest") {
   ]
 }
 
+ohos_unittest("DisplayChangeEventListenerTest") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  branch_protector_ret = "pac_ret"
+  module_out_path = module_output_path
+  include_dirs = [ "include" ]
+
+  defines = []
+
+  sources = [
+    "src/display_change_event_listener_test.cpp",
+    "src/test_context.cpp"
+  ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  configs = []
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
+    "${device_status_root_path}/intention/scheduler/plugin_manager:intention_plugin_manager",
+    "${device_status_root_path}/intention/drag/client:intention_drag_client",
+    "${device_status_root_path}/intention/drag/server:intention_drag_server",
+    "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:app_manager",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "data_share:datashare_consumer",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "libxml2:libxml2",
+    "samgr:samgr_proxy",
+    "window_manager:libdm",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -341,5 +401,6 @@ group("unittest") {
     ":DragServerTest",
     ":DragClientTest",
     ":DragDataUtilTest",
+    ":DisplayChangeEventListenerTest"
   ]
 }
