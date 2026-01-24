@@ -124,20 +124,30 @@ void DisplayChangeEventListener::HandleScreenRotation(Rosen::DisplayId displayId
         FI_HILOGD("Last rotation is zero");
         return;
     }
-    CHKPV(context_);
+    if (context_ == nullptr) {
+        FI_HILOGE("context_ is nullptr");
+        return;
+    }
     context_->GetDragManager().SetRotation(displayId, Rosen::Rotation::ROTATION_0);
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, displayId] {
-        CHKPR(this->context_, RET_ERR);
+        if (this->context_ == nullptr) {
+            FI_HILOGE("this context_ is nullptr");
+            return RET_ERR;
+        }
         return this->context_->GetDragManager().RotateDragWindow(displayId, Rosen::Rotation::ROTATION_0);
     });
     if (ret != RET_OK) {
-        FI_HILOGE("Post async task failed");
+        FI_HILOGE("Post async task failed:%{public}d", ret);
     }
     return;
 }
 
 void DisplayChangeEventListener::GetAllScreenAngles()
 {
+    if (context_ == nullptr) {
+        FI_HILOGE("context_ is nullptr");
+        return;
+    }
     std::vector<Rosen::DisplayId> displayIds = Rosen::DisplayManager::GetInstance().GetAllDisplayIds();
     for (const auto& displayId : displayIds) {
         sptr<Rosen::DisplayInfo> displayInfo = GetDisplayInfo(displayId);
@@ -147,7 +157,6 @@ void DisplayChangeEventListener::GetAllScreenAngles()
         }
         Rosen::Rotation rotation = displayInfo->GetRotation();
         FI_HILOGI("Get displayId:%{public}" PRIu64 ", rotation:%{public}d", displayId, rotation);
-        CHKPV(context_);
         context_->GetDragManager().SetRotation(displayId, rotation);
     }
 }
