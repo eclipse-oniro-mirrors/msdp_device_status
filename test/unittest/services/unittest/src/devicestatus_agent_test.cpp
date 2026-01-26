@@ -80,7 +80,7 @@ HWTEST_F(DeviceStatusAgentTest, DeviceStatusAgentTest001, TestSize.Level1)
     int32_t ret = g_agent1->SubscribeAgentEvent(type, ActivityEvent::ENTER_EXIT,
         ReportLatencyNs::LONG, agentEvent);
     EXPECT_TRUE(ret == RET_OK);
-    GTEST_LOG_(INFO) << "Open and close the lid, and event will report";
+    GTEST_LOG_(INFO) << "Open and close the lid, event will report";
     sleep(2);
     g_agent1->UnsubscribeAgentEvent(type, ActivityEvent::ENTER_EXIT);
 }
