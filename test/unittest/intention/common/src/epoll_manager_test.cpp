@@ -47,7 +47,7 @@ MonitorEvent::MonitorEvent()
 {
     inotifyFd_ = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
     if (inotifyFd_ < 0) {
-        FI_HILOGE("timerfd_create failed");
+        FI_HILOGE("timerfd_create failed, timerFd_:%{public}d", inotifyFd_);
     }
 }
 
@@ -74,9 +74,9 @@ void MonitorEvent::Dispatch(const struct epoll_event &ev)
         int32_t buf[EXPIRE_TIME] = { 0 };
         int32_t ret = read(inotifyFd_, buf, sizeof(buf));
         if (ret < 0) {
-            FI_HILOGE("epoll callback read error");
+            FI_HILOGE("epoll callback read error, ret:%{public}d", ret);
         } else {
-            FI_HILOGI("Epoll input, buf[0]: %{public}d, buf[1]: %{public}d", buf[0], buf[1]);
+            FI_HILOGI("Epoll input, buf[0]: %{public}d, buf[1]: %{public}d, ret:%{public}d", buf[0], buf[1], ret);
         }
     } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
         FI_HILOGE("Epoll hangup, errno:%{public}s", strerror(errno));
