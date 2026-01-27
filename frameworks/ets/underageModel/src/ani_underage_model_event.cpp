@@ -28,6 +28,7 @@ std::mutex g_mutex;
 ani_env* AniUnderageModelEvent::env_ {nullptr};
 ani_vm* AniUnderageModelEvent::vm_ {nullptr};
 constexpr int32_t MAX_ERROR_CODE = 1000;
+constexpr int32_t UNSUPP_FRATURE_ERR = 0x3A1000D;
 constexpr int32_t DEVICE_UNSUPPORT_ERR = 0x3A10028;
 const std::string USER_STATUS_CLIENT_SO_PATH = "libuser_status_client.z.so";
 const std::string_view REGISTER_LISTENER_FUNC_NAME = { "RegisterListener" };
@@ -139,7 +140,7 @@ bool AniUnderageModelEvent::Subscribe(uint32_t type)
     int32_t ret = g_subscribeFunc(type);
     if (ret == RET_OK) {
         return true;
-    } else if (ret == DEVICE_UNSUPPORT_ERR) {
+    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
         FI_HILOGE("failed to subscribe: %{public}d", ret);
         taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Device not support");
         return false;
@@ -173,7 +174,7 @@ bool AniUnderageModelEvent::UnSubscribeCallback(int32_t type)
     if (ret == RET_OK) {
         callbacks_.erase(iter);
         return true;
-    } else if (ret == DEVICE_UNSUPPORT_ERR) {
+    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
         FI_HILOGE("failed to unsubscribe");
         taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Device not support");
         return false;
