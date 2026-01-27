@@ -40,6 +40,7 @@ constexpr uint32_t UNSUBSCRIBE_ONE_PARA = 1;
 constexpr uint32_t UNSUBSCRIBE_TWO_PARA = 2;
 constexpr int32_t OTHERS = 0;
 constexpr int32_t CHILD = 1;
+constexpr int32_t UNSUPP_FRATURE_ERR = 0x3A1000D;
 constexpr int32_t DEVICE_UNSUPPORT_ERR = 0x3A10028;
 std::mutex g_mutex; // mutex: Subscribe/Unsubscribe/OnListener
 const std::array<napi_valuetype, 2> EXPECTED_SUB_ARG_TYPES = { napi_string, napi_function };
@@ -165,7 +166,7 @@ bool UnderageModelNapi::UnsubscribeCallback(napi_env env, uint32_t type)
         if (ret == RET_OK) {
             g_underageModelObj->callbacks_.erase(iter);
             return true;
-        } else if (ret == DEVICE_UNSUPPORT_ERR) {
+        } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
             FI_HILOGE("failed to unsubscribe");
             ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
             return false;
@@ -190,12 +191,12 @@ bool UnderageModelNapi::Subscribe(napi_env env, uint32_t type)
     int32_t ret = g_underageModelObj->g_subscribeFunc(type);
     if (ret == RET_OK) {
         return true;
-    } else if (ret == DEVICE_UNSUPPORT_ERR) {
+    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
         FI_HILOGE("failed to subscribe");
         ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
         return false;
     }
-    FI_HILOGE("failed to subscribe");
+    FI_HILOGE("failed to subscribe, ret: %{public}d", ret);
     ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Subscribe failed");
     return false;
 }
