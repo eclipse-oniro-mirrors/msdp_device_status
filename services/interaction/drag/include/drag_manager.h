@@ -281,6 +281,7 @@ private:
     void ResetMouseDragMonitorInfo();
     void ResetMouseDragMonitorTimerId(const DragData &dragData);
     std::string GetPackageName(int32_t pid);
+    std::string GetDragOutPkgName();
     DragRadarPackageName GetDragRadarPackageName(int32_t pid, const std::string &packageName,
         const std::string &appCaller);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X

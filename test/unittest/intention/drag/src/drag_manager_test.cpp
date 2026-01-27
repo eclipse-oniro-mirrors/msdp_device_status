@@ -2668,6 +2668,113 @@ HWTEST_F(DragManagerTest, DragManagerTest119, TestSize.Level0)
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
+
+/**
+ * @tc.name: DragManagerTest120
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest120, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDropResult dropResult { DragResult::DRAG_EXCEPTION, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    g_dragMgr.dragState_ = DragState::START;
+    int32_t ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isLongPressDrag_ = true;
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isLongPressDrag_ = true;
+    ret = g_dragMgr.StopDrag(dropResult, std::string(), 0);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isLongPressDrag_ = false;
+    ret = g_dragMgr.StopDrag(dropResult, std::string(), 0);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.isLongPressDrag_ = false;
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest121
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest121, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.isLongPressDrag_ = false;
+    std::string packageName = g_dragMgr.GetPackageName(-1);
+    ASSERT_EQ(packageName, "Cross-device drag");
+    g_dragMgr.isLongPressDrag_ = true;
+    packageName = g_dragMgr.GetPackageName(-1);
+    ASSERT_EQ(packageName, "Long-press drag");
+    packageName = g_dragMgr.GetPackageName(0);
+    ASSERT_EQ(packageName, std::string());
+    g_dragMgr.context_ = nullptr;
+    packageName = g_dragMgr.GetPackageName(0);
+    ASSERT_EQ(packageName, std::string());
+}
+
+/**
+ * @tc.name: DragManagerTest122
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest122, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.isLongPressDrag_ = false;
+    DragRadarPackageName dragRadarPackageName = g_dragMgr.GetDragRadarPackageName(-1, std::string(), std::string());
+    ASSERT_EQ(dragRadarPackageName.appCaller, std::string());
+    g_dragMgr.isLongPressDrag_ = true;
+    dragRadarPackageName = g_dragMgr.GetDragRadarPackageName(-1, std::string(), std::string());
+    ASSERT_EQ(dragRadarPackageName.appCaller, std::string());
+    g_dragMgr.isLongPressDrag_ = false;
+    dragRadarPackageName = g_dragMgr.GetDragRadarPackageName(0, std::string(), std::string());
+    ASSERT_EQ(dragRadarPackageName.appCaller, std::string());
+    g_dragMgr.isLongPressDrag_ = true;
+    dragRadarPackageName = g_dragMgr.GetDragRadarPackageName(0, std::string(), std::string());
+    ASSERT_EQ(dragRadarPackageName.appCaller, std::string());
+}
+
+/**
+ * @tc.name: DragManagerTest123
+ * @tc.desc: Drag Manager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest123, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragState_ = DragState::STOP;
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), true);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.StartDrag(dragData.value(), 0, std::string(), true);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.StartDrag(dragData.value(), 0, std::string(), false);
+    ASSERT_EQ(ret, RET_OK);
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
