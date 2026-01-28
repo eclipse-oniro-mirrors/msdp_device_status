@@ -57,9 +57,9 @@ void OffUserAgeGroupDetectedInner(::taihe::optional_view<uintptr_t> opq)
         }
     }
     if (!AniUnderageModelEvent::GetInstance()->UnSubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
- 	    FI_HILOGE("UnSubscribeCallback failed");
- 	    return;
- 	}
+        FI_HILOGE("UnSubscribeCallback failed");
+        return;
+    }
 }
 }  // namespace
 

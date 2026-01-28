@@ -150,7 +150,6 @@ bool AniMotionEvent::UnSubscribeCallback(int32_t type)
         }
     }
 
-
     return false;
 }
 
