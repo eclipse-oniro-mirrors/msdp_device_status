@@ -30,7 +30,6 @@ void OnUserAgeGroupDetectedInner(::taihe::callback_view<void(UserClassification_
     FI_HILOGI("OnUserAgeGroupDetectedInner enter");
     if (!AniUnderageModelEvent::GetInstance()->SubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
         FI_HILOGE("SubscribeCallback failed");
-        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "AddCallback failed");
         return;
     }
     if (!AniUnderageModelEvent::GetInstance()->AddCallback(UNDERAGE_MODEL_TYPE_KID, opq)) {
@@ -46,7 +45,7 @@ void OffUserAgeGroupDetectedInner(::taihe::optional_view<uintptr_t> opq)
     if (!opq.has_value()) {
         if (!AniUnderageModelEvent::GetInstance()->RemoveAllCallback(UNDERAGE_MODEL_TYPE_KID)) {
             FI_HILOGE("RemoveAllCallback failed");
-            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "RemoveAllCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveAllCallback failed");
             return;
         }
     } else {
@@ -57,6 +56,10 @@ void OffUserAgeGroupDetectedInner(::taihe::optional_view<uintptr_t> opq)
             return;
         }
     }
+    if (!AniUnderageModelEvent::GetInstance()->UnSubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
+ 	    FI_HILOGE("UnSubscribeCallback failed");
+ 	    return;
+ 	}
 }
 }  // namespace
 

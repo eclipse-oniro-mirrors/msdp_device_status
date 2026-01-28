@@ -102,11 +102,11 @@ bool AniMotionEvent::SubscribeCallback(int32_t type)
     
     if (ret == PERMISSION_DENIED) {
         FI_HILOGE("failed to subscribe");
-        taihe::set_business_error(PERMISSION_DENIED, "Permission denined");
+        taihe::set_business_error(PERMISSION_DENIED, "Permission check failed.");
         return false;
     } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
         FI_HILOGE("failed to subscribe");
-        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+        taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
         return false;
     } else {
         FI_HILOGE("failed to subscribe");
@@ -120,36 +120,36 @@ bool AniMotionEvent::SubscribeCallback(int32_t type)
 bool AniMotionEvent::UnSubscribeCallback(int32_t type)
 {
     if (CheckEvents(type)) {
-        return false;
-    }
-    auto iter = callbacks_.find(type);
-    if (iter == callbacks_.end()) {
-        FI_HILOGE("faild to find callback");
-        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
-        return false;
-    }
-    
-    int32_t ret = g_motionClient.UnsubscribeCallback(type, iter->second);
-    if (ret == RET_OK) {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            callbacks_.erase(iter);
+        auto iter = callbacks_.find(type);
+        if (iter == callbacks_.end()) {
+            FI_HILOGE("faild to find callback");
+            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+            return false;
         }
-        return true;
+        
+        int32_t ret = g_motionClient.UnsubscribeCallback(type, iter->second);
+        if (ret == RET_OK) {
+            {
+                std::lock_guard<std::mutex> lock(mutex_);
+                callbacks_.erase(iter);
+            }
+            return true;
+        }
+        if (ret == PERMISSION_DENIED) {
+            FI_HILOGE("failed to unsubscribe");
+            taihe::set_business_error(PERMISSION_DENIED, "Permission check failed.");
+            return false;
+        } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
+            FI_HILOGE("failed to unsubscribe");
+            taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
+            return false;
+        } else {
+            FI_HILOGE("failed to unsubscribe");
+            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+            return false;
+        }
     }
-    if (ret == PERMISSION_DENIED) {
-        FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(PERMISSION_DENIED, "Permission denined");
-        return false;
-    } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
-        FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
-        return false;
-    } else {
-        FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
-        return false;
-    }
+
 
     return false;
 }

@@ -96,16 +96,15 @@ void OffOperatingHandChangedInner(::taihe::optional_view<uintptr_t> opq)
             return;
         }
     } else {
-        if (!AniMotionEvent::GetInstance()->UnSubscribeCallback(MOTION_TYPE_OPERATING_HAND)) {
-            FI_HILOGE("UnSubscribeCallback failed");
-            taihe::set_business_error(SERVICE_EXCEPTION, "UnSubscribeCallback failed");
-            return;
-        }
         if (!AniMotionEvent::GetInstance()->RemoveCallback(MOTION_TYPE_OPERATING_HAND, opq.value())) {
             FI_HILOGE("RemoveCallback failed");
             taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
             return;
         }
+    }
+    if (!AniMotionEvent::GetInstance()->UnSubscribeCallback(MOTION_TYPE_OPERATING_HAND)) {
+        FI_HILOGE("UnSubscribeCallback failed");
+        return;
     }
 #else
     FI_HILOGI("OffOperatingHandChangedInner not Enter MOTION_ENABLE");
@@ -158,16 +157,15 @@ void OffHoldingHandChangedInner(::taihe::optional_view<uintptr_t> opq)
             return;
         }
     } else {
-        if (!AniMotionEvent::GetInstance()->UnSubscribeCallback(MOTION_TYPE_HOLDING_HAND)) {
-            FI_HILOGE("UnSubscribeCallback failed");
-            taihe::set_business_error(SERVICE_EXCEPTION, "UnSubscribeCallback failed");
-            return;
-        }
         if (!AniMotionEvent::GetInstance()->RemoveCallback(MOTION_TYPE_HOLDING_HAND, opq.value())) {
             FI_HILOGE("RemoveCallback failed");
             taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
             return;
         }
+    }
+    if (!AniMotionEvent::GetInstance()->UnSubscribeCallback(MOTION_TYPE_HOLDING_HAND)) {
+        FI_HILOGE("UnSubscribeCallback failed");
+        return;
     }
 #else
     FI_HILOGI("OffHoldingHandChangedInner not Enter MOTION_ENABLE");
