@@ -51,6 +51,7 @@ void OffUserAgeGroupDetectedInner(::taihe::optional_view<uintptr_t> opq)
     if (g_underageModelObj == nullptr) {
         FI_HILOGE("g_underageModelObj is null");
         taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "g_underageModelObj is null");
+        return;
     }
     if (!opq.has_value()) {
         if (!g_underageModelObj->RemoveAllCallback(UNDERAGE_MODEL_TYPE_KID)) {
