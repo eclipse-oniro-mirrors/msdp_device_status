@@ -382,6 +382,10 @@ void Context::OnTransitionOut()
     CHKPV(eventHandler_);
     FI_HILOGI("Notify observers of transition out");
     CooperateInfo cooperateInfo = { NormalizedCursorPosition(), cooperateOptions_ };
+    if (observers_.empty()) {
+        FI_HILOGW("No observers are registered");
+        return;
+    }
     for (const auto &observer : observers_) {
         eventHandler_->PostTask(
             [observer, remoteNetworkId = Peer(), cooperateInfo] {
