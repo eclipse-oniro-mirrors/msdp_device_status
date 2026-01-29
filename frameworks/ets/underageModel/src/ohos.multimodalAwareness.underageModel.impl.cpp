@@ -24,16 +24,22 @@
 #define LOG_TAG "ANIUnderageModel"
 namespace {
 using namespace OHOS::Msdp;
+std::shared_ptr<AniUnderageModelEvent> g_underageModelObj = nullptr;
 
 void OnUserAgeGroupDetectedInner(::taihe::callback_view<void(UserClassification_t const& info)> f, uintptr_t opq)
 {
     FI_HILOGI("OnUserAgeGroupDetectedInner enter");
-    if (!AniUnderageModelEvent::GetInstance()->SubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
-        FI_HILOGE("SubscribeCallback failed");
-        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "AddCallback failed");
+    g_underageModelObj = AniUnderageModelEvent::GetInstance();
+    if (g_underageModelObj == nullptr) {
+        FI_HILOGE("g_underageModelObj is null");
+        taihe::set_business_error(SUBSCRIBE_EXCEPTION, "g_underageModelObj is null");
         return;
     }
-    if (!AniUnderageModelEvent::GetInstance()->AddCallback(UNDERAGE_MODEL_TYPE_KID, opq)) {
+    if (!g_underageModelObj->SubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
+        FI_HILOGE("SubscribeCallback failed");
+        return;
+    }
+    if (!g_underageModelObj->AddCallback(UNDERAGE_MODEL_TYPE_KID, opq)) {
         FI_HILOGE("AddCallback failed");
         taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
         return;
@@ -43,19 +49,28 @@ void OnUserAgeGroupDetectedInner(::taihe::callback_view<void(UserClassification_
 void OffUserAgeGroupDetectedInner(::taihe::optional_view<uintptr_t> opq)
 {
     FI_HILOGI("OffUserAgeGroupDetectedInner enter");
+    if (g_underageModelObj == nullptr) {
+        FI_HILOGE("g_underageModelObj is null");
+        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "g_underageModelObj is null");
+        return;
+    }
     if (!opq.has_value()) {
-        if (!AniUnderageModelEvent::GetInstance()->RemoveAllCallback(UNDERAGE_MODEL_TYPE_KID)) {
+        if (!g_underageModelObj->RemoveAllCallback(UNDERAGE_MODEL_TYPE_KID)) {
             FI_HILOGE("RemoveAllCallback failed");
-            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "RemoveAllCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveAllCallback failed");
             return;
         }
     } else {
-        if (!AniUnderageModelEvent::GetInstance()->RemoveCallback(UNDERAGE_MODEL_TYPE_KID,
+        if (!g_underageModelObj->RemoveCallback(UNDERAGE_MODEL_TYPE_KID,
             opq.value())) {
             FI_HILOGE("RemoveCallback failed");
             taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
             return;
         }
+    }
+    if (!g_underageModelObj->UnSubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
+        FI_HILOGE("UnSubscribeCallback failed");
+        return;
     }
 }
 }  // namespace

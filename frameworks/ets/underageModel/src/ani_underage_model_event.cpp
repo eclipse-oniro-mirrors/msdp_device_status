@@ -142,7 +142,7 @@ bool AniUnderageModelEvent::Subscribe(uint32_t type)
         return true;
     } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
         FI_HILOGE("failed to subscribe: %{public}d", ret);
-        taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Device not support");
+        taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
         return false;
     }
     FI_HILOGE("failed to subscribe: %{public}d", ret);
@@ -153,33 +153,32 @@ bool AniUnderageModelEvent::Subscribe(uint32_t type)
 bool AniUnderageModelEvent::UnSubscribeCallback(int32_t type)
 {
     if (CheckEvents(type)) {
-        return false;
-    }
-    auto iter = callbacks_.find(type);
-    if (iter == callbacks_.end()) {
-        FI_HILOGE("faild to find callback");
-        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
-        return false;
-    }
-    if (g_unsubscribeFunc == nullptr) {
-        g_unsubscribeFunc = reinterpret_cast<UnsubscribeFunc>(
-            dlsym(g_userStatusHandle, UNSUBSCRIBE_FUNC_NAME.data()));
-        if (g_unsubscribeFunc == nullptr) {
-            FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
-            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Find symbol failed");
+        auto iter = callbacks_.find(type);
+        if (iter == callbacks_.end()) {
+            FI_HILOGE("faild to find callback");
+            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
             return false;
         }
+        if (g_unsubscribeFunc == nullptr) {
+            g_unsubscribeFunc = reinterpret_cast<UnsubscribeFunc>(
+                dlsym(g_userStatusHandle, UNSUBSCRIBE_FUNC_NAME.data()));
+            if (g_unsubscribeFunc == nullptr) {
+                FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
+                taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Find symbol failed");
+                return false;
+            }
+        }
+        auto ret = g_unsubscribeFunc(type);
+        if (ret == RET_OK) {
+            callbacks_.erase(iter);
+            return true;
+        } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
+            FI_HILOGE("failed to unsubscribe");
+            taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
+            return false;
+        }
+        FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
     }
-    auto ret = g_unsubscribeFunc(type);
-    if (ret == RET_OK) {
-        callbacks_.erase(iter);
-        return true;
-    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
-        FI_HILOGE("failed to unsubscribe");
-        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Device not support");
-        return false;
-    }
-    FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
     taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
     return false;
 }
