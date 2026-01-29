@@ -33,6 +33,7 @@ void OnUserAgeGroupDetectedInner(::taihe::callback_view<void(UserClassification_
     if (g_underageModelObj == nullptr) {
         FI_HILOGE("g_underageModelObj is null");
         taihe::set_business_error(SUBSCRIBE_EXCEPTION, "g_underageModelObj is null");
+        return;
     }
     if (!g_underageModelObj->SubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
         FI_HILOGE("SubscribeCallback failed");
