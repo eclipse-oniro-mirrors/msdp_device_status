@@ -76,6 +76,7 @@ const std::string NEED_FETCH {"NEED_FETCH"};
 const std::string LANGUAGE_KEY {"persist.global.language"};
 const std::string DEFAULT_LANGUAGE_KEY {"const.global.language"};
 const std::string CROSS_DEVICE_DRAG {"Cross-device drag"};
+const std::string LONG_PRESS_DRAG {"Long-press drag"};
 static std::map<std::string, std::string> g_rtlLanguageMap {
     { "ar", "arabic" },
     { "fa", "persian" },
@@ -314,17 +315,20 @@ void DragManager::ResetMouseDragMonitorTimerId(const DragData &dragData)
 
 std::string DragManager::GetPackageName(int32_t pid)
 {
-    CHKPS(context_);
     std::string packageName = std::string();
     if (pid == -1) {
-        packageName = CROSS_DEVICE_DRAG;
-    } else {
-        context_->GetSocketSessionManager().AddSessionDeletedCallback(pid,
-            [this](SocketSessionPtr session) { this->OnSessionLost(session); });
-        dragOutSession_ = context_->GetSocketSessionManager().FindSessionByPid(pid);
-        if (dragOutSession_ != nullptr) {
-            packageName = dragOutSession_->GetProgramName();
-        }
+        packageName = isLongPressDrag_ ? LONG_PRESS_DRAG : CROSS_DEVICE_DRAG;
+        return packageName;
+    }
+    if (context_ == nullptr) {
+        FI_HILOGE("context is nullptr");
+        return packageName;
+    }
+    context_->GetSocketSessionManager().AddSessionDeletedCallback(pid,
+        [this](SocketSessionPtr session) { this->OnSessionLost(session); });
+    dragOutSession_ = context_->GetSocketSessionManager().FindSessionByPid(pid);
+    if (dragOutSession_ != nullptr) {
+        packageName = dragOutSession_->GetProgramName();
     }
     return packageName;
 }
@@ -336,7 +340,7 @@ bool DragManager::IsCrossDragging()
 
 void DragManager::SetCrossDragging(int32_t pid)
 {
-    isCrossDragging_ .store(pid == -1);
+    isCrossDragging_.store((pid == -1) && !isLongPressDrag_);
 }
  
 void DragManager::ProcessExceptionDragStyle(DragCursorStyle &style)
@@ -355,7 +359,7 @@ DragRadarPackageName DragManager::GetDragRadarPackageName(int32_t pid, const std
     FI_HILOGI("enter");
     DragRadarPackageName dragRadarPackageName;
     dragRadarPackageName.packageName = packageName;
-    if (pid == -1) {
+    if ((pid == -1) && !isLongPressDrag_) {
         dragRadarPackageName.appCaller = appCaller;
     } else {
         dragRadarPackageName.appCaller = packageName;
@@ -369,6 +373,7 @@ int32_t DragManager::StartDrag(
     const std::string &appCaller)
 {
     FI_HILOGI("enter");
+    isLongPressDrag_ = isLongPressDrag;
     ResetMouseDragMonitorTimerId(dragData);
     SetCrossDragging(pid);
     if (dragState_ == DragState::START || dragState_ == DragState::MOTION_DRAGGING) {
@@ -395,7 +400,6 @@ int32_t DragManager::StartDrag(
             dragRadarPackageName);
         return RET_ERR;
     }
-    isLongPressDrag_ = isLongPressDrag;
     if (OnStartDrag(dragRadarPackageName, pid) != RET_OK) {
 #ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteStartDrag(dragState_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
@@ -417,7 +421,7 @@ int32_t DragManager::StartDrag(
     StateChangedNotify(DragState::START);
     ReportStartDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_SUCCESS, DragRadarErrCode::DRAG_SUCCESS, peerNetId,
         dragRadarPackageName);
-    if (pid == -1) {
+    if ((pid == -1) && !isLongPressDrag_) {
         ReportStartDragUEInfo(packageName);
     }
     FI_HILOGI("leave");
@@ -504,6 +508,19 @@ int32_t DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
+std::string DragManager::GetDragOutPkgName()
+{
+    FI_HILOGI("enter");
+    if (dragOutSession_ != nullptr) {
+        std::string dragOutPkgName = dragOutSession_->GetProgramName();
+        FI_HILOGI("leave");
+        return dragOutPkgName;
+    }
+    const std::string dragOutPkgName = isLongPressDrag_ ? LONG_PRESS_DRAG : CROSS_DEVICE_DRAG;
+    FI_HILOGI("leave");
+    return dragOutPkgName;
+}
+
 int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::string &packageName, int32_t pid,
     bool isStopCooperate, const DragRadarPackageName &inPackageName)
 {
@@ -513,7 +530,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     DragRadarPackageName dragRadarPackageName;
     dragRadarPackageName.packageName = packageName;
-    if (pid == -1) {
+    if ((pid == -1) && !isLongPressDrag_) {
         dragRadarPackageName.appCallee = inPackageName.appCallee;
         dragRadarPackageName.peerNetId = inPackageName.peerNetId;
     } else {
@@ -523,8 +540,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     dragRadarPackageName.dragNum = dragData.dragNum;
     ReportStopDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, pid,
         dragRadarPackageName);
-    std::string dragOutPkgName =
-        (dragOutSession_ == nullptr) ? CROSS_DEVICE_DRAG : dragOutSession_->GetProgramName();
+    std::string dragOutPkgName = GetDragOutPkgName();
     FI_HILOGI("mainWindow:%{public}d, dragResult:%{public}d, drop packageName:%{public}s,"
         "drag out packageName:%{public}s", dropResult.mainWindow, dropResult.result, packageName.c_str(),
         dragOutPkgName.c_str());
@@ -602,7 +618,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     DragSecurityManager::GetInstance().ResetSecurityPid();
     ReportStopDragRadarInfo(BizState::STATE_END, StageRes::RES_SUCCESS, DragRadarErrCode::DRAG_SUCCESS, pid,
         dragRadarPackageName);
-    if (dragOutSession_ == nullptr) {
+    if ((dragOutSession_ == nullptr) && !isLongPressDrag_) {
         ReportStopDragUEInfo(packageName);
     }
     dragOutSession_ = nullptr;
