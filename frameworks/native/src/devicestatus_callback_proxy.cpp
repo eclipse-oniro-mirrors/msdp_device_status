@@ -20,7 +20,6 @@
 #include "iremote_object.h"
 #include "message_option.h"
 
-#include "devicestatus_client.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
 

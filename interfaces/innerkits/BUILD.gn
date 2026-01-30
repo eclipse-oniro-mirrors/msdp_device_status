@@ -98,7 +98,6 @@ ohos_shared_library("devicestatus_client") {
     "${device_status_frameworks_path}/native/src/boomerang_callback_stub.cpp",
     "${device_status_frameworks_path}/native/src/boomerang_manager.cpp",
     "${device_status_frameworks_path}/native/src/client.cpp",
-    "${device_status_frameworks_path}/native/src/devicestatus_callback_proxy.cpp",
     "${device_status_frameworks_path}/native/src/devicestatus_callback_stub.cpp",
     "${device_status_frameworks_path}/native/src/devicestatus_client.cpp",
     "${device_status_frameworks_path}/native/src/fd_listener.cpp",
