@@ -78,7 +78,7 @@ private:
     IMsdp* iMock_ { nullptr };
     std::mutex mutex_;
     bool notifyManagerFlag_ { false };
-    std::mutex callMutex_;
+    mutable std::mutex callMutex_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

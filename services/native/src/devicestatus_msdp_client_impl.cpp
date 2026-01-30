@@ -338,6 +338,7 @@ Data DeviceStatusMsdpClientImpl::SaveObserverData(const Data &data)
 
 std::map<ClientType, ClientValue> DeviceStatusMsdpClientImpl::GetObserverData() const
 {
+    std::unique_lock callLock(callMutex_);
     return deviceStatusDatas_;
 }
 

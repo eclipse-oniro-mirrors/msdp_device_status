@@ -194,8 +194,8 @@ Data DeviceStatusManager::GetLatestDeviceStatusData(Type type)
         FI_HILOGE("msdpImpl_ is nullptr");
         return data;
     }
-    msdpData_ = msdpImpl_->GetObserverData();
-    for (auto iter = msdpData_.begin(); iter != msdpData_.end(); ++iter) {
+    auto msdpData = msdpImpl_->GetObserverData();
+    for (auto iter = msdpData.begin(); iter != msdpData.end(); ++iter) {
         if (data.type == iter->first) {
             data.value = iter->second;
             return data;
