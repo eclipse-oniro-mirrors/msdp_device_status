@@ -43,6 +43,7 @@ ohos_shared_library("intention_service") {
   include_dirs = [
     "include",
     "${device_status_root_path}/interfaces/innerkits/interaction/include",
+    "${device_status_root_path}/utils/common/include"
   ]
 
   if (device_status_enable_universal_drag) {

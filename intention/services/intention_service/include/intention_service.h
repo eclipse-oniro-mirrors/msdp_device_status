@@ -21,6 +21,7 @@
 #include "boomerang_dumper.h"
 #include "boomerang_server.h"
 #include "cooperate_server.h"
+#include "coordination_message.h"
 #include "drag_server.h"
 #include "intention_dumper.h"
 #include "intention_stub.h"
@@ -35,6 +36,22 @@ namespace Msdp {
 namespace DeviceStatus {
 class IntentionService final : public IntentionStub {
 public:
+    struct CooperateNoticeLite {
+        int32_t pid { -1 };
+        MessageId msgId { MessageId::INVALID };
+        int32_t userData { -1 };
+        std::string networkId;
+        CoordinationMessage msg { CoordinationMessage::PREPARE };
+        int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
+    };
+
+    struct CooperateStateNoticeLite {
+        int32_t pid { -1 };
+        MessageId msgId { MessageId::INVALID };
+        int32_t userData { -1 };
+        bool state{ false };
+        int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
+    };
     IntentionService(IContext *context);
     ~IntentionService() = default;
     DISALLOW_COPY_AND_MOVE(IntentionService);
@@ -149,6 +166,14 @@ private:
     CallingContext GetCallingContext();
     void PrintCallingContext(const CallingContext &context);
     int32_t PostSyncTask(TaskProtoType task);
+    bool CheckCooperatePermission(CallingContext &context);
+    bool IsSystemServiceCalling(CallingContext &context);
+    bool IsSystemCalling(CallingContext &context);
+    int32_t CheckPermission(CallingContext &context);
+#ifndef OHOS_BUILD_ENABLE_COORDINATION
+    void NotifyCooperateMessage(const CooperateNoticeLite &notice);
+    void NotifyCooperateState(const CooperateStateNoticeLite &notice);
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 private:
     IContext *context_ { nullptr };
     SocketServer socketServer_;

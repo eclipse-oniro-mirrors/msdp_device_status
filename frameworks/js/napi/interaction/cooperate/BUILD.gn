@@ -14,6 +14,15 @@
 import("//base/msdp/device_status/device_status.gni")
 
 ohos_shared_library("inputdevicecooperate") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  
   sources = [
     "src/js_cooperate_context.cpp",
     "src/js_cooperate_manager.cpp",

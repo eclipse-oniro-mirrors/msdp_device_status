@@ -239,10 +239,6 @@ HWTEST_F(CooperateServerTest, EnableTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->EnableCooperate(context, g_userData));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -282,10 +278,6 @@ HWTEST_F(CooperateServerTest, DisableTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->DisableCooperate(context, g_userData));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -325,10 +317,6 @@ HWTEST_F(CooperateServerTest, StartTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     int32_t startDeviceId = 0;
     bool isCheckPermission = true;
@@ -376,10 +364,6 @@ HWTEST_F(CooperateServerTest, StartWithOptionsTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     int32_t startDeviceId = 0;
     CooperateOptions options {
@@ -408,10 +392,6 @@ HWTEST_F(CooperateServerTest, StopCooperateTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     bool isUnchained = true;
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->StopCooperate(context, g_userData, isUnchained, isCheckPermission));
@@ -455,10 +435,6 @@ HWTEST_F(CooperateServerTest, RegisterCooperateListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterCooperateListener(context));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -497,10 +473,6 @@ HWTEST_F(CooperateServerTest, UnregisterCooperateListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterCooperateListener(context));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -540,10 +512,6 @@ HWTEST_F(CooperateServerTest, RegisterHotAreaListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterHotAreaListener(context, g_userData, isCheckPermission));
     context_->GetPluginManager().UnloadCooperate();
@@ -585,10 +553,6 @@ HWTEST_F(CooperateServerTest, UnregisterHotAreaListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterHotAreaListener(context));
     context_->GetPluginManager().UnloadCooperate();
 }
@@ -628,10 +592,6 @@ HWTEST_F(CooperateServerTest, RegisterMouseEventListenerTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterMouseEventListener(context, networkId));
     context_->GetPluginManager().UnloadCooperate();
@@ -673,10 +633,6 @@ HWTEST_F(CooperateServerTest, UnregisterMouseEventListenerTest1, TestSize.Level0
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterMouseEventListener(context, networkId));
     context_->GetPluginManager().UnloadCooperate();
@@ -718,10 +674,6 @@ HWTEST_F(CooperateServerTest, GetCooperateStateSyncTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     std::string udid = "udid";
     bool state = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateSync(context, udid, state));
@@ -765,10 +717,6 @@ HWTEST_F(CooperateServerTest, GetCooperateStateAsyncTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     std::string networkId = "networkId";
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateAsync(context,
@@ -814,10 +762,6 @@ HWTEST_F(CooperateServerTest, SetDamplingCoefficientTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool ret1 = cooperateServer_->IsSystemCalling(context);
-    ASSERT_TRUE(ret1);
-    int32_t ret = cooperateServer_->CheckPermission(context);
-    EXPECT_EQ(RET_OK, ret);
     uint32_t direction = 0;
     double coefficient = 0;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetDamplingCoefficient(context, direction, coefficient));

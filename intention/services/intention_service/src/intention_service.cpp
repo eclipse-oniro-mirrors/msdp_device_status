@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "accesstoken_kit.h"
 #include "intention_service.h"
 
 #include <ipc_skeleton.h>
 #include <string_ex.h>
+#include <tokenid_kit.h>
 #include <xcollie/xcollie.h>
 #include <xcollie/xcollie_define.h>
 
@@ -93,172 +95,258 @@ ErrCode IntentionService::Socket(const std::string& programName, int32_t moduleT
 
 ErrCode IntentionService::EnableCooperate(int32_t userData)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, userData] {
         return cooperate_.EnableCooperate(context, userData);
     });
 #else
-    return ERROR_UNSUPPORT;
+    CooperateNoticeLite notice {
+        .pid = context.pid,
+        .msgId = MessageId::COORDINATION_MESSAGE,
+        .userData = userData,
+        .msg = CoordinationMessage::PREPARE
+    };
+    NotifyCooperateMessage(notice);
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::DisableCooperate(int32_t userData)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, userData] {
         return cooperate_.DisableCooperate(context, userData);
     });
 #else
-    return ERROR_UNSUPPORT;
+    CooperateNoticeLite notice {
+        .pid = context.pid,
+        .msgId = MessageId::COORDINATION_MESSAGE,
+        .userData = userData,
+        .msg = CoordinationMessage::UNPREPARE
+    };
+    NotifyCooperateMessage(notice);
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::StartCooperate(const std::string& remoteNetworkId, int32_t userData, int32_t startDeviceId,
     bool checkPermission)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, &remoteNetworkId, userData, startDeviceId, checkPermission] {
         return cooperate_.StartCooperate(context, remoteNetworkId, userData, startDeviceId, checkPermission);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::StartCooperateWithOptions(const std::string& remoteNetworkId, int32_t userData,
     int32_t startDeviceId, bool checkPermission, const SequenceableCooperateOptions& options)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, &remoteNetworkId, userData, startDeviceId, checkPermission, &options] {
         return cooperate_.StartCooperateWithOptions(context, remoteNetworkId, userData,
             startDeviceId, options.options_);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::StopCooperate(int32_t userData, bool isUnchained, bool checkPermission)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, userData, isUnchained, checkPermission] {
         return cooperate_.StopCooperate(context, userData, isUnchained, checkPermission);
     });
 #else
-    return ERROR_UNSUPPORT;
+    CooperateNoticeLite notice {
+        .pid = context.pid,
+        .msgId = MessageId::COORDINATION_MESSAGE,
+        .userData = userData,
+        .networkId = "",
+        .msg = CoordinationMessage::DEACTIVATE_SUCCESS,
+        .errCode = 0
+    };
+    NotifyCooperateMessage(notice);
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::RegisterCooperateListener()
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context] {
         return cooperate_.RegisterCooperateListener(context);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::UnregisterCooperateListener()
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context] {
         return cooperate_.UnregisterCooperateListener(context);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::RegisterHotAreaListener(int32_t userData, bool checkPermission)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, userData, checkPermission] {
         return cooperate_.RegisterHotAreaListener(context, userData, checkPermission);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::UnregisterHotAreaListener()
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context] {
         return cooperate_.UnregisterHotAreaListener(context);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::RegisterMouseEventListener(const std::string& networkId)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, &networkId] {
         return cooperate_.RegisterMouseEventListener(context, networkId);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::UnregisterMouseEventListener(const std::string& networkId)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, &networkId] {
         return cooperate_.UnregisterMouseEventListener(context, networkId);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::GetCooperateStateSync(const std::string& udid, bool& state)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, &udid, &state] {
         return cooperate_.GetCooperateStateSync(context, udid, state);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::GetCooperateStateAsync(const std::string& networkId, int32_t userData, bool isCheckPermission)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, &networkId, userData, isCheckPermission] {
         return cooperate_.GetCooperateStateAsync(context, networkId, userData, isCheckPermission);
     });
 #else
-    return ERROR_UNSUPPORT;
+    CooperateStateNoticeLite notice {
+        .pid = context.pid,
+        .msgId = MessageId::COORDINATION_GET_STATE,
+        .userData = userData,
+        .state = false,
+    };
+    NotifyCooperateState(notice);
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 ErrCode IntentionService::SetDamplingCoefficient(uint32_t direction, double coefficient)
 {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     CallingContext context = GetCallingContext();
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return PostSyncTask([this, &context, direction, coefficient] {
         return cooperate_.SetDamplingCoefficient(context, direction, coefficient);
     });
 #else
-    return ERROR_UNSUPPORT;
+    return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -764,6 +852,86 @@ ErrCode IntentionService::Trigger(const OnScreen::SequenceableOnscreenAwarenessC
         return RET_OK;
     });
 }
+
+bool IntentionService::CheckCooperatePermission(CallingContext &context)
+{
+    CALL_DEBUG_ENTER;
+    Security::AccessToken::AccessTokenID callerToken = context.tokenId;
+    int32_t result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken,
+        COOPERATE_PERMISSION);
+    return result == Security::AccessToken::PERMISSION_GRANTED;
+}
+
+bool IntentionService::IsSystemServiceCalling(CallingContext &context)
+{
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
+        flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        FI_HILOGD("system service calling, flag:%{public}u", flag);
+        return true;
+    }
+    return false;
+}
+
+bool IntentionService::IsSystemCalling(CallingContext &context)
+{
+    if (IsSystemServiceCalling(context)) {
+        return true;
+    }
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
+}
+
+int32_t IntentionService::CheckPermission(CallingContext &context)
+{
+    if (!IsSystemCalling(context)) {
+        FI_HILOGE("The caller is not system hap");
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    if (!CheckCooperatePermission(context)) {
+        FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
+        return COMMON_PERMISSION_CHECK_ERROR;
+    }
+    return RET_OK;
+}
+
+#ifndef OHOS_BUILD_ENABLE_COORDINATION
+void IntentionService::NotifyCooperateMessage(const CooperateNoticeLite &notice)
+{
+    CHKPV(context_);
+    auto session = context_->GetSocketSessionManager().FindSessionByPid(notice.pid);
+    if (session == nullptr) {
+        FI_HILOGD("session is null");
+        return;
+    }
+    NetPacket pkt(notice.msgId);
+    pkt << notice.userData << notice.networkId << static_cast<int32_t>(notice.msg) << notice.errCode;
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Packet write data failed");
+        return;
+    }
+    if (!session->SendMsg(pkt)) {
+        FI_HILOGE("Sending failed");
+    }
+}
+
+void IntentionService::NotifyCooperateState(const CooperateStateNoticeLite &notice)
+{
+    CALL_INFO_TRACE;
+    CHKPV(context_);
+    auto session = context_->GetSocketSessionManager().FindSessionByPid(notice.pid);
+    CHKPV(session);
+    NetPacket pkt(notice.msgId);
+    pkt << notice.userData << notice.state << static_cast<int32_t>(notice.errCode);
+    if (pkt.ChkRWError()) {
+        FI_HILOGE("Packet write data failed");
+        return;
+    }
+    if (!session->SendMsg(pkt)) {
+        FI_HILOGE("Sending failed");
+        return;
+    }
+}
+#endif // OHOS_BUILD_ENABLE_COORDINATION
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

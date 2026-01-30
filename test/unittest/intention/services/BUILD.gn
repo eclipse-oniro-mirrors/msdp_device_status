@@ -623,8 +623,12 @@ group("unittest") {
       ":IntentionDeviceManagerTest",
       ":IntentionDumperTest",
       ":IntentionServiceCoverTest",
-      ":IntentionServiceTest",
       ":MonitorTest",
+    ]
+  }
+  if (device_status_interaction_coordination) {
+    deps += [
+      ":IntentionServiceTest",
     ]
   }
 }

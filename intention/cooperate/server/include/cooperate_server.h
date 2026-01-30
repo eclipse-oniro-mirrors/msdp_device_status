@@ -48,11 +48,6 @@ public:
         bool isCheckPermission);
     int32_t SetDamplingCoefficient(CallingContext &context, uint32_t direction, double coefficient);
 private:
-    bool CheckCooperatePermission(CallingContext &context);
-    bool IsSystemServiceCalling(CallingContext &context);
-    bool IsSystemCalling(CallingContext &context);
-    int32_t CheckPermission(CallingContext &context);
-private:
     IContext *context_ { nullptr };
     int32_t unloadTimerId_ { -1 };
 };
