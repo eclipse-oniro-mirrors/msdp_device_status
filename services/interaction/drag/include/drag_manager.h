@@ -276,12 +276,12 @@ private:
     void GetDragBehavior(const DragDropResult &dropResult, DragBehavior &dragBehavior);
     void DoLongPressDragZoomOutAnimation(int32_t displayX, int32_t displayY);
     int32_t DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t targetDisplayId);
-    std::string GetDragOutPkgName();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t NotifyAddSelectedPixelMapResult(bool result);
     void ResetMouseDragMonitorInfo();
     void ResetMouseDragMonitorTimerId(const DragData &dragData);
     std::string GetPackageName(int32_t pid);
+    std::string GetDragOutPkgName();
     DragRadarPackageName GetDragRadarPackageName(int32_t pid, const std::string &packageName,
         const std::string &appCaller);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
