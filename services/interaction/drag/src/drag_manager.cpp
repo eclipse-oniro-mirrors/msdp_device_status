@@ -427,6 +427,19 @@ int32_t DragManager::StartDrag(
     FI_HILOGI("leave");
     return RET_OK;
 }
+
+std::string DragManager::GetDragOutPkgName()
+{
+    FI_HILOGI("enter");
+    if (dragOutSession_ != nullptr) {
+        std::string dragOutPkgName = dragOutSession_->GetProgramName();
+        FI_HILOGI("leave");
+        return dragOutPkgName;
+    }
+    const std::string dragOutPkgName = isLongPressDrag_ ? LONG_PRESS_DRAG : CROSS_DEVICE_DRAG;
+    FI_HILOGI("leave");
+    return dragOutPkgName;
+}
 #else
 int32_t DragManager::StartDrag(const DragData &dragData)
 {
@@ -507,19 +520,6 @@ int32_t DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     return RET_OK;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-
-std::string DragManager::GetDragOutPkgName()
-{
-    FI_HILOGI("enter");
-    if (dragOutSession_ != nullptr) {
-        std::string dragOutPkgName = dragOutSession_->GetProgramName();
-        FI_HILOGI("leave");
-        return dragOutPkgName;
-    }
-    const std::string dragOutPkgName = isLongPressDrag_ ? LONG_PRESS_DRAG : CROSS_DEVICE_DRAG;
-    FI_HILOGI("leave");
-    return dragOutPkgName;
-}
 
 int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::string &packageName, int32_t pid,
     bool isStopCooperate, const DragRadarPackageName &inPackageName)
