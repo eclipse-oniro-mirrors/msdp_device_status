@@ -50,6 +50,11 @@ ohos_shared_library("onscreen_napi") {
     "napi:ace_napi",
   ]
 
+  defines = []
+  if(device_status_phone_standard_lite){
+    defines += [ "DEVICE_STATUS_PHONE_STANDARD_LITE" ]
+  }
+
   relative_install_dir = "module/multimodalawareness"
   subsystem_name = "msdp"
   part_name = "${device_status_part_name}"

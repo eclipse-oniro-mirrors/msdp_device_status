@@ -19,9 +19,11 @@
 #include <mutex>
 #include <map>
 
-#include "i_on_screen_algorithm.h"
 #include "i_plugin.h"
 #include "on_screen_data.h"
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
+#include "i_on_screen_algorithm.h"
+#endif
 
 namespace OHOS {
 namespace Msdp {
@@ -51,9 +53,9 @@ public:
     int32_t IsParallelFeatureEnabled(const CallingContext& context, int32_t windowId, int32_t& outStatus);
     int32_t ListenLiveBroadcast();
     int32_t GetLiveStatus();
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     int32_t OnScreenShotIntent(const CallingContext &context, const AwarenessOptions& option,
         OnscreenAwarenessInfo& info);
-
     int32_t RegisterAwarenessCallback(const CallingContext &context, const AwarenessCap& cap,
         const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option);
     int32_t UnregisterAwarenessCallback(const CallingContext &context, const AwarenessCap& cap,
@@ -64,6 +66,7 @@ public:
     static void FillUiTreeData(std::map<std::string, ValueObj> &entityInfo);
     static OnscreenAwarenessInfo FillDumpData(const AwarenessCap& cap, const AwarenessOptions& option);
     void NotifyClient();
+#endif
 
 private:
     int32_t LoadAlgoLib();
@@ -71,16 +74,18 @@ private:
     int32_t ConnectAlgoLib();
     bool CheckPermission(const CallingContext &context, const std::string &permission);
     bool IsSystemCalling(const CallingContext &context);
-    bool IsWhitelistAppCalling(const CallingContext &context);
-    bool GetAppIdentifier(const std::string& bundleName, int32_t userId, std::string& appIdentifier);
     bool IsSystemServiceCalling(const CallingContext &context);
     bool CheckDeviceType();
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
+    bool IsWhitelistAppCalling(const CallingContext &context);
+    bool GetAppIdentifier(const std::string& bundleName, int32_t userId, std::string& appIdentifier);
     bool SaveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap);
     std::vector<std::string> GetUnusedCap(const AwarenessCap& cap);
     int32_t RemoveCallbackInfo(const sptr<IRemoteOnScreenCallback>& callback, const AwarenessCap& cap);
 
     std::map<sptr<IRemoteOnScreenCallback>, std::set<std::string>> callbackInfo_;
     std::map<uint32_t, std::string> bundleNames_;
+#endif
     OnScreenAlgorithmHandle handle_;
     std::mutex mtx_;
 };

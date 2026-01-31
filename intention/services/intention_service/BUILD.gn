@@ -89,6 +89,10 @@ ohos_shared_library("intention_service") {
     "window_manager:libdm",
   ]
 
+  if(device_status_phone_standard_lite){
+    defines += [ "DEVICE_STATUS_PHONE_STANDARD_LITE" ]
+  }
+
   if (device_status_motion_enable) {
     defines += [ "MOTION_ENABLE" ]
     external_deps += [ "motion:motion_interface_native" ]

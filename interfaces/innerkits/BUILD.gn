@@ -89,6 +89,8 @@ ohos_shared_library("devicestatus_client") {
     debug = false
   }
 
+  defines = []
+
   branch_protector_ret = "pac_ret"
 
   version_script = "libdevicestatus_client_map"
@@ -161,6 +163,10 @@ ohos_shared_library("devicestatus_client") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
   ]
+
+  if(device_status_phone_standard_lite){
+    defines += [ "DEVICE_STATUS_PHONE_STANDARD_LITE" ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "${device_status_subsystem_name}"

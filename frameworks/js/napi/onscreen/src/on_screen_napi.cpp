@@ -19,11 +19,13 @@
 
 #include "devicestatus_define.h"
 #include "fi_log.h"
-#include "image_pixel_map_napi.h"
 #include "napi_constants.h"
 #include "on_screen_manager.h"
 #include "on_screen_napi_error.h"
 #include "util_napi.h"
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
+#include "image_pixel_map_napi.h"
+#endif
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenNapi"
@@ -35,11 +37,12 @@ namespace OnScreen {
 namespace {
 constexpr uint8_t ARG_0 = 0;
 constexpr uint8_t ARG_1 = 1;
-constexpr uint8_t ARG_2 = 2;
-constexpr uint8_t ARG_3 = 3;
 constexpr int32_t DEFAULT_WINDOW_ID = -1;
 OnScreenNapi *g_onScreenObj = nullptr;
 std::mutex g_mtx;
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
+constexpr uint8_t ARG_2 = 2;
+constexpr uint8_t ARG_3 = 3;
 constexpr size_t MAX_ARG_STR_LEN = 64;
 std::unordered_map<std::string, napi_ref>  g_screenCallbacks;
 sptr<OnScreenAwarenessCallback> g_callback = nullptr;
@@ -58,6 +61,7 @@ const std::set<std::string> CAP_LIST = {
     "scenarioTodo",
     "screenshotIntent",
 };
+#endif
 } // namespace
 
 OnScreenNapi::OnScreenNapi(napi_env env, napi_value thisVar)
@@ -73,10 +77,11 @@ napi_value OnScreenNapi::Init(napi_env env, napi_value exports)
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_FUNCTION("sendControlEvent", SendControlEventNapi),
         DECLARE_NAPI_STATIC_FUNCTION("getPageContent", GetPageContentNapi),
-
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
         DECLARE_NAPI_STATIC_FUNCTION("subscribe", RegisterAwarenessCallback),
         DECLARE_NAPI_STATIC_FUNCTION("unsubscribe", UnregisterAwarenessCallback),
         DECLARE_NAPI_STATIC_FUNCTION("trigger", Trigger),
+#endif
     };
     MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     // 声明枚举值Scenario
@@ -110,6 +115,7 @@ napi_value OnScreenNapi::Init(napi_env env, napi_value exports)
     return exports;
 }
 
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 bool OnScreenNapi::IsValidCap(const std::vector<std::string>& capList)
 {
     bool ret = true;
@@ -759,6 +765,7 @@ bool OnScreenNapi::SetBoolProperty(napi_env env, napi_value targetObj, bool valu
     }
     return SetPropertyName(env, targetObj, propName, prop);
 }
+#endif
 
 napi_value OnScreenNapi::GetPageContentNapi(napi_env env, napi_callback_info info)
 {

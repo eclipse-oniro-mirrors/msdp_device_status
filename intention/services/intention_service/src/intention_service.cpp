@@ -29,7 +29,11 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-
+namespace {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+constexpr int32_t RET_NO_SUPPORT = 801;
+#endif
+};
 IntentionService::IntentionService(IContext *context)
     : context_(context), socketServer_(context),
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
@@ -734,25 +738,36 @@ ErrCode IntentionService::RegisterAwarenessCallback(const OnScreen::Sequenceable
     const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback,
     const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, cap, onScreenCallback, awarenessOption] {
         return onScreen_.RegisterAwarenessCallback(context, cap.cap_, onScreenCallback, awarenessOption.option_);
     });
+#endif
 }
 
 ErrCode IntentionService::UnregisterAwarenessCallback(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
     const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, cap, onScreenCallback] {
         return onScreen_.UnregisterAwarenessCallback(context, cap.cap_, onScreenCallback);
     });
+#endif
 }
 
 ErrCode IntentionService::Trigger(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
     const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption,
     OnScreen::SequenceableOnscreenAwarenessInfo& info)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
     CallingContext context = GetCallingContext();
     return PostSyncTask([this, &context, cap, awarenessOption, &info] {
         OnScreen::OnscreenAwarenessInfo awarenessInfo;
@@ -763,6 +778,7 @@ ErrCode IntentionService::Trigger(const OnScreen::SequenceableOnscreenAwarenessC
         info.info_ = awarenessInfo;
         return RET_OK;
     });
+#endif
 }
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -15,8 +15,10 @@
 #ifndef ONSCREEN_NAPI_DATA_H
 #define ONSCREEN_NAPI_DATA_H
 
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 #include <map>
 #include <vector>
+#endif
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
@@ -44,6 +46,7 @@ struct SendControlEventAsyncContext {
     int32_t result;
 };
 
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 struct TriggerAsyncContext {
     napi_env env = nullptr;
     napi_async_work work = nullptr;
@@ -53,6 +56,7 @@ struct TriggerAsyncContext {
     OnscreenAwarenessInfo info;
     int32_t result;
 };
+#endif
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -33,7 +33,9 @@ public:
     DISALLOW_COPY_AND_MOVE(OnScreenCallbackProxy);
     ~OnScreenCallbackProxy() = default;
     virtual void OnScreenChange(const std::string& changeInfo) override;
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     virtual void OnScreenAwareness(const OnscreenAwarenessInfo& info) override;
+#endif
 
 private:
     static inline BrokerDelegator<OnScreenCallbackProxy> delegator_;

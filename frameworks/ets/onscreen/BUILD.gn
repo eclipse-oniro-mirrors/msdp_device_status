@@ -96,8 +96,11 @@ generate_static_abc("onScreen_test") {
 }
 
 group("onScreen_ani") {
-  deps = [
-    ":onScreen_etc",
-    ":onScreen_so",
-  ]
+  deps = []
+  if(!device_status_phone_standard_lite){
+    deps = [
+      ":onScreen_etc",
+      ":onScreen_so",
+    ]
+  }
 }

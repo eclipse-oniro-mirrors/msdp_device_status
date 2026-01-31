@@ -33,6 +33,7 @@ declare_args() {
   device_status_pullthrow_enable = false
   device_status_boomerang_onestep = false
   device_status_boomerang_support_hdr = false
+  device_status_phone_standard_lite = false
 
   # origin variables sets
   if (!is_arkui_x) {
