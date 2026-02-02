@@ -67,6 +67,10 @@ void BoomerangServer::DumpCurrentDeviceStatus(int32_t fd)
 int32_t BoomerangServer::SubscribeCallback(const CallingContext &context, int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& subCallback)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    FI_HILOGE("the device type is not support");
+    return COMMON_CAPABILITY_NOT_SUPPORT;
+#endif
     if (!IsDeviceSupport()) {
         FI_HILOGE("the device type is not support");
         return COMMON_CAPABILITY_NOT_SUPPORT;
@@ -92,6 +96,10 @@ int32_t BoomerangServer::SubscribeCallback(const CallingContext &context, int32_
 int32_t BoomerangServer::UnsubscribeCallback(const CallingContext &context, int32_t type, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& unsubCallback)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    FI_HILOGE("the device type is not support");
+    return COMMON_CAPABILITY_NOT_SUPPORT;
+#endif
     if (!IsDeviceSupport()) {
         FI_HILOGE("the device type is not support");
         return COMMON_CAPABILITY_NOT_SUPPORT;
@@ -117,6 +125,10 @@ int32_t BoomerangServer::UnsubscribeCallback(const CallingContext &context, int3
 int32_t BoomerangServer::NotifyMetadataBindingEvent(const CallingContext &context, const std::string& bundleName,
     const sptr<IRemoteBoomerangCallback>& notifyCallback)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    FI_HILOGE("the device type is not support");
+    return COMMON_CAPABILITY_NOT_SUPPORT;
+#endif
     if (!IsDeviceSupport()) {
         FI_HILOGE("the device type is not support");
         return COMMON_CAPABILITY_NOT_SUPPORT;
@@ -144,6 +156,10 @@ int32_t BoomerangServer::BoomerangEncodeImage(const CallingContext &context,
     const std::shared_ptr<Media::PixelMap>& pixelMap, const std::string& metaData,
     const sptr<IRemoteBoomerangCallback>& encodeCallback)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    FI_HILOGE("the device type is not support");
+    return COMMON_CAPABILITY_NOT_SUPPORT;
+#endif
     if (!IsDeviceSupport()) {
         FI_HILOGE("the device type is not support");
         return COMMON_CAPABILITY_NOT_SUPPORT;
@@ -170,6 +186,10 @@ int32_t BoomerangServer::BoomerangEncodeImage(const CallingContext &context,
 int32_t BoomerangServer::BoomerangDecodeImage(const CallingContext &context,
     const std::shared_ptr<Media::PixelMap>& pixelMap, const sptr<IRemoteBoomerangCallback>& decodeCallback)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    FI_HILOGE("the device type is not support");
+    return COMMON_CAPABILITY_NOT_SUPPORT;
+#endif
     if (!IsDeviceSupport()) {
         FI_HILOGE("the device type is not support");
         return COMMON_CAPABILITY_NOT_SUPPORT;
@@ -195,6 +215,10 @@ int32_t BoomerangServer::BoomerangDecodeImage(const CallingContext &context,
 
 int32_t BoomerangServer::SubmitMetadata(const CallingContext &context, const std::string& metaData)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    FI_HILOGE("the device type is not support");
+    return COMMON_CAPABILITY_NOT_SUPPORT;
+#endif
     if (!IsDeviceSupport()) {
         FI_HILOGE("the device type is not support");
         return COMMON_CAPABILITY_NOT_SUPPORT;
