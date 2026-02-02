@@ -76,7 +76,7 @@ ohos_source_set("intention_boomerang_server") {
     ]
   }
 
-  if(device_status_phone_standard_lite){
+  if (device_status_phone_standard_lite) {
     defines += [ "DEVICE_STATUS_PHONE_STANDARD_LITE" ]
   }
 
