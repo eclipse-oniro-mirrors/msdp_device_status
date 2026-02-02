@@ -1,0 +1,85 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../../device_status.gni")
+
+config("intention_boomerang_server_public_config") {
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/interfaces/innerkits/include",
+    "${device_status_root_path}/libs/interface",
+    "${device_status_root_path}/services/native/include",
+  ]
+}
+
+ohos_source_set("intention_boomerang_server") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/interfaces/innerkits/include",
+    "${device_status_root_path}/libs/interface",
+  ]
+
+  sources = [ "src/boomerang_server.cpp" ]
+
+  public_configs = [ ":intention_boomerang_server_public_config" ]
+
+  defines = device_status_default_defines
+
+  deps = [
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/utils/common:devicestatus_util",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+  ]
+
+  external_deps = [
+    "access_token:libtokenid_sdk",
+    "access_token:libaccesstoken_sdk",
+    "eventhandler:libeventhandler",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "samgr:samgr_proxy",
+    "window_manager:libdm",
+  ]
+
+  if (device_status_boomerang_onestep) {
+    defines += [ "BOOMERANG_ONESTEP" ]
+    external_deps += [
+      "window_manager:libwm",
+    ]
+  }
+
+  if(device_status_phone_standard_lite){
+    defines += [ "DEVICE_STATUS_PHONE_STANDARD_LITE" ]
+  }
+
+  subsystem_name = "${device_status_subsystem_name}"
+  part_name = "${device_status_part_name}"
+}
