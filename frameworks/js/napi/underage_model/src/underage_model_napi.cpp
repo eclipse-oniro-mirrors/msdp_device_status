@@ -204,6 +204,10 @@ bool UnderageModelNapi::Subscribe(napi_env env, uint32_t type)
 napi_value UnderageModelNapi::SubscribeUnderageModel(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
+    if (g_underageModelObj == nullptr) {
+        ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "g_underageModelObj is nullptr");
+        return false;
+    }
     size_t argc = 2;
     napi_value args[2] = { nullptr };
     napi_value jsThis = nullptr;

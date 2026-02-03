@@ -519,6 +519,10 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(sptr<JsUtilCooperate::
         return;
     }
     for (const auto &item : msgEvent->second) {
+        if (item == nullptr) {
+            FI_HILOGE("item is nullptr");
+            continue;
+        }
         CHKPC(item->env);
         if (item->ref != cb->ref) {
             continue;

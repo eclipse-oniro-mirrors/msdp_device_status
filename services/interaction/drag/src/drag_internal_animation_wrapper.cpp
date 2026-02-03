@@ -35,6 +35,7 @@ DragInternalAnimationWrapper::~DragInternalAnimationWrapper()
     FI_HILOGI("Enter");
     if (dragInternalAnimationHandle_ != nullptr) {
         dlclose(dragInternalAnimationHandle_);
+        enableInternalDropAnimationHandle_ = nullptr;
         dragInternalAnimationHandle_ = nullptr;
     }
 }

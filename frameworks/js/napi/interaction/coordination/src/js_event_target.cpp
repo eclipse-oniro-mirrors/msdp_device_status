@@ -689,6 +689,10 @@ void JsEventTarget::EmitCoordinationMessageEvent(sptr<JsUtil::CallbackInfo> cb)
         auto event = eventQueue_.front();
         eventQueue_.pop();
         for (const auto &item : dumpedMessageEvent) {
+            if (item == nullptr) {
+                FI_HILOGE("item is nullptr");
+                continue;
+            }
             CHKPC(item->env);
             if (item->ref != cb->ref) {
                 continue;
@@ -737,6 +741,10 @@ void JsEventTarget::EmitMouseLocationEvent(sptr<JsUtil::MouseCallbackInfo> cb)
         dumpedMouseListeners = mouseLocationEvent->second;
     }
     for (const auto &item : dumpedMouseListeners) {
+        if (item == nullptr) {
+            FI_HILOGE("item is nullptr");
+            continue;
+        }
         if (item->env == nullptr) {
             FI_HILOGW("Item->env is nullptr, skip then continue");
             continue;
