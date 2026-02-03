@@ -248,6 +248,9 @@ bool BoomerangServer::IsSystemHAPCalling(const CallingContext &context)
 
 bool BoomerangServer::IsDeviceSupport()
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return false;
+#endif
     std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
     return std::find(SUPPORT_DEVICE_TYPE.begin(), SUPPORT_DEVICE_TYPE.end(), deviceType) != SUPPORT_DEVICE_TYPE.end();
 }
