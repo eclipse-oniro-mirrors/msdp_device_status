@@ -742,7 +742,7 @@ bool DSoftbusAdapterImpl::CheckDeviceOsType(const std::string &networkId)
     cJSON *osType = cJSON_GetObjectItemCaseSensitive(extraData.Get(), PARAM_KEY_OS_TYPE);
     if (osType == nullptr) {
         FI_HILOGE("OsType is null");
-        return false;        
+        return false;
     }
     if (cJSON_IsNumber(osType)) {
         if (osType->valueint != OS_TYPE_OH) {
