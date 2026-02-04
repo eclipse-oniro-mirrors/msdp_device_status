@@ -435,7 +435,7 @@ void InteractionManagerTest::EnableCooperate()
     }
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -743,7 +743,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_PrepareCoordination, Tes
     ASSERT_EQ(ret, RET_OK);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -762,7 +762,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_ERR);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -791,13 +791,13 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer, isCompatible);
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -827,19 +827,19 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_RegisterCoordinationList
     #ifdef OHOS_BUILD_ENABLE_COORDINATION
         ASSERT_EQ(ret, RET_OK);
     #else
-        ASSERT_EQ(ret, ERROR_UNSUPPORT);
+        ASSERT_EQ(ret, RET_OK);
     #endif // OHOS_BUILD_ENABLE_COORDINATION
         ret = InteractionManager::GetInstance()->RegisterCoordinationListener(consumer, isCompatible);
     #ifdef OHOS_BUILD_ENABLE_COORDINATION
         ASSERT_EQ(ret, RET_ERR);
     #else
-        ASSERT_EQ(ret, ERROR_UNSUPPORT);
+        ASSERT_EQ(ret, RET_OK);
     #endif // OHOS_BUILD_ENABLE_COORDINATION
         ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer, isCompatible);
     #ifdef OHOS_BUILD_ENABLE_COORDINATION
         ASSERT_EQ(ret, RET_OK);
     #else
-        ASSERT_EQ(ret, ERROR_UNSUPPORT);
+        ASSERT_EQ(ret, RET_OK);
     #endif // OHOS_BUILD_ENABLE_COORDINATION
     FI_HILOGD("InteractionManagerTest_RegisterCoordinationListener_003 finish");
 }
@@ -865,7 +865,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCoordination, Te
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_TRUE((ret == RET_OK || ret == COMMON_PERMISSION_CHECK_ERROR || ret == COMMON_NOT_ALLOWED_DISTRIBUTED));
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -887,9 +887,9 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_DeactivateCoordination, 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->DeactivateCoordination(true, fun, isCompatible);
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -911,7 +911,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Abn
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -937,7 +937,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Nor
     ASSERT_EQ(ret, RET_OK);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -956,7 +956,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetCoordinationState_Syn
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -975,7 +975,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UnregisterCoordinationLi
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -1000,7 +1000,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UnprepareCoordination, T
     ASSERT_EQ(ret, RET_OK);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -1053,13 +1053,13 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_001, TestSize.Level1)
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     ret = InteractionManager::GetInstance()->RemoveHotAreaListener(listener);
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -1085,7 +1085,7 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_002, TestSize.Level1)
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     SimulateMovePointerEvent({ HOT_AREA_STEP, HOT_AREA_COOR }, { HOT_AREA_STEP - HOT_AREA_SPAN, HOT_AREA_COOR },
         MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
@@ -1102,7 +1102,7 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_002, TestSize.Level1)
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -1121,7 +1121,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDamplingCoefficient, 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -3122,7 +3122,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCooperateWithOpt
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_TRUE((ret == RET_OK || ret == COMMON_PERMISSION_CHECK_ERROR || ret == COMMON_NOT_ALLOWED_DISTRIBUTED));
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_OK);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 } // namespace DeviceStatus

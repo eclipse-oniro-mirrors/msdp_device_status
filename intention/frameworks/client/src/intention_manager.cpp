@@ -67,7 +67,6 @@ void IntentionManager::InitMsgHandler()
 {
     CALL_DEBUG_ENTER;
     std::map<MessageId, std::function<int32_t(const StreamClient&, NetPacket&)>> funs {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
         {MessageId::COORDINATION_ADD_LISTENER, [this](const StreamClient &client, NetPacket &pkt) {
             return this->cooperate_.OnCoordinationListener(client, pkt);
         }},
@@ -83,8 +82,6 @@ void IntentionManager::InitMsgHandler()
         {MessageId::MOUSE_LOCATION_ADD_LISTENER, [this](const StreamClient &client, NetPacket &pkt) {
             return this->cooperate_.OnMouseLocationListener(client, pkt);
         }},
-#endif // OHOS_BUILD_ENABLE_COORDINATION
-
         {MessageId::DRAG_NOTIFY_RESULT, [this](const StreamClient &client, NetPacket &pkt) {
             return this->drag_.OnNotifyResult(client, pkt);
         }},
@@ -168,179 +165,90 @@ int32_t IntentionManager::RegisterCoordinationListener(
     std::shared_ptr<ICoordinationListener> listener, bool isCompatible)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.RegisterListener(listener, isCompatible);
-#else
-    FI_HILOGW("Coordination does not support");
-    (void)(listener);
-    (void)(isCompatible);
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::UnregisterCoordinationListener(
     std::shared_ptr<ICoordinationListener> listener, bool isCompatible)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return cooperate_.UnregisterListener(listener, isCompatible);
-#else
-    FI_HILOGW("Coordination does not support");
-    (void)(listener);
-    (void)(isCompatible);
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::PrepareCoordination(CooperateMsgInfoCallback callback, bool isCompatible)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.Enable(callback, isCompatible);
-#else
-    FI_HILOGW("Coordination does not support");
-    (void)(callback);
-    (void)(isCompatible);
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::UnprepareCoordination(CooperateMsgInfoCallback callback, bool isCompatible)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.Disable(callback, isCompatible);
-#else
-    FI_HILOGW("Coordination does not support");
-    (void)(callback);
-    (void)(isCompatible);
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId,
     CooperateMsgInfoCallback callback, bool isCompatible)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.Start(remoteNetworkId, startDeviceId, callback, isCompatible);
-#else
-    FI_HILOGW("Coordination does not support");
-    (void)(remoteNetworkId);
-    (void)(startDeviceId);
-    (void)(callback);
-    (void)(isCompatible);
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::ActivateCooperateWithOptions(const std::string &remoteNetworkId,
     int32_t startDeviceId, CooperateMsgInfoCallback callback, const CooperateOptions &options)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.StartWithOptions(remoteNetworkId, startDeviceId, callback, options);
-#else
-    FI_HILOGW("Coordination does not support");
-    (void)(remoteNetworkId);
-    (void)(startDeviceId);
-    (void)(callback);
-    (void)(options);
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::DeactivateCoordination(bool isUnchained,
     CooperateMsgInfoCallback callback, bool isCompatible)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.Stop(isUnchained, callback, isCompatible);
-#else
-    FI_HILOGW("Coordination does not support");
-    (void)(callback);
-    (void)(isCompatible);
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::GetCoordinationState(
     const std::string &networkId, std::function<void(bool)> callback, bool isCompatible)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.GetCooperateState(networkId, callback, isCompatible);
-#else
-    (void)(networkId);
-    (void)(callback);
-    (void)(isCompatible);
-    FI_HILOGW("Coordination does not support");
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::GetCoordinationState(const std::string &udId, bool &state)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.GetCooperateState(udId, state);
-#else
-    (void)(udId);
-    (void)(state);
-    FI_HILOGW("Coordination does not support");
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::RegisterEventListener(const std::string &networkId, std::shared_ptr<IEventListener> listener)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.RegisterEventListener(networkId, listener);
-#else
-    (void)(networkId);
-    (void)(listener);
-    FI_HILOGW("Coordination does not support");
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::UnregisterEventListener(const std::string &networkId,
     std::shared_ptr<IEventListener> listener)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.UnregisterEventListener(networkId, listener);
-#else
-    (void)(networkId);
-    (void)(listener);
-    FI_HILOGW("Coordination does not support");
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::SetDamplingCoefficient(uint32_t direction, double coefficient)
 {
     CALL_INFO_TRACE;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.SetDamplingCoefficient(direction, coefficient);
-#else
-    (void)(direction);
-    (void)(coefficient);
-    FI_HILOGW("Coordination does not support");
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::UpdateDragStyle(DragCursorStyle style, int32_t eventId)
@@ -446,26 +354,14 @@ int32_t IntentionManager::GetExtraInfo(std::string &extraInfo)
 int32_t IntentionManager::AddHotAreaListener(std::shared_ptr<IHotAreaListener> listener)
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     InitClient();
     return cooperate_.AddHotAreaListener(listener);
-#else
-    FI_HILOGW("Coordination does not support");
-    (void)(listener);
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::RemoveHotAreaListener(std::shared_ptr<IHotAreaListener> listener)
 {
     CALL_DEBUG_ENTER;
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
     return cooperate_.RemoveHotAreaListener(listener);
-#else
-    FI_HILOGW("Coordination does not support");
-    (void)(listener);
-    return ERROR_UNSUPPORT;
-#endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
 int32_t IntentionManager::UpdatePreviewStyle(const PreviewStyle &previewStyle)

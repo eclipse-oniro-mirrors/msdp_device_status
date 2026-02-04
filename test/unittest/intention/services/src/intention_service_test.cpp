@@ -415,7 +415,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterHotAreaListener001, 
     int32_t userData = 0;
     bool isCheckPermission = true;
     ErrCode ret = g_intentionServiceNullptr->RegisterHotAreaListener(userData, isCheckPermission);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 /**
  * @tc.name: IntentionServiceTest8
@@ -427,7 +427,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterHotAreaListener001
 {
     CALL_TEST_DEBUG;
     ErrCode ret = g_intentionServiceNullptr->UnregisterHotAreaListener();
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
 /**
@@ -441,7 +441,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterMouseEventListener00
     CALL_TEST_DEBUG;
     std::string networkId = "networkId";
     ErrCode ret = g_intentionServiceNullptr->RegisterMouseEventListener(networkId);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
 /**
@@ -455,7 +455,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterMouseEventListener
     CALL_TEST_DEBUG;
     std::string networkId = "networkId";
     ErrCode ret = g_intentionServiceNullptr->UnregisterMouseEventListener(networkId);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
 /**
@@ -470,7 +470,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetCooperateStateSync001, Te
     std::string udid = "udid";
     bool state = true;
     ErrCode ret = g_intentionServiceNullptr->GetCooperateStateSync(udid, state);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
 /**
@@ -486,7 +486,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetCooperateStateAsync001, T
     int32_t userData = 0;
     bool isCheckPermission = true;
     ErrCode ret = g_intentionServiceNullptr->GetCooperateStateAsync(networkId, userData, isCheckPermission);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
 /**
@@ -501,7 +501,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDamplingCoefficient001, T
     uint32_t direction = 0;
     double coefficient = 0;
     ErrCode ret = g_intentionServiceNullptr->RegisterHotAreaListener(direction, coefficient);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 

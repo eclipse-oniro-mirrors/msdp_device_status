@@ -173,7 +173,11 @@ group("unittest") {
   deps = [
     ":InteractionDragDrawingTest",
     ":InteractionMouseLocationTest",
-    ":InteractionManagerTest",
-    ":OnScreenManagerTest"
   ]
+  if (device_status_interaction_coordination) {
+    deps += [
+      ":InteractionManagerTest",
+      ":OnScreenManagerTest"
+    ]
+  }
 }

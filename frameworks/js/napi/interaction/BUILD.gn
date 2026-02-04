@@ -29,9 +29,7 @@ config("interaction_config") {
 group("interaction_jsapi_group") {
   deps = [
     "${device_status_frameworks_path}/js/napi/interaction/drag:draginteraction",
+    "${device_status_frameworks_path}/js/napi/interaction/cooperate:inputdevicecooperate",
+    "${device_status_frameworks_path}/js/napi/interaction/coordination:cooperate"
   ]
-  if (device_status_interaction_coordination) {
-    deps += [ "${device_status_frameworks_path}/js/napi/interaction/cooperate:inputdevicecooperate" ]
-    deps += [ "${device_status_frameworks_path}/js/napi/interaction/coordination:cooperate" ]
-  }
 }

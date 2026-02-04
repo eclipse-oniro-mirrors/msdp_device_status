@@ -45,10 +45,6 @@ CooperateServer::CooperateServer(IContext *context)
 int32_t CooperateServer::EnableCooperate(CallingContext &context, int32_t userData)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     if (unloadTimerId_ >= 0) {
         context_->GetTimerManager().RemoveTimer(unloadTimerId_);
@@ -62,10 +58,6 @@ int32_t CooperateServer::EnableCooperate(CallingContext &context, int32_t userDa
 int32_t CooperateServer::DisableCooperate(CallingContext &context, int32_t userData)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -84,10 +76,6 @@ int32_t CooperateServer::StartCooperate(CallingContext &context, const std::stri
     int32_t userData, int32_t startDeviceId, bool checkPermission)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -98,10 +86,6 @@ int32_t CooperateServer::StartCooperateWithOptions(CallingContext &context, cons
     int32_t userData, int32_t startDeviceId, CooperateOptions options)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -112,10 +96,6 @@ int32_t CooperateServer::StopCooperate(CallingContext &context, int32_t userData
     bool checkPermission)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -125,10 +105,6 @@ int32_t CooperateServer::StopCooperate(CallingContext &context, int32_t userData
 int32_t CooperateServer::RegisterCooperateListener(CallingContext &context)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -138,10 +114,6 @@ int32_t CooperateServer::RegisterCooperateListener(CallingContext &context)
 int32_t CooperateServer::UnregisterCooperateListener(CallingContext &context)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -151,10 +123,6 @@ int32_t CooperateServer::UnregisterCooperateListener(CallingContext &context)
 int32_t CooperateServer::RegisterHotAreaListener(CallingContext &context, int32_t userData, bool checkPermission)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -164,10 +132,6 @@ int32_t CooperateServer::RegisterHotAreaListener(CallingContext &context, int32_
 int32_t CooperateServer::UnregisterHotAreaListener(CallingContext &context)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -177,10 +141,6 @@ int32_t CooperateServer::UnregisterHotAreaListener(CallingContext &context)
 int32_t CooperateServer::RegisterMouseEventListener(CallingContext &context, const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -190,10 +150,6 @@ int32_t CooperateServer::RegisterMouseEventListener(CallingContext &context, con
 int32_t CooperateServer::UnregisterMouseEventListener(CallingContext &context, const std::string &networkId)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -203,10 +159,6 @@ int32_t CooperateServer::UnregisterMouseEventListener(CallingContext &context, c
 int32_t CooperateServer::GetCooperateStateSync(CallingContext &context, const std::string &udid, bool &state)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -223,10 +175,6 @@ int32_t CooperateServer::GetCooperateStateAsync(CallingContext &context, const s
     int32_t userData, bool isCheckPermission)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
@@ -236,56 +184,11 @@ int32_t CooperateServer::GetCooperateStateAsync(CallingContext &context, const s
 int32_t CooperateServer::SetDamplingCoefficient(CallingContext &context, uint32_t direction, double coefficient)
 {
     CALL_DEBUG_ENTER;
-    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
-        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
-        return ret;
-    }
     CHKPR(context_, RET_ERR);
     ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
     CHKPR(cooperate, RET_ERR);
     FI_HILOGI("SetDamplingCoefficient(0x%{public}x, %{public}.3f)", direction, coefficient);
     return cooperate->SetDamplingCoefficient(direction, coefficient);
-}
-
-bool CooperateServer::CheckCooperatePermission(CallingContext &context)
-{
-    CALL_DEBUG_ENTER;
-    Security::AccessToken::AccessTokenID callerToken = context.tokenId;
-    int32_t result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken,
-        COOPERATE_PERMISSION);
-    return result == Security::AccessToken::PERMISSION_GRANTED;
-}
-
-bool CooperateServer::IsSystemServiceCalling(CallingContext &context)
-{
-    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
-    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
-        flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        FI_HILOGD("system service calling, flag:%{public}u", flag);
-        return true;
-    }
-    return false;
-}
-
-bool CooperateServer::IsSystemCalling(CallingContext &context)
-{
-    if (IsSystemServiceCalling(context)) {
-        return true;
-    }
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
-}
-
-int32_t CooperateServer::CheckPermission(CallingContext &context)
-{
-    if (!IsSystemCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return COMMON_NOT_SYSTEM_APP;
-    }
-    if (!CheckCooperatePermission(context)) {
-        FI_HILOGE("The caller has no COOPERATE_MANAGER permission");
-        return COMMON_PERMISSION_CHECK_ERROR;
-    }
-    return RET_OK;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
