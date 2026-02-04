@@ -35,13 +35,13 @@ void OnUserAgeGroupDetectedInner(::taihe::callback_view<void(UserClassification_
         taihe::set_business_error(SUBSCRIBE_EXCEPTION, "g_underageModelObj is null");
         return;
     }
-    if (!g_underageModelObj->SubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
-        FI_HILOGE("SubscribeCallback failed");
-        return;
-    }
     if (!g_underageModelObj->AddCallback(UNDERAGE_MODEL_TYPE_KID, opq)) {
         FI_HILOGE("AddCallback failed");
         taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
+        return;
+    }
+    if (!g_underageModelObj->SubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
+        FI_HILOGE("SubscribeCallback failed");
         return;
     }
 }

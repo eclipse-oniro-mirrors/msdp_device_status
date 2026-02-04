@@ -97,11 +97,10 @@ private:
 protected:
     std::map<int32_t, std::shared_ptr<UnderageModelEventListener>> events_;
 
-public:
+private:
     RegisterListenerFunc g_registerListenerFunc { nullptr };
     SubscribeFunc g_subscribeFunc { nullptr };
     UnsubscribeFunc g_unsubscribeFunc { nullptr };
-    std::mutex eventsMutex_;
 };
 } // namespace Msdp
 } // namespace OHOS

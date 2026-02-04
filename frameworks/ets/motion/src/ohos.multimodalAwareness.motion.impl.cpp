@@ -66,16 +66,16 @@ void OnOperatingHandChangedInner(taihe::callback_view<void(OperatingHandStatus_t
     FI_HILOGI("OnOperatingHandChangedInner enter");
 #ifdef MOTION_ENABLE
     FI_HILOGI("OnOperatingHandChangedInner Enter MOTION_ENABLE");
-    if (!AniMotionEvent::GetInstance()->SubscribeCallback(MOTION_TYPE_OPERATING_HAND)) {
-        FI_HILOGE("SubscribeCallback failed");
-        return;
-    }
     ::taihe::env_guard guard;
     ani_env *env = guard.get_env();
     ani_vm* vm = AniMotionEvent::GetInstance()->GetAniVm(env);
     if (!AniMotionEvent::GetInstance()->AddCallback(MOTION_TYPE_OPERATING_HAND, opq, vm)) {
         FI_HILOGE("AddCallback failed");
         taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
+        return;
+    }
+    if (!AniMotionEvent::GetInstance()->SubscribeCallback(MOTION_TYPE_OPERATING_HAND)) {
+        FI_HILOGE("SubscribeCallback failed");
         return;
     }
 #else
@@ -117,10 +117,6 @@ void OnHoldingHandChangedInner(taihe::callback_view<void(HoldingHandStatus_t)> f
     FI_HILOGI("OnHoldingHandChangedInner enter");
 #ifdef MOTION_ENABLE
     FI_HILOGI("OnHoldingHandChangedInner Enter MOTION_ENABLE");
-    if (!AniMotionEvent::GetInstance()->SubscribeCallback(MOTION_TYPE_HOLDING_HAND)) {
-        FI_HILOGE("SubscribeCallback failed");
-        return;
-    }
     ::taihe::env_guard guard;
     ani_env *env = guard.get_env();
     if (env == nullptr) {
@@ -137,6 +133,10 @@ void OnHoldingHandChangedInner(taihe::callback_view<void(HoldingHandStatus_t)> f
     if (!AniMotionEvent::GetInstance()->AddCallback(MOTION_TYPE_HOLDING_HAND, opq, vm)) {
         FI_HILOGE("AddCallback failed");
         taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
+        return;
+    }
+    if (!AniMotionEvent::GetInstance()->SubscribeCallback(MOTION_TYPE_HOLDING_HAND)) {
+        FI_HILOGE("SubscribeCallback failed");
         return;
     }
 #else

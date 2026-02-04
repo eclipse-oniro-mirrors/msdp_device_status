@@ -99,7 +99,7 @@ ohos::multimodalAwareness::onScreen::PageContent ConvertPageContent(
     };
 
     std::vector<::ohos::multimodalAwareness::onScreen::Paragraph> paragraphsArray;
-    for (auto paragraph: value.paragraphs) {
+    for (const auto &paragraph: value.paragraphs) {
         auto hookId = ::taihe::optional<int64_t>::make(paragraph.hookId);
         auto chapterId = ::taihe::optional<int32_t>::make(paragraph.chapterId);
         auto title = ::taihe::optional<::taihe::string>::make(::taihe::string(paragraph.title));
