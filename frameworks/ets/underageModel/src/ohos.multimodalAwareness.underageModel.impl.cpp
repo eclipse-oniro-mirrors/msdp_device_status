@@ -42,6 +42,11 @@ void OnUserAgeGroupDetectedInner(::taihe::callback_view<void(UserClassification_
     }
     if (!g_underageModelObj->SubscribeCallback(UNDERAGE_MODEL_TYPE_KID)) {
         FI_HILOGE("SubscribeCallback failed");
+        if (!g_underageModelObj->RemoveCallback(UNDERAGE_MODEL_TYPE_KID,
+            opq.value())) {
+            FI_HILOGE("RemoveCallback failed");
+            return;
+        }
         return;
     }
 }
