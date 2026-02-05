@@ -409,7 +409,7 @@ int32_t DragManager::StartDrag(
         return RET_ERR;
     }
     if (notifyPullUpCallback_ != nullptr) {
-        notifyPUllUpCallback_(false);
+        notifyPullUpCallback_(false);
     }
     if (DragSecurityManager::GetInstance().DeliverNonceToInput() == RET_ERR) {
         FI_HILOGE("Deliver nonce to input failed");
@@ -1296,7 +1296,7 @@ int32_t DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     CHKPR(pointerEvent, RET_ERR);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if (notifyPullUpCallback_ != nullptr) {
-        notifyPUllUpCallback_(true);
+        notifyPullUpCallback_(true);
     }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     if (dragState_ != DragState::START) {
