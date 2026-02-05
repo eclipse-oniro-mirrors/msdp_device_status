@@ -178,6 +178,7 @@ int32_t PullThrowListener::GetStringValue(const std::string &key, std::string &v
     int32_t ret = resultSet->GetString(index, value);
     if (ret != ERR_OK) {
         FI_HILOGE("GetString failed, ret:%{public}d", ret);
+        resultSet->Close();
         ReleaseDataShareHelper(helper);
         return ret;
     }

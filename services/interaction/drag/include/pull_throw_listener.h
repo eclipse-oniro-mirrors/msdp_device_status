@@ -77,6 +77,7 @@ public:
 
     bool RegisterPullThrowListener();
     bool RegisterVKListener();
+    bool ValidateThrowConditions();
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
@@ -84,7 +85,6 @@ private:
     int32_t GetIntValue(const std::string &key, int32_t &value);
     int32_t GetLongValue(const std::string &key, int64_t &value);
     bool ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper> &helper);
-    bool ValidateThrowConditions();
     bool RegisterFoldStatusListener();
     bool RegisterScreenMagneticStateListener();
     bool RegisterVKObserver(const sptr<VKObserver> &observer);
