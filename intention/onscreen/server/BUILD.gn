@@ -45,6 +45,10 @@ ohos_source_set("intention_on_screen_server") {
 
   defines = device_status_default_defines
 
+  if(device_status_phone_standard_lite){
+    defines += [ "DEVICE_STATUS_PHONE_STANDARD_LITE" ]
+  }
+
   deps = [
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/utils/common:devicestatus_util",

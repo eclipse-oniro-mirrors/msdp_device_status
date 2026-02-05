@@ -21,17 +21,20 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-#include "on_screen_callback_stub.h"
 #include "on_screen_data.h"
 #include "on_screen_manager.h"
 #include "on_screen_napi_data.h"
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
+#include "on_screen_callback_stub.h"
 #include "pixel_map_napi.h"
 #include "screen_event_napi.h"
+#endif
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 class OnScreenAwarenessCallback : public OnScreenCallbackStub {
 public:
     explicit OnScreenAwarenessCallback(napi_env env) : env_(env) {}
@@ -43,6 +46,7 @@ public:
     std::set<napi_ref> onRef;
     napi_env env_ { nullptr };
 };
+#endif
 
 class OnScreenNapi {
 public:
@@ -53,11 +57,13 @@ public:
     static napi_value GetPageContentNapi(napi_env env, napi_callback_info info);
     static napi_value SendControlEventNapi(napi_env env, napi_callback_info info);
     // perception
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     static napi_value RegisterAwarenessCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterAwarenessCallback(napi_env env, napi_callback_info info);
     static napi_value Trigger(napi_env env, napi_callback_info info);
     static bool ConstructAwarenessInfoObj(napi_env env, napi_value &awarenessInfoObj,
         const OnscreenAwarenessInfo& info);
+#endif
 
 private:
     static bool ConstructOnScreen(napi_env env, napi_value jsThis);
@@ -88,6 +94,7 @@ private:
     static void SendControlEventExecCB(napi_env env, void *data);
     static void SendControlEventCompCB(napi_env env, napi_status status, void *data);
 
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     // perception
     static bool GetAwarenessCap(napi_env env, napi_value awarenessCap, size_t argc, AwarenessCap &cap);
     static bool GetAwarenessOption(napi_env env, napi_value awarenessOption, AwarenessOptions &option);
@@ -122,6 +129,7 @@ private:
     static bool ConstructStringVector(napi_env env, napi_value &jsValue, std::vector<std::string> strVector);
     static bool ConstructObjectVector(napi_env env, napi_value &jsValue,
         std::vector<OnScreen::AwarenessInfoImageId> objVector);
+#endif
 
     napi_env env_;
 };

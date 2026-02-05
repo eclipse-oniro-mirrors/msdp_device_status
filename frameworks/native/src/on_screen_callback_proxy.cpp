@@ -22,7 +22,9 @@
 
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 #include "sequenceable_util.h"
+#endif
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenCallbackProxy"
@@ -53,6 +55,7 @@ void OnScreenCallbackProxy::OnScreenChange(const std::string& changeInfo)
     }
 }
 
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 void OnScreenCallbackProxy::OnScreenAwareness(const OnscreenAwarenessInfo& info)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -88,6 +91,7 @@ void OnScreenCallbackProxy::OnScreenAwareness(const OnscreenAwarenessInfo& info)
         return;
     }
 }
+#endif
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

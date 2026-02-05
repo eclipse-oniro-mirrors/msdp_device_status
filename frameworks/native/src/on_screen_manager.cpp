@@ -26,7 +26,11 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
-
+namespace {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+constexpr int32_t RET_NO_SUPPORT = 801;
+#endif
+};
 OnScreenManager& OnScreenManager::GetInstance()
 {
     static OnScreenManager instance;
@@ -68,17 +72,29 @@ int32_t OnScreenManager::GetLiveStatus()
 int32_t OnScreenManager::RegisterAwarenessCallback(const AwarenessCap& cap, sptr<IRemoteOnScreenCallback> callback,
     const AwarenessOptions& option)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
     return INTER_MGR_IMPL.RegisterAwarenessCallback(cap, callback, option);
+#endif
 }
 int32_t OnScreenManager::UnregisterAwarenessCallback(const AwarenessCap& cap, sptr<IRemoteOnScreenCallback> callback)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
     return INTER_MGR_IMPL.UnregisterAwarenessCallback(cap, callback);
+#endif
 }
 
 int32_t OnScreenManager::Trigger(const AwarenessCap& cap, const AwarenessOptions& option,
     OnscreenAwarenessInfo& info)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
     return INTER_MGR_IMPL.Trigger(cap, option, info);
+#endif
 }
 } // namespace OnScreen
 } // namespace DeviceStatus

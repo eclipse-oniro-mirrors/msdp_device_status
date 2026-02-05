@@ -33,7 +33,9 @@ public:
     };
 
     virtual void OnScreenChange(const std::string& changeInfo) = 0;
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     virtual void OnScreenAwareness(const OnscreenAwarenessInfo& info) = 0;
+#endif
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IRemoteOnScreenCallback");
 };
