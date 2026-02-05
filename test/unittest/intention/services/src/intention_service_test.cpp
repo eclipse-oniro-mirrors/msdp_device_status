@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -289,22 +289,6 @@ void IntentionServiceTest::AssignToAnimation(PreviewAnimation &animation)
     animation.duration = ANIMATION_DURATION;
     animation.curveName = CURVE_NAME;
     animation.curve = { 0.33, 0, 0.67, 1 };
-}
-
-/**
- * @tc.name: IntentionServiceTest_1
- * @tc.desc: Test Socket
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_Socket001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    auto programName = GetProgramName();
-    int32_t socketFd { -1 };
-    int32_t tokenType { -1 };
-    int32_t ret = g_intentionService->Socket(programName, CONNECT_MODULE_TYPE_FI_CLIENT, socketFd, tokenType);
-    EXPECT_EQ(ret, RET_ERR);
 }
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION

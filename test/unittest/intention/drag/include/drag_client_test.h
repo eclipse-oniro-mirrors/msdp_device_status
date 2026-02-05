@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,32 +22,12 @@
 #include "device_manager.h"
 #include "devicestatus_define.h"
 #include "drag_client.h"
-#include "i_context.h"
 #include "socket_session_manager.h"
 #include "timer_manager.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class ContextService final : public IContext {
-    ContextService();
-    ~ContextService();
-    DISALLOW_COPY_AND_MOVE(ContextService);
-public:
-    IDelegateTasks& GetDelegateTasks() override;
-    IDeviceManager& GetDeviceManager() override;
-    ITimerManager& GetTimerManager() override;
-    IDragManager& GetDragManager() override;
-    IDDMAdapter& GetDDM() override;
-    IPluginManager& GetPluginManager() override;
-    ISocketSessionManager& GetSocketSessionManager() override;
-    IInputAdapter& GetInput() override;
-    IDSoftbusAdapter& GetDSoftbus() override;
-    static ContextService* GetInstance();
-
-private:
-    std::unique_ptr<IDDMAdapter> ddm_;
-};
 
 class DragClientTest : public testing::Test {
 public:

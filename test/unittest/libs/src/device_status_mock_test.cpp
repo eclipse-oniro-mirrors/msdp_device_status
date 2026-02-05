@@ -45,6 +45,7 @@ constexpr int32_t INVAILD_TIMER_INTERVAL { -1 };
 constexpr int32_t ERR_INVALID_FD { -1 };
 constexpr int32_t ZERO_TIMER_INTERVAL { 0 };
 constexpr int32_t TIMER_INTERVAL { 3 };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 #ifdef __aarch64__
 const std::string DEVICESTATUS_MOCK_LIB_PATH { "/system/lib64/libdevicestatus_mock.z.so" };
 #else
@@ -549,6 +550,7 @@ HWTEST_F(DeviceStatusMsdpMocKTest, DeviceStatusMsdpMocKTest028, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     deviceStatusMsdpMock.timerFd_ = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
+    fdsan_exchange_owner_tag(deviceStatusMsdpMock.timerFd_, 0, DOMAIN_ID);
     fcntl(deviceStatusMsdpMock.timerFd_, F_SETFL, O_NONBLOCK);
     deviceStatusMsdpMock.TimerCallback();
     deviceStatusMsdpMock.CloseTimer();

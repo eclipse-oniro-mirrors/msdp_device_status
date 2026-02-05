@@ -35,6 +35,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 const std::string FOUNDATION { "foundation" };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 } // namespace
 
 StreamSession::StreamSession(const std::string &programName, int32_t moduleType, int32_t fd, int32_t uid, int32_t pid)
@@ -88,7 +89,7 @@ void StreamSession::Close()
     CALL_DEBUG_ENTER;
     FI_HILOGD("Enter fd_:%{public}d", fd_);
     if (fd_ >= 0) {
-        if (close(fd_) < 0) {
+        if (fdsan_close_with_tag(fd_, DOMAIN_ID) < 0) {
             FI_HILOGE("Close fd failed, error:%{public}s, fd_:%{public}d", strerror(errno), fd_);
         }
         fd_ = -1;

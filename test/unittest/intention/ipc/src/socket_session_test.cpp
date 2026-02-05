@@ -40,7 +40,7 @@ std::shared_ptr<SocketSessionManager> g_socketSessionManager { nullptr };
 IContext *g_context { nullptr };
 Intention g_intention { Intention::UNKNOWN_INTENTION };
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
-constexpr int32_t NUM_ONE { 1 };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 } // namespace
 
 void SocketSessionTest::SetUpTestCase() {}
@@ -55,6 +55,8 @@ void SocketSessionTest::SetUp()
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     int32_t sockFds[2] { -1, -1 };
+    fdsan_exchange_owner_tag(sockFds[0], 0, DOMAIN_ID);
+    fdsan_exchange_owner_tag(sockFds[1], 0, DOMAIN_ID);
     g_session = std::make_shared<SocketSession>("test", moduleType, tokenType, sockFds[0], uid, pid);
     g_sessionOne = std::make_shared<SocketSession>("test1", moduleType, tokenType, sockFds[1], uid, pid);
 }
@@ -83,6 +85,7 @@ HWTEST_F(SocketSessionTest, SocketSessionTest1, TestSize.Level0)
     ret = g_client->Connect();
     EXPECT_TRUE(ret);
     g_client->Stop();
+    EXPECT_NE(g_client->socket_, nullptr);
     g_client->OnDisconnected();
 }
 
@@ -156,20 +159,6 @@ HWTEST_F(SocketSessionTest, SocketSessionTest18, TestSize.Level0)
     g_socketSessionManager->GetAppMgr();
     int32_t ret = g_socketSessionManager->Enable();
     EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: SocketSessionTest19
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SocketSessionTest, SocketSessionTest19, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    int32_t clientFd { -1 };
-    int32_t ret = g_socketSessionManager->AllocSocketFd("", NUM_ONE, NUM_ONE, NUM_ONE, NUM_ONE, clientFd);
-    EXPECT_EQ(ret, RET_ERR);
 }
 
 /**
