@@ -104,7 +104,7 @@ std::optional<DragData> DragDataUtilTest::CreateDragData(int32_t sourceType,
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
     dragData.udKey = UD_KEY;
     dragData.sourceType = sourceType;
-    dragData.extraInfo = FILTER_INFO;
+    dragData.filterInfo = FILTER_INFO;
     dragData.displayId = DISPLAY_ID;
     dragData.pointerId = pointerId;
     dragData.dragNum = dragNum;

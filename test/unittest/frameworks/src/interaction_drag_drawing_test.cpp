@@ -158,7 +158,7 @@ std::optional<DragData> InteractionDragDrawingTest::CreateDragData(int32_t sourc
     }
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
     dragData.udKey = UD_KEY;
-    dragData.extraInfo = FILTER_INFO;
+    dragData.filterInfo = FILTER_INFO;
     dragData.extraInfo = EXTRA_INFO;
     dragData.sourceType = sourceType;
     dragData.pointerId = pointerId;

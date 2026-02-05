@@ -207,7 +207,7 @@ std::optional<DragData> DragManagerTest::CreateDragData(int32_t sourceType,
         dragData.shadowInfos.push_back({ pixelMap, g_shadowinfo_x, g_shadowinfo_y });
     }
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
-    dragData.extraInfo = FILTER_INFO;
+    dragData.filterInfo = FILTER_INFO;
     dragData.udKey = UD_KEY;
     dragData.sourceType = sourceType;
     dragData.extraInfo = EXTRA_INFO;
@@ -510,6 +510,7 @@ HWTEST_F(DragManagerTest, DragManagerTest11, TestSize.Level0)
     int32_t ret = InteractionManager::GetInstance()->RemoveSubscriptListener(nullptr);
     auto listener = std::make_shared<SubscriptListenerTest>("SubscriptListener");
     ret = InteractionManager::GetInstance()->AddSubscriptListener(listener);
+    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->RemoveSubscriptListener(nullptr);
     ASSERT_EQ(ret, RET_OK);
 }

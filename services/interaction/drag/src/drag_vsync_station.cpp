@@ -30,7 +30,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-const std::string THREAD_NAME { "os_dargRenderRunner" };
+const std::string THREAD_NAME { "os_dragRenderRunner" };
 constexpr int32_t INVALID_VALUE { -1 };
 }
 
