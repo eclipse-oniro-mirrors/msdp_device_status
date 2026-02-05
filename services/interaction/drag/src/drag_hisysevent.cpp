@@ -70,7 +70,7 @@ int32_t DragDFX::WriteModel(const DragType &dragType, Types... paras)
     auto &[label, dec] = serialStr_[dragType];
     OHOS::HiviewDFX::HiSysEvent::EventType eventType = (static_cast<uint32_t>(dragType) & 1) != 0 ?
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT : OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR;
-    int32_t ret = HiSysEventWrite( OHOS::HiviewDFX::HiSysEvent::Domain::MSDP, label, eventType, "MSG", dec, paras...);
+    int32_t ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::MSDP, label, eventType, "MSG", dec, paras...);
     if (ret == RET_ERR) {
         FI_HILOGE("HiviewDFX write failed, ret:%{public}d", ret);
     }
