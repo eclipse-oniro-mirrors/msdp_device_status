@@ -158,6 +158,9 @@ UniversalDragWrapper::~UniversalDragWrapper()
     setDragableStateHandle_ = nullptr;
     setDragSwitchStateHandle_ = nullptr;
     setAppDragSwitchStateHandle_ = nullptr;
+    getAppDragSwitchStateHandle_ = nullptr;
+    setDraggableStateAsyncHandle_ = nullptr;
+    StopLongPressDragHandle_ = nullptr;
 }
 
 void UniversalDragWrapper::SetDragSwitchState(bool enable)

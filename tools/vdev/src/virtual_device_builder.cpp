@@ -367,6 +367,10 @@ void VirtualDeviceBuilder::WaitFor(const char *path, const char *name)
 {
     CALL_DEBUG_ENTER;
     CHKPV(path);
+    if (name == nullptr) {
+        FI_HILOGE("name is null");
+        return;
+    }
     if (!Utility::IsInteger(std::string(path))) {
         std::cout << "Invalid argument to \'-w\', time duration of integer type is expected." << std::endl;
         return;

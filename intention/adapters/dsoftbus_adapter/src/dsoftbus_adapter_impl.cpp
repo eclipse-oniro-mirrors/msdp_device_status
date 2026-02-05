@@ -360,6 +360,7 @@ void DSoftbusAdapterImpl::OnBytes(int32_t socket, const void *data, uint32_t dat
 
         if (!circleBuffer.Write(reinterpret_cast<const char*>(data), dataLen)) {
             FI_HILOGE("Failed to write buffer");
+            return;
         }
         HandleSessionData(networkId, circleBuffer);
     } else {
@@ -739,6 +740,10 @@ bool DSoftbusAdapterImpl::CheckDeviceOsType(const std::string &networkId)
         return false;
     }
     cJSON *osType = cJSON_GetObjectItemCaseSensitive(extraData.Get(), PARAM_KEY_OS_TYPE);
+    if (osType == nullptr) {
+        FI_HILOGE("osType is null");
+        return false;
+    }
     if (cJSON_IsNumber(osType)) {
         if (osType->valueint != OS_TYPE_OH) {
             FI_HILOGE("Ostype:%{public}d", osType->valueint);

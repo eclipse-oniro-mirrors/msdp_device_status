@@ -74,6 +74,10 @@ static void OnReceivedData(SensorEvent *event)
     if (event->sensorTypeId == SENSOR_TYPE_ID_ROTATION_VECTOR) {
         std::unique_lock lockGrd(g_mtx);
         RotationVectorData *data = reinterpret_cast<RotationVectorData *>(event->data);
+        if (data == nullptr) {
+            FI_HILOGE("data is null");
+            return;
+        }
         cacheRotVecData_ = std::make_optional(*data);
         FI_HILOGI("rotation vec collect succ");
         g_cv.notify_all();
