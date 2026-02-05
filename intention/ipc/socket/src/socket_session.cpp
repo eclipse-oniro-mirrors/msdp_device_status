@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
+} // namespace
 
 SocketSession::SocketSession(const std::string &programName, int32_t moduleType,
                              int32_t tokenType, int32_t fd, int32_t uid, int32_t pid)
@@ -37,8 +40,9 @@ SocketSession::SocketSession(const std::string &programName, int32_t moduleType,
 
 SocketSession::~SocketSession()
 {
-    if ((fd_ >= 0) && (::close(fd_) != 0)) {
+    if ((fd_ >= 0) && (fdsan_close_with_tag(fd_, DOMAIN_ID) != 0)) {
         FI_HILOGE("close(%{public}d) failed:%{public}s", fd_, ::strerror(errno));
+        fd_ = -1;
     }
 }
 

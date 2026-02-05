@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
+} // namespace
 
 SocketServer::SocketServer(IContext *context) : context_(context) { }
 
@@ -41,7 +44,7 @@ int32_t SocketServer::Socket(CallingContext &context, const std::string& program
         programName, moduleType, clientTokenType, context.uid, context.pid, clientFd);
     if (ret != RET_OK) {
         FI_HILOGE("AllocSocketFd failed");
-        if (clientFd >= 0 && close(clientFd) < 0) {
+        if (clientFd >= 0 && fdsan_close_with_tag(clientFd, DOMAIN_ID) < 0) {
             FI_HILOGE("Close client fd failed, error:%{public}s, clientFd:%{private}d", strerror(errno), clientFd);
         }
         return RET_ERR;

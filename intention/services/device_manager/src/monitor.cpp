@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
+} // namespace
 
 Monitor::~Monitor()
 {
@@ -79,7 +82,7 @@ void Monitor::Disable()
         devWd_ = -1;
     }
     if (inotifyFd_ >= 0) {
-        if (close(inotifyFd_) < 0) {
+        if (fdsan_close_with_tag(inotifyFd_, DOMAIN_ID) < 0) {
             FI_HILOGE("close inotify fd failed, error:%{public}s, inotifyFd_:%{public}d", strerror(errno), inotifyFd_);
         }
         inotifyFd_ = -1;
@@ -94,6 +97,7 @@ int32_t Monitor::OpenConnection()
         FI_HILOGE("Initializing inotify, errno:%{public}s", strerror(errno));
         return RET_ERR;
     }
+    fdsan_exchange_owner_tag(inotifyFd_, 0, DOMAIN_ID);
     return RET_OK;
 }
 

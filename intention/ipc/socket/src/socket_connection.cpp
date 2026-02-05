@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-
+namespace {
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
+} // namespace
 SocketConnection::SocketConnection(int32_t socketFd,
                                    std::function<void(NetPacket&)> recv,
                                    std::function<void()> onDisconnected)
@@ -36,7 +38,7 @@ SocketConnection::SocketConnection(int32_t socketFd,
 
 SocketConnection::~SocketConnection()
 {
-    if ((socketFd_ >= 0) && (::close(socketFd_) != 0)) {
+    if ((socketFd_ >= 0) && (fdsan_close_with_tag(socketFd_, DOMAIN_ID) != 0)) {
         FI_HILOGE("close(%{public}d) failed:%{public}s", socketFd_, ::strerror(errno));
     }
 }
@@ -50,6 +52,7 @@ std::shared_ptr<SocketConnection> SocketConnection::Connect(std::function<int32_
     if (sockFd < 0) {
         return nullptr;
     }
+    fdsan_exchange_owner_tag(sockFd, 0, DOMAIN_ID);
     return std::make_shared<SocketConnection>(sockFd, recv, onDisconnected);
 }
 

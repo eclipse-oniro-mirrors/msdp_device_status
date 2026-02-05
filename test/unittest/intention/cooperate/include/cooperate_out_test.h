@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "devicestatus_delayed_sp_singleton.h"
 #include "drag_manager.h"
 #include "i_context.h"
+#include "test_context.h"
 #include "timer_manager.h"
 
 #include "intention_service.h"
@@ -40,24 +41,6 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class ContextService final : public IContext {
-    ContextService();
-    ~ContextService();
-    DISALLOW_COPY_AND_MOVE(ContextService);
-public:
-    IDelegateTasks& GetDelegateTasks() override;
-    IDeviceManager& GetDeviceManager() override;
-    ITimerManager& GetTimerManager() override;
-    IDragManager& GetDragManager() override;
-    IDDMAdapter& GetDDM() override;
-    IPluginManager& GetPluginManager() override;
-    ISocketSessionManager& GetSocketSessionManager() override;
-    IInputAdapter& GetInput() override;
-    IDSoftbusAdapter& GetDSoftbus() override;
-    static ContextService* GetInstance();
-    DeviceManager devMgr_;
-};
-
 class CooperateOutTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -67,6 +50,8 @@ public:
     void NotifyCooperate();
     void CheckInHot();
     void OnThreeStates(const Cooperate::CooperateEvent &event);
+private:
+    std::shared_ptr<TestContext> context_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
