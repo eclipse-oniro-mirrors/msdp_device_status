@@ -65,4 +65,4 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 #endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
-#endif // DEVICESTATUS_HISYSEVENT_H
+#endif // DRAG_HISYSEVENT_H

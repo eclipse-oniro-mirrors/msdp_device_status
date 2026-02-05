@@ -345,7 +345,7 @@ private:
 #endif //OHOS_DRAG_ENABLE_MONITOR
     SocketSessionPtr dragOutSession_ { nullptr };
     std::function<void(DragState)> stateChangedCallback_ { nullptr };
-    std::function<void(bool)> notifyPUllUpCallback_ { nullptr };
+    std::function<void(bool)> notifyPullUpCallback_ { nullptr };
     std::function<void(bool)> crossDragCallback_ { nullptr };
     std::shared_ptr<EventHub> eventHub_ { nullptr };
     sptr<ISystemAbilityStatusChange> statusListener_ { nullptr };

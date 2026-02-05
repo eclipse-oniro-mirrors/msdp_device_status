@@ -168,16 +168,21 @@ int32_t PullThrowListener::GetStringValue(const std::string &key, std::string &v
     Uri uri((SETTING_URI_PROXY + "&key=" + key));
     CHKPR(helper, RET_ERR);
     auto resultSet = helper->Query(uri, predicates, columns);
-    ReleaseDataShareHelper(helper);
     const int32_t index = 0;
-    CHKPR(resultSet, RET_ERR);
+    if (resultSet == nullptr) {
+        FI_HILOGE("resultSet is nullptr");
+        ReleaseDataShareHelper(helper);
+        return RET_ERR;
+    }
     resultSet->GoToRow(index);
     int32_t ret = resultSet->GetString(index, value);
     if (ret != ERR_OK) {
         FI_HILOGE("GetString failed, ret:%{public}d", ret);
+        ReleaseDataShareHelper(helper);
         return ret;
     }
     resultSet->Close();
+    ReleaseDataShareHelper(helper);
     return ERR_OK;
 }
 
