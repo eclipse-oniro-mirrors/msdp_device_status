@@ -52,6 +52,12 @@ void DisplayChangeEventListener::OnDestroy(Rosen::DisplayId displayId)
 
 void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
 {
+    FI_HILOGI("display:%{public}" PRIu64"", displayId);
+}
+
+void DisplayChangeEventListener::OnAttributeChange(Rosen::DisplayId displayId,
+    const std::vector<std::string>& attribute)
+{
     CHKPV(context_);
     Rosen::Rotation lastRotation = context_->GetDragManager().GetRotation(displayId);
     if (IsRotateDragScreen()) {
