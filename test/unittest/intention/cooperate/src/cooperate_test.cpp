@@ -36,6 +36,7 @@ std::shared_ptr<HotplugObserver> g_observer { nullptr };
 std::shared_ptr<SocketSession> g_session { nullptr };
 std::shared_ptr<StateMachine> g_stateMachine { nullptr };
 Channel<CooperateEvent>::Sender g_sender;
+ICooperate* g_cooperate { nullptr };
 } // namespace
 
 class CooperateObserver final : public ICooperateObserver {

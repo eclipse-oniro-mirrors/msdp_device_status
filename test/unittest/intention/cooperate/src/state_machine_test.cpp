@@ -1136,7 +1136,7 @@ HWTEST_F(StateMachineTest, StateMachineTest_OnEvent034, TestSize.Level1)
     CALL_TEST_DEBUG;
     auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
-    auto dev = g_devMgr.AddDevice(TEST_DEV_NODE);
+    auto dev = env->devMgr_.AddDevice(TEST_DEV_NODE);
     EXPECT_EQ(dev, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1144,7 +1144,7 @@ HWTEST_F(StateMachineTest, StateMachineTest_OnEvent034, TestSize.Level1)
     g_stateMachine->TransiteTo(cooperateContext, CooperateState::COOPERATE_STATE_OUT);
     g_stateMachine->TransiteTo(cooperateContext, CooperateState::COOPERATE_STATE_IN);
     g_stateMachine->TransiteTo(cooperateContext, CooperateState::COOPERATE_STATE_FREE);
-    dev = g_devMgr.RemoveDevice(TEST_DEV_NODE);
+    dev = env->devMgr_.RemoveDevice(TEST_DEV_NODE);
     EXPECT_EQ(dev, nullptr);
 }
 

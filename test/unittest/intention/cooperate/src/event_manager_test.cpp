@@ -99,9 +99,6 @@ void EventManagerTest::SetUpTestCase() {}
 
 void EventManagerTest::SetUp()
 {
-    g_ddm = std::make_unique<DDMAdapter>();
-    g_input = std::make_unique<InputAdapter>();
-    g_dsoftbus = std::make_unique<DSoftbusAdapter>();
     g_contextOne = std::make_shared<Context>(g_icontext);
     auto env = TestContext::GetInstance();
     g_context = std::make_shared<Context>(env);
