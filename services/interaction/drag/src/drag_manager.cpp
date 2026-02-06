@@ -408,8 +408,8 @@ int32_t DragManager::StartDrag(
         ResetMouseDragMonitorInfo();
         return RET_ERR;
     }
-    if (notifyPUllUpCallback_ != nullptr) {
-        notifyPUllUpCallback_(false);
+    if (notifyPullUpCallback_ != nullptr) {
+        notifyPullUpCallback_(false);
     }
     if (DragSecurityManager::GetInstance().DeliverNonceToInput() == RET_ERR) {
         FI_HILOGE("Deliver nonce to input failed");
@@ -1295,8 +1295,8 @@ int32_t DragManager::OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     FI_HILOGI("enter");
     CHKPR(pointerEvent, RET_ERR);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    if (notifyPUllUpCallback_ != nullptr) {
-        notifyPUllUpCallback_(true);
+    if (notifyPullUpCallback_ != nullptr) {
+        notifyPullUpCallback_(true);
     }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     if (dragState_ != DragState::START) {
@@ -1874,14 +1874,14 @@ void DragManager::RegisterNotifyPullUp(std::function<void(bool)> callback)
 {
     FI_HILOGI("enter");
     CHKPV(callback);
-    notifyPUllUpCallback_ = callback;
+    notifyPullUpCallback_ = callback;
     FI_HILOGI("leave");
 }
 
 void DragManager::UnregisterNotifyPullUp()
 {
     FI_HILOGI("Unregister notify-pullup callback");
-    notifyPUllUpCallback_ = nullptr;
+    notifyPullUpCallback_ = nullptr;
 }
 
 void DragManager::RegisterCrossDrag(std::function<void(bool)> callback)

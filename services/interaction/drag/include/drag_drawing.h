@@ -16,6 +16,7 @@
 #ifndef DRAG_DRAWING_H
 #define DRAG_DRAWING_H
 
+#include <memory>
 #include <vector>
 #include <shared_mutex>
 

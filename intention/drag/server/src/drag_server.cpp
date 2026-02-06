@@ -68,6 +68,14 @@ int32_t DragServer::EnableInternalDropAnimation(CallingContext &context, const s
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
     }
+    if (animationInfo.empty()) {
+        FI_HILOGE("The drag drop animation info is empty");
+        return COMMON_PARAMETER_ERROR;
+    }
+    if (animationInfo.length() > MAX_ANIMATION_INFO_LENGTH) {
+        FI_HILOGE("The drag drop animation info is too long, length:%{public}zu", animationInfo.length());
+        return COMMON_PARAMETER_ERROR;
+    }
     CHKPR(env_, RET_ERR);
     return env_->GetDragManager().EnableInternalDropAnimation(animationInfo);
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION

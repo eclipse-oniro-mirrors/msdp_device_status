@@ -39,8 +39,8 @@ enum class EventId {
     EVENT_SCREEN_UNLOCK,
     EVENT_BATTERY_LOW,
     EVENT_BATTERY_OKAY,
-    EVENT_MAX,
     EVENT_LOCALE_CHANGED,
+    EVENT_MAX,
 };
 class EventHub : public OHOS::EventFwk::CommonEventSubscriber {
 public:

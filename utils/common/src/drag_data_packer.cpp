@@ -333,8 +333,7 @@ int32_t SummaryPacker::UnMarshalling(Parcel &parcel, SummaryMap &val)
     size_t readAbleSize = parcel.GetReadableBytes();
     int32_t size = 0;
     READINT32(parcel, size, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    if (size < 0 || (static_cast<size_t>(size) > readAbleSize) || static_cast<size_t>(size) > val.max_size() ||
-        size > MAX_BUF_SIZE) {
+    if (size < 0 || (static_cast<size_t>(size) > readAbleSize) || size > MAX_BUF_SIZE) {
         FI_HILOGE("Invalid size:%{public}d", size);
         return RET_ERR;
     }

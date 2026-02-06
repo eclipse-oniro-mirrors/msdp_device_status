@@ -75,30 +75,29 @@ public:
         PullThrowListener* listener_;
     };
 
-    sptr<IRemoteObject> remoteObj_ { nullptr };
+    bool RegisterPullThrowListener();
+    bool RegisterVKListener();
+    bool ValidateThrowConditions();
+
+private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
-    
     int32_t GetStringValue(const std::string &key, std::string &value);
     int32_t GetIntValue(const std::string &key, int32_t &value);
     int32_t GetLongValue(const std::string &key, int64_t &value);
-    
     bool ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper> &helper);
-    bool ValidateThrowConditions();
     bool RegisterFoldStatusListener();
     bool RegisterScreenMagneticStateListener();
     bool RegisterVKObserver(const sptr<VKObserver> &observer);
-    bool RegisterPullThrowListener();
-    bool RegisterVKListener();
-
-    Rosen::FoldStatus oldFoldStatus_ {Rosen::FoldStatus::UNKNOWN};
-    bool currentMagneticState_ { false };
-    int32_t obstatusVk_ = -1;
-    sptr<VKObserver> CreateVKObserver(const VKObserver::UpdateFunc &func);
 
 private:
     DragManager* manager_;
     sptr<Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_;
     sptr<Rosen::DisplayManager::IScreenMagneticStateListener> screenMagneticStateListener_;
+    sptr<IRemoteObject> remoteObj_ { nullptr };
+    Rosen::FoldStatus oldFoldStatus_ {Rosen::FoldStatus::UNKNOWN};
+    bool currentMagneticState_ { false };
+    int32_t obstatusVk_ = -1;
+    sptr<VKObserver> CreateVKObserver(const VKObserver::UpdateFunc &func);
 };
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 } // namespace DeviceStatus

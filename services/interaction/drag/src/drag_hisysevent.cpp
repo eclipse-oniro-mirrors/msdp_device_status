@@ -43,7 +43,7 @@ std::map<DragResult, std::string> DragDFX::dragResult_ = {
     { DragResult::DRAG_SUCCESS, "DRAG_SUCCESS" },
     { DragResult::DRAG_FAIL, "DRAG_FAIL" },
     { DragResult::DRAG_CANCEL, "DRAG_CANCEL" },
-    { DragResult::DRAG_EXCEPTION, "DRAG_EXPECTION" }
+    { DragResult::DRAG_EXCEPTION, "DRAG_EXCEPTION" }
 };
 
 std::map<DragType, std::pair<std::string, std::string>> DragDFX::serialStr_ = {
@@ -64,19 +64,13 @@ template<typename... Types>
 int32_t DragDFX::WriteModel(const DragType &dragType, Types... paras)
 {
     if (serialStr_.find(dragType) == serialStr_.end()) {
-        FI_HILOGE("serialStr_ can't find the drag hisysevent type");
+        FI_HILOGE("serialStr_ can't find the drag hisysevent type:%{public}d", static_cast<int32_t>(dragType));
         return RET_ERR;
     }
     auto &[label, dec] = serialStr_[dragType];
     OHOS::HiviewDFX::HiSysEvent::EventType eventType = (static_cast<uint32_t>(dragType) & 1) != 0 ?
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT : OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR;
-    int32_t ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
-        label,
-        eventType,
-        "MSG",
-        dec,
-        paras...);
+    int32_t ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::MSDP, label, eventType, "MSG", dec, paras...);
     if (ret == RET_ERR) {
         FI_HILOGE("HiviewDFX write failed, ret:%{public}d", ret);
     }
@@ -140,7 +134,7 @@ int32_t DragDFX::WriteStopDrag(const DragState &dragState, const DragDropResult 
         return WriteModel(DragType::STOP_DRAG_SUCC, "dragState", curDragState, "animate",
             dropResult.hasCustomAnimation);
     }
-    return WriteModel(DragType::STOP_DRAG_FAIL, "dragstate", curDragState, "animate", dropResult.hasCustomAnimation);
+    return WriteModel(DragType::STOP_DRAG_FAIL, "dragState", curDragState, "animate", dropResult.hasCustomAnimation);
 }
 
 int32_t DragDFX::WriteNotifyDragResult(const DragResult &result, OHOS::HiviewDFX::HiSysEvent::EventType type)

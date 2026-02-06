@@ -147,7 +147,7 @@ void DragVSyncStation::SetQosForOtherThread(int32_t tid)
     if (ret != 0) {
         FI_HILOGE("Set mmi thread qos failed, ret:%{public}d", ret);
     } else {
-        FI_HILOGE("Set mmi thread qos success");
+        FI_HILOGI("Set mmi thread qos success");
     }
 }
 
