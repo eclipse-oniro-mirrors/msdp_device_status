@@ -41,6 +41,7 @@ SocketConnection::~SocketConnection()
     if ((socketFd_ >= 0) && (fdsan_close_with_tag(socketFd_, DOMAIN_ID) != 0)) {
         FI_HILOGE("close(%{public}d) failed:%{public}s", socketFd_, ::strerror(errno));
     }
+    socketFd_ = -1;
 }
 
 std::shared_ptr<SocketConnection> SocketConnection::Connect(std::function<int32_t()> socket,

@@ -117,7 +117,7 @@ int32_t SocketSessionManager::AllocSocketFd(const std::string& programName, int3
         if (sockFds[0] > 0 && fdsan_close_with_tag(sockFds[0], DOMAIN_ID) != 0) {
             FI_HILOGE("close(%{public}d) failed:%{public}s", sockFds[0], ::strerror(errno));
         }
-        if (sockFds[1] > 0 && fdsan_close_with_tag(sockFds[0], DOMAIN_ID) != 0) {
+        if (sockFds[1] > 0 && fdsan_close_with_tag(sockFds[1], DOMAIN_ID) != 0) {
             FI_HILOGE("close(%{public}d) failed:%{public}s", sockFds[1], ::strerror(errno));
         }
         return RET_ERR;
