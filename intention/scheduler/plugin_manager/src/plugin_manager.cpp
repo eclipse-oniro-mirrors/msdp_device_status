@@ -33,7 +33,7 @@ constexpr std::string_view LIB_MOTION_DRAG_PATH { "/system/lib64/libmotion_drag.
 #else
 constexpr std::string_view LIB_COOPERATE_PATH { "/system/lib/libintention_cooperate.z.so" };
 constexpr std::string_view LIB_MOTION_DRAG_PATH { "/system/lib/libmotion_drag.z.so" };
-#endif // defined(__x86_64__)
+#endif // (defined(__aarch64__) || defined(__x86_64__))
 
 ICooperate* PluginManager::LoadCooperate()
 {

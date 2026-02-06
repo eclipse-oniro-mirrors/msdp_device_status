@@ -395,6 +395,8 @@ HWTEST_F(DsoftbusAdapterTest, HandleRawData, TestSize.Level1)
     int32_t *data = new int32_t(SOCKET);
     ASSERT_NO_FATAL_FAILURE(DSoftbusAdapterImpl::GetInstance()->HandleRawData(networkId, data, sizeof(data)));
     RemovePermission();
+    delete data;
+    data = nullptr;
 }
 
 /**
@@ -428,7 +430,7 @@ HWTEST_F(DsoftbusAdapterTest, TestDestroyInstance, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestDestroyInstance
+ * @tc.name: TestSendPacket
  * @tc.desc: Test SendPacket
  * @tc.type: FUNC
  * @tc.require:
@@ -468,7 +470,7 @@ HWTEST_F(DsoftbusAdapterTest, DsoftbusAdapterTest02, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSendParcel
+ * @tc.name: TestBroadcastPacket
  * @tc.desc: Test BroadcastPacket
  * @tc.type: FUNC
  * @tc.require:
@@ -490,7 +492,7 @@ HWTEST_F(DsoftbusAdapterTest, DsoftbusAdapterTest03, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSendParcel
+ * @tc.name: TestInitSocket
  * @tc.desc: Test InitSocket
  * @tc.type: FUNC
  * @tc.require:
