@@ -595,7 +595,7 @@ int32_t DragDrawing::UpdateShadowPic(const ShadowInfo &shadowInfo)
 {
     FI_HILOGD("enter");
     CHKPR(shadowInfo.pixelMap, RET_ERR);
-    DragDrawing::UpdataGlobalPixelMapLocked(shadowInfo.pixelMap);
+    DragDrawing::UpdateGlobalPixelMapLocked(shadowInfo.pixelMap);
     g_drawingInfo.pixelMapX = shadowInfo.x;
     g_drawingInfo.pixelMapY = shadowInfo.y;
     if (!CheckNodesValid()) {
@@ -713,7 +713,7 @@ int32_t DragDrawing::AddSelectedPixelMap(std::shared_ptr<OHOS::Media::PixelMap> 
 
     auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
     g_drawingInfo.multiSelectedPixelMaps.emplace_back(currentPixelMap);
-    DragDrawing::UpdataGlobalPixelMapLocked(pixelMap);
+    DragDrawing::UpdateGlobalPixelMapLocked(pixelMap);
     if (UpdatePixeMapDrawingOrder() != RET_OK) {
         FI_HILOGE("Update pixeMap drawing order failed");
         return RET_ERR;
@@ -2035,7 +2035,7 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData, bool isLongPressDrag
         FI_HILOGE("ShadowInfos is empty");
         return;
     }
-    DragDrawing::UpdataGlobalPixelMapLocked(dragData.shadowInfos.front().pixelMap);
+    DragDrawing::UpdateGlobalPixelMapLocked(dragData.shadowInfos.front().pixelMap);
     g_drawingInfo.pixelMapX = dragData.shadowInfos.front().x;
     g_drawingInfo.pixelMapY = dragData.shadowInfos.front().y;
     float dragOriginDpi = DRAG_DATA_MGR.GetDragOriginDpi();
@@ -3872,7 +3872,7 @@ void DragDrawing::ResetParameter()
     g_drawingInfo.mouseHeight = 0;
     g_drawingInfo.rootNodeWidth = -1;
     g_drawingInfo.rootNodeHeight = -1;
-    DragDrawing::UpdataGlobalPixelMapLocked(nullptr);
+    DragDrawing::UpdateGlobalPixelMapLocked(nullptr);
     g_drawingInfo.stylePixelMap = nullptr;
     g_drawingInfo.isPreviousDefaultStyle = false;
     g_drawingInfo.isCurrentDefaultStyle = false;
@@ -4074,7 +4074,7 @@ std::shared_ptr<Media::PixelMap> DragDrawing::AccessGlobalPixelMapLocked()
     return g_drawingInfo.pixelMap;
 }
 
-void DragDrawing::UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap)
+void DragDrawing::UpdateGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap)
 {
     std::unique_lock<std::shared_mutex> lock(g_pixelMapLock);
     g_drawingInfo.pixelMap = pixelmap;

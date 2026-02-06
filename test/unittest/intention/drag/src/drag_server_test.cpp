@@ -155,7 +155,7 @@ std::optional<DragData> DragServerTest::CreateDragData(int32_t sourceType,
         dragData.shadowInfos.push_back({ pixelMap, g_shadowinfo_x, g_shadowinfo_y });
     }
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
-    dragData.extraInfo = FILTER_INFO;
+    dragData.filterInfo = FILTER_INFO;
     dragData.udKey = UD_KEY;
     dragData.sourceType = sourceType;
     dragData.extraInfo = EXTRA_INFO;
@@ -498,7 +498,7 @@ HWTEST_F(DragServerTest, DragServerTest13, TestSize.Level0)
     int32_t tid = DRAG_DATA_MGR.GetTargetTid();
     EXPECT_NE(tid, READ_OK);
     float dragOriginDpi = DRAG_DATA_MGR.GetDragOriginDpi();
-    EXPECT_TRUE(dragOriginDpi == 0.0f);
+    EXPECT_FLOAT_EQ(dragOriginDpi, 0.0f);
 }
 
 /**
@@ -1899,9 +1899,9 @@ HWTEST_F(DragServerTest, DragServerTest99, TestSize.Level1)
 HWTEST_F(DragServerTest, DragServerTest100, TestSize.Level1)
 {
     std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
-    context_->dragMgr_.dragDrawing_.UpdataGlobalPixelMapLocked(pixelMap);
+    context_->dragMgr_.dragDrawing_.UpdateGlobalPixelMapLocked(pixelMap);
     context_->dragMgr_.dragDrawing_.DoMultiSelectedAnimation(POSITION_X, POSITION_Y, SCALING_VALUE);
-    context_->dragMgr_.dragDrawing_.UpdataGlobalPixelMapLocked(nullptr);
+    context_->dragMgr_.dragDrawing_.UpdateGlobalPixelMapLocked(nullptr);
     ASSERT_NE(pixelMap, nullptr);
 }
 
@@ -1925,9 +1925,9 @@ HWTEST_F(DragServerTest, DragServerTest101, TestSize.Level1)
 HWTEST_F(DragServerTest, DragServerTest102, TestSize.Level1)
 {
     std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
-    context_->dragMgr_.dragDrawing_.UpdataGlobalPixelMapLocked(pixelMap);
+    context_->dragMgr_.dragDrawing_.UpdateGlobalPixelMapLocked(pixelMap);
     context_->dragMgr_.dragDrawing_.MultiSelectedAnimation(POSITION_X, POSITION_Y, SCALING_VALUE, false);
-    context_->dragMgr_.dragDrawing_.UpdataGlobalPixelMapLocked(nullptr);
+    context_->dragMgr_.dragDrawing_.UpdateGlobalPixelMapLocked(nullptr);
     ASSERT_NE(pixelMap, nullptr);
 }
 
