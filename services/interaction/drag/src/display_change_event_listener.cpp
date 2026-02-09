@@ -52,6 +52,12 @@ void DisplayChangeEventListener::OnDestroy(Rosen::DisplayId displayId)
 
 void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
 {
+    FI_HILOGI("display:%{public}" PRIu64"", displayId);
+}
+
+void DisplayChangeEventListener::OnAttributeChange(Rosen::DisplayId displayId,
+    const std::vector<std::string>& attribute)
+{
     CHKPV(context_);
     Rosen::Rotation lastRotation = context_->GetDragManager().GetRotation(displayId);
     if (IsRotateDragScreen()) {
@@ -247,7 +253,9 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     CHKPV(context_);
     displayChangeEventListener_ = sptr<DisplayChangeEventListener>::MakeSptr(context_);
     CHKPV(displayChangeEventListener_);
-    Rosen::DisplayManager::GetInstance().RegisterDisplayListener(displayChangeEventListener_);
+    std::vector<std::string> displayAttribute = {"rotation"};
+    Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(displayAttribute,
+        displayChangeEventListener_);
 #ifdef OHOS_ENABLE_PULLTHROW
     displayChangeEventListener_->SetFoldPC(
         SYS_PRODUCT_TYPE == PRODUCT_NAME_DEFINITION_PARSER.GetProductName("DEVICE_TYPE_FOLD_PC"));
