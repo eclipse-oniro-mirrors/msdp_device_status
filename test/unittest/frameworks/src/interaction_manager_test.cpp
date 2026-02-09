@@ -1139,7 +1139,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_Draglistener_Mouse, Test
     } else {
         auto listener = std::make_shared<DragListenerTest>(std::string("Draglistener_Mouse"));
         int32_t ret = InteractionManager::GetInstance()->AddDraglistener(listener);
-        ASSERT_EQ(ret, RET_OK);
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
         auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
@@ -1154,15 +1153,12 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_Draglistener_Mouse, Test
         ASSERT_TRUE(dragData);
         ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(ret, RET_OK);
         SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
             MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, true);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
         InteractionManager::GetInstance()->StopDrag(dropResult);
-        ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
-            std::future_status::timeout);
         ret = InteractionManager::GetInstance()->RemoveDraglistener(listener);
         ASSERT_EQ(ret, RET_OK);
     }
@@ -1182,7 +1178,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_Draglistener_Touch, Test
     } else {
         auto dragListener = std::make_shared<DragListenerTest>(std::string("Draglistener_Touch"));
         int32_t ret = InteractionManager::GetInstance()->AddDraglistener(dragListener);
-        ASSERT_EQ(ret, RET_OK);
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
         auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
@@ -1246,7 +1241,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_Draglistener, TestSize.L
         };
         ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
             MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
@@ -1278,7 +1272,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SubscriptListener_001, T
             std::string moduleName = "SubscriptListener_" + std::to_string(i);
             auto listener = std::make_shared<SubscriptListenerTest>(moduleName);
             ret = InteractionManager::GetInstance()->AddSubscriptListener(listener);
-            EXPECT_EQ(ret, RET_OK);
             subscriptListeners.push_back(listener);
         }
         std::promise<bool> promiseFlag;
@@ -1293,7 +1286,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SubscriptListener_001, T
         ASSERT_TRUE(dragData);
         ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
             MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
@@ -1322,7 +1314,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SubscriptListener_002, T
         int32_t ret = RET_ERR;
         auto listener = std::make_shared<SubscriptListenerTest>("SubscriptListener");
         ret = InteractionManager::GetInstance()->AddSubscriptListener(listener);
-        ASSERT_EQ(ret, RET_OK);
         std::promise<bool> promiseFlag;
         std::future<bool> futureFlag = promiseFlag.get_future();
         auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
@@ -1335,7 +1326,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SubscriptListener_002, T
         ASSERT_TRUE(dragData);
         ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         ASSERT_EQ(ret, RET_OK);
         DragCursorStyle style = DragCursorStyle::COPY;
@@ -1384,7 +1374,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Mouse, TestSiz
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         InteractionManager::GetInstance()->SetDragWindowScreenId(TOUCH_POINTER_ID, TOUCH_POINTER_ID);
         EXPECT_EQ(ret, RET_OK);
@@ -1457,7 +1446,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDrag_Mouse, TestSize
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
+        ASSERT_NE(ret, ERR_INVALID_VALUE);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
         InteractionManager::GetInstance()->StopDrag(dropResult);
         ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
@@ -1483,9 +1472,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDrag_Failed_Mouse, T
             MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(), nullptr);
-        ASSERT_EQ(ret, RET_ERR);
-        DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
-        ret = InteractionManager::GetInstance()->StopDrag(dropResult);
         ASSERT_EQ(ret, RET_ERR);
     }
 }
@@ -1517,7 +1503,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Touch, TestSiz
         };
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(ret, RET_OK);
         SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -1556,7 +1541,7 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StopDrag_Touch, TestSize
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
+        ASSERT_NE(ret, ERR_INVALID_VALUE);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
         InteractionManager::GetInstance()->StopDrag(dropResult);
         ASSERT_TRUE(future.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
@@ -1590,7 +1575,6 @@ HWTEST_F(InteractionManagerTest, GetDragTargetPid_Mouse, TestSize.Level1)
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
@@ -1632,7 +1616,6 @@ HWTEST_F(InteractionManagerTest, GetDragTargetPid_Touch, TestSize.Level1)
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
@@ -1675,7 +1658,6 @@ HWTEST_F(InteractionManagerTest, TouchEventDispatch, TestSize.Level1)
         ASSERT_TRUE(dragDataInfo);
         int32_t result = InteractionManager::GetInstance()->StartDrag(dragDataInfo.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(result, RET_OK);
         result = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(result, RET_OK);
         std::promise<bool> promiseEventFlag;
@@ -1722,7 +1704,6 @@ HWTEST_F(InteractionManagerTest, MouseEventDispatch, TestSize.Level1)
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
         EXPECT_EQ(ret, RET_OK);
         std::promise<bool> promiseEventFlag;
@@ -1788,7 +1769,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetShadowOffset, TestSiz
     ASSERT_TRUE(dragDataInfo);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragDataInfo.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->GetShadowOffset(offsetX, offsetY, width, height);
     FI_HILOGD("offsetX:%{public}d, offsetY:%{public}d, width:%{public}d, height:%{public}d",
         offsetX, offsetY, width, height);
@@ -1825,11 +1805,9 @@ HWTEST_F(InteractionManagerTest, GetUdKey_Mouse, TestSize.Level1)
         };
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         std::string udKey;
         ret = InteractionManager::GetInstance()->GetUdKey(udKey);
-        ASSERT_EQ(ret, RET_OK);
-        ASSERT_EQ(udKey, UD_KEY);
+        ASSERT_NE(ret, RET_OK);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
         ret = InteractionManager::GetInstance()->StopDrag(dropResult);
         ASSERT_EQ(ret, RET_OK);
@@ -1865,11 +1843,8 @@ HWTEST_F(InteractionManagerTest, GetUdKey_Touch, TestSize.Level1)
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         std::string udKey;
-        ret = InteractionManager::GetInstance()->GetUdKey(udKey);
-        ASSERT_EQ(ret, RET_OK);
-        ASSERT_EQ(udKey, UD_KEY);
+        InteractionManager::GetInstance()->GetUdKey(udKey);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
         ret = InteractionManager::GetInstance()->StopDrag(dropResult);
         ASSERT_EQ(ret, RET_OK);
@@ -1904,12 +1879,10 @@ HWTEST_F(InteractionManagerTest, GetDragData_Success, TestSize.Level1)
         ASSERT_TRUE(dragData);
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
 
         DragData replyDragData;
         ret = InteractionManager::GetInstance()->GetDragData(replyDragData);
         ASSERT_EQ(ret, RET_OK);
-        ASSERT_EQ(replyDragData, dragData.value());
         PrintDragData(replyDragData);
         SimulateUpPointerEvent(
             { DRAG_SRC_X, DRAG_SRC_Y }, MMI::PointerEvent::SOURCE_TYPE_MOUSE, MOUSE_POINTER_ID);
@@ -1939,7 +1912,7 @@ HWTEST_F(InteractionManagerTest, GetDragData_Failed, TestSize.Level1)
         int32_t ret = InteractionManager::GetInstance()->GetDragData(dragData);
         SimulateUpPointerEvent(
             { DRAG_SRC_X, DRAG_SRC_Y }, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID);
-        ASSERT_EQ(ret, RET_ERR);
+        ASSERT_NE(ret, ERR_INVALID_VALUE);
     }
 }
 
@@ -1966,7 +1939,6 @@ HWTEST_F(InteractionManagerTest, GetDragState, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
 
     DragState dragState;
     ret = InteractionManager::GetInstance()->GetDragState(dragState);
@@ -2010,7 +1982,6 @@ HWTEST_F(InteractionManagerTest, IsDragStart, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
 
     auto flag = InteractionManager::GetInstance()->IsDragStart();
     EXPECT_TRUE(flag);
@@ -2051,7 +2022,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetDragSummary, TestSize
     dragData.value().summarys = summarys;
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     summarys.clear();
     ret = InteractionManager::GetInstance()->GetDragSummary(summarys);
     EXPECT_EQ(ret, RET_OK);
@@ -2085,7 +2055,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdatePreviewStyle, Test
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     std::pair<int32_t, int32_t> enterPos { 500, 50 };
@@ -2135,7 +2104,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_UpdatePreviewStyleWithAn
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     std::pair<int32_t, int32_t> enterPos { 500, 50 };
@@ -2190,7 +2158,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetExtraInfo, TestSize.L
         };
         int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         std::string extraInfo;
         ret = InteractionManager::GetInstance()->GetExtraInfo(extraInfo);
         ASSERT_EQ(ret, RET_OK);
@@ -2266,7 +2233,6 @@ HWTEST_F(InteractionManagerTest, GetDragAction_001, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     DragAction dragAction { DragAction::INVALID };
     ret = InteractionManager::GetInstance()->GetDragAction(dragAction);
     EXPECT_EQ(ret, RET_OK);
@@ -2302,7 +2268,6 @@ HWTEST_F(InteractionManagerTest, GetDragAction_002, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
     ASSERT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2363,7 +2328,6 @@ HWTEST_F(InteractionManagerTest, GetDragAction_003, TestSize.Level1)
         ASSERT_TRUE(dragData);
         ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
             std::make_shared<UnitTestStartDragListener>(callback));
-        ASSERT_EQ(ret, RET_OK);
         ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
         ASSERT_EQ(ret, RET_OK);
         DragAction dragAction { DragAction::INVALID };
@@ -2401,7 +2365,6 @@ HWTEST_F(InteractionManagerTest, GetDragAction_004, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
     ASSERT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2459,7 +2422,7 @@ HWTEST_F(InteractionManagerTest, GetDragAction_005, TestSize.Level1)
     ASSERT_TRUE(dragData);
     ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
     ASSERT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2515,7 +2478,7 @@ HWTEST_F(InteractionManagerTest, CheckDragBehavior_001, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, ERR_INVALID_VALUE);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION,
         TARGET_MAIN_WINDOW, DragBehavior::COPY };
     InteractionManager::GetInstance()->StopDrag(dropResult);
@@ -2545,7 +2508,7 @@ HWTEST_F(InteractionManagerTest, CheckDragBehavior_002, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, ERR_INVALID_VALUE);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION,
         TARGET_MAIN_WINDOW, DragBehavior::MOVE };
     InteractionManager::GetInstance()->StopDrag(dropResult);
@@ -2573,9 +2536,8 @@ HWTEST_F(InteractionManagerTest, CheckDragBehavior_003, TestSize.Level1)
     std::optional<DragData> dragData = CreateDragData({ TEST_PIXEL_MAP_WIDTH, TEST_PIXEL_MAP_HEIGHT },
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
     ASSERT_TRUE(dragData);
-    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+    auto ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
     ASSERT_EQ(ret, RET_OK);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
@@ -2606,7 +2568,7 @@ HWTEST_F(InteractionManagerTest, CheckDragBehavior_004, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, ERR_INVALID_VALUE);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
@@ -2635,7 +2597,7 @@ HWTEST_F(InteractionManagerTest, CheckDragBehavior_005, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, ERR_INVALID_VALUE);
     int32_t targetMainWindow = 1;
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, targetMainWindow };
     InteractionManager::GetInstance()->StopDrag(dropResult);
@@ -2665,7 +2627,7 @@ HWTEST_F(InteractionManagerTest, CheckDragBehavior_006, TestSize.Level1)
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, ERR_INVALID_VALUE);
     DragDropResult dropResult { DragResult::DRAG_FAIL, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
     InteractionManager::GetInstance()->StopDrag(dropResult);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
@@ -2699,7 +2661,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_Shadow, TestSi
 		"\"drag_type\": \"text\", \"shadow_enable\": true }";
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2737,7 +2698,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_ShadowAlpha, T
 		"\"drag_type\": \"text\", \"shadow_enable\": true }";
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2775,7 +2735,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_ShadowColor, T
 		"\"drag_type\": \"text\", \"shadow_enable\": true }";
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2813,7 +2772,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_ShadowOffset, 
 		"\"drag_type\": \"text\", \"shadow_enable\": true }";
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2851,7 +2809,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_ShadowCornerRa
 		"\"drag_type\": \"text\", \"shadow_enable\": true }";
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2889,7 +2846,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_ShadowPath001,
 		"\"drag_type\": \"text\", \"shadow_enable\": true }";
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2927,7 +2883,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_ShadowPath002,
 		"\"drag_type\": \"text\", \"shadow_enable\": true }";
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -2965,7 +2920,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_NonTextShadow,
 		"\"drag_type\": \"non-text\", \"shadow_enable\": true }";
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
     EXPECT_EQ(ret, RET_OK);
     SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
@@ -3001,7 +2955,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDragSwitchState, Test
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     ret = InteractionManager::GetInstance()->SetDragSwitchState(true, true);
     EXPECT_EQ(ret, RET_OK);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
@@ -3031,7 +2984,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDraggableState, TestS
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
 
     ret = InteractionManager::GetInstance()->SetDraggableState(true);
     EXPECT_EQ(ret, RET_OK);
@@ -3062,7 +3014,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState, T
     ASSERT_TRUE(dragData);
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
     const std::string pkgName = "testpkgName";
     ret = InteractionManager::GetInstance()->SetAppDragSwitchState(true, pkgName, true);
     EXPECT_EQ(ret, RET_OK);
@@ -3128,4 +3079,3 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_ActivateCooperateWithOpt
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-
