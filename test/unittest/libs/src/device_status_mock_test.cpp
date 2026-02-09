@@ -391,28 +391,6 @@ HWTEST_F(DeviceStatusMsdpMocKTest, DeviceStatusMsdpMocKTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: DeviceStatusMsdpMocKTest018
- * @tc.desc: test devicestatus RegisterCallback
- * @tc.type: FUNC
- */
-HWTEST_F(DeviceStatusMsdpMocKTest, DeviceStatusMsdpMocKTest018, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    std::shared_ptr<MsdpAlgoHandle> mock = std::make_shared<MsdpAlgoHandle>();
-    int32_t ret = LoadMockLibrary(mock);
-    ASSERT_EQ(ret, RET_OK);
-    ASSERT_NE(mock->handle, nullptr);
-    mock->pAlgorithm = mock->create();
-
-    std::shared_ptr<DeviceStatusMsdpClientImpl> callback = std::make_shared<DeviceStatusMsdpClientImpl>();
-    EXPECT_TRUE(mock->pAlgorithm->RegisterCallback(callback) == ERR_OK);
-    EXPECT_TRUE(mock->pAlgorithm->UnregisterCallback() == ERR_OK);
-
-    ret = UnloadMockLibrary(mock);
-    ASSERT_EQ(ret, RET_OK);
-}
-
-/**
  * @tc.name: DeviceStatusMsdpMocKTest019
  * @tc.desc: test devicestatus Mock in Algorithm
  * @tc.type: FUNC

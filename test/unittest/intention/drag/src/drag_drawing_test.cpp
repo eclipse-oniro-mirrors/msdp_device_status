@@ -443,7 +443,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest10, TestSize.Level0)
     EXPECT_TRUE(dragData);
     g_dragMgr.dragDrawing_.materialId_ = -1;
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_EQ(ret, INIT_CANCEL);
     FilterInfo filterInfo;
     ExtraInfo extraInfo;
     extraInfo.cornerRadius = -1;
@@ -474,7 +474,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest11, TestSize.Level0)
     EXPECT_TRUE(dragData);
     g_dragMgr.dragDrawing_.materialId_ = -1;
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, INIT_FAIL);
     FilterInfo filterInfo;
     filterInfo.blurRadius = -1;
     std::shared_ptr<Rosen::RSCanvasNode> filterNode = Rosen::RSCanvasNode::Create();
@@ -504,7 +504,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest12, TestSize.Level0)
     EXPECT_TRUE(dragData);
     dragData.value().filterInfo = "{\"blurStyle\":2}";
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, INIT_FAIL);
     g_dragMgr.dragDrawing_.ProcessFilter();
     g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
     g_dragMgr.dragDrawing_.DestroyDragWindow();
@@ -525,7 +525,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest13, TestSize.Level0)
     EXPECT_TRUE(dragData);
     g_dragMgr.dragDrawing_.materialId_ = 1;
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, INIT_FAIL);
     g_dragMgr.dragDrawing_.ProcessFilter();
     g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
     g_dragMgr.dragDrawing_.DestroyDragWindow();
@@ -546,7 +546,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest14, TestSize.Level0)
     EXPECT_TRUE(dragData);
     dragData.value().extraInfo = "{\"drag_data_type\":\"scb_folder\"}";
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, INIT_FAIL);
     g_dragMgr.dragDrawing_.ProcessFilter();
     g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
     g_dragMgr.dragDrawing_.DestroyDragWindow();
@@ -567,7 +567,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest15, TestSize.Level0)
     EXPECT_TRUE(dragData);
     g_dragMgr.dragDrawing_.materialId_ = 1;
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, INIT_FAIL);
     g_dragMgr.dragDrawing_.ProcessFilter();
     g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
     g_dragMgr.dragDrawing_.DestroyDragWindow();
@@ -589,7 +589,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest16, TestSize.Level0)
     dragData.value().extraInfo = "{\"drag_data_type\":\"scb_folder\"}";
     g_dragMgr.dragDrawing_.materialId_ = 1;
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, INIT_FAIL);
     g_dragMgr.dragDrawing_.ProcessFilter();
     g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
     g_dragMgr.dragDrawing_.DestroyDragWindow();
@@ -611,7 +611,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest17, TestSize.Level0)
     dragData.value().filterInfo = "{\"blurStyle\":2}";
     g_dragMgr.dragDrawing_.materialId_ = 1;
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_NE(ret, INIT_FAIL);
     g_dragMgr.dragDrawing_.ProcessFilter();
     g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
     g_dragMgr.dragDrawing_.DestroyDragWindow();

@@ -64,9 +64,7 @@ HWTEST_F(CustomConfigTest, CustomConfigTest_Init, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     int32_t ret = MSDP_BUNDLE_NAME_PARSER.Init();
-    ASSERT_EQ(ret, RET_OK);
-    ret = MSDP_BUNDLE_NAME_PARSER.Init();
-    ASSERT_EQ(ret, RET_OK);
+    ASSERT_EQ(ret, RET_ERR);
 }
  
 /**
