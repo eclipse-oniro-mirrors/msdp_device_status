@@ -120,8 +120,8 @@ class DevListener : public MMI::IInputDeviceListener {
 class InterceptorConsumer : public MMI::IInputEventConsumer {
 public:
     InterceptorConsumer(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback,
-        std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback)
-            : pointCallback_(pointCallback), keyCallback_(keyCallback) {}
+                        std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback)
+        : pointCallback_(pointCallback), keyCallback_(keyCallback) {}
 
     void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override
     {
