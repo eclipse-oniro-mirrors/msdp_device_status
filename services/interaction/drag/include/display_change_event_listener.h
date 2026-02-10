@@ -47,6 +47,7 @@ private:
     sptr<Rosen::DisplayInfo> GetDisplayInfoById(Rosen::DisplayId displayId);
     sptr<Rosen::DisplayInfo> GetDisplayInfo(Rosen::DisplayId displayId);
     void HandleScreenRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation);
+    void ProcessDisplayRotationEvent(Rosen::DisplayId displayId);
 
 private:
     IContext *context_ { nullptr };
