@@ -13,31 +13,29 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
+#include <securec.h>
 #include <future>
 #include <optional>
 #include <utility>
 #include <vector>
-
-#include <unistd.h>
+#include <gtest/gtest.h>
 
 #include "accesstoken_kit.h"
-#include "display_manager.h"
-#include "display_info.h"
-#include <gtest/gtest.h>
-#include "input_device.h"
-#include "input_manager.h"
-#include "parcel.h"
-#include "pointer_event.h"
-#include "securec.h"
-
 #include "coordination_message.h"
 #include "devicestatus_define.h"
 #include "devicestatus_errors.h"
+#include "display_manager.h"
+#include "display_info.h"
 #include "drag_data_util.h"
-#include "interaction_manager.h"
+#include "input_device.h"
+#include "input_manager.h"
 #include "interaction_manager_test.h"
 #include "nativetoken_kit.h"
+#include "parcel.h"
+#include "pointer_event.h"
 #include "token_setproc.h"
+
 
 #undef LOG_TAG
 #define LOG_TAG "InteractionManagerTest"

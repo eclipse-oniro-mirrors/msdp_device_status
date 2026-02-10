@@ -96,8 +96,8 @@ private:
 
 class DevListener : public MMI::IInputDeviceListener {
     public:
-    DevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback)
-        : devAddedCallback_(devAddedCallback), devRemovedCallback_(devRemovedCallback) {}
+        DevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback)
+            : devAddedCallback_(devAddedCallback), devRemovedCallback_(devRemovedCallback) {}
     
         void OnDeviceAdded(int32_t deviceId, const std::string &type) override
         {
@@ -120,8 +120,8 @@ class DevListener : public MMI::IInputDeviceListener {
 class InterceptorConsumer : public MMI::IInputEventConsumer {
 public:
     InterceptorConsumer(std::function<void(std::shared_ptr<MMI::PointerEvent>)> pointCallback,
-                        std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback)
-        : pointCallback_(pointCallback), keyCallback_(keyCallback) {}
+        std::function<void(std::shared_ptr<MMI::KeyEvent>)> keyCallback)
+            : pointCallback_(pointCallback), keyCallback_(keyCallback) {}
 
     void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override
     {
