@@ -204,7 +204,8 @@ HWTEST_F(CooperateTest, CooperateTest1, TestSize.Level0)
 
 /**
  * @tc.name: CooperateTest2
- * @tc.desc: hen cooperate service is available, register and unregister hot area listener with calling PID should return RET_OK
+ * @tc.desc: hen cooperate service is available, register and unregister hot
+    area listener with calling PID should return RET_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -248,7 +249,8 @@ HWTEST_F(CooperateTest, CooperateTest3, TestSize.Level0)
 
 /**
  * @tc.name: CooperateTest4
- * @tc.desc: When cooperate service is available, calling Start with valid parameters should return a non-negative session ID (>= 0)
+ * @tc.desc: When cooperate service is available, calling Start with
+    valid parameters should return a non-negative session ID (>= 0)
  * @tc.type: FUNC
  * @tc.require:
  */
