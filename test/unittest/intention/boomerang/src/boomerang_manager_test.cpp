@@ -39,7 +39,6 @@ namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
-constexpr int32_t RET_IPC_ERR = 5;
 inline constexpr size_t MAX_STRING_LEN{1024};
 } // namespace
 
