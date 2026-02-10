@@ -472,7 +472,7 @@ HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest02, TestSize.Leve
     ev.data.ptr = eventData;
     ASSERT_NO_FATAL_FAILURE(env->devMgr_.Dispatch(ev));
     free(eventData);
- 	eventData = nullptr;
+    eventData = nullptr;
 }
 
 /**
