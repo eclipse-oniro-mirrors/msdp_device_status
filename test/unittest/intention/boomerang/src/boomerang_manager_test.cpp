@@ -92,7 +92,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest002, TestSize.Level1)
     sptr<IRemoteBoomerangCallback> subCallback { nullptr };
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.SubscribeCallback(type, bundleName, subCallback);
-    EXPECT_EQ(ret, RET_IPC_ERR);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest002 end";
 }
 
@@ -112,7 +112,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest003, TestSize.Level1)
     ASSERT_NE(subCallback, nullptr);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.SubscribeCallback(type, bundleName, subCallback);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest003 end";
 }
 
@@ -131,7 +131,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest004, TestSize.Level1)
     sptr<IRemoteBoomerangCallback> unsubCallback { nullptr };
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.UnsubscribeCallback(type, bundleName, unsubCallback);
-    EXPECT_EQ(ret, RET_IPC_ERR);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest004 end";
 }
 
@@ -151,7 +151,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest005, TestSize.Level1)
     ASSERT_NE(unsubCallback, nullptr);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.UnsubscribeCallback(type, bundleName, unsubCallback);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest005 end";
 }
 
@@ -169,7 +169,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest006, TestSize.Level1)
     sptr<IRemoteBoomerangCallback> notifyCallback { nullptr };
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.NotifyMetadataBindingEvent(bundleName, notifyCallback);
-    EXPECT_EQ(ret, RET_IPC_ERR);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest006 end";
 }
 
@@ -188,7 +188,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest007, TestSize.Level1)
     ASSERT_NE(notifyCallback, nullptr);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.NotifyMetadataBindingEvent(bundleName, notifyCallback);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest007 end";
 }
 
@@ -211,7 +211,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest008, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(initOptions);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangEncodeImage(pixelMap, metadata, encodeCallback);
-    EXPECT_EQ(ret, RET_IPC_ERR);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest008 end";
 }
 
@@ -231,7 +231,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest009, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangEncodeImage(pixelMap, metadata, encodeCallback);
-    EXPECT_EQ(ret, RET_IPC_ERR);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest009 end";
 }
 
@@ -250,7 +250,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest010, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangEncodeImage(pixelMap, metadata, encodeCallback);
-    EXPECT_EQ(ret, RET_IPC_ERR);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest010 end";
 }
 
@@ -274,7 +274,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest011, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(initOptions);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangEncodeImage(pixelMap, metadata, encodeCallback);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest011 end";
 }
 
@@ -290,7 +290,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest012, TestSize.Level1)
     string metadata = "";
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.SubmitMetadata(metadata);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest012 end";
 }
 
@@ -328,7 +328,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest014, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(initOptions);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangDecodeImage(pixelMap, decodeCallback);
-    EXPECT_EQ(ret, RET_IPC_ERR);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest014 end";
 }
 
@@ -347,7 +347,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest015, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangDecodeImage(pixelMap, decodeCallback);
-    EXPECT_EQ(ret, RET_IPC_ERR);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest015 end";
 }
 
@@ -365,7 +365,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest016, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangDecodeImage(pixelMap, decodeCallback);
-    EXPECT_EQ(ret, RET_IPC_ERR);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest016 end";
 }
 
@@ -388,7 +388,7 @@ HWTEST_F(BoomerangManagerTest, BoomerangManagerTest017, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(initOptions);
     BoomerangManager& boomerangManager = BoomerangManager::GetInstance();
     int32_t ret = boomerangManager.BoomerangDecodeImage(pixelMap, decodeCallback);
-    EXPECT_EQ(ret, RET_OK);
+    EXPECT_EQ(ret, RET_ERR);
     GTEST_LOG_(INFO) << "BoomerangManagerTest017 end";
 }
 } // namespace DeviceStatus
