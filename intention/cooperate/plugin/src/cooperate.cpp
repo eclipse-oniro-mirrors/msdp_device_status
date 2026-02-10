@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -444,8 +444,12 @@ void Cooperate::LoadMotionDrag()
 
 void Cooperate::SetDamplingCoefficient(const CooperateEvent &event)
 {
-    SetDamplingCoefficientEvent notice = std::get<SetDamplingCoefficientEvent>(event.event);
-    context_.inputEventBuilder_.SetDamplingCoefficient(notice.direction, notice.coefficient);
+    if (std::holds_alternative<SetDamplingCoefficientEvent>(event.event)) {
+        SetDamplingCoefficientEvent notice = std::get<SetDamplingCoefficientEvent>(event.event);
+        context_.inputEventBuilder_.SetDamplingCoefficient(notice.direction, notice.coefficient);
+    } else {
+        FI_HILOGE("event type is not SetDamplingCoefficientEvent");
+    }
 }
 
 extern "C" ICooperate* CreateInstance(IContext *env)

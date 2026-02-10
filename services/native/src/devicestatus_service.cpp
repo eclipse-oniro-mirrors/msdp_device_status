@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,8 +113,8 @@ void DeviceStatusService::OnStart()
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
 #endif
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
-    EnableDSoftbus();
-    EnableDDM();
+    EnableDSoftbus(MAX_N_RETRIES);
+    EnableDDM(MAX_N_RETRIES);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     FI_HILOGI("check live start intention");
     intention_ = sptr<IntentionService>::MakeSptr(this);
@@ -195,14 +195,14 @@ IDSoftbusAdapter& DeviceStatusService::GetDSoftbus()
     return *dsoftbus_;
 }
 
-void DeviceStatusService::EnableDSoftbus()
+void DeviceStatusService::EnableDSoftbus(int32_t nRetries)
 {
     CALL_INFO_TRACE;
     int32_t ret = dsoftbus_->Enable();
     if (ret != RET_OK) {
         FI_HILOGE("Failed to enable dsoftbus, try again later");
         int32_t timerId = timerMgr_.AddTimer(DEFAULT_WAIT_TIME_MS, WAIT_FOR_ONCE,
-            [this] { this->EnableDSoftbus(); });
+            [this, nRetries] { this->EnableDSoftbus(nRetries - 1); });
         if (timerId < 0) {
             FI_HILOGE("AddTimer failed, Failed to enable dsoftbus");
         }
@@ -211,14 +211,14 @@ void DeviceStatusService::EnableDSoftbus()
     }
 }
 
-void DeviceStatusService::EnableDDM()
+void DeviceStatusService::EnableDDM(int32_t nRetries)
 {
     CALL_INFO_TRACE;
     int32_t ret = ddm_->Enable();
     if (ret != RET_OK) {
         FI_HILOGE("Failed to enable DistributedDeviceManager, try again later");
         int32_t timerId = timerMgr_.AddTimer(DEFAULT_WAIT_TIME_MS, WAIT_FOR_ONCE,
-            [this] { this->EnableDDM(); });
+            [this, nRetries] { this->EnableDDM(nRetries - 1); });
         if (timerId < 0) {
             FI_HILOGE("AddTimer failed, Failed to enable DistributedDeviceManager");
         }
@@ -359,8 +359,7 @@ Data DeviceStatusService::GetCache(const Type &type)
 {
     CALL_DEBUG_ENTER;
     if (devicestatusManager_ == nullptr) {
-        Data data = {type, OnChangedValue::VALUE_EXIT};
-        data.value = OnChangedValue::VALUE_INVALID;
+        Data data = {type, OnChangedValue::VALUE_INVALID};
         FI_HILOGI("Get latest device status data func is nullptr, return default!");
         return data;
     }

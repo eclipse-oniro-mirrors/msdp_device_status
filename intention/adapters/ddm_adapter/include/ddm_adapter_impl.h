@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,16 +45,16 @@ public:
     bool CheckSinkIsSameAccount(const std::string &srcNetworkId, int32_t srcUserId,
         const std::string &srcAccountId) override;
     bool GetDmAccessCallerSrc(DistributedHardware::DmAccessCaller &caller);
-    bool GetDmAccessCalleeSrc(DistributedHardware::DmAccessCallee &callee, const std::string &sinkNetworkId);
     bool GetDmAccessCallerSink(DistributedHardware::DmAccessCaller &caller, const std::string &srcNetworkId,
         int32_t srcUserId, const std::string &srcAccountId);
     bool GetDmAccessCalleeSink(DistributedHardware::DmAccessCallee &callee);
-    int32_t GetUserId() override;
+    int32_t GetUserId() const override;
     std::string GetAccountId() override;
 
 private:
     void SetUserId(int32_t userId);
     void SetAccountId(const std::string &accountId);
+    bool CheckForegroundUser(const int32_t uid);
 
 private:
     class Observer final {

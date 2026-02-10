@@ -48,14 +48,14 @@ int32_t DDMAdapterImpl::Enable()
 
     int32_t ret = D_DEV_MGR.InitDeviceManager(pkgName, initCb_);
     if (ret != 0) {
-        FI_HILOGE("DM::InitDeviceManager fail");
+        FI_HILOGE("DM::InitDeviceManager fail, ret: %{public}d", ret);
         goto INIT_FAIL;
     }
     boardStateCb_ = std::make_shared<DmBoardStateCb>(shared_from_this());
 
     ret = D_DEV_MGR.RegisterDevStateCallback(pkgName, extra, boardStateCb_);
     if (ret != 0) {
-        FI_HILOGE("DM::RegisterDevStateCallback fail");
+        FI_HILOGE("DM::RegisterDevStateCallback fail, ret: %{public}d", ret);
         goto REG_FAIL;
     }
     return RET_OK;
@@ -63,7 +63,7 @@ int32_t DDMAdapterImpl::Enable()
 REG_FAIL:
     ret = D_DEV_MGR.UnInitDeviceManager(pkgName);
     if (ret != 0) {
-        FI_HILOGE("DM::UnInitDeviceManager fail");
+        FI_HILOGE("DM::UnInitDeviceManager fail, ret: %{public}d", ret);
     }
     boardStateCb_.reset();
 
@@ -82,14 +82,14 @@ void DDMAdapterImpl::Disable()
         boardStateCb_.reset();
         int32_t ret = D_DEV_MGR.UnRegisterDevStateCallback(pkgName);
         if (ret != 0) {
-            FI_HILOGE("DM::UnRegisterDevStateCallback fail");
+            FI_HILOGE("DM::UnRegisterDevStateCallback fail, ret: %{public}d", ret);
         }
     }
     if (initCb_ != nullptr) {
         initCb_.reset();
         int32_t ret = D_DEV_MGR.UnInitDeviceManager(pkgName);
         if (ret != 0) {
-            FI_HILOGE("DM::UnInitDeviceManager fail");
+            FI_HILOGE("DM::UnInitDeviceManager fail, ret: %{public}d", ret);
         }
     }
 }
@@ -147,7 +147,7 @@ bool DDMAdapterImpl::CheckSameAccountToLocal(const std::string &networkId)
     return false;
 }
 
-bool DDMAdapterImpl::CheckSameAccountToLocalWithUid(const std::string &networkId, const int32_t uid)
+bool DDMAdapterImpl::CheckForegroundUser(const int32_t uid)
 {
     CALL_INFO_TRACE;
     int32_t appUserId = -1;
@@ -163,13 +163,13 @@ bool DDMAdapterImpl::CheckSameAccountToLocalWithUid(const std::string &networkId
         FI_HILOGW("app userId is not Foreground");
         return false;
     }
-    isForegroundUser = false;
     std::vector<AccountSA::ForegroundOsAccount> accounts;
     ErrCode errCode = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccounts(accounts);
     if (errCode != ERR_OK || accounts.empty()) {
-        FI_HILOGE("GetForegroundOsAccounts fail, ret : %{public}d", errCode);
+        FI_HILOGE("GetForegroundOsAccounts fail, ret: %{public}d", errCode);
         return false;
     }
+    isForegroundUser = false;
     for (auto account : accounts) {
         if (account.localId == appUserId) {
             isForegroundUser = true;
@@ -177,6 +177,16 @@ bool DDMAdapterImpl::CheckSameAccountToLocalWithUid(const std::string &networkId
         }
     }
     if (!isForegroundUser) {
+        FI_HILOGW("app userId is not Foreground");
+        return false;
+    }
+    return true;
+}
+
+bool DDMAdapterImpl::CheckSameAccountToLocalWithUid(const std::string &networkId, const int32_t uid)
+{
+    CALL_INFO_TRACE;
+    if (!CheckForegroundUser(uid)) {
         FI_HILOGW("app userId is not Foreground");
         return false;
     }
@@ -192,12 +202,9 @@ bool DDMAdapterImpl::CheckSrcIsSameAccount(const std::string &sinkNetworkId)
         return false;
     }
     DistributedHardware::DmAccessCallee callee;
-    if (!GetDmAccessCalleeSrc(callee, sinkNetworkId)) {
-        FI_HILOGE("GetDmAccessCalleeSrc failed");
-        return false;
-    }
+    callee.networkId = sinkNetworkId;
     if (!D_DEV_MGR.CheckSrcIsSameAccount(caller, callee)) {
-        FI_HILOGE("CheckSrcIsSameAccount failed");
+        FI_HILOGE("CheckSrcIsSameAccount is false");
         return false;
     }
     return true;
@@ -218,7 +225,7 @@ bool DDMAdapterImpl::CheckSinkIsSameAccount(const std::string &srcNetworkId, int
         return false;
     }
     if (!D_DEV_MGR.CheckSinkIsSameAccount(caller, callee)) {
-        FI_HILOGE("CheckSinkIsSameAccount failed");
+        FI_HILOGE("CheckSinkIsSameAccount is false");
         return false;
     }
     return true;
@@ -245,12 +252,6 @@ bool DDMAdapterImpl::GetDmAccessCallerSrc(DistributedHardware::DmAccessCaller &c
     };
     SetUserId(caller.userId);
     SetAccountId(caller.accountId);
-    return true;
-}
-
-bool DDMAdapterImpl::GetDmAccessCalleeSrc(DistributedHardware::DmAccessCallee &callee, const std::string &sinkNetworkId)
-{
-    callee.networkId = sinkNetworkId;
     return true;
 }
 
@@ -295,7 +296,7 @@ void DDMAdapterImpl::SetAccountId(const std::string &accountId)
     accountId_ = accountId;
 }
 
-int32_t DDMAdapterImpl::GetUserId()
+int32_t DDMAdapterImpl::GetUserId() const
 {
     return userId_;
 }

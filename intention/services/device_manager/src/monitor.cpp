@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,9 @@ void Monitor::Dispatch(const struct epoll_event &ev)
     if ((ev.events & EPOLLIN) == EPOLLIN) {
         ReceiveDevice();
     } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
-        FI_HILOGE("Epoll hangup, errno:%{public}s", strerror(errno));
+        int savedErrno = errno;
+        FI_HILOGE("Epoll hangup/error, last errno: %{public}d, msg: %{public}s",
+            savedErrno, strerror(savedErrno));
     }
 }
 

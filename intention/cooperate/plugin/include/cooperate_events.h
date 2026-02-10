@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -270,7 +270,7 @@ struct DSoftbusHotPlugEvent {
     std::shared_ptr<IDevice> device;
 };
 
-struct NotAollowCooperateWhenMotionDragging {
+struct NotAllowCooperateWhenMotionDragging {
     int32_t pid;
     int32_t userData;
     std::string networkId;
@@ -345,7 +345,7 @@ struct CooperateEvent {
         UpdateVirtualDeviceIdMapEvent,
         StartWithOptionsEvent,
         DSoftbusCooperateOptions,
-        NotAollowCooperateWhenMotionDragging
+        NotAllowCooperateWhenMotionDragging
     > event;
 };
 

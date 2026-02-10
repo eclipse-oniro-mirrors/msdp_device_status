@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ constexpr bool HAS_CUSTOM_ANIMATION { true };
 std::shared_ptr<ContextService> g_context { nullptr };
 std::shared_ptr<IntentionService> g_intentionService { nullptr };
 std::shared_ptr<IntentionService> g_intentionServiceNullptr { nullptr };
-sptr<IRemoteDevStaCallback> stationaryCallback_;
+sptr<IRemoteDevStaCallback> g_stationaryCallback_;
 IContext *g_contextNullptr { nullptr };
 DragManager g_dragMgr;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
@@ -165,7 +165,10 @@ void IntentionServiceTest::TearDownTestCase()
 
 void IntentionServiceTest::SetUp()
 {
-    stationaryCallback_ = new (std::nothrow) TestDevStaCallback();
+    g_stationaryCallback_ = new (std::nothrow) TestDevStaCallback();
+    if (g_stationaryCallback_ == nullptr) {
+        FI_HILOGE("g_stationaryCallback_ is nullptr");
+    }
 }
 
 void IntentionServiceTest::TearDown() {}
@@ -292,7 +295,7 @@ void IntentionServiceTest::AssignToAnimation(PreviewAnimation &animation)
 }
 
 /**
- * @tc.name: IntentionServiceTest_1
+ * @tc.name: IntentionServiceTest_Socket001
  * @tc.desc: Test Socket
  * @tc.type: FUNC
  * @tc.require:
@@ -303,13 +306,17 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_Socket001, TestSize.Level0)
     auto programName = GetProgramName();
     int32_t socketFd { -1 };
     int32_t tokenType { -1 };
+    if (g_stationaryCallback_ == nullptr) {
+        FI_HILOGE("g_stationaryCallback_ is nullptr");
+        return;
+    }
     int32_t ret = g_intentionService->Socket(programName, CONNECT_MODULE_TYPE_FI_CLIENT, socketFd, tokenType);
     EXPECT_EQ(ret, RET_ERR);
 }
 
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
 /**
- * @tc.name: IntentionServiceTest2
+ * @tc.name: IntentionServiceTest_EnableCooperate001
  * @tc.desc: Test EnableCooperate
  * @tc.type: FUNC
  * @tc.require:
@@ -318,13 +325,17 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_EnableCooperate001, TestSize
 {
     CALL_TEST_DEBUG;
     int32_t userData = 0;
+    if (g_stationaryCallback_ == nullptr) {
+        FI_HILOGE("g_stationaryCallback_ is nullptr");
+        return;
+    }
     ErrCode ret = g_intentionService->EnableCooperate(userData);
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 
 
 /**
- * @tc.name: IntentionServiceTest3
+ * @tc.name: IntentionServiceTest_DisableCooperate001
  * @tc.desc: Test DisableCooperate
  * @tc.type: FUNC
  * @tc.require:
@@ -333,11 +344,15 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_DisableCooperate001, TestSiz
 {
     CALL_TEST_DEBUG;
     int32_t userData = 0;
+    if (g_stationaryCallback_ == nullptr) {
+        FI_HILOGE("g_stationaryCallback_ is nullptr");
+        return;
+    }
     ErrCode ret = g_intentionService->DisableCooperate(userData);
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 /**
- * @tc.name: IntentionServiceTest4
+ * @tc.name: IntentionServiceTest_StartCooperate001
  * @tc.desc: Test StartCooperate
  * @tc.type: FUNC
  * @tc.require:
@@ -378,7 +393,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_StartCooperateWithOptions001
 }
 
 /**
- * @tc.name: IntentionServiceTest5
+ * @tc.name: IntentionServiceTest_RegisterCooperateListener001
  * @tc.desc: Test RegisterCooperateListener
  * @tc.type: FUNC
  * @tc.require:
@@ -391,7 +406,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterCooperateListener001
 }
 
 /**
- * @tc.name: IntentionServiceTest6
+ * @tc.name: IntentionServiceTest_UnregisterCooperateListener001
  * @tc.desc: Test UnregisterCooperateListener
  * @tc.type: FUNC
  * @tc.require:
@@ -404,7 +419,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterCooperateListener0
 }
 
 /**
- * @tc.name: IntentionServiceTest7
+ * @tc.name: IntentionServiceTest_RegisterHotAreaListener001
  * @tc.desc: Test RegisterHotAreaListener
  * @tc.type: FUNC
  * @tc.require:
@@ -418,7 +433,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterHotAreaListener001, 
     EXPECT_EQ(ret, PERMISSION_EXCEPTION);
 }
 /**
- * @tc.name: IntentionServiceTest8
+ * @tc.name: IntentionServiceTest_UnregisterHotAreaListener001
  * @tc.desc: Test UnregisterHotAreaListener
  * @tc.type: FUNC
  * @tc.require:
@@ -431,7 +446,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterHotAreaListener001
 }
 
 /**
- * @tc.name: IntentionServiceTest9
+ * @tc.name: IntentionServiceTest_RegisterMouseEventListener001
  * @tc.desc: Test RegisterMouseEventListener
  * @tc.type: FUNC
  * @tc.require:
@@ -445,7 +460,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_RegisterMouseEventListener00
 }
 
 /**
- * @tc.name: IntentionServiceTest10
+ * @tc.name: IntentionServiceTest_UnregisterMouseEventListener001
  * @tc.desc: Test UnregisterMouseEventListener
  * @tc.type: FUNC
  * @tc.require:
@@ -459,7 +474,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnregisterMouseEventListener
 }
 
 /**
- * @tc.name: IntentionServiceTest11
+ * @tc.name: IntentionServiceTest_GetCooperateStateSync001
  * @tc.desc: Test GetCooperateStateSync
  * @tc.type: FUNC
  * @tc.require:
@@ -474,7 +489,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetCooperateStateSync001, Te
 }
 
 /**
- * @tc.name: IntentionServiceTest12
+ * @tc.name: IntentionServiceTest_GetCooperateStateAsync001
  * @tc.desc: Test GetCooperateStateAsync
  * @tc.type: FUNC
  * @tc.require:
@@ -490,7 +505,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetCooperateStateAsync001, T
 }
 
 /**
- * @tc.name: IntentionServiceTest13
+ * @tc.name: IntentionServiceTest_SetDamplingCoefficient001
  * @tc.desc: Test SetDamplingCoefficient
  * @tc.type: FUNC
  * @tc.require:
@@ -506,7 +521,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDamplingCoefficient001, T
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 
 /**
- * @tc.name: IntentionServiceTest14
+ * @tc.name: IntentionServiceTest_StartDrag001
  * @tc.desc: Test StartDrag
  * @tc.type: FUNC
  * @tc.require:
@@ -985,7 +1000,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SubscribeStationary001, Test
     int32_t type = Type::TYPE_STILL;
     int32_t event = ActivityEvent::ENTER;
     int32_t reportTime = ReportLatencyNs::MIDDLE;
-    ErrCode ret = g_intentionService->SubscribeStationaryCallback(type, event, reportTime, stationaryCallback_);
+    ErrCode ret = g_intentionService->SubscribeStationaryCallback(type, event, reportTime, g_stationaryCallback_);
     EXPECT_EQ(ret, RET_OK);
 }
 
@@ -1000,7 +1015,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnsubscribeStationary001, Te
     CALL_TEST_DEBUG;
     int32_t type = Type::TYPE_STILL;
     int32_t event = ActivityEvent::ENTER;
-    ErrCode ret = g_intentionService->UnsubscribeStationaryCallback(type, event, stationaryCallback_);
+    ErrCode ret = g_intentionService->UnsubscribeStationaryCallback(type, event, g_stationaryCallback_);
     EXPECT_EQ(ret, RET_OK);
 }
 

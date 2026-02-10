@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ inline constexpr std::string_view CREATE_PROMISE { "napi_create_promise" };
 inline constexpr std::string_view GET_UNDEFINED { "napi_get_undefined" };
 inline constexpr std::string_view RESOLVE_DEFERRED { "napi_resolve_deferred" };
 inline constexpr std::string_view REJECT_DEFERRED { "napi_reject_deferred" };
+constexpr size_t MAX_QUEUE_SIZE = 10000;
 } // namespace
 
 JsEventTarget::JsEventTarget()
@@ -63,8 +64,9 @@ void JsEventTarget::EmitJsPrepare(sptr<JsUtil::CallbackInfo> cb, const std::stri
             CallPrepareAsyncWork(cb);
         }
     };
-    if (napi_status::napi_ok != napi_send_event(cb->env, task, napi_eprio_immediate)) {
-        FI_HILOGE("Failed to SendEvent");
+    napi_status status = napi_send_event(cb->env, task, napi_eprio_immediate);
+    if (status != napi_status::napi_ok) {
+        FI_HILOGE("Failed to SendEvent, error: %{public}d", status);
     }
 }
 
@@ -359,6 +361,10 @@ void JsEventTarget::OnCoordinationMessage(const std::string &networkId, Coordina
             .networkId = networkId,
             .msg = msg
         };
+        if (eventQueue_.size() >= MAX_QUEUE_SIZE) {
+            FI_HILOGE("Event queue overflow");
+            return;
+        }
         eventQueue_.push(ev);
 
         auto task = [item]() {
@@ -698,7 +704,10 @@ void JsEventTarget::EmitCoordinationMessageEvent(sptr<JsUtil::CallbackInfo> cb)
                 continue;
             }
             napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(item->env, &scope);
+            napi_status status = napi_open_handle_scope(item->env, &scope);
+            if (status != napi_status::napi_ok) {
+                FI_HILOGE("Failed to open handle scope, error: %{public}d", status);
+            }
             napi_value deviceDescriptor = nullptr;
             CHKRV_SCOPE(item->env, napi_create_string_utf8(item->env, event.networkId.c_str(),
                 NAPI_AUTO_LENGTH, &deviceDescriptor), CREATE_STRING_UTF8, scope);
