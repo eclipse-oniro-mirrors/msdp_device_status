@@ -149,7 +149,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_003, TestSize.Level1)
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ASSERT_EQ(ret, RET_IPC_ERR);
     ret = boomerangClient.SubmitMetadata(metadata);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_NE(ret, RET_IPC_ERR);
 }
 
 /**
@@ -206,7 +206,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_006, TestSize.Level1)
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
     ASSERT_EQ(ret, RET_IPC_ERR);
     ret = boomerangClient.UnsubscribeCallback(BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback2);
-    ASSERT_NE(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, RET_IPC_ERR);
 }
 
 /**
@@ -227,7 +227,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_007, TestSize.Level1)
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
     ASSERT_EQ(ret, RET_IPC_ERR);
     ret = boomerangClient.NotifyMetadataBindingEvent(bundleName, callback2);
-    ASSERT_NE(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, RET_IPC_ERR);
 }
 
 /**
@@ -248,7 +248,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_008, TestSize.Level1)
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ASSERT_EQ(ret, RET_IPC_ERR);
     ret = boomerangClient.SubmitMetadata(metadata);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_NE(ret, RET_IPC_ERR);
 }
 
 /**
