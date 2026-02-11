@@ -66,6 +66,8 @@ HWTEST_F(DeviceTest, OpenTest001, TestSize.Level0)
     int32_t ret = dev->Open();
     EXPECT_EQ(ret, RET_OK);
     dev->Close();
+    delete dev;
+    dev = nullptr;
 }
 
 /**
@@ -81,6 +83,8 @@ HWTEST_F(DeviceTest, OpenTest002, TestSize.Level0)
     CHKPV(dev);
     int32_t ret = dev->Open();
     EXPECT_EQ(ret, RET_ERR);
+    delete dev;
+    dev = nullptr;
 }
 
 /**
@@ -95,6 +99,8 @@ HWTEST_F(DeviceTest, CloseTest001, TestSize.Level0)
     Device *dev = new Device(deviceId);
     CHKPV(dev);
     ASSERT_NO_FATAL_FAILURE(dev->Close());
+    delete dev;
+    dev = nullptr;
 }
 
 /**
