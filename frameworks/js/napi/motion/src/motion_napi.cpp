@@ -90,12 +90,10 @@ void MotionCallback::AddTarget(const std::shared_ptr<MotionNapi>& target)
     if (!target) {
         return;
     }
-    std::lock_guard<std::mutex> lk(mutex_);
 
-    // 强增强点：在锁内对 targets_ 做一次“清理 + 去重压缩”
-    // 1) 清理 expired weak_ptr，避免 targets_ 越来越大；
-    // 2) 消除历史重复项（防御性：即便未来 AddTarget 被误改，也能在这里纠正）；
-    // 3) 最后确保当前 target 一定被加入（若之前不存在）。
+    // 强增强点：在锁内对 targets_ 做一次“清理 + 去重压缩” 1) 清理 expired weak_ptr，避免 targets_ 越来越大；
+    // 2) 消除历史重复项（防御性：即便未来 AddTarget 被误改，也能在这里纠正）；3) 最后确保当前 target 一定被加入（若之前不存在）。
+    std::lock_guard<std::mutex> lk(mutex_);
     std::unordered_set<MotionNapi*> uniq;
     uniq.reserve(targets_.size() + 1);
 
@@ -121,9 +119,7 @@ void MotionCallback::AddTarget(const std::shared_ptr<MotionNapi>& target)
     if (!exists) {
         compact.push_back(target);
     }
-
-    targets_.swap(compact);    
-
+    targets_.swap(compact);
 }
 
 void MotionCallback::RemoveTarget(const std::shared_ptr<MotionNapi>& target)
@@ -155,12 +151,11 @@ bool MotionCallback::HasTargets() const
 void MotionCallback::OnMotionChanged(const MotionEvent &event)
 {
     FI_HILOGD("Enter");
-    // 回调通常在 binder/service 线程触发，此处严禁直接调用任何 N-API。
     // 对每个 JS 上下文，调用 MotionNapi::PostMotionEvent() 投递回对应 JS 线程。
     std::vector<std::shared_ptr<MotionNapi>> snapshot;
     {
         std::lock_guard<std::mutex> lk(mutex_);
-        for (auto it = targets_.begin(); it != targets_.end(); ) {
+        for (auto it = targets_.begin(); it != targets_.end();) {
             auto sp = it->lock();
             if (!sp) {
                 it = targets_.erase(it);
@@ -289,7 +284,7 @@ bool MotionNapi::DoSubscription(napi_env env, int32_t type, sptr<MotionCallback>
             return false;
         }
     }
-    return true;    
+    return true;
 }
 
 bool MotionNapi::UnsubscribeFromService(napi_env env, int32_t type)
@@ -297,7 +292,7 @@ bool MotionNapi::UnsubscribeFromService(napi_env env, int32_t type)
     FI_HILOGD("Enter");
     // 此函数预计仅在 CheckEvents(type) == true 时调用
     // g_callbacksMutex 仅保护 map 操作；IPC（UnsubscribeCallback）在锁外执行
-    // 仍保持原有对外行为：只有最后一个 target 才真正对 service 做 unsubscribe 
+    // 仍保持原有对外行为：只有最后一个 target 才真正对 service 做 unsubscribe
     sptr<MotionCallback> cb;
     {
         std::lock_guard<std::mutex> lk(g_callbacksMutex);
@@ -317,7 +312,6 @@ bool MotionNapi::UnsubscribeFromService(napi_env env, int32_t type)
     }
 
     // 需要成为最后一个 target：尝试从 map 中删除（锁内只做 map 操作）
-    // bool needUnsubscribe = false;
     {
         std::lock_guard<std::mutex> lk(g_callbacksMutex);
         auto it = g_typeCallbacks.find(type);
@@ -688,7 +682,7 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
     if (serviceAlreadySubscribed && isNewHandler) {
         MotionEvent latest = g_motionClient.GetMotionData(type); // todo
         // Only invoke the newly-added handler (args[ARG_1]) once.
-        int32_t statusVal =latest.status;
+        int32_t statusVal = latest.status;
         if (statusVal < BASE_HAND) {
             FI_HILOGD("unknown latest status");
             statusVal = HoldPostureStatus::UNKNOWN;
@@ -830,11 +824,8 @@ napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info i
         return nullptr;
     }
 #endif
-
-    // ConstructMotion(env, jsThis);
     auto motion = GetOrCreateInstance(env, jsThis);
 #ifdef MOTION_ENABLE
-    // if (g_motionObj == nullptr) {
     if (motion == nullptr) {
         ThrowMotionErr(env, SERVICE_EXCEPTION, "Error invalid type");
         return nullptr;
@@ -863,7 +854,7 @@ void MotionNapi::SaveExportsWeakRef(napi_env env, napi_value exports)
         }
     }
     // 锁外做N-API创建 weak ref
-    napi_ref newRef = nullptr; 
+    napi_ref newRef = nullptr;
     napi_status st = napi_create_reference(env, exports, 0, &newRef);
     if (st != napi_ok || newRef == nullptr) {
         FI_HILOGE("SaveExportsWeakRef: napi_create_reference failed");

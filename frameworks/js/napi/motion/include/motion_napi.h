@@ -42,14 +42,14 @@ public:
     ~MotionCallback() override = default;
     void OnMotionChanged(const MotionEvent& event) override;
     // 一个系统侧回调（MotionClient/SA 回调）需要分发给多个 JS 上下文（不同 napi_env）。
-     void AddTarget(const std::shared_ptr<MotionNapi>& target);
-     void RemoveTarget(const std::shared_ptr<MotionNapi>& target);
-     bool HasTargets() const;
+    void AddTarget(const std::shared_ptr<MotionNapi>& target);
+    void RemoveTarget(const std::shared_ptr<MotionNapi>& target);
+    bool HasTargets() const;
 
 private:
     // 保护 targets_ 的互斥锁 OnMotionChanged 可在binder线程触发。
-     mutable std::mutex mutex_;
-     std::vector<std::weak_ptr<MotionNapi>> targets_;
+    mutable std::mutex mutex_;
+    std::vector<std::weak_ptr<MotionNapi>> targets_;
 };
 #endif
 
@@ -93,7 +93,6 @@ private:
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
     static void SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
     static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
-
 };
 } // namespace Msdp
 } // namespace OHOS
