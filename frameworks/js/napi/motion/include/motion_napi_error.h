@@ -17,6 +17,8 @@
 #define MOTION_NAPI_ERROR_H
 
 #include <map>
+#include <optional>
+#include <string>
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
