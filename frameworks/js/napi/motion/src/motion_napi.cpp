@@ -15,7 +15,13 @@
 
 #include "motion_napi.h"
 
+#include <algorithm>
+#include <memory>
 #include <mutex>
+#include <unordered_map>
+#include <vector>
+#include <unordered_set>
+
 #include "devicestatus_define.h"
 #include "fi_log.h"
 #ifdef MOTION_ENABLE
@@ -66,49 +72,125 @@ const std::map<const std::string, int32_t> MOTION_TYPE_MAP = {
     { "remotePhotoStandingDetect", MOTION_TYPE_REMOTE_PHOTO },
     { "holdingHandChanged", MOTION_TYPE_HOLDING_HAND_STATUS },
 };
-MotionNapi *g_motionObj = nullptr;
-} // namespace
-
-std::mutex g_mutex;
+std::mutex g_instancesMutex;
+std::unordered_map<napi_env, std::weak_ptr<MotionNapi>> g_instances;
+std::mutex g_exportsMutex;
+std::unordered_map<napi_env, napi_ref> g_exportsRefs;
 
 #ifdef MOTION_ENABLE
+  std::mutex g_callbacksMutex;
+  std::unordered_map<int32_t, sptr<MotionCallback>> g_typeCallbacks;
+#endif
+} // namespace
+
+#ifdef MOTION_ENABLE
+void MotionCallback::AddTarget(const std::shared_ptr<MotionNapi>& target)
+{
+    FI_HILOGD("Enter");
+    if (!target) {
+        return;
+    }
+    std::lock_guard<std::mutex> lk(mutex_);
+
+    // 强增强点：在锁内对 targets_ 做一次“清理 + 去重压缩”
+    // 1) 清理 expired weak_ptr，避免 targets_ 越来越大；
+    // 2) 消除历史重复项（防御性：即便未来 AddTarget 被误改，也能在这里纠正）；
+    // 3) 最后确保当前 target 一定被加入（若之前不存在）。
+    std::unordered_set<MotionNapi*> uniq;
+    uniq.reserve(targets_.size() + 1);
+
+    std::vector<std::weak_ptr<MotionNapi>> compact;
+    compact.reserve(targets_.size() + 1);
+
+    bool exists = false;
+    for (auto &w : targets_) {
+        auto sp = w.lock();
+        if (!sp) {
+            continue; // 清理 expired
+        }
+        MotionNapi* key = sp.get();
+        if (!uniq.insert(key).second) {
+            continue; // 去重：相同对象只保留第一次
+        }
+        if (key == target.get()) {
+            exists = true;
+        }
+        compact.push_back(sp); // shared_ptr -> weak_ptr
+    }
+
+    if (!exists) {
+        compact.push_back(target);
+    }
+
+    targets_.swap(compact);    
+
+}
+
+void MotionCallback::RemoveTarget(const std::shared_ptr<MotionNapi>& target)
+{
+    FI_HILOGD("Enter");
+    if (!target) {
+        FI_HILOGE("target is null");
+        return;
+    }
+    std::lock_guard<std::mutex> lk(mutex_);
+    targets_.erase(std::remove_if(targets_.begin(), targets_.end(),
+        [&target](const std::weak_ptr<MotionNapi>& it) {
+            auto sp = it.lock();
+            return !sp || sp.get() == target.get();
+        }), targets_.end());
+}
+
+bool MotionCallback::HasTargets() const
+{
+    std::lock_guard<std::mutex> lk(mutex_);
+    for (auto &it : targets_) {
+        if (!it.expired()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void MotionCallback::OnMotionChanged(const MotionEvent &event)
 {
     FI_HILOGD("Enter");
-    std::lock_guard<std::mutex> guard(g_mutex);
-    auto* data = new (std::nothrow) MotionEvent();
-    CHKPV(data);
-    data->type = event.type;
-    data->status = event.status;
-    data->dataLen = event.dataLen;
-    data->data = event.data;
+    // 回调通常在 binder/service 线程触发，此处严禁直接调用任何 N-API。
+    // 对每个 JS 上下文，调用 MotionNapi::PostMotionEvent() 投递回对应 JS 线程。
+    std::vector<std::shared_ptr<MotionNapi>> snapshot;
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        for (auto it = targets_.begin(); it != targets_.end(); ) {
+            auto sp = it->lock();
+            if (!sp) {
+                it = targets_.erase(it);
+                continue;
+            }
+            snapshot.push_back(std::move(sp));
+            ++it;
+        }
+    }
 
-    auto task = [data]() {
-        FI_HILOGI("Execute lamdba");
-        EmitOnEvent(data);
-    };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
-        FI_HILOGE("Failed to SendEvent");
-        delete data;
+    // 锁外去重，避免极端情况下 targets_ 中存在重复 weak_ptr
+    std::unordered_set<MotionNapi*> seen;
+    seen.reserve(snapshot.size());
+    std::vector<std::shared_ptr<MotionNapi>> uniqueTargets;
+    uniqueTargets.reserve(snapshot.size());
+    for (auto &t : snapshot) {
+        if (!t) {
+            continue;
+        }
+        if (seen.insert(t.get()).second) {
+            uniqueTargets.push_back(std::move(t));
+        }
+    }
+
+    for (auto &tmp : uniqueTargets) {
+        tmp->PostMotionEvent(event.type, event.status);
     }
     FI_HILOGD("Exit");
 }
 
-void MotionCallback::EmitOnEvent(MotionEvent* data)
-{
-    if (data == nullptr) {
-        FI_HILOGE("data is nullptr");
-        return;
-    }
-
-    if (g_motionObj == nullptr) {
-        FI_HILOGE("Failed to get g_motionObj");
-        delete data;
-        return;
-    }
-    g_motionObj->OnEventOperatingHand(data->type, 1, *data);
-    delete data;
-}
 #endif
 
 MotionNapi::MotionNapi(napi_env env, napi_value thisVar) : MotionEventNapi(env, thisVar)
@@ -117,7 +199,12 @@ MotionNapi::MotionNapi(napi_env env, napi_value thisVar) : MotionEventNapi(env, 
 }
 
 MotionNapi::~MotionNapi()
-{}
+{
+#ifdef MOTION_ENABLE
+    // 确保ts上下文销毁时，从全局系统回调里解绑，必要时取消 MotionClient 的系统订阅。
+    UnsubscribeFromAllTypesNoThrow();
+#endif
+}
 
 int32_t MotionNapi::GetMotionType(const std::string &type)
 {
@@ -132,22 +219,60 @@ int32_t MotionNapi::GetMotionType(const std::string &type)
 }
 
 #ifdef MOTION_ENABLE
-bool MotionNapi::SubscribeCallback(napi_env env, int32_t type)
+bool MotionNapi::SubscribeToService(napi_env env, int32_t type, bool &serviceAlreadySubscribed)
 {
-    if (g_motionObj == nullptr) {
-        ThrowMotionErr(env, SUBSCRIBE_EXCEPTION, "g_motionObj is nullptr");
-        return false;
+    FI_HILOGD("Enter");
+    // 同一个 motion type 在进程内只向 MotionClient 订阅一次，然后分发给多个 napi_env。
+    // 1) g_callbacksMutex 只保护 g_typeCallbacks 的读写，不要在持锁状态下进行 IPC/耗时调用。
+    // 2) MotionCallback::mutex_ 只保护 targets_。锁顺序固定为：g_callbacksMutex -> mutex_
+    sptr<MotionCallback> cb;
+    serviceAlreadySubscribed = false;
+    bool needIpcSubscribe = false; // flag是否需要调用ipc
+    // 锁内写g_typeCallbacks,锁外调用
+    {
+        std::lock_guard<std::mutex> lk(g_callbacksMutex);
+        auto it = g_typeCallbacks.find(type);
+        if (it != g_typeCallbacks.end()) {
+            cb = it->second;
+            serviceAlreadySubscribed = true;
+        } else {
+            cb = new (std::nothrow) MotionCallback();
+            if (cb == nullptr) {
+                FI_HILOGE("Failed to create MotionCallback");
+                ThrowMotionErr(env, SUBSCRIBE_EXCEPTION, "Subscribe failed");
+                return false;
+            }
+
+            // 先占坑，防止并发线程重复对同一 type 做 SubscribeCallback（避免重复订阅）
+            g_typeCallbacks.emplace(type, cb);
+            needIpcSubscribe = true;
+        }
     }
 
-    auto iter = g_motionObj->callbacks_.find(type);
-    if (iter == g_motionObj->callbacks_.end()) {
-        FI_HILOGD("Don't find callback, to create");
-        sptr<IMotionCallback> callback = new (std::nothrow) MotionCallback(env);
-        CHKPF(callback);
-        int32_t ret = g_motionClient.SubscribeCallback(type, callback);
-        if (ret == RET_OK) {
-            g_motionObj->callbacks_.insert(std::make_pair(type, callback));
-            return true;
+    // (B) AddTarget 放在锁外，避免 g_callbacksMutex 与 mutex_ 长时间叠加
+    cb->AddTarget(shared_from_this());
+
+    // (C) IPC 调用放在锁外（锁安全增强关键点）
+    bool res = true;
+    if (needIpcSubscribe) {
+        res = DoSubscription(env, type, cb);
+    }
+    return res;
+}
+
+bool MotionNapi::DoSubscription(napi_env env, int32_t type, sptr<MotionCallback> cb)
+{
+    // 避免并发竞态，持锁执行一次IPC订阅，确保订阅原子操作。
+    int32_t ret = g_motionClient.SubscribeCallback(type, cb);
+    if (ret != RET_OK) {
+        // 回滚：移除 target + 从 map 中移除占坑项（仅当仍指向同一个 cb）
+        cb->RemoveTarget(shared_from_this());
+        {
+            std::lock_guard<std::mutex> lk(g_callbacksMutex);
+            auto it = g_typeCallbacks.find(type);
+            if (it != g_typeCallbacks.end() && it->second == cb) {
+                g_typeCallbacks.erase(it);
+            }
         }
 
         if (ret == PERMISSION_DENIED) {
@@ -164,73 +289,342 @@ bool MotionNapi::SubscribeCallback(napi_env env, int32_t type)
             return false;
         }
     }
-    return true;
+    return true;    
 }
 
-bool MotionNapi::UnSubscribeCallback(napi_env env, int32_t type)
+bool MotionNapi::UnsubscribeFromService(napi_env env, int32_t type)
 {
-    if (g_motionObj == nullptr) {
-        ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "g_motionObj is nullptr");
-        return false;
-    }
-
-    if (g_motionObj->CheckEvents(type)) {
-        auto iter = g_motionObj->callbacks_.find(type);
-        if (iter == g_motionObj->callbacks_.end()) {
+    FI_HILOGD("Enter");
+    // 此函数预计仅在 CheckEvents(type) == true 时调用
+    // g_callbacksMutex 仅保护 map 操作；IPC（UnsubscribeCallback）在锁外执行
+    // 仍保持原有对外行为：只有最后一个 target 才真正对 service 做 unsubscribe 
+    sptr<MotionCallback> cb;
+    {
+        std::lock_guard<std::mutex> lk(g_callbacksMutex);
+        auto it = g_typeCallbacks.find(type);
+        if (it == g_typeCallbacks.end()) {
             FI_HILOGE("faild to find callback");
             ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
             return false;
         }
-        int32_t ret = g_motionClient.UnsubscribeCallback(type, iter->second);
-        if (ret == RET_OK) {
-            g_motionObj->callbacks_.erase(iter);
+        cb = it->second;
+    }
+    // 先移除当前 env 的 target（锁外，内部只拿 mutex_）
+    cb->RemoveTarget(shared_from_this());
+    if (cb->HasTargets()) {
+        // 仍有其它 env 在监听：对外表现为“取消成功”，但不触发 service unsubscribe
+        return true;
+    }
+
+    // 需要成为最后一个 target：尝试从 map 中删除（锁内只做 map 操作）
+    // bool needUnsubscribe = false;
+    {
+        std::lock_guard<std::mutex> lk(g_callbacksMutex);
+        auto it = g_typeCallbacks.find(type);
+        if (it == g_typeCallbacks.end() || it->second != cb) {
+            return true; // 其他线程可能已经订阅，视为无需unsubscribe
+        }
+        // 再确认一次，避免窗口期其它线程 AddTarget
+        if (cb->HasTargets()) {
             return true;
         }
+        g_typeCallbacks.erase(it);
+    }
 
-        if (ret == PERMISSION_DENIED) {
-            FI_HILOGE("failed to unsubscribe");
-            ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
-            return false;
-        } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
-            FI_HILOGE("failed to unsubscribe");
-            ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
-            return false;
-        } else {
-            FI_HILOGE("failed to unsubscribe");
-            ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
-            return false;
+    // IPC 调用在锁外
+    int32_t ret = g_motionClient.UnsubscribeCallback(type, cb);
+    if (ret == RET_OK) {
+        return true;
+    } else if (ret == PERMISSION_DENIED) {
+        FI_HILOGE("failed to unsubscribe");
+        ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
+        return false;
+    } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
+        FI_HILOGE("failed to unsubscribe");
+        ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+        return false;
+    } else {
+        FI_HILOGE("failed to unsubscribe");
+        ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+        return false;
+    }
+}
+
+void MotionNapi::UnsubscribeFromServiceNoThrow(int32_t type)
+{
+    // 只用于析构不throwMotionErr
+    sptr<MotionCallback> cb;
+    bool needUnsubscribe = false;
+    {
+        std::lock_guard<std::mutex> lk(g_callbacksMutex);
+        auto it = g_typeCallbacks.find(type);
+        if (it == g_typeCallbacks.end()) {
+            return;
+        }
+        cb = it->second;
+        cb->RemoveTarget(shared_from_this());
+        if (!cb->HasTargets()) {
+            g_typeCallbacks.erase(it);
+            needUnsubscribe = true;
         }
     }
-    return false;
+
+    if (!needUnsubscribe) {
+        FI_HILOGE("type no needUnsubscribe");
+        return;
+    }
+
+    int32_t ret = g_motionClient.UnsubscribeCallback(type, cb);
+    if (ret != RET_OK) {
+        // 这里仅记录日志，不抛异常
+        FI_HILOGE("UnsubscribeCallback failed in finalize, type=%{public}d, ret=%{public}d", type, ret);
+    }
+}
+
+void MotionNapi::UnsubscribeFromAllTypes()
+{
+    FI_HILOGD("Enter");
+    std::vector<int32_t> types;
+    types.reserve(events_.size());
+    for (auto &p : events_) {
+        types.push_back(p.first);
+    }
+    for (auto t : types) {
+        UnsubscribeFromService(env_, t);
+    }
+}
+
+void MotionNapi::UnsubscribeFromAllTypesNoThrow()
+{
+    FI_HILOGD("Enter");
+    std::vector<int32_t> types;
+    types.reserve(events_.size());
+    for (auto &p : events_) {
+        types.push_back(p.first);
+    }
+    for (auto t : types) {
+        // 析构专用
+        UnsubscribeFromServiceNoThrow(t);
+    }
+}
+
+void MotionNapi::PostMotionEvent(int32_t type, int32_t status)
+{
+    // 从 binder/service线程投递回 env对应的JS线程再触发js回调。
+    auto selfW = weak_from_this();
+    napi_env env = env_;
+    auto task = [selfW, type, status]() {
+        auto self = selfW.lock();
+        if (!self) {
+            return;
+        }
+        MotionEvent ev;
+        ev.type = type;
+        ev.status = status;
+        // 只关心 status；避免转发其他
+        ev.dataLen = 0;
+        ev.data = nullptr;
+        self->OnEventOperatingHand(type, 1, ev);
+    };
+    if (napi_send_event(env, task, napi_eprio_immediate) != napi_ok) {
+        FI_HILOGE("Failed to SendEvent");
+    }
+}
+
+void MotionNapi::InvokeOperatingHandOnce(napi_ref handlerRef, int32_t status)
+{
+    // 必须在 env_ 对应的 JS 线程执行（由 complete 或 napi_send_event 投递保证）。
+    if (env_ == nullptr || handlerRef == nullptr) {
+        return;
+    }
+
+    napi_value handler = nullptr;
+    napi_status ret = napi_get_reference_value(env_, handlerRef, &handler);
+    if (ret == napi_ok && handler != nullptr) {
+        MotionEvent ev;
+        ev.status = status;
+        ev.data = nullptr;
+        // ConvertOperatingHandData 内部会调用 napi_call_function 等 N-API
+        ConvertOperatingHandData(handler, 1, ev);
+    } else {
+        FI_HILOGE("napi_get_reference_value failed, ret:%{public}d", ret);
+    }
+    // 一次性 ref：必须释放，避免泄露
+    napi_delete_reference(env_, handlerRef);
+}
+
+bool MotionNapi::ScheduleOperatingHandOnceDelayed(napi_ref handlerRef, int32_t status, uint32_t delayMs)
+{
+    // 约束：业务侧不能直接调用 uv_queue_work。
+    // 方案：使用 N-API 的 napi_async_work（execute 工作线程延时；complete 回 JS 线程触发回调）。
+    if (env_ == nullptr || handlerRef == nullptr) {
+        return false;
+    }
+
+    struct DelayedOnceCtx {
+        napi_env env {nullptr};
+        std::weak_ptr<MotionNapi> weak;
+        napi_ref handlerRef {nullptr};
+        int32_t status {0};
+        uint32_t delayMs {0};
+        napi_async_work work {nullptr};
+    };
+
+    auto *ctx = new (std::nothrow) DelayedOnceCtx;
+    if (ctx == nullptr) {
+        return false;
+    }
+    ctx->env = env_;
+    ctx->weak = shared_from_this(); // MotionNapi 已继承 enable_shared_from_this
+    ctx->handlerRef = handlerRef;
+    ctx->status = status;
+    ctx->delayMs = delayMs;
+
+    napi_value resourceName = nullptr;
+    napi_status sts = napi_create_string_utf8(env_, "MotionDelayedOnce", NAPI_AUTO_LENGTH, &resourceName);
+    if (sts != napi_ok) {
+        delete ctx;
+        return false;
+    }
+
+    auto execute = [](napi_env, void *data) {
+        auto *ctxdata = static_cast<DelayedOnceCtx *>(data);
+        usleep(static_cast<useconds_t>(ctxdata->delayMs) * 1000);
+    };
+
+    auto complete = [](napi_env, napi_status, void *data) {
+        auto *ctxdata = static_cast<DelayedOnceCtx *>(data);
+        auto sp = ctxdata->weak.lock();
+        if (sp) {
+            // JS 线程：InvokeOperatingHandOnce 内部会释放 handlerRef
+            sp->InvokeOperatingHandOnce(ctxdata->handlerRef,  ctxdata->status);
+        } else {
+            // MotionNapi 已析构：仍需释放引用避免泄露（complete 在 JS 线程，安全）
+            if (ctxdata->env != nullptr && ctxdata->handlerRef != nullptr) {
+                napi_delete_reference(ctxdata->env, ctxdata->handlerRef);
+            }
+        }
+
+        if (ctxdata->env != nullptr && ctxdata->work != nullptr) {
+            napi_delete_async_work(ctxdata->env, ctxdata->work);
+        }
+        delete ctxdata;
+    };
+
+    sts = napi_create_async_work(env_, nullptr, resourceName, execute, complete, ctx, &ctx->work);
+    if (sts != napi_ok || ctx->work == nullptr) {
+        delete ctx;
+        return false;
+    }
+
+    sts = napi_queue_async_work(env_, ctx->work);
+    if (sts != napi_ok) {
+        napi_delete_async_work(env_, ctx->work);
+        delete ctx;
+        return false;
+    }
+    return true;
 }
 #endif
 
-bool MotionNapi::ConstructMotion(napi_env env, napi_value jsThis) __attribute__((no_sanitize("cfi")))
+std::shared_ptr<MotionNapi> MotionNapi::GetOrCreateInstance(napi_env env, napi_value jsThis)
 {
-    std::lock_guard<std::mutex> guard(g_mutex);
-    if (g_motionObj == nullptr) {
-        g_motionObj = new (std::nothrow) MotionNapi(env, jsThis);
-        if (g_motionObj == nullptr) {
-            FI_HILOGE("faild to get g_motionObj");
-            return false;
-        }
-        napi_status status = napi_wrap(env, jsThis, reinterpret_cast<void *>(g_motionObj),
-            [](napi_env env, void *data, void *hint) {
-                (void)env;
-                (void)hint;
-                if (data != nullptr) {
-                    MotionNapi *motion = reinterpret_cast<MotionNapi *>(data);
-                    delete motion;
-                }
-            }, nullptr, nullptr);
-        if (status != napi_ok) {
-            delete g_motionObj;
-            g_motionObj = nullptr;
-            FI_HILOGE("napi_wrap failed");
-            return false;
+    // 锁安全增强：
+    // g_instancesMutex 只保护 g_instances 读写，绝不在持锁状态下调用 N-API（例如 napi_wrap），
+    // 避免 N-API 内部触发 finalize/GC 造成重入，进而导致潜在死锁。
+
+    // (1) 先在锁内快速查询是否已存在
+    if (auto exist = TryGetExistingInstanceLocked(env)) {
+        return exist;
+    }
+
+    // (2) 锁外创建对象（避免在锁内做可能抛异常/耗时的操作）
+    auto sp = std::make_shared<MotionNapi>(env, jsThis);
+
+    // (3) 锁内 check + emplace，避免并发覆盖
+    {
+        std::lock_guard<std::mutex> lk(g_instancesMutex);
+        auto it = g_instances.find(env);
+        if (it != g_instances.end()) {
+            auto exist = it->second.lock();
+            if (exist) {
+                return exist;
+            }
+            it->second = sp; // weak 已过期：覆盖成新的
+        } else {
+            g_instances.emplace(env, sp);
         }
     }
-    return true;
+
+    struct InstanceHolder {
+        std::shared_ptr<MotionNapi> sp;
+    };
+    
+    auto *holder = new (std::nothrow) InstanceHolder{sp};
+
+    // (4) 锁外做 N-API 绑定（napi_wrap）
+    if (holder == nullptr) {
+        FI_HILOGE("faild to alloc instanceHolder");
+        // 回滚占坑
+        RollbackInstancesLocked(env, sp);
+        return nullptr;
+
+    }
+
+    napi_status status = napi_wrap(env, jsThis, reinterpret_cast<void *>(holder),
+        [](napi_env env, void *data, void *hint) {
+            (void)hint;
+            auto *holder = reinterpret_cast<InstanceHolder *>(data);
+            {
+                std::lock_guard<std::mutex> lk(g_instancesMutex);
+                g_instances.erase(env);
+            }
+            TakeAndDeleteExportsRef(env);
+            delete holder; // 释放 shared_ptr 触发 MotionNapi 析构
+        }, nullptr, nullptr);
+
+    if (status != napi_ok) {
+        FI_HILOGE("napi_wrap failed");
+        delete holder;
+        // 回滚
+        RollbackInstancesLocked(env, sp);
+        return nullptr;
+    }
+    return sp;
+}
+
+void MotionNapi::RollbackInstancesLocked(napi_env env, const std::shared_ptr<MotionNapi> &sp)
+{
+    std::lock_guard<std::mutex> lk(g_instancesMutex);
+    auto it = g_instances.find(env);
+    if (it == g_instances.end()) {
+        return;
+    }
+    auto current = it->second.lock();
+    if (current && current.get() == sp.get()) {
+        g_instances.erase(it);
+    }
+}
+
+std::shared_ptr<MotionNapi> MotionNapi::TryGetExistingInstanceLocked(napi_env env)
+{
+    std::lock_guard<std::mutex> lk(g_instancesMutex);
+    auto it = g_instances.find(env);
+    if (it == g_instances.end()) {
+        return nullptr;
+    }
+    return it->second.lock();
+}
+
+std::shared_ptr<MotionNapi> MotionNapi::GetInstance(napi_env env)
+{
+    FI_HILOGD("Enter");
+    std::lock_guard<std::mutex> lk(g_instancesMutex);
+    auto it = g_instances.find(env);
+    if (it == g_instances.end()) {
+        return nullptr;
+    }
+    return it->second.lock();
 }
 
 napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
@@ -270,20 +664,50 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    if (!ConstructMotion(env, jsThis)) {
+    napi_value stableThis = GetStableThis(env, jsThis);
+    auto motion = GetOrCreateInstance(env, stableThis);
+    if (motion == nullptr) {
         ThrowMotionErr(env, SUBSCRIBE_EXCEPTION, "Failed to get g_motionObj");
         return nullptr;
     }
 
 #ifdef MOTION_ENABLE
-    if (!SubscribeCallback(env, type)) {
+    bool serviceAlreadySubscribed = false;
+    if (!motion->SubscribeToService(env, type, serviceAlreadySubscribed)) {
         return nullptr;
     }
 
-    if (!g_motionObj->AddCallback(type, args[ARG_1])) {
+    bool isNewHandler = false;
+    if (!motion->AddCallbackEx(type, args[ARG_1], isNewHandler)) {
         ThrowMotionErr(env, SERVICE_EXCEPTION, "AddCallback failed");
         return nullptr;
     }
+
+    // 如果服务已订阅（即本次我们没有调用 MotionClient::SubscribeCallback）
+    // 并且这是此环境的新js function ，则立即使用最新状态回调。
+    if (serviceAlreadySubscribed && isNewHandler) {
+        MotionEvent latest = g_motionClient.GetMotionData(type); // todo
+        // Only invoke the newly-added handler (args[ARG_1]) once.
+        int32_t statusVal =latest.status;
+        if (statusVal < BASE_HAND) {
+            FI_HILOGD("unknown latest status");
+            statusVal = HoldPostureStatus::UNKNOWN;
+        }
+        // 延迟 5ms 再回调一次
+        constexpr uint32_t kInitialCbDelayMs = 5;
+
+        napi_ref onceHandlerRef = nullptr;
+        napi_status refRet = napi_create_reference(env, args[ARG_1], 1, &onceHandlerRef);
+        if (env != motion->env_ || refRet != napi_ok || onceHandlerRef == nullptr) {
+            FI_HILOGE("napi_create_reference failed for delayed invoke, ret:%{public}d", refRet);
+        } else {
+            if (!motion->ScheduleOperatingHandOnceDelayed(onceHandlerRef, statusVal, kInitialCbDelayMs)) {
+                // async_work 失败：complete 不会来，所以这里必须释放 ref，避免泄露
+                napi_delete_reference(env, onceHandlerRef);
+            }
+        }
+    }
+
     if (processorId == EVENT_NOT_SUPPORT) {
         FI_HILOGW("Non-applications do not support breakpoint");
     } else {
@@ -308,8 +732,9 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
     int64_t beginTime = DeviceStatus::NapiEventUtils::GetSysClockTime();
     std::string transId = std::string("transId_") + std::to_string(std::rand());
 #endif
-    if (g_motionObj == nullptr) {
-        ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "g_motionObj is nullptr");
+    auto motion = GetInstance(env);
+    if (motion == nullptr) {
+        ThrowMotionErr(env, UNSUBSCRIBE_EXCEPTION, "Motion instance not found in this env");
         return nullptr;
     }
 
@@ -346,20 +771,27 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 
 #ifdef MOTION_ENABLE
     if (argc != ARG_2) {
-        if (!g_motionObj->RemoveAllCallback(type)) {
+        if (!motion->RemoveAllCallback(type)) {
             ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
             return nullptr;
         }
     } else {
-        if (!g_motionObj->RemoveCallback(type, args[ARG_1])) {
+        if (!motion->RemoveCallback(type, args[ARG_1])) {
             ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
             return nullptr;
         }
     }
 
-    if (!UnSubscribeCallback(env, type)) {
+    // 如果仍然有监听器监听此类事件
+    if (!motion->CheckEvents(type)) {
+        napi_get_undefined(env, &result);
+        return result;
+    }
+
+    if (!motion->UnsubscribeFromService(env, type)) {
         return nullptr;
     }
+
     if (processorId == EVENT_NOT_SUPPORT) {
         FI_HILOGW("Non-applications do not support breakpoint");
     } else {
@@ -399,9 +831,11 @@ napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info i
     }
 #endif
 
-    ConstructMotion(env, jsThis);
+    // ConstructMotion(env, jsThis);
+    auto motion = GetOrCreateInstance(env, jsThis);
 #ifdef MOTION_ENABLE
-    if (g_motionObj == nullptr) {
+    // if (g_motionObj == nullptr) {
+    if (motion == nullptr) {
         ThrowMotionErr(env, SERVICE_EXCEPTION, "Error invalid type");
         return nullptr;
     }
@@ -417,6 +851,82 @@ napi_value MotionNapi::GetRecentOptHandStatus(napi_env env, napi_callback_info i
     return result;
 }
 
+void MotionNapi::SaveExportsWeakRef(napi_env env, napi_value exports)
+{
+    FI_HILOGD("Enter");
+    // 先锁内判断是否已存在
+    {
+        std::lock_guard<std::mutex> lk(g_exportsMutex);
+        auto it = g_exportsRefs.find(env);
+        if (it != g_exportsRefs.end() && it->second != nullptr) {
+            return;
+        }
+    }
+    // 锁外做N-API创建 weak ref
+    napi_ref newRef = nullptr; 
+    napi_status st = napi_create_reference(env, exports, 0, &newRef);
+    if (st != napi_ok || newRef == nullptr) {
+        FI_HILOGE("SaveExportsWeakRef: napi_create_reference failed");
+        return;
+    }
+
+    // 再锁内写入
+    napi_ref toDelete = nullptr;
+    {
+        std::lock_guard<std::mutex> lk(g_exportsMutex);
+        auto it = g_exportsRefs.find(env);
+        if (it != g_exportsRefs.end() && it->second != nullptr) {
+            toDelete = newRef;
+        } else {
+            g_exportsRefs[env] = newRef;
+            newRef = nullptr;
+        }
+    }
+
+    if (toDelete != nullptr) {
+        napi_delete_reference(env, toDelete);
+    }
+}
+
+napi_value MotionNapi::GetStableThis(napi_env env, napi_value jsThis)
+{
+    napi_ref ref = nullptr;
+    {
+        std::lock_guard<std::mutex> lk(g_exportsMutex);
+        auto it = g_exportsRefs.find(env);
+        if (it != g_exportsRefs.end()) {
+            ref = it->second;
+        }
+    }
+    
+    if (ref != nullptr) {
+        napi_value exportsObj = nullptr;
+        napi_status st = napi_get_reference_value(env, ref, &exportsObj);
+        if (st == napi_ok && exportsObj != nullptr) {
+            return exportsObj;
+        }
+    }
+    return jsThis;
+}
+
+void MotionNapi::TakeAndDeleteExportsRef(napi_env env)
+{
+    napi_ref ref = nullptr;
+    {
+        std::lock_guard<std::mutex> lk(g_exportsMutex);
+        auto it = g_exportsRefs.find(env);
+        if (it == g_exportsRefs.end()) {
+            return;
+        }
+        ref = it->second;
+        g_exportsRefs.erase(it);
+    }
+    if (ref != nullptr) {
+        napi_delete_reference(env, ref);
+    }
+}
+
+
 napi_value MotionNapi::Init(napi_env env, napi_value exports)
 {
     FI_HILOGD("Enter");
@@ -426,6 +936,7 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("getRecentOperatingHandStatus", GetRecentOptHandStatus),
     };
     MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    SaveExportsWeakRef(env, exports);
 
     napi_value operatingHandStatus;
     napi_status status = napi_create_object(env, &operatingHandStatus);

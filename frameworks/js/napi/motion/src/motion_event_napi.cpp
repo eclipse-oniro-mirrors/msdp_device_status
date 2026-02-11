@@ -31,6 +31,22 @@ MotionEventNapi::MotionEventNapi(napi_env env, napi_value thisVar)
 
 MotionEventNapi::~MotionEventNapi()
 {
+#ifdef MOTION_ENABLE
+    // 释放 native 侧持有的所有 JS 回调引用（napi_ref）,防止napi_ref泄露
+    for (auto &typePair : events_) {
+        auto &listener = typePair.second;
+        if (!listener) {
+            continue;
+        }
+        for (auto it = listener->onRefSets.begin(); it != listener->onRefSets.end();) {
+            napi_ref ref = *it;
+            if (env_ != nullptr && ref != nullptr) {
+                (void)napi_delete_reference(env_, ref);
+            }
+            it = listener->onRefSets.erase(it);
+        }
+    }
+#endif
     events_.clear();
     if (env_ != nullptr && thisVarRef_ != nullptr) {
         napi_delete_reference(env_, thisVarRef_);
@@ -38,8 +54,16 @@ MotionEventNapi::~MotionEventNapi()
 }
 
 #ifdef MOTION_ENABLE
+
 bool MotionEventNapi::AddCallback(int32_t eventType, napi_value handler)
 {
+    bool dummyNew = false;
+    return AddCallbackEx(eventType, handler, dummyNew);
+}
+
+bool MotionEventNapi::AddCallbackEx(int32_t eventType, napi_value handler, bool &isNewHandler)
+{
+    isNewHandler = false;
     FI_HILOGD("Enter");
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
@@ -53,14 +77,9 @@ bool MotionEventNapi::AddCallback(int32_t eventType, napi_value handler)
             FI_HILOGE("napi_create_reference failed");
             return false;
         }
-
-        auto ret = listener->onRefSets.insert(onHandlerRef);
-        if (!ret.second) {
-            FI_HILOGE("Failed to insert refs");
-            return false;
-        }
-
+        listener->onRefSets.insert(onHandlerRef);
         events_.insert(std::make_pair(eventType, listener));
+        isNewHandler = true; // new listener => new handler
         FI_HILOGD("Insert finish");
         return true;
     }
@@ -73,9 +92,8 @@ bool MotionEventNapi::AddCallback(int32_t eventType, napi_value handler)
         FI_HILOGE("Refs is empty()");
         return false;
     }
-
     FI_HILOGD("Check type: %{public}d same handle", eventType);
-    if (!InsertRef(iter->second, handler)) {
+    if (!InsertRefEx(iter->second, handler, isNewHandler)) {
         FI_HILOGE("Failed to insert ref");
         return false;
     }
@@ -166,6 +184,15 @@ bool MotionEventNapi::RemoveCallback(int32_t eventType, napi_value handler)
 
 bool MotionEventNapi::InsertRef(std::shared_ptr<MotionEventListener> listener, const napi_value &handler)
 {
+    FI_HILOGD("Enter");
+    bool dummyNew = false;
+    return InsertRefEx(listener, handler, dummyNew);
+}
+
+bool MotionEventNapi::InsertRefEx(std::shared_ptr<MotionEventListener> listener,
+    const napi_value &handler, bool &isNewHandler)
+{
+    isNewHandler = false;
     if (listener == nullptr) {
         FI_HILOGE("listener is nullptr");
         return false;
@@ -205,6 +232,7 @@ bool MotionEventNapi::InsertRef(std::shared_ptr<MotionEventListener> listener, c
         FI_HILOGE("Failed to insert");
         return false;
     }
+    isNewHandler = true;
     FI_HILOGD("ref size %{public}zu", listener->onRefSets.size());
     return true;
 }
@@ -277,7 +305,7 @@ bool MotionEventNapi::CheckEvents(int32_t eventType)
     FI_HILOGD("Enter");
     auto typeIter = events_.find(eventType);
     if (typeIter == events_.end()) {
-        FI_HILOGD("eventType not find");
+        FI_HILOGD("eventType listener not find");
         return true;
     }
     if (typeIter->second->onRefSets.empty()) {

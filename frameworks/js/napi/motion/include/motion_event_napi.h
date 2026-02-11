@@ -40,6 +40,7 @@ public:
     virtual ~MotionEventNapi();
 #ifdef MOTION_ENABLE
     bool AddCallback(int32_t eventType, napi_value handler);
+    bool AddCallbackEx(int32_t eventType, napi_value handler, bool &isNewHandler);
     bool CheckEvents(int32_t eventType);
     bool RemoveAllCallback(int32_t eventType);
     bool RemoveCallback(int32_t eventType, napi_value handler);
@@ -49,6 +50,8 @@ public:
 protected:
     bool IsSameValue(const napi_env &env, const napi_value &lhs, const napi_value &rhs);
     bool InsertRef(std::shared_ptr<MotionEventListener> listener, const napi_value &handler);
+    bool InsertRefEx(std::shared_ptr<MotionEventListener> listener,
+        const napi_value &handler, bool &isNewHandler);
     void ConvertOperatingHandData(napi_value handler, size_t argc, const MotionEvent &event);
 #endif
 
