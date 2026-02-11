@@ -60,12 +60,11 @@ HWTEST_F(DeviceTest, OpenTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     dev->SetDevPath(devPath_);
     int32_t ret = dev->Open();
     EXPECT_EQ(ret, RET_OK);
-    dev->Close();
     delete dev;
     dev = nullptr;
 }
@@ -79,7 +78,7 @@ HWTEST_F(DeviceTest, OpenTest002, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     int32_t ret = dev->Open();
     EXPECT_EQ(ret, RET_ERR);
@@ -96,7 +95,7 @@ HWTEST_F(DeviceTest, CloseTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     ASSERT_NO_FATAL_FAILURE(dev->Close());
     delete dev;
@@ -112,7 +111,7 @@ HWTEST_F(DeviceTest, QueryDeviceInfoTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     ASSERT_NO_FATAL_FAILURE(dev->QueryDeviceInfo());
     delete dev;
@@ -128,7 +127,7 @@ HWTEST_F(DeviceTest, CheckAbsTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     ASSERT_NO_FATAL_FAILURE(dev->CheckAbs());
     delete dev;
@@ -144,7 +143,7 @@ HWTEST_F(DeviceTest, CheckMtTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     ASSERT_NO_FATAL_FAILURE(dev->CheckMt());
     delete dev;
@@ -161,7 +160,7 @@ HWTEST_F(DeviceTest, ReadConfigFileTest001, TestSize.Level0)
     CALL_TEST_DEBUG;
     const std::string filePath = { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     int32_t ret = dev->ReadConfigFile(filePath);
     EXPECT_EQ(ret, RET_ERR);
@@ -179,7 +178,7 @@ HWTEST_F(DeviceTest, ReadConfigFileTest002, TestSize.Level0)
     CALL_TEST_DEBUG;
     const std::string filePath = "";
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     int32_t ret = dev->ReadConfigFile(filePath);
     EXPECT_EQ(ret, RET_ERR);
@@ -198,7 +197,7 @@ HWTEST_F(DeviceTest, ConfigItemSwitchTest001, TestSize.Level0)
     std::string configItem = "123456";
     std::string value = "123456";
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     int32_t ret = dev->ConfigItemSwitch(configItem, value);
     EXPECT_EQ(ret, RET_OK);
@@ -217,7 +216,7 @@ HWTEST_F(DeviceTest, ConfigItemSwitchTest002, TestSize.Level0)
     std::string configItem = "";
     std::string value = "123456";
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     int32_t ret = dev->ConfigItemSwitch(configItem, value);
     EXPECT_EQ(ret, RET_ERR);
@@ -236,7 +235,7 @@ HWTEST_F(DeviceTest, ConfigItemSwitchTest003, TestSize.Level0)
     std::string configItem = "1234567";
     std::string value = "";
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     int32_t ret = dev->ConfigItemSwitch(configItem, value);
     EXPECT_EQ(ret, RET_ERR);
@@ -254,7 +253,7 @@ HWTEST_F(DeviceTest, ReadTomlFileTest001, TestSize.Level0)
     CALL_TEST_DEBUG;
     const std::string filePath = { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     int32_t ret = dev->ReadTomlFile(filePath);
     EXPECT_EQ(ret, RET_ERR);
@@ -271,7 +270,7 @@ HWTEST_F(DeviceTest, HasRelCoordTest001, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     bool ret = dev->HasRelCoord();
     EXPECT_EQ(ret, false);
@@ -289,7 +288,7 @@ HWTEST_F(DeviceTest, DispatchTest001, TestSize.Level0)
     CALL_TEST_DEBUG;
     const struct epoll_event ev {};
     int32_t deviceId = devmg_.ParseDeviceId(devNode_);
-    Device *dev = new Device(deviceId);
+    Device *dev = new (std::nothrow) Device(deviceId);
     CHKPV(dev);
     ASSERT_NO_FATAL_FAILURE(dev->Dispatch(ev));
     delete dev;

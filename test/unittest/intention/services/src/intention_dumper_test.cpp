@@ -44,7 +44,7 @@ namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
 int32_t g_fd { 1 };
-StationaryServer stationary;
+StationaryServer g_stationary;
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 } // namespace
 
@@ -146,7 +146,7 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest001, TestSize.Level1)
     CALL_TEST_DEBUG;
     auto env1 = ContextService::GetInstance();
     ASSERT_NE(env1, nullptr);
-    IntentionDumper dumper = IntentionDumper(env1, stationary);
+    IntentionDumper dumper = IntentionDumper(env1, g_stationary);
     std::vector<std::string> argList = {"s", "h", "l", "c", "d"};
     ASSERT_NO_FATAL_FAILURE(dumper.Dump(g_fd, argList));
 }
@@ -162,7 +162,7 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest002, TestSize.Level1)
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
-    IntentionDumper dumper = IntentionDumper(env, stationary);
+    IntentionDumper dumper = IntentionDumper(env, g_stationary);
     int32_t value = 's';
     ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
@@ -178,7 +178,7 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest003, TestSize.Level1)
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
-    IntentionDumper dumper = IntentionDumper(env, stationary);
+    IntentionDumper dumper = IntentionDumper(env, g_stationary);
     int32_t value = 'l';
     ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
@@ -194,7 +194,7 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest004, TestSize.Level1)
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
-    IntentionDumper dumper = IntentionDumper(env, stationary);
+    IntentionDumper dumper = IntentionDumper(env, g_stationary);
     int32_t value = 'c';
     ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
@@ -210,7 +210,7 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest005, TestSize.Level1)
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
-    IntentionDumper dumper = IntentionDumper(env, stationary);
+    IntentionDumper dumper = IntentionDumper(env, g_stationary);
     int32_t value = 'd';
     ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
@@ -226,7 +226,7 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest006, TestSize.Level1)
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
-    IntentionDumper dumper = IntentionDumper(env, stationary);
+    IntentionDumper dumper = IntentionDumper(env, g_stationary);
     int32_t value = 'm';
     ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));
 }
@@ -242,7 +242,7 @@ HWTEST_F(IntentionDumperTest, IntentionDumperTest007, TestSize.Level1)
     CALL_TEST_DEBUG;
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
-    IntentionDumper dumper = IntentionDumper(env, stationary);
+    IntentionDumper dumper = IntentionDumper(env, g_stationary);
 
     int32_t value = 'y';
     ASSERT_NO_FATAL_FAILURE(dumper.DumpOnce(g_fd, value));

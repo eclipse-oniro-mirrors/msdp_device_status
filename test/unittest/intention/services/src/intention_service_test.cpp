@@ -58,7 +58,7 @@ constexpr bool HAS_CUSTOM_ANIMATION { true };
 std::shared_ptr<ContextService> g_context { nullptr };
 std::shared_ptr<IntentionService> g_intentionService { nullptr };
 std::shared_ptr<IntentionService> g_intentionServiceNullptr { nullptr };
-sptr<IRemoteDevStaCallback> stationaryCallback_;
+sptr<IRemoteDevStaCallback> g_stationaryCallback_;
 IContext *g_contextNullptr { nullptr };
 DragManager g_dragMgr;
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
@@ -165,7 +165,7 @@ void IntentionServiceTest::TearDownTestCase()
 
 void IntentionServiceTest::SetUp()
 {
-    stationaryCallback_ = new (std::nothrow) TestDevStaCallback();
+    g_stationaryCallback_ = new (std::nothrow) TestDevStaCallback();
 }
 
 void IntentionServiceTest::TearDown() {}
@@ -985,7 +985,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_SubscribeStationary001, Test
     int32_t type = Type::TYPE_STILL;
     int32_t event = ActivityEvent::ENTER;
     int32_t reportTime = ReportLatencyNs::MIDDLE;
-    ErrCode ret = g_intentionService->SubscribeStationaryCallback(type, event, reportTime, stationaryCallback_);
+    ErrCode ret = g_intentionService->SubscribeStationaryCallback(type, event, reportTime, g_stationaryCallback_);
     EXPECT_EQ(ret, RET_OK);
 }
 
@@ -1000,7 +1000,7 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_UnsubscribeStationary001, Te
     CALL_TEST_DEBUG;
     int32_t type = Type::TYPE_STILL;
     int32_t event = ActivityEvent::ENTER;
-    ErrCode ret = g_intentionService->UnsubscribeStationaryCallback(type, event, stationaryCallback_);
+    ErrCode ret = g_intentionService->UnsubscribeStationaryCallback(type, event, g_stationaryCallback_);
     EXPECT_EQ(ret, RET_OK);
 }
 
