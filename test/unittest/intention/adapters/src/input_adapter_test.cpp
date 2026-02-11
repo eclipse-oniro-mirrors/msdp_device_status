@@ -244,6 +244,7 @@ HWTEST_F(InputAdapterTest, TestPointerAddMonitor, TestSize.Level1)
         FI_HILOGI("OnEvent");
     };
     int32_t monitorId = inputAdapter->AddMonitor(callback);
+    ASSERT_GT(monitorId, 0) << "AddMonitor should return a positive monitor ID";
     ASSERT_NO_FATAL_FAILURE(inputAdapter->RemoveMonitor(monitorId));
 }
 
@@ -261,6 +262,7 @@ HWTEST_F(InputAdapterTest, TestKeyAddMonitor, TestSize.Level1)
         FI_HILOGI("OnEvent");
     };
     int32_t monitorId = inputAdapter->AddMonitor(callback);
+    ASSERT_GT(monitorId, 0) << "AddMonitor should return a positive monitor ID";
     ASSERT_NO_FATAL_FAILURE(inputAdapter->RemoveMonitor(monitorId));
 }
 

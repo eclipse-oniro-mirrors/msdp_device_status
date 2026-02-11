@@ -199,7 +199,7 @@ int32_t ContextService::AddEpoll(EpollEventType type, int32_t fd)
         return RET_ERR;
     }
     auto eventData = static_cast<device_status_epoll_event*>(malloc(sizeof(device_status_epoll_event)));
-    if (!eventData) {
+    if (eventData == nullptr) {
         FI_HILOGE("Malloc failed");
         return RET_ERR;
     }
