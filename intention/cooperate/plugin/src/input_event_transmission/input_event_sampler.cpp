@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "input_event_transmission/input_event_sampler.h"
+
+#include <chrono>
+
+#include "devicestatus_define.h"
 
 #undef LOG_TAG
 #define LOG_TAG "InputEventSampler"
-
-#include <chrono>
-#include "input_event_transmission/input_event_sampler.h"
-#include "devicestatus_define.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -107,10 +108,11 @@ bool InputEventSampler::IsDurationMatched()
 
 bool InputEventSampler::IsOffsetMatched(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
-    MMI::PointerEvent::PointerItem item;
     if (pointerEvent == nullptr) {
+        FI_HILOGE("pointer event is nullptr");
         return false;
     }
+    MMI::PointerEvent::PointerItem item;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), item)) {
         FI_HILOGE("Corrupted pointerEvent, skip");
         return false;

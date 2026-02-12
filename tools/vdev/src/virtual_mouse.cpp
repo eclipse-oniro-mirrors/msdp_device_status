@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,7 +117,7 @@ VirtualMouse::VirtualMouse(const std::string &name) : VirtualDevice(name)
 int32_t VirtualMouse::DownButton(int32_t button)
 {
     CALL_DEBUG_ENTER;
-    if (button < BTN_MOUSE || button > BTN_TASK) {
+    if (button < BTN_MOUSE || button > BTN_SIDE) {
         FI_HILOGE("Not mouse button:%{public}d", button);
         return RET_ERR;
     }
@@ -268,7 +268,7 @@ void VirtualMouse::MoveProcess(int32_t dx, int32_t dy)
     int32_t targetY = currentY + dy;
     FI_HILOGD("Expected coordinates, (targetX, targetY):(%{private}d, %{private}d)", targetX, targetY);
     Move(dx, dy);
-    if ((targetX <= g_screenWidth && targetX >= 0) && (targetY <= g_screenHeight && targetY >= 0) &&
+    if ((targetX < g_screenWidth && targetX >= 0) && (targetY < g_screenHeight && targetY >= 0) &&
         (currentX < g_screenWidth && currentX > 0) && (currentY < g_screenHeight && currentY > 0)) {
         int32_t nLoops = 5;
         while (nLoops-- > 0) {

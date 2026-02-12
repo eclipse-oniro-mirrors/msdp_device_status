@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ public:
     virtual bool CheckSrcIsSameAccount(const std::string &sinkNetworkId) = 0;
     virtual bool CheckSinkIsSameAccount(const std::string &srcNetworkId, int32_t srcUserId,
         const std::string &srcAccountId) = 0;
-    virtual int32_t GetUserId() = 0;
+    virtual int32_t GetUserId() const = 0;
     virtual std::string GetAccountId() = 0;
 };
 } // namespace DeviceStatus

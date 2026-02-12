@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "cooperate_client.h"
 #include "cooperate_hisysevent.h"
 
+#include <atomic>
 #ifdef ENABLE_PERFORMANCE_CHECK
 #include <algorithm>
 #include <numeric>
@@ -321,13 +322,14 @@ int32_t CooperateClient::RemoveHotAreaListener(HotAreaListenerPtr listener)
 
 int32_t CooperateClient::GenerateRequestID()
 {
-    static int32_t requestId { 0 };
-
-    if (requestId == std::numeric_limits<int32_t>::max()) {
-        FI_HILOGE("Request ID exceeds the maximum");
-        requestId = 0;
+    static std::atomic<int32_t> requestId { 0 };
+    int32_t id = requestId.fetch_add(1, std::memory_order_relaxed);
+    if (id < 0) {
+        requestId.store(1, std::memory_order_relaxed);
+        id = 0;
+        FI_HILOGE("Request ID overflow");
     }
-    return requestId++;
+    return id;
 }
 
 int32_t CooperateClient::OnCoordinationListener(const StreamClient &client, NetPacket &pkt)

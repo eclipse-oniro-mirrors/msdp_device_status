@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,7 @@ uint64_t GetShellTokenId()
     return g_shellTokenId;
 }
 
-AccessTokenID GetNativeTokenIdFromProcess(const std::string &process)
+AccessTokenID GetNativeTokenIdFromProcess(const std::string& process)
 {
     uint64_t selfTokenId = GetSelfTokenID();
     EXPECT_EQ(0, SetSelfTokenID(GetShellTokenId())); // set shell token
@@ -225,7 +225,7 @@ void CooperateServerTest::TearDownTestCase()
 
 /**
  * @tc.name: EnableTest1
- * @tc.desc: Test func named enable
+ * @tc.desc: Test func named enable, tokenId ipc
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -245,7 +245,7 @@ HWTEST_F(CooperateServerTest, EnableTest1, TestSize.Level0)
 
 /**
  * @tc.name: EnableTest2
- * @tc.desc: Test func named enable
+ * @tc.desc: Test func named enable, token id test
  * @tc.type: FUNC
  * @tc.require:
  */

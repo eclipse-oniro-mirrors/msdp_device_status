@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,12 +26,12 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-const char* COORDINATION_CLASS { "Coordination_class" };
+constexpr const char* COORDINATION_CLASS { "Coordination_class" };
 const char* COORDINATION { "Coordination" };
-inline constexpr std::string_view GET_VALUE_BOOL { "napi_get_value_bool" };
-inline constexpr std::string_view GET_VALUE_INT32 { "napi_get_value_int32" };
-inline constexpr std::string_view GET_VALUE_STRING_UTF8 { "napi_get_value_string_utf8" };
-inline constexpr size_t MAX_STRING_LEN { 1024 };
+constexpr std::string_view GET_VALUE_BOOL { "napi_get_value_bool" };
+constexpr std::string_view GET_VALUE_INT32 { "napi_get_value_int32" };
+constexpr std::string_view GET_VALUE_STRING_UTF8 { "napi_get_value_string_utf8" };
+constexpr size_t MAX_STRING_LEN { 1024 };
 } // namespace
 
 JsCooperateContext::JsCooperateContext()
@@ -113,6 +113,10 @@ napi_value JsCooperateContext::Start(napi_env env, napi_callback_info info)
     size_t length = ZERO_PARAM;
     CHKRP(napi_get_value_string_utf8(env, argv[ZERO_PARAM], remoteNetworkDescriptor,
         sizeof(remoteNetworkDescriptor), &length), GET_VALUE_STRING_UTF8);
+    if (length >= MAX_STRING_LEN) {
+        FI_HILOGE("remoteNetworkDescriptor length: %{public}zu, max len: %{public}zu",
+            length, MAX_STRING_LEN);
+    }
     CHKRP(napi_get_value_int32(env, argv[ONE_PARAM], &startDeviceId), GET_VALUE_INT32);
 
     JsCooperateContext *jsDev = JsCooperateContext::GetInstance(env);

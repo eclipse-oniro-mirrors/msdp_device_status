@@ -15,8 +15,8 @@
 
 #include "delegate_tasks.h"
 
-#include <sys/syscall.h>
 #include <fcntl.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 #include "devicestatus_define.h"

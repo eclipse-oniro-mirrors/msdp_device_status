@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -259,7 +259,11 @@ void EventManager::OnClientDied(const ClientDiedEvent &event)
     FI_HILOGI("Remove client died listener, pid: %{public}d", event.pid);
     for (auto iter = listeners_.begin(); iter != listeners_.end();) {
         std::shared_ptr<EventInfo> listener = *iter;
-        CHKPC(listener);
+        if (listener == nullptr) {
+            FI_HILOGW("listener is null");
+            iter = listeners_.erase(iter);
+            continue;
+        }
         if (event.pid == listener->pid) {
             iter = listeners_.erase(iter);
             break;
@@ -269,7 +273,7 @@ void EventManager::OnClientDied(const ClientDiedEvent &event)
     }
 }
 
-void EventManager::ErrorNotAollowCooperateWhenMotionDragging(const NotAollowCooperateWhenMotionDragging &event)
+void EventManager::ErrorNotAollowCooperateWhenMotionDragging(const NotAllowCooperateWhenMotionDragging &event)
 {
     CooperateNotice notice {
         .pid = event.pid,

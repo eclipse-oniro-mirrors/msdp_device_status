@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -387,10 +387,7 @@ int32_t Device::ReadConfigFile(const std::string &filePath)
             continue;
         }
         pos = tmp.find('=');
-        if (tmp.size() == 0) {
-            FI_HILOGE("Invalid size, pos will overflow");
-            return RET_ERR;
-        } else if ((pos == (tmp.size() - 1)) || (pos == tmp.npos)) {
+        if ((pos == (tmp.size() - 1)) || (pos == tmp.npos)) {
             FI_HILOGE("Find config item error");
             return RET_ERR;
         }
