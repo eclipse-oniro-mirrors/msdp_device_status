@@ -40,6 +40,10 @@ JsDragContext::JsDragContext()
 JsDragContext::~JsDragContext()
 {
     std::lock_guard<std::mutex> guard(mutex_);
+    if ((env_ != nullptr) && (contextRef_ != nullptr)) {
+        napi_delete_reference(env_, contextRef_);
+        contextRef_ = nullptr;
+    }
     if (mgr_ != nullptr) {
         mgr_->ResetEnv();
         mgr_ = nullptr;
@@ -76,6 +80,7 @@ napi_value JsDragContext::CreateInstance(napi_env env)
     JsDragContext *jsContext = nullptr;
     CHKRP(napi_unwrap(env, jsInstance, reinterpret_cast<void**>(&jsContext)), UNWRAP);
     CHKPP(jsContext);
+    jsContext->env_ = env;
     CHKRP(napi_create_reference(env, jsInstance, 1, &(jsContext->contextRef_)), CREATE_REFERENCE);
 
     uint32_t refCount = 0;

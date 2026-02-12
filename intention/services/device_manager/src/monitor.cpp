@@ -43,7 +43,7 @@ void Monitor::Dispatch(const struct epoll_event &ev)
     if ((ev.events & EPOLLIN) == EPOLLIN) {
         ReceiveDevice();
     } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
-        int savedErrno = errno;
+        int32_t savedErrno = errno;
         FI_HILOGE("Epoll hangup/error, last errno: %{public}d, msg: %{public}s",
             savedErrno, strerror(savedErrno));
     }
