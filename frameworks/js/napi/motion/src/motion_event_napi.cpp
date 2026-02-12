@@ -14,7 +14,6 @@
  */
 
 #include "motion_event_napi.h"
-
 #include "fi_log.h"
 
 #undef LOG_TAG
@@ -54,7 +53,6 @@ MotionEventNapi::~MotionEventNapi()
 }
 
 #ifdef MOTION_ENABLE
-
 bool MotionEventNapi::AddCallback(int32_t eventType, napi_value handler)
 {
     bool dummyNew = false;
