@@ -142,7 +142,7 @@ bool DDMAdapterImpl::CheckSameAccountToLocal(const std::string &networkId)
     };
     if (D_DEV_MGR.CheckIsSameAccount(Caller, Callee)) {
             return true;
-        }
+    }
     FI_HILOGI("check same account fail, will try check access Group by hichain");
     return false;
 }

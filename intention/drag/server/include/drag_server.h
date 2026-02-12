@@ -16,14 +16,15 @@
 #ifndef DRAG_SERVER_H
 #define DRAG_SERVER_H
 
-#include "nocopyable.h"
-
 #include "accesstoken_kit.h"
 #include "i_context.h"
 #include "i_plugin.h"
+#include "nocopyable.h"
+
 #ifdef OHOS_BUILD_UNIVERSAL_DRAG
 #include "universal_drag_wrapper.h"
 #endif // OHOS_BUILD_UNIVERSAL_DRAG
+
 
 namespace OHOS {
 namespace Msdp {

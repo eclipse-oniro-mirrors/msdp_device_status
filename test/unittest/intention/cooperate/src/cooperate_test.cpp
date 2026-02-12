@@ -179,7 +179,7 @@ void MockPluginManager::UnloadMotionDrag()
 
 /**
  * @tc.name: CooperateTest1
- * @tc.desc: cooperate plugin
+ * @tc.desc: When cooperate service is available, register listener with calling PID should return RET_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -198,13 +198,14 @@ HWTEST_F(CooperateTest, CooperateTest1, TestSize.Level0)
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
-        EXPECT_EQ(!ret, RET_OK);
+        EXPECT_NE(ret, RET_OK);
     }
 }
 
 /**
  * @tc.name: CooperateTest2
- * @tc.desc: cooperate plugin
+ * @tc.desc: hen cooperate service is available, register and unregister hot
+    area listener with calling PID should return RET_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -220,13 +221,13 @@ HWTEST_F(CooperateTest, CooperateTest2, TestSize.Level0)
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
-        EXPECT_EQ(!ret, RET_OK);
+        EXPECT_NE(ret, RET_OK);
     }
 }
 
 /**
  * @tc.name: CooperateTest3
- * @tc.desc: cooperate plugin
+ * @tc.desc: When cooperate service is available, calling Enable with valid parameters should return RET_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -242,13 +243,14 @@ HWTEST_F(CooperateTest, CooperateTest3, TestSize.Level0)
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
-        EXPECT_EQ(!ret, RET_OK);
+        EXPECT_NE(ret, RET_OK);
     }
 }
 
 /**
  * @tc.name: CooperateTest4
- * @tc.desc: cooperate plugin
+ * @tc.desc: When cooperate service is available, calling Start with
+    valid parameters should return a non-negative session ID (>= 0)
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -264,13 +266,14 @@ HWTEST_F(CooperateTest, CooperateTest4, TestSize.Level0)
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
-        EXPECT_EQ(!ret, RET_OK);
+        EXPECT_NE(ret, RET_OK);
     }
 }
 
 /**
  * @tc.name: CooperateTest5
- * @tc.desc: cooperate plugin
+ * @tc.desc: When cooperate service is available and the session (pid=calling_pid, mode=1, name="test") is active,
+    GetCooperateState should return RET_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -284,13 +287,14 @@ HWTEST_F(CooperateTest, CooperateTest5, TestSize.Level0)
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
-        EXPECT_EQ(!ret, RET_OK);
+        EXPECT_NE(ret, RET_OK);
     }
 }
 
 /**
  * @tc.name: CooperateTest6
- * @tc.desc: cooperate plugin
+ * @tc.desc: When cooperate service is available, calling RegisterEventListener with
+    valid parameters (eventType=1, eventName="test") should return RET_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -306,13 +310,14 @@ HWTEST_F(CooperateTest, CooperateTest6, TestSize.Level0)
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
-        EXPECT_EQ(!ret, RET_OK);
+        EXPECT_NE(ret, RET_OK);
     }
 }
 
 /**
  * @tc.name: CooperateTest7
- * @tc.desc: cooperate plugin
+ * @tc.desc: When cooperate service is available, calling GetCooperateState with
+    valid UDID ("default") should return RET_OK and set state to true/false correctly
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -329,13 +334,13 @@ HWTEST_F(CooperateTest, CooperateTest7, TestSize.Level0)
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
-        EXPECT_EQ(!ret, RET_OK);
+        EXPECT_NE(ret, RET_OK);
     }
 }
 
 /**
  * @tc.name: CooperateTest8
- * @tc.desc: cooperate plugin
+ * @tc.desc: When cooperate service is available, calling StartWithOptions with valid parameters should return RET_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -352,12 +357,11 @@ HWTEST_F(CooperateTest, CooperateTest8, TestSize.Level0)
         int32_t userData = 1;
         int32_t startDeviceId = 0;
         const std::string &remoteNetworkId = "test";
-        ret = g_cooperate->StartWithOptions(pid, userData, remoteNetworkId,
-        startDeviceId, withOptions);
+        ret = g_cooperate->StartWithOptions(pid, userData, remoteNetworkId, startDeviceId, withOptions);
         EXPECT_EQ(ret, RET_OK);
     } else {
         GTEST_LOG_(INFO) << "The product does not intention_cooperate so";
-        EXPECT_EQ(!ret, RET_OK);
+        EXPECT_NE(ret, RET_OK);
     }
 }
 } // namespace DeviceStatus

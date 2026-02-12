@@ -116,6 +116,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Open001, TestSize.Level1)
 
     auto monitor = std::make_shared<MonitorEvent>();
     ASSERT_TRUE(epollMgr.Add(monitor));
+    epollMgr.Close();
 }
 
 /**
@@ -160,6 +161,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_GetFd001, TestSize.Level1)
     EXPECT_LT(epollMgr.GetFd(), 0);
     EXPECT_TRUE(epollMgr.Open());
     EXPECT_GE(epollMgr.GetFd(), 0);
+    epollMgr.Close();
 }
 
 /**
@@ -176,6 +178,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Add001, TestSize.Level1)
     auto monitor = std::make_shared<MonitorEvent>();
     ASSERT_TRUE(epollMgr.Add(monitor));
     EXPECT_TRUE(epollMgr.Add(monitor));
+    epollMgr.Close();
 }
 
 /**
@@ -194,6 +197,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Add002, TestSize.Level1)
     monitor->inotifyFd_ = -1;
     EXPECT_FALSE(epollMgr.Add(monitor));
     monitor->inotifyFd_ = fd;
+    epollMgr.Close();
 }
 
 /**
@@ -210,6 +214,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Remove001, TestSize.Level1)
     auto monitor = std::make_shared<MonitorEvent>();
     ASSERT_TRUE(epollMgr.Add(monitor));
     epollMgr.Remove(monitor);
+    epollMgr.Close();
 }
 
 /**
@@ -225,6 +230,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Remove002, TestSize.Level1)
 
     auto monitor = std::make_shared<MonitorEvent>();
     epollMgr.Remove(monitor);
+    epollMgr.Close();
 }
 
 /**
@@ -241,6 +247,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Remove003, TestSize.Level1)
     auto monitor = std::make_shared<MonitorEvent>();
     monitor->inotifyFd_ = -1;
     epollMgr.Remove(monitor);
+    epollMgr.Close();
 }
 
 /**
@@ -257,6 +264,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Update001, TestSize.Level1)
     auto monitor = std::make_shared<MonitorEvent>();
     ASSERT_TRUE(epollMgr.Add(monitor));
     EXPECT_TRUE(epollMgr.Update(monitor));
+    epollMgr.Close();
 }
 
 /**
@@ -272,6 +280,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Update002, TestSize.Level1)
 
     auto monitor = std::make_shared<MonitorEvent>();
     EXPECT_FALSE(epollMgr.Update(monitor));
+    epollMgr.Close();
 }
 
 /**
@@ -290,6 +299,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_WaitTimeout001, TestSize.Level1)
 
     struct epoll_event evs[MAX_N_EVENTS] {};
     EXPECT_GE(epollMgr.WaitTimeout(evs, MAX_N_EVENTS, TIMEOUT), 0);
+    epollMgr.Close();
 }
 
 /**
@@ -305,6 +315,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_WaitTimeout002, TestSize.Level1)
 
     struct epoll_event evs[MAX_N_EVENTS];
     EXPECT_GE(epollMgr.WaitTimeout(evs, MAX_N_EVENTS, TIMEOUT), 0);
+    epollMgr.Close();
 }
 
 /**
@@ -324,6 +335,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_WaitTimeout003, TestSize.Level1)
 
     struct epoll_event evs[MAX_N_EVENTS];
     EXPECT_GE(epollMgr.WaitTimeout(evs, MAX_N_EVENTS, BLOCK_EPOLL), 0);
+    epollMgr.Close();
 }
 
 /**
@@ -342,6 +354,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_WaitTimeout004, TestSize.Level1)
 
     struct epoll_event evs[MAX_N_EVENTS];
     EXPECT_GE(epollMgr.WaitTimeout(evs, MAX_N_EVENTS, UNBLOCK_EPOLL), 0);
+    epollMgr.Close();
 }
 
 /**
@@ -360,6 +373,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_WaitTimeout005, TestSize.Level1)
 
     struct epoll_event evs[MAX_N_EVENTS];
     EXPECT_GE(epollMgr.WaitTimeout(evs, MAX_N_EVENTS, TIMEOUT), 0);
+    epollMgr.Close();
 }
 
 /**
@@ -378,6 +392,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_WaitTimeout006, TestSize.Level1)
 
     struct epoll_event evs[MAX_N_EVENTS];
     EXPECT_LT(epollMgr.WaitTimeout(evs, 0, TIMEOUT), 0);
+    epollMgr.Close();
 }
 
 /**
@@ -397,6 +412,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Wait001, TestSize.Level1)
 
     struct epoll_event evs[MAX_N_EVENTS];
     EXPECT_GE(epollMgr.Wait(evs, MAX_N_EVENTS), 0);
+    epollMgr.Close();
 }
 
 /**
@@ -418,6 +434,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Dispatch001, TestSize.Level1)
     ev.data.ptr = &epollMgr;
 
     epollMgr.Dispatch(ev);
+    epollMgr.Close();
 }
 
 /**
@@ -439,6 +456,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Dispatch002, TestSize.Level1)
     ev.data.ptr = &epollMgr;
 
     epollMgr.Dispatch(ev);
+    epollMgr.Close();
 }
 
 /**
@@ -465,6 +483,7 @@ HWTEST_F(EpollManagerTest, EpollManagerTest_Dispatch003, TestSize.Level1)
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
         epollMgr.Dispatch(ev);
     }
+    epollMgr.Close();
 }
 } // namespace DeviceStatus
 } // namespace Msdp

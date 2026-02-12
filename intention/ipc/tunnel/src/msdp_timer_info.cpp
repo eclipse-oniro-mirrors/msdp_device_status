@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Msdp {
 std::string MsdpTimerInfo::Ts2Str(uint64_t timestamp)
 {
-    if (timestamp > std::numeric_limits<time_t>::max()) {
+    if (timestamp > static_cast<uint64_t>(std::numeric_limits<time_t>::max())) {
         return "Invalid time";
     }
 
@@ -51,4 +51,4 @@ void MsdpTimerInfo::OnTrigger()
     FI_HILOGI("OnTrigger complete");
 }
 }  // namespace Msdp
-}  // namespace OHOS
+}  // namespace OHOS

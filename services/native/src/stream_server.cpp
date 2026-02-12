@@ -136,29 +136,29 @@ int32_t StreamServer::SetSockOpt(int32_t &serverFd, int32_t &toReturnClientFd, i
     static constexpr size_t nativeBufferSize = 64 * 1024;
 
     if (setsockopt(serverFd, SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-        FI_HILOGE("setsockopt serverFd failed, errno:%{public}d", errno);
+        FI_HILOGE("Failed to set SO_SNDBUF on server socket, errno:%{public}d", errno);
         return CloseFd(serverFd, toReturnClientFd);
     }
     if (setsockopt(serverFd, SOL_SOCKET, SO_RCVBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-        FI_HILOGE("setsockopt serverFd failed, errno:%{public}d", errno);
+        FI_HILOGE("Failed to set SO_RCVBUF on server socket, errno:%{public}d", errno);
         return CloseFd(serverFd, toReturnClientFd);
     }
     if (tokenType == TokenType::TOKEN_NATIVE) {
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_SNDBUF, &nativeBufferSize, sizeof(nativeBufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, SO_SNDBUF and nativeBufferSize, errno:%{public}d", errno);
+            FI_HILOGE("Set SO_SNDBUF for native token client failed, errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_RCVBUF, &nativeBufferSize, sizeof(nativeBufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, SO_RCVBUF and nativeBufferSize, errno:%{public}d", errno);
+            FI_HILOGE("Set SO_RCVBUF for native token client failed, errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
     } else {
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, SO_SNDBUF and bufferSize, errno:%{public}d", errno);
+            FI_HILOGE("Set SO_SNDBUF for non-native token client failed, errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_RCVBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, SO_RCVBUF and bufferSize, errno:%{public}d", errno);
+            FI_HILOGE("Set SO_RCVBUF for non-native token client failed, errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
     }
@@ -352,6 +352,10 @@ void StreamServer::AddSessionDeletedCallback(int32_t pid, std::function<void(Ses
 void StreamServer::NotifySessionDeleted(SessionPtr ses)
 {
     CALL_DEBUG_ENTER;
+    if (ses == nullptr) {
+        FI_HILOGW("ses is null");
+        return;
+    }
     auto it = callbacks_.find(ses->GetPid());
     if (it != callbacks_.end()) {
         it->second(ses);
