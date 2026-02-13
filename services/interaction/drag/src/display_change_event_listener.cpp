@@ -79,6 +79,8 @@ void DisplayChangeEventListener::ProcessDisplayRotationEvent(Rosen::DisplayId di
     }
     Rosen::Rotation currentRotation = displayInfo->GetRotation();
     if (!IsRotation(displayId, currentRotation)) {
+        FI_HILOGI("No need to rotate window for display id:%{public}d angle from %{public}d to %{public}d",
+            static_cast<int32_t>(displayId), static_cast<int32_t>(lastRotation), static_cast<int32_t>(currentRotation));
         return;
     }
 
@@ -262,7 +264,7 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     displayChangeEventListener_ = sptr<DisplayChangeEventListener>::MakeSptr(context_);
     CHKPV(displayChangeEventListener_);
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(displayChangeEventListener_);
-    std::vector<std::string> displayAttribute = {"rotation"};
+    std::vector<std::string> displayAttribute = {"rotation", "width", "height"};
     Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(displayAttribute,
         displayChangeEventListener_);
 #ifdef OHOS_ENABLE_PULLTHROW
