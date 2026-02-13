@@ -43,7 +43,8 @@ ohos_shared_library("intention_service") {
   include_dirs = [
     "include",
     "${device_status_root_path}/interfaces/innerkits/interaction/include",
-    "${device_status_root_path}/utils/common/include"
+    "${device_status_root_path}/utils/common/include",
+    "${device_status_root_path}/intention/boomerang/client/include"
   ]
 
   if (device_status_enable_universal_drag) {
@@ -52,6 +53,7 @@ ohos_shared_library("intention_service") {
   }
 
   sources = [
+    "${device_status_frameworks_path}/native/src/boomerang_callback_proxy.cpp",
     "src/boomerang_dumper.cpp",
     "src/intention_dumper.cpp",
     "src/intention_service.cpp",
