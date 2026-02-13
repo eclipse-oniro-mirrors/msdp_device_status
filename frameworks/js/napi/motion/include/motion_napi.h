@@ -25,11 +25,9 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-
 #ifdef MOTION_ENABLE
 #include "motion_callback_stub.h"
 #endif
-
 #include "motion_event_napi.h"
 
 namespace OHOS {
@@ -41,15 +39,15 @@ public:
     MotionCallback() = default;
     ~MotionCallback() override = default;
     void OnMotionChanged(const MotionEvent& event) override;
-    // 一个系统侧回调（MotionClient/SA 回调）需要分发给多个 JS 上下文（不同 napi_env）。
-     void AddTarget(const std::shared_ptr<MotionNapi>& target);
-     void RemoveTarget(const std::shared_ptr<MotionNapi>& target);
-     bool HasTargets() const;
+    // 一个系统侧回调需要分发给多个 JS 上下文（不同 napi_env）。
+    void AddTarget(const std::shared_ptr<MotionNapi>& target);
+    void RemoveTarget(const std::shared_ptr<MotionNapi>& target);
+    bool HasTargets() const;
 
 private:
-    // 保护 targets_ 的互斥锁 OnMotionChanged 可在binder线程触发。
-     mutable std::mutex mutex_;
-     std::vector<std::weak_ptr<MotionNapi>> targets_;
+    // 保护 targets_ 的互斥锁
+    mutable std::mutex mutex_;
+    std::vector<std::weak_ptr<MotionNapi>> targets_;
 };
 #endif
 
