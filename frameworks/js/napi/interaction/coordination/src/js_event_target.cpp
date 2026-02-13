@@ -180,8 +180,8 @@ void JsEventTarget::AddListener(napi_env env, const std::string &type, napi_valu
                     iter->second.pop_back();
                 }
             }
-            RELEASE_CALLBACKINFO(env, ref);
             UtilNapiError::HandleExecuteResult(env, errCode, "on", COOPERATE_PERMISSION);
+            RELEASE_CALLBACKINFO(env, ref);
         } else {
             isListeningProcess_ = true;
         }
@@ -264,8 +264,8 @@ void JsEventTarget::AddListener(napi_env env, const std::string &type, const std
                 iter->second.pop_back();
             }
         }
-        RELEASE_CALLBACKINFO(env, ref);
         UtilNapiError::HandleExecuteResult(env, errCode, "on", COOPERATE_PERMISSION);
+        RELEASE_CALLBACKINFO(env, ref);
     }
 }
 
