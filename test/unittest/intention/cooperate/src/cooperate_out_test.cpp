@@ -665,6 +665,162 @@ HWTEST_F(CooperateOutTest, CooperateOutTest016, TestSize.Level1)
     bool ret = g_context->mouseLocation_.HasLocalListener();
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: CooperateOutTest017
+ * @tc.desc: Test CooperateOut constructor and initial_ initialization
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateOutTest, CooperateOutTest017, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS,
+        StartWithOptionsEvent{
+            .errCode = std::make_shared<std::promise<int32_t>>(),
+    });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    auto cooperateOut = std::make_shared<Cooperate::CooperateOut>(*g_stateMachine, env);
+    ASSERT_NO_FATAL_FAILURE(cooperateOut->SimulateShowPointerEvent());
+}
+
+/**
+ * @tc.name: CooperateOutTest018
+ * @tc.desc: Test simulate event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateOutTest, CooperateOutTest018, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS,
+        StartWithOptionsEvent{
+            .errCode = std::make_shared<std::promise<int32_t>>(),
+    });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    auto cooperateOut = std::make_shared<Cooperate::CooperateOut>(*g_stateMachine, env);
+    cooperateOut->pressedButtons_ = {1, 2, 3};
+    ASSERT_NO_FATAL_FAILURE(cooperateOut->SimulateShowPointerEvent());
+}
+
+/**
+ * @tc.name: CooperateOutTest017
+ * @tc.desc: Test CooperateOut constructor and initial_ initialization
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateOutTest, CooperateOutTest017, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateOut stateOut(*g_stateMachine, env);
+    ASSERT_NE(stateOut.initial_, nullptr);
+}
+
+/**
+ * @tc.name: CooperateOutTest018
+ * @tc.desc: Test OnEvent with DISABLE event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateOutTest, CooperateOutTest018, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DISABLE,
+        DisableCooperateEvent {
+            .pid = IPCSkeleton::GetCallingPid(),
+            .userData = 1,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateOut stateOut(*g_stateMachine, env);
+    ASSERT_NE(stateOut.initial_, nullptr);
+    stateOut.OnEvent(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateOutTest019
+ * @tc.desc: Test Initial OnStopAboutVirtualTrackpad
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateOutTest, CooperateOutTest019, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::STOP,
+        StopCooperateEvent {
+            .pid = IPCSkeleton::GetCallingPid(),
+            .userData = 1,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateOut stateOut(*g_stateMachine, env);
+    ASSERT_NE(stateOut.initial_, nullptr);
+    stateOut.initial_->OnStopAboutVirtualTrackpad(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateOutTest020
+ * @tc.desc: Test OnEvent with APP_CLOSED event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateOutTest, CooperateOutTest020, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::APP_CLOSED,
+        ClientDiedEvent {
+            .pid = IPCSkeleton::GetCallingPid(),
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateOut stateOut(*g_stateMachine, env);
+    ASSERT_NE(stateOut.initial_, nullptr);
+    stateOut.OnEvent(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateOutTest021
+ * @tc.desc: Test Initial OnRelayWithOptions
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateOutTest, CooperateOutTest021, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DSOFTBUS_RELAY_COOPERATE_WITHOPTIONS,
+        StartWithOptionsEvent{
+            .errCode = std::make_shared<std::promise<int32_t>>(),
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateOut stateOut(*g_stateMachine, env);
+    ASSERT_NE(stateOut.initial_, nullptr);
+    stateOut.initial_->OnRelayWithOptions(cooperateContext, event);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
