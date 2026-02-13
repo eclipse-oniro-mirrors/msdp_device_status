@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,15 +25,13 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DisplayChangeEventListener : public Rosen::DisplayManager::IDisplayListener,
-                                   public Rosen::DisplayManager::IDisplayAttributeListener {
+class DisplayChangeEventListener : public Rosen::DisplayManager::IDisplayListener {
 public:
     explicit DisplayChangeEventListener(IContext *context);
     ~DisplayChangeEventListener() = default;
     void OnCreate(Rosen::DisplayId displayId) override;
     void OnDestroy(Rosen::DisplayId displayId) override;
     void OnChange(Rosen::DisplayId displayId) override;
-    void OnAttributeChange(Rosen::DisplayId displayId, const std::vector<std::string>& attribute) override;
     void GetAllScreenAngles();
     bool IsRotateDragScreen();
     bool IsFoldPC() const { return isFoldPC_.load(); }

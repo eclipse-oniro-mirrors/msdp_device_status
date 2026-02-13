@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -360,6 +360,7 @@ void DSoftbusAdapterImpl::OnBytes(int32_t socket, const void *data, uint32_t dat
 
         if (!circleBuffer.Write(reinterpret_cast<const char*>(data), dataLen)) {
             FI_HILOGE("Failed to write buffer");
+            return;
         }
         HandleSessionData(networkId, circleBuffer);
     } else {
@@ -472,7 +473,7 @@ int32_t DSoftbusAdapterImpl::OpenSessionLocked(const std::string &networkId)
     std::string sessionName = CLIENT_SESSION_NAME + networkId.substr(0, BIND_STRING_LENGTH);
     char name[DEVICE_NAME_SIZE_MAX] {};
     if (strcpy_s(name, sizeof(name), sessionName.c_str()) != EOK) {
-        FI_HILOGE("Invalid name:%{public}s", sessionName.c_str());
+        FI_HILOGE("Invalid name:%{private}s", sessionName.c_str());
         return RET_ERR;
     }
     char peerName[DEVICE_NAME_SIZE_MAX] { SERVER_SESSION_NAME };
@@ -482,10 +483,10 @@ int32_t DSoftbusAdapterImpl::OpenSessionLocked(const std::string &networkId)
         return RET_ERR;
     }
     char pkgName[PKG_NAME_SIZE_MAX] { FI_PKG_NAME };
-    FI_HILOGI("Client session name: \'%{public}s\'", name);
-    FI_HILOGI("Peer name: \'%{public}s\'", peerName);
+    FI_HILOGI("Client session name: \'%{private}s\'", name);
+    FI_HILOGI("Peer name: \'%{private}s\'", peerName);
     FI_HILOGI("Peer network id: \'%{public}s\'", Utility::Anonymize(peerNetworkId).c_str());
-    FI_HILOGI("Package name: \'%{public}s\'", pkgName);
+    FI_HILOGI("Package name: \'%{private}s\'", pkgName);
     SocketInfo info {
         .name = name,
         .peerName = peerName,
@@ -739,13 +740,17 @@ bool DSoftbusAdapterImpl::CheckDeviceOsType(const std::string &networkId)
         return false;
     }
     cJSON *osType = cJSON_GetObjectItemCaseSensitive(extraData.Get(), PARAM_KEY_OS_TYPE);
+    if (osType == nullptr) {
+        FI_HILOGE("osType is null");
+        return false;
+    }
     if (cJSON_IsNumber(osType)) {
         if (osType->valueint != OS_TYPE_OH) {
             FI_HILOGE("Ostype:%{public}d", osType->valueint);
             return false;
         }
     } else {
-        FI_HILOGE("get ostype error, extraData:%{public}s", deviceInfo.extraData.c_str());
+        FI_HILOGE("get ostype error, extraData:%{private}s", deviceInfo.extraData.c_str());
         return false;
     }
     return true;

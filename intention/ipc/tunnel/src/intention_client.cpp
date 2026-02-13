@@ -30,7 +30,11 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-
+namespace {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+constexpr int32_t RET_NO_SUPPORT = 801;
+#endif
+};
 constexpr int32_t TIME_WAIT_FOR_DS_MS { 1000 };
 std::shared_ptr<IntentionClient> IntentionClient::instance_ = std::make_shared<IntentionClient>();
 
@@ -1153,6 +1157,9 @@ int32_t IntentionClient::GetLiveStatus()
 int32_t IntentionClient::RegisterAwarenessCallback(const OnScreen::AwarenessCap& cap,
     const sptr<OnScreen::IRemoteOnScreenCallback>& callback, const OnScreen::AwarenessOptions& option)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
     CALL_DEBUG_ENTER;
     if (Connect() != RET_OK) {
         FI_HILOGE("can not get proxy");
@@ -1167,11 +1174,15 @@ int32_t IntentionClient::RegisterAwarenessCallback(const OnScreen::AwarenessCap&
         FI_HILOGE("proxy:RegisterAwarenessCallback failed");
     }
     return ret;
+#endif
 }
 
 int32_t IntentionClient::UnregisterAwarenessCallback(const OnScreen::AwarenessCap& cap,
     const sptr<OnScreen::IRemoteOnScreenCallback>& callback)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
     CALL_DEBUG_ENTER;
     if (Connect() != RET_OK) {
         FI_HILOGE("can not get proxy");
@@ -1185,11 +1196,15 @@ int32_t IntentionClient::UnregisterAwarenessCallback(const OnScreen::AwarenessCa
         FI_HILOGE("proxy:UnregisterAwarenessCallback failed");
     }
     return ret;
+#endif
 }
 
 int32_t IntentionClient::Trigger(const OnScreen::AwarenessCap& cap, const OnScreen::AwarenessOptions& option,
     OnScreen::OnscreenAwarenessInfo& info)
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
     CALL_DEBUG_ENTER;
     if (Connect() != RET_OK) {
         FI_HILOGE("can not get proxy");
@@ -1206,6 +1221,7 @@ int32_t IntentionClient::Trigger(const OnScreen::AwarenessCap& cap, const OnScre
     }
     info = seqInfo.info_;
     return ret;
+#endif
 }
 
 void IntentionClient::ResetProxy(const wptr<IRemoteObject> &remote)

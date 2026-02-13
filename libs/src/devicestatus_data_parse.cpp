@@ -107,9 +107,13 @@ bool DeviceStatusDataParse::DeviceStatusDataInit(const std::string& fileData, bo
     }
     tempcount_[type] = tempcount_[type] % jsonsize;
     cJSON* mockvalue = cJSON_GetArrayItem(mockarray, tempcount_[type]);
+    if (mockvalue == nullptr) {
+        FI_HILOGE("Json parser number is failed");
+        return false;
+    }
     tempcount_[type]++;
     data.type = type;
-    if (mockvalue == nullptr || !cJSON_IsNumber(mockvalue)) {
+    if (!cJSON_IsNumber(mockvalue)) {
         FI_HILOGE("Json parser number is failed");
         return false;
     }

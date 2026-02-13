@@ -167,6 +167,7 @@ struct OnscreenAwarenessInfo {
     int32_t collectStrategy;
     int64_t displayId;
     int32_t windowId;
+    std::vector<std::string> pageTags;
     std::vector<OnscreenEntityInfo> entityInfo;
 };
 

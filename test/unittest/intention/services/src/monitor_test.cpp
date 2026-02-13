@@ -173,7 +173,10 @@ HWTEST_F(MonitorTest, MonitorTest07, TestSize.Level1)
     struct inotify_event *event = reinterpret_cast<struct inotify_event *>(buf);
     const char* name = "test_device";
     size_t nameLen = strlen(name) + 1;
-    memcpy_s(event->name, nameLen, name, nameLen);
+    auto ret = memcpy_s(event->name, nameLen, name, nameLen);
+    if (ret != 0) {
+        FI_HILOGE("Failed: memcpy_s");
+    }
     event->mask = IN_CREATE;
     ASSERT_NO_FATAL_FAILURE(monitor.HandleInotifyEvent(event));
 }
@@ -191,7 +194,10 @@ HWTEST_F(MonitorTest, MonitorTest08, TestSize.Level1)
     struct inotify_event *event = reinterpret_cast<struct inotify_event *>(buf);
     const char* name = "test_device";
     size_t nameLen = strlen(name) + 1;
-    memcpy_s(event->name, nameLen, name, nameLen);
+    auto ret = memcpy_s(event->name, nameLen, name, nameLen);
+    if (ret != 0) {
+        FI_HILOGE("Failed: memcpy_s");
+    }
     event->mask = IN_DELETE;
     ASSERT_NO_FATAL_FAILURE(monitor.HandleInotifyEvent(event));
 }

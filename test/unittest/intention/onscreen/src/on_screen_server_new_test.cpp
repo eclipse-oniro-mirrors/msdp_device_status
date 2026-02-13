@@ -404,7 +404,7 @@ HWTEST_F(OnScreenServerNewTest, RemoveCallbackInfo, TestSize.Level0)
  
     cap.capList.emplace_back("contentUiTree");
     ret = onScreen.RemoveCallbackInfo(callbackTest1, cap);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
  
 /**

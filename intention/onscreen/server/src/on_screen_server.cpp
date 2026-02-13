@@ -20,16 +20,18 @@
 #include <dlfcn.h>
 #include <string>
 #include <vector>
-
+#include "devicestatus_define.h"
+#include "parameters.h"
+#include "tokenid_kit.h"
 #include "accesstoken_kit.h"
+
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 #include "bundle_info.h"
 #include "bundle_mgr_proxy.h"
-#include "devicestatus_define.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
-#include "parameters.h"
 #include "system_ability_definition.h"
-#include "tokenid_kit.h"
+#endif
 
 #undef LOG_TAG
 #define LOG_TAG "OnScreenServer"
@@ -43,16 +45,18 @@ const char *LIB_ON_SCREEN_ALGO_PATH = "/system/lib64/libon_screen.z.so";
 const char *PERMISSION_GET_PAGE_CONTENT = "ohos.permission.GET_SCREEN_CONTENT";
 const char *PERMISSION_SEND_CONTROL_EVENT = "ohos.permission.SIMULATE_USER_INPUT";
 const char *DEVICE_TYPE_PARA_NAME = "const.product.devicetype";
-const char *PROACTIVE_SCREEN_SHOT_CAP = "screenshotIntent";
 const std::vector<std::string> SUPPORT_DEVICE_TYPE = { "phone", "tablet" };
 constexpr int32_t RET_NO_SUPPORT = 801;
 constexpr int32_t RET_NO_PERMISSION = 201;
 constexpr int32_t RET_NO_SYSTEM_CALLING = 202;
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
+const char *PROACTIVE_SCREEN_SHOT_CAP = "screenshotIntent";
 constexpr int32_t RET_NOT_REGISTER = 203;
 constexpr int32_t RET_PARAM_ERR = 401;
 const std::map<std::string, std::string> hapWhiteListMap = {
     {"com.huawei.hmos.vassistant", "1189827130565864320"},
 };
+#endif
 }
 
 OnScreenAlgorithmHandle::~OnScreenAlgorithmHandle()
@@ -318,6 +322,24 @@ bool OnScreenServer::IsSystemCalling(const CallingContext &context)
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(context.fullTokenId);
 }
 
+bool OnScreenServer::IsSystemServiceCalling(const CallingContext &context)
+{
+    auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    if ((flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) ||
+        (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL)) {
+        FI_HILOGI("system service calling, flag:%{public}u", flag);
+        return true;
+    }
+    return false;
+}
+
+bool OnScreenServer::CheckDeviceType()
+{
+    std::string deviceType = OHOS::system::GetParameter(DEVICE_TYPE_PARA_NAME, "");
+    return std::find(SUPPORT_DEVICE_TYPE.begin(), SUPPORT_DEVICE_TYPE.end(), deviceType) != SUPPORT_DEVICE_TYPE.end();
+}
+
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 bool OnScreenServer::GetAppIdentifier(const std::string& bundleName, int32_t userId, std::string& appIdentifier)
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
@@ -354,23 +376,6 @@ bool OnScreenServer::IsWhitelistAppCalling(const CallingContext &context)
     CHKCF(GetAppIdentifier(hapInfo.bundleName, hapInfo.userID, appIdentifier), "get appIdentifier failed");
     CHKCF(it->second == appIdentifier, "appIdentifier not match");
     return true;
-}
-
-bool OnScreenServer::IsSystemServiceCalling(const CallingContext &context)
-{
-    auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
-    if ((flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) ||
-        (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL)) {
-        FI_HILOGI("system service calling, flag:%{public}u", flag);
-        return true;
-    }
-    return false;
-}
-
-bool OnScreenServer::CheckDeviceType()
-{
-    std::string deviceType = OHOS::system::GetParameter(DEVICE_TYPE_PARA_NAME, "");
-    return std::find(SUPPORT_DEVICE_TYPE.begin(), SUPPORT_DEVICE_TYPE.end(), deviceType) != SUPPORT_DEVICE_TYPE.end();
 }
 
 void OnScreenServer::FillDumpCommonData(OnscreenAwarenessInfo& info)
@@ -718,6 +723,7 @@ int32_t OnScreenServer::OnScreenShotIntent(const CallingContext &context, const 
     }
     return RET_OK;
 }
+#endif
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

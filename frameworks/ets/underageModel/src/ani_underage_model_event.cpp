@@ -75,6 +75,20 @@ AniUnderageModelEvent::~AniUnderageModelEvent()
     g_registerListenerFunc = nullptr;
     g_subscribeFunc = nullptr;
     g_unsubscribeFunc = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        for (auto& iter : events_) {
+            if (iter.second == nullptr) {
+                continue;
+            }
+            for (auto item : iter.second->onRefSets) {
+                taihe::get_env()->GlobalReference_Delete(item);
+            }
+            iter.second->onRefSets.clear();
+            iter.second = nullptr;
+        }
+        events_.clear();
+    }
 }
 
 bool AniUnderageModelEvent::CheckEvents(int32_t eventType)
@@ -212,6 +226,7 @@ bool AniUnderageModelEvent::InsertRef(std::shared_ptr<UnderageModelEventListener
 bool AniUnderageModelEvent::AddCallback(int32_t eventType, uintptr_t opq)
 {
     FI_HILOGI("Enter");
+    std::lock_guard<std::mutex> guard(mutex_);
     ani_env *env = taihe::get_env();
     if (env == nullptr) {
         FI_HILOGE("ani_env is nullptr");
@@ -237,7 +252,6 @@ bool AniUnderageModelEvent::AddCallback(int32_t eventType, uintptr_t opq)
             FI_HILOGE("Failed to insert refs");
             return false;
         }
-        std::lock_guard<std::mutex> guard(mutex_);
         events_.insert(std::make_pair(eventType, listener));
         FI_HILOGD("Insert finish");
         return true;

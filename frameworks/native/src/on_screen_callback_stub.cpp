@@ -19,7 +19,9 @@
 
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 #include "sequenceable_util.h"
+#endif
 
 #undef LOG_TAG
 #define LOG_TAG  "OnScreenCallbackStub"
@@ -42,9 +44,11 @@ int32_t OnScreenCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         case static_cast<int32_t>(ON_SCREEN_CHANGE): {
             return OnScreenChangeStub(data);
         }
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
         case static_cast<int32_t>(ON_SCREEN_AWAREENSS): {
             return OnScreenAwarenessStub(data);
         }
+#endif
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -60,6 +64,7 @@ int32_t OnScreenCallbackStub::OnScreenChangeStub(MessageParcel &data)
     return RET_OK;
 }
 
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 int32_t OnScreenCallbackStub::OnScreenAwarenessStub(MessageParcel &data)
 {
     CALL_DEBUG_ENTER;
@@ -85,6 +90,7 @@ int32_t OnScreenCallbackStub::OnScreenAwarenessStub(MessageParcel &data)
     OnScreenAwareness(info);
     return RET_OK;
 }
+#endif
 } // namespace OnScreen
 } // namespace DeviceStatus
 } // namespace Msdp

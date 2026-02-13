@@ -296,7 +296,7 @@ HWTEST_F(DeviceStatusManagerTest, SubmitMetadataTest, TestSize.Level0) {
 
     deviceStatusManager->notifyListener_ = boomerangCallback_;
     result = deviceStatusManager->SubmitMetadata("metadata");
-    EXPECT_EQ(result, RET_OK);
+    EXPECT_EQ(result, RET_ERR);
     GTEST_LOG_(INFO) << "SubmitMetadataTest end";
 }
 

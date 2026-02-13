@@ -35,11 +35,15 @@ public:
     virtual ~OnScreenCallbackStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
     virtual void OnScreenChange(const std::string& changeInfo) override {}
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     virtual void OnScreenAwareness(const OnscreenAwarenessInfo& info) override {}
+#endif
 
 private:
     int32_t OnScreenChangeStub(MessageParcel &data);
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     int32_t OnScreenAwarenessStub(MessageParcel &data);
+#endif
 };
 } // namespace OnScreen
 } // namespace DeviceStatus

@@ -221,7 +221,7 @@ std::optional<DragData> IntentionServiceTest::CreateDragData(int32_t sourceType,
         dragData.shadowInfos.push_back({ pixelMap, g_shadowinfoX, g_shadowinfoY });
     }
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
-    dragData.extraInfo = FILTER_INFO;
+    dragData.filterInfo = FILTER_INFO;
     dragData.udKey = UD_KEY;
     dragData.sourceType = sourceType;
     dragData.extraInfo = EXTRA_INFO;
