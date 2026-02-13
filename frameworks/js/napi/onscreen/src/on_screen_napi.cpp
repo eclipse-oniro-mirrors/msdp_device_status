@@ -60,6 +60,7 @@ const std::set<std::string> CAP_LIST = {
     "scenarioActivity",
     "scenarioTodo",
     "screenshotIntent",
+    "QuickSnap",
 };
 #endif
 } // namespace
