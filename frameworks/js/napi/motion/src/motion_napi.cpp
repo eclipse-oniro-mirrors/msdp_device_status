@@ -92,7 +92,7 @@ void MotionCallback::AddTarget(const std::shared_ptr<MotionNapi>& target)
         return;
     }
     // 在锁内对 targets_ 做一次“清理 + 去重压缩” 1) 清理 expired weak_ptr，避免 targets_ 越来越大；
-    // 2) 消除历史重复项： 3) 最后确保当前 target 一定被加入（若之前不存在）。
+    // 2) 消除历史重复项； 3) 最后确保当前 target 一定被加入（若之前不存在）。
     std::lock_guard<std::mutex> lk(mutex_);
     std::unordered_set<MotionNapi*> uniq;
     uniq.reserve(targets_.size() + 1);
