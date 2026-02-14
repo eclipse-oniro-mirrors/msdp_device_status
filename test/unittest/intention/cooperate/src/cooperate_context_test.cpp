@@ -552,6 +552,109 @@ HWTEST_F(CooperateContextTest, CooperateContextTest014, TestSize.Level1)
     g_context->OnResetCooperation();
     g_context->StopEventHandler();
 }
+
+/**
+ * @tc.name: CooperateContextTest015
+ * @tc.desc: Test SetVirtualTrackpadDeviceId and GetVirtualTrackpadDeviceId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateContextTest, CooperateContextTest015, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t testDeviceId = 100;
+    g_context->SetVirtualTrackpadDeviceId(testDeviceId);
+    int32_t deviceId = g_context->GetVirtualTrackpadDeviceId();
+    EXPECT_EQ(deviceId, testDeviceId);
+}
+
+/**
+ * @tc.name: CooperateContextTest016
+ * @tc.desc: Test AdjustPointerPos with normal range values
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateContextTest, CooperateContextTest016, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DSoftbusCooperateOptions dSoftbusCooperateOptions {
+        .networkId = "test",
+        .originNetworkId = "test",
+        .success = true,
+        .cooperateOptions = CooperateOptions {
+            .displayX = 500,
+            .displayY = 500,
+            .displayId = 0,
+        }
+    };
+    ASSERT_NO_FATAL_FAILURE(g_context->AdjustPointerPos(dSoftbusCooperateOptions));
+}
+
+/**
+ * @tc.name: CooperateContextTest017
+ * @tc.desc: Test AdjustPointerPos with displayX out of bounds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateContextTest, CooperateContextTest017, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DSoftbusCooperateOptions dSoftbusCooperateOptions {
+        .networkId = "test",
+        .originNetworkId = "test",
+        .success = true,
+        .cooperateOptions = CooperateOptions {
+            .displayX = -100,
+            .displayY = 500,
+            .displayId = 0,
+        }
+    };
+    ASSERT_NO_FATAL_FAILURE(g_context->AdjustPointerPos(dSoftbusCooperateOptions));
+}
+
+/**
+ * @tc.name: CooperateContextTest018
+ * @tc.desc: Test AdjustPointerPos with displayY out of bounds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateContextTest, CooperateContextTest018, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DSoftbusCooperateOptions dSoftbusCooperateOptions {
+        .networkId = "test",
+        .originNetworkId = "test",
+        .success = true,
+        .cooperateOptions = CooperateOptions {
+            .displayX = 500,
+            .displayY = -100,
+            .displayId = 0,
+        }
+    };
+    ASSERT_NO_FATAL_FAILURE(g_context->AdjustPointerPos(dSoftbusCooperateOptions));
+}
+
+/**
+ * @tc.name: CooperateContextTest019
+ * @tc.desc: Test AdjustPointerPos with both coordinates in bounds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateContextTest, CooperateContextTest019, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    DSoftbusCooperateOptions dSoftbusCooperateOptions {
+        .networkId = "test",
+        .originNetworkId = "test",
+        .success = true,
+        .cooperateOptions = CooperateOptions {
+            .displayX = 100,
+            .displayY = 100,
+            .displayId = 0,
+        }
+    };
+    ASSERT_NO_FATAL_FAILURE(g_context->AdjustPointerPos(dSoftbusCooperateOptions));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

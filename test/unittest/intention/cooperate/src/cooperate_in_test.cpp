@@ -1500,6 +1500,97 @@ HWTEST_F(CooperateInTest, CooperateInTest040, TestSize.Level1)
     bool ret = g_context->mouseLocation_.HasLocalListener();
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: CooperateInTest041
+ * @tc.desc: Test CooperateIn constructor and initial_ initialization
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateInTest, CooperateInTest041, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateIn stateIn(*g_stateMachine, env);
+    ASSERT_NE(stateIn.initial_, nullptr);
+}
+
+/**
+ * @tc.name: CooperateInTest042
+ * @tc.desc: Test OnEvent with DISABLE event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateInTest, CooperateInTest042, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DISABLE,
+        DisableCooperateEvent {
+            .pid = IPCSkeleton::GetCallingPid(),
+            .userData = 1,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateIn stateIn(*g_stateMachine, env);
+    ASSERT_NE(stateIn.initial_, nullptr);
+    stateIn.OnEvent(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateInTest043
+ * @tc.desc: Test RelayConfirmation OnResetWithOptionsNotifyMessage
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateInTest, CooperateInTest043, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DSOFTBUS_START_COOPERATE,
+        DSoftbusStartCooperate {
+            .networkId = REMOTE_NETWORKID,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateIn stateIn(*g_stateMachine, env);
+    auto relay = std::make_shared<Cooperate::CooperateIn::RelayConfirmation>(stateIn, stateIn.initial_);
+    ASSERT_NE(relay, nullptr);
+    relay->OnResetWithOptionsNotifyMessage(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateInTest044
+ * @tc.desc: Test RelayConfirmation OnResponseWithOptions
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateInTest, CooperateInTest044, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::START,
+        StartCooperateEvent {
+            .pid = IPCSkeleton::GetCallingPid(),
+            .userData = 1,
+            .remoteNetworkId = REMOTE_NETWORKID,
+            .startDeviceId = 1,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateIn stateIn(*g_stateMachine, env);
+    auto relay = std::make_shared<Cooperate::CooperateIn::RelayConfirmation>(stateIn, stateIn.initial_);
+    ASSERT_NE(relay, nullptr);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
