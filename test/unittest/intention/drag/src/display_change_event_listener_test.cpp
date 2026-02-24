@@ -149,7 +149,6 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttrib
     EXPECT_NE(displayInfo, nullptr);
 }
 
-
 /**
  * @tc.name: DisplayChangeEventListenerTest_OnAttributeChange_004
  * @tc.desc: Drag Drawing
@@ -167,8 +166,6 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttrib
     displayListener_->ProcessDisplayEvent(0);
     EXPECT_NE(displayInfo, nullptr);
 }
-
-
 
 /**
  * @tc.name: DisplayChangeEventListenerTest_OnAttributeChange_005
