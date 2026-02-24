@@ -79,8 +79,7 @@ void DisplayChangeEventListener::ProcessDisplayRotationEvent(Rosen::DisplayId di
     }
     Rosen::Rotation currentRotation = displayInfo->GetRotation();
     if (!IsRotation(displayId, currentRotation)) {
-        FI_HILOGI("No need to rotate window for display id:%{public}d angle from %{public}d to %{public}d",
-            static_cast<int32_t>(displayId), static_cast<int32_t>(lastRotation), static_cast<int32_t>(currentRotation));
+        FI_HILOGI("No need to rotate window for display id:%{public}" PRIu64"", displayId);
         return;
     }
 
