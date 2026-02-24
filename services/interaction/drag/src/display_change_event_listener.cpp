@@ -58,7 +58,7 @@ void DisplayChangeEventListener::OnAttributeChange(Rosen::DisplayId displayId,
 {
     for (const auto& attribute : attributes) {
         if (attribute == "rotation" || attribute == "width" || attribute == "height") {
-            FI_HILOGI("Process rotation event for displayId:%{public}" PRIu64"", displayId);
+            FI_HILOGI("Display attributes changed for displayId:%{public}" PRIu64"", displayId);
             ProcessDisplayEvent(displayId);
             return;
         }
