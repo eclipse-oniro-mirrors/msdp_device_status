@@ -265,8 +265,8 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     displayChangeEventListener_ = sptr<DisplayChangeEventListener>::MakeSptr(context_);
     CHKPV(displayChangeEventListener_);
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(displayChangeEventListener_);
-    std::vector<std::string> displayAttribute = {"rotation", "width", "height"};
-    Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(displayAttribute,
+    std::vector<std::string> displayAttributes = {"rotation", "width", "height"};
+    Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(displayAttributes,
         displayChangeEventListener_);
 #ifdef OHOS_ENABLE_PULLTHROW
     displayChangeEventListener_->SetFoldPC(

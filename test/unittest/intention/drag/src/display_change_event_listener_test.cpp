@@ -108,8 +108,8 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttrib
     ASSERT_NE(displayListener_, nullptr);
     displayListener_->RotateDragWindow(0, Rosen::Rotation::ROTATION_90);
     auto displayInfo = displayListener_->GetDisplayInfo(0);
-    std::vector<std::string> displayAttribute = {"rotation"};
-    displayListener_->OnAttributeChange(0, displayAttribute);
+    std::vector<std::string> displayAttributes = {"rotation"};
+    displayListener_->OnAttributeChange(0, displayAttributes);
     displayListener_->ProcessDisplayEvent(0);
     EXPECT_NE(displayInfo, nullptr);
 }
@@ -125,9 +125,66 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttrib
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
     auto displayInfo = displayListener_->GetDisplayInfo(-1);
-    std::vector<std::string> displayAttribute = {};
-    displayListener_->OnAttributeChange(-1, displayAttribute);
+    std::vector<std::string> displayAttributes = {};
+    displayListener_->OnAttributeChange(-1, displayAttributes);
     displayListener_->ProcessDisplayEvent(-1);
+    EXPECT_NE(displayInfo, nullptr);
+}
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_OnAttributeChange_003
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC OnAttributeChange
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttributeChange_003, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    displayListener_->RotateDragWindow(0, Rosen::Rotation::ROTATION_90);
+    auto displayInfo = displayListener_->GetDisplayInfo(0);
+    std::vector<std::string> displayAttributes = {"width"};
+    displayListener_->OnAttributeChange(0, displayAttributes);
+    displayListener_->ProcessDisplayEvent(0);
+    EXPECT_NE(displayInfo, nullptr);
+}
+
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_OnAttributeChange_004
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC OnAttributeChange
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttributeChange_004, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    displayListener_->RotateDragWindow(0, Rosen::Rotation::ROTATION_90);
+    auto displayInfo = displayListener_->GetDisplayInfo(0);
+    std::vector<std::string> displayAttributes = {"height"};
+    displayListener_->OnAttributeChange(0, displayAttributes);
+    displayListener_->ProcessDisplayEvent(0);
+    EXPECT_NE(displayInfo, nullptr);
+}
+
+
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_OnAttributeChange_005
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC OnAttributeChange
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttributeChange_005, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    displayListener_->RotateDragWindow(0, Rosen::Rotation::ROTATION_90);
+    auto displayInfo = displayListener_->GetDisplayInfo(0);
+    std::vector<std::string> displayAttributes = {"unknown"};
+    displayListener_->OnAttributeChange(0, displayAttributes);
+    displayListener_->ProcessDisplayEvent(0);
     EXPECT_NE(displayInfo, nullptr);
 }
 
