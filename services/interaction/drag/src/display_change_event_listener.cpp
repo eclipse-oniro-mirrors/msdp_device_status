@@ -41,7 +41,7 @@ DisplayChangeEventListener::DisplayChangeEventListener(IContext *context)
 void DisplayChangeEventListener::OnCreate(Rosen::DisplayId displayId)
 {
     FI_HILOGI("display:%{public}" PRIu64"", displayId);
-    ProcessDisplayRotationEvent(displayId);
+    ProcessDisplayEvent(displayId);
 }
 
 void DisplayChangeEventListener::OnDestroy(Rosen::DisplayId displayId)
@@ -54,17 +54,19 @@ void DisplayChangeEventListener::OnDestroy(Rosen::DisplayId displayId)
 void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId) {}
 
 void DisplayChangeEventListener::OnAttributeChange(Rosen::DisplayId displayId,
-    const std::vector<std::string>& attribute)
+    const std::vector<std::string>& attributes)
 {
-    if (std::find(attribute.begin(), attribute.end(), "rotation") != attribute.end()) {
-        FI_HILOGI("Process rotation event for displayId:%{public}" PRIu64"", displayId);
-        ProcessDisplayRotationEvent(displayId);
-    } else {
-        FI_HILOGE("Rotation attribute not found for displayId:%{public}" PRIu64"", displayId);
+    for (const auto& attribute : attributes) {
+        if (attribute == "rotation" || attribute == "width" || attribute == "height") {
+            FI_HILOGI("Process rotation event for displayId:%{public}" PRIu64"", displayId);
+            ProcessDisplayEvent(displayId);
+            return;
+        }
     }
+    FI_HILOGE("No expected attributes found for displayId:%{public}" PRIu64"", displayId);
 }
 
-void DisplayChangeEventListener::ProcessDisplayRotationEvent(Rosen::DisplayId displayId)
+void DisplayChangeEventListener::ProcessDisplayEvent(Rosen::DisplayId displayId)
 {
     CHKPV(context_);
     Rosen::Rotation lastRotation = context_->GetDragManager().GetRotation(displayId);

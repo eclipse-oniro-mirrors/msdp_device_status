@@ -110,7 +110,7 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttrib
     auto displayInfo = displayListener_->GetDisplayInfo(0);
     std::vector<std::string> displayAttribute = {"rotation"};
     displayListener_->OnAttributeChange(0, displayAttribute);
-    displayListener_->ProcessDisplayRotationEvent(0);
+    displayListener_->ProcessDisplayEvent(0);
     EXPECT_NE(displayInfo, nullptr);
 }
 
@@ -127,7 +127,7 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttrib
     auto displayInfo = displayListener_->GetDisplayInfo(-1);
     std::vector<std::string> displayAttribute = {};
     displayListener_->OnAttributeChange(-1, displayAttribute);
-    displayListener_->ProcessDisplayRotationEvent(-1);
+    displayListener_->ProcessDisplayEvent(-1);
     EXPECT_NE(displayInfo, nullptr);
 }
 
