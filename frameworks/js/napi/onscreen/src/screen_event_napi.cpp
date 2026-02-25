@@ -391,6 +391,7 @@ bool ScreenEventNapi::IsSameJsHandler(napi_env env, const std::vector<napi_ref> 
     return false;
 }
 
+
 // - false: 失败（OOM/重复等），调用方需删除 handlerRef
 // - true : 成功；needRegisterSa=true 表示首次创建该(win,event)节点，需要向 SA Register。
 bool ScreenEventNapi::UpsertScreenCallback(napi_env env, int32_t windowId, const std::string &event,
@@ -696,7 +697,7 @@ napi_value ScreenEventNapi::UnregisterScreenEventCallbackNapi(napi_env env, napi
     // 顺序：先反注册 -> 再删引用（都在 JS 线程调用本函数)
     // 先底层反注册
     for (const auto &item : pending) {
-        OnScreenManager::GetInstance().UnregisterScreenEventCallback(item.wid, item.evt, item.cb);
+        OnScreenManager::GetInstance().UnregisterScreenEventCallback(item.wid, item.event, item.cb);
     }
 
     // 删除仅handler的 napi_ref（JS 线程）
