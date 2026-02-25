@@ -304,7 +304,7 @@ bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value holderOb
             std::vector<PendingOff> pending;
             ScreenEventNapi::CollectAllPendingLocked(env, pending);
             for (const auto &item : pending) {
-                OnScreenManager::GetInstance().UnregisterScreenEventCallback(item.wid, item.event, item.cb);
+                OnScreenManager::GetInstance().UnregisterScreenEventCallback(item.wid, item.evt, item.cb);
             }
             for (const auto &item : pending) {
                 if (item.cb) {
@@ -697,7 +697,7 @@ napi_value ScreenEventNapi::UnregisterScreenEventCallbackNapi(napi_env env, napi
     // 顺序：先反注册 -> 再删引用（都在 JS 线程调用本函数)
     // 先底层反注册
     for (const auto &item : pending) {
-        OnScreenManager::GetInstance().UnregisterScreenEventCallback(item.wid, item.event, item.cb);
+        OnScreenManager::GetInstance().UnregisterScreenEventCallback(item.wid, item.evt, item.cb);
     }
 
     // 删除仅handler的 napi_ref（JS 线程）
