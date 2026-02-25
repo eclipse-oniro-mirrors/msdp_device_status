@@ -18,6 +18,7 @@
 
 #include <uv.h>
 #include <set>
+#include <atomic>
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
@@ -38,12 +39,27 @@ public:
     ~OnScreenCallback();
     void OnScreenChange(const std::string& changeInfo) override;
 
+    void CloseOnJsThread();
+    void Disable();
+    bool Disabled();
+
+    // 做纯 C++ 容器操作；调用方需保证不在持锁状态下调用任何 N-API。
+    void SnapshotRefsLocked(std::vector<napi_ref> &out) const;
+    bool ContainsRefLocked(napi_ref ref) const;
+    void AddRefLocked(napi_ref ref);
+    bool RemoveRefLocked(napi_ref ref);
+    bool EmptyLocked() const;
+
 public:
     int32_t windowId { 0 };
     std::string event;
     sptr<IRemoteOnScreenCallback> callback;
-    std::set<napi_ref> onRef;
     napi_env env_ { nullptr };
+
+private:
+    std::atomic<bool> disabled_ { false };
+    mutable std::mutex refMtx_;
+    std::set<napi_ref> onRef_;
 };
 
 struct PendingOff {
@@ -69,18 +85,19 @@ private:
     static bool TransJsToInt32(napi_env env, napi_value in, int32_t &out);
     static void SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
     static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
-    static bool IsSameJsHandler(napi_env env, const std::set<napi_ref> &refs, napi_value jsHandler);
-    static sptr<OnScreenCallback> UpsertScreenCallback(
-        napi_env env, int32_t windowId, const std::string &event, napi_value jsHandler, napi_ref handlerRef);
+    static bool IsSameJsHandler(napi_env env, const std::vector<napi_ref> &refs, napi_value jsHandler);
+    static bool UpsertScreenCallback(napi_env env, int32_t windowId, const std::string &event,
+        napi_value jsHandler, napi_ref handlerRef, sptr<OnScreenCallback> &outCb, bool &needRegisterSa);
     static bool EraseAndDeleteJsHandler(napi_env env, std::set<napi_ref>& refs, napi_value jsHandler);
-    static void CollectAllPendingLocked(std::vector<PendingOff>& pending);
-    static bool CollectWindowAllPendingLocked(int32_t windowId, std::vector<PendingOff>& pending);
-    static bool CollectEventNodePendingLocked(int32_t windowId,
+    // 每个 env 都有一份 exports/模块实例：回调表与清理逻辑也按 env 维度隔离。
+    static void CollectAllPendingLocked(napi_env env, std::vector<PendingOff>& pending);
+    static bool CollectWindowAllPendingLocked(napi_env env, int32_t windowId, std::vector<PendingOff>& pending);
+    static bool CollectEventNodePendingLocked(napi_env env, int32_t windowId,
         const std::string& eventStr, std::vector<PendingOff>& pending);
-    static bool EraseOneHandlerLocked(int32_t windowId, const std::string& eventStr,
-        napi_env env, napi_value jsHandler, std::vector<PendingOff>& pending);
-
-    napi_env env_;
+    static bool EraseOneHandlerLocked(napi_env env, int32_t windowId, const std::string& eventStr,
+        napi_value jsHandler, std::vector<PendingOff>& pending, std::vector<napi_ref>& doomedRefs);
+    static bool FindAndEraseJsHandler(napi_env env, const sptr<OnScreenCallback> &cb,
+        napi_value jsHandler, napi_ref& doomed);
 };
 } // OnScreen
 } // DeviceStatus
