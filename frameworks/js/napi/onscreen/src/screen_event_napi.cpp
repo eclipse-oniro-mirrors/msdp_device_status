@@ -36,9 +36,9 @@ constexpr size_t ARG_1 = 1;
 constexpr size_t ARG_2 = 2;
 constexpr size_t ARG_3 = 3;
 // 1) g_instancesMtx 仅保护 g_instances
-// 2) g_callbacksMtx 仅保护 g_screenCallbacks （map 结构层面的增删查）
+// 2) g_callbacksMtx 仅保护 g_screenCallbacks（map 结构层面的增删查）
 // 锁顺序约定：若必须同时涉及两者，必须先拿 g_instancesMtx，再拿 g_callbacksMtx；
-// 且任何 mutex （包括回调对象内部锁）持有期间禁止调用 N-API，避免 GC/finalize 重入导致死锁。
+// 且任何 mutex（包括回调对象内部锁）持有期间禁止调用 N-API，避免 GC/finalize 重入导致死锁。
 std::mutex g_instancesMtx;
 std::mutex g_callbacksMtx;
 
@@ -71,7 +71,7 @@ napi_value ScreenEventNapi::Init(napi_env env, napi_value exports)
     MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     DefParallelFeatureStatus(env, exports);
 
-    // namespace 形式的接口：把 native 实例声明周期绑定到 exports（每个 env 一份）。
+    // namespace 形式的接口：把 native 实例生命周期绑定到 exports（每个 env 一份）。
     // 这样能在 env 销毁时（finalize）做兜底清理，避免 SA 回调继续上报时触发跨 env/失效 env 的 N-API 调用。
     ConstructScreenEventNapi(env, exports);
     return exports;
@@ -94,9 +94,9 @@ void ScreenEventNapi::DefParallelFeatureStatus(napi_env env, napi_value exports)
 
 OnScreenCallback::~OnScreenCallback()
 {
-    // 析构仅清理本地容器；napi_ref 的释放由 CloseOnJsThread 在 JS线程执行。
+    // 析构仅清理本地容器；napi_ref 的释放由 CloseOnJsThread 在 JS 线程执行。
     std::lock_guard<std::mutex> lk(refMtx_);
-    onRef.clear();
+    onRef_.clear();
 }
 
 void OnScreenCallback::SnapshotRefsLocked(std::vector<napi_ref> &out) const
@@ -161,7 +161,7 @@ void OnScreenCallback::CloseOnJsThread()
 
     // 若 env 正在销毁导致投递失败，则放弃删除（避免在非 JS 线程/失效 env 触发崩溃）。
     if (napi_send_event(env, task, napi_eprio_immediate) != napi_ok) {
-        FI_HILOGE("CloseOnJsThread: napi_send_event failed, skip deleting refs");
+       FI_HILOGE("CloseOnJsThread: napi_send_event failed, skip deleting refs");
     }
 }
 
@@ -197,6 +197,7 @@ void OnScreenCallback::OnScreenChange(const std::string& changeInfo)
                 FI_HILOGE("napi_get_reference_value failed");
                 continue;
             }
+
             napi_value result;
             if (napi_create_string_utf8(self->env_, changeInfo.c_str(), NAPI_AUTO_LENGTH, &result) != napi_ok) {
                 FI_HILOGE("Failed to napi_create_string_utf8");
@@ -247,7 +248,7 @@ napi_value ScreenEventNapi::RegisterScreenEventCallbackNapi(napi_env env, napi_c
         }
     }
 
-    // N-API 调用必须再锁外。
+    // N-API 调用必须在锁外。
     napi_ref handlerRef = nullptr;
     if (napi_create_reference(env, args[ARG_2], 1, &handlerRef) != napi_ok) {
         ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get callback");
@@ -261,11 +262,11 @@ napi_value ScreenEventNapi::RegisterScreenEventCallbackNapi(napi_env env, napi_c
         return nullptr;
     }
     if (needRegisterSa && needRegisterCb != nullptr) {
-        OnScreenManager::GetInstance().RegisterScreenEventCallback(windowId, eventStr, callback);
+        OnScreenManager::GetInstance().RegisterScreenEventCallback(windowId, eventStr, needRegisterCb);
     }
 
-    napi_get_undefined(env, &result);
-    return result;
+   napi_get_undefined(env, &result);
+   return result;
 }
 
 bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value holderObj)
@@ -273,14 +274,14 @@ bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value holderOb
     // 只负责在 Init 阶段把实例 wrap 到 exports；订阅/取消订阅不会触发 wrap。
     {
         // std::lock_guard<std::mutex> lk(g_mtx);
-        std::lock_guard<std::mutex> lk(g_instancesMtx);
+        std::lock_guard<std::mutex> lk(g_instancesMtx);        
         if (g_instances.find(env) != g_instances.end()) {
             FI_HILOGI("env has find");
             return true;
         }
     }
 
-    // holderObj 建议传 exports（模块导出对象），用于将 native 实例声明周期绑定到当前 env。
+    // holderObj 建议传 exports（模块导出对象），用于将 native 实例生命周期绑定到当前 env。
     ScreenEventNapi *inst = new (std::nothrow) ScreenEventNapi(env, holderObj);
     if (inst == nullptr) {
         FI_HILOGE("failed to new ScreenEventNapi");
@@ -291,17 +292,20 @@ bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value holderOb
         [](napi_env env, void *data, void *hint) {
             (void)hint;
             if (data == nullptr) {
-                    FI_HILOGE("data is nullptr");
-                    return;
+                FI_HILOGE("data is nullptr");
+                return;
             }
             auto *screenChange = reinterpret_cast<ScreenEventNapi *>(data);
 
             // exports 对象被 GC / env 即将销毁：这里做一次兜底清理（仅清理本 env）。
-            // 1) 禁用并摘除所有订阅（纯 C++ 操作，防止后续回调继续触发 N_API）
+            // 1) 禁用并摘除所有订阅（纯 C++ 操作，防止后续回调继续触发 N-API）
             // 2) 反注册 SA 回调（停止上报）
             // 3) 在 JS 线程释放 napi_ref（CloseOnJsThread 内部发送到js线程调用 napi_delete_reference）
             std::vector<PendingOff> pending;
             ScreenEventNapi::CollectAllPendingLocked(env, pending);
+            for (const auto &item : pending) {
+                OnScreenManager::GetInstance().UnregisterScreenEventCallback(item.wid, item.event, item.cb);
+            }
             for (const auto &item : pending) {
                 if (item.cb) {
                     item.cb->CloseOnJsThread();
@@ -316,7 +320,7 @@ bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value holderOb
                     g_instances.erase(it);
                 }
             }
-            delete screenChangel
+            delete screenChange;
         }, nullptr, nullptr);
 
     if (status != napi_ok) {
@@ -387,7 +391,6 @@ bool ScreenEventNapi::IsSameJsHandler(napi_env env, const std::vector<napi_ref> 
     return false;
 }
 
-// create/attach callback and update g_screenCallbacks; return nullptr when duplicate
 // - false: 失败（OOM/重复等），调用方需删除 handlerRef
 // - true : 成功；needRegisterSa=true 表示首次创建该(win,event)节点，需要向 SA Register。
 bool ScreenEventNapi::UpsertScreenCallback(napi_env env, int32_t windowId, const std::string &event,
@@ -398,7 +401,7 @@ bool ScreenEventNapi::UpsertScreenCallback(napi_env env, int32_t windowId, const
     needRegisterSa = false;
 
     sptr<OnScreenCallback> existing = nullptr;
-    std::vector<napi_ref> refSnapshot;
+    std::vector<napi_ref> refsSnapshot;
 
     // 锁内仅进行 map 读写/快照，禁止任何 N-API。
     {
@@ -414,22 +417,23 @@ bool ScreenEventNapi::UpsertScreenCallback(napi_env env, int32_t windowId, const
             }
             callback->windowId = windowId;
             callback->event = event;
-            callback->AddRefLocked(handler);
+            callback->AddRefLocked(handlerRef);
+            eventCallbacks[event] = callback;
             outCb = callback;
             needRegisterSa = true;
             return true;
         }
         existing = it->second;
-        existing->SnapshotRefsLocked(refSnapshot);
+        existing->SnapshotRefsLocked(refsSnapshot);
     }
 
     // 锁外做重复 handler 判定（N-API 调用）
-    if (IsSameJsHandler(env, refSnapshot, jsHandler)) {
+    if (IsSameJsHandler(env, refsSnapshot, jsHandler)) {
         FI_HILOGI("js handler is same");
         return false;
     }
 
-    // 重新入锁写入（期间可能已经被清理/替换，需要再次校验）
+    // 重新入锁写入（期间可能已被清理/替换，需要再次校验）
     {
         std::lock_guard<std::mutex> lk(g_callbacksMtx);
         auto itEnv = g_screenCallbacks.find(env);
@@ -459,7 +463,7 @@ bool ScreenEventNapi::UpsertScreenCallback(napi_env env, int32_t windowId, const
             }
             callback->windowId = windowId;
             callback->event = event;
-            callback->AddRefLocked(handler);
+            callback->AddRefLocked(handlerRef);
             eventCallbacks[event] = callback;
             outCb = callback;
             needRegisterSa = true;
@@ -498,12 +502,12 @@ void ScreenEventNapi::CollectAllPendingLocked(napi_env env,
     for (auto &wIt : itEnv->second) {
         for (auto &eIt : wIt.second) {
             if (eIt.second) {
-                eIt.second->Disabled(); // 标记停用
+                eIt.second->Disable(); // 标记停用
                 pending.push_back({ eIt.second->windowId, eIt.second->event, eIt.second });
             }
         }
     }
-    g_screenCallbacks.clear();
+    g_screenCallbacks.erase(itEnv);
 }
 
 // 1参：删除某个 windowId 下全部
@@ -523,7 +527,7 @@ bool ScreenEventNapi::CollectWindowAllPendingLocked(napi_env env, int32_t window
     }
     for (auto &eIt : wIt->second) {
         if (eIt.second) {
-            eIt.second->Disabled(); // 标记停用
+            eIt.second->Disable(); // 标记停用
             pending.push_back({ eIt.second->windowId, eIt.second->event, eIt.second });
         }
     }
@@ -565,14 +569,14 @@ bool ScreenEventNapi::CollectEventNodePendingLocked(napi_env env, int32_t window
         itEnv->second.erase(wIt);
         if (itEnv->second.empty()) {
             FI_HILOGI("erase callback");
-            g_screenCallbacks.erase(itEnv);
+            g_screenCallbacks.erase(itEnv); 
         }
     }
     return true;
 }
 
 // 3参：删除 (windowId, eventStr, jsHandler) 指定回调
-// 输出参数doomRefs，把需要删除的napi_ref交给外层的js线程统一删除
+// 输出参数doomRefs, 把需要删除的napi_ref交给外层的js线程统一删除
 bool ScreenEventNapi::EraseOneHandlerLocked(napi_env env, int32_t windowId, const std::string& eventStr,
     napi_value jsHandler, std::vector<PendingOff>& pending, std::vector<napi_ref>& doomedRefs)
 {
@@ -673,7 +677,7 @@ napi_value ScreenEventNapi::UnregisterScreenEventCallbackNapi(napi_env env, napi
         } else {
             // get event
             std::string eventStr;
-            if (!TransJsToStr(env, args[ARG_1], eventStr)) { // (4)
+            if (!TransJsToStr(env, args[ARG_1], eventStr)) {
                 ThrowOnScreenErr(env, RET_PARAM_ERR, "can not get event");
                 return nullptr;
             }
@@ -682,14 +686,14 @@ napi_value ScreenEventNapi::UnregisterScreenEventCallbackNapi(napi_env env, napi
                 ThrowOnScreenErr(env, RET_PARAM_ERR, "wrong param 2");
                 return nullptr;
             }
-            if (argc == ARG_3 && !EraseOneHandlerLocked(env, windowId, eventStr, env, args[ARG_2], pending, doomedRefs)) {
+            if (argc == ARG_3 && !EraseOneHandlerLocked(env, windowId, eventStr, args[ARG_2], pending, doomedRefs)) {
                 ThrowOnScreenErr(env, RET_PARAM_ERR, "wrong param 3");
                 return nullptr;
             }
         }
     }
 
-    // 顺序：先反注册 -> 再删引用（都在 JS 线程调用本函数）
+    // 顺序：先反注册 -> 再删引用（都在 JS 线程调用本函数)
     // 先底层反注册
     for (const auto &item : pending) {
         OnScreenManager::GetInstance().UnregisterScreenEventCallback(item.wid, item.evt, item.cb);
@@ -803,15 +807,15 @@ bool ScreenEventNapi::FindAndEraseJsHandler(napi_env env, const sptr<OnScreenCal
     // 在不持有任何 mutex 的情况下完成：
     // 1) 快照 refs（纯 C++）
     // 2) 锁外通过 N-API 做 strict_equals 找到匹配的 ref
-    // 3) 纯 C++ 从集合移除该 ref（不调用 napi_delete_reference）
+    // 3) 纯 C++ 从集合中移除该 ref（不调用 napi_delete_reference）
     doomed = nullptr;
     if (cb == nullptr) {
         FI_HILOGE("cb is nullptr");
         return false;
     }
-    std::vector<napi_ref> refSnapshot;
-    cb->SnapshotRefsLocked(refSnapshot);
-    for (auto ref : refSnapshot) {
+    std::vector<napi_ref> refsSnapshot;
+    cb->SnapshotRefsLocked(refsSnapshot);
+    for (auto ref : refsSnapshot) {
         napi_value cur = nullptr;
         if (napi_get_reference_value(env, ref, &cur) != napi_ok) {
             continue;
