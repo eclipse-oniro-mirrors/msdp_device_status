@@ -100,7 +100,7 @@ private:
         DistanceMeasurementConfigParams& distMeasureParams);
     static bool CreateDistMeasureCallback(napi_env env, napi_value callback,
         CDistMeasureData cdistMeasureData);
-    static bool DeleteDistMeasureCallback(napi_value callback, CDistMeasureData cdistMeasureData);
+    static bool DeleteDistMeasureCallback(napi_env env, napi_value callback, CDistMeasureData cdistMeasureData);
     static bool IsValidTechnologyType(int32_t techType);
     static bool isValidReportMode(napi_env env, napi_value jsParams,
         DistanceMeasurementConfigParams& distMeasureParams);

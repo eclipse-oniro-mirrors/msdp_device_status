@@ -178,7 +178,6 @@ void DistanceMeasurementEventNapi::RemoveCallback(const CDistMeasureData &cdistM
         FI_HILOGE("napi_delete_reference failed");
     }
     distMeasureEventMap_.erase(iter);
-    return;
 }
 
 void DistanceMeasurementEventNapi::OnDistMeasureEvent(size_t argc, const napi_value *argv,
