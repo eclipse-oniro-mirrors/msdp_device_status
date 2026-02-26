@@ -355,16 +355,20 @@ void DSoftbusAdapterImpl::OnBytes(int32_t socket, const void *data, uint32_t dat
     }
     const std::string networkId = iter->first;
 
-    if (*reinterpret_cast<const uint32_t*>(data) < static_cast<uint32_t>(MessageId::MAX_MESSAGE_ID)) {
-        CircleStreamBuffer &circleBuffer = iter->second.buffer_;
+    if (dataLen >= sizeof(uint32_t)) {
+        if (*reinterpret_cast<const uint32_t*>(data) < static_cast<uint32_t>(MessageId::MAX_MESSAGE_ID)) {
+            CircleStreamBuffer &circleBuffer = iter->second.buffer_;
 
-        if (!circleBuffer.Write(reinterpret_cast<const char*>(data), dataLen)) {
-            FI_HILOGE("Failed to write buffer");
-            return;
+            if (!circleBuffer.Write(reinterpret_cast<const char*>(data), dataLen)) {
+                FI_HILOGE("Failed to write buffer");
+                return;
+            }
+            HandleSessionData(networkId, circleBuffer);
+        } else {
+            HandleRawData(networkId, data, dataLen);
         }
-        HandleSessionData(networkId, circleBuffer);
     } else {
-        HandleRawData(networkId, data, dataLen);
+        FI_HILOGE("Data length too short: %{public}u", dataLen);
     }
 }
 
@@ -674,12 +678,18 @@ int32_t DSoftbusAdapterImpl::KeepHeartBeating(const std::string &networkId)
         FI_HILOGE("eventHandler is null");
         return RET_ERR;
     }
+    auto weakThis = std:: weak_ptr<DSoftbusAdapterImpl>(shared_from_this());
     if (!eventHandler->PostTask(
         [this, networkId]() {
-            if (GetHeartBeatState(networkId)) {
-                this->KeepHeartBeating(networkId);
+            auto self = weakThis.lock();
+            if (!self) {
+                FI_HILOGE("self is null");
+                return;
+            }
+            if (self->GetHeartBeatState(networkId)) {
+                self->KeepHeartBeating(networkId);
             } else {
-                UpdateHeartBeatState(networkId, false);
+                self->UpdateHeartBeatState(networkId, false);
                 FI_HILOGE("Switch off, Stop heartBeat to %{public}s", Utility::Anonymize(networkId).c_str());
             }
         }, HEART_BEAT_INTERVAL_MS)) {

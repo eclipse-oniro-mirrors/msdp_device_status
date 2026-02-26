@@ -33,7 +33,8 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DSoftbusAdapterImpl final : public IDSoftbusAdapter {
+class DSoftbusAdapterImpl final : public IDSoftbusAdapter,
+                                  public std::enable_shared_from_this<DSoftbusAdapterImpl> {
     class Observer final {
     public:
         explicit Observer(std::shared_ptr<IDSoftbusObserver> observer)
