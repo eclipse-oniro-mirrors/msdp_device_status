@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,7 +185,7 @@ int32_t ContextService::AddEpoll(EpollEventType type, int32_t fd)
         FI_HILOGE("Invalid type:%{public}d", type);
         return RET_ERR;
     }
-    if (fd < 0) {
+    if (fcntl(fd, F_GETFD) == -1) {
         FI_HILOGE("Invalid fd:%{public}d", fd);
         return RET_ERR;
     }
@@ -208,6 +208,7 @@ int32_t ContextService::AddEpoll(EpollEventType type, int32_t fd)
         FI_HILOGE("EpollCtl failed");
         return RET_ERR;
     }
+    free(eventData);
     return RET_OK;
 }
 
@@ -218,7 +219,7 @@ int32_t ContextService::DelEpoll(EpollEventType type, int32_t fd)
         FI_HILOGE("Invalid type:%{public}d", type);
         return RET_ERR;
     }
-    if (fd < 0) {
+    if (fcntl(fd, F_GETFD) == -1) {
         FI_HILOGE("Invalid fd:%{public}d", fd);
         return RET_ERR;
     }

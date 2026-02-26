@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+    constexpr int32_t SOCKET_PAIR_SIZE = 2;
+}
 
 StreamServer::~StreamServer()
 {
@@ -45,10 +48,10 @@ void StreamServer::UdsStop()
         epollFd_ = -1;
     }
 
-    for (const auto &item : sessionss_) {
+    for (const auto &item : sessions_) {
         item.second->Close();
     }
-    sessionss_.clear();
+    sessions_.clear();
 }
 
 int32_t StreamServer::GetClientFd(int32_t pid) const
@@ -62,8 +65,8 @@ int32_t StreamServer::GetClientFd(int32_t pid) const
 
 int32_t StreamServer::GetClientPid(int32_t fd) const
 {
-    auto it = sessionss_.find(fd);
-    if (it == sessionss_.end()) {
+    auto it = sessions_.find(fd);
+    if (it == sessions_.end()) {
         return INVALID_PID;
     }
     return it->second->GetPid();
@@ -95,7 +98,7 @@ int32_t StreamServer::AddSocketPairInfo(const std::string &programName, int32_t 
     int32_t &serverFd, int32_t &toReturnClientFd, int32_t &tokenType)
 {
     CALL_DEBUG_ENTER;
-    int32_t sockFds[2] = { -1 };
+    int32_t sockFds[SOCKET_PAIR_SIZE] = { -1 };
 
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockFds) != 0) {
         FI_HILOGE("Call socketpair failed, errno:%{public}d", errno);
@@ -133,29 +136,29 @@ int32_t StreamServer::SetSockOpt(int32_t &serverFd, int32_t &toReturnClientFd, i
     static constexpr size_t nativeBufferSize = 64 * 1024;
 
     if (setsockopt(serverFd, SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-        FI_HILOGE("setsockopt serverFd failed, errno:%{public}d", errno);
+        FI_HILOGE("Failed to set SO_SNDBUF on server socket, errno:%{public}d", errno);
         return CloseFd(serverFd, toReturnClientFd);
     }
     if (setsockopt(serverFd, SOL_SOCKET, SO_RCVBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-        FI_HILOGE("setsockopt serverFd failed, errno:%{public}d", errno);
+        FI_HILOGE("Failed to set SO_RCVBUF on server socket, errno:%{public}d", errno);
         return CloseFd(serverFd, toReturnClientFd);
     }
     if (tokenType == TokenType::TOKEN_NATIVE) {
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_SNDBUF, &nativeBufferSize, sizeof(nativeBufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, SO_SNDBUF and nativeBufferSize, errno:%{public}d", errno);
+            FI_HILOGE("Set SO_SNDBUF for native token client failed, errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_RCVBUF, &nativeBufferSize, sizeof(nativeBufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, SO_RCVBUF and nativeBufferSize, errno:%{public}d", errno);
+            FI_HILOGE("Set SO_RCVBUF for native token client failed, errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
     } else {
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, SO_SNDBUF and bufferSize, errno:%{public}d", errno);
+            FI_HILOGE("Set SO_SNDBUF for non-native token client failed, errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
         if (setsockopt(toReturnClientFd, SOL_SOCKET, SO_RCVBUF, &bufferSize, sizeof(bufferSize)) != 0) {
-            FI_HILOGE("setsockopt toReturnClientFd failed, SO_RCVBUF and bufferSize, errno:%{public}d", errno);
+            FI_HILOGE("Set SO_RCVBUF for non-native token client failed, errno:%{public}d", errno);
             return CloseFd(serverFd, toReturnClientFd);
         }
     }
@@ -262,7 +265,7 @@ void StreamServer::DumpSession(const std::string &title)
 {
     FI_HILOGD("in %{public}s:%{public}s", __func__, title.c_str());
     int32_t i = 0;
-    for (auto &[key, value] : sessionss_) {
+    for (auto &[key, value] : sessions_) {
         CHKPV(value);
         i++;
     }
@@ -270,8 +273,8 @@ void StreamServer::DumpSession(const std::string &title)
 
 SessionPtr StreamServer::GetSession(int32_t fd) const
 {
-    auto it = sessionss_.find(fd);
-    if (it == sessionss_.end()) {
+    auto it = sessions_.find(fd);
+    if (it == sessions_.end()) {
         FI_HILOGE("Session not found, fd:%{public}d", fd);
         return nullptr;
     }
@@ -299,18 +302,18 @@ bool StreamServer::AddSession(SessionPtr ses)
         return false;
     }
     int32_t pid = ses->GetPid();
-    if (pid <= 0) {
-        FI_HILOGE("Get process failed");
+    if (pid < 0) {
+        FI_HILOGE("Get process failed, pid: %{public}d", pid);
         return false;
     }
-    if (sessionss_.size() > MAX_SESSION_ALARM) {
+    if (sessions_.size() >= MAX_SESSION_ALARM) {
         FI_HILOGE("Too many clients, Warning Value:%{public}zu, Current Value:%{public}zu",
-            MAX_SESSION_ALARM, sessionss_.size());
+            MAX_SESSION_ALARM, sessions_.size());
         return false;
     }
     DumpSession("AddSession");
     idxPids_[pid] = fd;
-    sessionss_[fd] = ses;
+    sessions_[fd] = ses;
     FI_HILOGI("Add session end");
     return true;
 }
@@ -327,10 +330,10 @@ void StreamServer::DelSession(int32_t fd)
     if (pid > 0) {
         idxPids_.erase(pid);
     }
-    auto it = sessionss_.find(fd);
-    if (it != sessionss_.end()) {
+    auto it = sessions_.find(fd);
+    if (it != sessions_.end()) {
         NotifySessionDeleted(it->second);
-        sessionss_.erase(it);
+        sessions_.erase(it);
     }
     DumpSession("DelSession");
 }
@@ -349,6 +352,10 @@ void StreamServer::AddSessionDeletedCallback(int32_t pid, std::function<void(Ses
 void StreamServer::NotifySessionDeleted(SessionPtr ses)
 {
     CALL_DEBUG_ENTER;
+    if (ses == nullptr) {
+        FI_HILOGW("ses is null");
+        return;
+    }
     auto it = callbacks_.find(ses->GetPid());
     if (it != callbacks_.end()) {
         it->second(ses);

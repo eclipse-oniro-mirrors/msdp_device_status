@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,15 @@
 #include "input_event_transmission/input_event_builder.h"
 
 #include "display_info.h"
+#include "kits/c/wifi_hid2d.h"
+#include "res_sched_client.h"
+#include "res_type.h"
 
 #include "cooperate_context.h"
 #include "cooperate_hisysevent.h"
 #include "devicestatus_define.h"
 #include "input_event_transmission/input_event_serialization.h"
 #include "utility.h"
-#include "kits/c/wifi_hid2d.h"
-#include "res_sched_client.h"
-#include "res_type.h"
 
 #undef LOG_TAG
 #define LOG_TAG "InputEventBuilder"

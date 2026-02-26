@@ -15,7 +15,6 @@
 
 #include "motion_napi_error.h"
 
-#include <optional>
 #include "fi_log.h"
 
 #undef LOG_TAG

@@ -125,7 +125,7 @@ HWTEST_F(ChannelTest, ChannelTest004, TestSize.Level0)
 
     for (size_t index = 0; index < Channel<size_t>::QUEUE_CAPACITY; ++index) {
         EXPECT_EQ(sender.Send(data++), Channel<size_t>::NO_ERROR);
-    };
+    }
     EXPECT_EQ(sender.Send(data), Channel<size_t>::QUEUE_IS_FULL);
 }
 } // namespace DeviceStatus

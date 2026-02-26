@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,8 @@ enum class EventId {
     EVENT_SCREEN_UNLOCK,
     EVENT_BATTERY_LOW,
     EVENT_BATTERY_OKAY,
-    EVENT_MAX,
     EVENT_LOCALE_CHANGED,
+    EVENT_MAX,
 };
 class EventHub : public OHOS::EventFwk::CommonEventSubscriber {
 public:

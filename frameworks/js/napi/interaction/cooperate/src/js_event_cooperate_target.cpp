@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,8 +109,9 @@ void JsEventCooperateTarget::EmitJsStop(sptr<JsUtilCooperate::CallbackInfo> cb,
             CallStopAsyncWork(cb);
         }
     };
-    if (napi_status::napi_ok != napi_send_event(cb->env, task, napi_eprio_immediate)) {
-        FI_HILOGE("Failed to SendEvent");
+    napi_status status = napi_send_event(cb->env, task, napi_eprio_immediate);
+    if (status != napi_status::napi_ok) {
+        FI_HILOGE("Failed to SendEvent, error: %{public}d", status);
     }
 }
 
@@ -528,7 +529,10 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(sptr<JsUtilCooperate::
             continue;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(item->env, &scope);
+        napi_status status = napi_open_handle_scope(item->env, &scope);
+        if (status != napi_status::napi_ok) {
+            FI_HILOGE("Failed to open handle scope, error: %{public}d", status);
+        }
         napi_value deviceDescriptor = nullptr;
         CHKRV_SCOPE(item->env, napi_create_string_utf8(item->env, item->data.deviceDescriptor.c_str(),
             NAPI_AUTO_LENGTH, &deviceDescriptor), CREATE_STRING_UTF8, scope);

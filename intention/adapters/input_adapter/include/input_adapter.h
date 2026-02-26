@@ -96,8 +96,8 @@ private:
 
 class DevListener : public MMI::IInputDeviceListener {
     public:
-    DevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback)
-        : devAddedCallback_(devAddedCallback), devRemovedCallback_(devRemovedCallback) {}
+        DevListener(MMIDevListener devAddedCallback, MMIDevListener devRemovedCallback)
+            : devAddedCallback_(devAddedCallback), devRemovedCallback_(devRemovedCallback) {}
     
         void OnDeviceAdded(int32_t deviceId, const std::string &type) override
         {

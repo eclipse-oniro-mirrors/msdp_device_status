@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@ DisplayChangeEventListener::DisplayChangeEventListener(IContext *context)
 void DisplayChangeEventListener::OnCreate(Rosen::DisplayId displayId)
 {
     FI_HILOGI("display:%{public}" PRIu64"", displayId);
+    ProcessDisplayEvent(displayId);
 }
 
 void DisplayChangeEventListener::OnDestroy(Rosen::DisplayId displayId)
@@ -50,7 +51,22 @@ void DisplayChangeEventListener::OnDestroy(Rosen::DisplayId displayId)
     context_->GetDragManager().RemoveDisplayIdFromMap(displayId);
 }
 
-void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
+void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId) {}
+
+void DisplayChangeEventListener::OnAttributeChange(Rosen::DisplayId displayId,
+    const std::vector<std::string>& attributes)
+{
+    for (const auto& attribute : attributes) {
+        if (attribute == "rotation" || attribute == "width" || attribute == "height") {
+            FI_HILOGI("Display attributes changed for displayId:%{public}" PRIu64"", displayId);
+            ProcessDisplayEvent(displayId);
+            return;
+        }
+    }
+    FI_HILOGE("No expected attributes found for displayId:%{public}" PRIu64"", displayId);
+}
+
+void DisplayChangeEventListener::ProcessDisplayEvent(Rosen::DisplayId displayId)
 {
     CHKPV(context_);
     Rosen::Rotation lastRotation = context_->GetDragManager().GetRotation(displayId);
@@ -65,6 +81,7 @@ void DisplayChangeEventListener::OnChange(Rosen::DisplayId displayId)
     }
     Rosen::Rotation currentRotation = displayInfo->GetRotation();
     if (!IsRotation(displayId, currentRotation)) {
+        FI_HILOGI("No need to rotate window for display id:%{public}" PRIu64"", displayId);
         return;
     }
 
@@ -253,6 +270,9 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     displayChangeEventListener_ = sptr<DisplayChangeEventListener>::MakeSptr(context_);
     CHKPV(displayChangeEventListener_);
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(displayChangeEventListener_);
+    std::vector<std::string> displayAttributes = {"rotation", "width", "height"};
+    Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(displayAttributes,
+        displayChangeEventListener_);
 #ifdef OHOS_ENABLE_PULLTHROW
     displayChangeEventListener_->SetFoldPC(
         SYS_PRODUCT_TYPE == PRODUCT_NAME_DEFINITION_PARSER.GetProductName("DEVICE_TYPE_FOLD_PC"));

@@ -282,16 +282,16 @@ void DeviceManager::DeviceInfo(std::shared_ptr<IDevice> dev)
 {
     // LCOV_EXCL_START
     CHKPV(dev);
-    FI_HILOGI("Add device %{public}d:%{private}s", dev->GetId(), dev->GetDevPath().c_str());
+    FI_HILOGI("Add device %{private}d:%{private}s", dev->GetId(), dev->GetDevPath().c_str());
     FI_HILOGI("  sysPath:       \"%{private}s\"", dev->GetSysPath().c_str());
-    FI_HILOGD("  bus:           %{public}04x", dev->GetBus());
-    FI_HILOGI("  vendor:        %{public}04x", dev->GetVendor());
-    FI_HILOGD("  product:       %{public}04x", dev->GetProduct());
-    FI_HILOGD("  version:       %{public}04x", dev->GetVersion());
-    FI_HILOGI("  name:          \"%{public}s\"", Utility::Anonymize(dev->GetName()).c_str());
+    FI_HILOGD("  bus:           %{private}04x", dev->GetBus());
+    FI_HILOGI("  vendor:        %{private}04x", dev->GetVendor());
+    FI_HILOGD("  product:       %{private}04x", dev->GetProduct());
+    FI_HILOGD("  version:       %{private}04x", dev->GetVersion());
+    FI_HILOGI("  name:          \"%{private}s\"", Utility::Anonymize(dev->GetName()).c_str());
     FI_HILOGD("  location:      \"%{private}s\"", dev->GetPhys().c_str());
     FI_HILOGD("  unique id:     \"%{private}s\"", dev->GetUniq().c_str());
-    FI_HILOGI("  is pointer:    %{public}s, is keyboard:%{public}s",
+    FI_HILOGI("  is pointer:    %{private}s, is keyboard:%{private}s",
         dev->IsPointerDevice() ? "True" : "False", dev->IsKeyboard() ? "True" : "False");
     // LCOV_EXCL_STOP
 }

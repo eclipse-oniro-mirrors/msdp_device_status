@@ -124,7 +124,7 @@ void EtsDragManager::unRegisterListener(optional_view<uintptr_t> opq)
         if (it != callbacks.end()) {
             CHKPV(it->get());
             it->get()->Release();
-            FI_HILOGI("unRegister callback success");
+            FI_HILOGI("UnRegister callback success");
             callbacks.erase(it);
         }
         if (callbacks.empty()) {

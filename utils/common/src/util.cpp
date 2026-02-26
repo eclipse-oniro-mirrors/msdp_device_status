@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,7 @@ constexpr int32_t ROTATE_POLICY_WINDOW_ROTATE { 0 };
 constexpr int32_t ROTATE_POLICY_SCREEN_ROTATE { 1 };
 constexpr int32_t ROTATE_POLICY_FOLD_MODE { 2 };
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+constexpr int32_t MAX_THREAD_NAME_LEN { 15 };
 const int32_t ROTATE_POLICY = OHOS::system::GetIntParameter("const.window.device.rotate_policy", 0);
 const std::string FOLD_ROTATE_POLICY = OHOS::system::GetParameter("const.window.foldabledevice.rotate_policy", "0,0");
 const std::string FOLD_SCREEN_TYPE = OHOS::system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
@@ -101,19 +102,24 @@ void GetTimeStamp(std::string &startTime)
 {
     timespec curTime;
     clock_gettime(CLOCK_REALTIME, &curTime);
-    struct tm *timeinfo = localtime(&(curTime.tv_sec));
-    CHKPV(timeinfo);
-    startTime.append(std::to_string(timeinfo->tm_year + BASE_YEAR)).append("-")
-        .append(std::to_string(timeinfo->tm_mon + BASE_MON)).append("-").append(std::to_string(timeinfo->tm_mday))
-        .append(" ").append(std::to_string(timeinfo->tm_hour)).append(":").append(std::to_string(timeinfo->tm_min))
-        .append(":").append(std::to_string(timeinfo->tm_sec)).append(".")
+    struct tm timeinfo;
+    localtime_r(&(curTime.tv_sec), &timeinfo);
+    startTime.append(std::to_string(timeinfo.tm_year + BASE_YEAR)).append("-")
+        .append(std::to_string(timeinfo.tm_mon + BASE_MON)).append("-").append(std::to_string(timeinfo.tm_mday))
+        .append(" ").append(std::to_string(timeinfo.tm_hour)).append(":").append(std::to_string(timeinfo.tm_min))
+        .append(":").append(std::to_string(timeinfo.tm_sec)).append(".")
         .append(std::to_string(curTime.tv_nsec / MS_NS));
 }
 
 void SetThreadName(const std::string &name)
 {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    prctl(PR_SET_NAME, name.c_str());
+    if (name.length() > MAX_THREAD_NAME_LEN) {
+        FI_HILOGW("name: %{public}s, truncated to: %{public}s",
+            name.c_str(), name.substr(0, MAX_THREAD_NAME_LEN).c_str());
+    }
+    std::string truncatedName = name.substr(0, MAX_THREAD_NAME_LEN);
+    prctl(PR_SET_NAME, truncatedName.c_str());
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
@@ -430,7 +436,7 @@ std::string ReadJsonFile(const std::string &filePath)
         FI_HILOGE("File size out of read range");
         return "";
     }
-    return ReadFile(filePath);
+    return ReadFile(realPath);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

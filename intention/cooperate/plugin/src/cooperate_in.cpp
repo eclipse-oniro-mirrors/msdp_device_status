@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,7 @@ void CooperateIn::OnEnterState(Context &context)
         radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_FAIL);
         radarInfo.errCode = static_cast<int32_t> (CooperateRadarErrCode::PASSIVE_CURSOR_VISIBILITY_FAILED);
         CooperateRadar::ReportCooperateRadarInfo(radarInfo);
+        return;
     }
     radarInfo.bizStage = static_cast<int32_t> (BizCooperateStage::STAGE_PASSIVE_CURSOR_VISIBILITY);
     radarInfo.stageRes = static_cast<int32_t> (BizCooperateStageRes::RES_SUCCESS);
@@ -173,7 +174,7 @@ void CooperateIn::Initial::OnStart(Context &context, const CooperateEvent &event
 
     if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Not allow cooperate");
-        NotAollowCooperateWhenMotionDragging result {
+        NotAllowCooperateWhenMotionDragging result {
             .pid = startEvent.pid,
             .userData = startEvent.userData,
             .networkId = startEvent.remoteNetworkId,
@@ -260,7 +261,7 @@ void CooperateIn::Initial::OnStartWithOptions(Context &context, const CooperateE
     context.UpdateCooperateOptions(startEvent);
     if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Not allow cooperate");
-        NotAollowCooperateWhenMotionDragging result {
+        NotAllowCooperateWhenMotionDragging result {
             .pid = startEvent.pid,
             .userData = startEvent.userData,
             .networkId = startEvent.remoteNetworkId,

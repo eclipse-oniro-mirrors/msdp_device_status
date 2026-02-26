@@ -275,7 +275,7 @@ HWTEST_F(CooperateFreeTest, stateMachine_test137, TestSize.Level1)
 }
 
 /**
- * @tc.name: CooperateFreeTest1
+ * @tc.name: CooperateFreeTest001
  * @tc.desc: Test OnProgress and OnReset
  * @tc.type: FUNC
  * @tc.require:
@@ -433,7 +433,7 @@ HWTEST_F(CooperateFreeTest, CooperateFreeTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: CooperateFreeTest003
+ * @tc.name: CooperateFreeTest007
  * @tc.desc: Test cooperate plugin
  * @tc.type: FUNC
  * @tc.require:
@@ -465,6 +465,208 @@ HWTEST_F(CooperateFreeTest, CooperateFreeTest007, TestSize.Level1)
     bool ret = g_context->mouseLocation_.HasLocalListener();
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: CooperateFreeTest008
+ * @tc.desc: Test simulate event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest008, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    auto pointerEvent = OHOS::MMI::PointerEvent::Create();
+    OHOS::MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetRawDx(0);
+    item.SetRawDy(0);
+    CHKPV(pointerEvent);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
+    pointerEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
+    pointerEvent->SetPointerId(0);
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->AddPointerItem(item);
+    g_context->inputEventBuilder_.pointerEvent_ = pointerEvent;
+    auto cooperateFree = std::make_shared<Cooperate::CooperateFree>(*g_stateMachine, env);
+    ASSERT_NO_FATAL_FAILURE(CooperateFree->SimulateShowPointerEvent(cooperateContext));
+}
+
+/**
+ * @tc.name: CooperateFreeTest009
+ * @tc.desc: Test simulate event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest009, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::set<int32_t> pressedButtons = {1, 2, 3};
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    auto pointerEvent = OHOS::MMI::PointerEvent::Create();
+    OHOS::MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(0);
+    item.SetRawDx(0);
+    item.SetRawDy(0);
+    CHKPV(pointerEvent);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
+    pointerEvent->AddFlag(OHOS::MMI::InputEvent::EVENT_FLAG_RAW_POINTER_MOVEMENT);
+    pointerEvent->SetPointerId(0);
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->AddPointerItem(item);
+    for (auto buttonId : pressedButtons) {
+        pointerEvent->SetButtonPressed(buttonId);
+    }
+    g_context->inputEventBuilder_.pointerEvent_ = pointerEvent;
+    auto cooperateFree = std::make_shared<Cooperate::CooperateFree>(*g_stateMachine, env);
+    ASSERT_NO_FATAL_FAILURE(CooperateFree->SimulateShowPointerEvent(cooperateContext));
+}
+
+/**
+ * @tc.name: CooperateFreeTest010
+ * @tc.desc: Test CooperateFree constructor and initial_ initialization
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest010, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateFree stateFree(*g_stateMachine, env);
+    ASSERT_NE(stateFree.initial_, nullptr);
+}
+
+/**
+ * @tc.name: CooperateFreeTest011
+ * @tc.desc: Test OnEvent with DISABLE event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest011, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DISABLE,
+        DisableCooperateEvent {
+            .pid = IPCSkeleton::GetCallingPid(),
+            .userData = 1,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateFree stateFree(*g_stateMachine, env);
+    ASSERT_NE(stateFree.initial_, nullptr);
+    stateFree.OnEvent(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateFreeTest012
+ * @tc.desc: Test OnEvent with APP_CLOSED event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest012, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::APP_CLOSED,
+        ClientDiedEvent {
+            .pid = IPCSkeleton::GetCallingPid(),
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateFree stateFree(*g_stateMachine, env);
+    ASSERT_NE(stateFree.initial_, nullptr);
+    stateFree.OnEvent(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateFreeTest013
+ * @tc.desc: Test OnEvent with UPDATE_COOPERATE_FLAG event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest013, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::UPDATE_COOPERATE_FLAG,
+        UpdateCooperateFlagEvent {
+            .mask = COOPERATE_FLAG_HIDE_CURSOR,
+            .flag = COOPERATE_FLAG_HIDE_CURSOR,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateFree stateFree(*g_stateMachine, env);
+    ASSERT_NE(stateFree.initial_, nullptr);
+    stateFree.OnEvent(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateFreeTest014
+ * @tc.desc: Test OnEnterState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest014, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateFree stateFree(*g_stateMachine, env);
+    ASSERT_NE(stateFree.initial_, nullptr);
+    stateFree.OnEnterState(cooperateContext);
+}
+
+/**
+ * @tc.name: CooperateFreeTest015
+ * @tc.desc: Test OnLeaveState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest015, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateFree stateFree(*g_stateMachine, env);
+    ASSERT_NE(stateFree.initial_, nullptr);
+    stateFree.OnLeaveState(cooperateContext);
+}
+
+/**
+ * @tc.name: CooperateFreeTest016
+ * @tc.desc: Test GetDeviceManager
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateFreeTest, CooperateFreeTest016, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateFree stateFree(*g_stateMachine, env);
+    ASSERT_NE(env, nullptr);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
