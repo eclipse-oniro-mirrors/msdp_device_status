@@ -680,7 +680,7 @@ int32_t DSoftbusAdapterImpl::KeepHeartBeating(const std::string &networkId)
     }
     auto weakThis = std::weak_ptr<DSoftbusAdapterImpl>(shared_from_this());
     if (!eventHandler->PostTask(
-        [this, networkId]() {
+        [weakThis, networkId]() {
             auto self = weakThis.lock();
             if (!self) {
                 FI_HILOGE("self is null");
