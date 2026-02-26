@@ -158,10 +158,9 @@ void OnScreenCallback::CloseOnJsThread()
             napi_delete_reference(env, ref);
         }
     };
-
     // 若 env 正在销毁导致投递失败，则放弃删除（避免在非 JS 线程/失效 env 触发崩溃）。
     if (napi_send_event(env, task, napi_eprio_immediate) != napi_ok) {
-       FI_HILOGE("CloseOnJsThread: napi_send_event failed, skip deleting refs");
+        FI_HILOGE("CloseOnJsThread: napi_send_event failed, skip deleting refs");
     }
 }
 
@@ -265,8 +264,8 @@ napi_value ScreenEventNapi::RegisterScreenEventCallbackNapi(napi_env env, napi_c
         OnScreenManager::GetInstance().RegisterScreenEventCallback(windowId, eventStr, needRegisterCb);
     }
 
-   napi_get_undefined(env, &result);
-   return result;
+    napi_get_undefined(env, &result);
+    return result;
 }
 
 bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value holderObj)
@@ -274,7 +273,7 @@ bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value holderOb
     // 只负责在 Init 阶段把实例 wrap 到 exports；订阅/取消订阅不会触发 wrap。
     {
         // std::lock_guard<std::mutex> lk(g_mtx);
-        std::lock_guard<std::mutex> lk(g_instancesMtx);        
+        std::lock_guard<std::mutex> lk(g_instancesMtx);
         if (g_instances.find(env) != g_instances.end()) {
             FI_HILOGI("env has find");
             return true;
@@ -322,13 +321,11 @@ bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value holderOb
             }
             delete screenChange;
         }, nullptr, nullptr);
-
     if (status != napi_ok) {
         delete inst;
         FI_HILOGE("napi_wrap failed");
         return false;
     }
-
     {
         std::lock_guard<std::mutex> lk(g_instancesMtx);
         g_instances.emplace(env, inst);
@@ -390,7 +387,6 @@ bool ScreenEventNapi::IsSameJsHandler(napi_env env, const std::vector<napi_ref> 
     }
     return false;
 }
-
 
 // - false: 失败（OOM/重复等），调用方需删除 handlerRef
 // - true : 成功；needRegisterSa=true 表示首次创建该(win,event)节点，需要向 SA Register。
@@ -570,7 +566,7 @@ bool ScreenEventNapi::CollectEventNodePendingLocked(napi_env env, int32_t window
         itEnv->second.erase(wIt);
         if (itEnv->second.empty()) {
             FI_HILOGI("erase callback");
-            g_screenCallbacks.erase(itEnv); 
+            g_screenCallbacks.erase(itEnv);
         }
     }
     return true;
@@ -765,6 +761,7 @@ void ScreenEventNapi::SetInt32Property(napi_env env, napi_value targetObj, int32
     }
     SetPropertyName(env, targetObj, propName, prop);
 }
+
 void ScreenEventNapi::SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue)
 {
     napi_status status = napi_set_named_property(env, targetObj, propName, propValue);
