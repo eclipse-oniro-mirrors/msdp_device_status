@@ -678,7 +678,7 @@ int32_t DSoftbusAdapterImpl::KeepHeartBeating(const std::string &networkId)
         FI_HILOGE("eventHandler is null");
         return RET_ERR;
     }
-    auto weakThis = std:: weak_ptr<DSoftbusAdapterImpl>(shared_from_this());
+    auto weakThis = std::weak_ptr<DSoftbusAdapterImpl>(shared_from_this());
     if (!eventHandler->PostTask(
         [this, networkId]() {
             auto self = weakThis.lock();
