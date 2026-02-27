@@ -2195,7 +2195,7 @@ HWTEST_F(DragManagerTest, DragManagerTest105, TestSize.Level1)
     g_dragMgr.isCollaborationService_ = true;
     DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.lastEventId_ = 0;
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
@@ -2208,7 +2208,7 @@ HWTEST_F(DragManagerTest, DragManagerTest105, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = true;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2241,7 +2241,7 @@ HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
     g_dragMgr.isCollaborationService_ = false;
     DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2253,7 +2253,7 @@ HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.isCrossDragging_ = false;
     g_dragMgr.isCollaborationService_ = false;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2285,7 +2285,7 @@ HWTEST_F(DragManagerTest, DragManagerTest107, TestSize.Level1)
     g_dragMgr.isCollaborationService_ = true;
     DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.lastEventId_ = 0;
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
@@ -2298,7 +2298,7 @@ HWTEST_F(DragManagerTest, DragManagerTest107, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = true;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2330,7 +2330,7 @@ HWTEST_F(DragManagerTest, DragManagerTest108, TestSize.Level1)
     g_dragMgr.isCollaborationService_ = false;
     DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2342,7 +2342,7 @@ HWTEST_F(DragManagerTest, DragManagerTest108, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.isCrossDragging_ = false;
     g_dragMgr.isCollaborationService_ = false;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
