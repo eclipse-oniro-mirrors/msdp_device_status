@@ -2416,7 +2416,9 @@ HWTEST_F(DragManagerTest, DragManagerTest111, TestSize.Level0)
     dragData.summaryFormat = { { "image", { 0, 1 } } };
     dragData.summarys = { { "general.image", 0 }, { "general.video", 1 } };
     dragData.detailedSummarys = { { "general.image", 0 }, { "general.video", 1 } };
-    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+    g_dragMgr.PrintDragData(dragData, "");
+    ASSERT_TRUE(!dragData.summarys.empty());
+    ASSERT_EQ(dragData.summarys.begin()->second, 0);
 }
  
 /**
@@ -2437,7 +2439,9 @@ HWTEST_F(DragManagerTest, DragManagerTest112, TestSize.Level0)
     dragData.summarys = { { "general.image", 0 }, { "general.video", 1 } };
     dragData.detailedSummarys = { { "general.image", 0 }, { "general.video", 1 } };
     dragData.materialFilter = std::make_shared<Rosen::Filter>();
-    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+    g_dragMgr.PrintDragData(dragData, "");
+    ASSERT_TRUE(!dragData.summarys.empty());
+    ASSERT_EQ(dragData.summarys.begin()->second, 0);
 }
  
 /**
@@ -2474,6 +2478,57 @@ HWTEST_F(DragManagerTest, DragManagerTest113, TestSize.Level0)
     ASSERT_EQ(ret, RET_OK);
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
+}
+
+/**
+ * @tc.name: DragManagerTest114
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest114, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = false;
+    DragSecurityManager::GetInstance().StoreSecurityPid(0);
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false, "");
+    ASSERT_EQ(ret, RET_ERR);
+
+}
+
+/**
+ * @tc.name: DragManagerTest115
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest115, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = false;
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, true, "");
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
