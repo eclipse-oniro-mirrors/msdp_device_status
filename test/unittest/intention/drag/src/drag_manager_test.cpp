@@ -2503,7 +2503,6 @@ HWTEST_F(DragManagerTest, DragManagerTest114, TestSize.Level1)
     std::string udKey;
     ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false, "");
     ASSERT_EQ(ret, RET_ERR);
-
 }
 
 /**
