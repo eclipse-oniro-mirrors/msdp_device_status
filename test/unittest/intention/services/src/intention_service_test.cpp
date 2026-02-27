@@ -987,10 +987,10 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragBundleInfo001, TestSi
     ret = g_intentionServiceNullptr->GetDragBundleInfo(bundleName, state);
     EXPECT_EQ(ret, RET_ERR);
 }
+
 /**
  * @tc.name: IntentionServiceTest45
  * @tc.desc: Test SubscribeStationaryCallback
- * @tc.desc: Test GetDragBundleInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1100,6 +1100,44 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragSummaryInfo, TestSize
     g_dragMgr.dragState_ = DragState::STOP;
     ErrCode errCode = g_intentionService->GetDragSummaryInfo(sequenceableDragSummaryInfo);
     EXPECT_EQ(errCode, RET_ERR);
+}
+
+/**
+ * @tc.name: IntentionServiceTest_Dump
+ * @tc.desc: Test Dump
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Dump001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t fd = 1;
+    std::vector<std::u16string> args;
+    std::u16string arg1 = u"-h";
+    std::u16string arg2 = u"-i";
+    std::u16string arg3 = u"-r";
+    std::u16string arg4 = u"-n";
+    args.push_back(arg1);
+    args.push_back(arg2);
+    args.push_back(arg3);
+    args.push_back(arg4);
+    int32_t ret = g_intentionService->Dump(fd, args);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionServiceTest_Dump
+ * @tc.desc: Test Dump
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceTest, IntentionServiceTest_Dump002, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int32_t fd = -1;
+    std::vector<std::u16string> args;
+    int32_t ret = g_intentionService->Dump(fd, args);
+    EXPECT_EQ(ret, RET_ERR);
 }
 } // namespace DeviceStatus
 } // namespace Msdp
