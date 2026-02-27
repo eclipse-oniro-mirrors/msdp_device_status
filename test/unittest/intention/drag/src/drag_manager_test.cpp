@@ -2578,7 +2578,7 @@ HWTEST_F(DragManagerTest, DragManagerTest116, TestSize.Level0)
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
- 
+
 /**
  * @tc.name: DragManagerTest117
  * @tc.desc: Drag Manager
@@ -2627,7 +2627,7 @@ HWTEST_F(DragManagerTest, DragManagerTest117, TestSize.Level0)
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
- 
+
 /**
  * @tc.name: DragManagerTest118
  * @tc.desc: Drag Manager
@@ -2675,7 +2675,7 @@ HWTEST_F(DragManagerTest, DragManagerTest118, TestSize.Level0)
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
- 
+
 /**
  * @tc.name: DragManagerTest119
  * @tc.desc: Drag Manager
