@@ -2501,7 +2501,7 @@ HWTEST_F(DragManagerTest, DragManagerTest114, TestSize.Level1)
     g_dragMgr.isCollaborationService_ = false;
     DragSecurityManager::GetInstance().StoreSecurityPid(0);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false, "");
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_ERR);
 }
 
@@ -2526,7 +2526,7 @@ HWTEST_F(DragManagerTest, DragManagerTest115, TestSize.Level1)
     g_dragMgr.isCollaborationService_ = false;
     DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, true, "");
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, true);
     ASSERT_EQ(ret, RET_OK);
 }
 
