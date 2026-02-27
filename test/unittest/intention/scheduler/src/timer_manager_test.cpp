@@ -348,7 +348,7 @@ void ContextService::OnThread()
             } else {
                 FI_HILOGW("Unknown epoll event type:%{public}d", epollEvent->event_type);
             }
-            if(epollEvent != nullptr) {
+            if (epollEvent != nullptr) {
                 epollEvent = nullptr;
             }
         }
