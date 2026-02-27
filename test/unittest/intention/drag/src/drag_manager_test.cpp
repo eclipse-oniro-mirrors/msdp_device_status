@@ -77,7 +77,7 @@ uint64_t g_timestamp { 10000000 };
 double g_coordinateX {1.11 };
 double g_coordinateY {1.11 };
 const std::string SIGNATURE { "signature" };
-constexpr int32_t PID { 1 };
+constexpr int32_t SECURITY_PID { 1 };
 } // namespace
 
 ContextService::ContextService()
@@ -2061,7 +2061,7 @@ HWTEST_F(DragManagerTest, DragManagerTest99, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 }
- 
+
 /**
  * @tc.name: DragManagerTest100
  * @tc.desc: Update drag node bounds and frame
@@ -2082,7 +2082,7 @@ HWTEST_F(DragManagerTest, DragManagerTest100, TestSize.Level1)
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
- 
+
 /**
  * @tc.name: DragManagerTest101
  * @tc.desc: Update drag node bounds and frame
@@ -2103,7 +2103,7 @@ HWTEST_F(DragManagerTest, DragManagerTest101, TestSize.Level1)
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
- 
+
 /**
  * @tc.name: DragManagerTest102
  * @tc.desc: Update drag node bounds and frame
@@ -2125,7 +2125,7 @@ HWTEST_F(DragManagerTest, DragManagerTest102, TestSize.Level1)
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
- 
+
 /**
  * @tc.name: DragManagerTest103
  * @tc.desc: Update drag node bounds and frame
@@ -2148,7 +2148,7 @@ HWTEST_F(DragManagerTest, DragManagerTest103, TestSize.Level1)
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
- 
+
 /**
  * @tc.name: DragManagerTest104
  * @tc.desc: Update drag node bounds and frame
@@ -2193,7 +2193,7 @@ HWTEST_F(DragManagerTest, DragManagerTest105, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = false;
     g_dragMgr.isCollaborationService_ = true;
-    DragSecurityManager::GetInstance().StoreSecurityPid(PID);
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
     ret = g_dragMgr.GetUdKey(PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
@@ -2239,7 +2239,7 @@ HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = false;
-    DragSecurityManager::GetInstance().StoreSecurityPid(PID);
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
     ret = g_dragMgr.GetUdKey(PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
@@ -2283,7 +2283,7 @@ HWTEST_F(DragManagerTest, DragManagerTest107, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = false;
     g_dragMgr.isCollaborationService_ = true;
-    DragSecurityManager::GetInstance().StoreSecurityPid(PID);
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
     ret = g_dragMgr.GetUdKey(PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
@@ -2328,7 +2328,7 @@ HWTEST_F(DragManagerTest, DragManagerTest108, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = false;
-    DragSecurityManager::GetInstance().StoreSecurityPid(PID);
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
     ret = g_dragMgr.GetUdKey(PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
@@ -2578,7 +2578,7 @@ HWTEST_F(DragManagerTest, DragManagerTest116, TestSize.Level0)
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
-
+ 
 /**
  * @tc.name: DragManagerTest117
  * @tc.desc: Drag Manager
@@ -2627,7 +2627,7 @@ HWTEST_F(DragManagerTest, DragManagerTest117, TestSize.Level0)
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
-
+ 
 /**
  * @tc.name: DragManagerTest118
  * @tc.desc: Drag Manager
@@ -2675,7 +2675,7 @@ HWTEST_F(DragManagerTest, DragManagerTest118, TestSize.Level0)
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
 }
-
+ 
 /**
  * @tc.name: DragManagerTest119
  * @tc.desc: Drag Manager
