@@ -72,7 +72,7 @@ void DeviceStatusManagerTest::TearDown() {}
 void DeviceStatusManagerTest::BoomerangModuleTestCallback::OnScreenshotResult(const BoomerangData& screentshotData)
 {
     GTEST_LOG_(INFO) << "OnScreenshotResult status: " << screentshotData.status;
-    EXPECT_TRUE(screentshotData.status == BOOMERANG_STATUS_SCREEN_SHOT);
+    EXPECT_TRUE(screentshotData.status == BOOMERANG_STATUS_SCREENSHOT);
 }
 
 void DeviceStatusManagerTest::BoomerangModuleTestCallback::OnNotifyMetadata(const std::string& metadata)
