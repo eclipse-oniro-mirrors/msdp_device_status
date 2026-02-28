@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,8 +31,8 @@ enum BoomerangType {
 
 enum BoomerangStatus {
     BOOMERANG_STATUS_INVALID = -1,
-    BOOMERANG_STATUS_NOT_SCREEN_SHOT,
-    BOOMERANG_STATUS_SCREEN_SHOT,
+    BOOMERANG_STATUS_NOT_SCREENSHOT,
+    BOOMERANG_STATUS_SCREENSHOT,
 };
 
 struct BoomerangData {
@@ -41,7 +41,7 @@ struct BoomerangData {
     
     bool operator !=(const BoomerangData &r) const
     {
-        if (type == r.type && status - r.status) {
+        if (type == r.type && status == r.status) {
             return false;
         }
         return true;

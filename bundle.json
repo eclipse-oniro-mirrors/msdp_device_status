@@ -40,7 +40,8 @@
       "device_status_enable_internal_drop_animation",
       "device_status_pullthrow_enable",
       "device_status_boomerang_onestep",
-      "device_status_boomerang_support_hdr"
+      "device_status_boomerang_support_hdr",
+      "device_status_phone_standard_lite"
     ],
     "adapted_system_type": [ "standard" ],
     "rom": "2048KB",

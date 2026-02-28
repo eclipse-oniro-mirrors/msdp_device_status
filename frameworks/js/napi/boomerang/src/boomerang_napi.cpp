@@ -237,7 +237,6 @@ napi_value BoomerangNapi::SubscribeMeatadataCallback(
     int32_t subscribeRet =
         BoomerangManager::GetInstance().SubscribeCallback(static_cast<BoomerangType>(type), bundleName, callback);
     if (subscribeRet != RET_OK) {
-        delete callback;
         ThrowErr(env,
             SUBSCRIBE_FAILED,
             "Subscribe Failed. Possible causes: 1. Abnormal system capability; 2. IPC communication abnormality; 3. "
@@ -246,7 +245,6 @@ napi_value BoomerangNapi::SubscribeMeatadataCallback(
     }
     auto ret = callbacks_.insert(std::pair<int32_t, sptr<IRemoteBoomerangCallback>>(type, callback));
     if (!ret.second) {
-        delete callback;
         FI_HILOGE("Failed to insert");
     }
     return nullptr;
@@ -277,9 +275,6 @@ napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback
         return nullptr;
     }
 
-    auto asyncContext = new (std::nothrow) AsyncContext();
-    CHKPP(asyncContext);
-    asyncContext->env = env;
     napi_value promise = nullptr;
     napi_deferred deferred = nullptr;
     napi_status status = napi_create_promise(env, &deferred, &promise);
@@ -288,13 +283,17 @@ napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback
         return nullptr;
     }
 
-    asyncContext->deferred = deferred;
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, deferred);
     CHKPP(callback);
+    auto asyncContext = new (std::nothrow) AsyncContext();
+    CHKPP(asyncContext);
+    asyncContext->env = env;
+    asyncContext->deferred = deferred;
     bool result = CreateMetadataExecution(env, asyncContext, bundleName, callback);
     if (!result) {
         FI_HILOGE("notify metadataBinding event error by Create execution");
         delete asyncContext;
+        return nullptr;
     }
     return promise;
 }
@@ -387,8 +386,6 @@ napi_value BoomerangNapi::DecodeImage(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto asyncContext = new (std::nothrow) AsyncContext();
-    CHKPP(asyncContext);
     napi_value promise = nullptr;
     napi_deferred deferred = nullptr;
     napi_status status = napi_create_promise(env, &deferred, &promise);
@@ -397,14 +394,17 @@ napi_value BoomerangNapi::DecodeImage(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    asyncContext->deferred = deferred;
-    asyncContext->env = env;
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, deferred);
     CHKPP(callback);
+    auto asyncContext = new (std::nothrow) AsyncContext();
+    CHKPP(asyncContext);
+    asyncContext->deferred = deferred;
+    asyncContext->env = env;
     bool result = CreateDecodeImageExecution(env, asyncContext, pixelMap, callback);
     if (!result) {
         FI_HILOGE("decode image error by Create execution");
         delete asyncContext;
+        return nullptr;
     }
     return promise;
 }
@@ -454,7 +454,7 @@ napi_value BoomerangNapi::UnRegister(napi_env env, napi_callback_info info)
 
 bool BoomerangNapi::ValidateEncodeParam(const std::string& metadata, std::shared_ptr<Media::PixelMap>& pixelMap)
 {
-    if (metadata.empty() || metadata.size() > MAX_LENGTH) {
+    if (metadata.empty() || static_cast<int32_t>(metadata.size()) > MAX_LENGTH) {
         FI_HILOGE("The metadata data size does not comply with the specifications");
         return false;
     }
