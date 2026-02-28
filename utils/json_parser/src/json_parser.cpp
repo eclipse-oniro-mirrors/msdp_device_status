@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,6 +95,38 @@ int32_t JsonParser::ParseInt32(const cJSON *json, const std::string &key, int32_
         return RET_ERR;
     }
     value = jsonNode->valueint;
+    return RET_OK;
+}
+
+int32_t JsonParser::ParseFloat(const cJSON *json, const std::string &key, float &value)
+{
+    if (!cJSON_IsObject(json)) {
+        FI_HILOGE("The json is not object");
+        return RET_ERR;
+    }
+    cJSON *jsonNode = cJSON_GetObjectItemCaseSensitive(json, key.c_str());
+    CHKPR(jsonNode, RET_ERR);
+    if (!cJSON_IsNumber(jsonNode)) {
+        FI_HILOGE("value is not number");
+        return RET_ERR;
+    }
+    value = static_cast<float>(jsonNode->valuedouble);
+    return RET_OK;
+}
+
+int32_t JsonParser::ParseDouble(const cJSON *json, const std::string &key, double &value)
+{
+    if (!cJSON_IsObject(json)) {
+        FI_HILOGE("The json is not object");
+        return RET_ERR;
+    }
+    cJSON *jsonNode = cJSON_GetObjectItemCaseSensitive(json, key.c_str());
+    CHKPR(jsonNode, RET_ERR);
+    if (!cJSON_IsNumber(jsonNode)) {
+        FI_HILOGE("value is not number");
+        return RET_ERR;
+    }
+    value = jsonNode->valuedouble;
     return RET_OK;
 }
  
