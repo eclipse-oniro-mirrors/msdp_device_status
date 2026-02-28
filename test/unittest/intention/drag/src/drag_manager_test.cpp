@@ -77,7 +77,7 @@ uint64_t g_timestamp { 10000000 };
 double g_coordinateX {1.11 };
 double g_coordinateY {1.11 };
 const std::string SIGNATURE { "signature" };
-constexpr int32_t PID { 1 };
+constexpr int32_t SECURITY_PID { 1 };
 } // namespace
 
 ContextService::ContextService()
@@ -2061,7 +2061,7 @@ HWTEST_F(DragManagerTest, DragManagerTest99, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 }
- 
+
 /**
  * @tc.name: DragManagerTest100
  * @tc.desc: Update drag node bounds and frame
@@ -2082,7 +2082,7 @@ HWTEST_F(DragManagerTest, DragManagerTest100, TestSize.Level1)
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
- 
+
 /**
  * @tc.name: DragManagerTest101
  * @tc.desc: Update drag node bounds and frame
@@ -2103,7 +2103,7 @@ HWTEST_F(DragManagerTest, DragManagerTest101, TestSize.Level1)
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
- 
+
 /**
  * @tc.name: DragManagerTest102
  * @tc.desc: Update drag node bounds and frame
@@ -2125,7 +2125,7 @@ HWTEST_F(DragManagerTest, DragManagerTest102, TestSize.Level1)
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
- 
+
 /**
  * @tc.name: DragManagerTest103
  * @tc.desc: Update drag node bounds and frame
@@ -2148,7 +2148,7 @@ HWTEST_F(DragManagerTest, DragManagerTest103, TestSize.Level1)
     g_dragMgr.dragDrawing_.UpdateDrawingState();
     g_dragMgr.dragDrawing_.DestroyDragWindow();
 }
- 
+
 /**
  * @tc.name: DragManagerTest104
  * @tc.desc: Update drag node bounds and frame
@@ -2193,9 +2193,9 @@ HWTEST_F(DragManagerTest, DragManagerTest105, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = false;
     g_dragMgr.isCollaborationService_ = true;
-    DragSecurityManager::GetInstance().StoreSecurityPid(PID);
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.lastEventId_ = 0;
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
@@ -2208,7 +2208,7 @@ HWTEST_F(DragManagerTest, DragManagerTest105, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = true;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2239,9 +2239,9 @@ HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = false;
-    DragSecurityManager::GetInstance().StoreSecurityPid(PID);
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2253,7 +2253,7 @@ HWTEST_F(DragManagerTest, DragManagerTest106, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.isCrossDragging_ = false;
     g_dragMgr.isCollaborationService_ = false;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2283,9 +2283,9 @@ HWTEST_F(DragManagerTest, DragManagerTest107, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = false;
     g_dragMgr.isCollaborationService_ = true;
-    DragSecurityManager::GetInstance().StoreSecurityPid(PID);
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.lastEventId_ = 0;
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
@@ -2298,7 +2298,7 @@ HWTEST_F(DragManagerTest, DragManagerTest107, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = true;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2328,9 +2328,9 @@ HWTEST_F(DragManagerTest, DragManagerTest108, TestSize.Level1)
     g_dragMgr.dragState_ = DragState::START;
     g_dragMgr.isCrossDragging_ = true;
     g_dragMgr.isCollaborationService_ = false;
-    DragSecurityManager::GetInstance().StoreSecurityPid(PID);
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
     std::string udKey;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2342,7 +2342,7 @@ HWTEST_F(DragManagerTest, DragManagerTest108, TestSize.Level1)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.isCrossDragging_ = false;
     g_dragMgr.isCollaborationService_ = false;
-    ret = g_dragMgr.GetUdKey(PID, udKey, false);
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::MOVE, 0, 0, 1);
     g_dragMgr.UpdateDragStyle(DragCursorStyle::COPY, 0, 0, 1);
@@ -2416,7 +2416,9 @@ HWTEST_F(DragManagerTest, DragManagerTest111, TestSize.Level0)
     dragData.summaryFormat = { { "image", { 0, 1 } } };
     dragData.summarys = { { "general.image", 0 }, { "general.video", 1 } };
     dragData.detailedSummarys = { { "general.image", 0 }, { "general.video", 1 } };
-    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+    g_dragMgr.PrintDragData(dragData, "");
+    ASSERT_TRUE(!dragData.summarys.empty());
+    ASSERT_EQ(dragData.summarys.begin()->second, 0);
 }
  
 /**
@@ -2437,7 +2439,9 @@ HWTEST_F(DragManagerTest, DragManagerTest112, TestSize.Level0)
     dragData.summarys = { { "general.image", 0 }, { "general.video", 1 } };
     dragData.detailedSummarys = { { "general.image", 0 }, { "general.video", 1 } };
     dragData.materialFilter = std::make_shared<Rosen::Filter>();
-    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+    g_dragMgr.PrintDragData(dragData, "");
+    ASSERT_TRUE(!dragData.summarys.empty());
+    ASSERT_EQ(dragData.summarys.begin()->second, 0);
 }
  
 /**
@@ -2474,6 +2478,56 @@ HWTEST_F(DragManagerTest, DragManagerTest113, TestSize.Level0)
     ASSERT_EQ(ret, RET_OK);
     EXPECT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
         std::future_status::timeout);
+}
+
+/**
+ * @tc.name: DragManagerTest114
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest114, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = false;
+    DragSecurityManager::GetInstance().StoreSecurityPid(0);
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, false);
+    ASSERT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragManagerTest115
+ * @tc.desc: Get udkey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest115, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData->udKey = "test";
+    int32_t ret = g_dragMgr.InitDataManager(dragData.value());
+    ASSERT_EQ(ret, RET_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    g_dragMgr.dragState_ = DragState::START;
+    g_dragMgr.isCrossDragging_ = true;
+    g_dragMgr.isCollaborationService_ = false;
+    DragSecurityManager::GetInstance().StoreSecurityPid(SECURITY_PID);
+    std::string udKey;
+    ret = g_dragMgr.GetUdKey(SECURITY_PID, udKey, true);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
