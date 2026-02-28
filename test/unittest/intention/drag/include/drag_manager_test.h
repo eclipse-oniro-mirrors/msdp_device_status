@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,31 +27,12 @@
 #include "drag_manager.h"
 #include "i_context.h"
 #include "socket_session_manager.h"
+#include "test_context.h"
 #include "timer_manager.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class ContextService final : public IContext {
-    ContextService();
-    ~ContextService();
-    DISALLOW_COPY_AND_MOVE(ContextService);
-public:
-    IDelegateTasks& GetDelegateTasks() override;
-    IDeviceManager& GetDeviceManager() override;
-    ITimerManager& GetTimerManager() override;
-    IDragManager& GetDragManager() override;
-    IDDMAdapter& GetDDM() override;
-    IPluginManager& GetPluginManager() override;
-    ISocketSessionManager& GetSocketSessionManager() override;
-    IInputAdapter& GetInput() override;
-    IDSoftbusAdapter& GetDSoftbus() override;
-    static ContextService* GetInstance();
-
-private:
-    std::unique_ptr<IDDMAdapter> ddm_;
-};
-
 class DragManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -61,6 +42,8 @@ public:
         bool hasCoordinateCorrected, int32_t shadowNum);
     static std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height);
     static void AssignToAnimation(PreviewAnimation &animation);
+private:
+    std::shared_ptr<TestContext> context_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp

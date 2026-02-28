@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,13 +47,7 @@ constexpr int32_t DISPLAY_Y { 50 };
 constexpr int32_t INT32_BYTE { 4 };
 int32_t g_shadowinfo_x { 0 };
 int32_t g_shadowinfo_y { 0 };
-ContextService *g_instance = nullptr;
-DelegateTasks g_delegateTasks;
-DeviceManager g_devMgr;
-TimerManager g_timerMgr;
-DragManager g_dragMgr;
 DragClient g_dragClient;
-SocketSessionManager g_socketSessionMgr;
 std::unique_ptr<IInputAdapter> g_input { nullptr };
 std::unique_ptr<IPluginManager> g_pluginMgr { nullptr };
 std::unique_ptr<IDSoftbusAdapter> g_dsoftbus { nullptr };
@@ -75,71 +69,6 @@ Security::AccessToken::HapPolicyParams g_testPolicyPrams = {
     .permStateList = {}
 };
 } // namespace
-
-ContextService::ContextService()
-{
-    ddm_ = std::make_unique<DDMAdapter>();
-}
-
-ContextService::~ContextService()
-{
-}
-
-IDelegateTasks& ContextService::GetDelegateTasks()
-{
-    return g_delegateTasks;
-}
-
-IDeviceManager& ContextService::GetDeviceManager()
-{
-    return g_devMgr;
-}
-
-ITimerManager& ContextService::GetTimerManager()
-{
-    return g_timerMgr;
-}
-
-IDragManager& ContextService::GetDragManager()
-{
-    return g_dragMgr;
-}
-
-ContextService* ContextService::GetInstance()
-{
-    static std::once_flag flag;
-    std::call_once(flag, [&]() {
-        ContextService *cooContext = new (std::nothrow) ContextService();
-        CHKPL(cooContext);
-        g_instance = cooContext;
-    });
-    return g_instance;
-}
-
-ISocketSessionManager& ContextService::GetSocketSessionManager()
-{
-    return g_socketSessionMgr;
-}
-
-IDDMAdapter& ContextService::GetDDM()
-{
-    return *ddm_;
-}
-
-IPluginManager& ContextService::GetPluginManager()
-{
-    return *g_pluginMgr;
-}
-
-IInputAdapter& ContextService::GetInput()
-{
-    return *g_input;
-}
-
-IDSoftbusAdapter& ContextService::GetDSoftbus()
-{
-    return *g_dsoftbus;
-}
 
 void DragClientTest::SetUpTestCase() {}
 

@@ -30,8 +30,9 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-    constexpr int32_t SOCKET_PAIR_SIZE = 2;
-}
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
+constexpr int32_t SOCKET_PAIR_SIZE = 2;
+} // namespace
 
 StreamServer::~StreamServer()
 {
@@ -42,7 +43,7 @@ StreamServer::~StreamServer()
 void StreamServer::UdsStop()
 {
     if (epollFd_ != -1) {
-        if (close(epollFd_) < 0) {
+        if (fdsan_close_with_tag(epollFd_, DOMAIN_ID) < 0) {
             FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
         }
         epollFd_ = -1;
@@ -104,6 +105,8 @@ int32_t StreamServer::AddSocketPairInfo(const std::string &programName, int32_t 
         FI_HILOGE("Call socketpair failed, errno:%{public}d", errno);
         return RET_ERR;
     }
+    fdsan_exchange_owner_tag(sockFds[0], 0, DOMAIN_ID);
+    fdsan_exchange_owner_tag(sockFds[1], 0, DOMAIN_ID);
     serverFd = sockFds[0];
     toReturnClientFd = sockFds[1];
     if (serverFd < 0 || toReturnClientFd < 0) {
@@ -167,11 +170,11 @@ int32_t StreamServer::SetSockOpt(int32_t &serverFd, int32_t &toReturnClientFd, i
 
 int32_t StreamServer::CloseFd(int32_t &serverFd, int32_t &toReturnClientFd)
 {
-    if (close(serverFd) < 0) {
+    if (fdsan_close_with_tag(serverFd, DOMAIN_ID) < 0) {
         FI_HILOGE("Close server fd failed, error:%{public}s, serverFd:%{public}d", strerror(errno), serverFd);
     }
     serverFd = -1;
-    if (close(toReturnClientFd) < 0) {
+    if (fdsan_close_with_tag(toReturnClientFd, DOMAIN_ID) < 0) {
         FI_HILOGE("Close fd failed, error:%{public}s, toReturnClientFd:%{public}d", strerror(errno), toReturnClientFd);
     }
     toReturnClientFd = -1;
@@ -199,7 +202,7 @@ void StreamServer::ReleaseSession(int32_t fd, epoll_event &ev)
     }
     auto DeviceStatusService = DeviceStatus::DelayedSpSingleton<DeviceStatus::DeviceStatusService>::GetInstance();
     DeviceStatusService->DelEpoll(EPOLL_EVENT_SOCKET, fd);
-    if (close(fd) < 0) {
+    if (fdsan_close_with_tag(fd, DOMAIN_ID) < 0) {
         FI_HILOGE("Close fd failed, error:%{public}s, fd:%{public}d", strerror(errno), fd);
     }
 }

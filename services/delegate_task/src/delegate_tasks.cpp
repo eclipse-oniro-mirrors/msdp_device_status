@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
+}
 
 void DelegateTasks::Task::ProcessTask()
 {
@@ -45,13 +48,13 @@ void DelegateTasks::Task::ProcessTask()
 DelegateTasks::~DelegateTasks()
 {
     if (fds_[0] >= 0) {
-        if (close(fds_[0]) < 0) {
+        if (fdsan_close_with_tag(fds_[0], DOMAIN_ID) < 0) {
             FI_HILOGE("Close fds_[0] failed, error:%{public}s, fds_[0]:%{public}d", strerror(errno), fds_[0]);
         }
         fds_[0] = -1;
     }
     if (fds_[1] >= 0) {
-        if (close(fds_[1]) < 0) {
+        if (fdsan_close_with_tag(fds_[1], DOMAIN_ID) < 0) {
             FI_HILOGE("Close fds_[1] failed, error:%{public}s, fds_[1]:%{public}d", strerror(errno), fds_[1]);
         }
         fds_[1] = -1;
@@ -65,6 +68,8 @@ bool DelegateTasks::Init()
         FI_HILOGE("pipe2 failed, errno:%{public}s", ::strerror(errno));
         return false;
     }
+    fdsan_exchange_owner_tag(fds_[0], 0, DOMAIN_ID);
+    fdsan_exchange_owner_tag(fds_[1], 0, DOMAIN_ID);
     return true;
 }
 

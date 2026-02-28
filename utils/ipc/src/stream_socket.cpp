@@ -26,6 +26,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
+} // namespace
 
 StreamSocket::StreamSocket() {}
 
@@ -43,6 +46,7 @@ int32_t StreamSocket::EpollCreate()
         FI_HILOGE("epoll_create1 failed:%{public}s", ::strerror(errno));
         return RET_ERR;
     }
+    fdsan_exchange_owner_tag(epollFd_, 0, DOMAIN_ID);
     return RET_OK;
 }
 
@@ -117,7 +121,7 @@ void StreamSocket::OnReadPackets(CircleStreamBuffer &circBuf, StreamSocket::Pack
 void StreamSocket::EpollClose()
 {
     if (epollFd_ >= 0) {
-        if (close(epollFd_) < 0) {
+        if (fdsan_close_with_tag(epollFd_, DOMAIN_ID) < 0) {
             FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
         }
         epollFd_ = -1;
@@ -127,7 +131,7 @@ void StreamSocket::EpollClose()
 void StreamSocket::Close()
 {
     if (fd_ >= 0) {
-        int32_t rf = close(fd_);
+        int32_t rf = fdsan_close_with_tag(fd_, DOMAIN_ID);
         if (rf < 0) {
             FI_HILOGE("Socket close failed rf:%{public}d", rf);
         }

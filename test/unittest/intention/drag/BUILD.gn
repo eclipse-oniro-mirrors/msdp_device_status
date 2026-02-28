@@ -36,7 +36,10 @@ ohos_unittest("DragManagerTest") {
 
   defines = []
 
-  sources = [ "src/drag_manager_test.cpp" ]
+  sources = [
+    "src/drag_manager_test.cpp",
+    "src/test_context.cpp",
+  ]
 
   cflags = [
     "-Dprivate=public",
@@ -48,11 +51,13 @@ ohos_unittest("DragManagerTest") {
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
     "${device_status_root_path}/intention/cooperate/client:intention_cooperate_client",
     "${device_status_root_path}/intention/drag/client:intention_drag_client",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
     "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/intention/scheduler/plugin_manager:intention_plugin_manager",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_utils_path}:devicestatus_util",
     "${device_status_service_path}/drag_auth:drag_auth"
@@ -236,7 +241,10 @@ ohos_unittest("DragDrawingTest") {
  
   defines = []
  
-  sources = [ "src/drag_drawing_test.cpp" ]
+  sources = [ 
+    "src/drag_drawing_test.cpp",
+    "src/test_context.cpp",
+  ]
  
   cflags = [
     "-Dprivate=public",
@@ -248,11 +256,13 @@ ohos_unittest("DragDrawingTest") {
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_root_path}/intention/adapters/ddm_adapter:intention_ddm_adapter",
+    "${device_status_root_path}/intention/adapters/dsoftbus_adapter:intention_dsoftbus_adapter",
     "${device_status_root_path}/intention/cooperate/client:intention_cooperate_client",
     "${device_status_root_path}/intention/drag/client:intention_drag_client",
     "${device_status_root_path}/intention/ipc/socket:intention_socket_connection",
     "${device_status_root_path}/intention/ipc/tunnel:intention_client",
     "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/intention/scheduler/plugin_manager:intention_plugin_manager",
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_utils_path}:devicestatus_util",
   ]

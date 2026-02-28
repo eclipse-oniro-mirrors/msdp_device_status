@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ namespace DeviceStatus {
 namespace {
 constexpr int32_t TIMER_INTERVAL { 3 };
 constexpr int32_t ERR_INVALID_FD { -1 };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 DeviceStatusMsdpMock* g_msdpMock { nullptr };
 } // namespace
 
@@ -129,15 +130,17 @@ void DeviceStatusMsdpMock::InitTimer()
         FI_HILOGE("Create epoll fd failed");
         return;
     }
+    fdsan_exchange_owner_tag(epFd_, 0, DOMAIN_ID);
     timerFd_ = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
     if (timerFd_ == ERR_INVALID_FD) {
         FI_HILOGE("Create timer fd failed");
-        if (close(epFd_) < 0) {
+        if (fdsan_close_with_tag(epFd_, DOMAIN_ID) < 0) {
             FI_HILOGE("Close epoll fd failed, error:%{public}s, epFd_:%{public}d", strerror(errno), epFd_);
         }
         epFd_ = ERR_INVALID_FD;
         return;
     }
+    fdsan_exchange_owner_tag(timerFd_, 0, DOMAIN_ID);
     SetTimerInterval(TIMER_INTERVAL);
     fcntl(timerFd_, F_SETFL, O_NONBLOCK);
     auto [_, ret] = callbacks_.insert(std::make_pair(timerFd_, &DeviceStatusMsdpMock::TimerCallback));
@@ -179,7 +182,7 @@ void DeviceStatusMsdpMock::CloseTimer()
         FI_HILOGE("Invalid timerFd_");
         return;
     }
-    if (close(timerFd_) < 0) {
+    if (fdsan_close_with_tag(timerFd_, DOMAIN_ID) < 0) {
         FI_HILOGE("Close timer fd failed, error:%{public}s, timerFd_:%{public}d", strerror(errno), timerFd_);
     }
     timerFd_ = -1;
