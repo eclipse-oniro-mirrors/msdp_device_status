@@ -495,7 +495,7 @@ int32_t DeviceStatusManager::NotifyMetadata(const std::string &bundleName, sptr<
         CHKPR(listener, RET_ERR);
         BoomerangData data {};
         data.type = BoomerangType::BOOMERANG_TYPE_BOOMERANG;
-        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREEN_SHOT;
+        data.status = BoomerangStatus::BOOMERANG_STATUS_SCREENSHOT;
         listener->OnScreenshotResult(data);
     }
     object->AddDeathRecipient(boomerangCBDeathRecipient_);
