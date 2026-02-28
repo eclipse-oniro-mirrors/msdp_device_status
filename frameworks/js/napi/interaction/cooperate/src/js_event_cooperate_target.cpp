@@ -112,6 +112,7 @@ void JsEventCooperateTarget::EmitJsStop(sptr<JsUtilCooperate::CallbackInfo> cb,
     napi_status status = napi_send_event(cb->env, task, napi_eprio_immediate);
     if (status != napi_status::napi_ok) {
         FI_HILOGE("Failed to SendEvent, error: %{public}d", status);
+        return;
     }
 }
 
@@ -532,6 +533,7 @@ void JsEventCooperateTarget::EmitCoordinationMessageEvent(sptr<JsUtilCooperate::
         napi_status status = napi_open_handle_scope(item->env, &scope);
         if (status != napi_status::napi_ok) {
             FI_HILOGE("Failed to open handle scope, error: %{public}d", status);
+            return;
         }
         napi_value deviceDescriptor = nullptr;
         CHKRV_SCOPE(item->env, napi_create_string_utf8(item->env, item->data.deviceDescriptor.c_str(),

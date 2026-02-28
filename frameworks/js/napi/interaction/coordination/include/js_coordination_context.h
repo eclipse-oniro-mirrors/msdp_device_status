@@ -70,6 +70,7 @@ private:
 
     std::shared_ptr<JsCoordinationManager> mgr_ { nullptr };
     std::mutex mutex_;
+    napi_env env_ { nullptr };
     napi_ref contextRef_ { nullptr };
 };
 } // namespace DeviceStatus

@@ -40,6 +40,10 @@ JsCooperateContext::JsCooperateContext()
 JsCooperateContext::~JsCooperateContext()
 {
     std::lock_guard<std::mutex> guard(mutex_);
+    if ((env_ != nullptr) && (contextRef_ != nullptr)) {
+        napi_delete_reference(env_, contextRef_);
+        contextRef_ = nullptr;
+    }
     auto jsCooperateManager = mgr_;
     mgr_.reset();
     if (jsCooperateManager != nullptr) {
@@ -289,6 +293,7 @@ napi_value JsCooperateContext::CreateInstance(napi_env env)
     JsCooperateContext *jsContext = nullptr;
     CHKRP(napi_unwrap(env, jsInstance, reinterpret_cast<void**>(&jsContext)), UNWRAP);
     CHKPP(jsContext);
+    jsContext->env_ = env;
     CHKRP(napi_create_reference(env, jsInstance, ONE_PARAM, &(jsContext->contextRef_)), CREATE_REFERENCE);
 
     uint32_t refCount = ZERO_PARAM;
