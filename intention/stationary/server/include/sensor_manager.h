@@ -16,6 +16,7 @@
 #define DEVICE_STATUS_SENSOR_MANAGER_H
 
 #include <atomic>
+#include <mutex>
 
 #include "nocopyable.h"
 
@@ -31,17 +32,16 @@ public:
     SensorManager() = delete;
     virtual ~SensorManager();
     DISALLOW_COPY_AND_MOVE(SensorManager);
-    SensorManager(const int32_t sensorTypeId, const int32_t sensorSamplingInterval);
-    void SetCallback(RecordSensorCallback callback);
+    SensorManager(const int32_t sensorTypeId, const int32_t sensorSamplingInterval, RecordSensorCallback callback);
     static bool IsSupportedSensor(const int32_t sensorTypeId);
     int32_t StartSensor();
     int32_t StopSensor();
-    bool GetRunningStatus();
 private:
     SensorUser sensorUser_;
     int32_t sensorTypeId_;
     int32_t sensorSamplingInterval_ = 0;
     std::atomic_bool isRunning_ = false;
+    std::mutex mtx_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

@@ -27,7 +27,7 @@
 #endif
 #include "i_plugin.h"
 
-#ifdef DEVICE_STATUS_SENSOR_ENABLE
+#ifdef SENSOR_ENABLE
 #include "sensor_agent.h"
 #include "sensor_agent_type.h"
 #endif
@@ -93,8 +93,8 @@ private:
 #endif
     Data GetCache(CallingContext &context, const Type &type);
     void ReportSensorSysEvent(CallingContext &context, int32_t type, bool enable);
-#ifdef DEVICE_STATUS_SENSOR_ENABLE
-    void TransQuaternionsToZXYRot(RotationVectorData quaternions, DevicePostureData &data);
+#ifdef SENSOR_ENABLE
+    static void TransQuaternionsToZXYRot(const RotationVectorData &quaternions, DevicePostureData &data);
 #endif
 
 #ifdef MOTION_ENABLE

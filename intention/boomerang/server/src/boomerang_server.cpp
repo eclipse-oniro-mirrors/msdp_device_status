@@ -21,7 +21,6 @@
 #include "parameters.h"
 #include "tokenid_kit.h"
 
-
 #include "devicestatus_define.h"
 #include "devicestatus_dumper.h"
 #include "devicestatus_hisysevent.h"
@@ -201,7 +200,7 @@ int32_t BoomerangServer::SubmitMetadata(const CallingContext &context, const std
     }
     int32_t ret = manager_.SubmitMetadata(metaData);
     if (ret != RET_OK) {
-        FI_HILOGE("boomerang submit metada failed");
+        FI_HILOGE("boomerang submit metadata failed");
     }
     return ret;
 }
@@ -248,6 +247,9 @@ bool BoomerangServer::IsSystemHAPCalling(const CallingContext &context)
 
 bool BoomerangServer::IsDeviceSupport()
 {
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return false;
+#endif
     std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
     return std::find(SUPPORT_DEVICE_TYPE.begin(), SUPPORT_DEVICE_TYPE.end(), deviceType) != SUPPORT_DEVICE_TYPE.end();
 }

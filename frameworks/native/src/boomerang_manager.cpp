@@ -56,9 +56,9 @@ int32_t BoomerangManager::SubmitMetadata(const std::string &metadata)
 }
 
 int32_t BoomerangManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap,
-    const std::string &matedata, sptr<IRemoteBoomerangCallback> callback)
+    const std::string &metedata, sptr<IRemoteBoomerangCallback> callback)
 {
-    return INTER_MGR_IMPL.BoomerangEncodeImage(pixelMap, matedata, callback);
+    return INTER_MGR_IMPL.BoomerangEncodeImage(pixelMap, metedata, callback);
 }
 
 int32_t BoomerangManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMap> pixelMap,

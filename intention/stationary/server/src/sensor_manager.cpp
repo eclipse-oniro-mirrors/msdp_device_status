@@ -15,15 +15,26 @@
 
 #include "sensor_manager.h"
 
+#include <securec.h>
+
 #include "fi_log.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-SensorManager::SensorManager(const int32_t sensorTypeId, const int32_t sensorSamplingInterval)
+namespace {
+constexpr int32_t RET_ERR = -1;
+constexpr int32_t RET_OK = 0;
+}
+
+SensorManager::SensorManager(const int32_t sensorTypeId, const int32_t sensorSamplingInterval,
+    RecordSensorCallback callback)
 {
     sensorTypeId_ = sensorTypeId;
     sensorSamplingInterval_ = sensorSamplingInterval;
+    sensorUser_.callback = callback;
+    (void)memset_s(sensorUser_.name, sizeof(sensorUser_.name), 0, sizeof(sensorUser_.name));
+    sensorUser_.plugCallback = nullptr;
     isRunning_ = false;
 }
 
@@ -32,13 +43,17 @@ SensorManager::~SensorManager()
     StopSensor();
 }
 
-void SensorManager::SetCallback(RecordSensorCallback callback)
-{
-    sensorUser_.callback = callback;
-}
-
 int32_t SensorManager::StartSensor()
 {
+    std::lock_guard lockGrd(mtx_);
+    if (isRunning_ == true) {
+        FI_HILOGE("sensor manager is running");
+        return RET_OK;
+    }
+    if (sensorUser_.callback == nullptr) {
+        FI_HILOGE("sensorUser callback is nullptr");
+        return RET_OK;
+    }
     int32_t ret = SubscribeSensor(sensorTypeId_, &sensorUser_);
     if (ret != 0) {
         FI_HILOGE("Subscribe sensor failed, ret = %{public}d", ret);
@@ -47,11 +62,13 @@ int32_t SensorManager::StartSensor()
     ret = SetBatch(sensorTypeId_, &sensorUser_, sensorSamplingInterval_, 0);
     if (ret != 0) {
         FI_HILOGE("Set Batch failed, ret = %{public}d", ret);
+        UnsubscribeSensor(sensorTypeId_, &sensorUser_);
         return ret;
     }
     ret = ActivateSensor(sensorTypeId_, &sensorUser_);
     if (ret != 0) {
         FI_HILOGE("Activate sensor failed, ret = %{public}d", ret);
+        UnsubscribeSensor(sensorTypeId_, &sensorUser_);
         return ret;
     }
     isRunning_ = true;
@@ -60,6 +77,11 @@ int32_t SensorManager::StartSensor()
 
 int32_t SensorManager::StopSensor()
 {
+    std::lock_guard lockGrd(mtx_);
+    if (isRunning_ == false) {
+        FI_HILOGE("sensor manager is stopped");
+        return RET_OK;
+    }
     int32_t ret = DeactivateSensor(sensorTypeId_, &sensorUser_);
     if (ret != 0) {
         FI_HILOGE("Activate sensor failed, ret %{public}d", ret);
@@ -70,11 +92,6 @@ int32_t SensorManager::StopSensor()
     }
     isRunning_ = false;
     return ret;
-}
-
-bool SensorManager::GetRunningStatus()
-{
-    return isRunning_.load();
 }
 
 bool SensorManager::IsSupportedSensor(const int32_t sensorTypeId)

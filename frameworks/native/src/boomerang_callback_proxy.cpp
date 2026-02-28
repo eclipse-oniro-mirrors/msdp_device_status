@@ -67,6 +67,9 @@ void BoomerangCallbackProxy::OnEncodeImageResult(std::shared_ptr<Media::PixelMap
 {
     SendRequestCommon(static_cast<int32_t>(IRemoteBoomerangCallback::ENCODE_IMAGE),
         [pixelMap](MessageParcel& data) {
+            if (pixelMap == nullptr) {
+                return;
+            }
             pixelMap->Marshalling(data);
         });
 }

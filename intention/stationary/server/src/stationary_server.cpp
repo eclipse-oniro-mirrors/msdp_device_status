@@ -66,6 +66,7 @@ std::mutex g_mtx;
 std::condition_variable g_cv;
 } // namespace
 
+#ifdef SENSOR_ENABLE
 static void OnReceivedData(SensorEvent *event)
 {
     if (event == nullptr) {
@@ -79,6 +80,7 @@ static void OnReceivedData(SensorEvent *event)
         g_cv.notify_all();
     }
 }
+#endif
 
 #ifdef MOTION_ENABLE
 void MotionCallback::OnMotionChanged(const MotionEvent &motionEvent)
@@ -166,7 +168,7 @@ int32_t StationaryServer::GetDevicePostureDataSync(CallingContext &context, Devi
     if (!IsSystemCalling(context)) {
         return RET_NO_SYSTEM_API;
     }
-#ifndef DEVICE_STATUS_SENSOR_ENABLE
+#ifndef SENSOR_ENABLE
     return RET_NO_SUPPORT;
 #else
     if (!SensorManager::IsSupportedSensor(SENSOR_TYPE_ID_ROTATION_VECTOR)) {
@@ -174,8 +176,7 @@ int32_t StationaryServer::GetDevicePostureDataSync(CallingContext &context, Devi
         return RET_NO_SUPPORT;
     }
     // 订阅sensor获取四元数
-    SensorManager sensorManager(SENSOR_TYPE_ID_ROTATION_VECTOR, SENSOR_SAMPLING_INTERVAL);
-    sensorManager.SetCallback(&OnReceivedData);
+    SensorManager sensorManager(SENSOR_TYPE_ID_ROTATION_VECTOR, SENSOR_SAMPLING_INTERVAL, &OnReceivedData);
     sensorManager.StartSensor();
     std::unique_lock lockGrd(g_mtx);
     g_cv.wait_for(lockGrd, std::chrono::milliseconds(WAIT_SENSOR_DATA_TIMEOUT_MS));
@@ -190,8 +191,8 @@ int32_t StationaryServer::GetDevicePostureDataSync(CallingContext &context, Devi
 #endif
 }
 
-#ifdef DEVICE_STATUS_SENSOR_ENABLE
-void StationaryServer::TransQuaternionsToZXYRot(RotationVectorData quaternions, DevicePostureData &data)
+#ifdef SENSOR_ENABLE
+void StationaryServer::TransQuaternionsToZXYRot(const RotationVectorData &quaternions, DevicePostureData &data)
 {
     // 四元数表示法： w+xi+yj+zk
     float x = quaternions.x;
@@ -217,19 +218,30 @@ void StationaryServer::TransQuaternionsToZXYRot(RotationVectorData quaternions, 
         }
         return ret;
     };
-    auto pitch = transFunc(std::atan2(-rotationMat[MAT_IDX_2][MAT_IDX_0], rotationMat[MAT_IDX_2][MAT_IDX_2]));
-    auto yaw = transFunc(std::atan2(-rotationMat[MAT_IDX_0][MAT_IDX_1], rotationMat[MAT_IDX_1][MAT_IDX_1]));
-    float roll = 0.0F;
-    if (std::cos(pitch) >= EPSILON_FLOAT) {
-        roll = transFunc(std::atan2(rotationMat[MAT_IDX_2][MAT_IDX_1],
-            rotationMat[MAT_IDX_2][MAT_IDX_2] / std::cos(pitch)));
+    auto cosRoll = std::sqrt(1 - rotationMat[MAT_IDX_2][MAT_IDX_1] * rotationMat[MAT_IDX_2][MAT_IDX_1]);
+    // 万向锁逻辑
+    if (std::abs(cosRoll) < EPSILON_FLOAT) {
+        // roll = pi / 2
+        if (rotationMat[MAT_IDX_2][MAT_IDX_1] > 0) {
+            auto pitchAndYaw = transFunc(std::atan2(rotationMat[MAT_IDX_1][MAT_IDX_0],
+                rotationMat[MAT_IDX_0][MAT_IDX_0]));
+            data.yawRad = 0;
+            data.pitchRad = pitchAndYaw;
+            data.rollRad = PI / 2;
+        } else {
+            // roll = -pi / 2
+            auto yawSubPitch = std::atan2(rotationMat[MAT_IDX_1][MAT_IDX_0], rotationMat[MAT_IDX_0][MAT_IDX_0]);
+            data.yawRad = 0;
+            data.pitchRad = transFunc(-yawSubPitch);
+            data.rollRad = transFunc(-PI / 2);
+        }
     } else {
-        roll = transFunc(std::atan2(rotationMat[MAT_IDX_2][MAT_IDX_1],
-            -rotationMat[MAT_IDX_2][MAT_IDX_0] / std::sin(pitch)));
+        data.pitchRad = transFunc(std::atan2(-rotationMat[MAT_IDX_2][MAT_IDX_0], rotationMat[MAT_IDX_2][MAT_IDX_2]));
+        data.yawRad = transFunc(std::atan2(-rotationMat[MAT_IDX_0][MAT_IDX_1], rotationMat[MAT_IDX_1][MAT_IDX_1]));
+        data.rollRad = transFunc(std::atan2(rotationMat[MAT_IDX_2][MAT_IDX_1], std::sqrt(
+            std::pow(rotationMat[MAT_IDX_0][MAT_IDX_1], DOUBLE_FACTOR) +
+            std::pow(rotationMat[MAT_IDX_1][MAT_IDX_1], DOUBLE_FACTOR))));
     }
-    data.rollRad = roll;
-    data.yawRad = yaw;
-    data.pitchRad = pitch;
 }
 #endif
 
