@@ -285,7 +285,7 @@ napi_value BoomerangNapi::NotifyMetadataBindingEvent(napi_env env, napi_callback
 
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangCallback(env, deferred);
     CHKPP(callback);
-    auto asyncContext = new (std::nothrow) AsyncContext(); 
+    auto asyncContext = new (std::nothrow) AsyncContext();
     CHKPP(asyncContext);
     asyncContext->env = env;
     asyncContext->deferred = deferred;

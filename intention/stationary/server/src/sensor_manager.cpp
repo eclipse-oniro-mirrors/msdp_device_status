@@ -51,8 +51,8 @@ int32_t SensorManager::StartSensor()
         return RET_OK;
     }
     if (sensorUser_.callback == nullptr) {
-        FI_HILOGE("sensorUser callback is nullptr");
-        return RET_OK;
+        FI_HILOGI("sensorUser callback is nullptr");
+        return RET_ERR;
     }
     int32_t ret = SubscribeSensor(sensorTypeId_, &sensorUser_);
     if (ret != 0) {

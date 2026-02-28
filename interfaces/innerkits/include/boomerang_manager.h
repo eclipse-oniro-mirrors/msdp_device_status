@@ -78,19 +78,19 @@ public:
     int32_t SubmitMetadata(const std::string &metadata);
 
     /**
-     * @brief boomerang encode image.
+     * @brief boomerang encode image
      * @param pixelMap Images that need to be boomerang coded.
-     * @param matedata Encoding content.
+     * @param matedata Encoding content
      * @param callback Callback function that is called back to the client after encoding.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 15
      */
-    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, const std::string &metedata,
+    int32_t BoomerangEncodeImage(std::shared_ptr<Media::PixelMap> pixelMap, const std::string &metadata,
         sptr<IRemoteBoomerangCallback> callback);
 
         /**
-     * @brief boomerang decode image.
-     * @param pixelMap Images containing Boomerang coded information.
+     * @brief boomerang decode image
+     * @param pixelMap Image containing Boomerang coded information.
      * @param callback Callback function that is called back to the client after decoding.
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      * @since 15
