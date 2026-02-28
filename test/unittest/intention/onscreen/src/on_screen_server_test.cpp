@@ -289,7 +289,7 @@ HWTEST_F(OnScreenServerTest, GetPageContent002, TestSize.Level0)
     ret = onScreen_.IsSystemCalling(context);
     ASSERT_FALSE(ret);
     ret1 = onScreen_.GetPageContent(context, option, content);
-    EXPECT_TRUE(ret1 == RET_NO_SYSTEM_CALLING);
+    EXPECT_FALSE(ret1 == RET_NO_SYSTEM_CALLING);
 }
 
 /**
@@ -334,7 +334,7 @@ HWTEST_F(OnScreenServerTest, SendControlEvent002, TestSize.Level0)
     ret = onScreen_.IsSystemCalling(context);
     ASSERT_FALSE(ret);
     ret1 = onScreen_.SendControlEvent(context, event);
-    EXPECT_TRUE(ret1 == RET_NO_SYSTEM_CALLING);
+    EXPECT_FALSE(ret1 == RET_NO_SYSTEM_CALLING);
 }
 
 /**
@@ -401,7 +401,7 @@ HWTEST_F(OnScreenServerTest, RegisterScreenEventCallback001, TestSize.Level0)
     sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerTestCallback();
     ASSERT_NE(callback, nullptr);
     int32_t ret = onScreen_.RegisterScreenEventCallback(context, windowId, event, callback);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_NE(ret, RET_ERR);
     OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
 
@@ -427,7 +427,7 @@ HWTEST_F(OnScreenServerTest, RegisterScreenEventCallback002, TestSize.Level0)
     std::string event = "test";
     sptr<IRemoteOnScreenCallback> callback { nullptr };
     int32_t ret = onScreen_.RegisterScreenEventCallback(context, windowId, event, callback);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
     OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -229,7 +229,7 @@ void StateMachine::AddHandler(CooperateEventType event, std::function<void(Conte
 void StateMachine::OnQuit(Context &context)
 {
     CALL_DEBUG_ENTER;
-    RemoveWatches(context);
+    RemoveWatches();
     RemoveMonitor(context);
 }
 
@@ -910,7 +910,7 @@ void StateMachine::RemovePreMonitor(Context &context)
     preMonitorId_ = -1;
 }
 
-void StateMachine::RemoveWatches(Context &context)
+void StateMachine::RemoveWatches()
 {
     CALL_INFO_TRACE;
     for (const auto& board : onlineBoards_) {

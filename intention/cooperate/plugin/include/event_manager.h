@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,7 +92,7 @@ public:
     void RemoteStartWithOptionsFinish(const DSoftbusCooperateWithOptionsFinished &event);
     void StartCooperateWithOptionsFinish(const DSoftbusCooperateWithOptionsFinished &event);
     void StartCooperateWithOptions(const StartWithOptionsEvent &event);
-    void ErrorNotAollowCooperateWhenMotionDragging(const NotAollowCooperateWhenMotionDragging &event);
+    void ErrorNotAollowCooperateWhenMotionDragging(const NotAllowCooperateWhenMotionDragging &event);
 
 private:
     void OnCooperateMessage(CoordinationMessage msg, const std::string &networkId);

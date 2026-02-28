@@ -62,7 +62,7 @@ class AniMotionEvent {
 public:
     static std::shared_ptr<AniMotionEvent> GetInstance();
     AniMotionEvent() = default;
-    ~AniMotionEvent() = default;
+    ~AniMotionEvent();
 #ifdef MOTION_ENABLE
     bool CheckEvents(int32_t eventType);
     bool SubscribeCallback(int32_t type);

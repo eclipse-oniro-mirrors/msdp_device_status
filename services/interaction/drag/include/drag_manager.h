@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -345,7 +345,7 @@ private:
 #endif //OHOS_DRAG_ENABLE_MONITOR
     SocketSessionPtr dragOutSession_ { nullptr };
     std::function<void(DragState)> stateChangedCallback_ { nullptr };
-    std::function<void(bool)> notifyPUllUpCallback_ { nullptr };
+    std::function<void(bool)> notifyPullUpCallback_ { nullptr };
     std::function<void(bool)> crossDragCallback_ { nullptr };
     std::shared_ptr<EventHub> eventHub_ { nullptr };
     sptr<ISystemAbilityStatusChange> statusListener_ { nullptr };

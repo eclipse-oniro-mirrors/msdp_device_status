@@ -16,6 +16,7 @@
 #ifndef DRAG_DRAWING_H
 #define DRAG_DRAWING_H
 
+#include <memory>
 #include <vector>
 #include <shared_mutex>
 
@@ -321,7 +322,7 @@ public:
     void ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation);
     void UpdateDragState(DragState dragState);
     static std::shared_ptr<Media::PixelMap> AccessGlobalPixelMapLocked();
-    static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
+    static void UpdateGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
     void LongPressDragZoomOutAnimation();
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
     void ResetAnimationParameter();

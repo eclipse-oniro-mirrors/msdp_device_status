@@ -158,7 +158,7 @@ std::optional<DragData> InteractionDragDrawingTest::CreateDragData(int32_t sourc
     }
     dragData.buffer = std::vector<uint8_t>(MAX_BUFFER_SIZE, 0);
     dragData.udKey = UD_KEY;
-    dragData.extraInfo = FILTER_INFO;
+    dragData.filterInfo = FILTER_INFO;
     dragData.extraInfo = EXTRA_INFO;
     dragData.sourceType = sourceType;
     dragData.pointerId = pointerId;
@@ -1358,6 +1358,38 @@ HWTEST_F(InteractionDragDrawingTest, InteractionDragDrawingTest_RotateDragWindow
     ASSERT_EQ(ret, RET_OK);
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 }
+
+/**
+ * @tc.name: InteractionManagerTest_EnableInternalDropAnimation01
+ * @tc.desc: Check EnableInternalDropAnimation
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+HWTEST_F(InteractionDragDrawingTest, InteractionManagerTest_EnableInternalDropAnimation01, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::string animationInfo = "{\"targetPos\": [8, 8]}";
+    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
+    EXPECT_EQ(ret, RET_OK);
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+
+/**
+ * @tc.name: InteractionManagerTest_EnableInternalDropAnimation02
+ * @tc.desc: Check EnableInternalDropAnimation
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+HWTEST_F(InteractionDragDrawingTest, InteractionManagerTest_EnableInternalDropAnimation02, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::string animationInfo = "{}";
+    int32_t ret = InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
+    EXPECT_EQ(ret, COMMON_PARAMETER_ERROR);
+}
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

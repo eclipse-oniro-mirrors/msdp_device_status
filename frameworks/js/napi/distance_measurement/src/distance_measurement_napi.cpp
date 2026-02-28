@@ -52,6 +52,7 @@ constexpr size_t MAX_ARG_STRING_LEN = 512;
 constexpr int32_t NAPI_INDEX_ZERO = 0;
 constexpr int32_t NAPI_INDEX_ONE = 1;
 constexpr int32_t NAPI_INDEX_TWO = 2;
+constexpr int32_t E_NO_PERMISSION { 60882961 };
 } // namespace
 
 std::mutex g_mutex;
@@ -431,6 +432,7 @@ void DistMeasureListener::OnDoorIdentifyChanged(const CDoorPositionResponse &ide
             DistanceMeasurementNapi *DistanceMeasurementNapi = DistanceMeasurementNapi::GetDistanceMeasurementNapi();
             if (DistanceMeasurementNapi == nullptr) {
                 FI_HILOGE("DistanceMeasurementNapi is nullptr");
+                napi_close_handle_scope(env, scope);
                 return;
             }
             DistanceMeasurementNapi->OnDoorIdentifyChangedDone(staticIdentifyRes);
@@ -467,6 +469,7 @@ void DistMeasureListener::OnDistanceMeasurementChanged(const CDistMeasureRespons
             DistanceMeasurementNapi *DistanceMeasurementNapi = DistanceMeasurementNapi::GetDistanceMeasurementNapi();
             if (DistanceMeasurementNapi == nullptr) {
                 FI_HILOGE("DistanceMeasurementNapi is nullptr");
+                napi_close_handle_scope(env, scope);
                 return;
             }
             DistanceMeasurementNapi->OnDistanceMeasurementChangedDone(staticDistMeasureRes);
@@ -692,7 +695,7 @@ bool DistanceMeasurementNapi::DoSubscribe(napi_env env, napi_value jsThis,
     }
 
     if (!CreateDistMeasureCallback(env, callback, cdistMeasureData)) {
-        ThrowErr(env, SERVICE_EXCEPTION, "Create distance measurement callback failed");
+        FI_HILOGE("Create distance measurement callback failed");
         return false;
     }
     return true;
@@ -703,9 +706,11 @@ bool DistanceMeasurementNapi::CreateDistMeasureCallback(napi_env env,
 {
     FI_HILOGI("Enter");
     if (g_DistanceMeasurementNapi == nullptr) {
+        ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
         return false;
     }
     if (!g_DistanceMeasurementNapi->AddCallback(cdistMeasureData, callback)) {
+        ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
         return false;
     }
     if (distMeasureCallback_ == nullptr) {
@@ -718,6 +723,7 @@ bool DistanceMeasurementNapi::CreateDistMeasureCallback(napi_env env,
             FI_HILOGI("g_subscribeDistanceMeasurementFunc create end");
             if (g_DistanceMeasurementNapi->g_subscribeDistanceMeasurementFunc == nullptr) {
                 FI_HILOGE("%{public}s find symbol failed, error: %{public}s", SUBSCRIBE_FUNC_NAME.data(), dlerror());
+                ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
                 return false;
             }
         }
@@ -730,16 +736,23 @@ bool DistanceMeasurementNapi::CreateDistMeasureCallback(napi_env env,
     int32_t ret = g_DistanceMeasurementNapi->g_subscribeDistanceMeasurementFunc(
         listener, cdistMeasureData);
     FI_HILOGI("g_subscribeDistanceMeasurementFunc call end");
-    if (ret != 0) {
-        FI_HILOGE("Subscribe distance measurement callback failed");
-        g_DistanceMeasurementNapi->RemoveCallback(cdistMeasureData);
-        return false;
+    if (ret == 0) {
+        FI_HILOGI("Subscribe distance measurement callback success");
+        distMeasureCallback_ = listener;
+        return true;
     }
-    distMeasureCallback_ = listener;
-    return true;
+
+    FI_HILOGE("Subscribe distance measurement callback failed");
+    g_DistanceMeasurementNapi->RemoveCallback(cdistMeasureData);
+    if (ret == E_NO_PERMISSION) {
+        ThrowErr(env, PERMISSION_EXCEPTION, "Permission denied.");
+    } else {
+        ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
+    }
+    return false;
 }
 
-bool DistanceMeasurementNapi::DeleteDistMeasureCallback(napi_value callback,
+bool DistanceMeasurementNapi::DeleteDistMeasureCallback(napi_env env, napi_value callback,
     CDistMeasureData cdistMeasureData)
 {
     FI_HILOGI("Enter");
@@ -748,6 +761,7 @@ bool DistanceMeasurementNapi::DeleteDistMeasureCallback(napi_value callback,
         return true;
     }
     if (g_DistanceMeasurementNapi == nullptr) {
+        ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
         return false;
     }
     if (g_DistanceMeasurementNapi->g_unsubscribeDistanceMeasurementFunc == nullptr) {
@@ -756,16 +770,24 @@ bool DistanceMeasurementNapi::DeleteDistMeasureCallback(napi_value callback,
             dlsym(g_DistanceMeasurementNapi->g_distanceMeasurementHandle, UNSUBSCRIBE_FUNC_NAME.data()));
         if (g_DistanceMeasurementNapi->g_unsubscribeDistanceMeasurementFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
+            ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
             return false;
         }
     }
     int32_t ret = g_DistanceMeasurementNapi->g_unsubscribeDistanceMeasurementFunc(cdistMeasureData);
-    if (ret != 0) {
-        FI_HILOGE("Unsubscribe distance measurement callback failed");
-        return false;
+    if (ret == 0) {
+        FI_HILOGI("Unsubscribe distance measurement callback success");
+        g_DistanceMeasurementNapi->RemoveCallback(cdistMeasureData);
+        return true;
     }
-    g_DistanceMeasurementNapi->RemoveCallback(cdistMeasureData);
-    return true;
+
+    FI_HILOGE("Unsubscribe distance measurement callback failed");
+    if (ret == E_NO_PERMISSION) {
+        ThrowErr(env, PERMISSION_EXCEPTION, "Permission denied.");
+    } else {
+        ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
+    }
+    return false;
 }
 
 napi_value DistanceMeasurementNapi::OffDistanceMeasurement(napi_env env, napi_callback_info info)
@@ -866,8 +888,8 @@ bool DistanceMeasurementNapi::DoUnsubscribe(napi_env env, napi_value jsParams,
         .reportMode = distMeasureParams.reportMode,
         .reportFreq = distMeasureParams.reportFrequency
     };
-    if (!DeleteDistMeasureCallback(callback, cdistMeasureData)) {
-        ThrowErr(env, SERVICE_EXCEPTION, "Delete distance measurement callback failed");
+    if (!DeleteDistMeasureCallback(env, callback, cdistMeasureData)) {
+        FI_HILOGE("Delete distance measurement callback failed");
         return false;
     }
     return true;

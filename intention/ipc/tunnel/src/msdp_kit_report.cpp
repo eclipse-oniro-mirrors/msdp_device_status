@@ -32,10 +32,10 @@ constexpr const char MSDP_KIT_DOMAIN[] = "api_diagnostic";
 constexpr const char MSDP_KIT_NAME[] = "api_called_stat";
 constexpr const char CONFIG_NAME[] = "ha_app_event";
 constexpr const char CONFIG_CONFIG_NAME[] = "SDK_OCG";
-constexpr int32_t TIMER_TYPE_WAKEUP = 1 << 1;
-constexpr int32_t TIMER_TYPE_EXACT = 1 << 2;
-constexpr int64_t INTERVAL_HOUR = 12 * 60 * 60;
-constexpr int64_t MS_PER_SEC = 1000;
+constexpr uint32_t TIMER_TYPE_WAKEUP = 1 << 1;
+constexpr uint32_t TIMER_TYPE_EXACT = 1 << 2;
+constexpr uint32_t MS_PER_SEC = 1000;
+constexpr uint64_t INTERVAL_HOUR = 12 * 60 * 60;
 constexpr int32_t NON_APP_PROCESSOR_ID = -200;
 
 MsdpKitReport::MsdpKitReport()
@@ -52,7 +52,11 @@ MsdpKitReport::MsdpKitReport()
     tiSubscribe->SetRepeat(true);
     // Set the reporting time interval, 12-hour interval
     tiSubscribe->SetInterval(INTERVAL_HOUR * MS_PER_SEC);
-    tiSubscribe->SetCallback([this]() { this->SchedulerUpload(); });
+    tiSubscribe->SetCallback([this]() {
+        FI_HILOGI("The timer starts reporting kit data.");
+        this->SchedulerUpload();
+        FI_HILOGI("The timer ends and the kit data is reported.");
+    });
 
     // Create timer
     auto ret = MiscServices::TimeServiceClient::GetInstance()->CreateTimerV9(tiSubscribe, startTimerFd_);
@@ -63,7 +67,7 @@ MsdpKitReport::MsdpKitReport()
 
     // Start the timer (starting from the current time + 12 hours)
     time_t currentTime = time(nullptr);
-    uint64_t nextTriggerTime = (currentTime + INTERVAL_HOUR) * MS_PER_SEC;
+    uint64_t nextTriggerTime = (static_cast<uint64_t>(currentTime) + INTERVAL_HOUR) * MS_PER_SEC;
     FI_HILOGI("UTC, current: %{public}s, next trigger: %{public}s",
         MsdpTimerInfo::Ts2Str(currentTime).data(),
         MsdpTimerInfo::Ts2Str((currentTime + INTERVAL_HOUR)).data());
@@ -74,29 +78,28 @@ MsdpKitReport::MsdpKitReport()
 
 MsdpKitReport::~MsdpKitReport()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    // Prevent data loss when the timer does not trigger
-    if (processorId_ != -1 && processorId_ != NON_APP_PROCESSOR_ID) {
-        MsdpInterfaceEventReport();
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (isWatching_) {
+            MiscServices::TimeServiceClient::GetInstance()->DestroyTimerV9(startTimerFd_);
+            startTimerFd_ = 0;
+            isWatching_ = false;
+        }
     }
 
-    // If it's not an application, this data should also be cleared.
-    msdpInterfaceEventInfos_.clear();
-    if (!isWatching_) {
-        return;
-    }
-
-    MiscServices::TimeServiceClient::GetInstance()->DestroyTimerV9(startTimerFd_);
-    startTimerFd_ = 0;
-    isWatching_ = false;
+    FI_HILOGI("Begin reporting statistics data before reaching scheduled time.");
+    SchedulerUpload();
+    FI_HILOGI("Stop reporting statistics data before reaching scheduled time.");
 }
 
 void MsdpKitReport::AddEventProcessor()
 {
+    FI_HILOGI("AddEventProcessor start.");
     HiviewDFX::HiAppEvent::ReportConfig config;
     config.name = std::string(CONFIG_NAME);
     config.configName = std::string(CONFIG_CONFIG_NAME);
     processorId_ = HiviewDFX::HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
+    FI_HILOGI("AddEventProcessor end.");
 }
 
 void MsdpKitReport::SchedulerUpload()
@@ -110,15 +113,35 @@ void MsdpKitReport::SchedulerUpload()
 
     // Dot not supported in non-application applications
     if (processorId_ == NON_APP_PROCESSOR_ID) {
+        FI_HILOGE("Processor ID is non-application, skip upload.");
         return;
     }
     MsdpInterfaceEventReport();
     FI_HILOGI("SchedulerUpload end");
 }
 
+void UpdateErrorCode(MsdpInterfaceEventInfo &eventInfo, const MsdpInterfaceEventInfo &info)
+{
+    FI_HILOGI("UpdateErrorCode start.");
+    if (info.errorCodeType.empty()) {
+        FI_HILOGW("Input error code type is empty, skipping update.");
+        return;
+    }
+    auto it = std::find(eventInfo.errorCodeType.begin(), eventInfo.errorCodeType.end(), info.errorCodeType[0]);
+    if (it != eventInfo.errorCodeType.end()) {
+        size_t index = static_cast<size_t>(std::distance(eventInfo.errorCodeType.begin(), it));
+        eventInfo.errorCodeNum[index] += 1;
+        return;
+    }
+    eventInfo.errorCodeType.push_back(info.errorCodeType[0]);
+    eventInfo.errorCodeNum.push_back(1);
+    FI_HILOGI("UpdateErrorCode end.");
+}
+
 bool MsdpKitReport::UpdateMsdpInterfaceEvent(const MsdpInterfaceEventInfo &msdpInterfaceEventInfo)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    FI_HILOGI("UpdateMsdpInterfaceEvent start");
     if (msdpInterfaceEventInfo.apiName.empty() || msdpInterfaceEventInfo.sdkName.empty()) {
         FI_HILOGE("API name or SDK name is empty, apiName size: %{public}zu, sdkName size: %{public}zu",
             msdpInterfaceEventInfo.apiName.size(),
@@ -128,15 +151,26 @@ bool MsdpKitReport::UpdateMsdpInterfaceEvent(const MsdpInterfaceEventInfo &msdpI
     auto apiName = msdpInterfaceEventInfo.apiName;
     auto apiIter = msdpInterfaceEventInfos_.find(apiName);
     if (apiIter != msdpInterfaceEventInfos_.end()) {
-        apiIter->second = msdpInterfaceEventInfo;
+        apiIter->second.callTimes++;
+        apiIter->second.successTimes += msdpInterfaceEventInfo.successTimes;
+        apiIter->second.maxCostTime = apiIter->second.maxCostTime < msdpInterfaceEventInfo.maxCostTime ?
+            msdpInterfaceEventInfo.maxCostTime : apiIter->second.maxCostTime;
+        apiIter->second.minCostTime = apiIter->second.minCostTime > msdpInterfaceEventInfo.minCostTime ?
+            msdpInterfaceEventInfo.minCostTime : apiIter->second.minCostTime;
+        apiIter->second.totalCostTime += msdpInterfaceEventInfo.totalCostTime;
+        UpdateErrorCode(apiIter->second, msdpInterfaceEventInfo);
+        FI_HILOGI("update event");
     } else {
         msdpInterfaceEventInfos_.emplace(apiName, msdpInterfaceEventInfo);
+        FI_HILOGI("add event");
     }
+    FI_HILOGI("UpdateMsdpInterfaceEvent end");
     return true;
 };
 
 void MsdpKitReport::MsdpInterfaceEventReport()
 {
+    FI_HILOGI("MsdpInterfaceEventReport start.");
     if (msdpInterfaceEventInfos_.size() == 0) {
         FI_HILOGI("msdpInterfaceEventInfos_ is empty");
         return;
@@ -164,6 +198,7 @@ void MsdpKitReport::MsdpInterfaceEventReport()
         }
     }
     msdpInterfaceEventInfos_.clear();
+    FI_HILOGI("MsdpInterfaceEventReport end.");
 };
 }  // namespace Msdp
 }  // namespace OHOS

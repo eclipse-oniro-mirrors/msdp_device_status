@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-const std::string THREAD_NAME { "os_dargRenderRunner" };
+const std::string THREAD_NAME { "os_dragRenderRunner" };
 constexpr int32_t INVALID_VALUE { -1 };
 }
 
@@ -132,7 +132,7 @@ void DragVSyncStation::SetThreadQosLevel(std::shared_ptr<AppExecFwk::EventHandle
             if (ret != 0) {
                 FI_HILOGE("SetThreadQos failed, ret:%{public}d", ret);
             } else {
-                FI_HILOGE("SetThreadQos success");
+                FI_HILOGI("SetThreadQos success");
             }
         });
     }
@@ -147,7 +147,7 @@ void DragVSyncStation::SetQosForOtherThread(int32_t tid)
     if (ret != 0) {
         FI_HILOGE("Set mmi thread qos failed, ret:%{public}d", ret);
     } else {
-        FI_HILOGE("Set mmi thread qos success");
+        FI_HILOGI("Set mmi thread qos success");
     }
 }
 

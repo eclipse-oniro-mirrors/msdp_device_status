@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,8 +92,8 @@ private:
     void OnDeviceMgr(const epoll_event &ev);
     int32_t EnableSocketSessionMgr(int32_t nRetries);
     int32_t EnableDevMgr(int32_t nRetries);
-    void EnableDSoftbus();
-    void EnableDDM();
+    void EnableDSoftbus(int32_t nRetries);
+    void EnableDDM(int32_t nRetries);
 
 private:
     std::atomic<ServiceRunningState> state_ { ServiceRunningState::STATE_NOT_START };

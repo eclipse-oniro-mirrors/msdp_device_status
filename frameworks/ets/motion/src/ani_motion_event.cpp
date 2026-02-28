@@ -67,6 +67,24 @@ std::shared_ptr<AniMotionEvent> AniMotionEvent::GetInstance()
     return instance_;
 }
 
+AniMotionEvent::~AniMotionEvent()
+{
+#ifdef MOTION_ENABLE
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto &iter : events_) {
+        if (iter.second == nullptr) {
+            continue;
+        }
+        for (auto item : iter.second->onRefSets) {
+            taihe::get_env()->GlobalReference_Delete(item);
+        }
+        iter.second->onRefSets.clear();
+        iter.second = nullptr;
+    }
+#endif
+    events_.clear();
+}
+
 #ifdef MOTION_ENABLE
 bool AniMotionEvent::CheckEvents(int32_t eventType)
 {
@@ -182,6 +200,7 @@ bool AniMotionEvent::InsertRef(std::shared_ptr<MotionEventListener> listener, an
 bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
 {
     FI_HILOGD("Enter");
+    std::lock_guard<std::mutex> guard (mutex_);
     vm_ = vm;
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
@@ -202,7 +221,6 @@ bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
             taihe::get_env()->GlobalReference_Delete(onHandlerRef);
             return false;
         }
-        std::lock_guard<std::mutex> guard (mutex_);
         events_.insert(std::make_pair(eventType, listener));
         FI_HILOGD("Insert finish");
         return true;

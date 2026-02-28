@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -167,7 +167,7 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
     CHKPV(parent_.env_);
     if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Not allow cooperate");
-        NotAollowCooperateWhenMotionDragging result {
+        NotAllowCooperateWhenMotionDragging result {
             .pid = notice.pid,
             .userData = notice.userData,
             .networkId = notice.remoteNetworkId,
@@ -282,7 +282,7 @@ void CooperateFree::Initial::OnStartWithOptions(Context &context, const Cooperat
     context.eventMgr_.StartCooperateWithOptions(notice);
     if (parent_.env_->GetDragManager().GetDragState() == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Not allow cooperate");
-        NotAollowCooperateWhenMotionDragging result {
+        NotAllowCooperateWhenMotionDragging result {
             .pid = notice.pid,
             .userData = notice.userData,
             .networkId = notice.remoteNetworkId,
@@ -422,8 +422,12 @@ void CooperateFree::Initial::OnPointerEvent(Context &context, const CooperateEve
 void CooperateFree::Initial::OnUpdateCooperateFlag(Context &context, const CooperateEvent &event)
 {
     CALL_INFO_TRACE;
-    UpdateCooperateFlagEvent notice = std::get<UpdateCooperateFlagEvent>(event.event);
-    context.UpdateCooperateFlag(notice);
+    if (std::holds_alternative<UpdateCooperateFlagEvent>(event.event)) {
+        UpdateCooperateFlagEvent notice = std::get<UpdateCooperateFlagEvent>(event.event);
+        context.UpdateCooperateFlag(notice);
+    } else {
+        FI_HILOGE("event type is not UpdateCooperateFlagEvent");
+    }
 }
 } // namespace Cooperate
 } // namespace DeviceStatus

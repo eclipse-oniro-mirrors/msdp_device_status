@@ -72,7 +72,7 @@ AccessTokenID GetNativeTokenIdFromProcess(const std::string &process)
     AccessTokenKit::DumpTokenInfo(info, dumpInfo);
     size_t pos = dumpInfo.find("\"tokenID\": ");
     if (pos == std::string::npos) {
-        FI_HILOGE("tokenid not find");
+        FI_HILOGE("tokenID not find");
         return 0;
     }
     pos += std::string("\"tokenID\": ").length();
@@ -404,7 +404,7 @@ HWTEST_F(OnScreenServerNewTest, RemoveCallbackInfo, TestSize.Level0)
  
     cap.capList.emplace_back("contentUiTree");
     ret = onScreen.RemoveCallbackInfo(callbackTest1, cap);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
  
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ public:
     UniversalDragWrapper(IContext *env)  : env_(env) {}
     ~UniversalDragWrapper();
     bool InitUniversalDrag();
-    void RmoveUniversalDrag();
+    void RemoveUniversalDrag();
     void SetDragableState(bool state);
     void SetDragSwitchState(bool enable);
     void SetAppDragSwitchState(const std::string &pkgName, bool enable);
@@ -59,4 +59,4 @@ private:
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // I_DRAG_ANIMATION_H
+#endif // UNIVERSAL_DRAG_WRAPPER_H

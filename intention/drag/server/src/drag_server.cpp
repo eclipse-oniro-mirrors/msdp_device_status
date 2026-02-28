@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 #include "drag_server.h"
 
+#include "accesstoken_kit.h"
 #include "tokenid_kit.h"
 
-#include "accesstoken_kit.h"
 #include "devicestatus_define.h"
 
 #undef LOG_TAG
@@ -67,6 +67,14 @@ int32_t DragServer::EnableInternalDropAnimation(CallingContext &context, const s
     if (!IsSystemHAPCalling(context)) {
         FI_HILOGE("The caller is not system hap");
         return COMMON_NOT_SYSTEM_APP;
+    }
+    if (animationInfo.empty()) {
+        FI_HILOGE("The drag drop animation info is empty");
+        return COMMON_PARAMETER_ERROR;
+    }
+    if (animationInfo.length() > MAX_ANIMATION_INFO_LENGTH) {
+        FI_HILOGE("The drag drop animation info is too long, length:%{public}zu", animationInfo.length());
+        return COMMON_PARAMETER_ERROR;
     }
     CHKPR(env_, RET_ERR);
     return env_->GetDragManager().EnableInternalDropAnimation(animationInfo);

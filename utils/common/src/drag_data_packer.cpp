@@ -223,6 +223,10 @@ int32_t ShadowPacker::Marshalling(const std::vector<ShadowInfo> &shadowInfos, Pa
         return ERR_INVALID_VALUE;
     }
     int32_t shadowNum = static_cast<int32_t>(shadowInfos.size());
+    if (shadowNum < 0) {
+        FI_HILOGE("shadowNum overflow, size=%{public}zu", shadowInfos.size());
+        return ERR_INVALID_VALUE;
+    }
     if (shadowNum > SHADOW_NUM_LIMIT) {
         FI_HILOGW("Only %{public}d shadowInfos allowed at most, now %{public}d", SHADOW_NUM_LIMIT, shadowNum);
         shadowNum = SHADOW_NUM_LIMIT;
@@ -329,8 +333,7 @@ int32_t SummaryPacker::UnMarshalling(Parcel &parcel, SummaryMap &val)
     size_t readAbleSize = parcel.GetReadableBytes();
     int32_t size = 0;
     READINT32(parcel, size, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    if (size < 0 || (static_cast<size_t>(size) > readAbleSize) || static_cast<size_t>(size) > val.max_size() ||
-        size > MAX_BUF_SIZE) {
+    if (size < 0 || (static_cast<size_t>(size) > readAbleSize) || size > MAX_BUF_SIZE) {
         FI_HILOGE("Invalid size:%{public}d", size);
         return RET_ERR;
     }
