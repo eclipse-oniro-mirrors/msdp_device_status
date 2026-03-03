@@ -37,7 +37,8 @@ SocketSession::SocketSession(const std::string &programName, int32_t moduleType,
 
 SocketSession::~SocketSession()
 {
-    if ((fd_ >= 0) && (::close(fd_) != 0)) {
+    FI_HILOGI("pid:%{public}d close session", pid_);
+    if ((fd_ >= 0) && (fdsan_close_with_tag(fd_, DOMAIN_ID) != 0)) {
         FI_HILOGE("close(%{public}d) failed:%{public}s", fd_, ::strerror(errno));
     }
 }
