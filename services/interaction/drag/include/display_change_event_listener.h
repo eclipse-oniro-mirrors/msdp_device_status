@@ -26,7 +26,8 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 class DisplayChangeEventListener : public Rosen::DisplayManager::IDisplayListener,
-                                   public Rosen::DisplayManager::IDisplayAttributeListener {
+                                   public Rosen::DisplayManager::IDisplayAttributeListener,
+                                   public std::enable_shared_from_this<DisplayChangeEventListener> {
 public:
     explicit DisplayChangeEventListener(IContext *context);
     ~DisplayChangeEventListener() = default;

@@ -3317,6 +3317,7 @@ int32_t DragDrawing::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
     FI_HILOGD("enter");
     std::shared_ptr<Rosen::RSCanvasNode> pixelMapNode = g_drawingInfo.nodes[PIXEL_MAP_INDEX];
     CHKPR(pixelMapNode, RET_ERR);
+    std::weak_ptr<Rosen::RSCanvasNode> weakPixelMapNode = pixelMapNode;
     PreviewStyle originStyle;
     originStyle.types = previewStyle.types;
     if (auto color = pixelMapNode->GetShowingProperties().GetForegroundColor(); color.has_value()) {
@@ -3347,11 +3348,15 @@ int32_t DragDrawing::UpdatePreviewStyleWithAnimation(const PreviewStyle &preview
     protocol.SetDuration(animation.duration);
     auto curve = AnimationCurve::CreateCurve(animation.curveName, animation.curve);
     Rosen::RSNode::Animate(protocol, curve, [&]() {
-        if (ModifyPreviewStyle(pixelMapNode, previewStyle) != RET_OK) {
-            FI_HILOGE("ModifyPreviewStyle failed");
-        }
-        if (ModifyMultiPreviewStyle(std::vector<PreviewStyle>(multiSelectedNodesSize, previewStyle)) != RET_OK) {
-            FI_HILOGE("ModifyMultiPreviewStyle failed");
+        if (auto pixelMapNode = weakPixelMapNode.lock()) {
+            if (ModifyPreviewStyle(pixelMapNode, previewStyle) != RET_OK) {
+                FI_HILOGE("ModifyPreviewStyle failed");
+            }
+            if (ModifyMultiPreviewStyle(std::vector<PreviewStyle>(multiSelectedNodesSize, previewStyle)) != RET_OK) {
+                FI_HILOGE("ModifyMultiPreviewStyle failed");
+            }
+        } else {
+            FI_HILOGE("pixelMapNode has been destroyed");
         }
     },  []() { FI_HILOGD("UpdatePreviewStyleWithAnimation end"); });
     FI_HILOGD("leave");
