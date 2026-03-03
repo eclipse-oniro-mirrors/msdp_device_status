@@ -67,6 +67,7 @@ void JsEventTarget::EmitJsPrepare(sptr<JsUtil::CallbackInfo> cb, const std::stri
     napi_status status = napi_send_event(cb->env, task, napi_eprio_immediate);
     if (status != napi_status::napi_ok) {
         FI_HILOGE("Failed to SendEvent, error: %{public}d", status);
+        return;
     }
 }
 
@@ -180,8 +181,8 @@ void JsEventTarget::AddListener(napi_env env, const std::string &type, napi_valu
                     iter->second.pop_back();
                 }
             }
-            RELEASE_CALLBACKINFO(env, ref);
             UtilNapiError::HandleExecuteResult(env, errCode, "on", COOPERATE_PERMISSION);
+            RELEASE_CALLBACKINFO(env, ref);
         } else {
             isListeningProcess_ = true;
         }
@@ -264,8 +265,8 @@ void JsEventTarget::AddListener(napi_env env, const std::string &type, const std
                 iter->second.pop_back();
             }
         }
-        RELEASE_CALLBACKINFO(env, ref);
         UtilNapiError::HandleExecuteResult(env, errCode, "on", COOPERATE_PERMISSION);
+        RELEASE_CALLBACKINFO(env, ref);
     }
 }
 
@@ -707,6 +708,7 @@ void JsEventTarget::EmitCoordinationMessageEvent(sptr<JsUtil::CallbackInfo> cb)
             napi_status status = napi_open_handle_scope(item->env, &scope);
             if (status != napi_status::napi_ok) {
                 FI_HILOGE("Failed to open handle scope, error: %{public}d", status);
+                return;
             }
             napi_value deviceDescriptor = nullptr;
             CHKRV_SCOPE(item->env, napi_create_string_utf8(item->env, event.networkId.c_str(),

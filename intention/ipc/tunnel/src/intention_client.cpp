@@ -66,7 +66,8 @@ ErrCode IntentionClient::Connect()
     sptr<ISystemAbilityManager> sa = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     CHKPR(sa, E_DEVICESTATUS_GET_SYSTEM_ABILITY_MANAGER_FAILED);
 
-    sptr<IRemoteObject> remoteObject = sa->CheckSystemAbility(MSDP_DEVICESTATUS_SERVICE_ID);
+    bool isExist = false;
+    sptr<IRemoteObject> remoteObject = sa->CheckSystemAbility(MSDP_DEVICESTATUS_SERVICE_ID, isExist);
     CHKPR(remoteObject, E_DEVICESTATUS_GET_SERVICE_FAILED);
 
     deathRecipient_ = sptr<DeathRecipient>::MakeSptr(shared_from_this());

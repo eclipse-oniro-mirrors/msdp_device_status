@@ -51,88 +51,15 @@ constexpr bool HAS_CANCELED_ANIMATION { true };
 const std::string UD_KEY { "Unified data key" };
 const std::string FILTER_INFO { "Undefined filter info" };
 const std::string EXTRA_INFO { "Undefined extra info" };
-ContextService *g_instance = nullptr;
-DelegateTasks g_delegateTasks;
-DeviceManager g_devMgr;
-TimerManager g_timerMgr;
 DragManager g_dragMgr;
-SocketSessionManager g_socketSessionMgr;
-std::unique_ptr<IInputAdapter> g_input { nullptr };
-std::unique_ptr<IPluginManager> g_pluginMgr { nullptr };
-std::unique_ptr<IDSoftbusAdapter> g_dsoftbus { nullptr };
 IContext *g_context { nullptr };
 } // namespace
-
-ContextService::ContextService()
-{
-    ddm_ = std::make_unique<DDMAdapter>();
-}
-
-ContextService::~ContextService()
-{
-}
-
-IDelegateTasks& ContextService::GetDelegateTasks()
-{
-    return g_delegateTasks;
-}
-
-IDeviceManager& ContextService::GetDeviceManager()
-{
-    return g_devMgr;
-}
-
-ITimerManager& ContextService::GetTimerManager()
-{
-    return g_timerMgr;
-}
-
-IDragManager& ContextService::GetDragManager()
-{
-    return g_dragMgr;
-}
-
-ContextService* ContextService::GetInstance()
-{
-    static std::once_flag flag;
-    std::call_once(flag, [&]() {
-        ContextService *cooContext = new (std::nothrow) ContextService();
-        CHKPL(cooContext);
-        g_instance = cooContext;
-    });
-    return g_instance;
-}
-
-ISocketSessionManager& ContextService::GetSocketSessionManager()
-{
-    return g_socketSessionMgr;
-}
-
-IDDMAdapter& ContextService::GetDDM()
-{
-    return *ddm_;
-}
-
-IPluginManager& ContextService::GetPluginManager()
-{
-    return *g_pluginMgr;
-}
-
-IInputAdapter& ContextService::GetInput()
-{
-    return *g_input;
-}
-
-IDSoftbusAdapter& ContextService::GetDSoftbus()
-{
-    return *g_dsoftbus;
-}
 
 void DragDrawingTest::SetUpTestCase() {}
 
 void DragDrawingTest::SetUp()
 {
-    g_context = ContextService::GetInstance();
+    g_context = TestContext::GetInstance();
     g_dragMgr.Init(g_context);
 }
 

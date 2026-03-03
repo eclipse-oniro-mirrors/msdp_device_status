@@ -52,6 +52,11 @@ struct TimerInfo {
     int32_t timerId { 0 };
 };
 
+struct device_status_epoll_event {
+    int32_t fd { -1 };
+    EpollEventType event_type { EPOLL_EVENT_BEGIN };
+};
+
 enum class ServiceRunningState {STATE_NOT_START, STATE_RUNNING, STATE_EXIT};
 class ContextService final : public IContext {
     ContextService();
@@ -97,6 +102,7 @@ private:
     std::unique_ptr<IInputAdapter> input_;
     std::unique_ptr<IPluginManager> pluginMgr_;
     std::unique_ptr<IDSoftbusAdapter> dsoftbusAda_;
+    std::map<int32_t, device_status_epoll_event*> eventMap_;
 };
 
 class TimerManagerTest : public testing::Test {

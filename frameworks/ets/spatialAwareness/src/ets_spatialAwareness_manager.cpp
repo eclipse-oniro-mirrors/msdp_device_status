@@ -33,9 +33,11 @@ constexpr int32_t REPORT_MODE_MIN_VALUE { 0 };
 constexpr int32_t REPORT_MODE_MAX_VALUE { 1 };
 constexpr int32_t REPORT_FREQUENCY_MIN_VALUE { 0 };
 constexpr int32_t REPORT_FREQUENCY_MAX_VALUE { 999999 };
+constexpr int32_t PERMISSION_EXCEPTION { 201 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
 constexpr int32_t SERVICE_EXCEPTION { 35100001 };
 constexpr int32_t PARAMETER_EXCEPTION { 35100004 };
+constexpr int32_t E_NO_PERMISSION { 60882961 };
 const std::vector<std::string> EXPECTED_ON_ARG_TYPES_R1 = {"string", "object", "function"};
 const std::vector<std::string> EXPECTED_ON_ARG_TYPES_R2 = {"string", "object"};
 const std::vector<std::string> EXPECTED_STATIC_ARG_TYPES_R1 = {"object", "function"};
@@ -210,8 +212,8 @@ void EtsSpatialAwarenessManager::Subscribe(DistanceMeasurementConfigParams const
 
     InitDependencyLibrary();
     if (!SubscribeDistanceMeasurement(distMeasureDataSet)) {
+        FI_HILOGE("Call subscribeDistanceMeasurement failed.");
         RemoveFailCallback(env, distMeasureDataSet, opq, jsCbMap_);
-        taihe::set_business_error(SERVICE_EXCEPTION, "Call subscribeDistanceMeasurement failed.");
         return;
     }
     FI_HILOGI("Exit");
@@ -248,7 +250,7 @@ void EtsSpatialAwarenessManager::Unsubscribe(DistanceMeasurementConfigParams con
 
     InitDependencyLibrary();
     if (!UnsubscribeDistanceMeasurement(distMeasureDataSet)) {
-        taihe::set_business_error(SERVICE_EXCEPTION, "Call unsubscribeDistanceMeasurement failed.");
+        FI_HILOGE("Call unsubscribeDistanceMeasurement failed.");
         return;
     }
     FI_HILOGI("Exit");
@@ -387,19 +389,25 @@ bool EtsSpatialAwarenessManager::SubscribeDistanceMeasurement(const CDistMeasure
         FI_HILOGI("subscribeDistanceMeasurementFunc create end");
         if (subscribeDistanceMeasurementFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s", SUBSCRIBE_FUNC_NAME.data(), dlerror());
+            taihe::set_business_error(SERVICE_EXCEPTION, "Service exception.");
             return false;
         }
     }
 
     FI_HILOGI("subscribeDistanceMeasurementFunc call start");
     int32_t ret = subscribeDistanceMeasurementFunc(shared_from_this(), cdistMeasureData);
-    if (ret != 0) {
-        FI_HILOGE("Subscribe distance measurement callback failed");
-        return false;
+    if (ret == 0) {
+        FI_HILOGI("Subscribe distance measurement callback success.");
+        return true;
     }
-    FI_HILOGI("Subscribe distance measurement callback success.");
-    FI_HILOGI("Exit");
-    return true;
+
+    FI_HILOGE("Subscribe distance measurement callback failed");
+    if (ret == E_NO_PERMISSION) {
+        taihe::set_business_error(PERMISSION_EXCEPTION, "Permission denied.");
+    } else {
+        taihe::set_business_error(SERVICE_EXCEPTION, "Service exception.");
+    }
+    return false;
 }
 
 bool EtsSpatialAwarenessManager::UnsubscribeDistanceMeasurement(const CDistMeasureData &cdistMeasureData)
@@ -412,19 +420,25 @@ bool EtsSpatialAwarenessManager::UnsubscribeDistanceMeasurement(const CDistMeasu
         FI_HILOGI("unsubscribeDistanceMeasurementFunc create end");
         if (unsubscribeDistanceMeasurementFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
+            taihe::set_business_error(SERVICE_EXCEPTION, "Service exception.");
             return false;
         }
     }
 
     FI_HILOGI("unsubscribeDistanceMeasurementFunc call start");
     int32_t ret = unsubscribeDistanceMeasurementFunc(cdistMeasureData);
-    if (ret != 0) {
-        FI_HILOGE("Unsubscribe distance measurement callback failed");
-        return false;
+    if (ret == 0) {
+        FI_HILOGI("Unsubscribe distance measurement callback success.");
+        return true;
     }
-    FI_HILOGI("Unsubscribe distance measurement callback success.");
-    FI_HILOGI("Exit");
-    return true;
+
+    FI_HILOGE("Unsubscribe distance measurement callback failed");
+    if (ret == E_NO_PERMISSION) {
+        taihe::set_business_error(PERMISSION_EXCEPTION, "Permission denied.");
+    } else {
+        taihe::set_business_error(SERVICE_EXCEPTION, "Service exception.");
+    }
+    return false;
 }
 
 void EtsSpatialAwarenessManager::RemoveFailCallback(ani_env *env, const CDistMeasureData &distMeasureDataSet,

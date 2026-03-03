@@ -48,86 +48,12 @@ constexpr int32_t HOTAREA_50 { 50 };
 std::shared_ptr<Context> g_context { nullptr };
 std::shared_ptr<Context> g_contextOne { nullptr };
 std::shared_ptr<HotplugObserver> g_observer { nullptr };
-ContextService *g_instance = nullptr;
 IContext *g_icontext { nullptr };
 std::shared_ptr<SocketSession> g_session { nullptr };
-DelegateTasks g_delegateTasks;
-DeviceManager g_devMgr;
-TimerManager g_timerMgr;
-DragManager g_dragMgr;
-SocketSessionManager g_socketSessionMgr;
-std::unique_ptr<IDDMAdapter> g_ddm { nullptr };
-std::unique_ptr<IInputAdapter> g_input { nullptr };
-std::unique_ptr<IPluginManager> g_pluginMgr { nullptr };
-std::unique_ptr<IDSoftbusAdapter> g_dsoftbus { nullptr };
 std::shared_ptr<Cooperate::StateMachine> g_stateMachine { nullptr };
 const std::string LOCAL_NETWORKID { "testLocalNetworkId" };
 const std::string REMOTE_NETWORKID { "testRemoteNetworkId" };
 } // namespace
-
-ContextService::ContextService()
-{
-}
-
-ContextService::~ContextService()
-{
-}
-
-IDelegateTasks& ContextService::GetDelegateTasks()
-{
-    return g_delegateTasks;
-}
-
-IDeviceManager& ContextService::GetDeviceManager()
-{
-    return g_devMgr;
-}
-
-ITimerManager& ContextService::GetTimerManager()
-{
-    return g_timerMgr;
-}
-
-IDragManager& ContextService::GetDragManager()
-{
-    return g_dragMgr;
-}
-
-ContextService* ContextService::GetInstance()
-{
-    static std::once_flag flag;
-    std::call_once(flag, [&]() {
-        ContextService *cooContext = new (std::nothrow) ContextService();
-        CHKPL(cooContext);
-        g_instance = cooContext;
-    });
-    return g_instance;
-}
-
-ISocketSessionManager& ContextService::GetSocketSessionManager()
-{
-    return g_socketSessionMgr;
-}
-
-IDDMAdapter& ContextService::GetDDM()
-{
-    return *g_ddm;
-}
-
-IPluginManager& ContextService::GetPluginManager()
-{
-    return *g_pluginMgr;
-}
-
-IInputAdapter& ContextService::GetInput()
-{
-    return *g_input;
-}
-
-IDSoftbusAdapter& ContextService::GetDSoftbus()
-{
-    return *g_dsoftbus;
-}
 
 MMI::PointerEvent::PointerItem HotAreaTest::CreatePointerItem(int32_t pointerId, int32_t deviceId,
     const std::pair<int32_t, int32_t> &displayLocation, bool isPressed)
@@ -148,7 +74,8 @@ void HotAreaTest::NotifyCooperate()
         MessageId::COORDINATION_MESSAGE, 1, true, errCode};
     g_contextOne->eventMgr_.NotifyCooperateState(cooperateStateNotice);
     g_context->eventMgr_.NotifyCooperateState(cooperateStateNotice);
-    g_socketSessionMgr.AddSession(g_session);
+    auto env = TestContext::GetInstance();
+    env->socketSessionMgr_.AddSession(g_session);
     g_context->eventMgr_.NotifyCooperateState(cooperateStateNotice);
     g_context->eventMgr_.GetCooperateState(cooperateStateNotice);
 }
@@ -184,11 +111,8 @@ void HotAreaTest::SetUpTestCase() {}
 
 void HotAreaTest::SetUp()
 {
-    g_ddm = std::make_unique<DDMAdapter>();
-    g_input = std::make_unique<InputAdapter>();
-    g_dsoftbus = std::make_unique<DSoftbusAdapter>();
     g_contextOne = std::make_shared<Context>(g_icontext);
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     g_context = std::make_shared<Context>(env);
     int32_t moduleType = 1;
     int32_t tokenType = 1;
@@ -208,7 +132,7 @@ void HotAreaTest::TearDown()
 
 void HotAreaTest::OnThreeStates(const CooperateEvent &event)
 {
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
     g_stateMachine->current_ = CooperateState::COOPERATE_STATE_OUT;
@@ -251,13 +175,14 @@ public:
 HWTEST_F(HotAreaTest, HotAreaTest001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    g_socketSessionMgr.Enable();
+    auto env = TestContext::GetInstance();
+    env->socketSessionMgr_.Enable();
     RegisterHotareaListenerEvent registerHotareaListenerEvent{IPCSkeleton::GetCallingPid(), 1};
     g_context->hotArea_.AddListener(registerHotareaListenerEvent);
     g_context->hotArea_.OnHotAreaMessage(HotAreaType::AREA_LEFT, true);
     g_contextOne->hotArea_.AddListener(registerHotareaListenerEvent);
     g_contextOne->hotArea_.OnHotAreaMessage(HotAreaType::AREA_LEFT, true);
-    g_socketSessionMgr.sessions_.clear();
+    env->socketSessionMgr_.sessions_.clear();
     g_context->hotArea_.OnHotAreaMessage(HotAreaType::AREA_LEFT, true);
     g_context->hotArea_.RemoveListener(registerHotareaListenerEvent);
     EnableCooperateEvent enableCooperateEvent{1, 1, 1};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,86 +48,12 @@ constexpr int32_t VREMOTE_NETWORKID { 987654321 };
 std::shared_ptr<Context> g_context { nullptr };
 std::shared_ptr<Context> g_contextOne { nullptr };
 std::shared_ptr<HotplugObserver> g_observer { nullptr };
-ContextService *g_instance = nullptr;
 IContext *g_icontext { nullptr };
 std::shared_ptr<SocketSession> g_session { nullptr };
-DelegateTasks g_delegateTasks;
-DeviceManager g_devMgr;
-TimerManager g_timerMgr;
-DragManager g_dragMgr;
-SocketSessionManager g_socketSessionMgr;
-std::unique_ptr<IDDMAdapter> g_ddm { nullptr };
-std::unique_ptr<IInputAdapter> g_input { nullptr };
-std::unique_ptr<IPluginManager> g_pluginMgr { nullptr };
-std::unique_ptr<IDSoftbusAdapter> g_dsoftbus { nullptr };
 std::shared_ptr<Cooperate::StateMachine> g_stateMachine { nullptr };
 const std::string LOCAL_NETWORKID { "testLocalNetworkId" };
 const std::string REMOTE_NETWORKID { "testRemoteNetworkId" };
 } // namespace
-
-ContextService::ContextService()
-{
-}
-
-ContextService::~ContextService()
-{
-}
-
-IDelegateTasks& ContextService::GetDelegateTasks()
-{
-    return g_delegateTasks;
-}
-
-IDeviceManager& ContextService::GetDeviceManager()
-{
-    return g_devMgr;
-}
-
-ITimerManager& ContextService::GetTimerManager()
-{
-    return g_timerMgr;
-}
-
-IDragManager& ContextService::GetDragManager()
-{
-    return g_dragMgr;
-}
-
-ContextService* ContextService::GetInstance()
-{
-    static std::once_flag flag;
-    std::call_once(flag, [&]() {
-        ContextService *cooContext = new (std::nothrow) ContextService();
-        CHKPL(cooContext);
-        g_instance = cooContext;
-    });
-    return g_instance;
-}
-
-ISocketSessionManager& ContextService::GetSocketSessionManager()
-{
-    return g_socketSessionMgr;
-}
-
-IDDMAdapter& ContextService::GetDDM()
-{
-    return *g_ddm;
-}
-
-IPluginManager& ContextService::GetPluginManager()
-{
-    return *g_pluginMgr;
-}
-
-IInputAdapter& ContextService::GetInput()
-{
-    return *g_input;
-}
-
-IDSoftbusAdapter& ContextService::GetDSoftbus()
-{
-    return *g_dsoftbus;
-}
 
 void CooperateInTest::NotifyCooperate()
 {
@@ -136,7 +62,8 @@ void CooperateInTest::NotifyCooperate()
         MessageId::COORDINATION_MESSAGE, 1, true, errCode};
     g_contextOne->eventMgr_.NotifyCooperateState(cooperateStateNotice);
     g_context->eventMgr_.NotifyCooperateState(cooperateStateNotice);
-    g_socketSessionMgr.AddSession(g_session);
+    auto env = TestContext::GetInstance();
+    env->socketSessionMgr_.AddSession(g_session);
     g_context->eventMgr_.NotifyCooperateState(cooperateStateNotice);
     g_context->eventMgr_.GetCooperateState(cooperateStateNotice);
 }
@@ -176,7 +103,7 @@ void CooperateInTest::SetUp()
     g_input = std::make_unique<InputAdapter>();
     g_dsoftbus = std::make_unique<DSoftbusAdapter>();
     g_contextOne = std::make_shared<Context>(g_icontext);
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     g_context = std::make_shared<Context>(env);
     int32_t moduleType = 1;
     int32_t tokenType = 1;
@@ -196,7 +123,7 @@ void CooperateInTest::TearDown()
 
 void CooperateInTest::OnThreeStates(const CooperateEvent &event)
 {
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
     g_stateMachine->current_ = CooperateState::COOPERATE_STATE_OUT;
@@ -240,7 +167,7 @@ HWTEST_F(CooperateInTest, CooperateInTest001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CooperateEvent event;
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -267,7 +194,7 @@ HWTEST_F(CooperateInTest, CooperateInTest002, TestSize.Level1)
         DDMBoardOfflineEvent {
             .networkId = REMOTE_NETWORKID
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -294,7 +221,7 @@ HWTEST_F(CooperateInTest, CooperateInTest003, TestSize.Level1)
         DDMBoardOfflineEvent {
             .networkId = REMOTE_NETWORKID
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -326,7 +253,7 @@ HWTEST_F(CooperateInTest, CooperateInTest004, TestSize.Level1)
             .startDeviceId = 1,
             .errCode = std::make_shared<std::promise<int32_t>>(),
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -359,7 +286,7 @@ HWTEST_F(CooperateInTest, CooperateInTest005, TestSize.Level1)
             .startDeviceId = 1,
             .errCode = std::make_shared<std::promise<int32_t>>(),
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -389,7 +316,7 @@ HWTEST_F(CooperateInTest, CooperateInTest006, TestSize.Level1)
             .networkId = REMOTE_NETWORKID,
             .normal = true,
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -419,7 +346,7 @@ HWTEST_F(CooperateInTest, CooperateInTest006, TestSize.Level1)
 HWTEST_F(CooperateInTest, CooperateInTest007, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -462,7 +389,7 @@ HWTEST_F(CooperateInTest, CooperateInTest008, TestSize.Level1)
             .pid = pid,
             .userData = userData,
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -493,7 +420,7 @@ HWTEST_F(CooperateInTest, CooperateInTest009, TestSize.Level1)
             .userData = userData,
             .isUnchained = isUnchained,
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -520,7 +447,7 @@ HWTEST_F(CooperateInTest, CooperateInTest010, TestSize.Level1)
         DSoftbusStartCooperate {
             .networkId = localNetworkId
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -551,7 +478,7 @@ HWTEST_F(CooperateInTest, CooperateInTest010, TestSize.Level1)
 HWTEST_F(CooperateInTest, CooperateInTest011, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -593,7 +520,7 @@ HWTEST_F(CooperateInTest, CooperateInTest011, TestSize.Level1)
 HWTEST_F(CooperateInTest, CooperateInTest012, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -640,7 +567,7 @@ HWTEST_F(CooperateInTest, CooperateInTest013, TestSize.Level1)
         DDMBoardOnlineEvent {
             .networkId = LOCAL_NETWORKID
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -677,7 +604,7 @@ HWTEST_F(CooperateInTest, CooperateInTest014, TestSize.Level1)
         DSoftbusSessionClosed {
             .networkId = LOCAL_NETWORKID
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
@@ -715,7 +642,7 @@ HWTEST_F(CooperateInTest, CooperateInTest015, TestSize.Level1)
         DSoftbusSyncInputDevice {
             .networkId = LOCAL_NETWORKID,
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
@@ -739,7 +666,7 @@ HWTEST_F(CooperateInTest, CooperateInTest015, TestSize.Level1)
 HWTEST_F(CooperateInTest, CooperateInTest016, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -777,7 +704,7 @@ HWTEST_F(CooperateInTest, CooperateInTest016, TestSize.Level1)
 HWTEST_F(CooperateInTest, CooperateInTest017, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -816,7 +743,7 @@ HWTEST_F(CooperateInTest, CooperateInTest017, TestSize.Level1)
 HWTEST_F(CooperateInTest, CooperateInTest018, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -861,7 +788,7 @@ HWTEST_F(CooperateInTest, CooperateInTest019, TestSize.Level1)
             .mask = 10,
             .flag = 1,
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
@@ -890,7 +817,7 @@ HWTEST_F(CooperateInTest, CooperateInTest020, TestSize.Level1)
         DDMBoardOfflineEvent {
             .networkId = REMOTE_NETWORKID
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     Cooperate::CooperateIn stateIn(*g_stateMachine, env);
@@ -920,7 +847,7 @@ HWTEST_F(CooperateInTest, CooperateInTest021, TestSize.Level1)
             .type = InputHotplugType::PLUG,
             .device = std::make_shared<Device>(VREMOTE_NETWORKID),
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     cooperateContext.remoteNetworkId_ = LOCAL_NETWORKID;
@@ -947,7 +874,7 @@ HWTEST_F(CooperateInTest, CooperateInTest022, TestSize.Level1)
         DSoftbusStartCooperate {
             .networkId = LOCAL_NETWORKID
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -983,7 +910,7 @@ HWTEST_F(CooperateInTest, CooperateInTest023, TestSize.Level1)
         StartCooperateEvent{
         .errCode = std::make_shared<std::promise<int32_t>>(),
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1010,7 +937,7 @@ HWTEST_F(CooperateInTest, CooperateInTest024, TestSize.Level1)
         DDMBoardOfflineEvent {
             .networkId = REMOTE_NETWORKID
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1045,7 +972,7 @@ HWTEST_F(CooperateInTest, CooperateInTest025, TestSize.Level0)
         .displayId = 0,
         .errCode = std::make_shared<std::promise<int32_t>>(),
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     cooperateContext.remoteNetworkId_ = REMOTE_NETWORKID;
@@ -1074,7 +1001,7 @@ HWTEST_F(CooperateInTest, CooperateInTest026, TestSize.Level0)
         StartWithOptionsEvent{
         .errCode = std::make_shared<std::promise<int32_t>>(),
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1096,7 +1023,7 @@ HWTEST_F(CooperateInTest, CooperateInTest027, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1127,7 +1054,7 @@ HWTEST_F(CooperateInTest, CooperateInTest028, TestSize.Level1)
         StartWithOptionsEvent{
             .remoteNetworkId = "test",
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1153,7 +1080,7 @@ HWTEST_F(CooperateInTest, CooperateInTest029, TestSize.Level1)
         StartWithOptionsEvent{
             .remoteNetworkId = "test",
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1179,7 +1106,7 @@ HWTEST_F(CooperateInTest, CooperateInTest030, TestSize.Level1)
         DSoftbusCooperateOptions{
             .networkId = "test",
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     StartCooperateEvent startEvent {IPCSkeleton::GetCallingPid(), 1, "testtrue", 1,
@@ -1209,7 +1136,7 @@ HWTEST_F(CooperateInTest, CooperateInTest031, TestSize.Level1)
         StartWithOptionsEvent{
             .errCode = std::make_shared<std::promise<int32_t>>(),
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1235,7 +1162,7 @@ HWTEST_F(CooperateInTest, CooperateInTest032, TestSize.Level1)
         DSoftbusCooperateOptions{
             .networkId = "test",
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     StartCooperateEvent startEvent {IPCSkeleton::GetCallingPid(), 1, "test", 1,
@@ -1266,7 +1193,7 @@ HWTEST_F(CooperateInTest, CooperateInTest033, TestSize.Level1)
             .networkId = "test",
             .normal = true,
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     StartCooperateEvent startEvent {IPCSkeleton::GetCallingPid(), 1, "testtrue", 1,
@@ -1297,7 +1224,7 @@ HWTEST_F(CooperateInTest, CooperateInTest034, TestSize.Level1)
             .networkId = "test",
             .normal = true,
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     StartCooperateEvent startEvent {IPCSkeleton::GetCallingPid(), 1, "test", 1,
@@ -1328,7 +1255,7 @@ HWTEST_F(CooperateInTest, CooperateInTest035, TestSize.Level1)
             .networkId = "test",
             .normal = false,
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     StartCooperateEvent startEvent {IPCSkeleton::GetCallingPid(), 1, "test", 1,
@@ -1358,7 +1285,7 @@ HWTEST_F(CooperateInTest, CooperateInTest036, TestSize.Level1)
         StartWithOptionsEvent{
             .errCode = std::make_shared<std::promise<int32_t>>(),
     });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1379,7 +1306,7 @@ HWTEST_F(CooperateInTest, CooperateInTest036, TestSize.Level1)
 HWTEST_F(CooperateInTest, CooperateInTest037, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1416,7 +1343,7 @@ HWTEST_F(CooperateInTest, CooperateInTest038, TestSize.Level1)
             .errCode = std::make_shared<std::promise<int32_t>>(),
             .uid = 20020135,
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1450,7 +1377,7 @@ HWTEST_F(CooperateInTest, CooperateInTest039, TestSize.Level1)
             .errCode = std::make_shared<std::promise<int32_t>>(),
             .uid = 20020135,
         });
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1474,7 +1401,7 @@ HWTEST_F(CooperateInTest, CooperateInTest039, TestSize.Level1)
 HWTEST_F(CooperateInTest, CooperateInTest040, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = TestContext::GetInstance();
     ASSERT_NE(env, nullptr);
     Context cooperateContext(env);
     g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
@@ -1500,6 +1427,97 @@ HWTEST_F(CooperateInTest, CooperateInTest040, TestSize.Level1)
     bool ret = g_context->mouseLocation_.HasLocalListener();
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: CooperateInTest041
+ * @tc.desc: Test CooperateIn constructor and initial_ initialization
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateInTest, CooperateInTest041, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateIn stateIn(*g_stateMachine, env);
+    ASSERT_NE(stateIn.initial_, nullptr);
+}
+
+/**
+ * @tc.name: CooperateInTest042
+ * @tc.desc: Test OnEvent with DISABLE event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateInTest, CooperateInTest042, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DISABLE,
+        DisableCooperateEvent {
+            .pid = IPCSkeleton::GetCallingPid(),
+            .userData = 1,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateIn stateIn(*g_stateMachine, env);
+    ASSERT_NE(stateIn.initial_, nullptr);
+    stateIn.OnEvent(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateInTest043
+ * @tc.desc: Test RelayConfirmation OnResetWithOptionsNotifyMessage
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateInTest, CooperateInTest043, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::DSOFTBUS_START_COOPERATE,
+        DSoftbusStartCooperate {
+            .networkId = REMOTE_NETWORKID,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateIn stateIn(*g_stateMachine, env);
+    auto relay = std::make_shared<Cooperate::CooperateIn::RelayConfirmation>(stateIn, stateIn.initial_);
+    ASSERT_NE(relay, nullptr);
+    relay->OnResetWithOptionsNotifyMessage(cooperateContext, event);
+}
+
+/**
+ * @tc.name: CooperateInTest044
+ * @tc.desc: Test RelayConfirmation OnResponseWithOptions
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CooperateInTest, CooperateInTest044, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CooperateEvent event(
+        CooperateEventType::START,
+        StartCooperateEvent {
+            .pid = IPCSkeleton::GetCallingPid(),
+            .userData = 1,
+            .remoteNetworkId = REMOTE_NETWORKID,
+            .startDeviceId = 1,
+        });
+    auto env = ContextService::GetInstance();
+    ASSERT_NE(env, nullptr);
+    Context cooperateContext(env);
+    g_stateMachine = std::make_shared<Cooperate::StateMachine>(env);
+    Cooperate::CooperateIn stateIn(*g_stateMachine, env);
+    auto relay = std::make_shared<Cooperate::CooperateIn::RelayConfirmation>(stateIn, stateIn.initial_);
+    ASSERT_NE(relay, nullptr);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

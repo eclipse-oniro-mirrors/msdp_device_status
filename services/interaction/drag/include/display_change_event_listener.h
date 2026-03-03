@@ -25,13 +25,15 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-class DisplayChangeEventListener : public Rosen::DisplayManager::IDisplayListener {
+class DisplayChangeEventListener : public Rosen::DisplayManager::IDisplayListener,
+                                   public Rosen::DisplayManager::IDisplayAttributeListener {
 public:
     explicit DisplayChangeEventListener(IContext *context);
     ~DisplayChangeEventListener() = default;
     void OnCreate(Rosen::DisplayId displayId) override;
     void OnDestroy(Rosen::DisplayId displayId) override;
     void OnChange(Rosen::DisplayId displayId) override;
+    void OnAttributeChange(Rosen::DisplayId displayId, const std::vector<std::string>& attributes) override;
     void GetAllScreenAngles();
     bool IsRotateDragScreen();
     bool IsFoldPC() const { return isFoldPC_.load(); }
@@ -45,6 +47,7 @@ private:
     sptr<Rosen::DisplayInfo> GetDisplayInfoById(Rosen::DisplayId displayId);
     sptr<Rosen::DisplayInfo> GetDisplayInfo(Rosen::DisplayId displayId);
     void HandleScreenRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation);
+    void ProcessDisplayEvent(Rosen::DisplayId displayId);
 
 private:
     IContext *context_ { nullptr };

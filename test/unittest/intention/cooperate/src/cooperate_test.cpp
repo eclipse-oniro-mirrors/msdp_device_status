@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,83 +30,14 @@ using namespace Cooperate;
 namespace {
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 
-DelegateTasks g_delegateTasks;
-DeviceManager g_devMgr;
-TimerManager g_timerMgr;
-DragManager g_dragMgr;
-ContextService *g_instance = nullptr;
-SocketSessionManager g_socketSessionMgr;
-std::unique_ptr<IDDMAdapter> g_ddm;
-std::unique_ptr<IInputAdapter> g_input;
-std::unique_ptr<IPluginManager> g_pluginMgr;
-std::unique_ptr<IDSoftbusAdapter> g_dsoftbus;
-ICooperate* g_cooperate { nullptr };
+std::shared_ptr<Context> g_context { nullptr };
+std::shared_ptr<Context> g_contextOne { nullptr };
+std::shared_ptr<HotplugObserver> g_observer { nullptr };
+std::shared_ptr<SocketSession> g_session { nullptr };
+std::shared_ptr<StateMachine> g_stateMachine { nullptr };
 Channel<CooperateEvent>::Sender g_sender;
+ICooperate* g_cooperate { nullptr };
 } // namespace
-
-ContextService::ContextService()
-{
-}
-
-ContextService::~ContextService()
-{
-}
-
-IDelegateTasks& ContextService::GetDelegateTasks()
-{
-    return g_delegateTasks;
-}
-
-IDeviceManager& ContextService::GetDeviceManager()
-{
-    return g_devMgr;
-}
-
-ITimerManager& ContextService::GetTimerManager()
-{
-    return g_timerMgr;
-}
-
-IDragManager& ContextService::GetDragManager()
-{
-    return g_dragMgr;
-}
-
-ContextService* ContextService::GetInstance()
-{
-    static std::once_flag flag;
-    std::call_once(flag, [&]() {
-        ContextService *cooContext = new (std::nothrow) ContextService();
-        CHKPL(cooContext);
-        g_instance = cooContext;
-    });
-    return g_instance;
-}
-
-ISocketSessionManager& ContextService::GetSocketSessionManager()
-{
-    return g_socketSessionMgr;
-}
-
-IDDMAdapter& ContextService::GetDDM()
-{
-    return *g_ddm;
-}
-
-IPluginManager& ContextService::GetPluginManager()
-{
-    return *g_pluginMgr;
-}
-
-IInputAdapter& ContextService::GetInput()
-{
-    return *g_input;
-}
-
-IDSoftbusAdapter& ContextService::GetDSoftbus()
-{
-    return *g_dsoftbus;
-}
 
 class CooperateObserver final : public ICooperateObserver {
 public:
@@ -132,11 +63,7 @@ void CooperateTest::SetUpTestCase() {}
 
 void CooperateTest::SetUp()
 {
-    g_ddm = std::make_unique<DDMAdapter>();
-    g_input = std::make_unique<InputAdapter>();
-    g_dsoftbus = std::make_unique<DSoftbusAdapter>();
-    auto env = ContextService::GetInstance();
-    g_pluginMgr = std::make_unique<MockPluginManager>(env);
+    auto env = TestContext::GetInstance();
     g_cooperate = env->GetPluginManager().LoadCooperate();
 }
 
@@ -150,32 +77,9 @@ void CooperateTest::TearDownTestCase()
         GTEST_LOG_(INFO) << "g_cooperate is nullptr";
         return;
     }
-    ContextService::GetInstance()->GetPluginManager().UnloadCooperate();
+    TestContext::GetInstance()->GetPluginManager().UnloadCooperate();
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
-
-MockPluginManager::MockPluginManager(IContext *context)
-{
-    pluginMgr_ = std::make_unique<PluginManager>(context);
-}
- 
-ICooperate* MockPluginManager::LoadCooperate()
-{
-    return pluginMgr_->LoadCooperate();
-}
- 
-void MockPluginManager::UnloadCooperate()
-{
-    pluginMgr_->UnloadCooperate();
-}
- 
-IMotionDrag* MockPluginManager::LoadMotionDrag()
-{
-    return nullptr;
-}
- 
-void MockPluginManager::UnloadMotionDrag()
-{}
 
 /**
  * @tc.name: CooperateTest1

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace {
 constexpr int32_t MAX_EPOLL_EVENTS { 64 };
+constexpr uint64_t DOMAIN_ID { 0xD002220 };
 } // namespace
 
 SocketSessionManager::~SocketSessionManager()
@@ -97,6 +98,8 @@ int32_t SocketSessionManager::AllocSocketFd(const std::string& programName, int3
         FI_HILOGE("Call socketpair failed, errno:%{public}s", ::strerror(errno));
         return RET_ERR;
     }
+    fdsan_exchange_owner_tag(sockFds[0], 0, DOMAIN_ID);
+    fdsan_exchange_owner_tag(sockFds[1], 0, DOMAIN_ID);
     static constexpr size_t BUFFER_SIZE { 32 * 1024 };
     static constexpr size_t NATIVE_BUFFER_SIZE { 64 * 1024 };
     std::shared_ptr<SocketSession> session { nullptr };
@@ -111,10 +114,10 @@ int32_t SocketSessionManager::AllocSocketFd(const std::string& programName, int3
     session = std::make_shared<SocketSession>(programName, moduleType, tokenType, sockFds[0], uid, pid);
     if (!AddSession(session)) {
         FI_HILOGE("AddSession failed, errCode:%{public}d", ADD_SESSION_FAIL);
-        if (sockFds[0] > 0 && ::close(sockFds[0]) != 0) {
+        if (sockFds[0] > 0 && fdsan_close_with_tag(sockFds[0], DOMAIN_ID) != 0) {
             FI_HILOGE("close(%{public}d) failed:%{public}s", sockFds[0], ::strerror(errno));
         }
-        if (sockFds[1] > 0 && ::close(sockFds[1]) != 0) {
+        if (sockFds[1] > 0 && fdsan_close_with_tag(sockFds[1], DOMAIN_ID) != 0) {
             FI_HILOGE("close(%{public}d) failed:%{public}s", sockFds[1], ::strerror(errno));
         }
         return RET_ERR;
@@ -124,10 +127,10 @@ int32_t SocketSessionManager::AllocSocketFd(const std::string& programName, int3
     return RET_OK;
 
 CLOSE_SOCK:
-    if (::close(sockFds[0]) != 0) {
+    if (fdsan_close_with_tag(sockFds[0], DOMAIN_ID) != 0) {
         FI_HILOGE("close(%{public}d) failed:%{public}s", sockFds[0], ::strerror(errno));
     }
-    if (::close(sockFds[1]) != 0) {
+    if (fdsan_close_with_tag(sockFds[1], DOMAIN_ID) != 0) {
         FI_HILOGE("close(%{public}d) failed:%{public}s", sockFds[1], ::strerror(errno));
     }
     return RET_ERR;

@@ -27,11 +27,6 @@ namespace DeviceStatus {
 
 using namespace testing::ext;
 namespace {
-struct device_status_epoll_event {
-    int32_t fd { -1 };
-    EpollEventType event_type { EPOLL_EVENT_BEGIN };
-};
-
 ContextService *g_instance = nullptr;
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 100 };
 constexpr int32_t DEFAULT_DELAY_TIME { 40 };
@@ -198,17 +193,18 @@ int32_t ContextService::AddEpoll(EpollEventType type, int32_t fd)
     eventData->event_type = type;
     FI_HILOGD("EventData:[fd:%{public}d, type:%{public}d]", eventData->fd, eventData->event_type);
 
+    eventMap_[fd] = eventData;
     struct epoll_event ev {};
     ev.events = EPOLLIN;
     ev.data.ptr = eventData;
     if (EpollCtl(fd, EPOLL_CTL_ADD, ev) != RET_OK) {
+        eventMap_.erase(fd);
         free(eventData);
         eventData = nullptr;
         ev.data.ptr = nullptr;
         FI_HILOGE("EpollCtl failed");
         return RET_ERR;
     }
-    free(eventData);
     return RET_OK;
 }
 
@@ -222,6 +218,11 @@ int32_t ContextService::DelEpoll(EpollEventType type, int32_t fd)
     if (fcntl(fd, F_GETFD) == -1) {
         FI_HILOGE("Invalid fd:%{public}d", fd);
         return RET_ERR;
+    }
+    auto it = eventMap_.find(fd);
+    if (it != eventMap_.end()) {
+        free(it->second);
+        eventMap_.erase(it);
     }
     struct epoll_event ev {};
     if (EpollCtl(fd, EPOLL_CTL_DEL, ev) != RET_OK) {
@@ -346,6 +347,9 @@ void ContextService::OnThread()
                 OnDelegateTask(ev[i]);
             } else {
                 FI_HILOGW("Unknown epoll event type:%{public}d", epollEvent->event_type);
+            }
+            if (epollEvent != nullptr) {
+                epollEvent = nullptr;
             }
         }
     }
