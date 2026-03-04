@@ -35,8 +35,9 @@ int32_t SocketServer::Socket(CallingContext &context, const std::string& program
     int& socketFd, int32_t& tokenType)
 {
     CALL_INFO_TRACE;
-    FI_HILOGI("programName:%{public}s, moduleType:%{public}d, socketFd:%{private}d, tokenType:%{private}d",
-        programName.c_str(), moduleType, socketFd, tokenType);
+    FI_HILOGI("programName:%{public}s, moduleType:%{public}d, socketFd:%{private}d,"
+        "tokenType:%{private}d, pid:%{public}d",
+        programName.c_str(), moduleType, socketFd, tokenType, context.pid);
     int32_t clientTokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
     int32_t clientFd { -1 };
     CHKPR(context_, RET_ERR);

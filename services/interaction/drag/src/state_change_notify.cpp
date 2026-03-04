@@ -31,6 +31,8 @@ void StateChangeNotify::AddNotifyMsg(std::shared_ptr<MessageInfo> info)
             return *msgInfo == info;
         });
     if (it != msgInfos_[info->msgType].end()) {
+        FI_HILOGW("info msgType:%{public}d, it:%{public}s, info:%{public}s",
+            info->msgType, (*it)->session->ToString().c_str(), info->session->ToString().c_str());
         *it = info;
         return;
     }

@@ -222,12 +222,12 @@ void SocketSessionManager::ReleaseSession(int32_t fd)
     std::lock_guard<std::recursive_mutex> guard(mutex_);
     if (auto iter = sessions_.find(fd); iter != sessions_.end()) {
         auto session = iter->second;
-        sessions_.erase(iter);
 
         if (session != nullptr) {
             epollMgr_.Remove(session);
             NotifySessionDeleted(session);
         }
+        sessions_.erase(iter);
     }
     DumpSession("DelSession");
 }
@@ -295,7 +295,7 @@ void SocketSessionManager::DumpSession(const std::string &title) const
 
     for (auto &[_, session] : sessions_) {
         CHKPC(session);
-        FI_HILOGI("%{public}d, %{public}s", i, session->ToString().c_str());
+        FI_HILOGI("i:%{public}d, session:%{public}s", i, session->ToString().c_str());
         i++;
     }
 }

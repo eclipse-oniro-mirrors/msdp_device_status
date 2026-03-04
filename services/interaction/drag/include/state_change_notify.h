@@ -44,6 +44,9 @@ public:
         bool operator==(std::shared_ptr<MessageInfo> info)
         {
             if (info == nullptr || info->session == nullptr) {
+                FI_HILOGW("info:%{public}s, info session:%{public}s",
+                    (info == nullptr) ? "true" : "false",
+                    (info->session == nullptr) ? "true" : "false");
                 return false;
             }
             return session->GetPid() == info->session->GetPid();
