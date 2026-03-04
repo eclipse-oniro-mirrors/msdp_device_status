@@ -76,7 +76,7 @@ void OnOperatingHandChangedInner(taihe::callback_view<void(OperatingHandStatus_t
     }
     if (!AniMotionEvent::GetInstance()->SubscribeCallback(MOTION_TYPE_OPERATING_HAND)) {
         FI_HILOGE("SubscribeCallback failed");
-        if (!AniMotionEvent::GetInstance()->RemoveCallback(MOTION_TYPE_OPERATING_HAND, opq)) {
+        if (!AniMotionEvent::GetInstance()->RemoveAllCallback(MOTION_TYPE_OPERATING_HAND)) {
             FI_HILOGE("RemoveCallback failed");
         }
         return;
@@ -140,7 +140,7 @@ void OnHoldingHandChangedInner(taihe::callback_view<void(HoldingHandStatus_t)> f
     }
     if (!AniMotionEvent::GetInstance()->SubscribeCallback(MOTION_TYPE_HOLDING_HAND)) {
         FI_HILOGE("SubscribeCallback failed");
-        if (!AniMotionEvent::GetInstance()->RemoveCallback(MOTION_TYPE_HOLDING_HAND, opq)) {
+        if (!AniMotionEvent::GetInstance()->RemoveAllCallback(MOTION_TYPE_HOLDING_HAND)) {
             FI_HILOGE("RemoveCallback failed");
         }
         return;
