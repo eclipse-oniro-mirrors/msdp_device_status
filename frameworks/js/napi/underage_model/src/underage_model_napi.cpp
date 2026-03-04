@@ -75,7 +75,7 @@ void UnderageModelListener::OnUnderageModelListener(uint32_t eventType, int32_t 
         CHKPV(g_underageModelObj);
         g_underageModelObj->OnEventChanged(eventType, result, confidence);
     };
-    if (napi_send_event(env_, task, napi_eprio_immediate) != napi_status::napi_ok) {
+    if (napi_send_event(env_, task, napi_eprio_immediate, "underage.listener") != napi_status::napi_ok) {
         FI_HILOGE("Failed to SendEvent");
     }
     FI_HILOGD("Exit");

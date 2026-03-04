@@ -63,7 +63,7 @@ void DeviceStatusCallback::OnDeviceStatusChanged(const DeviceStatus::Data &event
         FI_HILOGI("Execute lamdba");
         EmitOnEvent(data);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, "device.changed")) {
         FI_HILOGE("Failed to SendEvent");
     }
     FI_HILOGD("Exit");

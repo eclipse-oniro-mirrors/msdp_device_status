@@ -751,7 +751,7 @@ void OnScreenAwarenessCallback::OnScreenAwareness(const OnscreenAwarenessInfo& i
             napi_call_function(self->env_, nullptr, handler, 1, &result, &callResult);
         }
     };
-    if (napi_send_event(self->env_, task, napi_eprio_immediate) != napi_ok) {
+    if (napi_send_event(self->env_, task, napi_eprio_immediate, "onScreen.awareness") != napi_ok) {
         FI_HILOGE("Failed to SendEvent");
     }
 }

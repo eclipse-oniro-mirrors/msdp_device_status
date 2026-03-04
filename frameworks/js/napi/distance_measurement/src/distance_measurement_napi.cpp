@@ -439,7 +439,7 @@ void DistMeasureListener::OnDoorIdentifyChanged(const CDoorPositionResponse &ide
         } while (0);
         napi_close_handle_scope(env, scope);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, "distance.identifyChanged")) {
         FI_HILOGE("Failed to send event for auth");
         return;
     }
@@ -476,7 +476,7 @@ void DistMeasureListener::OnDistanceMeasurementChanged(const CDistMeasureRespons
         } while (0);
         napi_close_handle_scope(env, scope);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, "distance.measurementChanged")) {
         FI_HILOGE("Failed to send event for auth");
         return;
     }

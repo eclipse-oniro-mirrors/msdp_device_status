@@ -416,7 +416,7 @@ void MotionNapi::PostMotionEvent(int32_t type, int32_t status)
         ev.data = nullptr;
         self->OnEventOperatingHand(type, 1, ev);
     };
-    if (napi_send_event(env, task, napi_eprio_immediate) != napi_ok) {
+    if (napi_send_event(env, task, napi_eprio_immediate, "motion.postEvent") != napi_ok) {
         FI_HILOGE("Failed to SendEvent");
     }
 }

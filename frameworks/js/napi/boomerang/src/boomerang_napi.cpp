@@ -63,7 +63,7 @@ void BoomerangCallback::OnScreenshotResult(const BoomerangData &screenshotData)
         FI_HILOGI("Execute lamdba");
         EmitOnEvent(&this->data_);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, "boomerang.screenshotResult")) {
         FI_HILOGE("Failed to SendEvent");
     }
 }
@@ -77,7 +77,7 @@ void BoomerangCallback::OnNotifyMetadata(const std::string &metadata)
         FI_HILOGI("Execute lamdba");
         EmitOnMetadata(this->env_, this->metadata_, this->deferred_);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, "boomerang.notifyMetadata")) {
         FI_HILOGE("Failed to SendEvent");
     }
 }
@@ -91,7 +91,7 @@ void BoomerangCallback::OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pix
         FI_HILOGI("Execute lamdba");
         EmitOnEncodeImage(this->env_, this->pixelMap_, this->deferred_);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, "boomerang.encodeImageResult")) {
         FI_HILOGE("Failed to SendEvent");
     }
 }
