@@ -14,7 +14,6 @@
  */
 
 #include "ohos.multimodalAwareness.motion.ani.hpp"
-#include "fi_log.h"
 #if __has_include(<ani.h>)
 #include <ani.h>
 #elif __has_include(<ani/ani.h>)
@@ -26,7 +25,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
     if (vm == nullptr || result == nullptr) {
-        FI_HILOGE("Error from ANI_Constructor, vm or result is null");
+        std::cerr << "Error from ohos::multimodalAwareness::motion::ANIRegister, vm or result is null" << std::endl;
         return ANI_ERROR;
     }
     if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {

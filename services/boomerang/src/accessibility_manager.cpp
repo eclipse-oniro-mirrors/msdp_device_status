@@ -75,7 +75,6 @@ void AccessibilityManager::AccessibilityConnect(AccessibilityCallback callback)
     auto listener = std::make_shared<AccessibleAbilityListenerImpl>(callback);
     if (listener == nullptr) {
         FI_HILOGE("create accessible ability listener failed");
-        return;
     }
 
     auto accessibilityInstance = Accessibility::AccessibilityUITestAbility::GetInstance();
