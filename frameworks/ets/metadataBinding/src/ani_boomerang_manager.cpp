@@ -105,7 +105,7 @@ void AniBoomerangCallback::OnEncodeImageResult(std::shared_ptr<Media::PixelMap> 
     g_encodeImage.notify_one();
 }
 
-bool AniBoomerangCallback::GetEncodeImage(std::shared_ptr<Media::PixelMap> image)
+bool AniBoomerangCallback::GetEncodeImage(std::shared_ptr<Media::PixelMap> &image)
 {
     std::unique_lock lockGrd(imageMutex_);
     if (g_encodeImage.wait_for(lockGrd, std::chrono::milliseconds(SLEEP_TIME),
