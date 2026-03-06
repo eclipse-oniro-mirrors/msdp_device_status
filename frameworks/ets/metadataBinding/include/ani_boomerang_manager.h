@@ -67,7 +67,7 @@ public:
     void OnNotifyMetadata(const std::string& metadata) override;
     void OnEncodeImageResult(std::shared_ptr<Media::PixelMap> pixelMap) override;
     bool GetMetadata(std::string &metadata);
-    bool GetEncodeImage(std::shared_ptr<Media::PixelMap> image);
+    bool GetEncodeImage(std::shared_ptr<Media::PixelMap> &image);
     static ani_vm* vm_;
     ani_env *env_ = nullptr;
     ani_env* envT_ = nullptr;
