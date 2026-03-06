@@ -159,7 +159,7 @@ void OnScreenCallback::CloseOnJsThread()
         }
     };
     // 若 env 正在销毁导致投递失败，则放弃删除（避免在非 JS 线程/失效 env 触发崩溃）。
-    if (napi_send_event(env, task, napi_eprio_immediate) != napi_ok) {
+    if (napi_send_event(env, task, napi_eprio_immediate, "screen.close") != napi_ok) {
         FI_HILOGE("CloseOnJsThread: napi_send_event failed, skip deleting refs");
     }
 }
@@ -207,7 +207,7 @@ void OnScreenCallback::OnScreenChange(const std::string& changeInfo)
             napi_call_function(self->env_, nullptr, handler, 1, &result, &callResult);
         }
     };
-    if (napi_send_event(self->env_, task, napi_eprio_immediate) != napi_ok) {
+    if (napi_send_event(self->env_, task, napi_eprio_immediate, "screen.changed") != napi_ok) {
         FI_HILOGE("Failed to SendEvent");
     }
 }
