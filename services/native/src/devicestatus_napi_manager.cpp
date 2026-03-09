@@ -44,6 +44,7 @@ bool BoomerangAlgoManager::EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMa
         return false;
     }
     if (boomerangAlgoHandle_ == nullptr) {
+        dlerror();
         boomerangAlgoHandle_ = dlopen(realPath, RTLD_LAZY);
         char *error = nullptr;
         if (((error = dlerror()) != nullptr) || (boomerangAlgoHandle_ == nullptr)) {
@@ -74,6 +75,7 @@ bool BoomerangAlgoManager::DecodeImage(std::shared_ptr<Media::PixelMap> &pixelMa
         return false;
     }
     if (boomerangAlgoHandle_ == nullptr) {
+        dlerror();
         boomerangAlgoHandle_ = dlopen(realPath, RTLD_LAZY);
         char *error = nullptr;
         if (((error = dlerror()) != nullptr) || (boomerangAlgoHandle_ == nullptr)) {
