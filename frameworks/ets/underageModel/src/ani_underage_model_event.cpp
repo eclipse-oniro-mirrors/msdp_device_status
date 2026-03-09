@@ -193,7 +193,6 @@ bool AniUnderageModelEvent::UnSubscribeCallback(int32_t type)
         }
         FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
     }
-    taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
     return false;
 }
 
