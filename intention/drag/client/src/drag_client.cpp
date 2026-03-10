@@ -451,6 +451,7 @@ int32_t DragClient::OnNotifyResult(const StreamClient &client, NetPacket &pkt)
     std::lock_guard<std::mutex> guard(mtx_);
     CHKPR(startDragListener_, RET_ERR);
     startDragListener_->OnDragEndMessage(notifyMsg);
+    startDragListener_ = nullptr;
     return RET_OK;
 }
 
