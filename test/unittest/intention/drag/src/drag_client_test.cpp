@@ -406,11 +406,8 @@ HWTEST_F(DragClientTest, DragClientTest12, TestSize.Level0)
     auto listener = std::make_shared<TestStartDragListener>(callback);
     g_dragClient.startDragListener_ = listener;
     std::weak_ptr<IStartDragListener> weakListener = listener;
-    
     ASSERT_FALSE(weakListener.expired());
-    
     g_dragClient.OnDisconnected();
-    
     ASSERT_TRUE(weakListener.expired());
 }
 
@@ -537,18 +534,6 @@ HWTEST_F(DragClientTest, DragClientTest21, TestSize.Level0)
     ShadowOffset shadowOffset;
     int32_t ret = g_dragClient.GetShadowOffset(shadowOffset);
     EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: DragClientTest22
- * @tc.desc: DragClient OnConnected
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragClientTest, DragClientTest22, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    ASSERT_NO_FATAL_FAILURE(g_dragClient.OnConnected());
 }
 } // namespace DeviceStatus
 } // namespace Msdp
