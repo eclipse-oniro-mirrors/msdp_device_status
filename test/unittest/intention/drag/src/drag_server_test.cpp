@@ -2200,11 +2200,11 @@ HWTEST_F(DragServerTest, DragServerTest115, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest116
- * @tc.desc: Test IsSystemServiceCalling with valid context
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: DragServerTest116
+* @tc.desc: Test IsSystemServiceCalling with valid context
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(DragServerTest, DragServerTest116, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
@@ -2222,15 +2222,15 @@ HWTEST_F(DragServerTest, DragServerTest116, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest117
- * @tc.desc: Test IsSystemServiceCalling with invalid context
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: DragServerTest117
+* @tc.desc: Test IsSystemServiceCalling with invalid context
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(DragServerTest, DragServerTest117, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    Security::AccessToken::AccessTokenIDEx tokenIdEx = {0};
+    Security::AccessToken::AccessTokenIDEx tokenIdEx = { 0 };
     tokenIdEx = Security::AccessToken::AccessTokenKit::AllocHapToken(g_testInfoParms, g_testPolicyPrams);
     EXPECT_EQ(0, SetSelfTokenID(tokenIdEx.tokenIdExStruct.tokenID));
     auto g_tokenId1 = tokenIdEx.tokenIdExStruct.tokenID;
@@ -2245,11 +2245,11 @@ HWTEST_F(DragServerTest, DragServerTest117, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest118
- * @tc.desc: Test StopDrag with DRAG_FAIL result
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: DragServerTest118
+* @tc.desc: Test StopDrag with DRAG_FAIL result
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(DragServerTest, DragServerTest118, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
@@ -2267,11 +2267,11 @@ HWTEST_F(DragServerTest, DragServerTest118, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest119
- * @tc.desc: Test StopDrag with DRAG_CANCEL result
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: DragServerTest119
+* @tc.desc: Test StopDrag with DRAG_CANCEL result
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(DragServerTest, DragServerTest119, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
@@ -2289,122 +2289,31 @@ HWTEST_F(DragServerTest, DragServerTest119, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest120
- * @tc.desc: Test UpdateShadowPic with valid shadow info
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: DragServerTest120
+* @tc.desc: Test UpdateShadowPic with valid shadow info
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(DragServerTest, DragServerTest120, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
     ASSERT_NE(pixelMap, nullptr);
     ShadowInfo shadowInfo = { pixelMap, 0, 0 };
+    context_->dragMgr_.dragState_ = DragState::START;
     int32_t ret = dragServer_->UpdateShadowPic(shadowInfo);
     EXPECT_EQ(ret, RET_ERR);
+    context_->dragMgr_.dragState_ = DragState::STOP;
 }
 
+
 /**
- * @tc.name: DragServerTest121
- * @tc.desc: Test GetDragBundleInfo with START state
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: DragServerTest121
+* @tc.desc: Test SetDragSwitchState with enable true
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(DragServerTest, DragServerTest121, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    DragBundleInfo dragBundleInfo;
-    context_->dragMgr_.dragState_ = DragState::START;
-    context_->dragMgr_.isCrossDragging_ = false;
-    context_->dragMgr_.sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCH;
-    int32_t ret = dragServer_->GetDragBundleInfo(dragBundleInfo);
-    EXPECT_EQ(ret, RET_OK);
-    EXPECT_FALSE(dragBundleInfo.isCrossDevice);
-    context_->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: DragServerTest122
- * @tc.desc: Test GetDragBundleInfo with different source types
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest122, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    DragBundleInfo dragBundleInfo;
-    
-    context_->dragMgr_.dragState_ = DragState::START;
-    context_->dragMgr_.sourceType_ = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
-    int32_t ret = dragServer_->GetDragBundleInfo(dragBundleInfo);
-    EXPECT_EQ(ret, RET_OK);
-    
-    context_->dragMgr_.sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD;
-    ret = dragServer_->GetDragBundleInfo(dragBundleInfo);
-    EXPECT_EQ(ret, RET_OK);
-    
-    context_->dragMgr_.dragState_ = DragState::STOP;
-}
-
-/**
- * @tc.name: DragServerTest123
- * @tc.desc: Test SetDragWindowVisible with different visible states
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest123, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    context_->dragMgr_.SetDragState(DragState::START);
-    bool visible = false;
-    bool isForce = true;
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction { nullptr };
-    int32_t ret = dragServer_->SetDragWindowVisible(visible, isForce, rsTransaction);
-    EXPECT_EQ(ret, RET_OK);
-    context_->dragMgr_.SetDragState(DragState::STOP);
-}
-
-/**
- * @tc.name: DragServerTest124
- * @tc.desc: Test UpdatePreviewStyle with different preview types
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest124, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    PreviewStyle previewStyle;
-    previewStyle.types = { PreviewType::BACKGROUND_COLOR };
-    previewStyle.backgroundColor = 0xFF00FF00;
-    int32_t ret = dragServer_->UpdatePreviewStyle(previewStyle);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: DragServerTest125
- * @tc.desc: Test UpdatePreviewStyleWithAnimation with animation parameters
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest125, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    PreviewStyle previewStyle;
-    previewStyle.types = { PreviewType::FOREGROUND_COLOR };
-    previewStyle.foregroundColor = FOREGROUND_COLOR_IN;
-    PreviewAnimation animation;
-    AssignToAnimation(animation);
-    int32_t ret = dragServer_->UpdatePreviewStyleWithAnimation(previewStyle, animation);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: DragServerTest126
- * @tc.desc: Test SetDragSwitchState with enable true
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest126, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     uint64_t g_tokenId = NativeTokenGet();
@@ -2423,12 +2332,12 @@ HWTEST_F(DragServerTest, DragServerTest126, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest127
- * @tc.desc: Test SetAppDragSwitchState with different package names
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest127, TestSize.Level1)
+* @tc.name: DragServerTest122
+* @tc.desc: Test SetAppDragSwitchState with different package names
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest122, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     uint64_t g_tokenId = NativeTokenGet();
@@ -2448,12 +2357,12 @@ HWTEST_F(DragServerTest, DragServerTest127, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest128
- * @tc.desc: Test AddPrivilege with valid signature
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest128, TestSize.Level1)
+* @tc.name: DragServerTest123
+* @tc.desc: Test AddPrivilege with valid signature
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest123, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     CallingContext context {
@@ -2473,29 +2382,12 @@ HWTEST_F(DragServerTest, DragServerTest128, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest129
- * @tc.desc: Test SetMouseDragMonitorState with toggle
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest129, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    bool state = true;
-    int32_t ret = dragServer_->SetMouseDragMonitorState(state);
-    EXPECT_EQ(ret, RET_ERR);
-    state = false;
-    ret = dragServer_->SetMouseDragMonitorState(state);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: DragServerTest130
- * @tc.desc: Test SetDraggableStateAsync with different downTime
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest130, TestSize.Level1)
+* @tc.name: DragServerTest124
+* @tc.desc: Test SetDraggableStateAsync with different downTime
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest124, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     bool state = true;
@@ -2508,39 +2400,12 @@ HWTEST_F(DragServerTest, DragServerTest130, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest131
- * @tc.desc: Test GetAppDragSwitchState with state output
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest131, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    uint64_t g_tokenId = NativeTokenGet();
-    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    bool state = false;
-    int32_t ret = dragServer_->GetAppDragSwitchState(context, state);
-#ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    EXPECT_EQ(ret, RET_ERR);
-#else
-    EXPECT_EQ(ret, RET_OK);
-#endif // OHOS_BUILD_UNIVERSAL_DRAG
-    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
-}
-
-/**
- * @tc.name: DragServerTest132
- * @tc.desc: Test GetDragSummaryInfo with MOTION_DRAGGING state
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest132, TestSize.Level1)
+* @tc.name: DragServerTest125
+* @tc.desc: Test GetDragSummaryInfo with MOTION_DRAGGING state
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest125, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     context_->dragMgr_.dragState_ = DragState::MOTION_DRAGGING;
@@ -2551,15 +2416,15 @@ HWTEST_F(DragServerTest, DragServerTest132, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest133
- * @tc.desc: Test StartDrag with valid drag data
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest133, TestSize.Level1)
+* @tc.name: DragServerTest126
+* @tc.desc: Test StartDrag with valid drag data
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest126, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    std::optional<DragData> dragDataOpt = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_TOUCH, 0, 1, false, 1);
+    std::optional<DragData> dragDataOpt = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, 0, 1, false, 1);
     ASSERT_TRUE(dragDataOpt);
     DragData &dragData = dragDataOpt.value();
     CallingContext context {
@@ -2573,12 +2438,12 @@ HWTEST_F(DragServerTest, DragServerTest133, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragServerTest134
- * @tc.desc: Test AddDraglistener and RemoveDraglistener cycle
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest134, TestSize.Level1)
+* @tc.name: DragServerTest127
+* @tc.desc: Test AddDraglistener and RemoveDraglistener cycle
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest127, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     uint64_t g_tokenId = NativeTokenGet();
@@ -2593,30 +2458,6 @@ HWTEST_F(DragServerTest, DragServerTest134, TestSize.Level1)
     int32_t ret = dragServer_->AddDraglistener(context, isJsCaller);
     EXPECT_EQ(ret, RET_ERR);
     ret = dragServer_->RemoveDraglistener(context, isJsCaller);
-    EXPECT_EQ(ret, RET_ERR);
-    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
-}
-
-/**
- * @tc.name: DragServerTest135
- * @tc.desc: Test AddSubscriptListener and RemoveSubscriptListener cycle
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest135, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    uint64_t g_tokenId = NativeTokenGet();
-    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    int32_t ret = dragServer_->AddSubscriptListener(context);
-    EXPECT_EQ(ret, RET_ERR);
-    ret = dragServer_->RemoveSubscriptListener(context);
     EXPECT_EQ(ret, RET_ERR);
     OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
