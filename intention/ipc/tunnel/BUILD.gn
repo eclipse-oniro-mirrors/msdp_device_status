@@ -126,6 +126,7 @@ ohos_source_set("msdp_kit_report") {
     "c_utils:utils",
     "ability_runtime:wantagent_innerkits",
     "time_service:time_client",
+    "ipc:ipc_single",
   ]
 
   part_name = "${device_status_part_name}"
