@@ -57,7 +57,7 @@ IntentionClient::~IntentionClient()
 
 ErrCode IntentionClient::Connect()
 {
-    CALL_INFO_TRACE;
+    CALL_DEBUG_ENTER;
     std::lock_guard lock(mutex_);
     if (devicestatusProxy_ != nullptr) {
         return RET_OK;
