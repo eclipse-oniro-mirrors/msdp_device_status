@@ -2198,6 +2198,269 @@ HWTEST_F(DragServerTest, DragServerTest115, TestSize.Level1)
     EXPECT_EQ(state, false);
     OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
+
+/**
+* @tc.name: DragServerTest116
+* @tc.desc: Test IsSystemServiceCalling with valid context
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest116, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    bool ret = dragServer_->IsSystemServiceCalling(context);
+    EXPECT_TRUE(ret);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
+}
+
+/**
+* @tc.name: DragServerTest117
+* @tc.desc: Test IsSystemServiceCalling with invalid context
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest117, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Security::AccessToken::AccessTokenIDEx tokenIdEx = { 0 };
+    tokenIdEx = Security::AccessToken::AccessTokenKit::AllocHapToken(g_testInfoParms, g_testPolicyPrams);
+    EXPECT_EQ(0, SetSelfTokenID(tokenIdEx.tokenIdExStruct.tokenID));
+    auto g_tokenId1 = tokenIdEx.tokenIdExStruct.tokenID;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = g_tokenId1,
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    bool ret = dragServer_->IsSystemServiceCalling(context);
+    EXPECT_FALSE(ret);
+}
+
+/**
+* @tc.name: DragServerTest118
+* @tc.desc: Test StopDrag with DRAG_FAIL result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest118, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    DragDropResult dropResult { DragResult::DRAG_FAIL, HAS_CUSTOM_ANIMATION, WINDOW_ID };
+    context_->dragMgr_.dragState_ = DragState::START;
+    int32_t ret = dragServer_->StopDrag(context, dropResult);
+    EXPECT_EQ(ret, RET_OK);
+    context_->dragMgr_.dragState_ = DragState::STOP;
+}
+
+/**
+* @tc.name: DragServerTest119
+* @tc.desc: Test StopDrag with DRAG_CANCEL result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest119, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    DragDropResult dropResult { DragResult::DRAG_CANCEL, HAS_CUSTOM_ANIMATION, WINDOW_ID };
+    context_->dragMgr_.dragState_ = DragState::START;
+    int32_t ret = dragServer_->StopDrag(context, dropResult);
+    EXPECT_EQ(ret, RET_OK);
+    context_->dragMgr_.dragState_ = DragState::STOP;
+}
+
+/**
+* @tc.name: DragServerTest120
+* @tc.desc: Test UpdateShadowPic with valid shadow info
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest120, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::shared_ptr<Media::PixelMap> pixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    ASSERT_NE(pixelMap, nullptr);
+    ShadowInfo shadowInfo = { pixelMap, 0, 0 };
+    context_->dragMgr_.dragState_ = DragState::START;
+    int32_t ret = dragServer_->UpdateShadowPic(shadowInfo);
+    EXPECT_EQ(ret, RET_ERR);
+    context_->dragMgr_.dragState_ = DragState::STOP;
+}
+
+
+/**
+* @tc.name: DragServerTest121
+* @tc.desc: Test SetDragSwitchState with enable true
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest121, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    bool enable = true;
+    bool isJsCaller = false;
+    int32_t ret = dragServer_->SetDragSwitchState(context, enable, isJsCaller);
+    EXPECT_EQ(ret, RET_OK);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
+}
+
+/**
+* @tc.name: DragServerTest122
+* @tc.desc: Test SetAppDragSwitchState with different package names
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest122, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    bool enable = true;
+    std::string pkgName { "test.package" };
+    bool isJsCaller = false;
+    int32_t ret = dragServer_->SetAppDragSwitchState(context, enable, pkgName, isJsCaller);
+    EXPECT_EQ(ret, RET_OK);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
+}
+
+/**
+* @tc.name: DragServerTest123
+* @tc.desc: Test AddPrivilege with valid signature
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest123, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    DragEventData dragEventData {
+        .timestampMs = g_timestamp,
+        .coordinateX = g_coordinateX,
+        .coordinateY = g_coordinateY,
+    };
+    std::string signature = "";
+    int32_t ret = dragServer_->AddPrivilege(context, signature, dragEventData);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+* @tc.name: DragServerTest124
+* @tc.desc: Test SetDraggableStateAsync with different downTime
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest124, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    bool state = true;
+    int64_t downTime = 0;
+    int32_t ret = dragServer_->SetDraggableStateAsync(state, downTime);
+    EXPECT_EQ(ret, RET_OK);
+    downTime = 1000;
+    ret = dragServer_->SetDraggableStateAsync(state, downTime);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+* @tc.name: DragServerTest125
+* @tc.desc: Test GetDragSummaryInfo with MOTION_DRAGGING state
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest125, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    context_->dragMgr_.dragState_ = DragState::MOTION_DRAGGING;
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = dragServer_->GetDragSummaryInfo(dragSummaryInfo);
+    EXPECT_EQ(ret, RET_OK);
+    context_->dragMgr_.dragState_ = DragState::STOP;
+}
+
+/**
+* @tc.name: DragServerTest126
+* @tc.desc: Test StartDrag with valid drag data
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest126, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragDataOpt = CreateDragData(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, 0, 1, false, 1);
+    ASSERT_TRUE(dragDataOpt);
+    DragData &dragData = dragDataOpt.value();
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    int32_t ret = dragServer_->StartDrag(context, dragData);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+* @tc.name: DragServerTest127
+* @tc.desc: Test AddDraglistener and RemoveDraglistener cycle
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragServerTest, DragServerTest127, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    uint64_t g_tokenId = NativeTokenGet();
+    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
+    CallingContext context {
+        .intention = g_intention,
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    bool isJsCaller = true;
+    int32_t ret = dragServer_->AddDraglistener(context, isJsCaller);
+    EXPECT_EQ(ret, RET_ERR);
+    ret = dragServer_->RemoveDraglistener(context, isJsCaller);
+    EXPECT_EQ(ret, RET_ERR);
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

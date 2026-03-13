@@ -368,6 +368,175 @@ HWTEST_F(DragClientTest, DragClientTest10, TestSize.Level0)
     g_dragClient.OnDisconnected();
     ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 }
+
+/**
+* @tc.name: DragClientTest11
+* @tc.desc: Test DragClient destructor releases startDragListener_
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest11, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto dragClient = std::make_unique<DragClient>();
+    std::weak_ptr<IStartDragListener> weakListener;
+    {
+        auto listener = std::make_shared<TestStartDragListener>([](const DragNotifyMsg &msg) {});
+        weakListener = listener;
+        dragClient->startDragListener_ = listener;
+    }
+    dragClient.reset();
+    ASSERT_TRUE(weakListener.expired());
+}
+
+/**
+* @tc.name: DragClientTest12
+* @tc.desc: Test OnNotifyResult clears startDragListener_
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest12, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
+    auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
+        promiseFlag.set_value(true);
+    };
+    auto listener = std::make_shared<TestStartDragListener>(callback);
+    g_dragClient.startDragListener_ = listener;
+    std::weak_ptr<IStartDragListener> weakListener = listener;
+    ASSERT_FALSE(weakListener.expired());
+    g_dragClient.OnDisconnected();
+    listener = nullptr;
+    ASSERT_TRUE(weakListener.expired());
+    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
+}
+
+/**
+* @tc.name: DragClientTest13
+* @tc.desc: DragClient GetDragTargetPid
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest13, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t targetPid = g_dragClient.GetDragTargetPid();
+    EXPECT_GE(targetPid, -1);
+}
+
+/**
+* @tc.name: DragClientTest14
+* @tc.desc: DragClient GetUdKey
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest14, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string udKey;
+    int32_t ret = g_dragClient.GetUdKey(udKey);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+* @tc.name: DragClientTest15
+* @tc.desc: DragClient EraseMouseIcon
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest15, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    int32_t ret = g_dragClient.EraseMouseIcon();
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+* @tc.name: DragClientTest16
+* @tc.desc: DragClient GetDragAction
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest16, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragAction dragAction;
+    int32_t ret = g_dragClient.GetDragAction(dragAction);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+* @tc.name: DragClientTest17
+* @tc.desc: DragClient GetExtraInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest17, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string extraInfo;
+    int32_t ret = g_dragClient.GetExtraInfo(extraInfo);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+* @tc.name: DragClientTest18
+* @tc.desc: DragClient GetDragSummaryInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest18, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret = g_dragClient.GetDragSummaryInfo(dragSummaryInfo);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+* @tc.name: DragClientTest19
+* @tc.desc: DragClient AddPrivilege
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest19, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::string signature = "test_signature";
+    DragEventData dragEventData;
+    int32_t ret = g_dragClient.AddPrivilege(signature, dragEventData);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+* @tc.name: DragClientTest20
+* @tc.desc: DragClient EnableUpperCenterMode
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest20, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool enable = true;
+    int32_t ret = g_dragClient.EnableUpperCenterMode(enable);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+* @tc.name: DragClientTest21
+* @tc.desc: DragClient GetShadowOffset
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragClientTest, DragClientTest21, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    ShadowOffset shadowOffset;
+    int32_t ret = g_dragClient.GetShadowOffset(shadowOffset);
+    EXPECT_EQ(ret, RET_ERR);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
