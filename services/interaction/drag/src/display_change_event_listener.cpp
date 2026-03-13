@@ -15,6 +15,8 @@
 
 #include "display_change_event_listener.h"
 
+#include "screen_manager.h"
+
 #include "devicestatus_define.h"
 #include "product_name_definition_parser.h"
 #include "parameters.h"
@@ -286,6 +288,27 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
 #endif // OHOS_ENABLE_PULLTHROW
     if (!displayChangeEventListener_->IsRotateDragScreen()) {
         displayChangeEventListener_->GetAllScreenAngles();
+    }
+    std::vector<sptr<Rosen::Screen>> screens;
+    Rosen::DMError ret = Rosen::ScreenManager::GetInstance().GetAllScreens(screens);
+    if (ret != Rosen::DMError::DM_OK) {
+        FI_HILOGE("GetAllScreens failed, ret:%{public}d", static_cast<int32_t>(ret));
+        return;
+    }
+    for (const auto &screen : screens) {
+        if (screen == nullptr) {
+            FI_HILOGW("screen is nullptr");
+            continue;
+        }
+        Rosen::ScreenId screenId = screen->GetId();
+        Rosen::ScreenId rsScreenId = 0;
+        if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+            FI_HILOGW("ConvertScreenIdToRsScreenId failed, screenId:%{public}" PRIu64, screenId);
+            continue;
+        }
+        FI_HILOGI("SetDragWindowScreenId, screenId:%{public}" PRIu64 ", rsScreenId:%{public}" PRIu64,
+            screenId, rsScreenId);
+        context_->GetDragManager().SetDragWindowScreenId(screenId, rsScreenId);
     }
 }
 
