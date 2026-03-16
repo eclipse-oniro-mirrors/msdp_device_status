@@ -19,6 +19,7 @@
 
 #include "display_manager.h"
 #include "product_name_definition_parser.h"
+#include "parameters.h"
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "display_info.h"
 #include "extra_data.h"
@@ -106,6 +107,8 @@ constexpr double ANGLE_LEFT_MAX { 225.0 };        // 左方角度范围最大值
 constexpr double FULL_CIRCLE_DEGREES = { 360.0 };
 constexpr double ANGLE_EPSILON {1e-9};
 #endif // OHOS_ENABLE_PULLTHROW
+constexpr const char* PERSIST_DRAG_DISPLAY_ID {"persist.msdp.drag.displayid"};
+constexpr const char* PERSIST_DRAG_SCREEN_ID {"persist.msdp.drag.screenid"};
 #ifdef OHOS_DRAG_ENABLE_INTERCEPTOR
 constexpr int32_t DRAG_PRIORITY { 500 };
 #endif // OHOS_DRAG_ENABLE_INTERCEPTOR
@@ -136,6 +139,13 @@ int32_t DragManager::Init(IContext* context)
     FI_HILOGI("enter");
     CHKPR(context, RET_ERR);
     context_ = context;
+    std::string displayIdStr = system::GetParameter(PERSIST_DRAG_DISPLAY_ID, "");
+    std::string screenIdStr = system::GetParameter(PERSIST_DRAG_SCREEN_ID, "");
+    if (!displayIdStr.empty() && !screenIdStr.empty()) {
+        displayId_ = std::stoull(displayIdStr);
+        screenId_ = std::stoull(screenIdStr);
+        FI_HILOGI("restore displayId:%{public}" PRIu64 ", screenId:%{public}" PRIu64, displayId_, screenId_);
+    }
     int32_t repeatCount = 1;
     context_->GetTimerManager().AddTimer(INTERVAL_MS, repeatCount, [this]() {
         if (eventHub_ == nullptr) {
@@ -2164,9 +2174,13 @@ int32_t DragManager::RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransac
 
 void DragManager::SetDragWindowScreenId(uint64_t displayId, uint64_t screenId)
 {
-    FI_HILOGI("displayId:%{public}" PRId64 ", screenId:%{public}" PRId64 "", displayId, screenId);
+    FI_HILOGI("displayId:%{public}" PRIu64 ", screenId:%{public}" PRIu64 "", displayId, screenId);
     displayId_ = displayId;
     screenId_ = screenId;
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    system::SetParameter(PERSIST_DRAG_DISPLAY_ID, std::to_string(displayId));
+    system::SetParameter(PERSIST_DRAG_SCREEN_ID, std::to_string(screenId));
+#endif
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
