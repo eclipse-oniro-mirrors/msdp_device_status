@@ -36,6 +36,7 @@ constexpr int32_t RET_NO_SUPPORT = 801;
 #endif
 };
 constexpr int32_t TIME_WAIT_FOR_DS_MS { 1000 };
+constexpr int32_t RECONNECT_MAX_RETRY { 30 };
 std::shared_ptr<IntentionClient> IntentionClient::instance_ = std::make_shared<IntentionClient>();
 
 IntentionClient *IntentionClient::GetInstance()
@@ -626,8 +627,12 @@ void IntentionClient::ResetDragWindowScreenId(uint64_t displayId, uint64_t scree
         return;
     }
     std::thread([this, displayId, screenId]() {
-        std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_DS_MS));
-        this->SetDragWindowScreenId(displayId, screenId);
+        for (int32_t i = 0; i < RECONNECT_MAX_RETRY; ++i) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_DS_MS));
+            if (this->SetDragWindowScreenId(displayId, screenId) == RET_OK) {
+                break;
+            }
+        }
     }).detach();
 }
 
