@@ -74,6 +74,7 @@ void BoomerangCallback::OnNotifyMetadata(const std::string &metadata)
     std::lock_guard<std::mutex> guard(mutex_);
     metadata_ = metadata;
     auto task = [this]() {
+        std::lock_guard<std::mutex> guard(mutex_);
         FI_HILOGI("Execute lamdba");
         EmitOnMetadata(this->env_, this->metadata_, this->deferred_);
     };
@@ -134,6 +135,7 @@ void BoomerangNapi::OnScreenshot(int32_t type, int32_t status, bool isOnce)
 void BoomerangNapi::OnMetadata(napi_env env, std::string metadata, bool isOnce, napi_deferred deferred)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mutex_);
     if (env == nullptr || deferred == nullptr) {
         return;
     }
