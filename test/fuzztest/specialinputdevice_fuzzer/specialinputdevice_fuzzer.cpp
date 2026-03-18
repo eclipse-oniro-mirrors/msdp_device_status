@@ -53,7 +53,7 @@ bool SpecialInputDeviceFuzzTest(FuzzedDataProvider &provider)
     cJSON *json = cJSON_GetObjectItemCaseSensitive(parser.Get(), "special_input_device");
     std:vector<std:string> keywords;
     keywords.push_back(name);
- 	keywords.push_back(alias);
+    keywords.push_back(alias);
     SpecialInputDeviceParser::GetInstance().ParseExactlyMatchItem(json, dev1);
     SpecialInputDeviceParser::GetInstance().ParseContainMatchItem(json, dev2);
     SpecialInputDeviceParser::GetInstance().ParseSpecialInputDeviceItem(json, dev3);
