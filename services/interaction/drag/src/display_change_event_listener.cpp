@@ -146,17 +146,12 @@ void DisplayChangeEventListener::HandleScreenRotation(Rosen::DisplayId displayId
         return;
     }
     context_->GetDragManager().SetRotation(displayId, Rosen::Rotation::ROTATION_0);
-    auto weakThis = std::weak_ptr<DisplayChangeEventListener>(shared_from_this());
-    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([weakThis, displayId] {
-        auto self = weakThis.lock();
-        if (!self) {
-            return RET_ERR;
-        }
-        if (self->context_ == nullptr) {
+    int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, displayId] {
+        if (this->context_ == nullptr) {
             FI_HILOGE("this context_ is nullptr");
             return RET_ERR;
         }
-        return self->context_->GetDragManager().RotateDragWindow(displayId, Rosen::Rotation::ROTATION_0);
+        return this->context_->GetDragManager().RotateDragWindow(displayId, Rosen::Rotation::ROTATION_0);
     });
     if (ret != RET_OK) {
         FI_HILOGE("Post async task failed:%{public}d", ret);
