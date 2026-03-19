@@ -40,8 +40,9 @@ sptr<DeviceStatusClientFuzzer::DeviceStatusTestCallback> cb =
 void DeviceStatusClientFuzzer::DeviceStatusTestCallback::OnDeviceStatusChanged(const \
     Data& devicestatusData)
 {
-    std::cout << "DeviceStatusTestCallback type: " << devicestatusData.type << std::endl;
-    std::cout << "DeviceStatusTestCallback value: " << devicestatusData.value << std::endl;
+    (void)devicestatusData.type;
+    (void)devicestatusData.value;
+    return true;
 }
 
 void DeviceStatusClientFuzzer::TestSubscribeCallback(const uint8_t* data)

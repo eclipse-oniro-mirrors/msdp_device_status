@@ -34,8 +34,8 @@ static std::shared_ptr<DeviceStatusAgent> agent_ = std::make_shared<DeviceStatus
 bool DevicestatusAgentFuzzer::DeviceStatusAgentClient::OnEventResult(
     const Data& devicestatusData)
 {
-    std::cout << "type: " << devicestatusData.type << std::endl;
-    std::cout << "value: " << devicestatusData.value << std::endl;
+    (void)devicestatusData.type;
+    (void)devicestatusData.value;
     return true;
 }
 
