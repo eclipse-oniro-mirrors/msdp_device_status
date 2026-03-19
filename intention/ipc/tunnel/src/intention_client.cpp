@@ -36,7 +36,7 @@ constexpr int32_t RET_NO_SUPPORT = 801;
 #endif
 };
 constexpr int32_t TIME_WAIT_FOR_DS_MS { 1000 };
-constexpr int32_t RECONNECT_MAX_RETRY { 30 };
+constexpr int32_t RECONNECT_MAX_RETRY { 3 };
 std::shared_ptr<IntentionClient> IntentionClient::instance_ = std::make_shared<IntentionClient>();
 
 IntentionClient *IntentionClient::GetInstance()
