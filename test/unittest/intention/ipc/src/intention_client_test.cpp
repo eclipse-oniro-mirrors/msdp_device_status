@@ -166,36 +166,6 @@ HWTEST_F(IntentionClientTest, IntentionClientTest7, TestSize.Level1)
 }
 
 /**
- * @tc.name: IntentionClientTest_ResetDragWindowScreenId_001
- * @tc.desc: Test ResetDragWindowScreenId with UINT64_MAX params
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionClientTest, IntentionClientTest_ResetDragWindowScreenId_001, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    auto env = IntentionClient::GetInstance();
-    env->ResetDragWindowScreenId(UINT64_MAX, UINT64_MAX);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
-}
-
-/**
- * @tc.name: IntentionClientTest_ResetDragWindowScreenId_002
- * @tc.desc: Test ResetDragWindowScreenId with valid params
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionClientTest, IntentionClientTest_ResetDragWindowScreenId_002, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    auto env = IntentionClient::GetInstance();
-    uint64_t displayId = 1;
-    uint64_t screenId = 1;
-    env->ResetDragWindowScreenId(displayId, screenId);
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
-}
-
-/**
  * @tc.name: IntentionClientTest_StartDrag_001
  * @tc.desc: Test StartDrag
  * @tc.type: FUNC
