@@ -66,6 +66,7 @@ ohos_fuzztest("DragQueryFuzzTest") {
     "${device_status_root_path}/services:devicestatus_static_service",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",
+    "${device_status_root_path}/intention/adapters/common_event_adapter:intention_common_event_adapter",
   ]
 
   external_deps = deps_ex
