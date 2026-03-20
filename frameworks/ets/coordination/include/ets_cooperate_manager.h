@@ -130,7 +130,9 @@ struct CallbackObject {
         if (env == nullptr) {
             return;
         }
-        env->GlobalReference_Delete(ref);
+        if (ANI_OK != env->GlobalReference_Delete(ref)) {
+            return;
+        }
     }
 
     callbackType callback;
@@ -165,7 +167,9 @@ public:
     ~GlobalRefGuard()
     {
         if (env_ && ref_) {
-            env_->GlobalReference_Delete(ref_);
+            if (ANI_OK != env_->GlobalReference_Delete(ref_)) {
+                return;
+            }
         }
     }
 

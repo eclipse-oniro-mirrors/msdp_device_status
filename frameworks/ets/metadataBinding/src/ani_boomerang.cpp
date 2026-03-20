@@ -31,7 +31,6 @@ constexpr size_t EVENT_MAP_MAX { 20 };
 constexpr size_t EVENT_LIST_MAX { 30 };
 } // namespace
 
-ani_env* AniBoomerangEvent::env_ {nullptr};
 ani_vm* AniBoomerangEvent::vm_ {nullptr};
 bool AniBoomerangEvent::On(int32_t eventType, ani_ref handler, bool isOnce)
 {
@@ -78,17 +77,17 @@ bool AniBoomerangEvent::SaveCallbackByEvent(int32_t eventType, ani_ref handler, 
     if (events[eventType].empty()) {
         FI_HILOGE("%{public}s events save callback", LOG_TAG);
         SaveCallback(eventType, onHandlerRef, isOnce);
-        env_ = env;
         vm_ = AniBoomerangCommon::GetInstance()->GetAniVm(env);
         return true;
     }
     if (!IsNoExistCallback(events[eventType], handler, eventType)) {
-        env->GlobalReference_Delete(onHandlerRef);
+        if (ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
+            FI_HILOGE("%{public}s Global Reference delete fail", LOG_TAG);
+        }
         FI_HILOGE("%{public}s Callback already exists", LOG_TAG);
         return false;
     }
     SaveCallback(eventType, onHandlerRef, isOnce);
-    env_ = env;
     vm_ = AniBoomerangCommon::GetInstance()->GetAniVm(env);
     return true;
 }
@@ -140,9 +139,12 @@ bool AniBoomerangEvent::OffOnce(int32_t eventType, ani_ref handler)
     auto& listeners = eventOnces_[eventType];
     for (auto it = listeners.begin(); it != listeners.end(); ) {
         ani_boolean is_equal = false;
-        if (ANI_OK == taihe::get_env()->Reference_StrictEquals(handler, (*it)->onHandlerRef, &is_equal)
-             && is_equal) {
-            taihe::get_env()->GlobalReference_Delete((*it)->onHandlerRef);
+        auto env = taihe::get_env();
+        if (env && ANI_OK == env->Reference_StrictEquals(handler, (*it)->onHandlerRef, &is_equal) && is_equal) {
+            if (ANI_OK != env->GlobalReference_Delete((*it)->onHandlerRef)) {
+                FI_HILOGE("Global Reference delete fail");
+                continue;
+            }
             it = listeners.erase(it);
             removed = true;
         } else {
@@ -170,7 +172,11 @@ bool AniBoomerangEvent::RemoveAllCallback(int32_t eventType, bool isEvent)
         if (listener == nullptr || listener->onHandlerRef == nullptr) {
             continue;
         }
-        taihe::get_env()->GlobalReference_Delete(listener->onHandlerRef);
+        auto env = taihe::get_env();
+        if (nullptr == env || ANI_OK != env->GlobalReference_Delete(listener->onHandlerRef)) {
+            FI_HILOGE("Global Reference delete fail");
+            continue;
+        }
         listener->onHandlerRef = nullptr;
     }
     if (isEvent) {
@@ -262,11 +268,10 @@ std::shared_ptr<AniBoomerangCommon> AniBoomerangCommon::GetInstance()
 ani_object AniBoomerangCommon::CreateAniUndefined(ani_env* env)
 {
     ani_ref aniRef;
-    if (env == nullptr) {
+    if (env == nullptr || ANI_OK != env->GetUndefined(&aniRef)) {
         FI_HILOGE("null env");
         return nullptr;
     }
-    env->GetUndefined(&aniRef);
     return static_cast<ani_object>(aniRef);
 }
 
@@ -366,7 +371,9 @@ ani_object AniBoomerangCommon::Uint8ArrayToObject(ani_env *env, const std::vecto
         return aniObject;
     }
     ani_ref buffer;
-    env->Object_GetFieldByName_Ref(aniObject, "buffer", &buffer);
+    if (ANI_OK != env->Object_GetFieldByName_Ref(aniObject, "buffer", &buffer)) {
+        return aniObject;
+    }
     void *bufData;
     size_t bufLength;
     retCode = env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(buffer), &bufData, &bufLength);

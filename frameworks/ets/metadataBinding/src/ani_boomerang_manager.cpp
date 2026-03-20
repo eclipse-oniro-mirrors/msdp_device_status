@@ -131,8 +131,8 @@ AniBoomerang::AniBoomerang()
 
 AniBoomerang::~AniBoomerang()
 {
-    if (ref_ != nullptr) {
-        env_->GlobalReference_Delete(ref_);
+    if (ref_ == nullptr || ANI_OK != env_->GlobalReference_Delete(ref_)) {
+        FI_HILOGE("Global Reference delete fail");
     }
     env_ = nullptr;
 }
