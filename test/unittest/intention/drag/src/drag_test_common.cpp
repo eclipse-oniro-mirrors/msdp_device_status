@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "drag_test_common.h"
- 
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
- 
+
 std::shared_ptr<Media::PixelMap> DragTestHelper::CreatePixelMap(int32_t width, int32_t height)
 {
     CALL_DEBUG_ENTER;
@@ -52,7 +52,7 @@ std::shared_ptr<Media::PixelMap> DragTestHelper::CreatePixelMap(int32_t width, i
     delete[] pixelColors;
     return pixelMap;
 }
- 
+
 std::optional<DragData> DragTestHelper::CreateDragData(int32_t sourceType,
     int32_t pointerId, int32_t dragNum, bool hasCoordinateCorrected, int32_t shadowNum)
 {
@@ -80,14 +80,14 @@ std::optional<DragData> DragTestHelper::CreateDragData(int32_t sourceType,
     dragData.hasCanceledAnimation = HAS_CANCELED_ANIMATION;
     return dragData;
 }
- 
+
 void DragTestHelper::AssignToAnimation(PreviewAnimation &animation)
 {
     animation.duration = ANIMATION_DURATION;
     animation.curveName = CURVE_NAME;
     animation.curve = { 0.33, 0, 0.67, 1 };
 }
- 
+
 void TestStartDragListener::OnDragEndMessage(const DragNotifyMsg &msg)
 {
     FI_HILOGD("DisplayX:%{public}d, displayY:%{public}d, targetPid:%{public}d, result:%{public}d",
@@ -97,12 +97,12 @@ void TestStartDragListener::OnDragEndMessage(const DragNotifyMsg &msg)
     }
     FI_HILOGD("Test OnDragEndMessage");
 }
- 
+
 void TestStartDragListener::OnHideIconMessage()
 {
     FI_HILOGD("Test OnHideIconMessage");
 }
- 
+
 void DragListenerTest::OnDragMessage(DragState state)
 {
     if (moduleName_.empty()) {
@@ -110,7 +110,7 @@ void DragListenerTest::OnDragMessage(DragState state)
     }
     FI_HILOGD("%{public}s, state:%{public}s", moduleName_.c_str(), PrintDragMessage(state).c_str());
 }
- 
+
 std::string DragListenerTest::PrintDragMessage(DragState state)
 {
     std::string type = "unknow";
@@ -126,7 +126,7 @@ std::string DragListenerTest::PrintDragMessage(DragState state)
     }
     return type;
 }
- 
+
 void SubscriptListenerTest::OnMessage(DragCursorStyle style)
 {
     SetDragSyle(style);
@@ -136,17 +136,17 @@ void SubscriptListenerTest::OnMessage(DragCursorStyle style)
     FI_HILOGD("SubscriptListener, %{public}s, state:%{public}s",
         moduleName_.c_str(), PrintStyleMessage(style).c_str());
 }
- 
+
 DragCursorStyle SubscriptListenerTest::GetDragStyle()
 {
     return dragStyle_;
 }
- 
+
 void SubscriptListenerTest::SetDragSyle(DragCursorStyle style)
 {
     dragStyle_ = style;
 }
- 
+
 std::string SubscriptListenerTest::PrintStyleMessage(DragCursorStyle style)
 {
     std::string type = "unknow";

@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef DRAG_MANAGER_BASIC_TEST_H
 #define DRAG_MANAGER_BASIC_TEST_H
- 
+
 #include "drag_test_common.h"
- 
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -26,12 +26,11 @@ public:
     static void SetUpTestCase();
     void SetUp() override;
     void TearDown() override;
- 
+
 private:
     std::shared_ptr<TestContext> context_ { nullptr };
 };
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
- 
 #endif // DRAG_MANAGER_BASIC_TEST_H

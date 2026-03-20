@@ -12,28 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "drag_manager_basic_test.h"
- 
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 
 void DragManagerBasicTest::SetUpTestCase() {}
- 
+
 void DragManagerBasicTest::SetUp()
 {
     context_ = std::make_shared<TestContext>();
     g_context = context_.get();
     g_dragMgr.Init(g_context);
 }
- 
+
 void DragManagerBasicTest::TearDown()
 {
     g_context = nullptr;
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
- 
+
 /**
  * @tc.name: StartDragWithNullListener
  * @tc.desc: Drag Drawing
@@ -295,8 +295,6 @@ HWTEST_F(DragManagerBasicTest, RotateDragWindowWithNull, TestSize.Level0)
     int32_t ret = InteractionManager::GetInstance()->RotateDragWindowSync(nullptr);
     EXPECT_EQ(ret, 5);
 }
- 
- 
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

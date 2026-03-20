@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef DRAG_MANAGER_NODE_TEST_H
 #define DRAG_MANAGER_NODE_TEST_H
- 
+
 #include "drag_test_common.h"
- 
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -33,5 +33,4 @@ private:
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
- 
 #endif // DRAG_MANAGER_NODE_TEST_H

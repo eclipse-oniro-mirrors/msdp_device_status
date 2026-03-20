@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef DRAG_TEST_COMMON_H
 #define DRAG_TEST_COMMON_H
- 
+
 #include <gtest/gtest.h>
 #include <functional>
 #include <memory>
@@ -24,7 +24,7 @@
 #include <string>
 #include <thread>
 #include <chrono>
- 
+
 #include "ddm_adapter.h"
 #include "drag_client.h"
 #include "drag_data_manager.h"
@@ -41,18 +41,18 @@
 #include "message_parcel.h"
 #include "securec.h"
 #include "stationary_data.h"
- 
+
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "parameters.h"
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
- 
+
 #define BUFF_SIZE 100
- 
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
- 
+
 namespace {
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
 constexpr int32_t TIME_WAIT_FOR_INTERNAL_DROP_ANIMATION { 500 };
@@ -91,7 +91,7 @@ constexpr int32_t SECURITY_PID { 1 };
 DragManager g_dragMgr;
 IContext *g_context { nullptr };
 } // namespace
- 
+
 class DragTestHelper {
 public:
     static std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height);
@@ -99,7 +99,7 @@ public:
         int32_t pointerId, int32_t dragNum, bool hasCoordinateCorrected, int32_t shadowNum);
     static void AssignToAnimation(PreviewAnimation &animation);
 };
- 
+
 class TestStartDragListener : public IStartDragListener {
 public:
     explicit TestStartDragListener(std::function<void(const DragNotifyMsg&)> function) : function_(function) { }
@@ -108,7 +108,7 @@ public:
 private:
     std::function<void(const DragNotifyMsg&)> function_;
 };
- 
+
 class DragListenerTest : public IDragListener {
 public:
     DragListenerTest() {}
@@ -118,7 +118,7 @@ private:
     std::string PrintDragMessage(DragState state);
     std::string moduleName_;
 };
- 
+
 class SubscriptListenerTest : public ISubscriptListener {
 public:
     SubscriptListenerTest() {}
@@ -131,9 +131,7 @@ private:
     DragCursorStyle dragStyle_ { DragCursorStyle::DEFAULT };
     std::string moduleName_;
 };
- 
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
- 
 #endif // DRAG_TEST_COMMON_H
