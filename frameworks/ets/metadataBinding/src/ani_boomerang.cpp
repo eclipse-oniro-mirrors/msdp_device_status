@@ -225,7 +225,7 @@ void AniBoomerangEvent::OnEvent(int32_t eventType, int32_t value, bool isOnce)
     }
     CheckRet(eventType, 1, value, typeHandler->second.back());
 }
- 
+
 void AniBoomerangEvent::ClearEventMap()
 {
     std::lock_guard<std::mutex> guard(mutex_);
@@ -348,7 +348,7 @@ ani_object AniBoomerangCommon::Uint8ArrayToObject(ani_env *env, const std::vecto
         FI_HILOGE("null env");
         return aniObject;
     }
-    ani_status retCode = env->FindClass("escompat.Uint8Array", &arrayClass);
+    ani_status retCode = env->FindClass("std.core.Uint8Array", &arrayClass);
     if (retCode != ANI_OK) {
         FI_HILOGE("Failed: env->FindClass()");
         return aniObject;
