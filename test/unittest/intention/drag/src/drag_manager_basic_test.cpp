@@ -83,6 +83,7 @@ HWTEST_F(DragManagerBasicTest, StartDragWithInvalidShadowX, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
     std::promise<bool> promiseFlag;
+    std::future<bool> futureFlag = promiseFlag.get_future();
     g_shadowinfo_x = 2;
     auto callback = [&promiseFlag](const DragNotifyMsg &notifyMessage) {
         FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d",
@@ -95,6 +96,10 @@ HWTEST_F(DragManagerBasicTest, StartDragWithInvalidShadowX, TestSize.Level0)
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<TestStartDragListener>(callback));
     ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) != std::future_status::timeout);
 }
 
 /**
