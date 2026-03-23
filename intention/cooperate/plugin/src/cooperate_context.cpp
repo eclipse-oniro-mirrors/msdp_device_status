@@ -435,6 +435,14 @@ void Context::OnBack()
     }
 }
 
+void Context::ResetPointerAndTouchPadSpeed()
+{
+    SetPointerSpeed(originPointerSpeed_);
+    ClearPeerPointerSpeed();
+    SetTouchPadSpeed(originTouchPadSpeed_);
+    ClearPeerTouchPadSpeed();
+}
+
 void Context::OnRelayCooperation(const std::string &networkId, const NormalizedCoordinate &cursorPos)
 {
     CHKPV(eventHandler_);

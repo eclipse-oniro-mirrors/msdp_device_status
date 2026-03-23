@@ -110,6 +110,7 @@ public:
     void StorePeerTouchPadSpeed(int32_t speed);
     void ClearPeerTouchPadSpeed();
     void StoreOriginTouchPadSpeed();
+    void ResetPointerAndTouchPadSpeed();
 
 #ifdef ENABLE_PERFORMANCE_CHECK
     void StartTrace(const std::string &name);

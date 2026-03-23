@@ -743,12 +743,15 @@ void CooperateIn::RelayConfirmation::OnNormal(Context &context, const CooperateE
         .success = true,
         .cursorPos = context.NormalizedCursorPosition(),
         .uid = noticeFinished.uid,
+        .pointerSpeed = context.GetPointerSpeed(),
+        .touchPadSpeed = context.GetTouchPadSpeed(),
     };
     context.OnStartCooperate(notice.extra);
     context.dsoftbus_.StartCooperate(parent_.process_.Peer(), notice);
 
     context.eventMgr_.StartCooperateFinish(notice);
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
+    context.ResetPointerAndTouchPadSpeed();
     context.OnRelayCooperation(parent_.process_.Peer(), context.NormalizedCursorPosition());
 }
 
@@ -763,12 +766,15 @@ void CooperateIn::RelayConfirmation::OnNormalWithOptions(Context &context, const
         .success = true,
         .cooperateOptions = {startWithOptionsEvent_.displayX, startWithOptionsEvent_.displayY,
             startWithOptionsEvent_.displayId},
+        .pointerSpeed = context.GetPointerSpeed(),
+        .touchPadSpeed = context.GetTouchPadSpeed(),
     };
     context.OnStartCooperate(notice.extra);
     context.dsoftbus_.StartCooperateWithOptions(parent_.process_.Peer(), notice);
 
     context.eventMgr_.StartCooperateWithOptionsFinish(notice);
     TransiteTo(context, CooperateState::COOPERATE_STATE_FREE);
+    context.ResetPointerAndTouchPadSpeed();
     context.OnRelayCooperation(parent_.process_.Peer(), context.NormalizedCursorPosition());
 }
 
