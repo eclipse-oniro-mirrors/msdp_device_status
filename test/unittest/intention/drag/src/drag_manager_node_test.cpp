@@ -146,9 +146,13 @@ HWTEST_F(DragManagerNodeTest, PrintDragDataWithDetailedSummary, TestSize.Level0)
     const std::string udType = "general.message";
     constexpr int64_t recordSize = 20;
     std::map<std::string, int64_t> summarys = { { udType, recordSize } };
+    dragData.dragNum = 1;
     dragData.detailedSummarys = summarys;
     dragData.summaryFormat = { { "image", { 0, 1 } } };
-    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+    g_dragMgr.PrintDragData(dragData, "");
+    DRAG_DATA_MGR.Init(dragData);
+    DragData dragDataTest = DRAG_DATA_MGR.GetDragData();
+    ASSERT_EQ(dragData.dragNum, dragDataTest.dragNum);
 }
 
 /**
@@ -164,9 +168,13 @@ HWTEST_F(DragManagerNodeTest, PrintDragDataWithEmptyFormat, TestSize.Level0)
     const std::string udType = "general.message";
     constexpr int64_t recordSize = 20;
     std::map<std::string, int64_t> summarys = { { udType, recordSize } };
+    dragData.dragNum = 1;
     dragData.detailedSummarys = summarys;
     dragData.summaryFormat = { { "image", {} } };
-    ASSERT_NO_FATAL_FAILURE(g_dragMgr.PrintDragData(dragData, ""));
+    g_dragMgr.PrintDragData(dragData, "");
+    DRAG_DATA_MGR.Init(dragData);
+    DragData dragDataTest = DRAG_DATA_MGR.GetDragData();
+    ASSERT_EQ(dragData.dragNum, dragDataTest.dragNum);
 }
 
 /**
