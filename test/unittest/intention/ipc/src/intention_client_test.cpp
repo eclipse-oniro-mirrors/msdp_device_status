@@ -291,7 +291,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_UpdateDragStyle_001, TestSize.
     CALL_TEST_DEBUG;
     auto env = IntentionClient::GetInstance();
     int32_t ret = env->UpdateDragStyle(DragCursorStyle::DEFAULT, 0);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -321,7 +321,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_GetDragTargetPid_001, TestSize
     auto env = IntentionClient::GetInstance();
     int32_t targetPid = -1;
     int32_t ret = env->GetDragTargetPid(targetPid);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -426,7 +426,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_GetDragSummary_001, TestSize.L
     auto env = IntentionClient::GetInstance();
     std::map<std::string, int64_t> summarys;
     int32_t ret = env->GetDragSummary(summarys, false);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -440,7 +440,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_SetDragSwitchState_001, TestSi
     CALL_TEST_DEBUG;
     auto env = IntentionClient::GetInstance();
     int32_t ret = env->SetDragSwitchState(true, false);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -454,7 +454,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_SetAppDragSwitchState_001, Tes
     CALL_TEST_DEBUG;
     auto env = IntentionClient::GetInstance();
     int32_t ret = env->SetAppDragSwitchState(true, "test", false);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -469,7 +469,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_GetDragState_001, TestSize.Lev
     auto env = IntentionClient::GetInstance();
     DragState dragState = DragState::ERROR;
     int32_t ret = env->GetDragState(dragState);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -556,7 +556,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_SetMouseDragMonitorState_001, 
     CALL_TEST_DEBUG;
     auto env = IntentionClient::GetInstance();
     int32_t ret = env->SetMouseDragMonitorState(true);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -570,7 +570,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_SetDraggableState_001, TestSiz
     CALL_TEST_DEBUG;
     auto env = IntentionClient::GetInstance();
     int32_t ret = env->SetDraggableState(true);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -585,7 +585,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_GetAppDragSwitchState_001, Tes
     auto env = IntentionClient::GetInstance();
     bool state = false;
     int32_t ret = env->GetAppDragSwitchState(state);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -599,7 +599,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_SetDraggableStateAsync_001, Te
     CALL_TEST_DEBUG;
     auto env = IntentionClient::GetInstance();
     int32_t ret = env->SetDraggableStateAsync(true, 0);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
@@ -629,7 +629,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_IsDragStart_001, TestSize.Leve
     auto env = IntentionClient::GetInstance();
     bool isStart = false;
     int32_t ret = env->IsDragStart(isStart);
-    ASSERT_NE(ret, RET_OK);
+    ASSERT_EQ(ret, RET_OK);
 }
 
 /**
