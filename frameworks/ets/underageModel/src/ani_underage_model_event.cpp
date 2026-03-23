@@ -213,6 +213,7 @@ bool AniUnderageModelEvent::InsertRef(std::shared_ptr<UnderageModelEventListener
             auto env = taihe::get_env();
             if (env == nullptr || ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
                 FI_HILOGE("Global Reference delete fail");
+                return false;
             }
             FI_HILOGD("callback already registered");
             return true;
@@ -348,6 +349,7 @@ bool AniUnderageModelEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     
     if (ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
         FI_HILOGE("Global Reference delete fail");
+        return false;
     }
     return true;
 }

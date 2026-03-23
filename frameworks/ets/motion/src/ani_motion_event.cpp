@@ -323,6 +323,7 @@ bool AniMotionEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     auto env = taihe::get_env();
     if (nullptr == env || ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
         FI_HILOGE("Global Reference delete fail");
+        return false;
     }
     return true;
 }
