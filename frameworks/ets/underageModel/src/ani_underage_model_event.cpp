@@ -82,7 +82,7 @@ AniUnderageModelEvent::~AniUnderageModelEvent()
             }
             for (auto item : iter.second->onRefSets) {
                 auto env = taihe::get_env();
-                if (ANI_OK != env->GlobalReference_Delete(item)) {
+                if (env == nullptr || ANI_OK != env->GlobalReference_Delete(item)) {
                     FI_HILOGE("Global Reference delete fail");
                 }
             }
@@ -211,7 +211,7 @@ bool AniUnderageModelEvent::InsertRef(std::shared_ptr<UnderageModelEventListener
             (taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
             auto env = taihe::get_env();
-            if (ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
+            if (env == nullptr || ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
                 FI_HILOGE("Global Reference delete fail");
             }
             FI_HILOGD("callback already registered");
