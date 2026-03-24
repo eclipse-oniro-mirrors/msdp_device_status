@@ -408,15 +408,15 @@ void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const 
         ani_status status = ANI_ERROR;
         status = env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(), &result);
         if (status != ANI_OK) {
-            FI_HILOGD(LOG_CORE, "Excute CallBack failed. %{public}d", status);
+            FI_HILOGD("Excute CallBack failed. %{public}d", status);
             if (ANI_OK != vm_->DetachCurrentThread()) {
-                FI_HILOGE(LOG_CORE, "detach current thread failed.");
+                FI_HILOGE("detach current thread failed.");
             }
             return;
         }
     }
     if (ANI_OK != vm_->DetachCurrentThread()) {
-        FI_HILOGE(LOG_CORE, "detach current thread failed.");
+        FI_HILOGE("detach current thread failed.");
     }
 }
 
