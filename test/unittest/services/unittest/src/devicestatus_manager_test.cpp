@@ -353,7 +353,7 @@ HWTEST_F(DeviceStatusManagerTest, SubmitMetadataTest04, TestSize.Level0) {
 
     std::string metadata = "https://example.com/preview?code=123&dataType=exampleData&page"
         "P_202407081523381322&=interfaceData&pageType=page&schemaName=hmos_reliability";
-    result = deviceStatusManager->SubmitMetadata(metadata);
+    int32_t result = deviceStatusManager->SubmitMetadata(metadata);
     EXPECT_EQ(result, COMMON_PARAMETER_ERROR);
     GTEST_LOG_(INFO) << "SubmitMetadataTest04 end";
 }
