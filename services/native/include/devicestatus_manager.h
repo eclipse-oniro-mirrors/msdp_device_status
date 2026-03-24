@@ -133,6 +133,7 @@ private:
     void SystemBarHiddedInit();
 #endif
     void TimerTask();
+    bool ValidateMetadata(const std::string& metadata);
     static constexpr int32_t argSize_ { TYPE_MAX };
 
     std::mutex mutex_;
