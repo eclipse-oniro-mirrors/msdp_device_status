@@ -272,7 +272,6 @@ bool ScreenEventNapi::ConstructScreenEventNapi(napi_env env, napi_value holderOb
 {
     // 只负责在 Init 阶段把实例 wrap 到 exports；订阅/取消订阅不会触发 wrap。
     {
-        // std::lock_guard<std::mutex> lk(g_mtx);
         std::lock_guard<std::mutex> lk(g_instancesMtx);
         if (g_instances.find(env) != g_instances.end()) {
             FI_HILOGI("env has find");
