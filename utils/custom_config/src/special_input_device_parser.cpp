@@ -257,6 +257,7 @@ bool SpecialInputDeviceParser::IsAllKeywordsMatched(const std::string &name, con
     return true;
 }
 
+ //LCOV_EXCL_START
 void SpecialInputDeviceParser::PrintSpecialInputDevice()
 {
     std::shared_lock<std::shared_mutex> lock(lock_);
@@ -277,6 +278,7 @@ void SpecialInputDeviceParser::PrintSpecialInputDevice()
         FI_HILOGI("devAlias:%{public}s -> devName:%{public}s", elem.first.c_str(), elem.second.c_str());
     }
 }
+ //LCOV_EXCL_STOP
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

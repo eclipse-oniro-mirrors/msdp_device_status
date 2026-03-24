@@ -51,6 +51,9 @@ bool SpecialInputDeviceFuzzTest(FuzzedDataProvider &provider)
         return false;
     }
     cJSON *json = cJSON_GetObjectItemCaseSensitive(parser.Get(), "special_input_device");
+    std::vector<std::string> keywords;
+    keywords.push_back(name);
+    keywords.push_back(alias);
     SpecialInputDeviceParser::GetInstance().ParseExactlyMatchItem(json, dev1);
     SpecialInputDeviceParser::GetInstance().ParseContainMatchItem(json, dev2);
     SpecialInputDeviceParser::GetInstance().ParseSpecialInputDeviceItem(json, dev3);
@@ -59,6 +62,7 @@ bool SpecialInputDeviceFuzzTest(FuzzedDataProvider &provider)
     SpecialInputDeviceParser::GetInstance().ParseExactlyMatch(parser);
     SpecialInputDeviceParser::GetInstance().ParseContainMatch(parser);
     SpecialInputDeviceParser::GetInstance().ParseSpecialInputDevice(parser);
+    SpecialInputDeviceParser::GetInstance().IsAllKeywordsMatched(name, keywords);
     return true;
 }
 
