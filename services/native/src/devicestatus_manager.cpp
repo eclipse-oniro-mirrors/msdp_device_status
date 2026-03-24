@@ -585,6 +585,7 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
         if (notifyListener_ != nullptr) {
             notifyListener_->OnNotifyMetadata(emptyMetadata);
         }
+        hasSubmitted_.store(false);
         notifyListener_ = nullptr;
         return COMMON_PARAMETER_ERROR;
     }
