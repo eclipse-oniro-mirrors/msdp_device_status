@@ -295,12 +295,12 @@ HWTEST_F(DeviceStatusManagerTest, ValidateMetadataTest, TestSize.Level0) {
     bool result = deviceStatusManager->ValidateMetadata(metadata);
     EXPECT_FALSE(result);
 
-    metadata = "https://hiviewocean.cbg.huawei.com/#/mateView/previewPage?code=P_202407081523381322&dataType="
+    metadata = "https://example.com/preview?code=123&dataType=exampleData&pageType=examplePage&schemaName=genericSchema"
         "interfaceData&pageType=page&schemaName=hmos_reliability";
     result = deviceStatusManager->ValidateMetadata(metadata);
     EXPECT_FALSE(result);
 
-    metadata = "https://onebox.huawei.com/v/dac76cc683f9aad36fed475ad2c4d878";
+    metadata = "https://example.com/preview?code=123&dataType=exampleData";
     result = deviceStatusManager->ValidateMetadata(metadata);
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "ValidateMetadataTest end";
@@ -351,7 +351,7 @@ HWTEST_F(DeviceStatusManagerTest, SubmitMetadataTest04, TestSize.Level0) {
     deviceStatusManager->hasSubmitted_ = false;
     deviceStatusManager->bundleNameCache_.emplace(boomerangCallback_, "metadata");
 
-    std::string metadata = "https://hiviewocean.cbg.huawei.com/#/mateView/previewPage?code="
+    std::string metadata = "https://example.com/preview?code=123&dataType=exampleData&pageType=examplePage&schemaName=genericSchema"
         "P_202407081523381322&=interfaceData&pageType=page&schemaName=hmos_reliability";
     result = deviceStatusManager->SubmitMetadata(metadata);
     EXPECT_EQ(result, COMMON_PARAMETER_ERROR);
