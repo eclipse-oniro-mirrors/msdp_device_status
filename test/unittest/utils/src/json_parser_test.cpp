@@ -52,7 +52,7 @@ void JsonParserTest::TearDown() {}
 
 /**
  * @tc.name: JsonParserTest_Constructor_001
- * @tc.desc: Test JsonParser constructor with nullptr jsonStr
+ * @tc.desc: Test JsonParser constructor with nullptr jsonStr.
  * @tc.type: FUNC
  * @tc.require:
  */
