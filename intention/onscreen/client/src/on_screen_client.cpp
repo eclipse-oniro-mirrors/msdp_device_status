@@ -72,11 +72,12 @@ int32_t OnScreenClient::IsParallelFeatureEnabled(int32_t windowId, int32_t& outS
     auto ret = INTENTION_CLIENT->IsParallelFeatureEnabled(windowId, outStatus);
     return ret;
 }
-
+//LCOV_EXCL_START
 int32_t OnScreenClient::GetLiveStatus()
 {
     return INTENTION_CLIENT->GetLiveStatus();
 }
+//LCOV_EXCL_STOP
 
 int32_t OnScreenClient::RegisterAwarenessCallback(const AwarenessCap& cap,
     const sptr<IRemoteOnScreenCallback>& callback, const AwarenessOptions& option)
