@@ -77,7 +77,6 @@ static void HiviewWriteEndEvent(const std::string& transId, const std::string& a
 
 bool IsTaiheStandCallbackExist(JsOnSteadyStandingCallbackType const& taiheCallback)
 {
-    std::lock_guard<std::mutex> guard(gCallbacksMutex_);
     auto iter = gCallbacks_.find(DeviceStatus::Type::TYPE_STAND);
     if (iter == gCallbacks_.end()) {
         return false;
