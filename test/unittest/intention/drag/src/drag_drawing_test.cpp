@@ -73,7 +73,7 @@ std::shared_ptr<Media::PixelMap> DragDrawingTest::CreatePixelMap(int32_t width, 
 {
     CALL_DEBUG_ENTER;
     if (width <= 0 || width > MAX_PIXEL_MAP_WIDTH || height <= 0 || height > MAX_PIXEL_MAP_HEIGHT) {
-        FI_HILOGE("invalid, height:%{public}d, width:%{public}d", height, width);
+        FI_HILOGE("Invalid, height:%{public}d, width:%{public}d", height, width);
         return nullptr;
     }
     Media::InitializationOptions opts;
@@ -129,6 +129,420 @@ std::optional<DragData> DragDrawingTest::CreateDragData(int32_t sourceType,
     dragData.hasCoordinateCorrected = hasCoordinateCorrected;
     dragData.hasCanceledAnimation = HAS_CANCELED_ANIMATION;
     return dragData;
+}
+
+/**
+ * @tc.name: DragDrawingTest1
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest1, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = 1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context, true);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.LoadNewMaterialLib();
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest2
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest2, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool ret = g_dragMgr.dragDrawing_.SetNewMaterialId();
+    EXPECT_FALSE(ret);
+    g_dragMgr.dragDrawing_.LoadNewMaterialLib();
+    ret = g_dragMgr.dragDrawing_.SetNewMaterialId();
+    EXPECT_FALSE(ret);
+    ret = g_dragMgr.dragDrawing_.SetNewMaterialId();
+    EXPECT_FALSE(ret);
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+}
+
+/**
+ * @tc.name: DragDrawingTest3
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest3, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = 1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.LoadNewMaterialLib();
+    bool result = g_dragMgr.dragDrawing_.SetNewMaterialId();
+    EXPECT_FALSE(result);
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest4
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest4, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool ret = g_dragMgr.dragDrawing_.SetMaterialFilter();
+    EXPECT_FALSE(ret);
+    g_dragMgr.dragDrawing_.materialFilter_ = std::make_shared<Rosen::Filter>();
+    ret = g_dragMgr.dragDrawing_.SetMaterialFilter();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DragDrawingTest5
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest5, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.materialFilter_ = std::make_shared<Rosen::Filter>();
+    bool result = g_dragMgr.dragDrawing_.SetMaterialFilter();
+    EXPECT_TRUE(result);
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest6
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest6, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    FilterInfo filterInfo;
+    std::shared_ptr<Rosen::RSCanvasNode> filterNode = Rosen::RSCanvasNode::Create();
+    g_dragMgr.dragDrawing_.OnSetCustomDragBlur(filterInfo, filterNode);
+    filterNode = nullptr;
+    g_dragMgr.dragDrawing_.OnSetCustomDragBlur(filterInfo, filterNode);
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest7
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest7, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    FilterInfo filterInfo;
+    std::shared_ptr<Rosen::RSCanvasNode> filterNode = Rosen::RSCanvasNode::Create();
+    g_dragMgr.dragDrawing_.SetCustomDragBlur(filterInfo, filterNode);
+    g_dragMgr.dragDrawing_.materialId_ = 1;
+    g_dragMgr.dragDrawing_.SetCustomDragBlur(filterInfo, filterNode);
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = 1694498816;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.SetCustomDragBlur(filterInfo, filterNode);
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    g_dragMgr.dragDrawing_.materialFilter_  = std::make_shared<Rosen::Filter>();
+    g_dragMgr.dragDrawing_.SetCustomDragBlur(filterInfo, filterNode);
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    g_dragMgr.dragDrawing_.materialFilter_  = std::make_shared<Rosen::Filter>();
+    ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.SetCustomDragBlur(filterInfo, filterNode);
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest8
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest8, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    FilterInfo filterInfo;
+    ExtraInfo extraInfo;
+    std::shared_ptr<Rosen::RSCanvasNode> filterNode = Rosen::RSCanvasNode::Create();
+    g_dragMgr.dragDrawing_.OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    filterNode = nullptr;
+    g_dragMgr.dragDrawing_.OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest9
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest9, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    FilterInfo filterInfo;
+    ExtraInfo extraInfo;
+    g_dragMgr.dragDrawing_.SetComponentDragBlur(filterInfo, extraInfo, nullptr);
+    std::shared_ptr<Rosen::RSCanvasNode> filterNode = Rosen::RSCanvasNode::Create();
+    g_dragMgr.dragDrawing_.SetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    g_dragMgr.dragDrawing_.materialId_ = 1;
+    g_dragMgr.dragDrawing_.SetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = 1694498816;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.SetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    g_dragMgr.dragDrawing_.materialFilter_  = std::make_shared<Rosen::Filter>();
+    g_dragMgr.dragDrawing_.SetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    g_dragMgr.dragDrawing_.materialFilter_  = std::make_shared<Rosen::Filter>();
+    ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.SetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+}
+
+/**
+ * @tc.name: DragDrawingTest10
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest10, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    FilterInfo filterInfo;
+    ExtraInfo extraInfo;
+    extraInfo.cornerRadius = -1;
+    std::shared_ptr<Rosen::RSCanvasNode> filterNode = Rosen::RSCanvasNode::Create();
+    g_dragMgr.dragDrawing_.OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    extraInfo.cornerRadius = 0;
+    filterInfo.dipScale = -1;
+    g_dragMgr.dragDrawing_.OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    filterInfo.dipScale = std::numeric_limits<float>::max();
+    extraInfo.cornerRadius = std::numeric_limits<float>::max();
+    g_dragMgr.dragDrawing_.OnSetComponentDragBlur(filterInfo, extraInfo, filterNode);
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest11
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest11, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = -1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    FilterInfo filterInfo;
+    filterInfo.blurRadius = -1;
+    std::shared_ptr<Rosen::RSCanvasNode> filterNode = Rosen::RSCanvasNode::Create();
+    g_dragMgr.dragDrawing_.OnSetCustomDragBlur(filterInfo, filterNode);
+    filterInfo.blurRadius = 0;
+    filterInfo.dipScale = -1;
+    g_dragMgr.dragDrawing_.OnSetCustomDragBlur(filterInfo, filterNode);
+    filterInfo.dipScale = std::numeric_limits<float>::max();
+    filterInfo.blurRadius = std::numeric_limits<float>::max();
+    g_dragMgr.dragDrawing_.OnSetCustomDragBlur(filterInfo, filterNode);
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest12
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest12, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData.value().filterInfo = "{\"blurStyle\":2}";
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.ProcessFilter();
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest13
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest13, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = 1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.ProcessFilter();
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest14
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest14, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData.value().extraInfo = "{\"drag_data_type\":\"scb_folder\"}";
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.ProcessFilter();
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest15
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest15, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragDrawing_.materialId_ = 1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.ProcessFilter();
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest16
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest16, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData.value().extraInfo = "{\"drag_data_type\":\"scb_folder\"}";
+    g_dragMgr.dragDrawing_.materialId_ = 1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.ProcessFilter();
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+ * @tc.name: DragDrawingTest17
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest17, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData.value().filterInfo = "{\"blurStyle\":2}";
+    g_dragMgr.dragDrawing_.materialId_ = 1;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.ProcessFilter();
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
 }
 } // namespace DeviceStatus
 } // namespace Msdp
