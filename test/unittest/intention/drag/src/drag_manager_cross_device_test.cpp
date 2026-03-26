@@ -78,6 +78,8 @@ HWTEST_F(DragManagerCrossDeviceTest, GetUdKeyWithCollaborationServiceEnabled, Te
     ret = g_dragMgr.GetDragSummaryInfo(dragSummaryInfo);
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragState_ = DragState::STOP;
+    g_dragMgr.isCrossDragging_ = false;
+    g_dragMgr.isCollaborationService_ = false;
 }
 /**
  * @tc.name: GetUdKeyWithCrossDragging
