@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,8 +40,8 @@ sptr<DeviceStatusClientFuzzer::DeviceStatusTestCallback> cb =
 void DeviceStatusClientFuzzer::DeviceStatusTestCallback::OnDeviceStatusChanged(const \
     Data& devicestatusData)
 {
-    std::cout << "DeviceStatusTestCallback type: " << devicestatusData.type << std::endl;
-    std::cout << "DeviceStatusTestCallback value: " << devicestatusData.value << std::endl;
+    (void)devicestatusData.type;
+    (void)devicestatusData.value;
 }
 
 void DeviceStatusClientFuzzer::TestSubscribeCallback(const uint8_t* data)
