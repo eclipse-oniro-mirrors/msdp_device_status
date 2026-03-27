@@ -428,6 +428,7 @@ ohos_unittest("MsdpKitReportTest") {
 }
 
 ohos_unittest("MsdpKitReportNewTest") {
+  use_exceptions = true
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -466,6 +467,7 @@ ohos_unittest("MsdpKitReportNewTest") {
 }
 
 ohos_unittest("MsdpTimerInfoTest") {
+  use_exceptions = true
   sanitize = {
     integer_overflow = true
     ubsan = true
