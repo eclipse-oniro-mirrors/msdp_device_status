@@ -71,7 +71,9 @@ void EtsDragManager::registerListener(callback_view<void(DragState)> callback, u
         return (ANI_OK == env->Reference_StrictEquals(callbackRef, obj->ref, &isEqual)) && isEqual;
     });
     if (isDuplicate) {
-        env->GlobalReference_Delete(callbackRef);
+        if (ANI_OK != env->GlobalReference_Delete(callbackRef)) {
+            FI_HILOGE("Global Reference delete fail");
+        }
         FI_HILOGD("callback already registered");
         return;
     }

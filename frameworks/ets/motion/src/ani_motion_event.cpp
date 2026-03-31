@@ -76,7 +76,11 @@ AniMotionEvent::~AniMotionEvent()
             continue;
         }
         for (auto item : iter.second->onRefSets) {
-            taihe::get_env()->GlobalReference_Delete(item);
+            auto env = taihe::get_env();
+            if (nullptr == env || ANI_OK != env->GlobalReference_Delete(item)) {
+                FI_HILOGE("Global Reference delete fail");
+                continue;
+            }
         }
         iter.second->onRefSets.clear();
         iter.second = nullptr;
@@ -89,6 +93,7 @@ AniMotionEvent::~AniMotionEvent()
 bool AniMotionEvent::CheckEvents(int32_t eventType)
 {
     FI_HILOGD("Enter");
+    std::lock_guard<std::mutex> lock(mutex_);
     auto typeIter = events_.find(eventType);
     if (typeIter == events_.end()) {
         FI_HILOGD("eventType not find");
@@ -99,6 +104,7 @@ bool AniMotionEvent::CheckEvents(int32_t eventType)
 
 bool AniMotionEvent::SubscribeCallback(int32_t type)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto iter = callbacks_.find(type);
     if (iter != callbacks_.end()) {
         return true;
@@ -111,10 +117,7 @@ bool AniMotionEvent::SubscribeCallback(int32_t type)
     }
     int32_t ret = g_motionClient.SubscribeCallback(type, callback);
     if (ret == RET_OK) {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            callbacks_.insert(std::make_pair(type, callback));
-        }
+        callbacks_.insert(std::make_pair(type, callback));
         return true;
     }
     
@@ -182,7 +185,11 @@ bool AniMotionEvent::InsertRef(std::shared_ptr<MotionEventListener> listener, an
         auto isDuplicate =
             (taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
-            taihe::get_env()->GlobalReference_Delete(onHandlerRef);
+            auto env = taihe::get_env();
+            if (nullptr == env || ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
+                FI_HILOGE("Global Reference delete fail");
+                return false;
+            }
             FI_HILOGD("callback already registered");
             return true;
         }
@@ -218,7 +225,10 @@ bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
         auto ret = listener->onRefSets.insert(onHandlerRef);
         if (!ret.second) {
             FI_HILOGE("Failed to insert refs");
-            taihe::get_env()->GlobalReference_Delete(onHandlerRef);
+            auto env = taihe::get_env();
+            if (nullptr == env || ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
+                FI_HILOGE("Global Reference delete fail");
+            }
             return false;
         }
         events_.insert(std::make_pair(eventType, listener));
@@ -260,7 +270,11 @@ bool AniMotionEvent::RemoveAllCallback(int32_t eventType)
         return false;
     }
     for (const auto item : iter->second->onRefSets) {
-        taihe::get_env()->GlobalReference_Delete(item);
+        auto env = taihe::get_env();
+        if (nullptr == env || ANI_OK != env->GlobalReference_Delete(item)) {
+            FI_HILOGE("Global Reference delete fail");
+            continue;
+        }
     }
     iter->second->onRefSets.clear();
     events_.erase(iter);
@@ -305,18 +319,22 @@ bool AniMotionEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     if (iter->second->onRefSets.empty()) {
         events_.erase(eventType);
     }
-    taihe::get_env()->GlobalReference_Delete(onHandlerRef);
+
+    auto env = taihe::get_env();
+    if (nullptr == env || ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
+        FI_HILOGE("Global Reference delete fail");
+        return false;
+    }
     return true;
 }
 
 ani_object AniMotionEvent::CreateAniUndefined(ani_env* env)
 {
     ani_ref aniRef;
-    if (env == nullptr) {
+    if (env == nullptr || ANI_OK != env->GetUndefined(&aniRef)) {
         FI_HILOGE("null env");
         return nullptr;
     }
-    env->GetUndefined(&aniRef);
     return static_cast<ani_object>(aniRef);
 }
 
@@ -387,16 +405,19 @@ void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const 
             return;
         }
         ani_ref result;
-        if (env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(),
-            &result) != ANI_OK) {
-            HILOG_ERROR(LOG_CORE, "Excute CallBack failed. %{public}d",
-                env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(),
-                &result));
-            vm_->DetachCurrentThread();
+        ani_status status = ANI_ERROR;
+        status = env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(), &result);
+        if (status != ANI_OK) {
+            FI_HILOGD("Excute CallBack failed. %{public}d", status);
+            if (ANI_OK != vm_->DetachCurrentThread()) {
+                FI_HILOGE("detach current thread failed.");
+            }
             return;
         }
     }
-    vm_->DetachCurrentThread();
+    if (ANI_OK != vm_->DetachCurrentThread()) {
+        FI_HILOGE("detach current thread failed.");
+    }
 }
 
 ani_vm* AniMotionEvent::GetAniVm(ani_env* env)
@@ -421,7 +442,7 @@ ani_env* AniMotionEvent::GetAniEnv(ani_vm* vm)
     }
     ani_env* env = nullptr;
     if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
-        FI_HILOGE("GetEnv failed: %{public}d", vm->GetEnv(ANI_VERSION_1, &env));
+        FI_HILOGE("GetEnv failed");
         return nullptr;
     }
     return env;
@@ -436,7 +457,7 @@ ani_env* AniMotionEvent::AttachAniEnv(ani_vm* vm)
     ani_env *workerEnv = nullptr;
     ani_options aniArgs {0, nullptr};
     if (vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv) != ANI_OK) {
-        FI_HILOGE("Attach Env failed: %{public}d", vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv));
+        FI_HILOGE("Attach Env failed");
         return nullptr;
     }
     return workerEnv;

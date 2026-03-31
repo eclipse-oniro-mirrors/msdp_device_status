@@ -47,7 +47,9 @@ struct CallbackObject {
     {
         taihe::env_guard guard;
         if (auto *env = guard.get_env()) {
-            env->GlobalReference_Delete(ref);
+            if (ANI_OK != env->GlobalReference_Delete(ref)) {
+                return;
+            }
         }
     }
     callbackType callback;

@@ -25,7 +25,6 @@ namespace OHOS {
 namespace Msdp {
 std::mutex g_mutex;
 
-ani_env* AniUnderageModelEvent::env_ {nullptr};
 ani_vm* AniUnderageModelEvent::vm_ {nullptr};
 constexpr int32_t MAX_ERROR_CODE = 1000;
 constexpr int32_t UNSUPP_FRATURE_ERR = 0x3A1000D;
@@ -82,7 +81,10 @@ AniUnderageModelEvent::~AniUnderageModelEvent()
                 continue;
             }
             for (auto item : iter.second->onRefSets) {
-                taihe::get_env()->GlobalReference_Delete(item);
+                auto env = taihe::get_env();
+                if (env == nullptr || ANI_OK != env->GlobalReference_Delete(item)) {
+                    FI_HILOGE("Global Reference delete fail");
+                }
             }
             iter.second->onRefSets.clear();
             iter.second = nullptr;
@@ -94,6 +96,7 @@ AniUnderageModelEvent::~AniUnderageModelEvent()
 bool AniUnderageModelEvent::CheckEvents(int32_t eventType)
 {
     FI_HILOGI("Enter");
+    std::lock_guard<std::mutex> lock(mutex_);
     auto typeIter = events_.find(eventType);
     if (typeIter == events_.end()) {
         FI_HILOGD("eventType not find");
@@ -207,7 +210,11 @@ bool AniUnderageModelEvent::InsertRef(std::shared_ptr<UnderageModelEventListener
         auto isDuplicate =
             (taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
-            taihe::get_env()->GlobalReference_Delete(onHandlerRef);
+            auto env = taihe::get_env();
+            if (env == nullptr || ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
+                FI_HILOGE("Global Reference delete fail");
+                return false;
+            }
             FI_HILOGD("callback already registered");
             return true;
         }
@@ -231,7 +238,6 @@ bool AniUnderageModelEvent::AddCallback(int32_t eventType, uintptr_t opq)
         FI_HILOGE("ani_env is nullptr");
         return false;
     }
-    env_ = env;
     vm_ = GetAniVm(env);
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
@@ -290,7 +296,11 @@ bool AniUnderageModelEvent::RemoveAllCallback(int32_t eventType)
         return false;
     }
     for (auto item : iter->second->onRefSets) {
-        taihe::get_env()->GlobalReference_Delete(item);
+        auto env = taihe::get_env();
+        if (env == nullptr || ANI_OK != env->GlobalReference_Delete(item)) {
+            FI_HILOGE("Global Reference delete fail");
+            continue;
+        }
     }
     iter->second->onRefSets.clear();
     events_.erase(iter);
@@ -316,7 +326,8 @@ bool AniUnderageModelEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     }
     ani_ref onHandlerRef = nullptr;
     ani_object callbackObj = reinterpret_cast<ani_object>(opq);
-    if (taihe::get_env()->GlobalReference_Create(callbackObj, &onHandlerRef) != ANI_OK) {
+    auto env = taihe::get_env();
+    if (env == nullptr || env->GlobalReference_Create(callbackObj, &onHandlerRef) != ANI_OK) {
         FI_HILOGE("GlobalReference_Create failed");
         return false;
     }
@@ -335,18 +346,21 @@ bool AniUnderageModelEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     if (iter->second->onRefSets.empty()) {
         events_.erase(eventType);
     }
-    taihe::get_env()->GlobalReference_Delete(onHandlerRef);
+    
+    if (ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
+        FI_HILOGE("Global Reference delete fail");
+        return false;
+    }
     return true;
 }
 
 ani_object AniUnderageModelEvent::CreateAniUndefined(ani_env* env)
 {
     ani_ref aniRef;
-    if (env == nullptr) {
+    if (env == nullptr || ANI_OK != env->GetUndefined(&aniRef)) {
         FI_HILOGE("null env");
         return nullptr;
     }
-    env->GetUndefined(&aniRef);
     return static_cast<ani_object>(aniRef);
 }
 
@@ -395,11 +409,15 @@ void AniUnderageModelEvent::OnEventChanged(uint32_t eventType, int32_t result, f
         if (env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(),
             &callResult) != ANI_OK) {
             HILOG_ERROR(LOG_CORE, "Excute CallBack failed.");
-            vm_->DetachCurrentThread();
+            if (ANI_OK != vm_->DetachCurrentThread()) {
+                HILOG_ERROR(LOG_CORE, "detach current thread.");
+            }
             return;
         }
     }
-    vm_->DetachCurrentThread();
+    if (ANI_OK != vm_->DetachCurrentThread()) {
+        HILOG_ERROR(LOG_CORE, "detach current thread.");
+    }
 }
 
 ani_vm* AniUnderageModelEvent::GetAniVm(ani_env* env)
