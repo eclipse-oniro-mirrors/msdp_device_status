@@ -459,6 +459,7 @@ HWTEST_F(DeviceStatusManagerTest, AccessibilityDisconnectTest, TestSize.Level0) 
 HWTEST_F(DeviceStatusManagerTest, TimerTaskTest, TestSize.Level0) {
     GTEST_LOG_(INFO) << "TimerTaskTest start";
     ASSERT_NO_FATAL_FAILURE(deviceStatusManager->TimerTask());
+    EXPECT_FALSE(deviceStatusManager->hasSubmitted_);
     GTEST_LOG_(INFO) << "TimerTaskTest end";
 }
 
