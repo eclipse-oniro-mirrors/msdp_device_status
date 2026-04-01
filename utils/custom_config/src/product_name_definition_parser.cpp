@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,20 @@ std::string ProductNameDefinitionParser::GetProductName(const std::string &key)
     return "";
 }
 
+std::vector<std::string> ProductNameDefinitionParser::GetProductNameVector(const std::string &key)
+{
+    if (Init() != RET_OK) {
+        FI_HILOGE("Init failed");
+        return {};
+    }
+    std::shared_lock<std::shared_mutex> lock(lock_);
+    if (productNamesVector_.find(key) != productNamesVector_.end()) {
+        return productNamesVector_[key];
+    }
+    FI_HILOGW("No %{public}s matched.", key.c_str());
+    return {};
+}
+
 int32_t ProductNameDefinitionParser::ParseProductNameMap(const JsonParser &jsonParser)
 {
     if (!cJSON_IsObject(jsonParser.Get())) {
@@ -104,7 +118,11 @@ int32_t ProductNameDefinitionParser::ParseProductNameMap(const JsonParser &jsonP
             continue;
         }
         std::unique_lock<std::shared_mutex> lock(lock_);
-        productNames_.insert({ productNameItem.productAlias, productNameItem.productName });
+        if (!productNameItem.productNamesVector.empty()) {
+            productNamesVector_.insert({ productNameItem.productAlias, productNameItem.productNamesVector });
+        } else {
+            productNames_.insert({ productNameItem.productAlias, productNameItem.productName });
+        }
     }
     return RET_OK;
 }
@@ -116,7 +134,9 @@ int32_t ProductNameDefinitionParser::ParserProductNameItem(const cJSON *json,
         FI_HILOGE("Parse product_alias failed");
         return RET_ERR;
     }
-    if (JsonParser::ParseString(json, "product_name", productNameItem.productName) != RET_OK) {
+    if (JsonParser::ParseString(json, "product_name", productNameItem.productName) != RET_OK &&
+        JsonParser::ParseStringArray(json, "product_name", productNameItem.productNamesVector, maxJsonArraySize) !=
+        RET_OK) {
         FI_HILOGE("Parse product_name failed");
         return RET_ERR;
     }

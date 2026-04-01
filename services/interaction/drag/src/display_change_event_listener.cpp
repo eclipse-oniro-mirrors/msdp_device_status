@@ -31,6 +31,9 @@ constexpr int32_t INDEX_EXPAND { 1 };
 constexpr size_t MAX_INDEX_LENGTH { 2 };
 const std::string SCREEN_ROTATION { "1" };
 const std::string SYS_PRODUCT_TYPE = OHOS::system::GetParameter("const.build.product", "HYM");
+const std::vector<std::string> DEVICE_TYPE_FOLD_PC_VECTOR {
+    PRODUCT_NAME_DEFINITION_PARSER.GetProductNameVector("DEVICE_TYPE_FOLD_PC_VECTOR")
+};
 } // namespace
 
 DisplayChangeEventListener::DisplayChangeEventListener(IContext *context)
@@ -269,8 +272,8 @@ void DisplayAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, con
     Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(displayAttributes,
         displayChangeEventListener_);
 #ifdef OHOS_ENABLE_PULLTHROW
-    displayChangeEventListener_->SetFoldPC(
-        SYS_PRODUCT_TYPE == PRODUCT_NAME_DEFINITION_PARSER.GetProductName("DEVICE_TYPE_FOLD_PC"));
+    displayChangeEventListener_->SetFoldPC(std::find(DEVICE_TYPE_FOLD_PC_VECTOR.begin(),
+        DEVICE_TYPE_FOLD_PC_VECTOR.end(), SYS_PRODUCT_TYPE) != DEVICE_TYPE_FOLD_PC_VECTOR.end());
     if (displayChangeEventListener_->IsFoldPC()) {
         FI_HILOGI("device foldPC check ok");
         if (!context_->GetDragManager().RegisterPullThrowListener()) {
