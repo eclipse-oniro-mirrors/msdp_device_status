@@ -919,6 +919,7 @@ int32_t IntentionClient::SetMouseDragMonitorState(bool state)
 
 int32_t IntentionClient::SetDraggableState(bool state)
 {
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
     if (Connect() != RET_OK) {
         FI_HILOGE("Can not connect to IntentionService");
         return RET_ERR;
@@ -929,11 +930,13 @@ int32_t IntentionClient::SetDraggableState(bool state)
         FI_HILOGE("proxy::SetDraggableState fail");
         return ret;
     }
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
     return RET_OK;
 }
 
 int32_t IntentionClient::GetAppDragSwitchState(bool &state)
 {
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
     if (Connect() != RET_OK) {
         FI_HILOGE("Can not connect to IntentionService");
         return RET_ERR;
@@ -944,11 +947,13 @@ int32_t IntentionClient::GetAppDragSwitchState(bool &state)
         FI_HILOGE("proxy::GetAppDragSwitchState fail");
         return ret;
     }
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
     return RET_OK;
 }
 
 int32_t IntentionClient::SetDraggableStateAsync(bool state, int64_t downTime)
 {
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
     if (Connect() != RET_OK) {
         FI_HILOGE("Can not connect to IntentionService");
         return RET_ERR;
@@ -959,6 +964,7 @@ int32_t IntentionClient::SetDraggableStateAsync(bool state, int64_t downTime)
         FI_HILOGE("proxy::SetDraggableStateAsync fail");
         return ret;
     }
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
     return RET_OK;
 }
 
