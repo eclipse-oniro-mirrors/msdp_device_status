@@ -77,10 +77,10 @@ function GetCooperateSwitchStatePromise(networkId: String): @sts_type("Promise<b
 function ActivateCooperateWithOptionsPromise(targetNetworkId: String, inputDeviceId: i32, cooperateOptions: Optional<CooperateOptions>): @sts_type("Promise<void>") Opaque;
 
 @!sts_inject("""
-    function onCooperateMessage(callback: (info: CooperateMessage) => void) {
+    function onCooperateMessage(callback: (info: CooperateMessage) => void): void {
         return onCooperateMessageInner(callback, callback);
       }
-    function offCooperateMessage( callback?: (info: CooperateMessage) => void) {
+    function offCooperateMessage( callback?: (info: CooperateMessage) => void): void {
         return offCooperateMessageInner(callback);
       }
 """)
@@ -88,10 +88,10 @@ function OnCooperateMessageInner(f: (info: CooperateMessage) => void, opq: Opaqu
 function OffCooperateMessageInner(opq: Optional<Opaque>);
 
 @!sts_inject("""
-    function onCooperateMouseEvent(networkId: string, callback: (info: MouseLocation) => void) {
+    function onCooperateMouseEvent(networkId: string, callback: (info: MouseLocation) => void): void {
         return onCooperateMouseEventInner(networkId, callback, callback);
       }
-    function offCooperateMouseEvent(networkId: string, callback?: (info: MouseLocation) => void) {
+    function offCooperateMouseEvent(networkId: string, callback?: (info: MouseLocation) => void): void {
         return offCooperateMouseEventInner(networkId, callback);
       }
 """)

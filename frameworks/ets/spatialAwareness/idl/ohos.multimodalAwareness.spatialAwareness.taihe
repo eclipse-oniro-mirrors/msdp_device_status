@@ -65,19 +65,19 @@ struct DoorPositionResponse {
 
 @!sts_inject("""
     function onDistanceMeasure(configParams: DistanceMeasurementConfigParams,
-        callback: (info: DistanceMeasurementResponse) => void) {
+        callback: (info: DistanceMeasurementResponse) => void): void {
         return onDistanceMeasureInner(configParams, callback, callback);
       }
     function offDistanceMeasure(configParams: DistanceMeasurementConfigParams,
-        callback?: (info: DistanceMeasurementResponse) => void) {
+        callback?: (info: DistanceMeasurementResponse) => void): void {
         return offDistanceMeasureInner(configParams, callback);
       }
     function onIndoorOrOutdoorIdentify(configParams: DistanceMeasurementConfigParams,
-        callback: (info: DoorPositionResponse) => void) {
+        callback: (info: DoorPositionResponse) => void): void {
         return onIndoorOrOutdoorIdentifyInner(configParams, callback, callback);
       }
     function offIndoorOrOutdoorIdentify(configParams: DistanceMeasurementConfigParams,
-        callback?: (info: DoorPositionResponse) => void) {
+        callback?: (info: DoorPositionResponse) => void): void {
         return offIndoorOrOutdoorIdentifyInner(configParams, callback);
       }
 """)

@@ -35,16 +35,16 @@ enum HoldingHandStatus : i32 {
 }
 
 @!sts_inject("""
-    function onOperatingHandChanged(callback: (info: OperatingHandStatus) => void) {
+    function onOperatingHandChanged(callback: (info: OperatingHandStatus) => void): void {
         return onOperatingHandChangedInner(callback, callback);
       }
-    function offOperatingHandChanged(callback?: (info: OperatingHandStatus) => void) {
+    function offOperatingHandChanged(callback?: (info: OperatingHandStatus) => void): void {
         return offOperatingHandChangedInner(callback);
       }
-    function onHoldingHandChanged(callback: (info: HoldingHandStatus) => void) {
+    function onHoldingHandChanged(callback: (info: HoldingHandStatus) => void): void {
         return onHoldingHandChangedInner(callback, callback);
       }
-    function offHoldingHandChanged(callback?: (info: HoldingHandStatus) => void) {
+    function offHoldingHandChanged(callback?: (info: HoldingHandStatus) => void): void {
         return offHoldingHandChangedInner(callback);
       }
 """)
