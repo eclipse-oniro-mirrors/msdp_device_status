@@ -265,9 +265,7 @@ void JsDragContext::DeclareDragInterface(napi_env env, napi_value exports)
     napi_property_descriptor functions[] = {
         DECLARE_NAPI_STATIC_FUNCTION("on", On),
         DECLARE_NAPI_STATIC_FUNCTION("off", Off),
-        DECLARE_NAPI_STATIC_FUNCTION("getDataSummary", GetDataSummary),
-        DECLARE_NAPI_STATIC_FUNCTION("setDragSwitchState", SetDragSwitchState),
-        DECLARE_NAPI_STATIC_FUNCTION("setAppDragSwitchState", SetAppDragSwitchState)
+        DECLARE_NAPI_STATIC_FUNCTION("getDataSummary", GetDataSummary)
     };
     CHKRV(napi_define_properties(env, exports,
         sizeof(functions) / sizeof(*functions), functions), DEFINE_PROPERTIES);
