@@ -828,28 +828,6 @@ HWTEST_F(DragServerTest, DragServerTest30, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    bool enable = false;
-    bool isJsCaller = false;
-    int32_t ret = dragServer_->SetDragSwitchState(context, enable, isJsCaller);
-    EXPECT_EQ(ret, RET_OK);
-    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
-}
-
-/**
- * @tc.name: DragServerTest31
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest31, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
     DragEventData dragEventData {
         .timestampMs = g_timestamp,
         .coordinateX = g_coordinateX,
@@ -880,31 +858,6 @@ HWTEST_F(DragServerTest, DragServerTest32, TestSize.Level0)
     };
     int32_t ret = dragServer_->EraseMouseIcon(context);
     EXPECT_EQ(ret, COMMON_NOT_SYSTEM_APP);
-}
-
-/**
- * @tc.name: DragServerTest33
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragServerTest, DragServerTest33, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    uint64_t g_tokenId = NativeTokenGet();
-    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    bool enable = false;
-    std::string pkgName { "Undefined name" };
-    bool isJsCaller = false;
-    int32_t ret = dragServer_->SetAppDragSwitchState(context, enable, pkgName, isJsCaller);
-    EXPECT_EQ(ret, RET_OK);
-    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
 
 /**
@@ -2306,55 +2259,6 @@ HWTEST_F(DragServerTest, DragServerTest120, TestSize.Level1)
     context_->dragMgr_.dragState_ = DragState::STOP;
 }
 
-
-/**
-* @tc.name: DragServerTest121
-* @tc.desc: Test SetDragSwitchState with enable true
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DragServerTest, DragServerTest121, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    uint64_t g_tokenId = NativeTokenGet();
-    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    bool enable = true;
-    bool isJsCaller = false;
-    int32_t ret = dragServer_->SetDragSwitchState(context, enable, isJsCaller);
-    EXPECT_EQ(ret, RET_OK);
-    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
-}
-
-/**
-* @tc.name: DragServerTest122
-* @tc.desc: Test SetAppDragSwitchState with different package names
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DragServerTest, DragServerTest122, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    uint64_t g_tokenId = NativeTokenGet();
-    EXPECT_EQ(g_tokenId, IPCSkeleton::GetCallingTokenID());
-    CallingContext context {
-        .intention = g_intention,
-        .tokenId = IPCSkeleton::GetCallingTokenID(),
-        .uid = IPCSkeleton::GetCallingUid(),
-        .pid = IPCSkeleton::GetCallingPid(),
-    };
-    bool enable = true;
-    std::string pkgName { "test.package" };
-    bool isJsCaller = false;
-    int32_t ret = dragServer_->SetAppDragSwitchState(context, enable, pkgName, isJsCaller);
-    EXPECT_EQ(ret, RET_OK);
-    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
-}
 
 /**
 * @tc.name: DragServerTest123

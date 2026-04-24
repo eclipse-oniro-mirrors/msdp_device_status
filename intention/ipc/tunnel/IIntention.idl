@@ -76,8 +76,6 @@ interface OHOS.Msdp.IIntention {
     void SetDragWindowScreenId([in] unsigned long displayId, [in] unsigned long screenId);
     void GetDragSummary([out] OrderedMap<String, long> summarys, [in] boolean isJsCaller);
     void GetDragSummaryInfo([out] SequenceableDragSummaryInfo sequenceableDragSummaryInfo);
-    void SetDragSwitchState([in] boolean enable, [in] boolean isJsCaller);
-    void SetAppDragSwitchState([in] boolean enable, [in] String pkgName, [in] boolean isJsCaller);
     void GetDragState([out] int dragState);
     void EnableUpperCenterMode([in] boolean enable);
     void GetDragAction([out] int dragAction);

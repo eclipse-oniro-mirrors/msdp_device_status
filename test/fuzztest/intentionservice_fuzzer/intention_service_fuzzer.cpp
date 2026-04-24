@@ -346,21 +346,6 @@ public:
         return 0;
     }
 
-    ErrCode SetDragSwitchState(bool enable, bool isJsCaller) override
-    {
-        (void)enable;
-        (void)isJsCaller;
-        return 0;
-    }
-
-    ErrCode SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller) override
-    {
-        (void)enable;
-        (void)pkgName;
-        (void)isJsCaller;
-        return 0;
-    }
-
     ErrCode GetDragState(int32_t &dragState) override
     {
         (void)dragState;

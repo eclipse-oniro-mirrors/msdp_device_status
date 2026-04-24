@@ -19,7 +19,6 @@
 #define LOG_TAG "ohos.deviceStatus.dragInteraction"
 
 namespace {
-inline constexpr size_t MAX_PKG_NAME_LEN { 128 };
 static DragState ConverDragState(DeviceStatus::DragState state)
 {
     switch (state) {

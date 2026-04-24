@@ -43,8 +43,6 @@ public:
     void RegisterListener(napi_env env, napi_value handle);
     void UnregisterListener(napi_env env, napi_value handle = nullptr);
     napi_value GetDataSummary(napi_env env);
-    int32_t SetDragSwitchState(napi_env env, bool enable);
-    int32_t SetAppDragSwitchState(napi_env env, bool enable, const std::string &pkgName);
 
 private:
     struct CallbackInfo : public RefBase {

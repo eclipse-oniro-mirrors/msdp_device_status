@@ -316,26 +316,6 @@ int32_t DragClient::GetDragSummary(std::map<std::string, int64_t> &summarys, boo
     return ret;
 }
 
-int32_t DragClient::SetDragSwitchState(bool enable, bool isJsCaller)
-{
-    CALL_DEBUG_ENTER;
-    int32_t ret = INTENTION_CLIENT->SetDragSwitchState(enable, isJsCaller);
-    if (ret != RET_OK) {
-        FI_HILOGE("SetDragSwitchState fail");
-    }
-    return ret;
-}
-
-int32_t DragClient::SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller)
-{
-    CALL_DEBUG_ENTER;
-    int32_t ret = INTENTION_CLIENT->SetAppDragSwitchState(enable, pkgName, isJsCaller);
-    if (ret != RET_OK) {
-        FI_HILOGE("SetAppDragSwitchState fail");
-    }
-    return ret;
-}
-
 int32_t DragClient::GetDragAction(DragAction &dragAction)
 {
     CALL_DEBUG_ENTER;

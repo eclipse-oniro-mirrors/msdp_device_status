@@ -406,25 +406,6 @@ public:
      * @since 11
      */
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller = false);
-
-    /**
-     * @brief Sets the master switch for enhancing the drag capability.
-     * @param enable Switch state.
-     * @param isJsCaller Indicates whether to add checking.
-     * @return Returns <b>0</b> if the operation is successful; returns other values if the operation fails.
-     * @since 15
-     */
-    int32_t SetDragSwitchState(bool enable, bool isJsCaller = false);
-
-    /**
-     * @brief Sets the app switch for enhancing the drag capability.
-     * @param enable Switch state.
-     * @param pkgName App package name.
-     * @param isJsCaller Indicates whether to add checking.
-     * @return Returns <b>0</b> if the operation is successful; returns other values if the operation fails.
-     * @since 15
-     */
-    int32_t SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller = false);
 #else
     /**
      * @brief Obtains data summary of the drag object.
