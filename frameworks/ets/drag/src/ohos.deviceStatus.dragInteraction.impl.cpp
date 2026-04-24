@@ -187,17 +187,6 @@ array<Summary> EtsDragManager::GetDataSummary()
     return array<Summary>(arr);
 }
 
-int32_t EtsDragManager::SetDragSwitchState(bool enable)
-{
-    CALL_INFO_TRACE;
-    return INTERACTION_MGR->SetDragSwitchState(enable, true);
-}
-
-int32_t EtsDragManager::SetAppDragSwitchState(bool enable, const std::string &pkgName)
-{
-    return INTERACTION_MGR->SetAppDragSwitchState(enable, pkgName, true);
-}
-
 void registerListener(callback_view<void(DragState)> callback, uintptr_t opq)
 {
     return EtsDragManager::GetInstance()->registerListener(callback, opq);
@@ -212,27 +201,6 @@ array<Summary> GetDataSummary()
 {
     return EtsDragManager::GetInstance()->GetDataSummary();
 }
-
-void SetDragSwitchState(bool enabled)
-{
-    if (EtsDragManager::GetInstance()->SetDragSwitchState(enabled) == OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP) {
-        taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP, "Not system application.");
-    }
-}
-
-void SetAppDragSwitchState(bool enabled, ::taihe::string_view bundleName)
-{
-    std::string pkgName(bundleName);
-    if (pkgName.empty() || pkgName.length() > MAX_PKG_NAME_LEN) {
-        FI_HILOGE("The pkgName is empty or pkgName len ");
-        taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_PARAMETER_ERROR, "Invalid pkgName length.");
-        return;
-    }
-    if (EtsDragManager::GetInstance()->SetAppDragSwitchState(enabled, pkgName) ==
-        OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP) {
-        taihe::set_business_error(OHOS::Msdp::DeviceStatus::COMMON_NOT_SYSTEM_APP, "Not system application.");
-    }
-}
 } // namespace
 
 // Since these macros are auto-generate, lint will cause false positive.
@@ -240,6 +208,4 @@ void SetAppDragSwitchState(bool enabled, ::taihe::string_view bundleName)
 TH_EXPORT_CPP_API_registerListener(registerListener);
 TH_EXPORT_CPP_API_unRegisterListener(unRegisterListener);
 TH_EXPORT_CPP_API_GetDataSummary(GetDataSummary);
-TH_EXPORT_CPP_API_SetDragSwitchState(SetDragSwitchState);
-TH_EXPORT_CPP_API_SetAppDragSwitchState(SetAppDragSwitchState);
 // NOLINTEND

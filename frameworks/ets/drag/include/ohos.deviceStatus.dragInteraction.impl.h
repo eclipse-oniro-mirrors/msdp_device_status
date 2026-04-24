@@ -66,8 +66,6 @@ public:
     void unRegisterListener(optional_view<uintptr_t> opq);
     void OnDragMessage(DeviceStatus::DragState state) override;
     array<Summary> GetDataSummary();
-    int32_t SetDragSwitchState(bool enable);
-    int32_t SetAppDragSwitchState(bool enable, const std::string &pkgName);
     static std::shared_ptr<EtsDragManager> GetInstance();
 
 private:
