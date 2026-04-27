@@ -33,6 +33,7 @@ public:
     void TearDown();
     static std::shared_ptr<Media::PixelMap> CreatePixelMap(int32_t width, int32_t height);
     static std::optional<DragData> CreateDragData(int32_t sourceType, int32_t pointerId, int32_t dragNum);
+    static inline std::shared_ptr<Rosen::RSUIDirector> rsUiDirector_ = nullptr;
 };
 } // namespace DeviceStatus
 } // namespace Msdp
