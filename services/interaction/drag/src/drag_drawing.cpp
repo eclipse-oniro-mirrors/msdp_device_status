@@ -474,7 +474,11 @@ void DragDrawing::Draw(int32_t displayId, int32_t displayX, int32_t displayY, bo
     if (!g_drawingInfo.multiSelectedNodes.empty() && !g_drawingInfo.multiSelectedPixelMaps.empty()) {
         MultiSelectedAnimation(positionX, positionY, adjustSize, isMultiSelectedAnimation);
     }
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    } else {
+        FI_HILOGE("DragDrawing::Draw displayId:%{public}d, uidirector is nullptr", displayId);
+    }
 }
 
 void DragDrawing::UpdateDragNodeBoundsAndFrame(float x, float y, int32_t w, int32_t h)
@@ -1005,7 +1009,11 @@ void DragDrawing::DestroyDragWindow()
         screenId_ = 0;
         g_drawingInfo.displayId = -1;
         g_drawingInfo.surfaceNode = nullptr;
-        rsUiDirector_->SendMessages();
+        if (rsUiDirector_ != nullptr) {
+            rsUiDirector_->SendMessages();
+        } else {
+            FI_HILOGE("DragDrawing::DestroyDragWindow uidirector is nullptr");
+        }
     }
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(callback_);
@@ -1059,6 +1067,10 @@ void DragDrawing::UpdateDragWindowState(
 {
     CHKPV(g_drawingInfo.surfaceNode);
     dragWindowVisible_.store(visible);
+    if (rsUiDirector_ == nullptr) {
+        FI_HILOGE("DragDrawing::UpdateDragWindowState uidirector is nullptr");
+        return;
+    }
     if (visible && isZoomInAndAlphaChanged) {
         FI_HILOGI("UpdateDragWindowState in animation");
         if (!CheckNodesValid()) {
@@ -1221,8 +1233,9 @@ void DragDrawing::PullThrowAnimation(double tx, double ty, float vx,
                 pullThrowAnimationYCompleted_ = true;
             }
         });
-    CHKPV(rsUiDirector_);
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    }
     FI_HILOGI("leave");
     return;
 }
@@ -1266,8 +1279,9 @@ void DragDrawing::SetScaleAnimation()
             }
         },
         [&]() { FI_HILOGI("pullthrow Scale end"); });
-    CHKPV(rsUiDirector_);
-    rsUiDirector_->SendMessages()
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    }
     FI_HILOGI("leave");
     return;
 }
@@ -1310,7 +1324,9 @@ void DragDrawing::PullThrowBreatheAnimation()
             }
         },
         [&]() { FI_HILOGI("Breathe end"); });
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    }
     FI_HILOGI("leave");
     return;
 }
@@ -1333,8 +1349,9 @@ void DragDrawing::PullThrowBreatheEndAnimation()
             g_drawingInfo.parentNode->SetScale(1.0f);
         },
         [&]() { FI_HILOGI("Breathe end Animation End"); });
-    CHKPV(rsUiDirector_);
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    }
     FI_HILOGI("leave");
     return;
 }
@@ -1359,7 +1376,9 @@ void DragDrawing::PullThrowZoomOutAnimation()
             FI_HILOGI("PullThrowZoomOutAnimation End");
             PullThrowBreatheEndAnimation();
         });
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    }
     FI_HILOGI("leave");
     return;
 }
@@ -1421,7 +1440,9 @@ void DragDrawing::RemoveStyleNodeAnimations()
         drawStyleScaleModifier_ = nullptr;
         needBreakStyleScaleAnimation_ = true;
     }
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    }
     FI_HILOGI("leave");
 }
 #endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
@@ -1733,7 +1754,10 @@ void DragDrawing::UpdateAnimationProtocol(Rosen::RSAnimationTimingProtocol proto
     interruptNum_ = START_TIME * INTERRUPT_SCALE;
     hasRunningAnimation_ = true;
     bool stopSignal = true;
-    CHKPV(rsUiDirector_);
+    if (rsUiDirector_ == nullptr) {
+        FI_HILOGE("UpdateAnimationProtocol, rsUidirect_ is nullptr");
+        return;
+    }
     while (hasRunningAnimation_) {
         hasRunningAnimation_ = rsUiDirector_->FlushAnimation(g_drawingInfo.startNum);
         rsUiDirector_->FlushModifier();
@@ -2224,7 +2248,10 @@ int32_t DragDrawing::InitVSync(float endAlpha, float endScale)
         drawDynamicEffectModifier_->SetAlpha(endAlpha);
         drawDynamicEffectModifier_->SetScale(endScale);
     },  []() { FI_HILOGD("InitVSync end"); });
-    CHKPR(rsUiDirector_, RET_ERR);
+    if (rsUiDirector_ == nullptr) {
+        FI_HILOGE("DragDrawing::InitVSync rsUiDirector_ is nullptr");
+        return RET_ERR;
+    }
     rsUiDirector_->SendMessages();
     DoEndAnimation();
     FI_HILOGD("leave");
@@ -2618,6 +2645,10 @@ int32_t DragDrawing::InitLayer()
 
 void DragDrawing::InitCanvas(int32_t width, int32_t height)
 {
+    if (rsUiDirector_ == nullptr) {
+        FI_HILOGE("InitCanvas rsUiDirector_ is nullptr");
+        return;
+    }
     FI_HILOGI("enter");
     if (g_drawingInfo.rootNode == nullptr) {
         g_drawingInfo.rootNode = Rosen::RSRootNode::Create(false, false, rsUiDirector_->GetRSUIContext());
@@ -2657,7 +2688,6 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
         }
     }
     g_drawingInfo.rootNode->AddChild(g_drawingInfo.parentNode);
-    CHKPV(rsUiDirector_);
 #ifndef OHOS_BUILD_PC_PRODUCT
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         std::shared_ptr<Rosen::RSCanvasNode> mouseIconNode =
@@ -2676,19 +2706,22 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
 
 void DragDrawing::CreateWindow()
 {
-#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if (g_drawingInfo.isInitUiDirector) {
         g_drawingInfo.isInitUiDirector = false;
         auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
         auto connectToRenderObj = Rosen::RSInterfaces::GetInstance().GetConnectToRenderToken(screenId_);
         rsUiDirector_ = Rosen::RSUIDirector::Create(connectToRenderObj);
-        CHKPV(rsUiDirector_);
+        if (rsUiDirector_ == nullptr) {
+            FI_HILOGE("CreateWindow isInitUiDirector rsUiDirector_ is nullptr");
+            return;
+        }
         rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay = 0) {
             CHKPV(this->handler_);
             this->handler_->PostTask(task);
             }, -1, true);
     }
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     FI_HILOGI("Parameter screen number:%{public}llu", static_cast<unsigned long long>(screenId_));
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig;
     surfaceNodeConfig.SurfaceNodeName = "drag window";
@@ -3794,7 +3827,9 @@ int32_t DragDrawing::UpdatePreviewStyle(const PreviewStyle &previewStyle)
         FI_HILOGE("ModifyPreviewStyle failed");
         return RET_ERR;
     }
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    }
     FI_HILOGD("leave");
     return RET_OK;
 }
@@ -4619,7 +4654,9 @@ void DragDrawing::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRot
         UpdateMousePosition(g_drawingInfo.currentPositionX, g_drawingInfo.currentPositionY);
     }
 #endif // OHOS_BUILD_PC_PRODUCT
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    }
     screenRotateState_ = true;
     FI_HILOGI("leave");
 }
@@ -4628,6 +4665,10 @@ int32_t DragDrawing::DoRotateDragWindowAnimation(float rotation, float pivotX, f
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     FI_HILOGD("enter");
+    if (rsUiDirector_ == nullptr) {
+        FI_HILOGE("DoRotateDragWindowAnimation rsUiDirector_ is nullptr");
+        return RET_ERR;
+    }
     if (rsTransaction != nullptr) {
         rsUiDirector_->SendMessages();
         if (auto rsUIContext = rsUiDirector_->GetRSUIContext()) {
@@ -5329,7 +5370,9 @@ void DragDrawing::DetachToDisplay(int32_t displayId)
     g_drawingInfo.displayId = displayId;
     StopVSyncStation();
     frameCallback_ = nullptr;
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ != nullptr) {
+        rsUiDirector_->SendMessages();
+    }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
@@ -5383,7 +5426,9 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     g_drawingInfo.surfaceNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
     g_drawingInfo.surfaceNode->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
     g_drawingInfo.surfaceNode->AttachToWindowContainer(screenId_);
-    rsUiDirector_->SendMessages();
+    if (rsUiDirector_ == nullptr) {
+        rsUiDirector_->SendMessages();
+    }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 } // namespace DeviceStatus
