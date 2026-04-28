@@ -66,8 +66,6 @@ const std::vector<IIntentionIpcCode > CODE_LIST = {
     IIntentionIpcCode::COMMAND_ROTATE_DRAG_WINDOW_SYNC,
     IIntentionIpcCode::COMMAND_SET_DRAG_WINDOW_SCREEN_ID,
     IIntentionIpcCode::COMMAND_GET_DRAG_SUMMARY,
-    IIntentionIpcCode::COMMAND_SET_DRAG_SWITCH_STATE,
-    IIntentionIpcCode::COMMAND_SET_APP_DRAG_SWITCH_STATE,
     IIntentionIpcCode::COMMAND_GET_DRAG_STATE,
     IIntentionIpcCode::COMMAND_ENABLE_UPPER_CENTER_MODE,
     IIntentionIpcCode::COMMAND_GET_DRAG_ACTION,
