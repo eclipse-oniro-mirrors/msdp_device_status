@@ -700,7 +700,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest031, TestSize.Level0)
     dragDrawing.rsUiDirector_ = rsUiDirector_;
     dragDrawing.InitDrawingInfo(dragData.value());
     int32_t ret = dragDrawing.Init(dragData.value(), nullptr);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, INIT_CANCEL);
 
     // Test UpdateAnimationProtocol with non-null rsUiDirector_
     Rosen::RSAnimationTimingProtocol protocol;
@@ -779,7 +779,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest035, TestSize.Level0)
     dragDrawing.rsUiDirector_ = rsUiDirector_;
     dragDrawing.InitDrawingInfo(dragData.value());
     int32_t ret = dragDrawing.Init(dragData.value(), nullptr);
-    EXPECT_EQ(ret, RET_ERR);
+    EXPECT_EQ(ret, INIT_CANCEL);
 
     // Test FlushDragPosition with non-null rsUiDirector_
     uint64_t nanoTimestamp = 1000000;
