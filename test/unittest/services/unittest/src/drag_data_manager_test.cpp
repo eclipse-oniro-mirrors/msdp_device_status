@@ -49,7 +49,8 @@ constexpr int32_t INT32_BYTE { 4 };
 constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
 const std::string UD_KEY { "Unified data key" };
 }
-void DragDataManagerTest::SetUpTestCase() {
+void DragDataManagerTest::SetUpTestCase()
+{
     auto connectToRenderObj = Rosen::RSInterfaces::GetInstance().GetConnectToRenderToken(screenId_);
     rsUiDirector_ = Rosen::RSUIDirector::Create(connectToRenderObj);
 }
