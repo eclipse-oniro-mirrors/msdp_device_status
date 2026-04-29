@@ -59,8 +59,6 @@
             "OHOS::Msdp::DeviceStatus::InteractionManager::RotateDragWindowSync(std::__h::shared_ptr<OHOS::Rosen::RSTransaction> const&)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragSummary(std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, long long, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, long long>>>&, bool)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragSummary(std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, long, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, long>>>&, bool)";
-            "OHOS::Msdp::DeviceStatus::InteractionManager::SetDragSwitchState(bool, bool)";
-            "OHOS::Msdp::DeviceStatus::InteractionManager::SetAppDragSwitchState(bool, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDropType(OHOS::Msdp::DeviceStatus::DropType&)";
             "OHOS::Msdp::DeviceStatus::DragDataUtil::Marshalling(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&, bool)";
             "OHOS::Msdp::DeviceStatus::DragDataUtil::UnMarshalling(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&, bool)";

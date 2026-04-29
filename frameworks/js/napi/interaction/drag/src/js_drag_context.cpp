@@ -30,8 +30,6 @@ namespace {
 const char* DRAG_CLASS { "drag_class" };
 const char* DRAG { "drag" };
 inline constexpr size_t MAX_STRING_LEN { 1024 };
-inline constexpr size_t MAX_PKG_NAME_LEN { 128 };
-inline constexpr std::string_view GET_VALUE_BOOL { "napi_get_value_bool" };
 } // namespace
 
 JsDragContext::JsDragContext()
@@ -236,73 +234,6 @@ napi_value JsDragContext::GetDataSummary(napi_env env, napi_callback_info info)
     return jsDragMgr->GetDataSummary(env);
 }
 
-napi_value JsDragContext::SetDragSwitchState(napi_env env, napi_callback_info info)
-{
-    CALL_INFO_TRACE;
-    size_t argc = ONE_PARAM;
-    napi_value argv[ONE_PARAM] = { nullptr };
-    CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
-
-    JsDragContext *jsDev = JsDragContext::GetInstance(env);
-    CHKPP(jsDev);
-    auto jsDragMgr = jsDev->GetJsDragMgr();
-    CHKPP(jsDragMgr);
-    if (argc < ONE_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
-        return nullptr;
-    }
-    if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_boolean)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "enable", "boolean");
-        return nullptr;
-    }
-    bool enable = false;
-    CHKRP(napi_get_value_bool(env, argv[ZERO_PARAM], &enable), GET_VALUE_BOOL);
-    if (jsDragMgr->SetDragSwitchState(env, enable) == COMMON_NOT_SYSTEM_APP) {
-        THROWERR_CUSTOM(env, COMMON_NOT_SYSTEM_APP, "Not system application.");
-    }
-    return nullptr;
-}
-
-napi_value JsDragContext::SetAppDragSwitchState(napi_env env, napi_callback_info info)
-{
-    CALL_INFO_TRACE;
-    size_t argc = TWO_PARAM;
-    napi_value argv[TWO_PARAM] = { nullptr };
-    CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
-
-    JsDragContext *jsDev = JsDragContext::GetInstance(env);
-    CHKPP(jsDev);
-    auto jsDragMgr = jsDev->GetJsDragMgr();
-    CHKPP(jsDragMgr);
-    if (argc < TWO_PARAM) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
-        return nullptr;
-    }
-    if (!UtilNapi::TypeOf(env, argv[ZERO_PARAM], napi_boolean)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "enable", "boolean");
-        return nullptr;
-    }
-    if (!UtilNapi::TypeOf(env, argv[ONE_PARAM], napi_string)) {
-        THROWERR(env, COMMON_PARAMETER_ERROR, "pkgName", "string");
-        return nullptr;
-    }
-    bool enable = false;
-    CHKRP(napi_get_value_bool(env, argv[ZERO_PARAM], &enable), GET_VALUE_BOOL);
-    char param[MAX_STRING_LEN] = { 0 };
-    size_t length = 0;
-    CHKRP(napi_get_value_string_utf8(env, argv[ONE_PARAM], param, sizeof(param), &length), CREATE_STRING_UTF8);
-    if (length <= 0 || length > MAX_PKG_NAME_LEN) {
-        FI_HILOGE("Invalid pkgName length:%{public}zu", length);
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Invalid pkgName length");
-        return nullptr;
-    }
-    std::string pkgName = param;
-    if (jsDragMgr->SetAppDragSwitchState(env, enable, pkgName) == COMMON_NOT_SYSTEM_APP) {
-        THROWERR_CUSTOM(env, COMMON_NOT_SYSTEM_APP, "Not system application.");
-    }
-    return nullptr;
-}
-
 void JsDragContext::DeclareDragData(napi_env env, napi_value exports)
 {
     napi_value startMsg = nullptr;
@@ -332,9 +263,7 @@ void JsDragContext::DeclareDragInterface(napi_env env, napi_value exports)
     napi_property_descriptor functions[] = {
         DECLARE_NAPI_STATIC_FUNCTION("on", On),
         DECLARE_NAPI_STATIC_FUNCTION("off", Off),
-        DECLARE_NAPI_STATIC_FUNCTION("getDataSummary", GetDataSummary),
-        DECLARE_NAPI_STATIC_FUNCTION("setDragSwitchState", SetDragSwitchState),
-        DECLARE_NAPI_STATIC_FUNCTION("setAppDragSwitchState", SetAppDragSwitchState)
+        DECLARE_NAPI_STATIC_FUNCTION("getDataSummary", GetDataSummary)
     };
     CHKRV(napi_define_properties(env, exports,
         sizeof(functions) / sizeof(*functions), functions), DEFINE_PROPERTIES);

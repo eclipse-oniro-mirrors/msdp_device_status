@@ -256,36 +256,6 @@ void DragClientTest::AssignToAnimation(PreviewAnimation &animation)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DragClientTest, DragClientTest1, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    bool enable = false;
-    bool isJsCaller = false;
-    int32_t ret = g_dragClient.SetDragSwitchState(enable, isJsCaller);
-    EXPECT_EQ(ret, RET_OK);
-}
-/**
- * @tc.name: DragClientTest2
- * @tc.desc: DragClient
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragClientTest, DragClientTest2, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    bool enable = false;
-    std::string pkgName = {"pkg"};
-    bool isJsCaller = false;
-    int32_t ret = g_dragClient.SetAppDragSwitchState(enable, pkgName, isJsCaller);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: DragClientTest3
- * @tc.desc: DragClient
- * @tc.type: FUNC
- * @tc.require:
- */
 HWTEST_F(DragClientTest, DragClientTest3, TestSize.Level0)
 {
     CALL_TEST_DEBUG;

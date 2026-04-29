@@ -643,36 +643,6 @@ int32_t IntentionClient::GetDragSummary(std::map<std::string, int64_t> &summarys
     return RET_OK;
 }
 
-int32_t IntentionClient::SetDragSwitchState(bool enable, bool isJsCaller)
-{
-    if (Connect() != RET_OK) {
-        FI_HILOGE("Can not connect to IntentionService");
-        return RET_ERR;
-    }
-    std::lock_guard lock(mutex_);
-    CHKPR(devicestatusProxy_, RET_ERR);
-    if (int32_t ret = devicestatusProxy_->SetDragSwitchState(enable, isJsCaller); ret != RET_OK) {
-        FI_HILOGE("proxy::SetDragSwitchState fail");
-        return ret;
-    }
-    return RET_OK;
-}
-
-int32_t IntentionClient::SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller)
-{
-    if (Connect() != RET_OK) {
-        FI_HILOGE("Can not connect to IntentionService");
-        return RET_ERR;
-    }
-    std::lock_guard lock(mutex_);
-    CHKPR(devicestatusProxy_, RET_ERR);
-    if (int32_t ret = devicestatusProxy_->SetAppDragSwitchState(enable, pkgName, isJsCaller); ret != RET_OK) {
-        FI_HILOGE("proxy::SetAppDragSwitchState fail");
-        return ret;
-    }
-    return RET_OK;
-}
-
 int32_t IntentionClient::GetDragState(DragState &dragState)
 {
     if (Connect() != RET_OK) {

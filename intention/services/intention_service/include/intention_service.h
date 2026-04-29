@@ -101,8 +101,6 @@ public:
     ErrCode SetDragWindowScreenId(uint64_t displayId, uint64_t screenId) override;
     ErrCode GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller) override;
     ErrCode GetDragSummaryInfo(SequenceableDragSummaryInfo &sequenceableDragSummaryInfo) override;
-    ErrCode SetDragSwitchState(bool enable, bool isJsCaller) override;
-    ErrCode SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller) override;
     ErrCode GetDragState(int32_t &dragState) override;
     ErrCode EnableUpperCenterMode(bool enable) override;
     ErrCode GetDragAction(int32_t &dragAction) override;

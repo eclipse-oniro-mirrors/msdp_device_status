@@ -776,37 +776,6 @@ HWTEST_F(IntentionServiceTest, IntentionServiceTest_GetDragSummary001, TestSize.
 }
 
 /**
- * @tc.name: IntentionServiceTest32
- * @tc.desc: Test SetDragSwitchState
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetDragSwitchState001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    bool enable = true;
-    bool isJsCaller = true;
-    ErrCode ret = g_intentionServiceNullptr->SetDragSwitchState(enable, isJsCaller);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
- * @tc.name: IntentionServiceTest33
- * @tc.desc: Test SetAppDragSwitchState
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionServiceTest, IntentionServiceTest_SetAppDragSwitchState001, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    bool enable = true;
-    std::string pkgName = "pkg";
-    bool isJsCaller = true;
-    ErrCode ret = g_intentionServiceNullptr->SetAppDragSwitchState(enable, pkgName, isJsCaller);
-    EXPECT_EQ(ret, RET_ERR);
-}
-
-/**
  * @tc.name: IntentionServiceTest34
  * @tc.desc: Test GetDragState
  * @tc.type: FUNC

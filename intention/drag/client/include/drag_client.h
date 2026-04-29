@@ -57,8 +57,6 @@ public:
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
     int32_t GetDragSummary(std::map<std::string, int64_t> &summarys, bool isJsCaller = false);
-    int32_t SetDragSwitchState(bool enable, bool isJsCaller = false);
-    int32_t SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller = false);
     int32_t GetDragState(DragState &dragState);
     int32_t EnableUpperCenterMode(bool enable);
     int32_t GetDragAction(DragAction &dragAction);

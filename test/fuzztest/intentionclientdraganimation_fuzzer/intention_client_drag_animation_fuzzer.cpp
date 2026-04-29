@@ -66,8 +66,6 @@ void IntentionClientDragAnimationFuzzTest(const uint8_t *data, size_t size)
     INTENTION_CLIENT->ResetDragWindowScreenId(displayId, screenId);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_DS_MS));
     INTENTION_CLIENT->GetDragSummary(summarys, isJsCaller);
-    INTENTION_CLIENT->SetDragSwitchState(enable, isJsCaller);
-    INTENTION_CLIENT->SetAppDragSwitchState(enable, pkgName, isJsCaller);
     INTENTION_CLIENT->GetDragState(dragState);
     INTENTION_CLIENT->EnableUpperCenterMode(enable);
     INTENTION_CLIENT->GetDragAction(dragAction);

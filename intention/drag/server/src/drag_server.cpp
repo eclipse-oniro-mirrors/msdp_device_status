@@ -278,31 +278,6 @@ int32_t DragServer::GetDragSummary(CallingContext &context, std::map<std::string
     return RET_OK;
 }
 
-int32_t DragServer::SetDragSwitchState(CallingContext &context, bool enable, bool isJsCaller)
-{
-    if (!IsSystemHAPCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return COMMON_NOT_SYSTEM_APP;
-    }
-#ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    universalDragWrapper_.SetDragSwitchState(enable);
-#endif // OHOS_BUILD_UNIVERSAL_DRAG
-    return RET_OK;
-}
-
-int32_t DragServer::SetAppDragSwitchState(
-    CallingContext &context, bool enable, const std::string &pkgName, bool isJsCaller)
-{
-    if (!IsSystemHAPCalling(context)) {
-        FI_HILOGE("The caller is not system hap");
-        return COMMON_NOT_SYSTEM_APP;
-    }
-#ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    universalDragWrapper_.SetAppDragSwitchState(pkgName, enable);
-#endif // OHOS_BUILD_UNIVERSAL_DRAG
-    return RET_OK;
-}
-
 int32_t DragServer::GetDragState(CallingContext &context, DragState &dragState)
 {
     CHKPR(env_, RET_ERR);

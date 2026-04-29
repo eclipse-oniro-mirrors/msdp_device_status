@@ -431,34 +431,6 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_GetDragSummary_001, TestSize.L
 }
 
 /**
- * @tc.name: IntentionClientTest_SetDragSwitchState_001
- * @tc.desc: Test SetDragSwitchState
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionClientTest, IntentionClientTest_SetDragSwitchState_001, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    auto env = IntentionClient::GetInstance();
-    int32_t ret = env->SetDragSwitchState(true, false);
-    ASSERT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: IntentionClientTest_SetAppDragSwitchState_001
- * @tc.desc: Test SetAppDragSwitchState
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentionClientTest, IntentionClientTest_SetAppDragSwitchState_001, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    auto env = IntentionClient::GetInstance();
-    int32_t ret = env->SetAppDragSwitchState(true, "test", false);
-    ASSERT_EQ(ret, RET_OK);
-}
-
-/**
  * @tc.name: IntentionClientTest_GetDragState_001
  * @tc.desc: Test GetDragState
  * @tc.type: FUNC

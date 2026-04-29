@@ -2979,36 +2979,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_StartDrag_NonTextShadow,
 }
 
 /**
- * @tc.name: InteractionManagerTest_SetDragSwitchState
- * @tc.desc: Get drag summarys
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDragSwitchState, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    std::promise<bool> promiseFlag;
-    std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
-        promiseFlag.set_value(true);
-    };
-    std::optional<DragData> dragData = CreateDragData({ TEST_PIXEL_MAP_WIDTH, TEST_PIXEL_MAP_HEIGHT },
-        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
-    ASSERT_TRUE(dragData);
-    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
-        std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
-    ret = InteractionManager::GetInstance()->SetDragSwitchState(true, true);
-    EXPECT_EQ(ret, RET_OK);
-    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
-    InteractionManager::GetInstance()->StopDrag(dropResult);
-    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
-        std::future_status::timeout);
-}
-
-/**
  * @tc.name: InteractionManagerTest_SetDraggableState
  * @tc.desc: Get drag summarys
  * @tc.type: FUNC
@@ -3040,63 +3010,6 @@ HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDraggableState, TestS
 }
 
 /**
- * @tc.name: InteractionManagerTest_SetAppDragSwitchState
- * @tc.desc: Get drag summarys
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    std::promise<bool> promiseFlag;
-    std::future<bool> futureFlag = promiseFlag.get_future();
-    auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
-        FI_HILOGD("displayX:%{public}d, displayY:%{public}d, result:%{public}d, target:%{public}d",
-            notifyMessage.displayX, notifyMessage.displayY, notifyMessage.result, notifyMessage.targetPid);
-        promiseFlag.set_value(true);
-    };
-    std::optional<DragData> dragData = CreateDragData({ TEST_PIXEL_MAP_WIDTH, TEST_PIXEL_MAP_HEIGHT },
-        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
-    ASSERT_TRUE(dragData);
-    int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
-        std::make_shared<UnitTestStartDragListener>(callback));
-    ASSERT_EQ(ret, RET_OK);
-    const std::string pkgName = "testpkgName";
-    ret = InteractionManager::GetInstance()->SetAppDragSwitchState(true, pkgName, true);
-    EXPECT_EQ(ret, RET_OK);
-    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
-    InteractionManager::GetInstance()->StopDrag(dropResult);
-    ASSERT_TRUE(futureFlag.wait_for(std::chrono::milliseconds(PROMISE_WAIT_SPAN_MS)) !=
-        std::future_status::timeout);
-}
-
-/**
- * @tc.name: InteractionManagerTest_SetAppDragSwitchState002
- * @tc.desc: Check SetAppDragSwitchState
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetAppDragSwitchState002, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    int32_t ret = InteractionManager::GetInstance()->SetDragSwitchState(true, true);
-    EXPECT_EQ(ret, RET_OK);
-    std::string pkgName;
-    ret = InteractionManager::GetInstance()->SetAppDragSwitchState(true, pkgName, true);
-    EXPECT_EQ(ret, RET_OK);
-    ret = InteractionManager::GetInstance()->SetDraggableState(true);
-    EXPECT_EQ(ret, RET_OK);
-    int64_t downTime = 0;
-    InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
-    bool status = true;
-    ret = InteractionManager::GetInstance()->GetAppDragSwitchState(status);
-#ifdef OHOS_BUILD_UNIVERSAL_DRAG
-    EXPECT_EQ(ret, RET_ERR);
-#else
-    EXPECT_EQ(ret, RET_OK);
-#endif // OHOS_BUILD_UNIVERSAL_DRAG
-}
-/*
  * @tc.name: InteractionManagerTest_ActivateCooperateWithOptions
  * @tc.desc: Activate coordination
  * @tc.type: FUNC

@@ -536,22 +536,6 @@ ErrCode IntentionService::GetDragSummaryInfo(SequenceableDragSummaryInfo &sequen
     });
 }
 
-ErrCode IntentionService::SetDragSwitchState(bool enable, bool isJsCaller)
-{
-    CallingContext context = GetCallingContext();
-    return PostSyncTask([this, &context, enable, isJsCaller] {
-        return drag_.SetDragSwitchState(context, enable, isJsCaller);
-    });
-}
-
-ErrCode IntentionService::SetAppDragSwitchState(bool enable, const std::string &pkgName, bool isJsCaller)
-{
-    CallingContext context = GetCallingContext();
-    return PostSyncTask([this, &context, enable, &pkgName, isJsCaller] {
-       return drag_.SetAppDragSwitchState(context, enable, pkgName, isJsCaller);
-    });
-}
-
 ErrCode IntentionService::GetDragState(int32_t& dragState)
 {
     CallingContext context = GetCallingContext();
