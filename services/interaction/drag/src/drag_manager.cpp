@@ -1042,16 +1042,20 @@ bool DragManager::IsAncoDragCallback(std::shared_ptr<MMI::PointerEvent> pointerE
 {
     CHKPF(pointerEvent);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) &&
-        (dragData.pointerId == pointerEvent->GetPointerId()) &&
-        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        FI_HILOGE("pointerItem is null");
+        return false;
+    }
+    bool isDragPointer = ((dragData.pointerId == pointerEvent->GetPointerId() &&
+        (pointerItem.GetToolType() == MMI::PointerEvent::TOOL_TYPE_FINGER) &&
+        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) ||
+        (pointerItem.GetToolType() == MMI::PointerEvent::TOOL_TYPE_PEN));
+    if ((pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE) && isDragPointer) {
         OnDragMove(pointerEvent);
         return true;
-    } else if (((pointerAction == MMI::PointerEvent::POINTER_ACTION_UP) &&
-        (dragData.pointerId == pointerEvent->GetPointerId()) &&
-        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) ||
-        ((pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) &&
-        (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE)) ||
+    } else if (((pointerAction == MMI::PointerEvent::POINTER_ACTION_UP) && isDragPointer) ||
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP) ||
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL)) {
         CHKPF(context_);
         int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent] {
