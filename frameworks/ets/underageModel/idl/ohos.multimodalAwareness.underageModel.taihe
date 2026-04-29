@@ -29,10 +29,10 @@ struct UserClassification {
 }
 
 @!sts_inject("""
-    function onUserAgeGroupDetected(callback: (info: UserClassification) => void) {
+    function onUserAgeGroupDetected(callback: (info: UserClassification) => void): void {
         return onUserAgeGroupDetectedInner(callback, callback);
       }
-    function offUserAgeGroupDetected(callback?: (info: UserClassification) => void) {
+    function offUserAgeGroupDetected(callback?: (info: UserClassification) => void): void {
         return offUserAgeGroupDetectedInner(callback);
       }
 """)
