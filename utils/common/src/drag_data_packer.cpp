@@ -142,6 +142,7 @@ int32_t DragDataPacker::UnMarshallingMaterialFilter(Parcel &data, DragData &drag
         FI_HILOGW("isSetMaterialFilter is false, not need Unmarshalling materialFilter");
         return RET_OK;
     }
+    Rosen::Filter::RegisterUnmarshallingCallback();
     if (!Rosen::Filter::Unmarshalling(data, dragData.materialFilter)) {
         FI_HILOGE("Filter Unmarshalling faled");
         return RET_ERR;
