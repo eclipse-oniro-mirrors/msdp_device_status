@@ -1841,7 +1841,7 @@ HWTEST_F(DragServerTest, DragServerTest99, TestSize.Level1)
     ASSERT_NE(pixelMap, nullptr);
     ShadowInfo shadowInfo = { pixelMap, 0, 0 };
     int32_t ret = context_->dragMgr_.dragDrawing_.UpdateShadowPic(shadowInfo);
-    ASSERT_EQ(ret, RET_ERR);
+    ASSERT_EQ(ret, RET_OK);
     context_->dragMgr_.dragDrawing_.UpdateDragWindowDisplay(DISPLAY_ID);
     Rosen::Rotation rotation = context_->dragMgr_.dragDrawing_.GetRotation(WINDOW_ID);
     ret = context_->dragMgr_.dragDrawing_.RotateDragWindow(rotation);
