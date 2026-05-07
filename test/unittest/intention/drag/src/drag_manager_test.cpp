@@ -77,6 +77,7 @@ void DragManagerTest::SetUpTestCase() {}
 void DragManagerTest::SetUp()
 {
     context_ = std::make_shared<TestContext>();
+    g_context = context_.get();
     g_dragMgr.Init(g_context);
 }
 
@@ -2804,6 +2805,7 @@ HWTEST_F(DragManagerTest, DragManagerTest126, TestSize.Level0)
     auto pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
     pointerEvent->SetPointerId(1);
+    pointerEvent->SetActionTime(INT64_MAX);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(1);
     pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
@@ -2830,6 +2832,7 @@ HWTEST_F(DragManagerTest, DragManagerTest127, TestSize.Level0)
     auto pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
     pointerEvent->SetPointerId(1);
+    pointerEvent->SetActionTime(INT64_MAX);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(1);
     pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_PEN);
@@ -2860,11 +2863,9 @@ HWTEST_F(DragManagerTest, DragManagerTest128, TestSize.Level0)
     pointerItem.SetPointerId(1);
     pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
     pointerEvent->AddPointerItem(pointerItem);
-    g_dragMgr.context_ = g_context;
     g_dragMgr.dragState_ = DragState::START;
     bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_UP);
     ASSERT_TRUE(result);
-    g_dragMgr.context_ = nullptr;
     g_dragMgr.dragState_ = DragState::STOP;
 }
 
@@ -2884,11 +2885,9 @@ HWTEST_F(DragManagerTest, DragManagerTest129, TestSize.Level0)
     pointerItem.SetPointerId(1);
     pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
     pointerEvent->AddPointerItem(pointerItem);
-    g_dragMgr.context_ = g_context;
     g_dragMgr.dragState_ = DragState::START;
     bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_PULL_UP);
     ASSERT_TRUE(result);
-    g_dragMgr.context_ = nullptr;
     g_dragMgr.dragState_ = DragState::STOP;
 }
 
@@ -2908,11 +2907,9 @@ HWTEST_F(DragManagerTest, DragManagerTest130, TestSize.Level0)
     pointerItem.SetPointerId(1);
     pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
     pointerEvent->AddPointerItem(pointerItem);
-    g_dragMgr.context_ = g_context;
     g_dragMgr.dragState_ = DragState::START;
     bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
     ASSERT_TRUE(result);
-    g_dragMgr.context_ = nullptr;
     g_dragMgr.dragState_ = DragState::STOP;
 }
 
