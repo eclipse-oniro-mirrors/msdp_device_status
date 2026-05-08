@@ -192,7 +192,7 @@ struct LightIntensity {
     float lightLeft = 0.0f;
     float lightRight = 0.0f;
     float lightTop = 0.0f;
-    float lightButtom = 0.0f;
+    float lightBottom = 0.0f;
 };
 
 enum class ScreenSizeType {
