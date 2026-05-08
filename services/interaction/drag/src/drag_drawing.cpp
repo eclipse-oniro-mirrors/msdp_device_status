@@ -129,8 +129,9 @@ constexpr float SECOND_PIXELMAP_ALPHA { 0.3f };
 constexpr float HALF_RATIO { 0.5f };
 constexpr float ROTATION_0 { 0.0f };
 constexpr float ROTATION_90 { 90.0f };
-constexpr float ROTATION_360 { 360.0f };
+constexpr float ROTATION_180 { 180.0f };
 constexpr float ROTATION_270 { 270.0f };
+constexpr float ROTATION_360 { 360.0f };
 constexpr float ZOOM_IN_SCALE { 1.03f };
 constexpr float ZOOM_OUT_SCALE { 0.9f };
 constexpr float ZOOM_END_SCALE { 1.0f };
@@ -516,7 +517,55 @@ void DragDrawing::CalculateRotation(float targetPositionX, float targetPositionY
     degreeX = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, deltaY * DEGREE_COEFF));
     degreeY = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, -deltaX * DEGREE_COEFF));
 }
- 
+
+void DragDrawing::CalculateLightIntensity(float degreeX, float degreeY, LightIntensity &lightIntensity)
+{
+    if (degreeY > 1.0f) {
+        if (DragWindowRotateInfo_.rotation == ROTATION_0) {
+            lightIntensity.lightLeft = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_90) {
+            lightIntensity.lightButtom = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_180) {
+            lightIntensity.lightRight = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_270) {
+            lightIntensity.lightTop = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        }
+    }
+    if (degreeY < -1.0f) {
+        if (DragWindowRotateInfo_.rotation == ROTATION_0) {
+            lightIntensity.lightRight = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_90) {
+            lightIntensity.lightTop= std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_180) {
+            lightIntensity.lightLeft= std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_270) {
+            lightIntensity.lightButtom = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        }
+    }
+    if (degreeX > 1.0f) {
+        if (DragWindowRotateInfo_.rotation == ROTATION_0) {
+            lightIntensity.lightButtom = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_90) {
+            lightIntensity.lightRight = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_180) {
+            lightIntensity.lightTop = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_270) {
+            lightIntensity.lightLeft = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        }
+    }
+    if (degreeX < -1.0f) {
+        if (DragWindowRotateInfo_.rotation == ROTATION_0) {
+            lightIntensity.lightTop = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_90) {
+            lightIntensity.lightLeft = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_180) {
+            lightIntensity.lightButtom = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if (DragWindowRotateInfo_.rotation == ROTATION_270) {
+            lightIntensity.lightRight = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        }
+    }
+}
+
 void DragDrawing::DoFollowHandAnimation(const float &displayX, const float &displayY)
 {
     float degreeX = 0.0f;
@@ -524,22 +573,8 @@ void DragDrawing::DoFollowHandAnimation(const float &displayX, const float &disp
     CalculateRotation(displayX, displayY, degreeX, degreeY);
     rotationDegreeX_ = degreeX;
     rotationDegreeY_ = degreeY;
-    float lightLeft = 0.0f;
-    float lightRight = 0.0f;
-    float lightTop = 0.0f;
-    float lightButtom = 0.0f;
-    if (degreeY > 1.0f) {
-        lightLeft = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-    }
-    if (degreeY < -1.0f) {
-        lightRight = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-    }
-    if (degreeX > 1.0f) {
-        lightButtom = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-    }
-    if (degreeX < -1.0f) {
-        lightTop = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-    }
+    LightIntensity lightIntensity;
+    CalculateLightIntensity(degreeX, degreeY, lightIntensity);
     auto parentNode = g_drawingInfo.parentNode;
     if (parentNode == nullptr) {
         FI_HILOGE("parentNode is nullptr");
@@ -552,13 +587,13 @@ void DragDrawing::DoFollowHandAnimation(const float &displayX, const float &disp
             FI_HILOGE("parentNode is nullptr");
             return;
         }
-        parentNode->SetRotation(degreeX, degreeY, 0.0f);
+        parentNode->SetRotation(degreeX, degreeY, DragWindowRotateInfo_.rotation);
         if ((lightFilterLeft_ != nullptr) && (lightFilterRight_ != nullptr) &&
             (lightFilterTop_ != nullptr) && (lightFilterButtom_ != nullptr)) {
-            lightFilterLeft_->Setter<Rosen::ContentLightIntensityTag>(lightLeft);
-            lightFilterRight_->Setter<Rosen::ContentLightIntensityTag>(lightRight);
-            lightFilterTop_->Setter<Rosen::ContentLightIntensityTag>(lightTop);
-            lightFilterButtom_->Setter<Rosen::ContentLightIntensityTag>(lightButtom);
+            lightFilterLeft_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightLeft);
+            lightFilterRight_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightRight);
+            lightFilterTop_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightTop);
+            lightFilterButtom_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightButtom);
         }
     });
 }
@@ -1039,13 +1074,13 @@ void DragDrawing::StopDestopAnimation()
             FI_HILOGE("parentNode is nullptr");
             return;
         }
-        g_drawingInfo.parentNode->SetRotation(0.0f, 0.0f, 0.0f);
+        g_drawingInfo.parentNode->SetRotation(0.0f, 0.0f, DragWindowRotateInfo_.rotation);
         Rosen::RSNode::Animate(g_drawingInfo.parentNode->GetRSUIContext(), protocol, SPRING_ROTATION, [=]() {
             if (g_drawingInfo.parentNode == nullptr) {
                 FI_HILOGE("parentNode is nullptr");
                 return;
             }
-            g_drawingInfo.parentNode->SetRotation(degreeX, degreeY, 0.0f);
+            g_drawingInfo.parentNode->SetRotation(degreeX, degreeY, DragWindowRotateInfo_.rotation);
         });
     } else {
         DestroyDragWindow();
@@ -2351,7 +2386,7 @@ int32_t DragDrawing::MoveToEndAnimation()
         return RET_ERR;
     }
     parentNode->SetPivot(HALF_PIVOT, HALF_PIVOT);
-    parentNode->SetRotation(0.0f, 0.0f, 0.0f);
+    parentNode->SetRotation(0.0f, 0.0f, DragWindowRotateInfo_.rotation);
     float scaleValueWidth = 0.0f;
     float scaleValueHeight = 0.0f;
     int32_t width = currentPixelMap->GetWidth();
@@ -2404,7 +2439,15 @@ int32_t DragDrawing::DoDestopAnimation()
         return RET_ERR;
     }
     shadowNode->SetAlpha(1.0f);
-    Rosen::RSTransaction::FlushImplicitTransaction();
+    auto parentNode = g_drawingInfo.parentNode;
+    if (parentNode == nullptr) {
+        FI_HILOGE("parentNode is nullptr");
+        return RET_ERR;
+    }
+    auto rsUIContext = parentNode->GetRSUIContext();
+    if (rsUIContext != nullptr) {
+        rsUIContext->GetRSTransaction()->FlushImplicitTransaction();
+    }
     FI_HILOGI("leave");
     return RET_OK;
 }
@@ -2423,9 +2466,12 @@ int32_t DragDrawing::RunDestopAnimation(int32_t pid, std::string dragAnimationIn
     }
     Rosen::RSAnimationTimingProtocol protocol;
     protocol.SetDuration(ANIMATION_DURATION);
-    parentNode->SetRotation(rotationDegreeX_, rotationDegreeY_, 0.0f);
+    parentNode->SetRotation(rotationDegreeX_, rotationDegreeY_, DragWindowRotateInfo_.rotation);
     parentNode->SetScale(1.0f, 1.0f);
-    Rosen::RSTransaction::FlushImplicitTransaction();
+    auto rsUIContext = parentNode->GetRSUIContext();
+    if (rsUIContext != nullptr) {
+        rsUIContext->GetRSTransaction()->FlushImplicitTransaction();
+    }
     Rosen::RSAnimationTimingCurve animationTimingCurve = GetAnimationTimingCurve();
     Rosen::RSNode::Animate(parentNode->GetRSUIContext(), protocol, animationTimingCurve, [&, this]() {
         if (this->DoDestopAnimation() != RET_OK) {
@@ -2619,6 +2665,10 @@ int32_t DragDrawing::InitLayer()
 void DragDrawing::InitCanvas(int32_t width, int32_t height)
 {
     FI_HILOGI("enter");
+    if (rsUiDirector_ == nullptr) {
+        FI_HILOGE("rsUiDirector is nullptr");
+        return;
+    }
     if (g_drawingInfo.rootNode == nullptr) {
         g_drawingInfo.rootNode = Rosen::RSRootNode::Create(false, false, rsUiDirector_->GetRSUIContext());
         CHKPV(g_drawingInfo.rootNode);
@@ -2657,7 +2707,6 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
         }
     }
     g_drawingInfo.rootNode->AddChild(g_drawingInfo.parentNode);
-    CHKPV(rsUiDirector_);
 #ifndef OHOS_BUILD_PC_PRODUCT
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         std::shared_ptr<Rosen::RSCanvasNode> mouseIconNode =

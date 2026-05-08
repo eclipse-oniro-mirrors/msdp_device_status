@@ -278,7 +278,7 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_SetDragWindowVisible_001, Test
     CALL_TEST_DEBUG;
     auto env = IntentionClient::GetInstance();
     int32_t ret = env->SetDragWindowVisible(true, false, nullptr);
-    ASSERT_NE(ret, RET_ERR);
+    ASSERT_NE(ret, RET_OK);
 }
 
 /**
