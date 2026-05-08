@@ -24,6 +24,7 @@
 #include "fi_log.h"
 #include "ohos.multimodalAwareness.motion.proj.hpp"
 #include "ohos.multimodalAwareness.motion.impl.hpp"
+#include "ohos.multimodalAwareness.motion.SmartRotateEvent.ani.1.hpp"
 #include "taihe/runtime.hpp"
 
 #ifdef MOTION_ENABLE
@@ -71,12 +72,17 @@ public:
     bool AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm);
     bool RemoveAllCallback(int32_t eventType);
     bool RemoveCallback(int32_t eventType, uintptr_t opq);
+    bool CreateAniRefArgs(ani_env* env, int32_t eventType, std::vector<ani_ref> &args,
+        const std::shared_ptr<MotionEvent> &event);
     void OnEventOperatingHand(int32_t eventType, size_t argc, const std::shared_ptr<MotionEvent> &event);
     static ani_vm* GetAniVm(ani_env* env);
     static ani_env* GetAniEnv(ani_vm* vm);
     static ani_env* AttachAniEnv(ani_vm* vm);
     ani_enum_item CreateAniHoldingHandStatus(ani_env* env, int32_t status);
     ani_enum_item CreateAniOperatingHandStatus(ani_env* env, int32_t status);
+    ani_enum_item CreateAniPickupEvent(ani_env* env, int32_t status);
+    ani_enum_item CreateAniRotateEvent(ani_env* env, int32_t status);
+    ani_object CreateAniSmartRotateEvent(ani_env* env, const std::shared_ptr<MotionEvent> &event);
     ani_object CreateAniUndefined(ani_env* env);
 #endif
 

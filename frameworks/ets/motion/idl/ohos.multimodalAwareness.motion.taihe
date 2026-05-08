@@ -34,6 +34,40 @@ enum HoldingHandStatus : i32 {
     UNKNOWN_STATUS = 16
 }
 
+enum PickupEvent : i32 {
+    PICKED_UP = 0
+}
+
+enum RotateEvent : i32 {
+    UNCHANGED = -1,
+    UNRIGHT = 0,
+    LEFT = 1,
+    INVERTED = 2,
+    RIGHT = 3
+}
+
+enum PhysicalOrientation : i32 {
+    UNRIGHT = 0,
+    LEFT = 1,
+    INVERTED = 2,
+    RIGHT = 3,
+    FACE_UP = 4,
+    FACE_DOWN = 5
+}
+
+enum LogicalOrientation : i32 {
+    UNKNOWN = -1,
+    UNRIGHT = 0,
+    LEFT = 1,
+    INVERTED = 2,
+    RIGHT = 3
+}
+
+struct SmartRotateEvent {
+  physicalOrientation: PhysicalOrientation;
+  logicalOrientation: Optional<LogicalOrientation>;
+}
+
 @!sts_inject("""
     function onOperatingHandChanged(callback: (info: OperatingHandStatus) => void): void {
         return onOperatingHandChangedInner(callback, callback);
@@ -47,8 +81,32 @@ enum HoldingHandStatus : i32 {
     function offHoldingHandChanged(callback?: (info: HoldingHandStatus) => void): void {
         return offHoldingHandChangedInner(callback);
       }
+    function onPickupChange(callback: (info: PickupEvent) => void): void {
+        return onPickupChangeInner(callback, callback);
+      }
+    function onRotateChange(callback: (info: RotateEvent) => void): void {
+        return onRotateChangeInner(callback, callback);
+      }
+    function onSmartRotateChange(callback: (info: SmartRotateEvent) => void): void {
+        return onSmartRotateChangeInner(callback, callback);
+      }
+    function offPickupChange(callback?: (info: PickupEvent) => void): void {
+        return offPickupChangeInner(callback);
+      }
+    function offRotateChange(callback?: (info: RotateEvent) => void): void {
+        return offRotateChangeInner(callback);
+      }
+    function offSmartRotateChange(callback?: (info: SmartRotateEvent) => void): void {
+        return offSmartRotateChangeInner(callback);
+      }
 """)
 function OnOperatingHandChangedInner(f: (info: OperatingHandStatus) => void, opq: Opaque);
 function OffOperatingHandChangedInner(opq: Optional<Opaque>);
 function OnHoldingHandChangedInner(f: (info: HoldingHandStatus) => void, opq: Opaque);
 function OffHoldingHandChangedInner(opq: Optional<Opaque>);
+function OnPickupChangeInner(f: (info: PickupEvent) => void, opq: Opaque);
+function OnRotateChangeInner(f: (info: RotateEvent) => void, opq: Opaque);
+function OnSmartRotateChangeInner(f: (info: SmartRotateEvent) => void, opq: Opaque);
+function OffPickupChangeInner(opq: Optional<Opaque>);
+function OffRotateChangeInner(opq: Optional<Opaque>);
+function OffSmartRotateChangeInner(opq: Optional<Opaque>);

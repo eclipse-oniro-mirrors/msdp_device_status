@@ -21,6 +21,11 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace {
+#ifdef MOTION_ENABLE
+constexpr int32_t INVALID_LOGICAL_DATA = -2;
+#endif
+}
 MotionEventNapi::MotionEventNapi(napi_env env, napi_value thisVar)
 {
     env_ = env;
@@ -235,7 +240,8 @@ bool MotionEventNapi::InsertRefEx(std::shared_ptr<MotionEventListener> listener,
     return true;
 }
 
-void MotionEventNapi::OnEventOperatingHand(int32_t eventType, size_t argc, const MotionEvent &event)
+void MotionEventNapi::OnEventOperatingHand(int32_t eventType, size_t argc, const MotionEvent &event,
+    int32_t logicalData)
 {
     FI_HILOGD("eventType: %{public}d", eventType);
     auto typeIter = events_.find(eventType);
@@ -250,20 +256,36 @@ void MotionEventNapi::OnEventOperatingHand(int32_t eventType, size_t argc, const
             FI_HILOGE("napi_get_reference_value for %{public}d failed, status: %{public}d", eventType, ret);
             return;
         }
-        ConvertOperatingHandData(handler, argc, event);
+        ConvertOperatingHandData(handler, argc, event, logicalData);
     }
 }
 
-void MotionEventNapi::ConvertOperatingHandData(napi_value handler, size_t argc, const MotionEvent &event)
+void MotionEventNapi::ConvertOperatingHandData(napi_value handler, size_t argc, const MotionEvent &event,
+    int32_t logicalData)
 {
     napi_value result;
-    napi_status ret = napi_create_int32(env_, event.status, &result);
-    if (ret != napi_ok) {
-        FI_HILOGE("napi_create_int32 failed");
-        return;
+    if (event.type == MOTION_TYPE_SMART_ROTATION) {
+        napi_value motionValue = nullptr;
+        napi_status ret = napi_create_object(env_, &result);
+        if (ret != napi_ok) {
+            FI_HILOGE("napi_create_object failed");
+            return;
+        }
+        CreateIntData(env_, motionValue, result, "physicalOrientation", event.status);
+        if (logicalData != INVALID_LOGICAL_DATA) {
+            CreateIntData(env_, motionValue, result, "logicalOrientation", logicalData);
+        } else {
+            FI_HILOGD("Invalid logicalOrientation data");
+        }
+    } else {
+        napi_status ret = napi_create_int32(env_, event.status, &result);
+        if (ret != napi_ok) {
+            FI_HILOGE("napi_create_int32 failed");
+            return;
+        }
     }
     napi_value callResult = nullptr;
-    ret = napi_call_function(env_, nullptr, handler, argc, &result, &callResult);
+    napi_status ret = napi_call_function(env_, nullptr, handler, argc, &result, &callResult);
     if (ret != napi_ok) {
         FI_HILOGE("napi_call_function ret %{public}d", ret);
         return;
