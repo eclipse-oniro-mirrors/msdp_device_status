@@ -1292,6 +1292,120 @@ HWTEST_F(DragDrawingTest, DragDrawingTest54, TestSize.Level0)
     EXPECT_EQ(2, g_dragMgr.dragDrawing_.dropAnimationCurve_.size());
     g_dragMgr.dragDrawing_.dropAnimationCurve_.resize(0);
 }
+
+/**
+* @tc.name: DragDrawingTest55
+* @tc.desc: Test CalculateRotation with normal values
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest55, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.currentDisplayX_ = 100.0f;
+    g_dragMgr.dragDrawing_.currentDisplayY_ = 100.0f;
+    float degreeX = 0.0f;
+    float degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.CalculateRotation(150.0f, 150.0f, degreeX, degreeY);
+    EXPECT_GE(degreeX, -40.0f);
+    EXPECT_LE(degreeX, 40.0f);
+    EXPECT_GE(degreeY, -40.0f);
+    EXPECT_LE(degreeY, 40.0f);
+}
+ 
+/**
+* @tc.name: DragDrawingTest56
+* @tc.desc: Test CalculateRotation with extreme values
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest56, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.currentDisplayX_ = 0.0f;
+    g_dragMgr.dragDrawing_.currentDisplayY_ = 0.0f;
+    float degreeX = 0.0f;
+    float degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.CalculateRotation(1000.0f, 1000.0f, degreeX, degreeY);
+    EXPECT_GE(degreeX, -40.0f);
+    EXPECT_LE(degreeX, 40.0f);
+    EXPECT_GE(degreeY, -40.0f);
+    EXPECT_LE(degreeY, 40.0f);
+}
+ 
+/**
+* @tc.name: DragDrawingTest57
+* @tc.desc: Test CalculateRotation with negative movement
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest57, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.currentDisplayX_ = 200.0f;
+    g_dragMgr.dragDrawing_.currentDisplayY_ = 200.0f;
+    float degreeX = 0.0f;
+    float degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_GE(degreeX, -40.0f);
+    EXPECT_LE(degreeX, 40.0f);
+    EXPECT_GE(degreeY, -40.0f);
+    EXPECT_LE(degreeY, 40.0f);
+}
+ 
+/**
+* @tc.name: DragDrawingTest58
+* @tc.desc: Test CalculateRotation with zero movement
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest58, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.currentDisplayX_ = 100.0f;
+    g_dragMgr.dragDrawing_.currentDisplayY_ = 100.0f;
+    float degreeX = 0.0f;
+    float degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_FLOAT_EQ(degreeX, 0.0f);
+    EXPECT_FLOAT_EQ(degreeY, 0.0f);
+}
+ 
+/**
+* @tc.name: DragDrawingTest59
+* @tc.desc: Test CalculateLightIntensity
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest59, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    LightIntensity lightIntensity;
+    g_dragMgr.dragDrawing_.DragWindowRotateInfo_.rotation = 0.0f;
+    g_dragMgr.dragDrawing_.CalculateLightIntensity(100.0f, 100.0f, lightIntensity);
+    EXPECT_NE(lightIntensity.lightLeft, 0.0f);
+    g_dragMgr.dragDrawing_.DragWindowRotateInfo_.rotation = 90.0f;
+    g_dragMgr.dragDrawing_.CalculateLightIntensity(100.0f, 100.0f, lightIntensity);
+    EXPECT_NE(lightIntensity.lightLeft, 0.0f);
+    g_dragMgr.dragDrawing_.DragWindowRotateInfo_.rotation = 180.0f;
+    g_dragMgr.dragDrawing_.CalculateLightIntensity(100.0f, 100.0f, lightIntensity);
+    EXPECT_NE(lightIntensity.lightLeft, 0.0f);
+    g_dragMgr.dragDrawing_.DragWindowRotateInfo_.rotation = 270.0f;
+    g_dragMgr.dragDrawing_.CalculateLightIntensity(100.0f, 100.0f, lightIntensity);
+    EXPECT_NE(lightIntensity.lightLeft, 0.0f);
+    g_dragMgr.dragDrawing_.DragWindowRotateInfo_.rotation = 0.0f;
+    g_dragMgr.dragDrawing_.CalculateLightIntensity(-100.0f, -100.0f, lightIntensity);
+    EXPECT_NE(lightIntensity.lightLeft, 0.0f);
+    g_dragMgr.dragDrawing_.DragWindowRotateInfo_.rotation = 90.0f;
+    g_dragMgr.dragDrawing_.CalculateLightIntensity(-100.0f, -100.0f, lightIntensity);
+    EXPECT_NE(lightIntensity.lightLeft, 0.0f);
+    g_dragMgr.dragDrawing_.DragWindowRotateInfo_.rotation = 180.0f;
+    g_dragMgr.dragDrawing_.CalculateLightIntensity(-100.0f, -100.0f, lightIntensity);
+    EXPECT_NE(lightIntensity.lightLeft, 0.0f);
+    g_dragMgr.dragDrawing_.DragWindowRotateInfo_.rotation = 270.0f;
+    g_dragMgr.dragDrawing_.CalculateLightIntensity(-100.0f, -100.0f, lightIntensity);
+    EXPECT_NE(lightIntensity.lightLeft, 0.0f);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

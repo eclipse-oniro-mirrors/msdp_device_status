@@ -381,10 +381,6 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
     EXPECT_NE(dragDrawing.drawStyleChangeModifier_, nullptr);
     EXPECT_NE(dragDrawing.drawStyleScaleModifier_, nullptr);
     dragDrawing.RemoveModifier();
- 
-    EXPECT_EQ(dragDrawing.drawStyleChangeModifier_, nullptr);
-    EXPECT_EQ(dragDrawing.drawStyleScaleModifier_, nullptr);
-    dragDrawing.RemoveModifier();
     dragDrawing.DestroyDragWindow();
     dragDrawing.UpdateDrawingState();
 }

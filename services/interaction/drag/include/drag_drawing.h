@@ -188,6 +188,13 @@ struct ExtraInfo {
     Rosen::Vector2f coef;
 };
 
+struct LightIntensity {
+    float lightLeft = 0.0f;
+    float lightRight = 0.0f;
+    float lightTop = 0.0f;
+    float lightBottom = 0.0f;
+};
+
 enum class ScreenSizeType {
     // Undefined screen width
     UNDEFINED = 0,
@@ -460,6 +467,7 @@ private:
     void CalculateRotation(float targetPositionX, float targetPositionY, float &degreeX, float &degreeY);
     void DrawContentLight();
     void DoFollowHandAnimation(const float &displayX, const float &displayY);
+    void CalculateLightIntensity(float degreeX, float degreeY, LightIntensity &lightIntensity);
 
 private:
     float currentDisplayX_ { 0.0f };
