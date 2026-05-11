@@ -2706,7 +2706,7 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
 
 void DragDrawing::CreateWindow()
 {
-    if (g_drawingInfo.isInitUiDirector) {
+    if (g_drawingInfo.isInitUiDirector || rsUiDirector_ == nullptr) {
         g_drawingInfo.isInitUiDirector = false;
         auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
