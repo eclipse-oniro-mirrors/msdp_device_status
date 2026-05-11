@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 
 #include "drag_data_manager.h"
-
+#include "ui/rs_ui_director.h"
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
