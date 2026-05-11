@@ -23,7 +23,7 @@
 #include "devicestatus_define.h"
 #define private public
 #include "drag_drawing.h"
-
+#include "transaction/rs_interfaces.h"
 #undef LOG_TAG
 #define LOG_TAG "DragDataManagerTest"
 
@@ -49,7 +49,11 @@ constexpr int32_t INT32_BYTE { 4 };
 constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
 const std::string UD_KEY { "Unified data key" };
 }
-void DragDataManagerTest::SetUpTestCase() {}
+void DragDataManagerTest::SetUpTestCase()
+{
+    auto connectToRenderObj = Rosen::RSInterfaces::GetInstance().GetConnectToRenderToken(DISPLAY_ID);
+    rsUiDirector_ = OHOS::Rosen::RSUIDirector::Create(connectToRenderObj);
+}
 
 void DragDataManagerTest::TearDownTestCase() {}
 
@@ -370,6 +374,7 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest013, TestSize.Level0)
     DragDrawing dragDrawing;
     int32_t width = 30;
     int32_t height = 50;
+    dragDrawing.rsUiDirector_ = rsUiDirector_;
     dragDrawing.InitCanvas(width, height);
     if (dragDrawing.drawStyleScaleModifier_ == nullptr) {
         dragDrawing.drawStyleScaleModifier_ = std::make_shared<DrawStyleScaleModifier>();
@@ -491,6 +496,308 @@ HWTEST_F(DragDataManagerTest, DragDataManagerTest017, TestSize.Level0)
     ASSERT_NO_FATAL_FAILURE(drawSVGModifier.Draw(context));
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
+
+// ========== Simplified tests: only test nullptr branch ==========
+
+/**
+ * @tc.name: DragDataManagerTest018
+ * @tc.desc: test DragDrawing Draw with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest018, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData == std::nullopt);
+    DragDrawing dragDrawing;
+    dragDrawing.InitDrawingInfo(dragData.value());
+    dragDrawing.rsUiDirector_ = nullptr;
+    int32_t displayId = 0;
+    int32_t displayX = 100;
+    int32_t displayY = 100;
+    dragDrawing.Draw(displayId, displayX, displayY);
+    dragDrawing.Draw(displayId, displayX, displayY, true);
+}
+
+/**
+ * @tc.name: DragDataManagerTest019
+ * @tc.desc: test DragDrawing DestroyDragWindow with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest019, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = nullptr;
+    dragDrawing.DestroyDragWindow();
+    ASSERT_TRUE(dragDrawing.rsUiDirector_ == nullptr);
+}
+
+/**
+ * @tc.name: DragDataManagerTest020
+ * @tc.desc: test DragDrawing UpdateDragWindowState with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest020, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData == std::nullopt);
+    DragDrawing dragDrawing;
+    dragDrawing.InitDrawingInfo(dragData.value());
+    dragDrawing.rsUiDirector_ = nullptr;
+    dragDrawing.UpdateDragWindowState(true);
+    dragDrawing.UpdateDragWindowState(false);
+}
+
+/**
+ * @tc.name: DragDataManagerTest023
+ * @tc.desc: test DragDrawing UpdatePreviewStyle with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest023, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    PreviewStyle previewStyle;
+    previewStyle.scale = 1.0f;
+    dragDrawing.rsUiDirector_ = nullptr;
+    int32_t ret = dragDrawing.UpdatePreviewStyle(previewStyle);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragDataManagerTest024
+ * @tc.desc: test DragDrawing ScreenRotate with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest024, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = nullptr;
+    dragDrawing.ScreenRotate(Rosen::Rotation::ROTATION_0, Rosen::Rotation::ROTATION_90);
+    ASSERT_TRUE(dragDrawing.rsUiDirector_ == nullptr);
+}
+
+/**
+ * @tc.name: DragDataManagerTest025
+ * @tc.desc: test DragDrawing DoRotateDragWindowAnimation with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest025, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = nullptr;
+    float rotation = 90.0f;
+    float pivotX = 0.5f;
+    float pivotY = 0.5f;
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
+    int32_t ret = dragDrawing.DoRotateDragWindowAnimation(rotation, pivotX, pivotY, rsTransaction);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragDataManagerTest026
+ * @tc.desc: test DragDrawing InitVSync with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest026, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = nullptr;
+    float endAlpha = 1.0f;
+    float endScale = 1.0f;
+    int32_t ret = dragDrawing.InitVSync(endAlpha, endScale);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: DragDataManagerTest027
+ * @tc.desc: test DragDrawing UpdateAnimationProtocol with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest027, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = nullptr;
+    Rosen::RSAnimationTimingProtocol protocol;
+    protocol.SetDuration(100);
+    dragDrawing.UpdateAnimationProtocol(protocol);
+    ASSERT_TRUE(dragDrawing.rsUiDirector_ == nullptr);
+}
+
+/**
+ * @tc.name: DragDataManagerTest028
+ * @tc.desc: test DragDrawing RemoveModifier with nullptr modifiers
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest028, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    dragDrawing.drawStyleScaleModifier_ = nullptr;
+    dragDrawing.drawStyleChangeModifier_ = nullptr;
+    dragDrawing.RemoveModifier();
+    dragDrawing.RemoveModifier();
+    ASSERT_TRUE(dragDrawing.rsUiDirector_ == nullptr);
+}
+
+// ========== Integration tests: cover non-nullptr branches ==========
+
+/**
+ * @tc.name: DragDataManagerTest029
+ * @tc.desc: test DragDrawing core functions with valid rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest029, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData == std::nullopt);
+
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = rsUiDirector_;
+    dragDrawing.InitDrawingInfo(dragData.value());
+
+    // Test InitCanvas with non-null rsUiDirector_
+    dragDrawing.InitCanvas(100, 100);
+
+    // Test Draw with non-null rsUiDirector_ (relies on InitCanvas)
+    dragDrawing.Draw(0, 100, 100);
+
+    // Test UpdatePreviewStyle with non-null rsUiDirector_
+    PreviewStyle previewStyle;
+    previewStyle.scale = 1.0f;
+    int32_t ret = dragDrawing.UpdatePreviewStyle(previewStyle);
+    EXPECT_EQ(ret, RET_OK);
+
+    // Test ScreenRotate with non-null rsUiDirector_
+    dragDrawing.ScreenRotate(Rosen::Rotation::ROTATION_0, Rosen::Rotation::ROTATION_90);
+
+    // Cleanup
+    dragDrawing.DestroyDragWindow();
+}
+
+/**
+ * @tc.name: DragDataManagerTest031
+ * @tc.desc: test DragDrawing animation functions with valid rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest031, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData == std::nullopt);
+
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = rsUiDirector_;
+    dragDrawing.InitDrawingInfo(dragData.value());
+    int32_t ret = dragDrawing.Init(dragData.value(), nullptr);
+    EXPECT_EQ(ret, INIT_CANCEL);
+
+    // Test UpdateAnimationProtocol with non-null rsUiDirector_
+    Rosen::RSAnimationTimingProtocol protocol;
+    protocol.SetDuration(100);
+    dragDrawing.UpdateAnimationProtocol(protocol);
+
+    // Test InitVSync with non-null rsUiDirector_
+    float endAlpha = 1.0f;
+    float endScale = 1.0f;
+    ret = dragDrawing.InitVSync(endAlpha, endScale);
+    EXPECT_EQ(ret, RET_ERR);
+
+    // Cleanup
+    dragDrawing.DestroyDragWindow();
+}
+
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+/**
+ * @tc.name: DragDataManagerTest032
+ * @tc.desc: test DragDrawing FlushDragPosition with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest032, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = nullptr;
+    uint64_t nanoTimestamp = 1000000;
+    dragDrawing.FlushDragPosition(nanoTimestamp);
+    ASSERT_TRUE(dragDrawing.rsUiDirector_ == nullptr);
+}
+
+/**
+ * @tc.name: DragDataManagerTest033
+ * @tc.desc: test DragDrawing DetachToDisplay with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest033, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = nullptr;
+    int32_t displayId = 0;
+    dragDrawing.DetachToDisplay(displayId);
+    ASSERT_TRUE(dragDrawing.rsUiDirector_ == nullptr);
+}
+
+/**
+ * @tc.name: DragDataManagerTest034
+ * @tc.desc: test DragDrawing UpdateDragWindowDisplay with nullptr rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest034, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = nullptr;
+    int32_t displayId = 0;
+    dragDrawing.UpdateDragWindowDisplay(displayId);
+    ASSERT_TRUE(dragDrawing.rsUiDirector_ == nullptr);
+}
+
+/**
+ * @tc.name: DragDataManagerTest034
+ * @tc.desc: test DragDrawing ARKUI_X functions with valid rsUiDirector_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDataManagerTest, DragDataManagerTest035, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE);
+    ASSERT_FALSE(dragData == std::nullopt);
+
+    DragDrawing dragDrawing;
+    dragDrawing.rsUiDirector_ = rsUiDirector_;
+    dragDrawing.InitDrawingInfo(dragData.value());
+    int32_t ret = dragDrawing.Init(dragData.value(), nullptr);
+    EXPECT_EQ(ret, INIT_CANCEL);
+
+    // Test FlushDragPosition with non-null rsUiDirector_
+    uint64_t nanoTimestamp = 1000000;
+    dragDrawing.FlushDragPosition(nanoTimestamp);
+
+    // Test DetachToDisplay with non-null rsUiDirector_
+    int32_t displayId = 0;
+    dragDrawing.DetachToDisplay(displayId);
+
+    // Test UpdateDragWindowDisplay with non-null rsUiDirector_
+    dragDrawing.UpdateDragWindowDisplay(displayId);
+
+    // Cleanup
+    dragDrawing.DestroyDragWindow();
+}
+#endif
+
 } // namespace
 } // namespace DeviceStatus
 } // namespace Msdp
