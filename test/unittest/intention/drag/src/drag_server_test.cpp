@@ -1878,7 +1878,7 @@ HWTEST_F(DragServerTest, DragServerTest98, TestSize.Level1)
 HWTEST_F(DragServerTest, DragServerTest99, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    if (context_->dragMgr_.dragDrawing_.rsUidirector_ == nullptr) {
+    if (context_->dragMgr_.dragDrawing_.rsUiDirector_ == nullptr) {
         auto connectToRenderObj = Rosen::RSInterfaces::GetInstance().GetConnectToRenderToken(DISPLAY_ID);
         context_->dragMgr_.dragDrawing_.rsUiDirector_ = Rosen::RSUIDirector::Create(connectToRenderObj);
     }
