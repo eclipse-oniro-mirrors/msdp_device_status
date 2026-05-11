@@ -79,13 +79,12 @@ void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wp
             }
         }
     }
+    
     if (manager_->notifyListener_ != nullptr && remote == manager_->notifyListener_->AsObject()) {
         manager_->notifyListener_ = nullptr;
         if (manager_->boomerangAlgo_ != nullptr) {
             std::thread timerThread([this]() {
-                if (manager_->boomerangAlgo_) {
-                    manager_->RemoveLibTimerTask(manager_->boomerangAlgo_);
-                }
+                manager_->RemoveLibTimerTask(manager_->boomerangAlgo_);
             });
             timerThread.detach();
         }
