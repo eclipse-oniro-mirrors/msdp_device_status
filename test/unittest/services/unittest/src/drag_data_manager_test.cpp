@@ -51,8 +51,8 @@ const std::string UD_KEY { "Unified data key" };
 }
 void DragDataManagerTest::SetUpTestCase()
 {
-    auto connectToRenderObj = Rosen::RSInterfaces::GetInstance().GetConnectToRenderToken(screenId_);
-    rsUiDirector_ = Rosen::RSUIDirector::Create(connectToRenderObj);
+    auto connectToRenderObj = Rosen::RSInterfaces::GetInstance().GetConnectToRenderToken(DISPLAY_ID);
+    rsUiDirector_ = OHOS::Rosen::RSUIDirector::Create(connectToRenderObj);
 }
 
 void DragDataManagerTest::TearDownTestCase() {}
