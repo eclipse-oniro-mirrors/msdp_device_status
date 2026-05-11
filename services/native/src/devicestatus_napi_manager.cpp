@@ -97,6 +97,17 @@ bool BoomerangAlgoManager::DecodeImage(std::shared_ptr<Media::PixelMap> &pixelMa
     return true;
 }
 
+void BoomerangAlgoManager::UnloadBoomerangAlgoLib()
+{
+    if (boomerangAlgoHandle_ != nullptr) {
+        dlclose(boomerangAlgoHandle_);
+        boomerangAlgoHandle_ = nullptr;
+        FI_HILOGI("Remove boomerangAlgoHandle_");
+    }
+    boomerangAlgoEncodeImageHandle_ = nullptr;
+    boomerangAlgoDecodeImageHandle_ = nullptr;
+}
+
 BoomerangAlgoManager::~BoomerangAlgoManager()
 {
     FI_HILOGI("Boomerang Algo Unload");
@@ -128,6 +139,11 @@ void BoomerangAlgoImpl::DecodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, 
 {
     BoomerangAlgoManager::DecodeImage(pixelMap, content);
     return;
+}
+
+void BoomerangAlgoImpl::UnloadBoomerangAlgoLib()
+{
+    BoomerangAlgoManager::UnloadBoomerangAlgoLib();
 }
 }   // namespace DeviceStatus
 }   // namespace Msdp

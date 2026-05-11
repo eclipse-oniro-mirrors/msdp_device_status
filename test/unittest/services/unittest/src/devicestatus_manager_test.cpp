@@ -176,6 +176,23 @@ HWTEST_F(DeviceStatusManagerTest, BoomerangDecodeImageTest, TestSize.Level0)
 }
 
 /**
+ * @tc.name: BoomerangRemoveLibTimerTask
+ * @tc.desc: test devicestatus BoomerangRemoveLibTimerTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusManagerTest, BoomerangRemoveLibTimerTask, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "BoomerangRemoveLibTimerTask start";
+    std::shared_ptr<Media::PixelMap> pixelMap = CreateEmptyPixelMap();
+    int32_t result = deviceStatusManager->BoomerangDecodeImage(pixelMap, boomerangCallback_);
+    EXPECT_EQ(result, RET_OK);
+
+    deviceStatusManager->RemoveLibTimerTask(deviceStatusManager->boomerangAlgo_);
+    EXPECT_EQ(deviceStatusManager->boomerangAlgo_, nullptr);
+    GTEST_LOG_(INFO) << "BoomerangRemoveLibTimerTask end";
+}
+
+/**
  * @tc.name: GetFocuseWindowIdEventTest
  * @tc.desc: test devicestatus GetFocuseWindowId
  * @tc.type: FUNC

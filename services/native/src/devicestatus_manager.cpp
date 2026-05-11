@@ -29,7 +29,6 @@
 #include "accessibility_manager.h"
 #endif
 #include "devicestatus_define.h"
-#include "devicestatus_napi_manager.h"
 #include "fi_log.h"
 
 #undef LOG_TAG
@@ -80,9 +79,15 @@ void DeviceStatusManager::BoomerangCallbackDeathRecipient::OnRemoteDied(const wp
             }
         }
     }
+    
     if (manager_->notifyListener_ != nullptr && remote == manager_->notifyListener_->AsObject()) {
-        FI_HILOGI("the screenshot app has died");
         manager_->notifyListener_ = nullptr;
+        if (manager_->boomerangAlgo_ != nullptr) {
+            std::thread timerThread([this]() {
+                manager_->RemoveLibTimerTask(manager_->boomerangAlgo_);
+            });
+            timerThread.detach();
+        }
     }
 }
 
@@ -584,7 +589,6 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
     } else {
         notifyListener_->OnNotifyMetadata(emptyMetadata);
     }
-    notifyListener_ = nullptr;
     return RET_OK;
 }
  
@@ -609,6 +613,7 @@ int32_t DeviceStatusManager::BoomerangEncodeImage(std::shared_ptr<Media::PixelMa
 
     auto algo = std::make_shared<BoomerangAlgoImpl>();
     CHKPR(algo, RET_ERR);
+    boomerangAlgo_ = algo;
     std::shared_ptr<Media::PixelMap> encodePixelMap;
     algo->EncodeImage(pixelMap, metadata, encodePixelMap);
     CHKPR(encodePixelMap, RET_ERR);
@@ -641,9 +646,14 @@ int32_t DeviceStatusManager::BoomerangDecodeImage(std::shared_ptr<Media::PixelMa
     CHKPR(pixelMap, RET_ERR);
     CHKPR(callback, RET_ERR);
     std::lock_guard lock(mutex_);
+    auto object = callback->AsObject();
+    CHKPR(object, RET_ERR);
+    object->AddDeathRecipient(boomerangCBDeathRecipient_);
+    notifyListener_ = callback;
     std::string metadata;
     auto algo = std::make_shared<BoomerangAlgoImpl>();
     CHKPR(algo, RET_ERR);
+    boomerangAlgo_ = algo;
     algo->DecodeImage(pixelMap, metadata);
     callback->OnNotifyMetadata(metadata);
     return RET_OK;
@@ -706,6 +716,14 @@ void DeviceStatusManager::TimerTask()
         std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
         SubmitMetadata("");
     }
+}
+
+void DeviceStatusManager::RemoveLibTimerTask(const std::shared_ptr<BoomerangAlgoImpl> &boomerangAlgo)
+{
+    if (boomerangAlgo != nullptr) {
+        boomerangAlgo->UnloadBoomerangAlgoLib();
+    }
+    boomerangAlgo_ = nullptr;
 }
 
 #ifdef BOOMERANG_ONESTEP

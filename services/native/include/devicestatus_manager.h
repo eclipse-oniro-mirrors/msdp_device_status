@@ -25,6 +25,7 @@
 
 #include "boomerang_data.h"
 #include "devicestatus_msdp_client_impl.h"
+#include "devicestatus_napi_manager.h"
 #include "iremote_boomerang_callback.h"
 #include "iremote_dev_sta_callback.h"
 #include "stationary_data.h"
@@ -133,6 +134,7 @@ private:
     void SystemBarHiddedInit();
 #endif
     void TimerTask();
+    void RemoveLibTimerTask(const std::shared_ptr<BoomerangAlgoImpl> &boomerangAlgo);
     static constexpr int32_t argSize_ { TYPE_MAX };
 
     std::mutex mutex_;
@@ -146,6 +148,7 @@ private:
     sptr<IRemoteBoomerangCallback> encodeCallback_ { nullptr };
     std::map<sptr<IRemoteBoomerangCallback>, std::string> bundleNameCache_;
     sptr<AppExecFwk::IBundleMgr> bundleManager_ { nullptr };
+    std::shared_ptr<BoomerangAlgoImpl> boomerangAlgo_;
     int32_t type_ { -1 };
     int32_t boomerangType_ { -1 };
     int32_t event_ { -1 };
