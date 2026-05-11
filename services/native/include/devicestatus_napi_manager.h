@@ -34,6 +34,7 @@ public:
     static bool EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &content,
                             std::shared_ptr<Media::PixelMap> &resultPixelMap);
     static bool DecodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content);
+    static void UnloadBoomerangAlgoLib();
 private:
     static void *boomerangAlgoHandle_;
     static EncodeImageFunc boomerangAlgoEncodeImageHandle_;
@@ -45,6 +46,7 @@ public:
     static void EncodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, const std::string &content,
                             std::shared_ptr<Media::PixelMap> &resultPixelMap);
     static void DecodeImage(std::shared_ptr<Media::PixelMap> &pixelMap, std::string &content);
+    static void UnloadBoomerangAlgoLib();
 };
 }
 }
