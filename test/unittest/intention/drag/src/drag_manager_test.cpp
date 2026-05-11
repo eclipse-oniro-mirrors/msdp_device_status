@@ -77,6 +77,7 @@ void DragManagerTest::SetUpTestCase() {}
 void DragManagerTest::SetUp()
 {
     context_ = std::make_shared<TestContext>();
+    g_context = context_.get();
     g_dragMgr.Init(g_context);
 }
 
@@ -2757,6 +2758,212 @@ HWTEST_F(DragManagerTest, DragManagerTest123, TestSize.Level0)
     ASSERT_EQ(ret, RET_OK);
     g_dragMgr.dragState_ = DragState::STOP;
 }
+
+#ifdef OHOS_BUILD_ENABLE_ANCO
+/**
+ * @tc.name: DragManagerTest124
+ * @tc.desc: Test IsAncoDragCallback with null pointerEvent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest124, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    bool result = g_dragMgr.IsAncoDragCallback(nullptr, MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: DragManagerTest125
+ * @tc.desc: Test IsAncoDragCallback with GetPointerItem failure
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest125, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(1);
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: DragManagerTest126
+ * @tc.desc: Test IsAncoDragCallback with touch finger and POINTER_ACTION_MOVE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest126, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    dragData.pointerId = 1;
+    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    DRAG_DATA_MGR.Init(dragData);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetActionTime(INT64_MAX);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
+    pointerEvent->AddPointerItem(pointerItem);
+    g_dragMgr.dragState_ = DragState::START;
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ASSERT_TRUE(result);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest127
+ * @tc.desc: Test IsAncoDragCallback with pen tool and POINTER_ACTION_MOVE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest127, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    dragData.pointerId = 999;
+    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    DRAG_DATA_MGR.Init(dragData);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetActionTime(INT64_MAX);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_PEN);
+    pointerEvent->AddPointerItem(pointerItem);
+    g_dragMgr.dragState_ = DragState::START;
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ASSERT_TRUE(result);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest128
+ * @tc.desc: Test IsAncoDragCallback with POINTER_ACTION_UP and valid finger touch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest128, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    dragData.pointerId = 1;
+    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    DRAG_DATA_MGR.Init(dragData);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
+    pointerEvent->AddPointerItem(pointerItem);
+    g_dragMgr.dragState_ = DragState::START;
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_UP);
+    ASSERT_TRUE(result);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest129
+ * @tc.desc: Test IsAncoDragCallback with POINTER_ACTION_PULL_UP
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest129, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
+    pointerEvent->AddPointerItem(pointerItem);
+    g_dragMgr.dragState_ = DragState::START;
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    ASSERT_TRUE(result);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest130
+ * @tc.desc: Test IsAncoDragCallback with POINTER_ACTION_PULL_CANCEL
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest130, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
+    pointerEvent->AddPointerItem(pointerItem);
+    g_dragMgr.dragState_ = DragState::START;
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
+    ASSERT_TRUE(result);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest131
+ * @tc.desc: Test IsAncoDragCallback returns false when conditions not met
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest131, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    dragData.pointerId = 1;
+    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    DRAG_DATA_MGR.Init(dragData);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(2); // Different from dragData.pointerId
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(2);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
+    pointerEvent->AddPointerItem(pointerItem);
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: DragManagerTest132
+ * @tc.desc: Test IsAncoDragCallback with null context for cancel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest132, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    dragData.pointerId = 1;
+    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    DRAG_DATA_MGR.Init(dragData);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
+    pointerEvent->AddPointerItem(pointerItem);
+    g_dragMgr.context_ = nullptr;
+    g_dragMgr.dragState_ = DragState::START;
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_UP);
+    ASSERT_FALSE(result);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+#endif // OHOS_BUILD_ENABLE_ANCO
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
