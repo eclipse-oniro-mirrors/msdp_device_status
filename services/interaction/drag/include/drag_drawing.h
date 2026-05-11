@@ -282,6 +282,7 @@ public:
     int32_t RunDestopAnimation(int32_t pid, std::string dragAnimationInfo);
     Rosen::RSAnimationTimingCurve GetAnimationTimingCurve();
     int32_t OnAnimationEndCallBack(int32_t pid);
+    void AdjustRotateDropPositionXY(float scaleValueWidth, float scaleValueHeight, float &displayX, float &displayY);
     int32_t MoveToEndAnimation();
     int32_t DoDestopAnimation();
     void StopDestopAnimation();

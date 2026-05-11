@@ -3576,6 +3576,26 @@ HWTEST_F(InteractionManagerTest, GetDragAnimationTypeTest008, TestSize.Level0)
     EXPECT_EQ(ret, RET_ERR);
     EXPECT_EQ(animationType, INT32_MAX);
 }
+
+/**
+ * @tc.name: InteractionManagerTest_SetDraggableStateAsync
+ * @tc.desc: Check SetDraggableStateAsync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_SetDraggableStateAsync, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    int64_t downTime = 0;
+    InteractionManager::GetInstance()->SetDraggableStateAsync(true, downTime);
+    bool status = true;
+    int32_t ret = InteractionManager::GetInstance()->GetAppDragSwitchState(status);
+#ifdef OHOS_BUILD_UNIVERSAL_DRAG
+    EXPECT_EQ(ret, RET_ERR);
+#else
+    EXPECT_EQ(ret, RET_OK);
+#endif // OHOS_BUILD_UNIVERSAL_DRAG
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

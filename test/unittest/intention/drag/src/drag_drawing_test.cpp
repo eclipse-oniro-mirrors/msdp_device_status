@@ -1406,6 +1406,44 @@ HWTEST_F(DragDrawingTest, DragDrawingTest59, TestSize.Level0)
     g_dragMgr.dragDrawing_.CalculateLightIntensity(-100.0f, -100.0f, lightIntensity);
     EXPECT_NE(lightIntensity.lightLeft, 0.0f);
 }
+
+/**
+* @tc.name: DragDrawingTest60
+* @tc.desc: Test AdjustRotateDropPositionXY
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest60, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    float degreeX = 0.0f;
+    float degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.AdjustRotateDropPositionXY(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_FLOAT_EQ(degreeX, 0.0f);
+    EXPECT_FLOAT_EQ(degreeY, 0.0f);
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.SetRotation(DISPLAY_ID, Rosen::Rotation::ROTATION_0);
+    g_dragMgr.dragDrawing_.AdjustRotateDropPositionXY(1.0f, 1.0f, degreeX, degreeY);
+    EXPECT_FLOAT_EQ(degreeX, 0.0f);
+    EXPECT_FLOAT_EQ(degreeY, 0.0f);
+    g_dragMgr.dragDrawing_.SetRotation(DISPLAY_ID, Rosen::Rotation::ROTATION_90);
+    g_dragMgr.dragDrawing_.AdjustRotateDropPositionXY(1.0f, 1.0f, degreeX, degreeY);
+    EXPECT_NE(degreeX, 0.0f);
+    g_dragMgr.dragDrawing_.SetRotation(DISPLAY_ID, Rosen::Rotation::ROTATION_180);
+    g_dragMgr.dragDrawing_.AdjustRotateDropPositionXY(1.0f, 1.0f, degreeX, degreeY);
+    EXPECT_NE(degreeX, 0.0f);
+    g_dragMgr.dragDrawing_.SetRotation(DISPLAY_ID, Rosen::Rotation::ROTATION_270);
+    g_dragMgr.dragDrawing_.AdjustRotateDropPositionXY(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_NE(degreeX, 0.0f);
+    g_dragMgr.dragDrawing_.UpdateDragWindowState(false);
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -2398,7 +2398,45 @@ int32_t DragDrawing::OnAnimationEndCallBack(int32_t pid)
     FI_HILOGI("leave");
     return RET_OK;
 }
- 
+
+void DragDrawing::AdjustRotateDropPositionXY(
+    float scaleValueWidth, float scaleValueHeight, float &displayX, float &displayY)
+{
+    auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
+    if (currentPixelMap == nullptr) {
+        FI_HILOGE("currentPixelMap is nullptr");
+        return;
+    }
+    float width = currentPixelMap->GetWidth() * scaleValueWidth;
+    float height = currentPixelMap->GetHeight() * scaleValueHeight;
+    float adjustSize = TWELVE_SIZE * GetScaling();
+    Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
+    switch (rotation) {
+        case Rosen::Rotation::ROTATION_0: {
+            break;
+        }
+        case Rosen::Rotation::ROTATION_90: {
+            displayX -= (width - height + adjustSize) / TWICE_SIZE;
+            displayY -= (width - height) / TWICE_SIZE - (adjustSize * scaleValueHeight / TWICE_SIZE) + height;
+            break;
+        }
+        case Rosen::Rotation::ROTATION_180: {
+            displayX -= width;
+            displayY -= height - (adjustSize * scaleValueHeight);
+            break;
+        }
+        case Rosen::Rotation::ROTATION_270: {
+            displayX -= (width - height) / TWICE_SIZE - (adjustSize * scaleValueHeight / TWICE_SIZE) + height;
+            displayY += (width - height + adjustSize) / TWICE_SIZE;
+            break;
+        }
+        default: {
+            FI_HILOGE("Invalid parameter, rotation:%{public}d", static_cast<int32_t>(rotation));
+            break;
+        }
+    }
+}
+
 int32_t DragDrawing::MoveToEndAnimation()
 {
     FI_HILOGI("enter");
@@ -2433,6 +2471,8 @@ int32_t DragDrawing::MoveToEndAnimation()
     float dropPositionX = dropPosition_.at(DRAG_END_POSITON_X);
     float dropPositionY = dropPosition_.at(DRAG_END_POSITON_Y);
     int32_t adjustSize = TWELVE_SIZE * GetScaling();
+    RotatePosition(dropPositionX, dropPositionY);
+    AdjustRotateDropPositionXY(scaleValueWidth, scaleValueHeight, dropPositionX, dropPositionY);
     float positionX = dropPositionX - ((width * (1 - scaleValueWidth) * HALF_RATIO));
     float positionY = dropPositionY - (adjustSize * scaleValueHeight) -
         ((height + adjustSize) * (1 - scaleValueHeight) * HALF_RATIO);
