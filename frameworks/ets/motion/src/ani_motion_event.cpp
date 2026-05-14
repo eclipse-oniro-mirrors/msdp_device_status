@@ -125,6 +125,10 @@ bool AniMotionEvent::SubscribeCallback(int32_t type)
         FI_HILOGE("failed to subscribe");
         taihe::set_business_error(PERMISSION_DENIED, "Permission check failed.");
         return false;
+    } else if (ret == NO_SYSTEM_API) {
+        FI_HILOGE("failed to subscribe");
+        taihe::set_business_error(NO_SYSTEM_API, "No system api.");
+        return false;
     } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
         FI_HILOGE("failed to subscribe");
         taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
@@ -159,6 +163,10 @@ bool AniMotionEvent::UnSubscribeCallback(int32_t type)
         if (ret == PERMISSION_DENIED) {
             FI_HILOGE("failed to unsubscribe");
             taihe::set_business_error(PERMISSION_DENIED, "Permission check failed.");
+            return false;
+        } else if (ret == NO_SYSTEM_API) {
+            FI_HILOGE("failed to unsubscribe");
+            taihe::set_business_error(NO_SYSTEM_API, "No system api.");
             return false;
         } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
             FI_HILOGE("failed to unsubscribe");
@@ -355,6 +363,59 @@ ani_enum_item AniMotionEvent::CreateAniOperatingHandStatus(ani_env* env, int32_t
     return enumItem;
 }
 
+ani_enum_item AniMotionEvent::CreateAniPickupEvent(ani_env *env, int32_t status)
+{
+    ani_enum enumType;
+    ani_enum_item enumItem = nullptr;
+    ani_status ret = env->FindEnum("@ohos.multimodalAwareness.motion.motion.PickupEvent", &enumType);
+    if (ret != ANI_OK) {
+        FI_HILOGE("[ANI] PickupEvent not found");
+        return enumItem;
+    }
+    ret = env->Enum_GetEnumItemByIndex(enumType, ani_int(status), &enumItem);
+    if (ret != ANI_OK) {
+        FI_HILOGE("env Enum_GetEnumItemByIndex failed");
+        return enumItem;
+    }
+    return enumItem;
+}
+
+ani_enum_item AniMotionEvent::CreateAniRotateEvent(ani_env *env, int32_t status)
+{
+    ani_enum enumType;
+    ani_enum_item enumItem = nullptr;
+    ani_status ret = env->FindEnum("@ohos.multimodalAwareness.motion.motion.RotateEvent", &enumType);
+    if (ret != ANI_OK) {
+        FI_HILOGE("[ANI] RotateEvent not found");
+        return enumItem;
+    }
+    ret = env->Enum_GetEnumItemByIndex(enumType, ani_int(status), &enumItem);
+    if (ret != ANI_OK) {
+        FI_HILOGE("env Enum_GetEnumItemByIndex failed");
+        return enumItem;
+    }
+    return enumItem;
+}
+
+ani_object AniMotionEvent::CreateAniSmartRotateEvent(ani_env *env, const std::shared_ptr<MotionEvent> &event)
+{
+    auto physicalOrientation =
+        ::ohos::multimodalAwareness::motion::PhysicalOrientation::from_value(event->status);
+    ::taihe::optional<::ohos::multimodalAwareness::motion::LogicalOrientation> logicalOrientation;
+    if (event->dataLen >= 1 && event->data != nullptr) {
+        int32_t *logicalDatas = reinterpret_cast<int32_t *>(event->data);
+        logicalOrientation.emplace(
+            ::ohos::multimodalAwareness::motion::LogicalOrientation::from_value(logicalDatas[0]));
+    } else {
+        FI_HILOGD("Invalid logicalOrientation data");
+    }
+    auto smartRotateEvent = ::ohos::multimodalAwareness::motion::SmartRotateEvent {
+        std::move(physicalOrientation),
+        std::move(logicalOrientation),
+    };
+    return ::taihe::into_ani<::ohos::multimodalAwareness::motion::SmartRotateEvent>(env, smartRotateEvent);
+}
+
 ani_enum_item AniMotionEvent::CreateAniHoldingHandStatus(ani_env* env, int32_t status)
 {
     ani_enum enumType;
@@ -370,6 +431,30 @@ ani_enum_item AniMotionEvent::CreateAniHoldingHandStatus(ani_env* env, int32_t s
         return enumItem;
     }
     return enumItem;
+}
+
+bool AniMotionEvent::CreateAniRefArgs(ani_env *env, int32_t eventType, std::vector<ani_ref> &args,
+    const std::shared_ptr<MotionEvent> &event)
+{
+    if (eventType == MOTION_TYPE_HOLDING_HAND) {
+        auto statusAni = CreateAniHoldingHandStatus(env, event->status);
+        args.push_back(static_cast<ani_ref>(statusAni));
+    } else if (eventType == MOTION_TYPE_OPERATING_HAND) {
+        auto statusAni = CreateAniOperatingHandStatus(env, event->status);
+        args.push_back(static_cast<ani_ref>(statusAni));
+    } else if (eventType == MOTION_TYPE_PICKUP) {
+        auto statusAni = CreateAniPickupEvent(env, event->status);
+        args.push_back(static_cast<ani_ref>(statusAni));
+    } else if (eventType == MOTION_TYPE_ROTATION) {
+        auto statusAni = CreateAniRotateEvent(env, event->status);
+        args.push_back(static_cast<ani_ref>(statusAni));
+    } else if (eventType == MOTION_TYPE_SMART_ROTATION) {
+        auto statusAni = CreateAniSmartRotateEvent(env, event);
+        args.push_back(static_cast<ani_ref>(statusAni));
+    } else {
+        return false;
+    }
+    return true;
 }
 
 void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const std::shared_ptr<MotionEvent> &event)
@@ -394,13 +479,7 @@ void AniMotionEvent::OnEventOperatingHand(int32_t eventType, size_t argc, const 
     for (auto item : typeIter->second->onRefSets) {
         ani_ref handler = item;
         std::vector<ani_ref> args;
-        if (eventType == MOTION_TYPE_HOLDING_HAND) {
-            auto statusAni = CreateAniHoldingHandStatus(env, event->status);
-            args.push_back(static_cast<ani_ref>(statusAni));
-        } else if (eventType == MOTION_TYPE_OPERATING_HAND) {
-            auto statusAni = CreateAniOperatingHandStatus(env, event->status);
-            args.push_back(static_cast<ani_ref>(statusAni));
-        } else {
+        if (!CreateAniRefArgs(env, eventType, args, event)) {
             FI_HILOGE("status is err. eventType: %{public}d ", eventType);
             return;
         }

@@ -39,14 +39,16 @@ namespace {
 #ifdef MOTION_ENABLE
 auto &g_motionClient = MotionClient::GetInstance();
 constexpr int32_t PERMISSION_DENIED = 201;
-static constexpr uint8_t ARG_1 = 1;
+constexpr int32_t NO_SYSTEM_API = 202;
 constexpr int32_t HOLDING_HAND_FEATURE_DISABLE = 11;
+constexpr int32_t INVALID_LOGICAL_DATA = -2;
 constexpr int32_t EVENT_NOT_SUPPORT = -200;
 constexpr int32_t EVENT_NO_INITIALIZE = -1;
 static int64_t processorId = -1;
 #endif
 
 static constexpr uint8_t ARG_0 = 0;
+static constexpr uint8_t ARG_1 = 1;
 static constexpr uint8_t ARG_2 = 2;
 constexpr int32_t INVALID_MOTION_TYPE = -1;
 constexpr size_t MAX_ARG_STRING_LEN = 512;
@@ -57,6 +59,12 @@ constexpr int32_t MOTION_TYPE_HOLDING_HAND_STATUS = 3605;
 constexpr int32_t BASE_HAND = 0;
 constexpr int32_t LEFT_HAND = 1;
 constexpr int32_t RIGHT_HAND = 2;
+constexpr int32_t TYPE_PICKUP = 100;
+constexpr int32_t TYPE_ROTATION = 700;
+constexpr int32_t TYPE_SMART_ROTATION = 701;
+const std::string PICK_UP_STR = "pickUp";
+const std::string ROTATE_STR = "rotate";
+const std::string SMART_ROTATE_STR = "smartRotate";
 enum HoldPostureStatus : int32_t {
     NOT_HELD = 0,
     LEFT_HAND_HELD,
@@ -65,6 +73,7 @@ enum HoldPostureStatus : int32_t {
     UNKNOWN = 16,
 };
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES = { "string", "function" };
+const std::vector<std::string> EXPECTED_SUB_ARG_TYPES_FUNCTION = { "function" };
 const std::vector<std::string> EXPECTED_UNSUB_ONE_ARG_TYPES = { "string" };
 const std::vector<std::string> EXPECTED_UNSUB_TWO_ARG_TYPES = { "string", "function" };
 const std::map<const std::string, int32_t> MOTION_TYPE_MAP = {
@@ -178,7 +187,7 @@ void MotionCallback::OnMotionChanged(const MotionEvent &event)
     }
 
     for (auto &tmp : uniqueTargets) {
-        tmp->PostMotionEvent(event.type, event.status);
+        tmp->PostMotionEvent(event);
     }
     FI_HILOGD("Exit");
 }
@@ -270,6 +279,10 @@ bool MotionNapi::DoSubscription(napi_env env, int32_t type, sptr<MotionCallback>
             FI_HILOGE("Failed to subscribe");
             ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
             return false;
+        } else if (ret == NO_SYSTEM_API) {
+            FI_HILOGE("Failed to subscribe");
+            ThrowMotionErr(env, NO_SYSTEM_API, "No system api");
+            return false;
         } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
             FI_HILOGE("Failed to subscribe");
             ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
@@ -328,6 +341,10 @@ bool MotionNapi::UnsubscribeFromService(napi_env env, int32_t type)
     } else if (ret == PERMISSION_DENIED) {
         FI_HILOGE("failed to unsubscribe");
         ThrowMotionErr(env, PERMISSION_EXCEPTION, "Permission denined");
+        return false;
+    } else if (ret == NO_SYSTEM_API) {
+        FI_HILOGE("Failed to unsubscribe");
+        ThrowMotionErr(env, NO_SYSTEM_API, "No system api");
         return false;
     } else if (ret == DEVICE_EXCEPTION || ret == HOLDING_HAND_FEATURE_DISABLE) {
         FI_HILOGE("failed to unsubscribe");
@@ -398,12 +415,19 @@ void MotionNapi::UnsubscribeFromAllTypesNoThrow()
     }
 }
 
-void MotionNapi::PostMotionEvent(int32_t type, int32_t status)
+void MotionNapi::PostMotionEvent(const MotionEvent &event)
 {
     // 从 binder/service线程投递回 env对应的JS线程再触发js回调。
     auto selfW = weak_from_this();
     napi_env env = env_;
-    auto task = [selfW, type, status]() {
+    int32_t type = event.type;
+    int32_t status = event.status;
+    int32_t logicalData = INVALID_LOGICAL_DATA;
+    if (event.type == TYPE_SMART_ROTATION && event.dataLen >= 1 && event.data != nullptr) {
+        int32_t *logicalDatas = reinterpret_cast<int32_t *>(event.data);
+        logicalData = logicalDatas[0];
+    }
+    auto task = [selfW, type, status, logicalData]() {
         auto self = selfW.lock();
         if (!self) {
             return;
@@ -414,7 +438,7 @@ void MotionNapi::PostMotionEvent(int32_t type, int32_t status)
         // 只关心 status；不转发其他
         ev.dataLen = 0;
         ev.data = nullptr;
-        self->OnEventOperatingHand(type, 1, ev);
+        self->OnEventOperatingHand(type, 1, ev, logicalData);
     };
     if (napi_send_event(env, task, napi_eprio_immediate, "motion.postEvent") != napi_ok) {
         FI_HILOGE("Failed to SendEvent");
@@ -435,7 +459,7 @@ void MotionNapi::InvokeOperatingHandOnce(napi_ref handlerRef, int32_t status)
         ev.status = status;
         ev.data = nullptr;
         // ConvertOperatingHandData 内部会调用 napi_call_function 等 N-API
-        ConvertOperatingHandData(handler, 1, ev);
+        ConvertOperatingHandData(handler, 1, ev, INVALID_LOGICAL_DATA);
     } else {
         FI_HILOGE("napi_get_reference_value failed, ret:%{public}d", ret);
     }
@@ -706,6 +730,190 @@ napi_value MotionNapi::SubscribeMotion(napi_env env, napi_callback_info info)
 #endif
 }
 
+napi_value MotionNapi::OnPickupChange(napi_env env, napi_callback_info info)
+{
+    FI_HILOGD("Enter");
+#ifdef MOTION_ENABLE
+    if (processorId == EVENT_NO_INITIALIZE) {
+        processorId = DeviceStatus::NapiEventUtils::AddProcessor();
+    }
+    int64_t beginTime = DeviceStatus::NapiEventUtils::GetSysClockTime();
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
+#endif
+    size_t argc = ARG_1;
+    napi_value args[ARG_1] = { nullptr };
+    napi_value jsThis = nullptr;
+    napi_value result = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
+    if (status != napi_ok) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
+        return nullptr;
+    }
+
+    if (!ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES_FUNCTION)) {
+        ThrowMotionErr(env, PARAM_EXCEPTION, "validateargstype failed");
+        return nullptr;
+    }
+
+    if (!SubscribeMotionCommon(env, args, jsThis, TYPE_PICKUP)) {
+        return nullptr;
+    }
+
+#ifdef MOTION_ENABLE
+    if (processorId == EVENT_NOT_SUPPORT) {
+        FI_HILOGW("Non-applications do not support breakpoint");
+    } else {
+        std::string apiName = "motion." + PICK_UP_STR + ".on";
+        DeviceStatus::NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
+    }
+    napi_get_undefined(env, &result);
+    return result;
+#else
+    ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+    return result;
+#endif
+}
+
+napi_value MotionNapi::OnRotateChange(napi_env env, napi_callback_info info)
+{
+    FI_HILOGD("Enter");
+#ifdef MOTION_ENABLE
+    if (processorId == EVENT_NO_INITIALIZE) {
+        processorId = DeviceStatus::NapiEventUtils::AddProcessor();
+    }
+    int64_t beginTime = DeviceStatus::NapiEventUtils::GetSysClockTime();
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
+#endif
+    size_t argc = ARG_1;
+    napi_value args[ARG_1] = { nullptr };
+    napi_value jsThis = nullptr;
+    napi_value result = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
+    if (status != napi_ok) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
+        return nullptr;
+    }
+
+    if (!ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES_FUNCTION)) {
+        ThrowMotionErr(env, PARAM_EXCEPTION, "validateargstype failed");
+        return nullptr;
+    }
+
+    if (!SubscribeMotionCommon(env, args, jsThis, TYPE_ROTATION)) {
+        return nullptr;
+    }
+
+#ifdef MOTION_ENABLE
+    if (processorId == EVENT_NOT_SUPPORT) {
+        FI_HILOGW("Non-applications do not support breakpoint");
+    } else {
+        std::string apiName = "motion." + ROTATE_STR + ".on";
+        DeviceStatus::NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
+    }
+    napi_get_undefined(env, &result);
+    return result;
+#else
+    ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+    return result;
+#endif
+}
+
+napi_value MotionNapi::OnSmartRotateChange(napi_env env, napi_callback_info info)
+{
+    FI_HILOGD("Enter");
+#ifdef MOTION_ENABLE
+    if (processorId == EVENT_NO_INITIALIZE) {
+        processorId = DeviceStatus::NapiEventUtils::AddProcessor();
+    }
+    int64_t beginTime = DeviceStatus::NapiEventUtils::GetSysClockTime();
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
+#endif
+    size_t argc = ARG_1;
+    napi_value args[ARG_1] = { nullptr };
+    napi_value jsThis = nullptr;
+    napi_value result = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
+    if (status != napi_ok) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_get_cb_info failed");
+        return nullptr;
+    }
+
+    if (!ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES_FUNCTION)) {
+        ThrowMotionErr(env, PARAM_EXCEPTION, "validateargstype failed");
+        return nullptr;
+    }
+
+    if (!SubscribeMotionCommon(env, args, jsThis, TYPE_SMART_ROTATION)) {
+        return nullptr;
+    }
+
+#ifdef MOTION_ENABLE
+    if (processorId == EVENT_NOT_SUPPORT) {
+        FI_HILOGW("Non-applications do not support breakpoint");
+    } else {
+        std::string apiName = "motion." + SMART_ROTATE_STR + ".on";
+        DeviceStatus::NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
+    }
+    napi_get_undefined(env, &result);
+    return result;
+#else
+    ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+    return result;
+#endif
+}
+
+bool MotionNapi::SubscribeMotionCommon(const napi_env &env, napi_value *args, const napi_value &jsThis, int32_t type)
+{
+    FI_HILOGD("Enter");
+    // 用stable this + GetOrCreateInstance
+    napi_value stableThis = GetStableThis(env, jsThis);
+    auto motion = GetOrCreateInstance(env, stableThis);
+    if (motion == nullptr) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "Failed to get g_motionObj");
+        return false;
+    }
+
+#ifdef MOTION_ENABLE
+    bool serviceAlreadySubscribed = false;
+    if (!motion->SubscribeToService(env, type, serviceAlreadySubscribed)) {
+        return false;
+    }
+
+    bool isNewHandler = false;
+    if (!motion->AddCallbackEx(type, args[ARG_0], isNewHandler)) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "AddCallback failed");
+        return false;
+    }
+
+    // 如果服务已订阅 并且这是此环境的新js function ，则立即使用最新状态回调。
+    if (serviceAlreadySubscribed && isNewHandler) {
+        MotionEvent latest = g_motionClient.GetMotionData(type);
+        // Only invoke the newly-added handler (args[ARG_0]) once.
+        int32_t statusVal = latest.status;
+        if (statusVal < BASE_HAND) {
+            FI_HILOGD("unknown latest status");
+            statusVal = HoldPostureStatus::UNKNOWN;
+        }
+        // 延迟 5ms 再回调一次
+        constexpr uint32_t kInitialCbDelayMs = 5;
+        napi_ref onceHandlerRef = nullptr;
+        napi_status refRet = napi_create_reference(env, args[ARG_0], 1, &onceHandlerRef);
+        if (env != motion->env_ || refRet != napi_ok || onceHandlerRef == nullptr) {
+            FI_HILOGE("napi_create_reference failed for delayed invoke, ret:%{public}d", refRet);
+            if (onceHandlerRef != nullptr) {
+                napi_delete_reference(env, onceHandlerRef);
+            }
+        } else {
+            if (!motion->ScheduleOperatingHandOnceDelayed(onceHandlerRef, statusVal, kInitialCbDelayMs)) {
+                // async_work 失败：complete 不会来，所以这里必须释放 ref，避免泄露
+                napi_delete_reference(env, onceHandlerRef);
+            }
+        }
+    }
+#endif
+    return true;
+}
+
 napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
@@ -775,6 +983,109 @@ napi_value MotionNapi::UnSubscribeMotion(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    if (processorId == EVENT_NOT_SUPPORT) {
+        FI_HILOGW("Non-applications do not support breakpoint");
+    } else {
+        std::string apiName = "motion." + typeStr + ".off";
+        DeviceStatus::NapiEventUtils::WriteEndEvent(transId, apiName, beginTime, 0, 0);
+    }
+    napi_get_undefined(env, &result);
+    return result;
+#else
+    ThrowMotionErr(env, DEVICE_EXCEPTION, "Device not support");
+    return result;
+#endif
+}
+
+napi_value MotionNapi::OffPickupChange(napi_env env, napi_callback_info info)
+{
+    FI_HILOGD("Enter");
+    size_t argc = ARG_1;
+    napi_value args[ARG_1] = { nullptr };
+    napi_value jsThis = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
+    if (status != napi_ok) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_get_cb_info is failed");
+        return nullptr;
+    }
+
+    if (argc == 1 && !ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES_FUNCTION)) {
+        ThrowMotionErr(env, PARAM_EXCEPTION, "validateargstype failed");
+        return nullptr;
+    }
+    return UnSubscribeMotionCommon(env, args, argc, TYPE_PICKUP, PICK_UP_STR);
+}
+
+napi_value MotionNapi::OffRotateChange(napi_env env, napi_callback_info info)
+{
+    FI_HILOGD("Enter");
+    size_t argc = ARG_1;
+    napi_value args[ARG_1] = { nullptr };
+    napi_value jsThis = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
+    if (status != napi_ok) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_get_cb_info is failed");
+        return nullptr;
+    }
+
+    if (argc == 1 && !ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES_FUNCTION)) {
+        ThrowMotionErr(env, PARAM_EXCEPTION, "validateargstype failed");
+        return nullptr;
+    }
+    return UnSubscribeMotionCommon(env, args, argc, TYPE_ROTATION, ROTATE_STR);
+}
+
+napi_value MotionNapi::OffSmartRotateChange(napi_env env, napi_callback_info info)
+{
+    FI_HILOGD("Enter");
+    size_t argc = ARG_1;
+    napi_value args[ARG_1] = { nullptr };
+    napi_value jsThis = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
+    if (status != napi_ok) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "napi_get_cb_info is failed");
+        return nullptr;
+    }
+
+    if (argc == 1 && !ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES_FUNCTION)) {
+        ThrowMotionErr(env, PARAM_EXCEPTION, "validateargstype failed");
+        return nullptr;
+    }
+    return UnSubscribeMotionCommon(env, args, argc, TYPE_SMART_ROTATION, SMART_ROTATE_STR);
+}
+
+napi_value MotionNapi::UnSubscribeMotionCommon(const napi_env &env, napi_value *args, size_t argc,
+    int32_t type, const std::string &typeStr)
+{
+    FI_HILOGD("Enter");
+    napi_value result = nullptr;
+#ifdef MOTION_ENABLE
+    if (processorId == EVENT_NO_INITIALIZE) {
+        processorId = DeviceStatus::NapiEventUtils::AddProcessor();
+    }
+    int64_t beginTime = DeviceStatus::NapiEventUtils::GetSysClockTime();
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
+    auto motion = GetInstance(env);
+    if (motion == nullptr) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "Motion instance not found in this env");
+        return nullptr;
+    }
+    if (argc != ARG_1 && !motion->RemoveAllCallback(type)) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
+        return nullptr;
+    }
+    if (argc == ARG_1 && !motion->RemoveCallback(type, args[ARG_0])) {
+        ThrowMotionErr(env, SERVICE_EXCEPTION, "RemoveCallback failed");
+        return nullptr;
+    }
+    // 如果仍然有监听器监听此类事件
+    if (!motion->CheckEvents(type)) {
+        napi_get_undefined(env, &result);
+        return result;
+    }
+    if (!motion->UnsubscribeFromService(env, type)) {
+        return nullptr;
+    }
     if (processorId == EVENT_NOT_SUPPORT) {
         FI_HILOGW("Non-applications do not support breakpoint");
     } else {
@@ -918,6 +1229,12 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_FUNCTION("on", SubscribeMotion),
         DECLARE_NAPI_STATIC_FUNCTION("off", UnSubscribeMotion),
+        DECLARE_NAPI_STATIC_FUNCTION("onPickupChange", OnPickupChange),
+        DECLARE_NAPI_STATIC_FUNCTION("onRotateChange", OnRotateChange),
+        DECLARE_NAPI_STATIC_FUNCTION("onSmartRotateChange", OnSmartRotateChange),
+        DECLARE_NAPI_STATIC_FUNCTION("offPickupChange", OffPickupChange),
+        DECLARE_NAPI_STATIC_FUNCTION("offRotateChange", OffRotateChange),
+        DECLARE_NAPI_STATIC_FUNCTION("offSmartRotateChange", OffSmartRotateChange),
         DECLARE_NAPI_STATIC_FUNCTION("getRecentOperatingHandStatus", GetRecentOptHandStatus),
     };
     MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

@@ -28,6 +28,9 @@
 
 using OperatingHandStatus_t = ohos::multimodalAwareness::motion::OperatingHandStatus;
 using HoldingHandStatus_t = ohos::multimodalAwareness::motion::HoldingHandStatus;
+using PickupEvent_t = ohos::multimodalAwareness::motion::PickupEvent;
+using RotateEvent_t = ohos::multimodalAwareness::motion::RotateEvent;
+using SmartRotateEvent_t = ohos::multimodalAwareness::motion::SmartRotateEvent;
 
 namespace {
 using namespace OHOS::Msdp;
@@ -178,6 +181,198 @@ void OffHoldingHandChangedInner(::taihe::optional_view<uintptr_t> opq)
     taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
 #endif
 }
+
+void OnPickupChangeInner(taihe::callback_view<void(PickupEvent_t)> f, uintptr_t opq)
+{
+    FI_HILOGI("OnPickupChangeInner enter");
+#ifdef MOTION_ENABLE
+    FI_HILOGI("OnPickupChangeInner Enter MOTION_ENABLE");
+    ::taihe::env_guard guard;
+    ani_env *env = guard.get_env();
+    if (env == nullptr) {
+        FI_HILOGE("get_env failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "get_env failed");
+        return;
+    }
+    ani_vm* vm = AniMotionEvent::GetInstance()->GetAniVm(env);
+    if (vm == nullptr) {
+        FI_HILOGE("GetAniVm failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "GetAniVm failed");
+        return;
+    }
+    if (!AniMotionEvent::GetInstance()->AddCallback(MOTION_TYPE_PICKUP, opq, vm)) {
+        FI_HILOGE("AddCallback failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
+        return;
+    }
+    if (!AniMotionEvent::GetInstance()->SubscribeCallback(MOTION_TYPE_PICKUP)) {
+        FI_HILOGE("SubscribeCallback failed");
+        if (!AniMotionEvent::GetInstance()->RemoveAllCallback(MOTION_TYPE_PICKUP)) {
+            FI_HILOGE("RemoveCallback failed");
+        }
+        return;
+    }
+#else
+    FI_HILOGI("OnPickupChangeInner not Enter MOTION_ENABLE");
+    taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+#endif
+}
+
+void OnRotateChangeInner(taihe::callback_view<void(RotateEvent_t)> f, uintptr_t opq)
+{
+    FI_HILOGI("OnRotateChangeInner enter");
+#ifdef MOTION_ENABLE
+    FI_HILOGI("OnRotateChangeInner Enter MOTION_ENABLE");
+    ::taihe::env_guard guard;
+    ani_env *env = guard.get_env();
+    if (env == nullptr) {
+        FI_HILOGE("get_env failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "get_env failed");
+        return;
+    }
+    ani_vm* vm = AniMotionEvent::GetInstance()->GetAniVm(env);
+    if (vm == nullptr) {
+        FI_HILOGE("GetAniVm failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "GetAniVm failed");
+        return;
+    }
+    if (!AniMotionEvent::GetInstance()->AddCallback(MOTION_TYPE_ROTATION, opq, vm)) {
+        FI_HILOGE("AddCallback failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
+        return;
+    }
+    if (!AniMotionEvent::GetInstance()->SubscribeCallback(MOTION_TYPE_ROTATION)) {
+        FI_HILOGE("SubscribeCallback failed");
+        if (!AniMotionEvent::GetInstance()->RemoveAllCallback(MOTION_TYPE_ROTATION)) {
+            FI_HILOGE("RemoveCallback failed");
+        }
+        return;
+    }
+#else
+    FI_HILOGI("OnRotateChangeInner not Enter MOTION_ENABLE");
+    taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+#endif
+}
+
+void OnSmartRotateChangeInner(taihe::callback_view<void(SmartRotateEvent_t const &)> f, uintptr_t opq)
+{
+    FI_HILOGI("OnSmartRotateChangeInner enter");
+#ifdef MOTION_ENABLE
+    FI_HILOGI("OnSmartRotateChangeInner Enter MOTION_ENABLE");
+    ::taihe::env_guard guard;
+    ani_env *env = guard.get_env();
+    if (env == nullptr) {
+        FI_HILOGE("get_env failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "get_env failed");
+        return;
+    }
+    ani_vm* vm = AniMotionEvent::GetInstance()->GetAniVm(env);
+    if (vm == nullptr) {
+        FI_HILOGE("GetAniVm failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "GetAniVm failed");
+        return;
+    }
+    if (!AniMotionEvent::GetInstance()->AddCallback(MOTION_TYPE_SMART_ROTATION, opq, vm)) {
+        FI_HILOGE("AddCallback failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
+        return;
+    }
+    if (!AniMotionEvent::GetInstance()->SubscribeCallback(MOTION_TYPE_SMART_ROTATION)) {
+        FI_HILOGE("SubscribeCallback failed");
+        if (!AniMotionEvent::GetInstance()->RemoveAllCallback(MOTION_TYPE_SMART_ROTATION)) {
+            FI_HILOGE("RemoveCallback failed");
+        }
+        return;
+    }
+#else
+    FI_HILOGI("OnSmartRotateChangeInner not Enter MOTION_ENABLE");
+    taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+#endif
+}
+
+void OffPickupChangeInner(::taihe::optional_view<uintptr_t> opq)
+{
+    FI_HILOGI("OffPickupChangeInner enter");
+#ifdef MOTION_ENABLE
+    FI_HILOGI("OffPickupChangeInner Enter MOTION_ENABLE");
+    if (!opq.has_value()) {
+        if (!AniMotionEvent::GetInstance()->RemoveAllCallback(MOTION_TYPE_PICKUP)) {
+            FI_HILOGE("RemoveAllCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveAllCallback failed");
+            return;
+        }
+    } else {
+        if (!AniMotionEvent::GetInstance()->RemoveCallback(MOTION_TYPE_PICKUP, opq.value())) {
+            FI_HILOGE("RemoveCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
+            return;
+        }
+    }
+    if (!AniMotionEvent::GetInstance()->UnSubscribeCallback(MOTION_TYPE_PICKUP)) {
+        FI_HILOGE("UnSubscribeCallback failed");
+        return;
+    }
+#else
+    FI_HILOGI("OffPickupChangeInner not Enter MOTION_ENABLE");
+    taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+#endif
+}
+
+void OffRotateChangeInner(::taihe::optional_view<uintptr_t> opq)
+{
+    FI_HILOGI("OffRotateChangeInner enter");
+#ifdef MOTION_ENABLE
+    FI_HILOGI("OffRotateChangeInner Enter MOTION_ENABLE");
+    if (!opq.has_value()) {
+        if (!AniMotionEvent::GetInstance()->RemoveAllCallback(MOTION_TYPE_ROTATION)) {
+            FI_HILOGE("RemoveAllCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveAllCallback failed");
+            return;
+        }
+    } else {
+        if (!AniMotionEvent::GetInstance()->RemoveCallback(MOTION_TYPE_ROTATION, opq.value())) {
+            FI_HILOGE("RemoveCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
+            return;
+        }
+    }
+    if (!AniMotionEvent::GetInstance()->UnSubscribeCallback(MOTION_TYPE_ROTATION)) {
+        FI_HILOGE("UnSubscribeCallback failed");
+        return;
+    }
+#else
+    FI_HILOGI("OffRotateChangeInner not Enter MOTION_ENABLE");
+    taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+#endif
+}
+
+void OffSmartRotateChangeInner(::taihe::optional_view<uintptr_t> opq)
+{
+    FI_HILOGI("OffSmartRotateChangeInner enter");
+#ifdef MOTION_ENABLE
+    FI_HILOGI("OffSmartRotateChangeInner Enter MOTION_ENABLE");
+    if (!opq.has_value()) {
+        if (!AniMotionEvent::GetInstance()->RemoveAllCallback(MOTION_TYPE_SMART_ROTATION)) {
+            FI_HILOGE("RemoveAllCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveAllCallback failed");
+            return;
+        }
+    } else {
+        if (!AniMotionEvent::GetInstance()->RemoveCallback(MOTION_TYPE_SMART_ROTATION, opq.value())) {
+            FI_HILOGE("RemoveCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
+            return;
+        }
+    }
+    if (!AniMotionEvent::GetInstance()->UnSubscribeCallback(MOTION_TYPE_SMART_ROTATION)) {
+        FI_HILOGE("UnSubscribeCallback failed");
+        return;
+    }
+#else
+    FI_HILOGI("OffSmartRotateChangeInner not Enter MOTION_ENABLE");
+    taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+#endif
+}
 }  // namespace
 
 // Since these macros are auto-generate, lint will cause false positive.
@@ -187,4 +382,10 @@ TH_EXPORT_CPP_API_OnOperatingHandChangedInner(OnOperatingHandChangedInner);
 TH_EXPORT_CPP_API_OffOperatingHandChangedInner(OffOperatingHandChangedInner);
 TH_EXPORT_CPP_API_OnHoldingHandChangedInner(OnHoldingHandChangedInner);
 TH_EXPORT_CPP_API_OffHoldingHandChangedInner(OffHoldingHandChangedInner);
+TH_EXPORT_CPP_API_OnPickupChangeInner(OnPickupChangeInner);
+TH_EXPORT_CPP_API_OnRotateChangeInner(OnRotateChangeInner);
+TH_EXPORT_CPP_API_OnSmartRotateChangeInner(OnSmartRotateChangeInner);
+TH_EXPORT_CPP_API_OffPickupChangeInner(OffPickupChangeInner);
+TH_EXPORT_CPP_API_OffRotateChangeInner(OffRotateChangeInner);
+TH_EXPORT_CPP_API_OffSmartRotateChangeInner(OffSmartRotateChangeInner);
 // NOLINTEND

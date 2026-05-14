@@ -60,11 +60,17 @@ public:
     static void DefineHoldingHandStatus(napi_env env, napi_value exports);
     static napi_value SubscribeMotion(napi_env env, napi_callback_info info);
     static napi_value UnSubscribeMotion(napi_env env, napi_callback_info info);
+    static napi_value OnPickupChange(napi_env env, napi_callback_info info);
+    static napi_value OnRotateChange(napi_env env, napi_callback_info info);
+    static napi_value OnSmartRotateChange(napi_env env, napi_callback_info info);
+    static napi_value OffPickupChange(napi_env env, napi_callback_info info);
+    static napi_value OffRotateChange(napi_env env, napi_callback_info info);
+    static napi_value OffSmartRotateChange(napi_env env, napi_callback_info info);
     static napi_value GetRecentOptHandStatus(napi_env env, napi_callback_info info);
 public:
 #ifdef MOTION_ENABLE
     // 将事件投递回“当前 napi_env 对应的 JS 线程”执行 避免跨线程直接调用 N-API
-    void PostMotionEvent(int32_t type, int32_t status);
+    void PostMotionEvent(const MotionEvent &event);
     bool ScheduleOperatingHandOnceDelayed(napi_ref handlerRef, int32_t status, uint32_t delayMs);
     void InvokeOperatingHandOnce(napi_ref handlerRef, int32_t status);
 #endif
@@ -89,6 +95,9 @@ private:
     static bool ValidateArgsType(napi_env env, napi_value *args, size_t argc,
         const std::vector<std::string> &expectedTypes);
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
+    static bool SubscribeMotionCommon(const napi_env &env, napi_value *args, const napi_value &jsThis, int32_t type);
+    static napi_value UnSubscribeMotionCommon(const napi_env &env, napi_value *args, size_t argc, int32_t type,
+        const std::string &typeStr);
     static void SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
     static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
 

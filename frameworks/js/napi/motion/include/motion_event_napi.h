@@ -44,7 +44,7 @@ public:
     bool CheckEvents(int32_t eventType);
     bool RemoveAllCallback(int32_t eventType);
     bool RemoveCallback(int32_t eventType, napi_value handler);
-    virtual void OnEventOperatingHand(int32_t eventType, size_t argc, const MotionEvent &event);
+    virtual void OnEventOperatingHand(int32_t eventType, size_t argc, const MotionEvent &event, int32_t logicalData);
     void CreateIntData(napi_env env, napi_value motionValue, napi_value result, std::string name, int32_t value);
 
 protected:
@@ -52,7 +52,7 @@ protected:
     bool InsertRef(std::shared_ptr<MotionEventListener> listener, const napi_value &handler);
     bool InsertRefEx(std::shared_ptr<MotionEventListener> listener,
         const napi_value &handler, bool &isNewHandler);
-    void ConvertOperatingHandData(napi_value handler, size_t argc, const MotionEvent &event);
+    void ConvertOperatingHandData(napi_value handler, size_t argc, const MotionEvent &event, int32_t logicalData);
 #endif
 
 protected:
