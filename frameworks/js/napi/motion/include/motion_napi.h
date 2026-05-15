@@ -58,6 +58,10 @@ public:
 
     static napi_value Init(napi_env env, napi_value exports);
     static void DefineHoldingHandStatus(napi_env env, napi_value exports);
+    static void DefinePickupEvent(napi_env env, napi_value exports);
+    static void DefineRotateEvent(napi_env env, napi_value exports);
+    static void DefinePhysicalOrientation(napi_env env, napi_value exports);
+    static void DefineLogicalOrientation(napi_env env, napi_value exports);
     static napi_value SubscribeMotion(napi_env env, napi_callback_info info);
     static napi_value UnSubscribeMotion(napi_env env, napi_callback_info info);
     static napi_value OnPickupChange(napi_env env, napi_callback_info info);

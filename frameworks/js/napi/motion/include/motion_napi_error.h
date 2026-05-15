@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace Msdp {
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
+constexpr int32_t NO_SYSTEM_API { 202 };
 constexpr int32_t PARAM_EXCEPTION { 401 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
 constexpr int32_t SERVICE_EXCEPTION { 31500001 };
@@ -33,6 +34,7 @@ constexpr int32_t SUBSCRIBE_EXCEPTION { 31500002 };
 constexpr int32_t UNSUBSCRIBE_EXCEPTION { 31500003 };
 const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {PERMISSION_EXCEPTION, "Permission check failed."},
+    {NO_SYSTEM_API, "not system application."},
     {PARAM_EXCEPTION, "Params check failed."},
     {DEVICE_EXCEPTION, "The device does not support this API."},
     {SERVICE_EXCEPTION, "Service exception. Possible causes: 1. A system error, such as null pointer, "

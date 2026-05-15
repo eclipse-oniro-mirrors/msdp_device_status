@@ -39,7 +39,6 @@ namespace {
 #ifdef MOTION_ENABLE
 auto &g_motionClient = MotionClient::GetInstance();
 constexpr int32_t PERMISSION_DENIED = 201;
-constexpr int32_t NO_SYSTEM_API = 202;
 constexpr int32_t HOLDING_HAND_FEATURE_DISABLE = 11;
 constexpr int32_t INVALID_LOGICAL_DATA = -2;
 constexpr int32_t EVENT_NOT_SUPPORT = -200;
@@ -71,6 +70,31 @@ enum HoldPostureStatus : int32_t {
     RIGHT_HAND_HELD,
     BOTH_HAND_HELD,
     UNKNOWN = 16,
+};
+enum PickupStatus : int32_t {
+    PICKED_UP = 0
+};
+enum RotateStatus : int32_t {
+    ROTATE_UNCHANGED = -1,
+    ROTATE_UPRIGHT = 0,
+    ROTATE_LEFT = 1,
+    ROTATE_INVERTED = 2,
+    ROTATE_RIGHT = 3
+};
+enum PhysicalOrientationStatus : int32_t {
+    PHYSICAL_UPRIGHT = 0,
+    PHYSICAL_LEFT = 1,
+    PHYSICAL_INVERTED = 2,
+    PHYSICAL_RIGHT = 3,
+    PHYSICAL_FACE_UP = 4,
+    PHYSICAL_FACE_DOWN = 5
+};
+enum LogicalOrientationStatus : int32_t {
+    LOGICAL_UNKNOWN = -1,
+    LOGICAL_UPRIGHT = 0,
+    LOGICAL_LEFT = 1,
+    LOGICAL_INVERTED = 2,
+    LOGICAL_RIGHT = 3
 };
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES = { "string", "function" };
 const std::vector<std::string> EXPECTED_SUB_ARG_TYPES_FUNCTION = { "function" };
@@ -1253,6 +1277,10 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
     SetInt32Property(env, operatingHandStatus, RIGHT_HAND, "RIGHT_HAND_OPERATED");
     SetPropertyName(env, exports, "OperatingHandStatus", operatingHandStatus);
     DefineHoldingHandStatus(env, exports);
+    DefinePickupEvent(env, exports);
+    DefineRotateEvent(env, exports);
+    DefinePhysicalOrientation(env, exports);
+    DefineLogicalOrientation(env, exports);
     FI_HILOGD("Exit");
     return exports;
 }
@@ -1272,6 +1300,71 @@ void MotionNapi::DefineHoldingHandStatus(napi_env env, napi_value exports)
     SetInt32Property(env, holdingHandStatus, HoldPostureStatus::RIGHT_HAND_HELD, "RIGHT_HAND_HELD");
     SetInt32Property(env, holdingHandStatus, HoldPostureStatus::BOTH_HAND_HELD, "BOTH_HANDS_HELD");
     SetPropertyName(env, exports, "HoldingHandStatus", holdingHandStatus);
+}
+
+void MotionNapi::DefinePickupEvent(napi_env env, napi_value exports)
+{
+    napi_value pickupEvent;
+    napi_status status = napi_create_object(env, &pickupEvent);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed create pickupEvent");
+        return;
+    }
+
+    SetInt32Property(env, pickupEvent, PickupStatus::PICKED_UP, "PICKED_UP");
+    SetPropertyName(env, exports, "PickupEvent", pickupEvent);
+}
+
+void MotionNapi::DefineRotateEvent(napi_env env, napi_value exports)
+{
+    napi_value rotateEvent;
+    napi_status status = napi_create_object(env, &rotateEvent);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed create rotateEvent");
+        return;
+    }
+
+    SetInt32Property(env, rotateEvent, RotateStatus::ROTATE_UNCHANGED, "UNCHANGED");
+    SetInt32Property(env, rotateEvent, RotateStatus::ROTATE_UPRIGHT, "UPRIGHT");
+    SetInt32Property(env, rotateEvent, RotateStatus::ROTATE_LEFT, "LEFT");
+    SetInt32Property(env, rotateEvent, RotateStatus::ROTATE_INVERTED, "INVERTED");
+    SetInt32Property(env, rotateEvent, RotateStatus::ROTATE_RIGHT, "RIGHT");
+    SetPropertyName(env, exports, "RotateEvent", rotateEvent);
+}
+
+void MotionNapi::DefinePhysicalOrientation(napi_env env, napi_value exports)
+{
+    napi_value physicalOrientation;
+    napi_status status = napi_create_object(env, &physicalOrientation);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed create physicalOrientation");
+        return;
+    }
+
+    SetInt32Property(env, physicalOrientation, PhysicalOrientationStatus::PHYSICAL_UPRIGHT, "UPRIGHT");
+    SetInt32Property(env, physicalOrientation, PhysicalOrientationStatus::PHYSICAL_LEFT, "LEFT");
+    SetInt32Property(env, physicalOrientation, PhysicalOrientationStatus::PHYSICAL_INVERTED, "INVERTED");
+    SetInt32Property(env, physicalOrientation, PhysicalOrientationStatus::PHYSICAL_RIGHT, "RIGHT");
+    SetInt32Property(env, physicalOrientation, PhysicalOrientationStatus::PHYSICAL_FACE_UP, "FACE_UP");
+    SetInt32Property(env, physicalOrientation, PhysicalOrientationStatus::PHYSICAL_FACE_DOWN, "FACE_DOWN");
+    SetPropertyName(env, exports, "PhysicalOrientation", physicalOrientation);
+}
+
+void MotionNapi::DefineLogicalOrientation(napi_env env, napi_value exports)
+{
+    napi_value logicalOrientation;
+    napi_status status = napi_create_object(env, &logicalOrientation);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed create logicalOrientation");
+        return;
+    }
+
+    SetInt32Property(env, logicalOrientation, LogicalOrientationStatus::LOGICAL_UNKNOWN, "UNKNOWN");
+    SetInt32Property(env, logicalOrientation, LogicalOrientationStatus::LOGICAL_UPRIGHT, "UPRIGHT");
+    SetInt32Property(env, logicalOrientation, LogicalOrientationStatus::LOGICAL_LEFT, "LEFT");
+    SetInt32Property(env, logicalOrientation, LogicalOrientationStatus::LOGICAL_INVERTED, "INVERTED");
+    SetInt32Property(env, logicalOrientation, LogicalOrientationStatus::LOGICAL_RIGHT, "RIGHT");
+    SetPropertyName(env, exports, "LogicalOrientation", logicalOrientation);
 }
 
 void MotionNapi::SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName)
