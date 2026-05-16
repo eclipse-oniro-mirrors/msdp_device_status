@@ -255,6 +255,42 @@ void UnderageModelNapiEvent::OnEventChanged(uint32_t eventType, int32_t result, 
     }
 }
 
+void UnderageModelNapiEvent::OnReceiveData(
+    int32_t callbackId, std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    std::lock_guard<std::mutex> lock(eventsMutex_);
+    uint32_t featureId = userStatusData->GetFeature();
+    auto typeIter = events_.find(featureId);
+    if (typeIter == events_.end()) {
+        FI_HILOGE("featureId: %{public}d not found", featureId);
+        return;
+    }
+    if (typeIter->second == nullptr) {
+        FI_HILOGE("listener is nullptr.");
+        return;
+    }
+    for (auto item : typeIter->second->onRefSets) {
+        napi_value handler = nullptr;
+        napi_status ret = napi_get_reference_value(env_, item, &handler);
+        if (ret != napi_ok) {
+            FI_HILOGE("napi_get_reference_value for %{public}d failed, status: %{public}d", featureId, ret);
+            continue;
+        }
+        napi_value userData;
+        napi_status createDataResult = napi_create_object(env_, &userData);
+        if (createDataResult != napi_ok) {
+            FI_HILOGE("create user callback data failed");
+            continue;
+        }
+        UserStatusAwareness::UserStatusNapiUtil::ReportUserDataToJs(env_, userStatusData, userData);
+        napi_value callResult = nullptr;
+        if (napi_call_function(env_, nullptr, handler, 1, &userData, &callResult) != napi_ok) {
+            FI_HILOGE("Report event to Js failed");
+            continue;
+        }
+    }
+}
+
 void UnderageModelNapiEvent::ConvertUserAgeGroup(napi_value handler, int32_t result, float confidence)
 {
     napi_handle_scope scope = nullptr;

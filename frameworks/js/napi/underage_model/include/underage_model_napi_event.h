@@ -24,6 +24,7 @@
 #include <string>
 
 #include "napi/native_api.h"
+#include "user_status_napi_util.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -41,6 +42,7 @@ public:
     bool RemoveAllCallback(uint32_t eventType);
     bool RemoveCallback(uint32_t eventType, napi_value handler);
     virtual void OnEventChanged(uint32_t eventType, int32_t result, float confidence);
+    void OnReceiveData(int32_t callbackId, std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData);
     void ConvertUserAgeGroup(napi_value handler, int32_t result, float confidence);
 
 private:
