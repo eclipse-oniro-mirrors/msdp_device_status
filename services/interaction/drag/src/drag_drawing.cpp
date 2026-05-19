@@ -2821,8 +2821,8 @@ void DragDrawing::CreateWindow()
     Rosen::RSSurfaceNodeType surfaceNodeType = Rosen::RSSurfaceNodeType::SELF_DRAWING_WINDOW_NODE;
     g_drawingInfo.surfaceNode =
         Rosen::RSSurfaceNode::Create(surfaceNodeConfig, surfaceNodeType, true, false, rsUiDirector_->GetRSUIContext());
-    g_drawingInfo.surfaceNode->SetSkipCheckInMultiInstance(true);
     CHKPV(g_drawingInfo.surfaceNode);
+    g_drawingInfo.surfaceNode->SetSkipCheckInMultiInstance(true);
 #ifndef OHOS_BUILD_PC_PRODUCT
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
 #else
