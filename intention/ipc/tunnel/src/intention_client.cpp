@@ -65,13 +65,60 @@ ErrCode IntentionClient::Connect()
     sptr<ISystemAbilityManager> sa = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     CHKPR(sa, E_DEVICESTATUS_GET_SYSTEM_ABILITY_MANAGER_FAILED);
 
-    bool isExist = false;
-    sptr<IRemoteObject> remoteObject = sa->CheckSystemAbility(MSDP_DEVICESTATUS_SERVICE_ID, isExist);
-    CHKPR(remoteObject, E_DEVICESTATUS_GET_SERVICE_FAILED);
+    sptr<IRemoteObject> remoteObject = sa->CheckSystemAbility(MSDP_DEVICESTATUS_SERVICE_ID);
+    if (remoteObject == nullptr || remoteObject->IsObjectDead()) {
+        int32_t ret = LoadDeviceStatusService();
+        if (ret != RET_OK) {
+            FI_HILOGE("Load device status service failed");
+        }
+        return ret;
+    }
+    int32_t ret = DealAfterServiceAlive(remoteObject);
+    if (ret != RET_OK) {
+        FI_HILOGE("DealAfterServiceAlive failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
 
+int32_t IntentionClient::LoadDeviceStatusService()
+{
+    CALL_INFO_TRACE;
+    sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        FI_HILOGE("samgr is nullptr");
+        return RET_ERR;
+    }
+    sptr<ServiceProxyLoadCallback> loadCallback = new (std::nothrow) ServiceProxyLoadCallback();
+    if (loadCallback == nullptr) {
+        FI_HILOGE("Create load callback failed");
+        return RET_ERR;
+    }
+    int32_t errCode = samgr->LoadSystemAbility(MSDP_DEVICESTATUS_SERVICE_ID, loadCallback);
+    if (errCode != RET_OK) {
+        FI_HILOGE("LoadDeviceStatusService failed");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
+    sptr<IRemoteObject> remoteObject = nullptr;
+    loadCallback->OnLoadSystemAbilitySuccess(MSDP_DEVICESTATUS_SERVICE_ID, remoteObject);
+    if (remoteObject == nullptr) {
+        FI_HILOGE("OnLoadDeviceStatusService failed");
+        return E_DEVICESTATUS_GET_SERVICE_FAILED;
+    }
+    FI_HILOGI("LoadDeviceStatusService success");
+    int32_t ret = DealAfterServiceAlive(remoteObject);
+    if (ret != RET_OK) {
+        FI_HILOGE("DealAfterServiceAlive failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t IntentionClient::DealAfterServiceAlive(const sptr<IRemoteObject>& remoteObject)
+{
     deathRecipient_ = sptr<DeathRecipient>::MakeSptr(shared_from_this());
-    CHKPR(deathRecipient_, ERR_NO_MEMORY);
-
+    if (deathRecipient_ == nullptr) {
+        FI_HILOGE("deathRecipient_ is null");
+        return ERR_NO_MEMORY;
+    }
     if (remoteObject->IsProxyObject()) {
         if (!remoteObject->AddDeathRecipient(deathRecipient_)) {
             FI_HILOGE("Add death recipient to DeviceStatus service failed");
@@ -79,7 +126,6 @@ ErrCode IntentionClient::Connect()
             return E_DEVICESTATUS_ADD_DEATH_RECIPIENT_FAILED;
         }
     }
-
     devicestatusProxy_ = iface_cast<IIntention>(remoteObject);
     FI_HILOGI("Connecting IntentionService success");
     return RET_OK;
@@ -1327,6 +1373,25 @@ void IntentionClient::ServiceStatusListener::OnRemoveSystemAbility(int32_t syste
 {
     FI_HILOGI("systemAbilityId:%{public}d", systemAbilityId);
 }
+
+void IntentionClient::ServiceProxyLoadCallback::OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
+    const sptr<IRemoteObject> &remoteObject)
+{
+    if (systemAbilityId != MSDP_DEVICESTATUS_SERVICE_ID) {
+        FI_HILOGE("Incorrect SA Id:%{public}d", systemAbilityId);
+        return;
+    }
+    if (remoteObject == nullptr) {
+        FI_HILOGE("remote object is nullptr");
+        return;
+    }
+}
+
+void IntentionClient::ServiceProxyLoadCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
+{
+    FI_HILOGE("Load SA:%{public}d failed", systemAbilityId);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
