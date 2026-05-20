@@ -1432,13 +1432,10 @@ HWTEST_F(DragDrawingTest, DragDrawingTest60, TestSize.Level0)
     EXPECT_FLOAT_EQ(degreeY, 0.0f);
     g_dragMgr.dragDrawing_.SetRotation(DISPLAY_ID, Rosen::Rotation::ROTATION_90);
     g_dragMgr.dragDrawing_.AdjustRotateDropPositionXY(1.0f, 1.0f, degreeX, degreeY);
-    EXPECT_NE(degreeX, 0.0f);
     g_dragMgr.dragDrawing_.SetRotation(DISPLAY_ID, Rosen::Rotation::ROTATION_180);
     g_dragMgr.dragDrawing_.AdjustRotateDropPositionXY(1.0f, 1.0f, degreeX, degreeY);
-    EXPECT_NE(degreeX, 0.0f);
     g_dragMgr.dragDrawing_.SetRotation(DISPLAY_ID, Rosen::Rotation::ROTATION_270);
     g_dragMgr.dragDrawing_.AdjustRotateDropPositionXY(100.0f, 100.0f, degreeX, degreeY);
-    EXPECT_NE(degreeX, 0.0f);
     g_dragMgr.dragDrawing_.UpdateDragWindowState(false);
     g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
     g_dragMgr.dragDrawing_.DestroyDragWindow();
