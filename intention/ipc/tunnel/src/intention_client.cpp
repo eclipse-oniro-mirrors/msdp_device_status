@@ -115,10 +115,8 @@ int32_t IntentionClient::LoadDeviceStatusService()
 int32_t IntentionClient::DealAfterServiceAlive(const sptr<IRemoteObject>& remoteObject)
 {
     deathRecipient_ = sptr<DeathRecipient>::MakeSptr(shared_from_this());
-    if (deathRecipient_ == nullptr) {
-        FI_HILOGE("deathRecipient_ is null");
-        return ERR_NO_MEMORY;
-    }
+    CHKPR(deathRecipient_, ERR_NO_MEMORY);
+
     if (remoteObject->IsProxyObject()) {
         if (!remoteObject->AddDeathRecipient(deathRecipient_)) {
             FI_HILOGE("Add death recipient to DeviceStatus service failed");
@@ -126,6 +124,7 @@ int32_t IntentionClient::DealAfterServiceAlive(const sptr<IRemoteObject>& remote
             return E_DEVICESTATUS_ADD_DEATH_RECIPIENT_FAILED;
         }
     }
+
     devicestatusProxy_ = iface_cast<IIntention>(remoteObject);
     FI_HILOGI("Connecting IntentionService success");
     return RET_OK;
@@ -1391,7 +1390,6 @@ void IntentionClient::ServiceProxyLoadCallback::OnLoadSystemAbilityFail(int32_t 
 {
     FI_HILOGE("Load SA:%{public}d failed", systemAbilityId);
 }
-
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
