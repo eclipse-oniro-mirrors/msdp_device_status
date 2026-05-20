@@ -1370,7 +1370,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest58, TestSize.Level0)
     EXPECT_FLOAT_EQ(degreeX, 0.0f);
     EXPECT_FLOAT_EQ(degreeY, 0.0f);
 }
- 
+
 /**
 * @tc.name: DragDrawingTest59
 * @tc.desc: Test CalculateLightIntensity
