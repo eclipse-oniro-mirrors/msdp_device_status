@@ -17,7 +17,9 @@
 
 #include "message_parcel.h"
 
+#include "devicestatus_define.h"
 #include "fi_log.h"
+
 
 namespace OHOS {
 namespace Msdp {

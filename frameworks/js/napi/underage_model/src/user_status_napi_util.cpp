@@ -17,6 +17,7 @@
 
 #include "securec.h"
 
+#include "devicestatus_define.h"
 #include "fi_log.h"
 #include "user_blow_data.h"
 #include "user_mood_data.h"
@@ -87,7 +88,7 @@ void UserStatusNapiUtil::SetMoodJsData(napi_env env, std::shared_ptr<UserStatusD
         napi_value napiValue;
         CHKRV(napi_create_array_with_length(env, moodData->GetNonRealTimeEmotion().size(), &napiValue),
             "napi_create_array_with_length failed");
-        if (Int32VectorToJsArray(env, moodData->GetNonRealTimeEmotion(), napiValue) != 0) {
+        if (Int32VectorToJsArray(env, moodData->GetNonRealTimeEmotion(), napiValue) != napi_ok) {
             FI_HILOGE("FeaturesToJsArray failed");
             return;
         }
@@ -223,14 +224,14 @@ void UserStatusNapiUtil::SetJsArrayProperty(napi_env env, const std::vector<floa
 {
     napi_value napiValue;
     CHKRV(napi_create_array_with_length(env, vec.size(), &napiValue), "napi_create_array_with_length failed");
-    if (VectorToJsArray(env, vec, napiValue) != 0) {
+    if (VectorToJsArray(env, vec, napiValue) != napi_ok) {
         FI_HILOGE("FeaturesToJsArray failed");
         return;
     }
     CHKRV(napi_set_named_property(env, jsData, key, napiValue), "napi_set_named_property failed");
 }
 
-int32_t UserStatusNapiUtil::VectorToJsArray(napi_env env, const std::vector<float>& vec,
+napi_status UserStatusNapiUtil::VectorToJsArray(napi_env env, const std::vector<float>& vec,
     napi_value& arrayResult)
 {
     CALL_DEBUG_ENTER;
@@ -240,23 +241,23 @@ int32_t UserStatusNapiUtil::VectorToJsArray(napi_env env, const std::vector<floa
         napi_status status = napi_create_object(env, &eachObj);
         if (status != napi_ok) {
             FI_HILOGE("napi_create_object failed");
-            return 1;
+            return napi_object_expected;
         }
         status = napi_create_double(env, each, &eachObj);
         if (status != napi_ok) {
             FI_HILOGE("napi_create_double failed");
-            return 1;
+            return napi_object_expected;
         }
         status = napi_set_element(env, arrayResult, idx++, eachObj);
         if (status != napi_ok) {
             FI_HILOGE("error: napi set element error: %{public}d, idx: %{public}d", status, idx - 1);
-            return 5;
+            return napi_function_expected;
         }
     }
-    return 0;
+    return napi_ok;
 }
 
-int32_t UserStatusNapiUtil::Int32VectorToJsArray(napi_env env, const std::vector<int32_t>& vec,
+napi_status UserStatusNapiUtil::Int32VectorToJsArray(napi_env env, const std::vector<int32_t>& vec,
     napi_value& arrayResult)
 {
     CALL_DEBUG_ENTER;
@@ -266,20 +267,20 @@ int32_t UserStatusNapiUtil::Int32VectorToJsArray(napi_env env, const std::vector
         napi_status status = napi_create_object(env, &eachObj);
         if (status != napi_ok) {
             FI_HILOGE("napi_create_object failed");
-            return 1;
+            return napi_object_expected;
         }
         status = napi_create_int32(env, each, &eachObj);
         if (status != napi_ok) {
             FI_HILOGE("napi_create_double failed");
-            return 1;
+            return napi_object_expected;
         }
         status = napi_set_element(env, arrayResult, idx++, eachObj);
         if (status != napi_ok) {
             FI_HILOGE("error: napi set element error: %{public}d, idx: %{public}d", status, idx - 1);
-            return 5;
+            return napi_function_expected;
         }
     }
-    return 0;
+    return napi_ok;
 }
 
 void UserStatusNapiUtil::GetUserDataToJs(napi_env env, UserStatusNapiResult &statusResult, napi_value result)

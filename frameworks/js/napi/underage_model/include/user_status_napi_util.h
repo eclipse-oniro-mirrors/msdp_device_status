@@ -49,22 +49,6 @@ constexpr uint32_t FEATURE_RAPIDCAPTURE_ANTI_MISTOUCH = 18;
 constexpr uint32_t FEATURE_LEM_EXT_SCREEN_ANTI_MISTOUCH = 19;
 constexpr uint32_t FEATURE_UNSUPPORTED = 20;
 
-#define CHKBRF(cond) \
-    do { \
-        if (!(cond)) { \
-            FI_HILOGE("CHKBRF(%{public}s) is false", #cond); \
-            return false; \
-        } \
-    } while (0)
-
-#define CHKPV(cond) \
-    do { \
-        if ((cond) == nullptr) { \
-            FI_HILOGE("CHKPV(%{public}s) is null", #cond); \
-            return; \
-        } \
-    } while (0)
-
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
 constexpr int32_t PERMISSION_SYSTEM_EXCEPTION { 202 };
 constexpr int32_t PARAM_ERROR { 401 };
@@ -73,6 +57,7 @@ inline const std::map <int32_t, std::string> ERROR_MESSAGES = {
     {SERVICE_EXCEPTION, "Service exception"},
     {PARAM_ERROR, "Param error"}
 };
+
 struct UserStatusNapiResult {
     uint32_t feature { 0 };
     std::string statusDescription;
@@ -118,8 +103,8 @@ public:
     static void SetMoodJsData(napi_env env, std::shared_ptr<UserStatusData> data, napi_value& jsData);
     static void SetJsGesturesData(napi_env env, std::shared_ptr<UserStatusData> data, napi_value& jsData);
     static void SetPlayAbilityData(napi_env env, std::shared_ptr<UserStatusData> data, napi_value& jsData);
-    static int32_t VectorToJsArray(napi_env env, const std::vector<float>& vec, napi_value& arrayResult);
-    static int32_t Int32VectorToJsArray(napi_env env, const std::vector<int32_t>& vec, napi_value& arrayResult);
+    static napi_status VectorToJsArray(napi_env env, const std::vector<float>& vec, napi_value& arrayResult);
+    static napi_status Int32VectorToJsArray(napi_env env, const std::vector<int32_t>& vec, napi_value& arrayResult);
 
     static napi_value CreateNapiError(napi_env env, int32_t errCode, const std::string &errMessage);
     static std::optional<std::string> GetErrMsg(int32_t errorCode);

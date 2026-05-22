@@ -17,6 +17,7 @@
 
 #include "message_parcel.h"
 
+#include "devicestatus_define.h"
 #include "fi_log.h"
 
 namespace OHOS {
@@ -109,6 +110,7 @@ void UserMoodData::SetLinearAcc(const std::vector<float> &linearAcc)
 
 std::string UserMoodData::Dump()
 {
+    constexpr int32_t ARG_2 = 2;
     if (gravityAcc_.size() != SIZE_THREE || linearAcc_.size() != SIZE_THREE) {
         FI_HILOGE("gravityAcc or linearAcc_ size error");
         return "";
@@ -123,10 +125,10 @@ std::string UserMoodData::Dump()
     dumpInfo << "}";
     dumpInfo << ", gravityAcc_[0]=" << gravityAcc_[0]
              << ", gravityAcc_[1]=" << gravityAcc_[1]
-             << ", gravityAcc_[2]=" << gravityAcc_[2];
+             << ", gravityAcc_[2]=" << gravityAcc_[ARG_2];
     dumpInfo << ", linearAcc_[0]=" << linearAcc_[0]
              << ", linearAcc_[1]=" << linearAcc_[1]
-             << ", linearAcc_[2]=" << linearAcc_[2];
+             << ", linearAcc_[2]=" << linearAcc_[ARG_2];
     return dumpInfo.str();
 }
 

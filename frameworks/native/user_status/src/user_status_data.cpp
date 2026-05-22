@@ -17,6 +17,7 @@
 
 #include "message_parcel.h"
 
+#include "devicestatus_define.h"
 #include "fi_log.h"
 
 namespace OHOS {
@@ -24,6 +25,9 @@ namespace Msdp {
 namespace UserStatusAwareness {
 namespace {
 constexpr int32_t MAX_APP_SIZE = 50;
+constexpr uint32_t FEATURE_USER_PREFERENCE_APP = 10;
+constexpr uint32_t FEATURE_USER_FACE_ANGLE = 11;
+constexpr uint32_t FEATURE_TIME_TUNNEL = 14;
 } // namespace
 UserStatusData::UserStatusData() {}
 
@@ -152,8 +156,8 @@ void UserStatusData::SetTpStatus(int32_t tpStatus)
 std::string UserStatusData::Dump()
 {
     std::string dumpInfo = DumpBaseData();
-
-    if (feature_ == 10) {
+    
+    if (feature_ == FEATURE_USER_PREFERENCE_APP) {
         dumpInfo.append(", resultApps_=");
         dumpInfo.append(std::to_string(resultApps_.size()));
         for (const auto& app : resultApps_) {
@@ -171,7 +175,7 @@ std::string UserStatusData::DumpBaseData()
              << ", status=" << status_
              << ", result=" << result_
              << ", errorCode_=" << errorCode_;
-    if (feature_ == 14) {
+    if (feature_ == FEATURE_TIME_TUNNEL) {
         dumpInfo << ", pointerAction=" << pointerAction_
                  << ", orientation=" << orientation_
                  << ", displayId=" << displayId_
@@ -214,7 +218,7 @@ bool UserStatusData::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (feature_ == 10) {
+    if (feature_ == FEATURE_USER_PREFERENCE_APP) {
         int32_t appSize = static_cast<int32_t>(resultApps_.size());
         if (appSize > MAX_APP_SIZE) {
             appSize = MAX_APP_SIZE;
@@ -230,13 +234,13 @@ bool UserStatusData::Marshalling(Parcel &parcel) const
             }
         }
     }
-    if (feature_ == 11) {
+    if (feature_ == FEATURE_USER_FACE_ANGLE) {
         if (!parcel.WriteString(hpeDeviceId_)) {
             FI_HILOGE("write hpeDeviceId_ is failed");
             return false;
         }
     }
-    if (feature_ == 14) {
+    if (feature_ == FEATURE_TIME_TUNNEL) {
         if (!WriteTimeTunnelData(parcel)) {
             return false;
         }

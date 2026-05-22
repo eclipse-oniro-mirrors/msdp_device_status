@@ -44,6 +44,9 @@ constexpr int32_t OTHERS = 0;
 constexpr int32_t CHILD = 1;
 constexpr int32_t UNSUPP_FRATURE_ERR = 0x3A1000D;
 constexpr int32_t DEVICE_UNSUPPORT_ERR = 0x3A10028;
+constexpr int32_t ARG_1 = 1;
+constexpr int32_t ARG_2 = 2;
+constexpr int32_t ARG_3 = 3;
 std::mutex g_mutex; // mutex:Subscribe/Unsubscribe/OnListener
 const std::array<napi_valuetype, 2> EXPECTED_SUB_ARG_TYPES = { napi_string, napi_function };
 const std::array<napi_valuetype, 1> EXPECTED_UNSUB_ONE_ARG_TYPES = { napi_string };
@@ -394,7 +397,7 @@ napi_value UnderageModelNapi::SubscribeUserStatus(napi_env env, napi_callback_in
     napi_value args[3] = { nullptr, nullptr, nullptr };
     napi_value jsThis = nullptr;
     CHKRP(napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr), "napi_get_cb_info fail");
-    if (argc != 2 && argc != 3) {
+    if (argc != ARG_2 && argc != ARG_3) {
         ThrowUnderageModelErr(env, PARAM_EXCEPTION, "Wrong number of parameters");
         return nullptr;
     }
@@ -407,8 +410,8 @@ napi_value UnderageModelNapi::SubscribeUserStatus(napi_env env, napi_callback_in
     uint32_t featureId = 0;
     CHKRP(napi_get_value_uint32(env, args[0], &featureId), "napi_get_value_uint32 fail");
     std::vector<DeviceInfo> deviceInfoList;
-    if (argc == 3) {
-        if (!ValidateAndGetDeviceInfo(env, args[2], deviceInfoList)) {
+    if (argc == ARG_3) {
+        if (!ValidateAndGetDeviceInfo(env, args[ARG_2], deviceInfoList)) {
             ThrowUnderageModelErr(env, PARAM_EXCEPTION, "type mismatch for the args[2]");
             return nullptr;
         }
@@ -454,10 +457,10 @@ napi_value UnderageModelNapi::UnsubscribeUserStatus(napi_env env, napi_callback_
     CHKRP(napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr), "napi_get_cb_info fail");
     bool validateArgsRes = false;
     if (argc == UNSUBSCRIBE_ONE_PARA) {
-        std::array<napi_valuetype, 1> argTypes = { napi_number };
+        std::array<napi_valuetype, ARG_1> argTypes = { napi_number };
         validateArgsRes = ValidateArgsType(env, args, argc, argTypes);
     } else if (argc == UNSUBSCRIBE_TWO_PARA) {
-        std::array<napi_valuetype, 2> argTypes = { napi_number, napi_function };
+        std::array<napi_valuetype, ARG_2> argTypes = { napi_number, napi_function };
         validateArgsRes = ValidateArgsType(env, args, argc, argTypes);
     }
     if (!validateArgsRes) {
@@ -521,7 +524,7 @@ napi_value UnderageModelNapi::ConfigParams(napi_env env, napi_callback_info info
     napi_value args[2] = { nullptr };
     napi_value jsThis = nullptr;
     CHKRP(napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr), "napi_get_cb_info fail");
-    if (argc != 2) {
+    if (argc != ARG_2) {
         ThrowUnderageModelErr(env, PARAM_EXCEPTION, "Wrong number of parameters");
         return nullptr;
     }

@@ -477,9 +477,9 @@ void AniUnderageModelEvent::OnUserStatusData(
         if (env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(), &callResult) !=
             ANI_OK) {
             HILOG_ERROR(LOG_CORE, "Excute CallBack failed.");
-	    if (ANI_OK != vm_->DetachCurrentThread()) {
-	        HILOG_ERROR(LOG_CORE, "detach current thread.");
-	    }
+            if (ANI_OK != vm_->DetachCurrentThread()) {
+                HILOG_ERROR(LOG_CORE, "detach current thread.");
+            }
             return;
         }
     }
