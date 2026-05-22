@@ -13,10 +13,22 @@
  * limitations under the License.
  */
 #include <dlfcn.h>
+#include <nlohmann/json.hpp>
 
 #include "ani_underage_model_event.h"
 #include "devicestatus_define.h"
 #include "ohos.multimodalAwareness.underageModel.UserClassification.ani.1.hpp"
+#include "ohos.multimodalAwareness.underageModel.UserStatusData.ani.1.hpp"
+#include "ohos.multimodalAwareness.underageModel.UserFacesData.ani.1.hpp"
+#include "ohos.multimodalAwareness.underageModel.UserGesturesData.ani.1.hpp"
+#include "ohos.multimodalAwareness.underageModel.UserFaceAngleData.ani.1.hpp"
+#include "ohos.multimodalAwareness.underageModel.UserBlowData.ani.1.hpp"
+#include "ohos.multimodalAwareness.underageModel.UserEmotionData.ani.1.hpp"
+#include "ohos.multimodalAwareness.underageModel.ComfortReminderData.ani.1.hpp"
+#include "user_status_napi_util.h"
+#include "play_ability_status_data.h"
+#include "user_blow_data.h"
+#include "user_mood_data.h"
 
 #undef LOG_TAG
 #define LOG_TAG "AniUnderageModelEvent"
@@ -31,13 +43,25 @@ constexpr int32_t UNSUPP_FRATURE_ERR = 0x3A1000D;
 constexpr int32_t DEVICE_UNSUPPORT_ERR = 0x3A10028;
 const std::string USER_STATUS_CLIENT_SO_PATH = "libuser_status_client.z.so";
 const std::string_view REGISTER_LISTENER_FUNC_NAME = { "RegisterListener" };
+const std::string_view SUBSCRIBE_CALLBACK_FUNC_NAME = { "SubscribeCallback" };
 const std::string_view SUBSCRIBE_FUNC_NAME = { "Subscribe" };
+const std::string_view SUBSCRIBE_WITH_DEVICEINFO_FUNC_NAME = { "SubscribeWithDeviceInfo" };
 const std::string_view UNSUBSCRIBE_FUNC_NAME = { "Unsubscribe" };
+constexpr std::string_view CONFIGPARAMS_FUNC_NAME = { "ConfigParams" };
+constexpr std::string_view QUERYCAPABILITIES_FUNC_NAME = { "QueryCapabilities" };
 
 void UnderageModelListener::OnUnderageModelListener(uint32_t eventType, int32_t result, float confidence) const
 {
     FI_HILOGI("Enter");
     AniUnderageModelEvent::GetInstance()->OnEventChanged(eventType, result, confidence);
+    FI_HILOGI("Exit");
+}
+
+void UserStatusDataCallback::OnReceiveData(int32_t callbackId,
+    std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    FI_HILOGI("Enter");
+    AniUnderageModelEvent::GetInstance()->OnUserStatusData(callbackId, userStatusData);
     FI_HILOGI("Exit");
 }
 
@@ -72,8 +96,12 @@ AniUnderageModelEvent::~AniUnderageModelEvent()
         g_userStatusHandle = nullptr;
     }
     g_registerListenerFunc = nullptr;
+    g_subscribeCallbackFunc = nullptr;
     g_subscribeFunc = nullptr;
+    g_subscribeWithdeviceInfoFunc = nullptr;
     g_unsubscribeFunc = nullptr;
+    g_configParamsFunc = nullptr;
+    g_queryCapabilitiesFunc = nullptr;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         for (auto& iter : events_) {
@@ -171,7 +199,7 @@ bool AniUnderageModelEvent::UnSubscribeCallback(int32_t type)
 {
     if (CheckEvents(type)) {
         auto iter = callbacks_.find(type);
-        if (iter == callbacks_.end()) {
+        if (type == UNDERAGE_MODEL_TYPE_KID && iter == callbacks_.end()) {
             FI_HILOGE("faild to find callback");
             taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
             return false;
@@ -187,7 +215,9 @@ bool AniUnderageModelEvent::UnSubscribeCallback(int32_t type)
         }
         auto ret = g_unsubscribeFunc(type);
         if (ret == RET_OK) {
-            callbacks_.erase(iter);
+            if (type == UNDERAGE_MODEL_TYPE_KID) {
+                callbacks_.erase(iter);
+            }
             return true;
         } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
             FI_HILOGE("failed to unsubscribe");
@@ -346,7 +376,6 @@ bool AniUnderageModelEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
     if (iter->second->onRefSets.empty()) {
         events_.erase(eventType);
     }
-    
     if (ANI_OK != env->GlobalReference_Delete(onHandlerRef)) {
         FI_HILOGE("Global Reference delete fail");
         return false;
@@ -420,6 +449,234 @@ void AniUnderageModelEvent::OnEventChanged(uint32_t eventType, int32_t result, f
     }
 }
 
+void AniUnderageModelEvent::OnUserStatusData(
+    int32_t callbackId, std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    uint32_t featureId = userStatusData->GetFeature();
+    std::lock_guard<std::mutex> guard(mutex_);
+    if (vm_ == nullptr) {
+        FI_HILOGE("vm_ is nullptr");
+        return;
+    }
+    auto typeIter = events_.find(featureId);
+    if (typeIter == events_.end()) {
+        FI_HILOGE("featureId: %{public}d not found", featureId);
+        return;
+    }
+    ani_env *env = AttachAniEnv(vm_);
+    if (env == nullptr) {
+        FI_HILOGE("AttachAniEnv get env is nullptr");
+        return;
+    }
+    auto baseData = CreateBaseData(userStatusData);
+    for (auto handler : typeIter->second->onRefSets) {
+        std::vector<ani_ref> args;
+        ani_object userDataAni = CreateUserDataAni(env, featureId, userStatusData, baseData);
+        args.push_back(static_cast<ani_ref>(userDataAni));
+        ani_ref callResult;
+        if (env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(), &callResult) !=
+            ANI_OK) {
+            HILOG_ERROR(LOG_CORE, "Excute CallBack failed.");
+	    if (ANI_OK != vm_->DetachCurrentThread()) {
+	        HILOG_ERROR(LOG_CORE, "detach current thread.");
+	    }
+            return;
+        }
+    }
+    if (ANI_OK != vm_->DetachCurrentThread()) {
+        HILOG_ERROR(LOG_CORE, "detach current thread.");
+    }
+}
+
+::ohos::multimodalAwareness::underageModel::UserStatusData AniUnderageModelEvent::CreateBaseData(
+    std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    uint32_t featureId = userStatusData->GetFeature();
+    return ::ohos::multimodalAwareness::underageModel::UserStatusData{
+        .feature = ::ohos::multimodalAwareness::underageModel::UserStatusFeature::from_value(featureId),
+        .status = userStatusData->GetStatus(),
+        .result = ::taihe::optional<int32_t>(std::in_place_t{}, userStatusData->GetResult()),
+        .errCode = userStatusData->GetErrorCode(),
+    };
+}
+
+ani_object AniUnderageModelEvent::CreateUserDataAni(
+    ani_env *env, uint32_t featureId, std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData,
+    const ::ohos::multimodalAwareness::underageModel::UserStatusData &baseData)
+{
+    switch (featureId) {
+        case UserStatusAwareness::FEATURE_USER_PLAYING:
+        case UserStatusAwareness::FEATURE_USER_FACE:
+            return HandlePlayAbilityOrFaceData(env, baseData, userStatusData);
+        case UserStatusAwareness::FEATURE_USER_PLAY_ABILITY_FATIGUE:
+        case UserStatusAwareness::FEATURE_USER_GESTURE:
+            return HandlePlayAbilityOrGestureData(env, baseData, userStatusData);
+        case UserStatusAwareness::FEATURE_USER_FACE_ANGLE:
+            return HandleFaceAngleData(env, baseData, userStatusData);
+        case UserStatusAwareness::FEATURE_USER_BLOW:
+            return HandleBlowData(env, baseData, userStatusData);
+        case UserStatusAwareness::FEATURE_COMFORT_REMINDER:
+            return HandleComfortReminderData(env, baseData, userStatusData);
+        case UserStatusAwareness::FEATURE_USER_MOOD:
+            return HandleMoodData(env, baseData, userStatusData);
+        default:
+            return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserStatusData>(env, baseData);
+    }
+}
+
+ani_object AniUnderageModelEvent::HandlePlayAbilityOrFaceData(ani_env *env,
+    const ohos::multimodalAwareness::underageModel::UserStatusData &baseData,
+    std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    auto playAbilityData =
+        std::static_pointer_cast<UserStatusAwareness::PlayAbilityStatusData>(userStatusData);
+    auto aniPlayAbilityData = ohos::multimodalAwareness::underageModel::UserFacesData{
+        .base = baseData,
+        .visualAngle = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetVisualAngle().data(),
+                playAbilityData->GetVisualAngle().size())),
+        .angularVelocity = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetAngularVelocity().data(),
+                playAbilityData->GetAngularVelocity().size())),
+        .gravityAcceleration = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetGravityAcc().data(),
+                playAbilityData->GetGravityAcc().size())),
+        .linearAcceleration = taihe::optional<taihe::array<taihe::array<float>>>(std::in_place_t{},
+            taihe::array<taihe::array<float>>(
+                taihe::copy_data_t{}, playAbilityData->GetLinearAcc().data(), playAbilityData->GetLinearAcc().size())),
+        .Azimuth = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetGameRotationData().data(),
+                playAbilityData->GetGameRotationData().size())),
+        .faceNum = taihe::optional<int32_t>(std::in_place_t{}, playAbilityData->GetFaceNum()),
+    };
+    return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserFacesData>(env, aniPlayAbilityData);
+}
+
+ani_object AniUnderageModelEvent::HandlePlayAbilityOrGestureData(ani_env *env,
+    const ohos::multimodalAwareness::underageModel::UserStatusData &baseData,
+    std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    auto playAbilityData =
+        std::static_pointer_cast<UserStatusAwareness::PlayAbilityStatusData>(userStatusData);
+    auto aniPlayAbilityData = ohos::multimodalAwareness::underageModel::UserFacesData{
+        .base = baseData,
+        .visualAngle = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetVisualAngle().data(),
+                playAbilityData->GetVisualAngle().size())),
+        .angularVelocity = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetAngularVelocity().data(),
+                playAbilityData->GetAngularVelocity().size())),
+        .gravityAcceleration = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetGravityAcc().data(),
+                playAbilityData->GetGravityAcc().size())),
+        .linearAcceleration = taihe::optional<taihe::array<taihe::array<float>>>(std::in_place_t{},
+            taihe::array<taihe::array<float>>(
+                taihe::copy_data_t{}, playAbilityData->GetLinearAcc().data(), playAbilityData->GetLinearAcc().size())),
+        .Azimuth = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetGameRotationData().data(),
+                playAbilityData->GetGameRotationData().size())),
+        .faceNum = taihe::optional<int32_t>(std::in_place_t{}, playAbilityData->GetFaceNum()),
+    };
+    auto aniGesturesData = ohos::multimodalAwareness::underageModel::UserGesturesData{
+        .base = aniPlayAbilityData,
+        .isHandExist = playAbilityData->GetHandExistFlag(),
+        .handPosition = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetHandPosition().data(),
+                playAbilityData->GetHandPosition().size())),
+        .motionGesture = taihe::optional<int32_t>(std::in_place_t{}, playAbilityData->GetMotionGesture()),
+        .handType = taihe::optional<int32_t>(std::in_place_t{}, playAbilityData->GetHandType()),
+        .directionAngle = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetDirectionAngle().data(),
+                playAbilityData->GetDirectionAngle().size())),
+        .gestureSpeed = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(taihe::copy_data_t{},
+                playAbilityData->GetGestureSpeed().data(),
+                playAbilityData->GetGestureSpeed().size())),
+    };
+    return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserGesturesData>(env, aniGesturesData);
+}
+
+ani_object AniUnderageModelEvent::HandleFaceAngleData(ani_env *env,
+    const ohos::multimodalAwareness::underageModel::UserStatusData &baseData,
+    std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    auto aniFaceAngleData = ohos::multimodalAwareness::underageModel::UserFaceAngleData{
+        .base = baseData,
+        .hpeNetworkId = userStatusData->GetHpeDeviceId(),
+    };
+    return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserFaceAngleData>(env, aniFaceAngleData);
+}
+
+ani_object AniUnderageModelEvent::HandleBlowData(ani_env *env,
+    const ohos::multimodalAwareness::underageModel::UserStatusData &baseData,
+    std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    auto userBlowData =
+        std::static_pointer_cast<UserStatusAwareness::UserBlowData>(userStatusData);
+    auto aniUserBlowData = ohos::multimodalAwareness::underageModel::UserBlowData{
+        .base = baseData,
+        .facePosition = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(
+                taihe::copy_data_t{}, userBlowData->GetFacePosition().data(), userBlowData->GetFacePosition().size())),
+        .strengthLevel = taihe::optional<int32_t>(std::in_place_t{}, userBlowData->GetStrengthLevel()),
+        .blowDirection = taihe::optional<int32_t>(std::in_place_t{}, userBlowData->GetDirection()),
+        .emotion = taihe::optional<int32_t>(std::in_place_t{}, userBlowData->GetEmotion()),
+        .isGazeStatus = userBlowData->GetEyesOn(),
+        .gravityAcceleration = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(
+                taihe::copy_data_t{}, userBlowData->GetGravityAcc().data(), userBlowData->GetGravityAcc().size())),
+    };
+    return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserBlowData>(env, aniUserBlowData);
+}
+
+ani_object AniUnderageModelEvent::HandleComfortReminderData(ani_env *env,
+    const ohos::multimodalAwareness::underageModel::UserStatusData &baseData,
+    std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    auto comfortReminderData =
+        std::static_pointer_cast<UserStatusAwareness::ComfortReminderData>(userStatusData);
+    auto aniComfortReminderData = ohos::multimodalAwareness::underageModel::ComfortReminderData{
+        .base = baseData,
+        .fusionReminderData = ohos::multimodalAwareness::underageModel::ReminderLevel::from_value(
+            comfortReminderData->GetFusionReminderData()),
+        .swingReminderData = ohos::multimodalAwareness::underageModel::ReminderLevel::from_value(
+            comfortReminderData->GetSwingReminderData()),
+        .eventType = comfortReminderData->GetEventType(),
+    };
+    return taihe::into_ani<ohos::multimodalAwareness::underageModel::ComfortReminderData>(env, aniComfortReminderData);
+}
+
+ani_object AniUnderageModelEvent::HandleMoodData(ani_env *env,
+    const ohos::multimodalAwareness::underageModel::UserStatusData &baseData,
+    std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
+{
+    auto moodData = std::static_pointer_cast<UserStatusAwareness::UserMoodData>(userStatusData);
+    auto aniMoodData = ohos::multimodalAwareness::underageModel::UserEmotionData{
+        .base = baseData,
+        .emotionRealTime = taihe::optional<int32_t>(std::in_place_t{}, moodData->GetRealTimeEmotion()),
+        .confidence = taihe::optional<int32_t>(std::in_place_t{}, moodData->GetConfidence()),
+        .isRealTime = moodData->GetIsRealTimeTag(),
+        .emotionNonRealTime = taihe::optional<taihe::array<int32_t>>(std::in_place_t{},
+            taihe::array<int32_t>(taihe::copy_data_t{},
+                moodData->GetNonRealTimeEmotion().data(),
+                moodData->GetNonRealTimeEmotion().size())),
+        .gravityAcceleration = taihe::optional<taihe::array<float>>(std::in_place_t{},
+            taihe::array<float>(
+                taihe::copy_data_t{}, moodData->GetGravityAcc().data(), moodData->GetGravityAcc().size())),
+    };
+    return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserEmotionData>(env, aniMoodData);
+}
+
 ani_vm* AniUnderageModelEvent::GetAniVm(ani_env* env)
 {
     if (env == nullptr) {
@@ -461,6 +718,122 @@ ani_env* AniUnderageModelEvent::AttachAniEnv(ani_vm* vm)
         return nullptr;
     }
     return workerEnv;
+}
+
+int32_t AniUnderageModelEvent::SubscribeUserStatus(
+    int32_t featureId, std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList)
+{
+    FI_HILOGI("SubscribeUserStatus enter, feature: %{public}u", featureId);
+    if (g_userStatusHandle == nullptr && !LoadLibrary()) {
+        FI_HILOGE("LoadLibrary failed");
+        return DEVICE_EXCEPTION;
+    }
+    if (g_callback == nullptr) {
+        auto userStatusDataCallback = std::make_shared<UserStatusDataCallback>();
+        g_callback = [userStatusDataCallback](
+                         int32_t callbackId, std::shared_ptr<UserStatusAwareness::UserStatusData> data) -> void {
+            if (userStatusDataCallback == nullptr) {
+                FI_HILOGE("userStatusDataCallback is nullptr");
+                return;
+            }
+            userStatusDataCallback->OnReceiveData(callbackId, data);
+        };
+        if (g_subscribeCallbackFunc == nullptr) {
+            g_subscribeCallbackFunc = reinterpret_cast<SubscribeCallbackFunc>(
+                dlsym(g_userStatusHandle, SUBSCRIBE_CALLBACK_FUNC_NAME.data()));
+            if (g_subscribeCallbackFunc == nullptr) {
+                FI_HILOGE("find symbol failed, error: %{public}s", dlerror());
+                return SERVICE_EXCEPTION;
+            }
+        }
+        g_subscribeCallbackFunc(featureId, g_callback);
+    }
+    if (g_subscribeWithdeviceInfoFunc == nullptr) {
+        g_subscribeWithdeviceInfoFunc = reinterpret_cast<SubscribeWithdeviceInfoFunc>(
+            dlsym(g_userStatusHandle, SUBSCRIBE_WITH_DEVICEINFO_FUNC_NAME.data()));
+        if (g_subscribeWithdeviceInfoFunc == nullptr) {
+            FI_HILOGE("%{public}s find symbol failed, error: %{public}s",
+                SUBSCRIBE_WITH_DEVICEINFO_FUNC_NAME.data(),
+                dlerror());
+            return SERVICE_EXCEPTION;
+        }
+    }
+    return g_subscribeWithdeviceInfoFunc(featureId, deviceInfoList);
+}
+
+int32_t AniUnderageModelEvent::ConfigParams(uint32_t feature, std::string& configParams)
+{
+    FI_HILOGI("ConfigParams enter, feature: %{public}u", feature);
+    if (g_userStatusHandle == nullptr && !LoadLibrary()) {
+        FI_HILOGE("LoadLibrary failed");
+        return DEVICE_EXCEPTION;
+    }
+    if (g_configParamsFunc == nullptr) {
+        g_configParamsFunc = reinterpret_cast<ConfigParamsFunc>(
+            dlsym(g_userStatusHandle, CONFIGPARAMS_FUNC_NAME.data()));
+        if (g_configParamsFunc == nullptr) {
+            FI_HILOGE("find symbol failed, error: %{public}s", dlerror());
+            return SERVICE_EXCEPTION;
+        }
+    }
+    std::map<std::string, std::vector<int32_t>> details;
+    if (!ParseConfigParams(configParams, details)) {
+        FI_HILOGE("ParseConfigParams failed");
+        return PARAM_EXCEPTION;
+    }
+    return g_configParamsFunc(feature, details);
+}
+
+bool AniUnderageModelEvent::QueryCapabilities(std::vector<int32_t>& capabilities)
+{
+    FI_HILOGI("QueryCapabilities enter");
+    if (g_userStatusHandle == nullptr && !LoadLibrary()) {
+        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+        return false;
+    }
+    if (g_queryCapabilitiesFunc == nullptr) {
+        g_queryCapabilitiesFunc = reinterpret_cast<QueryCapabilitiesFunc>(
+            dlsym(g_userStatusHandle, QUERYCAPABILITIES_FUNC_NAME.data()));
+        if (g_queryCapabilitiesFunc == nullptr) {
+            FI_HILOGE("find symbol failed, error: %{public}s", dlerror());
+            return false;
+        }
+    }
+    int32_t ret = g_queryCapabilitiesFunc(capabilities);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to query capabilities, ret: %{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool AniUnderageModelEvent::ParseConfigParams(
+    std::string const &params, std::map<std::string, std::vector<int32_t>> &configMap)
+{
+    nlohmann::json root = nlohmann::json::parse(params);
+    if (!root.contains("params") || !root["params"].is_array()) {
+        return false;
+    }
+    for (const auto& param : root["params"]) {
+        if (!param.contains("description") || !param.contains("value")) {
+            FI_HILOGE("Skipping invalid param object");
+            return false;
+        }
+        if (!param["description"].is_string() || !param["value"].is_array()) {
+            FI_HILOGE("Skipping invalid param object11111");
+            return false;
+        }
+        std::string key = param["description"].get<std::string>();
+        std::vector<int32_t> values;
+        for (const auto& num : param["value"]) {
+            if (num == nullptr || !num.is_number()) {
+                return false;
+            }
+            values.push_back(static_cast<int32_t>(num.get<int>()));
+        }
+        configMap.emplace(key, values);
+    }
+    return true;
 }
 } // namespace Msdp
 } // namespace OHOS

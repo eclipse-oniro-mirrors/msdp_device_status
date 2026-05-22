@@ -24,6 +24,7 @@
 #define LOG_TAG "ANIUnderageModel"
 namespace {
 using namespace OHOS::Msdp;
+using namespace ::ohos::multimodalAwareness::underageModel;
 std::shared_ptr<AniUnderageModelEvent> g_underageModelObj = nullptr;
 
 void OnUserAgeGroupDetectedInner(::taihe::callback_view<void(UserClassification_t const& info)> f, uintptr_t opq)
@@ -76,10 +77,119 @@ void OffUserAgeGroupDetectedInner(::taihe::optional_view<uintptr_t> opq)
         return;
     }
 }
+
+int32_t SubscribeInner(UserStatusFeature featureId, taihe::callback_view<void(UserStatusData const &data)> callback,
+    uintptr_t opq, taihe::optional_view<taihe::array<DeviceInfo>> deviceInfo)
+{
+    FI_HILOGI("Subscribe enter");
+    g_underageModelObj = AniUnderageModelEvent::GetInstance();
+    if (g_underageModelObj == nullptr) {
+        FI_HILOGE("g_underageModelObj is null");
+        taihe::set_business_error(SERVICE_EXCEPTION, "g_underageModelObj is null");
+        return 0;
+    }
+    std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList;
+    if (deviceInfo.has_value()) {
+        for (size_t i = 0; i < deviceInfo.value().size(); i++) {
+            std::string deviceId(deviceInfo.value()[i].deviceId);
+            std::string networkId(deviceInfo.value()[i].networkId);
+            std::string deviceName(deviceInfo.value()[i].deviceName);
+            std::uint32_t deviceType = static_cast<std::uint32_t>(deviceInfo.value()[i].deviceType);
+            UserStatusAwareness::DeviceInfo deviceInfo(deviceId, deviceName, networkId, deviceType);
+            deviceInfoList.emplace_back(deviceInfo);
+        }
+    }
+    if (g_underageModelObj->SubscribeUserStatus(featureId, deviceInfoList) != 0) {
+        FI_HILOGE("SubscribeCallback failed");
+        return 0;
+    }
+    if (!g_underageModelObj->AddCallback(featureId, opq)) {
+        FI_HILOGE("AddCallback failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
+        return 0;
+    }
+    return 0;
+}
+
+int32_t UnsubscribeInner(UserStatusFeature featureId, ::taihe::optional_view<uintptr_t> opq)
+{
+    FI_HILOGI("UnsubscribeInner enter");
+    if (g_underageModelObj == nullptr) {
+        FI_HILOGE("g_underageModelObj is null");
+        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "g_underageModelObj is null");
+        return 0;
+    }
+    if (!opq.has_value()) {
+        if (!g_underageModelObj->RemoveAllCallback(featureId)) {
+            FI_HILOGE("RemoveAllCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveAllCallback failed");
+            return 0;
+        }
+    } else {
+        if (!g_underageModelObj->RemoveCallback(featureId,
+            opq.value())) {
+            FI_HILOGE("RemoveCallback failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
+            return 0;
+        }
+    }
+    if (!g_underageModelObj->UnSubscribeCallback(featureId)) {
+        FI_HILOGE("UnSubscribeCallback failed");
+        return 0;
+    }
+    return 0;
+}
+
+int32_t Configure(UserStatusFeature featureId, taihe::string_view detail)
+{
+    FI_HILOGI("Configure enter");
+    if (detail.empty()) {
+        return PARAM_EXCEPTION;
+    }
+    g_underageModelObj = AniUnderageModelEvent::GetInstance();
+    if (g_underageModelObj == nullptr) {
+        FI_HILOGE("g_underageModelObj is null");
+        taihe::set_business_error(SERVICE_EXCEPTION, "g_underageModelObj is null");
+        return SERVICE_EXCEPTION;
+    }
+    std::string detailStr(detail);
+    return g_underageModelObj->ConfigParams(featureId, detailStr);
+}
+
+taihe::array<UserStatusAtomicCap> QueryCapabilities(taihe::array_view<UserStatusAtomicCap> capabilities)
+{
+    FI_HILOGI("QueryCapabilities enter");
+    if (capabilities.empty()) {
+        return {};
+    }
+    std::vector<std::int32_t> caps;
+    for (size_t i = 0; i < capabilities.size(); ++i) {
+        caps.push_back(static_cast<std::int32_t>(capabilities[i]));
+    }
+    g_underageModelObj = AniUnderageModelEvent::GetInstance();
+    if (g_underageModelObj == nullptr) {
+        FI_HILOGE("g_underageModelObj is null");
+        taihe::set_business_error(SERVICE_EXCEPTION, "g_underageModelObj is null");
+        return {};
+    }
+    if (!g_underageModelObj->QueryCapabilities(caps)) {
+        return {};
+    }
+    std::vector<UserStatusAtomicCap> res;
+    for (size_t i = 0; i < caps.size(); ++i) {
+        res[i] = static_cast<UserStatusAtomicCap::key_t>(caps[i]);
+    }
+    return taihe::array<UserStatusAtomicCap>(res);
+}
 }  // namespace
 
 // Since these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_OnUserAgeGroupDetectedInner(OnUserAgeGroupDetectedInner);
 TH_EXPORT_CPP_API_OffUserAgeGroupDetectedInner(OffUserAgeGroupDetectedInner);
+
+TH_EXPORT_CPP_API_SubscribeInner(SubscribeInner);
+TH_EXPORT_CPP_API_UnsubscribeInner(UnsubscribeInner);
+TH_EXPORT_CPP_API_Configure(Configure);
+TH_EXPORT_CPP_API_QueryCapabilities(QueryCapabilities);
 // NOLINTEND
