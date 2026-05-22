@@ -107,9 +107,9 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_001, TestSize.Level1)
     BoomerangClient boomerangClient;
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
     ret = boomerangClient.UnsubscribeCallback(BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
 }
 
 /**
@@ -128,7 +128,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_002, TestSize.Level1)
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
     ret = boomerangClient.NotifyMetadataBindingEvent(bundleName, callback);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
 }
 
 /**
@@ -147,9 +147,9 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_003, TestSize.Level1)
     char bundleName[MAX_STRING_LEN] = { 0 };
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
     ret = boomerangClient.SubmitMetadata(metadata);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
 }
 
 /**
@@ -167,7 +167,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_004, TestSize.Level1)
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
     ASSERT_NE(callback, nullptr);
     int32_t ret = boomerangClient.BoomerangEncodeImage(pixelMap, metadata, callback);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
 }
 
 /**
@@ -185,7 +185,7 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_005, TestSize.Level1)
     sptr<IRemoteBoomerangCallback> callback = new (std::nothrow) BoomerangClientTestCallback();
     ASSERT_NE(callback, nullptr);
     int32_t ret = boomerangClient.BoomerangDecodeImage(pixelMap, callback);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
 }
 
 /**
@@ -204,9 +204,9 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_006, TestSize.Level1)
     BoomerangClient boomerangClient;
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
     ret = boomerangClient.UnsubscribeCallback(BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback2);
-    ASSERT_NE(ret, RET_IPC_ERR);
+    ASSERT_NE(ret, COMMON_CAPABILITY_NOT_SUPPORT);
 }
 
 /**
@@ -225,9 +225,9 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_007, TestSize.Level1)
     BoomerangClient boomerangClient;
    int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback1);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
     ret = boomerangClient.NotifyMetadataBindingEvent(bundleName, callback2);
-    ASSERT_NE(ret, RET_IPC_ERR);
+    ASSERT_NE(ret, COMMON_CAPABILITY_NOT_SUPPORT);
 }
 
 /**
@@ -246,9 +246,9 @@ HWTEST_F(BoomerangClientTest, BoomerangClientTest_008, TestSize.Level1)
     char bundleName[MAX_STRING_LEN] = { 0 };
     int32_t ret = boomerangClient.SubscribeCallback(
         BoomerangType::BOOMERANG_TYPE_BOOMERANG, bundleName, callback);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
     ret = boomerangClient.SubmitMetadata(metadata);
-    ASSERT_EQ(ret, RET_IPC_ERR);
+    ASSERT_EQ(ret, COMMON_CAPABILITY_NOT_SUPPORT);
 }
 
 /**
