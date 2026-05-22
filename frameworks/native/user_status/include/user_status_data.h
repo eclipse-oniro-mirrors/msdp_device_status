@@ -26,6 +26,14 @@
 namespace OHOS {
 namespace Msdp {
 namespace UserStatusAwareness {
+#define CHKBRF(cond) \
+    do { \
+        if (!(cond)) { \
+            FI_HILOGE("CHKBRF(%{public}s) is false", #cond); \
+            return false; \
+        } \
+    } while (0)
+
 class UserStatusData : public Parcelable {
 public:
     UserStatusData();
