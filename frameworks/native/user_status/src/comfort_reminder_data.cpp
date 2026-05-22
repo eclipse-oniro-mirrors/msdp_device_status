@@ -20,7 +20,6 @@
 #include "devicestatus_define.h"
 #include "fi_log.h"
 
-
 namespace OHOS {
 namespace Msdp {
 namespace UserStatusAwareness {
@@ -82,19 +81,19 @@ std::shared_ptr<UserStatusData> ComfortReminderData::Unmarshalling(Parcel &parce
 
 bool ComfortReminderData::MarshallComfortReminderData(Parcel &parcel) const
 {
-    CHKBRF(parcel.WriteInt32(fusionReminderData_));
-    CHKBRF(parcel.WriteInt32(swingReminderData_));
-    CHKBRF(parcel.WriteInt32(eventType_));
+    CHKCF(parcel.WriteInt32(fusionReminderData_), "Write fusion reminder failed");
+    CHKCF(parcel.WriteInt32(swingReminderData_), "Write swing reminderdata failed");
+    CHKCF(parcel.WriteInt32(eventType_), "Write event type failed");
 
     return true;
 }
 
 bool ComfortReminderData::Marshalling(Parcel &parcel) const
 {
-    CHKBRF(parcel.WriteUint32(feature_));
-    CHKBRF(parcel.WriteInt32(result_));
-    CHKBRF(parcel.WriteInt32(errorCode_));
-    CHKBRF(parcel.WriteString(status_));
+    CHKCF(parcel.WriteUint32(feature_), "Write feature failed");
+    CHKCF(parcel.WriteInt32(result_), "Write result failed");
+    CHKCF(parcel.WriteInt32(errorCode_), "Write error code failed");
+    CHKCF(parcel.WriteString(status_), "Write status failed");
     if (!MarshallComfortReminderData(parcel)) {
         FI_HILOGE("write ComfortReminderData failed");
         return false;

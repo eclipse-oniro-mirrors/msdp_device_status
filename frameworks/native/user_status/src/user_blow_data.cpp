@@ -140,23 +140,23 @@ std::shared_ptr<UserStatusData> UserBlowData::Unmarshalling(Parcel &parcel)
 
 bool UserBlowData::MarshallBlowData(Parcel &parcel) const
 {
-    CHKBRF(parcel.WriteInt32(strengthLevel_));
-    CHKBRF(parcel.WriteInt32(direction_));
-    CHKBRF(parcel.WriteInt32(emotion_));
-    CHKBRF(parcel.WriteBool(eyesOn_));
-    CHKBRF(parcel.WriteFloatVector(facePosition_));
-    CHKBRF(parcel.WriteFloatVector(gravityAcc_));
-    CHKBRF(parcel.WriteFloatVector(linearAcc_));
+    CHKCF(parcel.WriteInt32(strengthLevel_), "Write strength level failed");
+    CHKCF(parcel.WriteInt32(direction_), "Write direction failed");
+    CHKCF(parcel.WriteInt32(emotion_), "Write emotion failed");
+    CHKCF(parcel.WriteBool(eyesOn_), "Write eyes on failed");
+    CHKCF(parcel.WriteFloatVector(facePosition_), "Write face position failed");
+    CHKCF(parcel.WriteFloatVector(gravityAcc_), "Write gravity acc failed");
+    CHKCF(parcel.WriteFloatVector(linearAcc_), "Write linear acc failed");
     return true;
 }
 
 bool UserBlowData::Marshalling(Parcel &parcel) const
 {
     MessageParcel& msgParcel = static_cast<MessageParcel&>(parcel);
-    CHKBRF(msgParcel.WriteUint32(feature_));
-    CHKBRF(msgParcel.WriteInt32(result_));
-    CHKBRF(msgParcel.WriteInt32(errorCode_));
-    CHKBRF(msgParcel.WriteString(status_));
+    CHKCF(msgParcel.WriteUint32(feature_), "Write feature failed");
+    CHKCF(msgParcel.WriteInt32(result_), "Write result failed");
+    CHKCF(msgParcel.WriteInt32(errorCode_), "Write error code failed");
+    CHKCF(msgParcel.WriteString(status_), "Write status failed");
     if (!MarshallBlowData(msgParcel)) {
         FI_HILOGE("write PlayAbilityData failed");
         return false;
@@ -179,9 +179,9 @@ bool UserBlowData::ReadFromParcel(Parcel &parcel)
     direction_ = msgParcel.ReadInt32();
     emotion_ = msgParcel.ReadInt32();
     eyesOn_ = parcel.ReadBool();
-    CHKBRF(msgParcel.ReadFloatVector(&facePosition_));
-    CHKBRF(parcel.ReadFloatVector(&gravityAcc_));
-    CHKBRF(parcel.ReadFloatVector(&linearAcc_));
+    CHKCF(msgParcel.ReadFloatVector(&facePosition_), "Read face position failed");
+    CHKCF(parcel.ReadFloatVector(&gravityAcc_), "Read gravity acc failed");
+    CHKCF(parcel.ReadFloatVector(&linearAcc_), "Read linear acc failed");
     return true;
 }
 } // namespace UserStatusAwareness

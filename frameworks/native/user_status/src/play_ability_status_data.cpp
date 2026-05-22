@@ -300,22 +300,21 @@ std::shared_ptr<UserStatusData> PlayAbilityStatusData::Unmarshalling(Parcel &par
 
 bool PlayAbilityStatusData::MarshallPlayAbilityData(Parcel &parcel) const
 {
-    CHKBRF(parcel.WriteInt32(faceNum_));
-    CHKBRF(parcel.WriteFloatVector(visualAngle_));
-    CHKBRF(parcel.WriteFloatVector(angularVelocity_));
-    CHKBRF(parcel.WriteFloatVector(gravityAcc_));
+    CHKCF(parcel.WriteInt32(faceNum_), "Write face num failed");
+    CHKCF(parcel.WriteFloatVector(visualAngle_), "Write visual angle failed");
+    CHKCF(parcel.WriteFloatVector(angularVelocity_), "Write angular velocity failed");
+    CHKCF(parcel.WriteFloatVector(gravityAcc_), "Write gravity acc failed");
 
     for (const auto &acc : linearAcc_) {
-        CHKBRF(parcel.WriteFloatVector(acc));
+        CHKCF(parcel.WriteFloatVector(acc), "Write linear acc item failed");
     }
-    CHKBRF(parcel.WriteFloatVector(gameRotationData_));
-    CHKBRF(parcel.WriteBool(isHandExist_));
-    CHKBRF(parcel.WriteInt32(motionGesture_));
-    CHKBRF(parcel.WriteInt32(handType_));
-    CHKBRF(parcel.WriteFloatVector(handPosition_));
-    CHKBRF(parcel.WriteFloatVector(directionAngle_));
-    CHKBRF(parcel.WriteFloatVector(gestureSpeed_));
-
+    CHKCF(parcel.WriteFloatVector(gameRotationData_), "Write game rotation data failed");
+    CHKCF(parcel.WriteBool(isHandExist_), "Write is hand exist failed");
+    CHKCF(parcel.WriteInt32(motionGesture_), "Write motion gesture failed");
+    CHKCF(parcel.WriteInt32(handType_), "Write hand type failed");
+    CHKCF(parcel.WriteFloatVector(handPosition_), "Write hand position failed");
+    CHKCF(parcel.WriteFloatVector(directionAngle_), "Write direction angle failed");
+    CHKCF(parcel.WriteFloatVector(gestureSpeed_), "Write gesture speed failed");
     return true;
 }
 

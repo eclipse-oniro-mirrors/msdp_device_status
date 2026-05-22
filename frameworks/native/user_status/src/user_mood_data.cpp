@@ -144,17 +144,17 @@ std::shared_ptr<UserStatusData> UserMoodData::Unmarshalling(Parcel &parcel)
 
 bool UserMoodData::Marshalling(Parcel &parcel) const
 {
-    CHKBRF(parcel.WriteUint32(feature_));
-    CHKBRF(parcel.WriteInt32(result_));
-    CHKBRF(parcel.WriteInt32(errorCode_));
-    CHKBRF(parcel.WriteString(status_));
-    CHKBRF(parcel.WriteInt32(emotionRealTime_));
-    CHKBRF(parcel.WriteInt32(confidence_));
-    CHKBRF(parcel.WriteBool(isRealTime_));
-    CHKBRF(parcel.WriteBool(isValidMood_));
-    CHKBRF(parcel.WriteInt32Vector(emotionNonRealTime_));
-    CHKBRF(parcel.WriteFloatVector(gravityAcc_));
-    CHKBRF(parcel.WriteFloatVector(linearAcc_));
+    CHKCF(parcel.WriteUint32(feature_), "Write feature failed");
+    CHKCF(parcel.WriteInt32(result_), "Write result failed");
+    CHKCF(parcel.WriteInt32(errorCode_), "Write error code failed");
+    CHKCF(parcel.WriteString(status_), "Write status failed");
+    CHKCF(parcel.WriteInt32(emotionRealTime_), "Write emotion real time failed");
+    CHKCF(parcel.WriteInt32(confidence_), "Write confidence failed");
+    CHKCF(parcel.WriteBool(isRealTime_), "Write is real time failed");
+    CHKCF(parcel.WriteBool(isValidMood_), "Write is valid mood failed");
+    CHKCF(parcel.WriteInt32Vector(emotionNonRealTime_), "Write emotion non real time failed");
+    CHKCF(parcel.WriteFloatVector(gravityAcc_), "Write gravity acc failed");
+    CHKCF(parcel.WriteFloatVector(linearAcc_), "Write linear acc failed");
     return true;
 }
 
@@ -171,9 +171,9 @@ bool UserMoodData::ReadFromParcel(Parcel &parcel)
     confidence_ = parcel.ReadInt32();
     isRealTime_ = parcel.ReadBool();
     isValidMood_ = parcel.ReadBool();
-    CHKBRF(parcel.ReadInt32Vector(&emotionNonRealTime_));
-    CHKBRF(parcel.ReadFloatVector(&gravityAcc_));
-    CHKBRF(parcel.ReadFloatVector(&linearAcc_));
+    CHKCF(parcel.ReadInt32Vector(&emotionNonRealTime_), "Read emotion non real time failed");
+    CHKCF(parcel.ReadFloatVector(&gravityAcc_), "Read gravity acc failed");
+    CHKCF(parcel.ReadFloatVector(&linearAcc_), "Read linear acc failed");
     return true;
 }
 } // namespace UserStatusAwareness
