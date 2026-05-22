@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@
 #include "message_parcel.h"
 
 #include "fi_log.h"
-#include "user_status_napi_util.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -115,20 +114,6 @@ bool ComfortReminderData::ReadFromParcel(Parcel &parcel)
     swingReminderData_ = parcel.ReadInt32();
     eventType_ = parcel.ReadInt32();
     return true;
-}
-
-extern "C" int32_t GetFusionReminderData(std::shared_ptr<UserStatusData> userStatusData)
-{
-    std::shared_ptr<ComfortReminderData> comfortReminderData =
-        std::static_pointer_cast<ComfortReminderData>(userStatusData);
-    return comfortReminderData->GetFusionReminderData();
-}
-
-extern "C" int32_t GetEventType(std::shared_ptr<UserStatusData> userStatusData)
-{
-    std::shared_ptr<ComfortReminderData> comfortReminderData =
-        std::static_pointer_cast<ComfortReminderData>(userStatusData);
-    return comfortReminderData->GetEventType();
 }
 } // namespace UserStatusAwareness
 } // namespace Msdp
