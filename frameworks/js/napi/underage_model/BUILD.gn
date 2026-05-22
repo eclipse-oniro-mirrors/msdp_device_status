@@ -29,20 +29,18 @@ ohos_shared_library("userstatus_napi") {
   }
 
   sources = [
-    "src/comfort_reminder_data.cpp",
-    "src/play_ability_status_data.cpp",
     "src/underage_model_napi_error.cpp",
     "src/underage_model_napi_event.cpp",
     "src/underage_model_napi.cpp",
-    "src/user_blow_data.cpp",
-    "src/user_mood_data.cpp",
-    "src/user_status_data.cpp",
     "src/user_status_napi_util.cpp"
   ]
 
   configs = [ ":underage_mode_private_config" ]
 
-  deps = [ "${device_status_utils_path}:devicestatus_util" ]
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_interfaces_path}/innerkits:user_status_data_util" 
+  ]
 
   external_deps = [
     "c_utils:utils",

@@ -24,6 +24,7 @@ config("devicestatus_public_config") {
     "${device_status_utils_path}/include",
     "${device_status_interfaces_path}/innerkits/include",
     "${device_status_interfaces_path}/innerkits/interaction/include",
+    "${device_status_frameworks_path}/native/user_status/include",
     "${device_status_root_path}/utils/ipc/include",
     "${device_status_root_path}/services/communication/base/",
     "${device_status_root_path}/services/communication/client/include",
@@ -36,6 +37,46 @@ config("devicestatus_public_config") {
   }
 
   defines = device_status_default_defines
+}
+
+ohos_source_set("user_status_data_util") {
+ sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+ 
+  include_dirs = [
+    "${device_status_utils_path}/include",
+    "${device_status_frameworks_path}/native/user_status/include"
+  ]
+ 
+  branch_protector_ret = "pac_ret"
+ 
+  sources = [
+    "${device_status_frameworks_path}/native/user_status/src/comfort_reminder_data.cpp",
+    "${device_status_frameworks_path}/native/user_status/src/play_ability_status_data.cpp",
+    "${device_status_frameworks_path}/native/user_status/src/user_blow_data.cpp",
+    "${device_status_frameworks_path}/native/user_status/src/user_mood_data.cpp",
+    "${device_status_frameworks_path}/native/user_status/src/user_status_data.cpp"
+  ]
+ 
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+ 
+  public_configs = [ ":devicestatus_public_config" ]
+ 
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+ 
+  subsystem_name = "${device_status_subsystem_name}"
+  part_name = "${device_status_part_name}"
 }
 
 ohos_source_set("drag_data_util") {
