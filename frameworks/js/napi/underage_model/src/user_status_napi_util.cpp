@@ -214,7 +214,7 @@ void UserStatusNapiUtil::SetPlayAbilityData(napi_env env, std::shared_ptr<UserSt
     }
     CHKRV(napi_set_named_property(env, jsData, "linearAcceleration", linearAccNapiValue),
         "napi_set_named_property failed");
-    SetJsArrayProperty(env, pData->GetGameRotationData(), "Azimuth", jsData);
+    SetJsArrayProperty(env, pData->GetGameRotationData(), "azimuth", jsData);
     CHKRV(SetValueInt32(env, "faceNum", pData->GetFaceNum(), jsData), "napi_set_property failed");
 }
 

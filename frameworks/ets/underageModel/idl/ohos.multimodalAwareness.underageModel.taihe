@@ -121,7 +121,7 @@ struct UserFacesData {
     angularVelocity: Optional<Array<f32>>;
     gravityAcceleration: Optional<Array<f32>>;
     linearAcceleration: Optional<Array<Array<f32>>>;
-    Azimuth: Optional<Array<f32>>;
+    azimuth: Optional<Array<f32>>;
     faceNum: Optional<i32>;
 }
 

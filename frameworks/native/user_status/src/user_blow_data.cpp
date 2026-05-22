@@ -18,7 +18,6 @@
 #include "message_parcel.h"
 
 #include "fi_log.h"
-#include "user_status_napi_util.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -147,7 +146,6 @@ bool UserBlowData::MarshallBlowData(Parcel &parcel) const
     CHKBRF(parcel.WriteFloatVector(facePosition_));
     CHKBRF(parcel.WriteFloatVector(gravityAcc_));
     CHKBRF(parcel.WriteFloatVector(linearAcc_));
-
     return true;
 }
 

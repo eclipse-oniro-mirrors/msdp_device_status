@@ -27,14 +27,6 @@ constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
 constexpr int32_t INDEX_THREE = 3;
-
-#define CHKBRF(cond) \
-    do { \
-        if (!(cond)) { \
-            FI_HILOGE("CHKBRF(%{public}s) is false", #cond); \
-            return false; \
-        } \
-    } while (0)
 } // namespace
 
 PlayAbilityStatusData::PlayAbilityStatusData() {}

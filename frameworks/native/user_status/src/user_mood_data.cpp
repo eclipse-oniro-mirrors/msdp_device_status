@@ -18,7 +18,6 @@
 #include "message_parcel.h"
 
 #include "fi_log.h"
-#include "user_status_napi_util.h"
 
 namespace OHOS {
 namespace Msdp {
