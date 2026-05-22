@@ -41,7 +41,6 @@ namespace DeviceStatus {
 using namespace testing::ext;
 using namespace testing;
 namespace {
-constexpr int32_t RET_IPC_ERR = 5;
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
 inline constexpr size_t MAX_STRING_LEN{1024};
 } // namespace
