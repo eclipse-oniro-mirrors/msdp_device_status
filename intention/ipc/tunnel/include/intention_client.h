@@ -155,10 +155,13 @@ private:
 
     class ServiceProxyLoadCallback : public SystemAbilityLoadCallbackStub {
     public:
-        ServiceProxyLoadCallback() = default;
+        explicit ServiceProxyLoadCallback(std::shared_ptr<IntentionClient> parent);
         virtual ~ServiceProxyLoadCallback() = default;
         void OnLoadSystemAbilitySuccess(int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject) override;
         void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
+    
+    private:
+        std::weak_ptr<IntentionClient> parent_;
     };
 
     ErrCode Connect();
