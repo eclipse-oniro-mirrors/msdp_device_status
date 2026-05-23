@@ -37,6 +37,7 @@ const int32_t RET_OK = 0;
 using UserClassification_t = ohos::multimodalAwareness::underageModel::UserClassification;
 constexpr int32_t UNDERAGE_MODEL_TYPE_KID = 16;
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
+constexpr int32_t NO_SYSTEM_API { 202 };
 constexpr int32_t PARAM_EXCEPTION { 401 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
 constexpr int32_t SERVICE_EXCEPTION { 33900001 };
