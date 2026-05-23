@@ -666,6 +666,10 @@ ani_object AniUnderageModelEvent::HandleComfortReminderData(ani_env *env,
 {
     auto comfortReminderData =
         std::static_pointer_cast<UserStatusAwareness::ComfortReminderData>(userStatusData);
+    if (comfortReminderData == nullptr) {
+        FI_HILOGE("comfortReminderData is nullptr after cast");
+        return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserStatusData>(env, baseData);
+    }
     auto aniComfortReminderData = ohos::multimodalAwareness::underageModel::ComfortReminderData{
         .base = baseData,
         .fusionReminderData = ohos::multimodalAwareness::underageModel::ReminderLevel::from_value(
@@ -887,11 +891,11 @@ bool AniUnderageModelEvent::ParseConfigParams(
     }
     for (const auto& param : root["params"]) {
         if (!param.contains("description") || !param.contains("value")) {
-            FI_HILOGE("Not include para, skipping invalid param object");
+            FI_HILOGE("Not include para, invalid param object");
             return false;
         }
         if (!param["description"].is_string() || !param["value"].is_array()) {
-            FI_HILOGE("Format err, skipping invalid param object");
+            FI_HILOGE("Format err, invalid param object");
             return false;
         }
         std::string key = param["description"].get<std::string>();

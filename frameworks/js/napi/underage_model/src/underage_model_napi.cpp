@@ -946,11 +946,11 @@ bool UnderageModelNapi::ParseConfigParams(
     }
     for (const auto& param : root["params"]) {
         if (!param.contains("description") || !param.contains("value")) {
-            FI_HILOGE("Not include para, skipping invalid param object");
+            FI_HILOGE("Not include para, invalid param object");
             return false;
         }
         if (!param["description"].is_string() || !param["value"].is_array()) {
-            FI_HILOGE("Format err, skipping invalid param object");
+            FI_HILOGE("Format err, invalid param object");
             return false;
         }
         std::string key = param["description"].get<std::string>();
@@ -972,7 +972,10 @@ std::vector<DeviceInfo> UnderageModelNapi::GetDeviceList(napi_env env, napi_valu
         return {};
     }
     uint32_t arrayLength = 0;
-    napi_get_array_length(env, deviceNapiValue, &arrayLength);
+    if (napi_get_array_length(env, deviceNapiValue, &arrayLength) != napi_ok) {
+        FI_HILOGE("napi_get_array_length failed");
+        return {};
+    }
     std::vector<DeviceInfo> deviceInfoList;
     for (size_t i = 0; i < arrayLength; i++) {
         bool hasElement = false;

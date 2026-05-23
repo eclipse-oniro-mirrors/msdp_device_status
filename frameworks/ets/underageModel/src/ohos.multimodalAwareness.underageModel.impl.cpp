@@ -95,8 +95,8 @@ int32_t SubscribeInner(UserStatusFeature featureId, taihe::callback_view<void(Us
             std::string networkId(deviceInfo.value()[i].networkId);
             std::string deviceName(deviceInfo.value()[i].deviceName);
             std::uint32_t deviceType = static_cast<std::uint32_t>(deviceInfo.value()[i].deviceType);
-            UserStatusAwareness::DeviceInfo deviceInfo(deviceId, deviceName, networkId, deviceType);
-            deviceInfoList.emplace_back(deviceInfo);
+            UserStatusAwareness::DeviceInfo deviceInfoItem(deviceId, deviceName, networkId, deviceType);
+            deviceInfoList.emplace_back(deviceInfoItem);
         }
     }
     if (!g_underageModelObj->SubscribeUserStatus(featureId, deviceInfoList)) {
