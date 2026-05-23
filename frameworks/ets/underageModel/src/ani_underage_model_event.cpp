@@ -41,6 +41,7 @@ ani_vm* AniUnderageModelEvent::vm_ {nullptr};
 constexpr int32_t MAX_ERROR_CODE = 1000;
 constexpr int32_t UNSUPP_FRATURE_ERR = 0x3A1000D;
 constexpr int32_t DEVICE_UNSUPPORT_ERR = 0x3A10028;
+constexpr int32_t NOT_SYSTEM_ERR = 0x3A10006;
 const std::string USER_STATUS_CLIENT_SO_PATH = "libuser_status_client.z.so";
 const std::string_view REGISTER_LISTENER_FUNC_NAME = { "RegisterListener" };
 const std::string_view SUBSCRIBE_CALLBACK_FUNC_NAME = { "SubscribeCallback" };
@@ -222,6 +223,10 @@ bool AniUnderageModelEvent::UnSubscribeCallback(int32_t type)
         } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
             FI_HILOGE("failed to unsubscribe");
             taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
+            return false;
+        } else if (ret == NOT_SYSTEM_ERR) {
+            FI_HILOGE("Not system app, ret:%{public}d", ret);
+            taihe::set_business_error(NO_SYSTEM_API, "Not system app");
             return false;
         }
         FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
@@ -720,13 +725,14 @@ ani_env* AniUnderageModelEvent::AttachAniEnv(ani_vm* vm)
     return workerEnv;
 }
 
-int32_t AniUnderageModelEvent::SubscribeUserStatus(
+bool AniUnderageModelEvent::SubscribeUserStatus(
     int32_t featureId, std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList)
 {
     FI_HILOGI("SubscribeUserStatus enter, feature: %{public}u", featureId);
     if (g_userStatusHandle == nullptr && !LoadLibrary()) {
         FI_HILOGE("LoadLibrary failed");
-        return DEVICE_EXCEPTION;
+        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+        return false;
     }
     if (g_callback == nullptr) {
         auto userStatusDataCallback = std::make_shared<UserStatusDataCallback>();
@@ -743,22 +749,54 @@ int32_t AniUnderageModelEvent::SubscribeUserStatus(
                 dlsym(g_userStatusHandle, SUBSCRIBE_CALLBACK_FUNC_NAME.data()));
             if (g_subscribeCallbackFunc == nullptr) {
                 FI_HILOGE("find symbol failed, error: %{public}s", dlerror());
-                return SERVICE_EXCEPTION;
+                taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Find symbol failed");
+                return false;
             }
         }
-        g_subscribeCallbackFunc(featureId, g_callback);
+        int32_t ret = std::abs(g_subscribeCallbackFunc(featureId, g_callback));
+        if (ret < MAX_ERROR_CODE) {
+            FI_HILOGE("Subscribe Callback failed, ret: %{public}d", ret);
+            taihe::set_business_error(SUBSCRIBE_EXCEPTION, "SubscribeCallback failed");
+            g_callback = nullptr;
+            return false;
+        } else if (ret == NOT_SYSTEM_ERR) {
+            FI_HILOGE("Not system app, ret:%{public}d", ret);
+            taihe::set_business_error(NO_SYSTEM_API, "Not system app");
+            g_callback = nullptr;
+            return false;
+        }
     }
+    return SubscribeWitchDeviceInfo(featureId, deviceInfoList);
+}
+
+bool AniUnderageModelEvent::SubscribeWitchDeviceInfo(int32_t featureId,
+    std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList)
+{
     if (g_subscribeWithdeviceInfoFunc == nullptr) {
         g_subscribeWithdeviceInfoFunc = reinterpret_cast<SubscribeWithdeviceInfoFunc>(
             dlsym(g_userStatusHandle, SUBSCRIBE_WITH_DEVICEINFO_FUNC_NAME.data()));
         if (g_subscribeWithdeviceInfoFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s",
-                SUBSCRIBE_WITH_DEVICEINFO_FUNC_NAME.data(),
-                dlerror());
-            return SERVICE_EXCEPTION;
+                SUBSCRIBE_WITH_DEVICEINFO_FUNC_NAME.data(), dlerror());
+            taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Find symbol failed");
+            return false;
         }
     }
-    return g_subscribeWithdeviceInfoFunc(featureId, deviceInfoList);
+    int32_t ret = g_subscribeWithdeviceInfoFunc(featureId, deviceInfoList);
+    if (ret == RET_OK) {
+        return true;
+    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
+        FI_HILOGE("failed to subscribe: %{public}d", ret);
+        taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
+        return false;
+    } else if (ret == NOT_SYSTEM_ERR) {
+        FI_HILOGE("Not system app, ret:%{public}d", ret);
+        taihe::set_business_error(NO_SYSTEM_API, "Not system app");
+        return false;
+    }
+    FI_HILOGE("failed to subscribe: %{public}d", ret);
+    taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Subscribe failed");
+    return false;
 }
 
 int32_t AniUnderageModelEvent::ConfigParams(uint32_t feature, std::string& configParams)
@@ -766,29 +804,36 @@ int32_t AniUnderageModelEvent::ConfigParams(uint32_t feature, std::string& confi
     FI_HILOGI("ConfigParams enter, feature: %{public}u", feature);
     if (g_userStatusHandle == nullptr && !LoadLibrary()) {
         FI_HILOGE("LoadLibrary failed");
-        return DEVICE_EXCEPTION;
+        taihe::set_business_error(SERVICE_EXCEPTION, "LoadLibrary failed");
+        return SERVICE_EXCEPTION;
     }
     if (g_configParamsFunc == nullptr) {
         g_configParamsFunc = reinterpret_cast<ConfigParamsFunc>(
             dlsym(g_userStatusHandle, CONFIGPARAMS_FUNC_NAME.data()));
         if (g_configParamsFunc == nullptr) {
             FI_HILOGE("find symbol failed, error: %{public}s", dlerror());
+            taihe::set_business_error(SERVICE_EXCEPTION, "find symbol failed");
             return SERVICE_EXCEPTION;
         }
     }
     std::map<std::string, std::vector<int32_t>> details;
     if (!ParseConfigParams(configParams, details)) {
         FI_HILOGE("ParseConfigParams failed");
+        taihe::set_business_error(PARAM_EXCEPTION, "find symbol failed");
         return PARAM_EXCEPTION;
     }
-    return g_configParamsFunc(feature, details);
+    int32_t ret = g_configParamsFunc(feature, details);
+    if (ret == NOT_SYSTEM_ERR) {
+        taihe::set_business_error(NO_SYSTEM_API, "Not system app");
+    }
+    return ret;
 }
 
 bool AniUnderageModelEvent::QueryCapabilities(std::vector<int32_t>& capabilities)
 {
     FI_HILOGI("QueryCapabilities enter");
     if (g_userStatusHandle == nullptr && !LoadLibrary()) {
-        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+        taihe::set_business_error(SERVICE_EXCEPTION, "Device not support");
         return false;
     }
     if (g_queryCapabilitiesFunc == nullptr) {
@@ -796,15 +841,18 @@ bool AniUnderageModelEvent::QueryCapabilities(std::vector<int32_t>& capabilities
             dlsym(g_userStatusHandle, QUERYCAPABILITIES_FUNC_NAME.data()));
         if (g_queryCapabilitiesFunc == nullptr) {
             FI_HILOGE("find symbol failed, error: %{public}s", dlerror());
+            taihe::set_business_error(SERVICE_EXCEPTION, "find symbol failed");
             return false;
         }
     }
     int32_t ret = g_queryCapabilitiesFunc(capabilities);
-    if (ret != RET_OK) {
-        FI_HILOGE("failed to query capabilities, ret: %{public}d", ret);
-        return false;
+    if (ret == RET_OK) {
+        return true;
+    } else if (ret == NOT_SYSTEM_ERR) {
+        taihe::set_business_error(NO_SYSTEM_API, "Not system app");
     }
-    return true;
+    FI_HILOGE("failed to query capabilities, ret: %{public}d", ret);
+    return false;
 }
 
 bool AniUnderageModelEvent::ParseConfigParams(

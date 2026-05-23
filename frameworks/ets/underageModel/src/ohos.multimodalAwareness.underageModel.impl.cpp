@@ -86,7 +86,7 @@ int32_t SubscribeInner(UserStatusFeature featureId, taihe::callback_view<void(Us
     if (g_underageModelObj == nullptr) {
         FI_HILOGE("g_underageModelObj is null");
         taihe::set_business_error(SERVICE_EXCEPTION, "g_underageModelObj is null");
-        return 0;
+        return ANI_ERROR;
     }
     std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList;
     if (deviceInfo.has_value()) {
@@ -99,16 +99,16 @@ int32_t SubscribeInner(UserStatusFeature featureId, taihe::callback_view<void(Us
             deviceInfoList.emplace_back(deviceInfo);
         }
     }
-    if (g_underageModelObj->SubscribeUserStatus(featureId, deviceInfoList) != 0) {
+    if (!g_underageModelObj->SubscribeUserStatus(featureId, deviceInfoList)) {
         FI_HILOGE("SubscribeCallback failed");
-        return 0;
+        return ANI_ERROR;
     }
     if (!g_underageModelObj->AddCallback(featureId, opq)) {
         FI_HILOGE("AddCallback failed");
         taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
-        return 0;
+        return ANI_ERROR;
     }
-    return 0;
+    return ANI_OK;
 }
 
 int32_t UnsubscribeInner(UserStatusFeature featureId, ::taihe::optional_view<uintptr_t> opq)
@@ -117,40 +117,40 @@ int32_t UnsubscribeInner(UserStatusFeature featureId, ::taihe::optional_view<uin
     if (g_underageModelObj == nullptr) {
         FI_HILOGE("g_underageModelObj is null");
         taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "g_underageModelObj is null");
-        return 0;
+        return ANI_ERROR;
     }
     if (!opq.has_value()) {
         if (!g_underageModelObj->RemoveAllCallback(featureId)) {
             FI_HILOGE("RemoveAllCallback failed");
             taihe::set_business_error(SERVICE_EXCEPTION, "RemoveAllCallback failed");
-            return 0;
+            return ANI_ERROR;
         }
     } else {
         if (!g_underageModelObj->RemoveCallback(featureId,
             opq.value())) {
             FI_HILOGE("RemoveCallback failed");
             taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
-            return 0;
+            return ANI_ERROR;
         }
     }
     if (!g_underageModelObj->UnSubscribeCallback(featureId)) {
         FI_HILOGE("UnSubscribeCallback failed");
-        return 0;
+        return ANI_ERROR;
     }
-    return 0;
+    return ANI_OK;
 }
 
 int32_t Configure(UserStatusFeature featureId, taihe::string_view detail)
 {
     FI_HILOGI("Configure enter");
     if (detail.empty()) {
-        return PARAM_EXCEPTION;
+        return ANI_ERROR;
     }
     g_underageModelObj = AniUnderageModelEvent::GetInstance();
     if (g_underageModelObj == nullptr) {
         FI_HILOGE("g_underageModelObj is null");
         taihe::set_business_error(SERVICE_EXCEPTION, "g_underageModelObj is null");
-        return SERVICE_EXCEPTION;
+        return ANI_ERROR;
     }
     std::string detailStr(detail);
     return g_underageModelObj->ConfigParams(featureId, detailStr);
@@ -160,6 +160,7 @@ taihe::array<UserStatusAtomicCap> QueryCapabilities(taihe::array_view<UserStatus
 {
     FI_HILOGI("QueryCapabilities enter");
     if (capabilities.empty()) {
+        FI_HILOGE("capabilities is empty");
         return {};
     }
     std::vector<std::int32_t> caps;
@@ -177,7 +178,7 @@ taihe::array<UserStatusAtomicCap> QueryCapabilities(taihe::array_view<UserStatus
     }
     std::vector<UserStatusAtomicCap> res;
     for (size_t i = 0; i < caps.size(); ++i) {
-        res[i] = static_cast<UserStatusAtomicCap::key_t>(caps[i]);
+        res.push_back(static_cast<UserStatusAtomicCap::key_t>(caps[i]));
     }
     return taihe::array<UserStatusAtomicCap>(res);
 }

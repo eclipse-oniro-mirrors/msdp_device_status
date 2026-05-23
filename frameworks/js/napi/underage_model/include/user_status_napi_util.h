@@ -49,8 +49,6 @@ constexpr uint32_t FEATURE_RAPIDCAPTURE_ANTI_MISTOUCH = 18;
 constexpr uint32_t FEATURE_LEM_EXT_SCREEN_ANTI_MISTOUCH = 19;
 constexpr uint32_t FEATURE_UNSUPPORTED = 20;
 
-constexpr int32_t PERMISSION_EXCEPTION { 201 };
-constexpr int32_t PERMISSION_SYSTEM_EXCEPTION { 202 };
 constexpr int32_t PARAM_ERROR { 401 };
 constexpr int32_t SERVICE_EXCEPTION { 801 };
 inline const std::map <int32_t, std::string> ERROR_MESSAGES = {

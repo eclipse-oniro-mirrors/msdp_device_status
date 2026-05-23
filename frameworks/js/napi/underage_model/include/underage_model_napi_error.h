@@ -25,6 +25,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
+constexpr int32_t PERMISSION_SYSTEM_EXCEPTION { 202 };
 constexpr int32_t PARAM_EXCEPTION { 401 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
 constexpr int32_t SERVICE_EXCEPTION { 33900001 };

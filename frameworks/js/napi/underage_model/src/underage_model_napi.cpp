@@ -44,6 +44,7 @@ constexpr int32_t OTHERS = 0;
 constexpr int32_t CHILD = 1;
 constexpr int32_t UNSUPP_FRATURE_ERR = 0x3A1000D;
 constexpr int32_t DEVICE_UNSUPPORT_ERR = 0x3A10028;
+constexpr int32_t NOT_SYSTEM_ERR = 0x3A10006;
 constexpr int32_t ARG_1 = 1;
 constexpr int32_t ARG_2 = 2;
 constexpr int32_t ARG_3 = 3;
@@ -198,6 +199,10 @@ bool UnderageModelNapi::UnsubscribeCallback(napi_env env, uint32_t type)
         } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
             FI_HILOGE("failed to unsubscribe");
             ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
+            return false;
+        } else if (ret == NOT_SYSTEM_ERR) {
+            FI_HILOGE("Not system app, ret:%{public}d", ret);
+            ThrowUnderageModelErr(env, PERMISSION_SYSTEM_EXCEPTION, "Not system app");
             return false;
         }
         FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
@@ -366,11 +371,23 @@ bool UnderageModelNapi::InitializeCallback(napi_env env, uint32_t featureId)
         if (g_underageModelObj->g_subscribeCallbackFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s",
                 SUBSCRIBE_CALLBACK_FUNC_NAME.data(), dlerror());
+            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Find symbol failed");
             return false;
         }
     }
 
-    g_underageModelObj->g_subscribeCallbackFunc(featureId, g_underageModelObj->g_callback);
+    int32_t ret = std::abs(g_underageModelObj->g_subscribeCallbackFunc(featureId, g_underageModelObj->g_callback));
+    if (ret < MAX_ERROR_CODE) {
+        FI_HILOGE("Subscribe Callback failed, ret:%{public}d", ret);
+        g_underageModelObj->g_callback = nullptr;
+        ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Find symbol failed");
+        return false;
+    } else if (ret == NOT_SYSTEM_ERR) {
+        FI_HILOGE("Not system app, ret:%{public}d", ret);
+        g_underageModelObj->g_callback = nullptr;
+        ThrowUnderageModelErr(env, PERMISSION_SYSTEM_EXCEPTION, "Not system app");
+        return false;
+    }
     return true;
 }
 
@@ -383,12 +400,26 @@ bool UnderageModelNapi::SubscribeWithDeviceInfo(napi_env env, uint32_t featureId
         if (g_underageModelObj->g_subscribeWithdeviceInfoFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s",
                 SUBSCRIBE_WITH_DEVICEINFO_FUNC_NAME.data(), dlerror());
+            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Find symbol failed");
             return false;
         }
     }
-    
-    g_underageModelObj->g_subscribeWithdeviceInfoFunc(featureId, deviceInfoList);
-    return true;
+
+    int32_t ret = g_underageModelObj->g_subscribeWithdeviceInfoFunc(featureId, deviceInfoList);
+    if (ret == RET_OK) {
+        return true;
+    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
+        FI_HILOGE("failed to subscribe");
+        ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
+        return false;
+    } else if (ret == NOT_SYSTEM_ERR) {
+        FI_HILOGE("Not system app, ret:%{public}d", ret);
+        ThrowUnderageModelErr(env, PERMISSION_SYSTEM_EXCEPTION, "Not system app");
+        return false;
+    }
+    FI_HILOGE("failed to subscribe, ret: %{public}d", ret);
+    ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Subscribe failed");
+    return false;
 }
 
 napi_value UnderageModelNapi::SubscribeUserStatus(napi_env env, napi_callback_info info)
@@ -417,7 +448,7 @@ napi_value UnderageModelNapi::SubscribeUserStatus(napi_env env, napi_callback_in
         }
     }
     if (!ConstructUnderageModel(env, jsThis)) {
-        ThrowUnderageModelErr(env, SERVICE_EXCEPTION, "Failed to get g_underageModelObj");
+        ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Failed to get g_underageModelObj");
         return nullptr;
     }
     if (g_underageModelObj->g_userStatusHandle == nullptr && !LoadLibrary()) {
@@ -426,12 +457,10 @@ napi_value UnderageModelNapi::SubscribeUserStatus(napi_env env, napi_callback_in
     }
 
     if (!InitializeCallback(env, featureId)) {
-        ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Find symbol failed");
         return nullptr;
     }
 
     if (!SubscribeWithDeviceInfo(env, featureId, deviceInfoList)) {
-        ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Find symbol failed");
         return nullptr;
     }
 
@@ -540,7 +569,7 @@ napi_value UnderageModelNapi::ConfigParams(napi_env env, napi_callback_info info
         return nullptr;
     }
     if (g_underageModelObj->g_userStatusHandle == nullptr && !LoadLibrary()) {
-        ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
+        ThrowUnderageModelErr(env, SERVICE_EXCEPTION, "Device not support");
         return nullptr;
     }
     if (g_underageModelObj->g_configParamsFunc == nullptr) {
@@ -553,6 +582,10 @@ napi_value UnderageModelNapi::ConfigParams(napi_env env, napi_callback_info info
         }
     }
     int32_t ret = g_underageModelObj->g_configParamsFunc(featureId, details);
+    if (ret == NOT_SYSTEM_ERR) {
+        FI_HILOGE("Not system app, ret:%{public}d", ret);
+        ThrowUnderageModelErr(env, PERMISSION_SYSTEM_EXCEPTION, "Not system app");
+    }
     napi_value retValue = nullptr;
     CHKRP(napi_create_int32(env, ret, &retValue), "napi_create_int32 fail");
     return retValue;
@@ -625,13 +658,17 @@ napi_value UnderageModelNapi::QueryCapabilities(napi_env env, napi_callback_info
     }
 
     if (g_underageModelObj->g_userStatusHandle == nullptr && !LoadLibrary()) {
-        ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
+        ThrowUnderageModelErr(env, SERVICE_EXCEPTION, "Device not support");
         return nullptr;
     }
 
     int32_t ret = HandleQueryCapabilities(env, caps);
     if (ret != RET_OK) {
         FI_HILOGE("failed to query capabilities, ret: %{public}d", ret);
+        return nullptr;
+    } else if (ret == NOT_SYSTEM_ERR) {
+        FI_HILOGE("Not system app, ret:%{public}d", ret);
+        ThrowUnderageModelErr(env, PERMISSION_SYSTEM_EXCEPTION, "Not system app");
         return nullptr;
     }
 
