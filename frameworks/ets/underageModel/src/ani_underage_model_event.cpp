@@ -477,6 +477,10 @@ void AniUnderageModelEvent::OnUserStatusData(
     for (auto handler : typeIter->second->onRefSets) {
         std::vector<ani_ref> args;
         ani_object userDataAni = CreateUserDataAni(env, featureId, userStatusData, baseData);
+        if (userDataAni == nullptr) {
+            HILOG_ERROR(LOG_CORE, "Failed to create userDataAni object.");
+            continue;
+        }
         args.push_back(static_cast<ani_ref>(userDataAni));
         ani_ref callResult;
         if (env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(), &callResult) !=
@@ -867,11 +871,11 @@ bool AniUnderageModelEvent::ParseConfigParams(
     }
     for (const auto& param : root["params"]) {
         if (!param.contains("description") || !param.contains("value")) {
-            FI_HILOGE("Skipping invalid param object");
+            FI_HILOGE("Not include para, skipping invalid param object");
             return false;
         }
         if (!param["description"].is_string() || !param["value"].is_array()) {
-            FI_HILOGE("Skipping invalid param object11111");
+            FI_HILOGE("Format err, skipping invalid param object");
             return false;
         }
         std::string key = param["description"].get<std::string>();

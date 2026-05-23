@@ -663,12 +663,12 @@ napi_value UnderageModelNapi::QueryCapabilities(napi_env env, napi_callback_info
     }
 
     int32_t ret = HandleQueryCapabilities(env, caps);
-    if (ret != RET_OK) {
-        FI_HILOGE("failed to query capabilities, ret: %{public}d", ret);
-        return nullptr;
-    } else if (ret == NOT_SYSTEM_ERR) {
+    if (ret == NOT_SYSTEM_ERR) {
         FI_HILOGE("Not system app, ret:%{public}d", ret);
         ThrowUnderageModelErr(env, PERMISSION_SYSTEM_EXCEPTION, "Not system app");
+        return nullptr;
+    } else if (ret != RET_OK) {
+        FI_HILOGE("failed to query capabilities, ret: %{public}d", ret);
         return nullptr;
     }
 
@@ -946,11 +946,11 @@ bool UnderageModelNapi::ParseConfigParams(
     }
     for (const auto& param : root["params"]) {
         if (!param.contains("description") || !param.contains("value")) {
-            FI_HILOGE("Skipping invalid param object");
+            FI_HILOGE("Not include para, skipping invalid param object");
             return false;
         }
         if (!param["description"].is_string() || !param["value"].is_array()) {
-            FI_HILOGE("Skipping invalid param object11111");
+            FI_HILOGE("Format err, skipping invalid param object");
             return false;
         }
         std::string key = param["description"].get<std::string>();

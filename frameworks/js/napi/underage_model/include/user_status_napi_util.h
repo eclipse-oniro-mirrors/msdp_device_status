@@ -107,15 +107,6 @@ public:
     static napi_value CreateNapiError(napi_env env, int32_t errCode, const std::string &errMessage);
     static std::optional<std::string> GetErrMsg(int32_t errorCode);
     static void ThrowErr(napi_env env, int32_t errCode, const std::string &printMsg);
-
-    template <typename T>
-    static void DeletePtr(T &ptr)
-    {
-        if (ptr != nullptr) {
-            delete ptr;
-            ptr = nullptr;
-        }
-    }
 };
 } // namespace UserStatusAwareness
 } // namespace Msdp
