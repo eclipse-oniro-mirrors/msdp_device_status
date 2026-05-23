@@ -528,7 +528,7 @@ napi_status UserStatusNapiUtil::SetValueInt64(napi_env env, const char *fieldStr
     napi_value napiIntValue = nullptr;
     napi_status status = napi_create_int64(env, intValue, &napiIntValue);
     if (status != napi_ok) {
-        FI_HILOGE("napi_create_int64 failed! intValue: %{public}ld", intValue);
+        FI_HILOGE("napi_create_int64 failed! intValue");
         return status;
     }
     status = napi_set_named_property(env, result, fieldStr, napiIntValue);
