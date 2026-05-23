@@ -858,6 +858,9 @@ bool AniUnderageModelEvent::QueryCapabilities(std::vector<int32_t>& capabilities
 bool AniUnderageModelEvent::ParseConfigParams(
     std::string const &params, std::map<std::string, std::vector<int32_t>> &configMap)
 {
+    if (params.empty() || !nlohmann::json::accept(params)) {
+        return false;
+    }
     nlohmann::json root = nlohmann::json::parse(params);
     if (!root.contains("params") || !root["params"].is_array()) {
         return false;
