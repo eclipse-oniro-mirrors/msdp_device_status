@@ -96,7 +96,7 @@ public:
     void OnEventChanged(uint32_t eventType, int32_t result, float confidence);
     void OnUserStatusData(int32_t callbackId, std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData);
     bool  SubscribeUserStatus(int32_t featureId, std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList);
-    bool SubscribeWitchDeviceInfo(int32_t featureId, std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList);
+    bool SubscribeWithDeviceInfo(int32_t featureId, std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList);
     int32_t ConfigParams(uint32_t feature, std::string& configParams);
     bool QueryCapabilities(std::vector<int32_t>& capabilities);
     static ani_vm* GetAniVm(ani_env* env);

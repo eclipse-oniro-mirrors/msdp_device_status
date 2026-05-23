@@ -539,6 +539,10 @@ ani_object AniUnderageModelEvent::HandlePlayAbilityOrFaceData(ani_env *env,
 {
     auto playAbilityData =
         std::static_pointer_cast<UserStatusAwareness::PlayAbilityStatusData>(userStatusData);
+    if (playAbilityData == nullptr) {
+        FI_HILOGE("playAbilityData is nullptr after cast");
+        return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserStatusData>(env, baseData);
+    }
     auto aniPlayAbilityData = ohos::multimodalAwareness::underageModel::UserFacesData{
         .base = baseData,
         .visualAngle = taihe::optional<taihe::array<float>>(std::in_place_t{},
@@ -571,6 +575,10 @@ ani_object AniUnderageModelEvent::HandlePlayAbilityOrGestureData(ani_env *env,
 {
     auto playAbilityData =
         std::static_pointer_cast<UserStatusAwareness::PlayAbilityStatusData>(userStatusData);
+    if (playAbilityData == nullptr) {
+        FI_HILOGE("playAbilityData is nullptr after cast");
+        return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserStatusData>(env, baseData);
+    }
     auto aniPlayAbilityData = ohos::multimodalAwareness::underageModel::UserFacesData{
         .base = baseData,
         .visualAngle = taihe::optional<taihe::array<float>>(std::in_place_t{},
@@ -632,6 +640,10 @@ ani_object AniUnderageModelEvent::HandleBlowData(ani_env *env,
 {
     auto userBlowData =
         std::static_pointer_cast<UserStatusAwareness::UserBlowData>(userStatusData);
+    if (userBlowData == nullptr) {
+        FI_HILOGE("userBlowData is nullptr after cast");
+        return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserStatusData>(env, baseData);
+    }
     auto aniUserBlowData = ohos::multimodalAwareness::underageModel::UserBlowData{
         .base = baseData,
         .facePosition = taihe::optional<taihe::array<float>>(std::in_place_t{},
@@ -670,6 +682,10 @@ ani_object AniUnderageModelEvent::HandleMoodData(ani_env *env,
     std::shared_ptr<UserStatusAwareness::UserStatusData> userStatusData)
 {
     auto moodData = std::static_pointer_cast<UserStatusAwareness::UserMoodData>(userStatusData);
+    if (moodData == nullptr) {
+        FI_HILOGE("moodData is nullptr after cast");
+        return taihe::into_ani<ohos::multimodalAwareness::underageModel::UserStatusData>(env, baseData);
+    }
     auto aniMoodData = ohos::multimodalAwareness::underageModel::UserEmotionData{
         .base = baseData,
         .emotionRealTime = taihe::optional<int32_t>(std::in_place_t{}, moodData->GetRealTimeEmotion()),
@@ -770,10 +786,10 @@ bool AniUnderageModelEvent::SubscribeUserStatus(
             return false;
         }
     }
-    return SubscribeWitchDeviceInfo(featureId, deviceInfoList);
+    return SubscribeWithDeviceInfo(featureId, deviceInfoList);
 }
 
-bool AniUnderageModelEvent::SubscribeWitchDeviceInfo(int32_t featureId,
+bool AniUnderageModelEvent::SubscribeWithDeviceInfo(int32_t featureId,
     std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList)
 {
     if (g_subscribeWithdeviceInfoFunc == nullptr) {
