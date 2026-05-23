@@ -73,6 +73,7 @@ ohos_source_set("user_status_data_util") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_core",
   ]
  
   subsystem_name = "${device_status_subsystem_name}"
