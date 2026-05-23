@@ -28,6 +28,118 @@ struct UserClassification {
   confidence: Optional<f32>;
 }
 
+enum DeviceType : i32 {
+    UNKNOWN_TYPE = 0,
+    PC = 0x0C,
+    PHONE = 0x0E,
+    TABLET = 0x11
+}
+
+struct DeviceInfo {
+    deviceId: String;
+    networkId: String;
+    deviceName: String;
+    deviceType: DeviceType;
+}
+
+enum UserStatusFeature : i32 {
+    GESTURES_RECOGNITION = 5,
+    ANTI_MISTOUCH = 6,
+    QUICK_GESTURES_RECOGNITION = 7,
+    FACE_RELATIVE_POSITION_RECOGNITION = 8,
+    QUICK_FACE_RELATIVE_POSITION_RECOGNITION = 9,
+    HAND_GAZE_COORDINATION = 11,
+    USER_BLOWING_STATUS = 12,
+    USER_MOOD = 13,
+    COMFORT_REMINDER = 15,
+    ENV_SOUND = 17,
+    EXT_SCREEN_ANTI_MISTOUCH = 19
+}
+
+enum UserStatusAtomicCap : i32 {
+    ATOMIC_UNKNOWN = 0,
+    FACE_RELATIVE_POSITION = 1,
+    FACE_NUM_CHANGE = 2,
+    GESTURE = 3,
+    FACE_ANGLE = 4,
+    SENSOR_GRAVITY = 5,
+    SENSOR_GYROSCOPE = 6,
+    SENSOR_ACCELEROMETER = 7,
+    SENSOR_LINEAR_ACCELERATION = 8,
+    SENSOR_ROTATION_VECTOR = 9,
+    SENSOR_ORIENTATION = 10,
+    BLOWING_STATUS = 11,
+    MOOD_STATUS = 12,
+    ENV_SOUND = 13,
+    NOISE_SOUND = 14,
+    EYE_GAZE_SCREEN = 15
+}
+
+enum ReminderLevel : i32 {
+    WEAK_REMINDER = 0,
+    NORMAL_REMINDER = 1
+}
+
+struct UserStatusData {
+    feature: UserStatusFeature;
+    status: String;
+    result: Optional<i32>;
+    errCode: i32;
+}
+
+struct UserBlowData {
+    @extends base: UserStatusData;
+    facePosition: Optional<Array<f32>>;
+    strengthLevel: Optional<i32>;
+    blowDirection: Optional<i32>;
+    emotion: Optional<i32>;
+    isGazeStatus: bool;
+    gravityAcceleration: Optional<Array<f32>>;
+    linearAcceleration: Optional<Array<Array<f32>>>;
+}
+  
+struct UserEmotionData {
+    @extends base: UserStatusData;
+    emotionRealTime: Optional<i32>;
+    confidence: Optional<i32>;
+    isRealTime: bool;
+    emotionNonRealTime: Optional<Array<i32>>;
+    gravityAcceleration: Optional<Array<f32>>;
+    linearAcceleration: Optional<Array<Array<f32>>>;
+}
+
+struct ComfortReminderData {
+    @extends base: UserStatusData;
+    fusionReminderData: ReminderLevel;
+    swingReminderData: ReminderLevel;
+    eventType: i32;
+}
+
+struct UserFacesData {
+    @extends base: UserStatusData;
+    visualAngle: Optional<Array<f32>>;
+    angularVelocity: Optional<Array<f32>>;
+    gravityAcceleration: Optional<Array<f32>>;
+    linearAcceleration: Optional<Array<Array<f32>>>;
+    azimuth: Optional<Array<f32>>;
+    faceNum: Optional<i32>;
+}
+
+struct UserGesturesData {
+    @extends base: UserFacesData;
+    isHandExist: bool;
+    handPosition: Optional<Array<f32>>;
+    motionGesture: Optional<i32>;
+    handType: Optional<i32>;
+    directionAngle: Optional<Array<f32>>;
+    gestureSpeed: Optional<Array<f32>>;
+}
+
+struct UserFaceAngleData {
+    @extends base: UserStatusData;
+    hpeNetworkId: String;
+}
+
 @!sts_inject("""
     function onUserAgeGroupDetected(callback: (info: UserClassification) => void): void {
         return onUserAgeGroupDetectedInner(callback, callback);
@@ -35,6 +147,19 @@ struct UserClassification {
     function offUserAgeGroupDetected(callback?: (info: UserClassification) => void): void {
         return offUserAgeGroupDetectedInner(callback);
       }
+    function subscribe(featureId: UserStatusFeature, callback: (data: UserStatusData) => void, deviceInfo?: DeviceInfo[]): int {
+        return subscribeInner(featureId, callback, callback, deviceInfo);
+      }
+    function unsubscribe(featureId: UserStatusFeature, callback?: (data: UserStatusData) => void): int {
+        return unsubscribeInner(featureId, callback);
+      }
 """)
 function OnUserAgeGroupDetectedInner(f: (info: UserClassification) => void, opq: Opaque);
 function OffUserAgeGroupDetectedInner(opq: Optional<Opaque>);
+function SubscribeInner(featureId: UserStatusFeature, callback: (data: UserStatusData) => void, opq: Opaque, deviceInfo: Optional<Array<DeviceInfo>>): i32;
+function UnsubscribeInner(featureId: UserStatusFeature, opq: Optional<Opaque>): i32;
+
+@rename("configure")
+function Configure(featureId: UserStatusFeature, detail: String): i32;
+@rename("queryCapabilities")
+function QueryCapabilities(capabilities: Array<UserStatusAtomicCap>): Array<UserStatusAtomicCap>;

@@ -31,18 +31,23 @@ ohos_shared_library("userstatus_napi") {
   sources = [
     "src/underage_model_napi_error.cpp",
     "src/underage_model_napi_event.cpp",
-    "src/underage_model_napi.cpp"
+    "src/underage_model_napi.cpp",
+    "src/user_status_napi_util.cpp"
   ]
 
   configs = [ ":underage_mode_private_config" ]
 
-  deps = [ "${device_status_utils_path}:devicestatus_util" ]
+  deps = [
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_interfaces_path}/innerkits:user_status_data_util" 
+  ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "json:nlohmann_json_static",
   ]
 
   relative_install_dir = "module/multimodalawareness"

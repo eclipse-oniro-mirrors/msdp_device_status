@@ -62,6 +62,7 @@ taihe_shared_library("underageModel_so") {
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
+    "json:nlohmann_json_static",
   ]
   sources += [
     "src/ani_constructor.cpp",
@@ -72,6 +73,7 @@ taihe_shared_library("underageModel_so") {
     ":run_taihe",
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_utils_path}:devicestatus_util",
+    "${device_status_interfaces_path}/innerkits:user_status_data_util"
   ]
 }
 

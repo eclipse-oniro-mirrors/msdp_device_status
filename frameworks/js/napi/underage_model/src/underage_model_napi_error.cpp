@@ -28,6 +28,7 @@ namespace {
 const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {PERMISSION_EXCEPTION, "Permission check failed."},
     {PARAM_EXCEPTION, "Params check failed."},
+    {PERMISSION_SYSTEM_EXCEPTION, "Permission check failed. A non-system application uses the system API."},
     {DEVICE_EXCEPTION, "The device does not support this API."},
     {SERVICE_EXCEPTION, "Service exception. Possible causes: 1. A system error, such as null pointer, "
         "container-related exception; 2. N-API invocation exception, invalid N-API status."},
