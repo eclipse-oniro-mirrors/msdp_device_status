@@ -24,6 +24,7 @@
 
 #include "isystem_ability_status_change.h"
 #include "system_ability_status_change_stub.h"
+#include "system_ability_load_callback_stub.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -152,10 +153,23 @@ private:
         std::weak_ptr<IntentionClient> parent_;
     };
 
+    class ServiceProxyLoadCallback : public SystemAbilityLoadCallbackStub {
+    public:
+        explicit ServiceProxyLoadCallback(std::shared_ptr<IntentionClient> parent);
+        virtual ~ServiceProxyLoadCallback() = default;
+        void OnLoadSystemAbilitySuccess(int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject) override;
+        void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
+    
+    private:
+        std::weak_ptr<IntentionClient> parent_;
+    };
+
     ErrCode Connect();
     void ResetProxy(const wptr<IRemoteObject> &remote);
     void SubscribeSaListener();
     void UnsubscribeSaListener();
+    int32_t LoadDeviceStatusService();
+    int32_t DealAfterServiceAlive(const sptr<IRemoteObject>& remoteObject);
 
 private:
     std::mutex mutex_;
