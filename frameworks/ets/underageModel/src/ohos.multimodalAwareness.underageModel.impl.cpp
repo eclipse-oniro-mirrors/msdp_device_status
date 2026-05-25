@@ -108,7 +108,7 @@ int32_t SubscribeInner(UserStatusFeature featureId, taihe::callback_view<void(Us
         taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
         return ANI_ERROR;
     }
-    return ANI_OK;
+    return g_underageModelObj->GetCallbackId();
 }
 
 int32_t UnsubscribeInner(UserStatusFeature featureId, ::taihe::optional_view<uintptr_t> opq)
@@ -136,6 +136,9 @@ int32_t UnsubscribeInner(UserStatusFeature featureId, ::taihe::optional_view<uin
     if (!g_underageModelObj->UnSubscribeCallback(featureId)) {
         FI_HILOGE("UnSubscribeCallback failed");
         return ANI_ERROR;
+    }
+    if (g_underageModelObj->IsEmptyEvents()) {
+        g_underageModelObj->ResetCallback();
     }
     return ANI_OK;
 }

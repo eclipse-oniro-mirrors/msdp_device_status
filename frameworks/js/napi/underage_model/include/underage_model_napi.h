@@ -109,6 +109,7 @@ private:
 private:
     napi_env env_ { nullptr };
     void* g_userStatusHandle { nullptr };
+    int32_t g_callbackId { 0 };
     UserStatusAwareness::UserStatusDataCallbackFunc g_callback { nullptr };
     RegisterListenerFunc g_registerListenerFunc { nullptr };
     SubscribeCallbackFunc g_subscribeCallbackFunc { nullptr };

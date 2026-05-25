@@ -326,6 +326,12 @@ bool UnderageModelNapiEvent::IsSameValue(const napi_env &env, const napi_value &
     return result;
 }
 
+bool UnderageModelNapiEvent::IsEmptyEvents()
+{
+    FI_HILOGI("Enter");
+    return events_.empty();
+}
+
 bool UnderageModelNapiEvent::CheckEvents(uint32_t eventType)
 {
     FI_HILOGD("Enter");

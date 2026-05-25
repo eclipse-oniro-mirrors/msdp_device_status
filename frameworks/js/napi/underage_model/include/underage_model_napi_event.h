@@ -38,6 +38,7 @@ public:
     UnderageModelNapiEvent(napi_env env, napi_value thisVar);
     virtual ~UnderageModelNapiEvent();
     bool AddCallback(uint32_t eventType, napi_value handler);
+    bool IsEmptyEvents();
     bool CheckEvents(uint32_t eventType);
     bool RemoveAllCallback(uint32_t eventType);
     bool RemoveCallback(uint32_t eventType, napi_value handler);

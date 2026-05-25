@@ -388,6 +388,7 @@ bool UnderageModelNapi::InitializeCallback(napi_env env, uint32_t featureId)
         ThrowUnderageModelErr(env, PERMISSION_SYSTEM_EXCEPTION, "Not system app");
         return false;
     }
+    g_underageModelObj->g_callbackId = ret;
     return true;
 }
 
@@ -469,7 +470,7 @@ napi_value UnderageModelNapi::SubscribeUserStatus(napi_env env, napi_callback_in
         return nullptr;
     }
     napi_value result = nullptr;
-    napi_get_undefined(env, &result);
+    CHKRP(napi_create_int32(env, g_underageModelObj->g_callbackId, &result), "napi_create_int32 fail");
     return result;
 }
 
@@ -511,8 +512,13 @@ napi_value UnderageModelNapi::UnsubscribeUserStatus(napi_env env, napi_callback_
         if (!UnsubscribeCallback(env, featureId)) {
             return nullptr;
         }
+        if (g_underageModelObj->IsEmptyEvents()) {
+            g_underageModelObj->g_callback = nullptr;
+            g_underageModelObj->g_callbackId = 0;
+        }
     }
-    napi_get_undefined(env, &result);
+    napi_value result = nullptr;
+    CHKRP(napi_create_int32(env, RET_OK, &result), "napi_create_int32 fail");
     return result;
 }
 

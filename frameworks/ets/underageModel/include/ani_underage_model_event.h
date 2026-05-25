@@ -85,6 +85,7 @@ public:
     static std::shared_ptr<AniUnderageModelEvent> GetInstance();
     AniUnderageModelEvent() = default;
     ~AniUnderageModelEvent();
+    bool IsEmptyEvents();
     bool CheckEvents(int32_t eventType);
     bool SubscribeCallback(int32_t type);
     bool UnSubscribeCallback(int32_t type);
@@ -99,6 +100,8 @@ public:
     bool SubscribeWithDeviceInfo(int32_t featureId, std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList);
     int32_t ConfigParams(uint32_t feature, std::string& configParams);
     bool QueryCapabilities(std::vector<int32_t>& capabilities);
+    int32_t GetCallbackId();
+    void ResetCallback();
     static ani_vm* GetAniVm(ani_env* env);
     static ani_env* GetAniEnv(ani_vm* vm);
     static ani_env* AttachAniEnv(ani_vm* vm);
@@ -144,6 +147,7 @@ protected:
 
 private:
     UserStatusAwareness::UserStatusDataCallbackFunc g_callback { nullptr };
+    int32_t g_callbackId { 0 };
     RegisterListenerFunc g_registerListenerFunc { nullptr };
     SubscribeCallbackFunc g_subscribeCallbackFunc { nullptr };
     SubscribeFunc g_subscribeFunc { nullptr };
