@@ -216,7 +216,7 @@ void EtsSpatialAwarenessManager::Subscribe(DistanceMeasurementConfigParams const
     InitDependencyLibrary();
     if (!SubscribeDistanceMeasurement(distMeasureDataSet)) {
         FI_HILOGE("Call subscribeDistanceMeasurement failed.");
-        RemoveFailCallback(env, distMeasureDataSet, opq, jsCbMap_);
+        RemoveFailCallback(distMeasureDataSet, callbackRef, jsCbMap_);
         return;
     }
     FI_HILOGI("Exit");
@@ -239,9 +239,9 @@ void EtsSpatialAwarenessManager::Unsubscribe(DistanceMeasurementConfigParams con
             FI_HILOGE("Not exist distMeasureDataSet");
             return;
         }
-        if (!opq.has_value()) {
+        if (!opq.has_value() || iter->second.empty()) {
             jsCbMap_.erase(iter);
-            FI_HILOGI("Unsubscribe callback is nullptr!");
+            FI_HILOGI("Unsubscribe callback is nullptr or jsCbMap_ content is empty.");
         } else {
             if (!RemoveCallback(iter, opq)) {
                 FI_HILOGI("Remove callback failed!");
@@ -444,34 +444,27 @@ bool EtsSpatialAwarenessManager::UnsubscribeDistanceMeasurement(const CDistMeasu
     return false;
 }
 
-void EtsSpatialAwarenessManager::RemoveFailCallback(ani_env *env, const CDistMeasureData &distMeasureDataSet,
-    uintptr_t opq, std::map<CDistMeasureData, std::vector<std::shared_ptr<CallbackObject>>> &jsCbMap)
+void EtsSpatialAwarenessManager::RemoveFailCallback(const CDistMeasureData &distMeasureDataSet,
+    ani_ref targetRef, std::map<CDistMeasureData, std::vector<std::shared_ptr<CallbackObject>>> &jsCbMap)
 {
     FI_HILOGI("Enter");
-    if (env == nullptr) {
-        FI_HILOGE("ani_env is nullptr!");
-        return;
-    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     const auto cbVec = jsCbMap.find(distMeasureDataSet);
     if (cbVec == jsCbMap.end()) {
         FI_HILOGE("distMeasureDataSet is invalid");
         return;
     }
-    GlobalRefGuard guard(env, reinterpret_cast<ani_object>(opq));
-    if (!guard) {
-        FI_HILOGE("GlobalRefGuard is false!");
-        return;
-    }
-    const auto pred = [env, targetRef = guard.get()](std::shared_ptr<CallbackObject> &obj) {
-        ani_boolean is_equal = false;
-        return (ANI_OK == env->Reference_StrictEquals(targetRef, obj->ref, &is_equal)) && is_equal;
+    const auto pred = [targetRef](std::shared_ptr<CallbackObject> &obj) {
+        return targetRef == obj->ref;
     };
     auto &callbacks = cbVec->second;
     const auto it = std::find_if(callbacks.begin(), callbacks.end(), pred);
     if (it != callbacks.end()) {
         FI_HILOGI("remove callback success");
         callbacks.erase(it);
+    }
+    if (callbacks.empty()) {
+        jsCbMap.erase(cbVec);
     }
     FI_HILOGI("Exit");
 }
