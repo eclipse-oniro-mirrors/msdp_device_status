@@ -185,8 +185,8 @@ public:
     bool IsValidReportFrequency(int32_t reportFrequency);
     bool LoadLibrary();
     void InitDependencyLibrary();
-    void RemoveFailCallback(ani_env *env, const CDistMeasureData &distMeasureDataSet,
-        uintptr_t opq, std::map<CDistMeasureData, std::vector<std::shared_ptr<CallbackObject>>> &jsCbMap);
+    void RemoveFailCallback(const CDistMeasureData &distMeasureDataSet, ani_ref targetRef,
+        std::map<CDistMeasureData, std::vector<std::shared_ptr<CallbackObject>>> &jsCbMap);
     bool SubscribeDistanceMeasurement(const CDistMeasureData &cdistMeasureData);
     bool UnsubscribeDistanceMeasurement(const CDistMeasureData &cdistMeasureData);
 
