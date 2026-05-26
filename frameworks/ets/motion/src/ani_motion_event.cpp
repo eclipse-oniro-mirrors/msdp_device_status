@@ -389,7 +389,7 @@ ani_enum_item AniMotionEvent::CreateAniRotateEvent(ani_env *env, int32_t status)
         FI_HILOGE("[ANI] RotateEvent not found");
         return enumItem;
     }
-    ret = env->Enum_GetEnumItemByIndex(enumType, ani_int(status), &enumItem);
+    ret = env->Enum_GetEnumItemByIndex(enumType, ani_int(status + 1), &enumItem);
     if (ret != ANI_OK) {
         FI_HILOGE("env Enum_GetEnumItemByIndex failed");
         return enumItem;
