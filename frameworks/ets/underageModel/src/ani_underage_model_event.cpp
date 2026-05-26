@@ -122,6 +122,12 @@ AniUnderageModelEvent::~AniUnderageModelEvent()
     }
 }
 
+bool AniUnderageModelEvent::IsEmptyEvents()
+{
+    FI_HILOGI("Enter");
+    return events_.empty();
+}
+
 bool AniUnderageModelEvent::CheckEvents(int32_t eventType)
 {
     FI_HILOGI("Enter");
@@ -789,6 +795,7 @@ bool AniUnderageModelEvent::SubscribeUserStatus(
             g_callback = nullptr;
             return false;
         }
+        g_callbackId = ret;
     }
     return SubscribeWithDeviceInfo(featureId, deviceInfoList);
 }
@@ -909,6 +916,17 @@ bool AniUnderageModelEvent::ParseConfigParams(
         configMap.emplace(key, values);
     }
     return true;
+}
+
+int32_t AniUnderageModelEvent::GetCallbackId()
+{
+    return g_callbackId;
+}
+
+void AniUnderageModelEvent::ResetCallback()
+{
+    g_callbackId = 0;
+    g_callback = nullptr;
 }
 } // namespace Msdp
 } // namespace OHOS
