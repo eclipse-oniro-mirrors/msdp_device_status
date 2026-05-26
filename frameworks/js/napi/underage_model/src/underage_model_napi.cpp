@@ -483,7 +483,6 @@ napi_value UnderageModelNapi::UnsubscribeUserStatus(napi_env env, napi_callback_
     size_t argc = 2;
     napi_value args[2] = { nullptr };
     napi_value jsThis = nullptr;
-    napi_value result = nullptr;
     CHKRP(napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr), "napi_get_cb_info fail");
     bool validateArgsRes = false;
     if (argc == UNSUBSCRIBE_ONE_PARA) {
