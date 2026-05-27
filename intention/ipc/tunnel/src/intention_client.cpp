@@ -37,9 +37,9 @@ constexpr int32_t RET_NO_SUPPORT = 801;
 };
 std::shared_ptr<IntentionClient> IntentionClient::instance_ = std::make_shared<IntentionClient>();
 
-IntentionClient *IntentionClient::GetInstance()
+std::shared_ptr<IntentionClient> IntentionClient::GetInstance()
 {
-    return instance_.get();
+    return instance_;
 }
 
 // LCOV_EXCL_START
