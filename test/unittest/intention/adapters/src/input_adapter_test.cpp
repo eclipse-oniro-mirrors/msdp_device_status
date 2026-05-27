@@ -366,8 +366,8 @@ HWTEST_F(InputAdapterTest, TestSetPointerLocation, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     std::shared_ptr<IInputAdapter> inputAdapter = std::make_shared<InputAdapter>();
-    int32_t ret= inputAdapter->SetPointerLocation(0, 0);
-    EXPECT_EQ(RET_OK, ret);
+    int32_t ret= inputAdapter->SetPointerLocation(0, 0, 0);
+    EXPECT_EQ(RET_ERR, ret);
 }
 
 /**
