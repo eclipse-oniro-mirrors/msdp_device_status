@@ -222,6 +222,47 @@ int32_t JsonParser::ParseFloatArray(const cJSON *json, const std::string &key, s
     }
     return RET_OK;
 }
+
+int32_t JsonParser::ParseInt32Array(const cJSON *json, const std::string &key, std::vector<int32_t> &value,
+    int32_t maxSize)
+{
+    if (!cJSON_IsObject(json)) {
+        FI_HILOGE("json is not json object");
+        return RET_ERR;
+    }
+    cJSON *jsonNode = cJSON_GetObjectItemCaseSensitive(json, key.c_str());
+    if (jsonNode == nullptr) {
+        FI_HILOGE("jsonNode is nullptr");
+        return RET_ERR;
+    }
+    if (!cJSON_IsArray(jsonNode)) {
+        FI_HILOGE("jsonNode is not array");
+        return RET_ERR;
+    }
+    int32_t arraySize = cJSON_GetArraySize(jsonNode);
+    if (arraySize > maxSize) {
+        FI_HILOGW("arraySize is too much, truncate it");
+    }
+    value.clear();
+    for (int32_t i = 0; i < std::min(maxSize, arraySize); i++) {
+        cJSON* arrayItem = cJSON_GetArrayItem(jsonNode, i);
+        if (!cJSON_IsNumber(arrayItem)) {
+            FI_HILOGE("The arrayItem is not number");
+            return RET_ERR;
+        }
+        if (!IsInteger(arrayItem)) {
+            FI_HILOGE("value is not integer");
+            return RET_ERR;
+        }
+        if (arrayItem->valueint < std::numeric_limits<int32_t>::min() ||
+            arrayItem->valueint > std::numeric_limits<int32_t>::max()) {
+            FI_HILOGE("value is out of int32_t bounds");
+            return RET_ERR;
+        }
+        value.push_back(arrayItem->valueint);
+    }
+    return RET_OK;
+}
 } // namespace JSON_PARSER_H
 } // namespace Msdp
 } // namespace OHOS

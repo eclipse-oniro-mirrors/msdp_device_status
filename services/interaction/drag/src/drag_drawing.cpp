@@ -139,10 +139,8 @@ constexpr float ROTATION_ANGLE_MAX { 40.0f };
 constexpr float ROTATION_ANGLE_MIN { -40.0f };
 constexpr float DEFAULT_CONTENT_LIGHT_INTENSITY { 0.0f };
 const Rosen::Vector4f DEFAULT_CONTENT_LIGHT_COLOR { 1.0f, 1.0f, 1.0f, 1.0f };
-const Rosen::Vector3f CONTENT_LIGHT_POSITION_LEFT { -1.0f, 0.0f, 4.0f };
-const Rosen::Vector3f CONTENT_LIGHT_POSITION_RIGHT { 1.0f, 0.0f, 4.0f };
-const Rosen::Vector3f CONTENT_LIGHT_POSITION_TOP { 0.0f, -1.0f, 4.0f };
-const Rosen::Vector3f CONTENT_LIGHT_POSITION_BUTTOM { 0.0f, 1.0f, 4.0f };
+const Rosen::Vector3f CONTENT_LIGHT_POSITION_LEFT_TOP { -1.0f, -1.0f, 4.0f };
+const Rosen::Vector3f CONTENT_LIGHT_POSITION_RIGHT_BUTTOM { 1.0f, 1.0f, 2.0f };
 #ifdef OHOS_ENABLE_PULLTHROW
 constexpr float THROW_SLIP_TIME { 616.0f };
 constexpr float BREATHE_TIME { 600.0f };
@@ -174,6 +172,14 @@ constexpr int32_t BLEND_DURATION_INDEX { 2 };
 constexpr int32_t AMPLITUDE_RATIO_INDEX { 3 };
 constexpr int32_t DRAG_END_POSITON_X { 0 };
 constexpr int32_t DRAG_END_POSITON_Y { 1 };
+constexpr int32_t DRAG_AREA_WIDTH_INDEX { 0 };
+constexpr int32_t DRAG_AREA_HEIGHT_INDEX { 1 };
+constexpr int32_t DEFAULT_DRAG_AREA_WIDTH { 2 };
+constexpr int32_t DEFAULT_DRAG_AREA_HEIGHT { 2 };
+constexpr int32_t DRAG_AREA_WIDTH_FOUR { 4 };
+constexpr int32_t DRAG_AREA_HEIGHT_FOUR { 4 };
+constexpr int32_t DRAG_AREA_WIDTH_SIX { 6 };
+constexpr int32_t DRAG_AREA_HEIGHT_SIX { 6 };
 constexpr int32_t DRAG_SIZE_WIDTH_INDEX { 0 };
 constexpr int32_t DRAG_SIZE_HEIGHT_INDEX { 1 };
 constexpr size_t DROP_POSITION_SIZE { 2 };
@@ -201,8 +207,13 @@ constexpr float BEZIER_100 { 1.00f };
 constexpr float MIN_OPACITY { 0.0f };
 constexpr float MAX_OPACITY { 1.0f };
 constexpr float ADJUST_MENT { 0.25f };
-constexpr float DEGREE_COEFF { 1.5f };
-constexpr float ADJUST_LIGHT { 0.5f };
+constexpr float ADJUST_MENT_DEGREE { 0.15 };
+constexpr float DEFAULT_SENSITIVITY { 0.2f };
+constexpr float SENSITIVITY_FIRST { 0.3f };
+constexpr float SENSITIVITY_SECOND { 0.25f };
+constexpr float SENSITIVITY_THIRD { 0.15f };
+constexpr float ADJUST_LIGHT { 0.8f };
+constexpr float ADJUST_DEGREE { 0.7f };
 constexpr int32_t TIME_DRAG_CHANGE_STYLE { 50 };
 constexpr int32_t TIME_DRAG_STYLE { 100 };
 constexpr int32_t TIME_STOP_FAIL_WINDOW { 125 };
@@ -518,54 +529,85 @@ void DragDrawing::CalculateRotation(float targetPositionX, float targetPositionY
     currentDisplayY_ = ((1 - ADJUST_MENT) * currentDisplayY_) + (ADJUST_MENT * targetPositionY);
     float deltaX = targetPositionX - currentDisplayX_;
     float deltaY = targetPositionY - currentDisplayY_;
-    degreeX = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, deltaY * DEGREE_COEFF));
-    degreeY = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, -deltaX * DEGREE_COEFF));
+    float sensitivity = DEFAULT_SENSITIVITY;
+    if (dropArea_.size() == DROP_POSITION_SIZE) {
+        int32_t dropAreaWidth = dropArea_.at(DRAG_AREA_WIDTH_INDEX);
+        int32_t dropAreaHeight = dropArea_.at(DRAG_AREA_HEIGHT_INDEX);
+        if ((dropAreaWidth <= DEFAULT_DRAG_AREA_WIDTH) && (dropAreaHeight <= DEFAULT_DRAG_AREA_HEIGHT)) {
+            sensitivity = SENSITIVITY_FIRST;
+        } else if (((dropAreaWidth == DEFAULT_DRAG_AREA_WIDTH) && (dropAreaHeight == DRAG_AREA_HEIGHT_FOUR)) ||
+            ((dropAreaWidth == DRAG_AREA_WIDTH_FOUR) && (dropAreaHeight == DEFAULT_DRAG_AREA_HEIGHT))) {
+            sensitivity = SENSITIVITY_SECOND;
+        } else if ((dropAreaWidth == DRAG_AREA_WIDTH_FOUR) && (dropAreaHeight == DRAG_AREA_HEIGHT_FOUR)) {
+            sensitivity = DEFAULT_SENSITIVITY;
+        } else if (((dropAreaWidth >= DRAG_AREA_WIDTH_FOUR) && (dropAreaHeight >= DRAG_AREA_HEIGHT_SIX)) ||
+            ((dropAreaWidth >= DRAG_AREA_WIDTH_SIX) && (dropAreaHeight >= DRAG_AREA_HEIGHT_FOUR))) {
+            sensitivity = SENSITIVITY_THIRD;
+        } else {
+            sensitivity = DEFAULT_SENSITIVITY;
+        }
+    }
+    degreeX = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, deltaY * sensitivity));
+    degreeY = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, -deltaX * sensitivity));
+    currentDegreeX_ = ((1 - ADJUST_MENT_DEGREE) * currentDegreeX_) + (ADJUST_MENT_DEGREE * degreeX);
+    currentDegreeY_ = ((1 - ADJUST_MENT_DEGREE) * currentDegreeY_) + (ADJUST_MENT_DEGREE * degreeY);
+    degreeX = currentDegreeX_;
+    degreeY = currentDegreeY_;
+    if (dropArea_.size() != DROP_POSITION_SIZE) {
+        FI_HILOGE("dropArea size is invalid, size:%{public}zu", dropArea_.size());
+        return;
+    }
+    int32_t dropAreaWidth = dropArea_.at(DRAG_AREA_WIDTH_INDEX);
+    int32_t dropAreaHeight = dropArea_.at(DRAG_AREA_HEIGHT_INDEX);
+    if ((dropAreaWidth == 0) || (dropAreaHeight == 0)) {
+        FI_HILOGE("dropArea invalid, dropAreaWidth:%{public}d, dropAreaHeight:%{public}d",
+            dropAreaWidth, dropAreaHeight);
+        return;
+    }
+    if (dropAreaWidth > DEFAULT_DRAG_AREA_WIDTH) {
+        degreeY = (ADJUST_DEGREE * DEFAULT_DRAG_AREA_WIDTH / (dropAreaWidth * 1.0f)) * degreeY;
+    }
+    if (dropAreaHeight > DEFAULT_DRAG_AREA_HEIGHT) {
+        degreeX = (ADJUST_DEGREE * DEFAULT_DRAG_AREA_HEIGHT / (dropAreaHeight * 1.0f)) * degreeX;
+    }
 }
 
 void DragDrawing::CalculateLightIntensity(float degreeX, float degreeY, LightIntensity &lightIntensity)
 {
     if (degreeY > 1.0f) {
-        if (DragWindowRotateInfo_.rotation == ROTATION_0) {
-            lightIntensity.lightLeft = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_90) {
-            lightIntensity.lightBottom = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_180) {
-            lightIntensity.lightRight = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_270) {
-            lightIntensity.lightTop = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        if ((DragWindowRotateInfo_.rotation == ROTATION_0) ||
+            (DragWindowRotateInfo_.rotation == ROTATION_270)) {
+            lightIntensity.lightLeftTop = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if ((DragWindowRotateInfo_.rotation == ROTATION_90) ||
+            (DragWindowRotateInfo_.rotation == ROTATION_180)) {
+            lightIntensity.lightRightBottom = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
         }
     }
     if (degreeY < -1.0f) {
-        if (DragWindowRotateInfo_.rotation == ROTATION_0) {
-            lightIntensity.lightRight = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_90) {
-            lightIntensity.lightTop = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_180) {
-            lightIntensity.lightLeft = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_270) {
-            lightIntensity.lightBottom = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        if ((DragWindowRotateInfo_.rotation == ROTATION_0) ||
+            (DragWindowRotateInfo_.rotation == ROTATION_270)) {
+            lightIntensity.lightRightBottom = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if ((DragWindowRotateInfo_.rotation == ROTATION_90) ||
+            (DragWindowRotateInfo_.rotation == ROTATION_180)) {
+            lightIntensity.lightLeftTop = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
         }
     }
     if (degreeX > 1.0f) {
-        if (DragWindowRotateInfo_.rotation == ROTATION_0) {
-            lightIntensity.lightBottom = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_90) {
-            lightIntensity.lightRight = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_180) {
-            lightIntensity.lightTop = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_270) {
-            lightIntensity.lightLeft = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        if ((DragWindowRotateInfo_.rotation == ROTATION_0)
+            || (DragWindowRotateInfo_.rotation == ROTATION_90)) {
+            lightIntensity.lightRightBottom = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if ((DragWindowRotateInfo_.rotation == ROTATION_180) ||
+            (DragWindowRotateInfo_.rotation == ROTATION_270)) {
+            lightIntensity.lightLeftTop = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
         }
     }
     if (degreeX < -1.0f) {
-        if (DragWindowRotateInfo_.rotation == ROTATION_0) {
-            lightIntensity.lightTop = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_90) {
-            lightIntensity.lightLeft = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_180) {
-            lightIntensity.lightBottom = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
-        } else if (DragWindowRotateInfo_.rotation == ROTATION_270) {
-            lightIntensity.lightRight = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        if ((DragWindowRotateInfo_.rotation == ROTATION_0) ||
+            (DragWindowRotateInfo_.rotation == ROTATION_90)) {
+            lightIntensity.lightLeftTop = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+        } else if ((DragWindowRotateInfo_.rotation == ROTATION_180) ||
+            (DragWindowRotateInfo_.rotation == ROTATION_270)) {
+            lightIntensity.lightRightBottom = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
         }
     }
 }
@@ -592,12 +634,9 @@ void DragDrawing::DoFollowHandAnimation(const float &displayX, const float &disp
             return;
         }
         parentNode->SetRotation(degreeX, degreeY, DragWindowRotateInfo_.rotation);
-        if ((lightFilterLeft_ != nullptr) && (lightFilterRight_ != nullptr) &&
-            (lightFilterTop_ != nullptr) && (lightFilterButtom_ != nullptr)) {
-            lightFilterLeft_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightLeft);
-            lightFilterRight_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightRight);
-            lightFilterTop_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightTop);
-            lightFilterButtom_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightBottom);
+        if ((lightFilterLeftTop_ != nullptr) && (lightFilterRightBottom_ != nullptr)) {
+            lightFilterLeftTop_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightLeftTop);
+            lightFilterRightBottom_->Setter<Rosen::ContentLightIntensityTag>(lightIntensity.lightRightBottom);
         }
     });
 }
@@ -1088,11 +1127,27 @@ void DragDrawing::StopDestopAnimation()
                 FI_HILOGE("parentNode is nullptr");
                 return;
             }
+            if (g_drawingInfo.surfaceNode == nullptr) {
+                FI_HILOGE("surfaceNode is nullptr");
+                return;
+            }
             g_drawingInfo.parentNode->SetRotation(degreeX, degreeY, DragWindowRotateInfo_.rotation);
+            g_drawingInfo.surfaceNode->SetVisible(dragWindowVisible_.load());
         });
     } else {
-        DestroyDragWindow();
-        UpdateDrawingState();
+        Rosen::RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(ANIMATION_DURATION);
+        Rosen::RSNode::Animate(g_drawingInfo.surfaceNode ? g_drawingInfo.surfaceNode->GetRSUIContext() : nullptr,
+            protocol, SPRING_ROTATION, [=]() {
+            if (g_drawingInfo.surfaceNode == nullptr) {
+                FI_HILOGE("surfaceNode is nullptr");
+                return;
+            }
+            g_drawingInfo.surfaceNode->SetVisible(!dragWindowVisible_.load());
+        }, [=]() {
+            DestroyDragWindow();
+            UpdateDrawingState();
+        });
     }
     FI_HILOGI("leave");
 }
@@ -1135,9 +1190,10 @@ void DragDrawing::UpdateDragWindowState(
                 rsTransaction->SetTransactionHandler(rsUIContext->GetRSTransaction());
             }
             rsTransaction->Begin();
-            g_drawingInfo.surfaceNode->SetVisible(visible);
             if (dragAnimationType_ == static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH)) {
                 StopDestopAnimation();
+            } else {
+                g_drawingInfo.surfaceNode->SetVisible(visible);
             }
             rsTransaction->Commit();
         } else {
@@ -1620,35 +1676,21 @@ void DragDrawing::DrawContentLight()
         FI_HILOGE("pixelMapNode is nullptr");
         return;
     }
-    if (lightFilterLeft_ == nullptr) {
-        lightFilterLeft_ = std::make_shared<Rosen::RSNGContentLightFilter>();
-        lightFilterLeft_->Setter<Rosen::ContentLightPositionTag>(CONTENT_LIGHT_POSITION_LEFT);
-        lightFilterLeft_->Setter<Rosen::ContentLightColorTag>(DEFAULT_CONTENT_LIGHT_COLOR);
-        lightFilterLeft_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
+    if (lightFilterLeftTop_ == nullptr) {
+        lightFilterLeftTop_ = std::make_shared<Rosen::RSNGContentLightFilter>();
+        lightFilterLeftTop_->Setter<Rosen::ContentLightPositionTag>(CONTENT_LIGHT_POSITION_LEFT_TOP);
+        lightFilterLeftTop_->Setter<Rosen::ContentLightColorTag>(DEFAULT_CONTENT_LIGHT_COLOR);
+        lightFilterLeftTop_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
     }
-    if (lightFilterRight_ == nullptr) {
-        lightFilterRight_ = std::make_shared<Rosen::RSNGContentLightFilter>();
-        lightFilterRight_->Setter<Rosen::ContentLightPositionTag>(CONTENT_LIGHT_POSITION_RIGHT);
-        lightFilterRight_->Setter<Rosen::ContentLightColorTag>(DEFAULT_CONTENT_LIGHT_COLOR);
-        lightFilterRight_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
-    }
-    if (lightFilterTop_ == nullptr) {
-        lightFilterTop_ = std::make_shared<Rosen::RSNGContentLightFilter>();
-        lightFilterTop_->Setter<Rosen::ContentLightPositionTag>(CONTENT_LIGHT_POSITION_TOP);
-        lightFilterTop_->Setter<Rosen::ContentLightColorTag>(DEFAULT_CONTENT_LIGHT_COLOR);
-        lightFilterTop_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
-    }
-    if (lightFilterButtom_ == nullptr) {
-        lightFilterButtom_ = std::make_shared<Rosen::RSNGContentLightFilter>();
-        lightFilterButtom_->Setter<Rosen::ContentLightPositionTag>(CONTENT_LIGHT_POSITION_BUTTOM);
-        lightFilterButtom_->Setter<Rosen::ContentLightColorTag>(DEFAULT_CONTENT_LIGHT_COLOR);
-        lightFilterButtom_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
+    if (lightFilterRightBottom_ == nullptr) {
+        lightFilterRightBottom_ = std::make_shared<Rosen::RSNGContentLightFilter>();
+        lightFilterRightBottom_->Setter<Rosen::ContentLightPositionTag>(CONTENT_LIGHT_POSITION_RIGHT_BUTTOM);
+        lightFilterRightBottom_->Setter<Rosen::ContentLightColorTag>(DEFAULT_CONTENT_LIGHT_COLOR);
+        lightFilterRightBottom_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
     }
     auto contentLightFilter = std::make_shared<Rosen::RSNGContentLightFilter>();
-    contentLightFilter->Append(lightFilterLeft_);
-    contentLightFilter->Append(lightFilterRight_);
-    contentLightFilter->Append(lightFilterTop_);
-    contentLightFilter->Append(lightFilterButtom_);
+    contentLightFilter->Append(lightFilterLeftTop_);
+    contentLightFilter->Append(lightFilterRightBottom_);
     pixelMapNode->SetForegroundNGFilter(contentLightFilter);
     FI_HILOGI("leave");
 }
@@ -2489,12 +2531,9 @@ int32_t DragDrawing::DoDestopAnimation()
         FI_HILOGE("MoveToEndAnimation failed");
         return RET_ERR;
     }
-    if ((lightFilterLeft_ != nullptr) && (lightFilterRight_ != nullptr) &&
-        (lightFilterTop_ != nullptr) && (lightFilterButtom_ != nullptr)) {
-        lightFilterLeft_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
-        lightFilterRight_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
-        lightFilterTop_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
-        lightFilterButtom_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
+    if ((lightFilterLeftTop_ != nullptr) && (lightFilterRightBottom_ != nullptr)) {
+        lightFilterLeftTop_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
+        lightFilterRightBottom_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
     }
     if (!CheckNodesValid()) {
         FI_HILOGE("Check nodes valid failed");
@@ -2652,6 +2691,7 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData, bool isLongPressDrag
     g_drawingInfo.displayId = dragData.displayId;
     g_drawingInfo.displayX = dragData.displayX;
     g_drawingInfo.displayY = dragData.displayY;
+    dragAnimationType_ = dragData.dragAnimationType;
     RotateDisplayXY(g_drawingInfo.displayX, g_drawingInfo.displayY);
     if (!ParserExtraInfo(dragData.extraInfo, g_drawingInfo.extraInfo)) {
         FI_HILOGI("No parser valid extraInfo data");
@@ -2671,7 +2711,6 @@ void DragDrawing::InitDrawingInfo(const DragData &dragData, bool isLongPressDrag
     }
     materialId_ = dragData.materialId;
     materialFilter_ = dragData.materialFilter;
-    dragAnimationType_ = dragData.dragAnimationType;
     if (isLongPressDrag) {
         RotatePixelMapXY();
     }
@@ -3496,6 +3535,15 @@ bool DragDrawing::ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &ex
         tempCoef2 = static_cast<float>(coef2->valuedouble);
     }
     extraInfo.coef = { tempCoef1, tempCoef2 };
+    if (dragAnimationType_ == static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH)) {
+        std::vector<int32_t> dropArea;
+        if (JsonParser::ParseIntArray(
+            extraInfoParser.Get(), "dropArea", dropArea, MAX_JSON_ARRAY_SIZE) != RET_OK) {
+            FI_HILOGE("Parse dropArea failed");
+            return false;
+        }
+        dropArea_ = std::move(dropArea);
+    }
     FI_HILOGI("ExtraInfo componentType:%{public}s, blurStyle:%{public}d, cornerRadius:%{public}f, "
         "allowDistributed:%{public}d, coef:[%{public}f, %{public}f]",
         extraInfo.componentType.c_str(), extraInfo.blurStyle, extraInfo.cornerRadius, extraInfo.allowDistributed,
@@ -4525,14 +4573,13 @@ void DragDrawing::ResetParameter()
     dropAnimationCurve_.clear();
     dropPosition_.clear();
     dropSize_.clear();
+    dropArea_.clear();
     dragWindowVisible_.store(false);
     dragAnimationType_ = 0;
     cubicCurveEnable_.store(false);
     springEnable_.store(false);
-    lightFilterLeft_ = nullptr;
-    lightFilterRight_ = nullptr;
-    lightFilterTop_ = nullptr;
-    lightFilterButtom_ = nullptr;
+    lightFilterLeftTop_ = nullptr;
+    lightFilterRightBottom_ = nullptr;
     FI_HILOGI("leave");
 }
 
