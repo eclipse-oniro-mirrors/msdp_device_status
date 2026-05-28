@@ -3458,7 +3458,7 @@ void DragDrawing::ParserBlurInfo(const cJSON *BlurInfoInfoStr, FilterInfo &filte
 
 bool DragDrawing::ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &extraInfo)
 {
-    FI_HILOGD("ExtraInfo size:%{public}zu, extraInfo:%{public}s",
+    FI_HILOGD("ExtraInfo size:%{public}zu, extraInfo:%{private}s",
         extraInfoStr.size(), extraInfoStr.c_str());
     if (extraInfoStr.empty()) {
         FI_HILOGD("ExtraInfo is empty");
@@ -3496,6 +3496,10 @@ bool DragDrawing::ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &ex
         tempCoef2 = static_cast<float>(coef2->valuedouble);
     }
     extraInfo.coef = { tempCoef1, tempCoef2 };
+    FI_HILOGI("ExtraInfo componentType:%{private}s, blurStyle:%{public}d, cornerRadius:%{public}f, "
+        "allowDistributed:%{public}d, coef:[%{public}f, %{public}f]",
+        extraInfo.componentType.c_str(), extraInfo.blurStyle, extraInfo.cornerRadius, extraInfo.allowDistributed,
+        extraInfo.coef[0], extraInfo.coef[1]);
     return true;
 }
 
