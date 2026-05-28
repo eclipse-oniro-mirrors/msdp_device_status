@@ -33,7 +33,7 @@ namespace Msdp {
 namespace DeviceStatus {
 using namespace testing::ext;
 namespace {
-constexpr int32_t TIME_WAIT_FOR_OP_MS { 20 };
+constexpr int32_t TIME_WAIT_FOR_OP_MS { 200 };
 constexpr uint32_t DEFAULT_ICON_COLOR { 0xFF };
 constexpr int32_t PIXEL_MAP_HEIGHT { 3 };
 constexpr int32_t PIXEL_MAP_WIDTH { 3 };
@@ -66,6 +66,8 @@ void DragDrawingTest::SetUp()
 void DragDrawingTest::TearDown()
 {
     g_context = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
 
