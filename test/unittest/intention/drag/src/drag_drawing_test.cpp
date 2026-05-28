@@ -1511,6 +1511,24 @@ HWTEST_F(DragDrawingTest, DragDrawingTest63, TestSize.Level0)
     g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
     EXPECT_LE(degreeY, 40.0f);
 }
+
+/**
+* @tc.name: DragDrawingTest64
+* @tc.desc: Test ParseDropArea
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest64, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    JsonParser jsonParser("{\"dropArea\":\"2,2\"}");
+    g_dragMgr.dragDrawing_.dragAnimationType_ = 0;
+    bool ret = g_dragMgr.dragDrawing_.ParseDropArea(jsonParser);
+    EXPECT_TRUE(ret);
+    g_dragMgr.dragDrawing_.dragAnimationType_ = 1;
+    ret = g_dragMgr.dragDrawing_.ParseDropArea(jsonParser);
+    EXPECT_TRUE(!ret);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

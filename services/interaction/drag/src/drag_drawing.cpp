@@ -3546,12 +3546,12 @@ bool DragDrawing::ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &ex
     return true;
 }
 
-bool DragDrawing::ParseDropArea(JsonParser &extraInfoParser)
+bool DragDrawing::ParseDropArea(JsonParser &jsonParser)
 {
     if (dragAnimationType_ == static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH)) {
         std::vector<int32_t> dropArea;
-        if (JsonParser::ParseIntArray(
-            extraInfoParser.Get(), "dropArea", dropArea, MAX_JSON_ARRAY_SIZE) != RET_OK) {
+        if (JsonParser::ParseInt32Array(
+            jsonParser.Get(), "dropArea", dropArea, MAX_JSON_ARRAY_SIZE) != RET_OK) {
             FI_HILOGE("Parse dropArea failed");
             return false;
         }
