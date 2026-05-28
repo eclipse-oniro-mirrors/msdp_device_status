@@ -59,7 +59,8 @@ void DragDrawingTest::SetUpTestCase() {}
 
 void DragDrawingTest::SetUp()
 {
-    g_context = TestContext::GetInstance();
+    context_ = std::make_shared<TestContext>();
+    g_context = context_.get();
     g_dragMgr.Init(g_context);
 }
 
