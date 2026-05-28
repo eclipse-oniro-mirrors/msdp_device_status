@@ -1454,7 +1454,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest61, TestSize.Level0)
     g_dragMgr.dragDrawing_.DestroyDragWindow();
     g_dragMgr.dragDrawing_.UpdateDrawingState();
 }
- 
+
 /**
 * @tc.name: DragDrawingTest62
 * @tc.desc: Test StopDestopAnimation with dragWindowVisible false
