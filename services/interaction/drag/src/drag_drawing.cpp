@@ -4579,6 +4579,12 @@ void DragDrawing::ResetParameter()
     screenRotateState_ = false;
     isRTL_ = false;
     materialId_ = -1;
+    ResetDragAnimationParameter();
+    FI_HILOGI("leave");
+}
+
+void DragDrawing::ResetDragAnimationParameter()
+{
     currentDegreeX_ = 0.0f;
     currentDegreeY_ = 0.0f;
     dropAnimationCurve_.clear();
@@ -4591,7 +4597,6 @@ void DragDrawing::ResetParameter()
     springEnable_.store(false);
     lightFilterLeftTop_ = nullptr;
     lightFilterRightBottom_ = nullptr;
-    FI_HILOGI("leave");
 }
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X

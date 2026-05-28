@@ -468,6 +468,7 @@ private:
     void DoFollowHandAnimation(const float &displayX, const float &displayY);
     void CalculateLightIntensity(float degreeX, float degreeY, LightIntensity &lightIntensity);
     bool ParseDropArea(JsonParser &jsonParser);
+    void ResetDragAnimationParameter();
 
 private:
     float currentDisplayX_ { 0.0f };
