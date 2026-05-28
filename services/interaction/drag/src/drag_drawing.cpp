@@ -3535,6 +3535,19 @@ bool DragDrawing::ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &ex
         tempCoef2 = static_cast<float>(coef2->valuedouble);
     }
     extraInfo.coef = { tempCoef1, tempCoef2 };
+    if (!ParseDropArea(extraInfoParser)) {
+        FI_HILOGE("ParseDropArea failed");
+        return false;
+    }
+    FI_HILOGI("ExtraInfo componentType:%{public}s, blurStyle:%{public}d, cornerRadius:%{public}f, "
+        "allowDistributed:%{public}d, coef:[%{public}f, %{public}f]",
+        extraInfo.componentType.c_str(), extraInfo.blurStyle, extraInfo.cornerRadius, extraInfo.allowDistributed,
+        extraInfo.coef[0], extraInfo.coef[1]);
+    return true;
+}
+
+bool DragDrawing::ParseDropArea(JsonParser &extraInfoParser)
+{
     if (dragAnimationType_ == static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH)) {
         std::vector<int32_t> dropArea;
         if (JsonParser::ParseIntArray(
@@ -3544,10 +3557,6 @@ bool DragDrawing::ParserExtraInfo(const std::string &extraInfoStr, ExtraInfo &ex
         }
         dropArea_ = std::move(dropArea);
     }
-    FI_HILOGI("ExtraInfo componentType:%{public}s, blurStyle:%{public}d, cornerRadius:%{public}f, "
-        "allowDistributed:%{public}d, coef:[%{public}f, %{public}f]",
-        extraInfo.componentType.c_str(), extraInfo.blurStyle, extraInfo.cornerRadius, extraInfo.allowDistributed,
-        extraInfo.coef[0], extraInfo.coef[1]);
     return true;
 }
 
