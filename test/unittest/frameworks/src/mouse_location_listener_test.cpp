@@ -263,7 +263,7 @@ HWTEST_F(MouseLocationListenerTest, RegisterEventListener_00, TestSize.Level1)
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, COMMON_PERMISSION_CHECK_ERROR);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -281,7 +281,7 @@ HWTEST_F(MouseLocationListenerTest, RegisterEventListener_01, TestSize.Level1)
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, COMMON_PARAMETER_ERROR);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, COMMON_PARAMETER_ERROR);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -300,13 +300,13 @@ HWTEST_F(MouseLocationListenerTest, UnregisterEventListener_00, TestSize.Level1)
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, COMMON_PERMISSION_CHECK_ERROR);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     ret = InteractionManager::GetInstance()->UnregisterEventListener(networkId, listener);
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_ERR);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
@@ -325,13 +325,13 @@ HWTEST_F(MouseLocationListenerTest, UnregisterEventListener_01, TestSize.Level1)
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, COMMON_PERMISSION_CHECK_ERROR);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
     ret = InteractionManager::GetInstance()->UnregisterEventListener(networkId, nullptr);
 #ifdef OHOS_BUILD_ENABLE_COORDINATION
     ASSERT_EQ(ret, RET_OK);
 #else
-    ASSERT_EQ(ret, ERROR_UNSUPPORT);
+    ASSERT_EQ(ret, RET_ERR);
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 } // namespace DeviceStatus

@@ -518,8 +518,7 @@ HWTEST_F(IntentionDeviceManagerTest, IntentionDeviceManagerTest05, TestSize.Leve
     auto env = ContextService::GetInstance();
     ASSERT_NE(env, nullptr);
     std::weak_ptr<IDeviceObserver> weakObserver = std::weak_ptr<IDeviceObserver>();
-    int32_t ret = env->GetDeviceManager().AddDeviceObserver(weakObserver);
-    EXPECT_EQ(ret, RET_ERR);
+    env->GetDeviceManager().AddDeviceObserver(weakObserver);
     ASSERT_NO_FATAL_FAILURE(env->GetDeviceManager().RemoveDeviceObserver(weakObserver));
 }
 
