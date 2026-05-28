@@ -140,7 +140,7 @@ constexpr float ROTATION_ANGLE_MIN { -40.0f };
 constexpr float DEFAULT_CONTENT_LIGHT_INTENSITY { 0.0f };
 const Rosen::Vector4f DEFAULT_CONTENT_LIGHT_COLOR { 1.0f, 1.0f, 1.0f, 1.0f };
 const Rosen::Vector3f CONTENT_LIGHT_POSITION_LEFT_TOP { -1.0f, -1.0f, 4.0f };
-const Rosen::Vector3f CONTENT_LIGHT_POSITION_RIGHT_BUTTOM { 1.0f, 1.0f, 2.0f };
+const Rosen::Vector3f CONTENT_LIGHT_POSITION_RIGHT_BOTTOM { 1.0f, 1.0f, 2.0f };
 #ifdef OHOS_ENABLE_PULLTHROW
 constexpr float THROW_SLIP_TIME { 616.0f };
 constexpr float BREATHE_TIME { 600.0f };
@@ -1684,7 +1684,7 @@ void DragDrawing::DrawContentLight()
     }
     if (lightFilterRightBottom_ == nullptr) {
         lightFilterRightBottom_ = std::make_shared<Rosen::RSNGContentLightFilter>();
-        lightFilterRightBottom_->Setter<Rosen::ContentLightPositionTag>(CONTENT_LIGHT_POSITION_RIGHT_BUTTOM);
+        lightFilterRightBottom_->Setter<Rosen::ContentLightPositionTag>(CONTENT_LIGHT_POSITION_RIGHT_BOTTOM);
         lightFilterRightBottom_->Setter<Rosen::ContentLightColorTag>(DEFAULT_CONTENT_LIGHT_COLOR);
         lightFilterRightBottom_->Setter<Rosen::ContentLightIntensityTag>(DEFAULT_CONTENT_LIGHT_INTENSITY);
     }
@@ -4579,6 +4579,8 @@ void DragDrawing::ResetParameter()
     screenRotateState_ = false;
     isRTL_ = false;
     materialId_ = -1;
+    currentDegreeX_ = 0.0f;
+    currentDegreeY_ = 0.0f;
     dropAnimationCurve_.clear();
     dropPosition_.clear();
     dropSize_.clear();
