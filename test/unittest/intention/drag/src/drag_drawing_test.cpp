@@ -1339,7 +1339,7 @@ HWTEST_F(DragDrawingTest, DragDrawingTest57, TestSize.Level0)
     EXPECT_GE(degreeY, -40.0f);
     EXPECT_LE(degreeY, 40.0f);
 }
- 
+
 /**
 * @tc.name: DragDrawingTest58
 * @tc.desc: Test CalculateRotation with zero movement
