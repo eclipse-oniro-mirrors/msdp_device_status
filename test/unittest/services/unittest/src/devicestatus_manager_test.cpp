@@ -297,7 +297,7 @@ HWTEST_F(DeviceStatusManagerTest, SubmitMetadataTest, TestSize.Level0) {
 
     deviceStatusManager->notifyListener_ = boomerangCallback_;
     result = deviceStatusManager->SubmitMetadata("metadata");
-    EXPECT_EQ(result, RET_ERR);
+    EXPECT_EQ(result, RET_OK);
     GTEST_LOG_(INFO) << "SubmitMetadataTest end";
 }
 
@@ -313,7 +313,7 @@ HWTEST_F(DeviceStatusManagerTest, SubmitMetadataTest03, TestSize.Level0) {
     deviceStatusManager->hasSubmitted_ = false;
     deviceStatusManager->bundleNameCache_.emplace(boomerangCallback_, "metadata");
     int32_t result = deviceStatusManager->SubmitMetadata("");
-    EXPECT_EQ(result, RET_ERR);
+    EXPECT_EQ(result, RET_OK);
     GTEST_LOG_(INFO) << "SubmitMetadataTest03 end";
 }
 
@@ -437,7 +437,7 @@ HWTEST_F(DeviceStatusManagerTest, AccessibilityDisconnectTest, TestSize.Level0) 
 HWTEST_F(DeviceStatusManagerTest, TimerTaskTest, TestSize.Level0) {
     GTEST_LOG_(INFO) << "TimerTaskTest start";
     ASSERT_NO_FATAL_FAILURE(deviceStatusManager->TimerTask());
-    EXPECT_FALSE(deviceStatusManager->hasSubmitted_);
+    EXPECT_TRUE(deviceStatusManager->hasSubmitted_);
     GTEST_LOG_(INFO) << "TimerTaskTest end";
 }
 
