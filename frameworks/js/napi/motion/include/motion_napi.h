@@ -77,6 +77,9 @@ public:
     void PostMotionEvent(const MotionEvent &event);
     bool ScheduleOperatingHandOnceDelayed(napi_ref handlerRef, int32_t status, uint32_t delayMs);
     void InvokeOperatingHandOnce(napi_ref handlerRef, int32_t status);
+    void InvokeMotionOnce(napi_ref handlerRef, int32_t type, int32_t status, int32_t logicalData);
+    bool ScheduleMotionOnceDelayed(napi_ref handlerRef, int32_t type, int32_t status, int32_t logicalData,
+        uint32_t delayMs);
 #endif
 
 private:
@@ -99,9 +102,10 @@ private:
     static bool ValidateArgsType(napi_env env, napi_value *args, size_t argc,
         const std::vector<std::string> &expectedTypes);
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
-    static bool SubscribeMotionCommon(const napi_env &env, napi_value *args, const napi_value &jsThis, int32_t type);
-    static napi_value UnSubscribeMotionCommon(const napi_env &env, napi_value *args, size_t argc, int32_t type,
-        const std::string &typeStr);
+    static napi_value SubscribeNamedMotion(napi_env env, napi_callback_info info, int32_t type);
+    static void TryNotifyNamedInitialValue(napi_env env, int32_t type, napi_value handler,
+        const std::shared_ptr<MotionNapi> &motion);
+    static napi_value UnSubscribeNamedMotion(napi_env env, napi_callback_info info, int32_t type);
     static void SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
     static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
 
