@@ -396,7 +396,7 @@ bool UnderageModelNapi::SubscribeWithDeviceInfo(napi_env env, uint32_t featureId
     const std::vector<DeviceInfo>& deviceInfoList)
 {
     if (!g_underageModelObj->CheckEvents(featureId)) {
-        FI_HILOGI("%{public}d has subscribe", featureId);
+        FI_HILOGI("%{public}d has subscribed", featureId);
         return true;
     }
     if (g_underageModelObj->g_subscribeWithdeviceInfoFunc == nullptr) {
