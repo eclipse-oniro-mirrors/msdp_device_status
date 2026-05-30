@@ -144,7 +144,7 @@ bool UnderageModelNapi::SubscribeCallback(napi_env env, uint32_t type)
     auto iter = g_underageModelObj->callbacks_.find(type);
     if (iter == g_underageModelObj->callbacks_.end()) {
         FI_HILOGD("Find no callback, to create");
-        if (g_underageModelObj->g_registerListenerregisterListenerFunc == nullptr) {
+        if (g_underageModelObj->g_registerListenerFunc == nullptr) {
             g_underageModelObj->g_registerListenerFunc = reinterpret_cast<RegisterListenerFunc>(
                 dlsym(g_underageModelObj->g_userStatusHandle, REGISTER_LISTENER_FUNC_NAME.data()));
             if (g_underageModelObj->g_registerListenerFunc == nullptr) {
