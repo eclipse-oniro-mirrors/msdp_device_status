@@ -144,7 +144,7 @@ bool UnderageModelNapi::SubscribeCallback(napi_env env, uint32_t type)
     auto iter = g_underageModelObj->callbacks_.find(type);
     if (iter == g_underageModelObj->callbacks_.end()) {
         FI_HILOGD("Find no callback, to create");
-        if (g_underageModelObj->g_registerListenerFunc == nullptr) {
+        if (g_underageModelObj->g_registerListenerregisterListenerFunc == nullptr) {
             g_underageModelObj->g_registerListenerFunc = reinterpret_cast<RegisterListenerFunc>(
                 dlsym(g_underageModelObj->g_userStatusHandle, REGISTER_LISTENER_FUNC_NAME.data()));
             if (g_underageModelObj->g_registerListenerFunc == nullptr) {
@@ -156,8 +156,8 @@ bool UnderageModelNapi::SubscribeCallback(napi_env env, uint32_t type)
         auto listener = std::make_shared<UnderageModelListener>(env);
         int32_t ret = std::abs(g_underageModelObj->g_registerListenerFunc(type, listener));
         if (ret < MAX_ERROR_CODE) {
-            FI_HILOGE("RegisterListener failed, ret:%{public}d", ret);
-            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "RegisterListener failed");
+            FI_HILOGE("SubscribeCallback failed, ret:%{public}d", ret);
+            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "SubscribeCallback failed");
             return false;
         }
         if (!Subscribe(env, type)) {
@@ -395,6 +395,10 @@ bool UnderageModelNapi::InitializeCallback(napi_env env, uint32_t featureId)
 bool UnderageModelNapi::SubscribeWithDeviceInfo(napi_env env, uint32_t featureId,
     const std::vector<DeviceInfo>& deviceInfoList)
 {
+    if (!g_underageModelObj->CheckEvents(featureId)) {
+        FI_HILOGI("%{public}d has subscribe", featureId);
+        return true;
+    }
     if (g_underageModelObj->g_subscribeWithdeviceInfoFunc == nullptr) {
         g_underageModelObj->g_subscribeWithdeviceInfoFunc = reinterpret_cast<SubscribeWithdeviceInfoFunc>(
             dlsym(g_underageModelObj->g_userStatusHandle, SUBSCRIBE_WITH_DEVICEINFO_FUNC_NAME.data()));
