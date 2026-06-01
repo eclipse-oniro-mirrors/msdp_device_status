@@ -107,7 +107,6 @@ int32_t IntentionClient::LoadDeviceStatusService()
 
 int32_t IntentionClient::DealAfterServiceAlive(const sptr<IRemoteObject>& remoteObject)
 {
-    
     sptr<DeathRecipient> deathRecipient = sptr<DeathRecipient>::MakeSptr(shared_from_this());
     if (deathRecipient == nullptr) {
         FI_HILOGE("deathRecipient is nullptr");
