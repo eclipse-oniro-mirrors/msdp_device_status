@@ -1021,7 +1021,6 @@ void DragManager::InPullThrow(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         dragDrawing_.StopVSyncStation();
         mouseDragMonitorDisplayX_ = -1;
         mouseDragMonitorDisplayY_ = -1;
-        mouseDragMonitorDisplayId_ = -1;
         OnDragCancel(pointerEvent);
         throwState_ = ThrowState::NOT_THROW;
     } else {
