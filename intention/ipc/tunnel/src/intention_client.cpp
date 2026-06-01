@@ -37,9 +37,9 @@ constexpr int32_t RET_NO_SUPPORT = 801;
 };
 std::shared_ptr<IntentionClient> IntentionClient::instance_ = std::make_shared<IntentionClient>();
 
-IntentionClient *IntentionClient::GetInstance()
+std::shared_ptr<IntentionClient> IntentionClient::GetInstance()
 {
-    return instance_.get();
+    return instance_;
 }
 
 // LCOV_EXCL_START
@@ -107,19 +107,22 @@ int32_t IntentionClient::LoadDeviceStatusService()
 
 int32_t IntentionClient::DealAfterServiceAlive(const sptr<IRemoteObject>& remoteObject)
 {
-    deathRecipient_ = sptr<DeathRecipient>::MakeSptr(shared_from_this());
-    CHKPR(deathRecipient_, ERR_NO_MEMORY);
+    sptr<DeathRecipient> deathRecipient = sptr<DeathRecipient>::MakeSptr(shared_from_this());
+    if (deathRecipient == nullptr) {
+        FI_HILOGE("deathRecipient is nullptr");
+        return ERR_NO_MEMORY;
+    }
 
     if (remoteObject->IsProxyObject()) {
-        if (!remoteObject->AddDeathRecipient(deathRecipient_)) {
+        if (!remoteObject->AddDeathRecipient(deathRecipient)) {
             FI_HILOGE("Add death recipient to DeviceStatus service failed");
-            deathRecipient_ = nullptr;
             return E_DEVICESTATUS_ADD_DEATH_RECIPIENT_FAILED;
         }
     }
 
     {
         std::lock_guard lock(mutex_);
+        deathRecipient_ = deathRecipient;
         devicestatusProxy_ = iface_cast<IIntention>(remoteObject);
     }
     FI_HILOGI("Connecting IntentionService success");

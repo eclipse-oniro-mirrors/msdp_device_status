@@ -34,7 +34,7 @@ public:
     IntentionClient() = default;
     ~IntentionClient();
     DISALLOW_COPY_AND_MOVE(IntentionClient);
-    static IntentionClient *GetInstance();
+    static std::shared_ptr<IntentionClient> GetInstance();
     // Socket
     ErrCode Socket(const std::string& programName, int32_t moduleType, int& socketFd, int32_t& tokenType);
 
