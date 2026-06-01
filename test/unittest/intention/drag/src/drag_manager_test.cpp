@@ -2964,6 +2964,71 @@ HWTEST_F(DragManagerTest, DragManagerTest132, TestSize.Level0)
     g_dragMgr.dragState_ = DragState::STOP;
 }
 #endif // OHOS_BUILD_ENABLE_ANCO
+
+/**
+ * @tc.name: DragManagerTest133
+ * @tc.desc: Test OnStartDrag with mouse monitor state and different displayId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest133, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    constexpr int32_t NEW_DISPLAY_ID { 1 };
+    constexpr int32_t VALID_COORD { 100 };
+    g_dragMgr.mouseDragMonitorState_ = true;
+    g_dragMgr.existMouseMoveDragCallback_ = true;
+    g_dragMgr.mouseDragMonitorDisplayX_ = VALID_COORD;
+    g_dragMgr.mouseDragMonitorDisplayY_ = VALID_COORD;
+    g_dragMgr.mouseDragMonitorDisplayId_ = NEW_DISPLAY_ID;
+    g_dragMgr.dragState_ = DragState::STOP;
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+    g_dragMgr.mouseDragMonitorState_ = false;
+    g_dragMgr.existMouseMoveDragCallback_ = false;
+    g_dragMgr.mouseDragMonitorDisplayX_ = -1;
+    g_dragMgr.mouseDragMonitorDisplayY_ = -1;
+    g_dragMgr.mouseDragMonitorDisplayId_ = -1;
+}
+
+/**
+ * @tc.name: DragManagerTest134
+ * @tc.desc: Test OnStartDrag with mouse monitor state and same displayId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest134, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    constexpr int32_t VALID_COORD { 100 };
+    g_dragMgr.mouseDragMonitorState_ = true;
+    g_dragMgr.existMouseMoveDragCallback_ = true;
+    g_dragMgr.mouseDragMonitorDisplayX_ = VALID_COORD;
+    g_dragMgr.mouseDragMonitorDisplayY_ = VALID_COORD;
+    g_dragMgr.mouseDragMonitorDisplayId_ = DISPLAY_ID;
+    g_dragMgr.dragState_ = DragState::STOP;
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+    g_dragMgr.mouseDragMonitorState_ = false;
+    g_dragMgr.existMouseMoveDragCallback_ = false;
+    g_dragMgr.mouseDragMonitorDisplayX_ = -1;
+    g_dragMgr.mouseDragMonitorDisplayY_ = -1;
+    g_dragMgr.mouseDragMonitorDisplayId_ = -1;
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
