@@ -246,6 +246,10 @@ int32_t JsonParser::ParseInt32Array(const cJSON *json, const std::string &key, s
     value.clear();
     for (int32_t i = 0; i < std::min(maxSize, arraySize); i++) {
         cJSON* arrayItem = cJSON_GetArrayItem(jsonNode, i);
+        if (arrayItem == nullptr) {
+            FI_HILOGE("arrayItem is nullptr");
+            continue;
+        }
         if (!cJSON_IsNumber(arrayItem)) {
             FI_HILOGE("The arrayItem is not number");
             return RET_ERR;
