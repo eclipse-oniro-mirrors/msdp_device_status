@@ -50,8 +50,6 @@ public:
         int32_t maxSize);
     static int32_t ParseFloatArray(const cJSON *json, const std::string &key, std::vector<float> &value,
         int32_t maxSize);
-    static int32_t ParseInt32Array(const cJSON *json, const std::string &key, std::vector<int32_t> &value,
-        int32_t maxSize);
 };
 } // namespace DeviceStatus
 } // namespace Msdp

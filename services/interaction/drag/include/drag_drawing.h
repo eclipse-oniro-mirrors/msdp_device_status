@@ -189,8 +189,10 @@ struct ExtraInfo {
 };
 
 struct LightIntensity {
-    float lightLeftTop { 0.0f };
-    float lightRightBottom { 0.0f };
+    float lightLeft = 0.0f;
+    float lightRight = 0.0f;
+    float lightTop = 0.0f;
+    float lightBottom = 0.0f;
 };
 
 enum class ScreenSizeType {
@@ -467,14 +469,10 @@ private:
     void DrawContentLight();
     void DoFollowHandAnimation(const float &displayX, const float &displayY);
     void CalculateLightIntensity(float degreeX, float degreeY, LightIntensity &lightIntensity);
-    bool ParseDropArea(JsonParser &jsonParser);
-    void ResetDragAnimationParameter();
 
 private:
     float currentDisplayX_ { 0.0f };
     float currentDisplayY_ { 0.0f };
-    float currentDegreeX_ { 0.0f };
-    float currentDegreeY_ { 0.0f };
     std::atomic_bool dragWindowVisible_ { false };
     float rotationDegreeX_ { 0.0f };
     float rotationDegreeY_ { 0.0f };
@@ -531,9 +529,10 @@ private:
     std::vector<float> dropAnimationCurve_;
     std::vector<float> dropPosition_;
     std::vector<float> dropSize_;
-    std::vector<int32_t> dropArea_;
-    std::shared_ptr<Rosen::RSNGContentLightFilter> lightFilterLeftTop_ { nullptr };
-    std::shared_ptr<Rosen::RSNGContentLightFilter> lightFilterRightBottom_ { nullptr };
+    std::shared_ptr<Rosen::RSNGContentLightFilter> lightFilterLeft_ { nullptr };
+    std::shared_ptr<Rosen::RSNGContentLightFilter> lightFilterRight_ { nullptr };
+    std::shared_ptr<Rosen::RSNGContentLightFilter> lightFilterTop_ { nullptr };
+    std::shared_ptr<Rosen::RSNGContentLightFilter> lightFilterButtom_ { nullptr };
 #ifdef OHOS_ENABLE_PULLTHROW
     bool pullThrowAnimationXCompleted_  { false };
     bool pullThrowAnimationYCompleted_ { false };
