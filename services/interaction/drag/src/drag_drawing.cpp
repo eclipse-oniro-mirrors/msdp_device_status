@@ -2858,7 +2858,7 @@ void DragDrawing::CreateWindow()
             handler_ = nullptr;
             return;
         }
-        rsUIContext->->SetOnRenderProcessDiedCallback([]() {
+        rsUIContext->GetRSRenderInterface()->SetOnRenderProcessDiedCallback([]() {
             g_drawingInfo.isInitUiDirector.store(true);
         });
         g_drawingInfo.isInitUiDirector.store(false);
