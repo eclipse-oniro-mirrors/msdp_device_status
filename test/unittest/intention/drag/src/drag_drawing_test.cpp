@@ -1531,6 +1531,27 @@ HWTEST_F(DragDrawingTest, DragDrawingTest64, TestSize.Level0)
     ret = g_dragMgr.dragDrawing_.ParseDropArea(jsonParser);
     EXPECT_TRUE(!ret);
 }
+
+/**
+* @tc.name: DragDrawingTest65
+* @tc.desc: Test CreateWindow with isInitUiDirector = false, rsUiDirector_ = nullptr
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest65, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.rsUiDirector_ = nullptr;
+
+    g_dragMgr.dragDrawing_.CreateWindow();
+
+    g_dragMgr.dragDrawing_.rsUiDirector_ = nullptr;
+
+    g_dragMgr.dragDrawing_.CreateWindow();
+
+    EXPECT_FALSE(g_dragMgr.dragDrawing_.rsUiDirector_ == nullptr);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -2838,8 +2838,8 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
 
 void DragDrawing::CreateWindow()
 {
-    if (g_drawingInfo.isInitUiDirector || rsUiDirector_ == nullptr) {
-        g_drawingInfo.isInitUiDirector = false;
+    bool isInitUiDirector = g_drawingInfo.isInitUiDirector.load();
+    if (isInitUiDirector || rsUiDirector_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
         auto connectToRenderObj = Rosen::RSInterfaces::GetInstance().GetConnectToRenderToken(screenId_);
@@ -2852,6 +2852,16 @@ void DragDrawing::CreateWindow()
             CHKPV(this->handler_);
             this->handler_->PostTask(task);
             }, -1, true);
+        auto rsUIContext = rsUiDirector_->GetRSUIContext();
+        if (rsUIContext == nullptr || rsUIContext->GetRSRenderInterface() == nullptr) {
+            FI_HILOGE("CreateWindow isInitUiDirector rsUIContext or GetRSRenderInterface is nullptr");
+            handler_ = nullptr;
+            return;
+        }
+        renderInterface->SetOnRenderProcessDiedCallback([]() {
+            g_drawingInfo.isInitUiDirector.store(true);
+        });
+        g_drawingInfo.isInitUiDirector.store(false);
     }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     FI_HILOGI("Parameter screen number:%{public}llu", static_cast<unsigned long long>(screenId_));
