@@ -131,6 +131,7 @@ bool AniUnderageModelEvent::IsEmptyEvents()
 bool AniUnderageModelEvent::CheckEvents(int32_t eventType)
 {
     FI_HILOGI("Enter");
+
     std::lock_guard<std::mutex> lock(mutex_);
     auto typeIter = events_.find(eventType);
     if (typeIter == events_.end()) {
@@ -204,39 +205,41 @@ bool AniUnderageModelEvent::Subscribe(uint32_t type)
 
 bool AniUnderageModelEvent::UnSubscribeCallback(int32_t type)
 {
-    if (CheckEvents(type)) {
-        auto iter = callbacks_.find(type);
-        if (type == UNDERAGE_MODEL_TYPE_KID && iter == callbacks_.end()) {
-            FI_HILOGE("faild to find callback");
-            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
-            return false;
-        }
-        if (g_unsubscribeFunc == nullptr) {
-            g_unsubscribeFunc = reinterpret_cast<UnsubscribeFunc>(
-                dlsym(g_userStatusHandle, UNSUBSCRIBE_FUNC_NAME.data()));
-            if (g_unsubscribeFunc == nullptr) {
-                FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
-                taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Find symbol failed");
-                return false;
-            }
-        }
-        auto ret = g_unsubscribeFunc(type);
-        if (ret == RET_OK) {
-            if (type == UNDERAGE_MODEL_TYPE_KID) {
-                callbacks_.erase(iter);
-            }
-            return true;
-        } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
-            FI_HILOGE("failed to unsubscribe");
-            taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
-            return false;
-        } else if (ret == NOT_SYSTEM_ERR) {
-            FI_HILOGE("Not system app, ret:%{public}d", ret);
-            taihe::set_business_error(NO_SYSTEM_API, "Not system app");
-            return false;
-        }
-        FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
+    if (!CheckEvents(type)) { // 还有其他type及callback存在，不能去订阅
+        return true;
     }
+    // type不存在或type对应的callback为空，则去订阅能力
+    auto iter = callbacks_.find(type);
+    if (type == UNDERAGE_MODEL_TYPE_KID && iter == callbacks_.end()) {
+        FI_HILOGE("faild to find callback");
+        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+        return false;
+    }
+    if (g_unsubscribeFunc == nullptr) {
+        g_unsubscribeFunc = reinterpret_cast<UnsubscribeFunc>(
+            dlsym(g_userStatusHandle, UNSUBSCRIBE_FUNC_NAME.data()));
+        if (g_unsubscribeFunc == nullptr) {
+            FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
+            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Find symbol failed");
+            return false;
+        }
+    }
+    auto ret = g_unsubscribeFunc(type);
+    if (ret == RET_OK) {
+        if (type == UNDERAGE_MODEL_TYPE_KID) {
+            callbacks_.erase(iter);
+        }
+        return true;
+    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
+        FI_HILOGE("failed to unsubscribe");
+        taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
+        return false;
+    } else if (ret == NOT_SYSTEM_ERR) {
+        FI_HILOGE("Not system app, ret:%{public}d", ret);
+        taihe::set_business_error(NO_SYSTEM_API, "Not system app");
+        return false;
+    }
+    FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
     return false;
 }
 
@@ -759,6 +762,10 @@ bool AniUnderageModelEvent::SubscribeUserStatus(
     int32_t featureId, std::vector<UserStatusAwareness::DeviceInfo> deviceInfoList)
 {
     FI_HILOGI("SubscribeUserStatus enter, feature: %{public}u", featureId);
+    if (!CheckEvents(featureId)) {
+        FI_HILOGI("%{public}d has subscribed", featureId);
+        return true;
+    }
     if (g_userStatusHandle == nullptr && !LoadLibrary()) {
         FI_HILOGE("LoadLibrary failed");
         taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
@@ -850,7 +857,7 @@ int32_t AniUnderageModelEvent::ConfigParams(uint32_t feature, std::string& confi
     std::map<std::string, std::vector<int32_t>> details;
     if (!ParseConfigParams(configParams, details)) {
         FI_HILOGE("ParseConfigParams failed");
-        taihe::set_business_error(PARAM_EXCEPTION, "find symbol failed");
+        taihe::set_business_error(PARAM_EXCEPTION, "Parse config params failed");
         return PARAM_EXCEPTION;
     }
     int32_t ret = g_configParamsFunc(feature, details);

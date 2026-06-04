@@ -147,6 +147,7 @@ int32_t Configure(UserStatusFeature featureId, taihe::string_view detail)
 {
     FI_HILOGI("Configure enter");
     if (detail.empty()) {
+        taihe::set_business_error(PARAM_EXCEPTION, "Parse config params failed");
         return ANI_ERROR;
     }
     g_underageModelObj = AniUnderageModelEvent::GetInstance();
@@ -164,6 +165,7 @@ taihe::array<UserStatusAtomicCap> QueryCapabilities(taihe::array_view<UserStatus
     FI_HILOGI("QueryCapabilities enter");
     if (capabilities.empty()) {
         FI_HILOGE("capabilities is empty");
+        taihe::set_business_error(PARAM_EXCEPTION, "Parse capabilities params failed");
         return {};
     }
     std::vector<std::int32_t> caps;
