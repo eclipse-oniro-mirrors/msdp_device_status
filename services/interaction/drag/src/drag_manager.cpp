@@ -589,6 +589,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     lastEventId_ = -1;
     mouseDragMonitorDisplayX_ = -1;
     mouseDragMonitorDisplayY_ = -1;
+    mouseDragMonitorDisplayId_ = -1;
     mouseDragMonitorState_ = false;
     existMouseMoveDragCallback_ = false;
     needLongPressDragAnimation_ = true;
@@ -1094,6 +1095,7 @@ void DragManager::DragUpCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent
     dragDrawing_.StopVSyncStation();
     mouseDragMonitorDisplayX_ = -1;
     mouseDragMonitorDisplayY_ = -1;
+    mouseDragMonitorDisplayId_ = -1;
     CHKPV(context_);
     int32_t ret = context_->GetDelegateTasks().PostAsyncTask([this, pointerEvent] {
         return this->OnDragUp(pointerEvent);
@@ -1124,11 +1126,13 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
         mouseDragMonitorDisplayX_ = pointerItem.GetDisplayX();
         mouseDragMonitorDisplayY_ = pointerItem.GetDisplayY();
+        mouseDragMonitorDisplayId_ = pointerEvent->GetTargetDisplayId();
         existMouseMoveDragCallback_ = true;
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         mouseDragMonitorDisplayX_ = -1;
         mouseDragMonitorDisplayY_ = -1;
+        mouseDragMonitorDisplayId_ = -1;
         OnDragMove(pointerEvent);
         return;
     }
@@ -1747,9 +1751,12 @@ int32_t DragManager::OnStartDrag()
         dragDrawing_.Draw(dragData.displayId, dragData.displayX, dragData.displayY, isNeedAdjustDisplayXY,
             isMultiSelectedAnimation);
     } else if (mouseDragMonitorState_ && existMouseMoveDragCallback_ && (mouseDragMonitorDisplayX_ != -1)
-        && (mouseDragMonitorDisplayY_ != -1)) {
-        dragDrawing_.Draw(dragData.displayId, mouseDragMonitorDisplayX_, mouseDragMonitorDisplayY_,
+        && (mouseDragMonitorDisplayY_ != -1) && (mouseDragMonitorDisplayId_ != -1)) {
+        dragDrawing_.Draw(mouseDragMonitorDisplayId_, mouseDragMonitorDisplayX_, mouseDragMonitorDisplayY_,
             isNeedAdjustDisplayXY, isMultiSelectedAnimation);
+        if (lastDisplayId_ != mouseDragMonitorDisplayId_) {
+            dragDrawing_.UpdateDragWindowDisplay(mouseDragMonitorDisplayId_);
+        }
     }
     FI_HILOGI("Start drag, appened extra data");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -2739,6 +2746,7 @@ void DragManager::ResetMouseDragMonitorInfo()
     RemoveDragEventHandler();
     mouseDragMonitorDisplayX_ = -1;
     mouseDragMonitorDisplayY_ = -1;
+    mouseDragMonitorDisplayId_ = -1;
     existMouseMoveDragCallback_ = false;
     mouseDragMonitorState_ = false;
     DRAG_DATA_MGR.SetEventId(-1);
