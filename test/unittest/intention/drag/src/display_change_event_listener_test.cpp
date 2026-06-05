@@ -41,34 +41,6 @@ void DisplayChangeEventListenerTest::TearDown()
 }
 
 /**
- * @tc.name: DisplayChangeEventListenerTest_GetDisplayInfoById_001
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC GetDisplayInfoById
- * @tc.require:
- */
-HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_GetDisplayInfoById_001, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    ASSERT_NE(displayListener_, nullptr);
-    auto displayInfo = displayListener_->GetDisplayInfoById(0);
-    EXPECT_NE(displayInfo, nullptr);
-}
-
-/**
- * @tc.name: DisplayChangeEventListenerTest_GetDisplayInfoById_002
- * @tc.desc: Drag Drawing
- * @tc.type: FUNC GetDisplayInfoById
- * @tc.require:
- */
-HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_GetDisplayInfoById_002, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    ASSERT_NE(displayListener_, nullptr);
-    auto displayInfo = displayListener_->GetDisplayInfoById(-1);
-    EXPECT_EQ(displayInfo, nullptr);
-}
-
-/**
  * @tc.name: DisplayChangeEventListenerTest_GetDisplayInfo_001
  * @tc.desc: Drag Drawing
  * @tc.type: FUNC GetDisplayInfo

@@ -81,11 +81,7 @@ void PointerEventMonitor::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointe
 
 VirtualTouchScreenBuilder::VirtualTouchScreenBuilder() : VirtualDeviceBuilder(GetDeviceName(), BUS_USB, 0x6006, 0x6006)
 {
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
     sptr<Rosen::DisplayInfo> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
     CHKPV(display);
     g_absMaxWidth = display->GetWidth();
     g_absMaxHeight = display->GetHeight();

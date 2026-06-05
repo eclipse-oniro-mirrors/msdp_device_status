@@ -302,12 +302,8 @@ void Context::AdjustPointerPos(DSoftbusCooperateOptions& dSoftbusCooperateOption
     auto& displayY = dSoftbusCooperateOptions.cooperateOptions.displayY;
     FI_HILOGI("Start cooperate finish,displayX:%{private}d,displayY:%{private}d,displayId:%{public}d",
         displayX, displayY, displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-    auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-#else
     sptr<Rosen::DisplayInfo> display =
         Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGE("No default display");
         return;

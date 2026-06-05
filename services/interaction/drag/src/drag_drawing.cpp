@@ -105,9 +105,8 @@ constexpr float END_SCALE_FAIL { 1.2f };
 constexpr float END_SCALE_SUCCESS { 0.0f };
 #ifndef OHOS_BUILD_PC_PRODUCT
 constexpr float DEFAULT_PIVOT { 0.0f };
-#else
-constexpr int32_t DOT_PER_INCH { 160 };
 #endif // OHOS_BUILD_PC_PRODUCT
+constexpr int32_t DOT_PER_INCH { 160 };
 constexpr float HALF_PIVOT { 0.5f };
 constexpr float START_STYLE_SCALE { 1.0f };
 constexpr float STYLE_CHANGE_SCALE { 1.1f };
@@ -294,18 +293,6 @@ float GetScaling()
         return g_drawingInfo.scalingValue;
     }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-    if (display == nullptr) {
-        FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-        if (display == nullptr) {
-            FI_HILOGE("Get display info failed, display is nullptr");
-            return DEFAULT_SCALING;
-        }
-    }
-    int32_t deviceDpi = display->GetDpi();
-#else
     sptr<Rosen::DisplayInfo> displayInfo =
         Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
     if (displayInfo == nullptr) {
@@ -317,7 +304,6 @@ float GetScaling()
         }
     }
     int32_t deviceDpi = displayInfo->GetVirtualPixelRatio() * DOT_PER_INCH;
-#endif // OHOS_BUILD_PC_PRODUCT
 #else
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
     if (display == nullptr) {
@@ -1497,10 +1483,11 @@ void DragDrawing::GetDragDrawingInfo(DragInternalInfo &dragInternalInfo)
     dragInternalInfo.rotation = GetRotation(g_drawingInfo.displayId);
     dragInternalInfo.handler = handler_;
  
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
+    sptr<Rosen::DisplayInfo> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(
+        g_drawingInfo.displayId);
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
+        display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
         if (display == nullptr) {
             FI_HILOGE("Get default display info failed");
             dragInternalInfo.displayWidth = 0;
@@ -2863,19 +2850,11 @@ void DragDrawing::CreateWindow()
         Rosen::RSSurfaceNode::Create(surfaceNodeConfig, surfaceNodeType, true, false, rsUiDirector_->GetRSUIContext());
     CHKPV(g_drawingInfo.surfaceNode);
     g_drawingInfo.surfaceNode->SetSkipCheckInMultiInstance(true);
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
     sptr<Rosen::DisplayInfo> display =
         Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
         display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
         if (display == nullptr) {
             FI_HILOGE("Get display info failed, display is nullptr");
             return;
@@ -2884,20 +2863,10 @@ void DragDrawing::CreateWindow()
     uint64_t rsScreenId = screenId_;
     displayWidth_ = display->GetWidth();
     displayHeight_ = display->GetHeight();
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Screen> screen = Rosen::ScreenManager::GetInstance().GetScreenById(screenId_);
-    if ((screen != nullptr) && (!screen->IsReal())) {
-        if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {
-            FI_HILOGE("ConvertScreenIdToRsScreenId failed");
-            return;
-        }
-    }
-#else
     if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {
         FI_HILOGE("ConvertScreenIdToRsScreenId failed");
         return;
     }
-#endif // OHOS_BUILD_PC_PRODUCT
     screenId_ = rsScreenId;
     FI_HILOGI("Parameter rsScreen number:%{public}llu", static_cast<unsigned long long>(rsScreenId));
     int32_t surfaceNodeSize = std::max(displayWidth_, displayHeight_);
@@ -4355,20 +4324,12 @@ void DragDrawing::RotateDisplayXY(int32_t &displayX, int32_t &displayY)
 {
 Rosen::Rotation rotation = GetRotation(g_drawingInfo.displayId);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
     sptr<Rosen::DisplayInfo> display =
         Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
         rotation = GetRotation(0);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
         display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
         CHKPV(display);
     }
     int32_t width = display->GetWidth();
@@ -4622,19 +4583,11 @@ int32_t DragDrawing::DoRotateDragWindow(float rotation,
 {
     FI_HILOGI("Rotation:%{public}f, isAnimated:%{public}d", rotation, isAnimated);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
     sptr<Rosen::DisplayInfo> display =
         Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
         display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
         CHKPR(display, RET_ERR);
     }
     displayWidth_ = display->GetWidth();
@@ -4728,19 +4681,11 @@ void DragDrawing::ScreenRotateAdjustDisplayXY(
 {
     FI_HILOGI("enter");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
     sptr<Rosen::DisplayInfo> display =
         Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
         display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
         CHKPV(display);
     }
     displayWidth_ = display->GetWidth();
@@ -5327,19 +5272,11 @@ void DrawDragStopModifier::SetStyleAlpha(float alpha)
 float DragDrawing::CalculateWidthScale()
 {
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(g_drawingInfo.displayId);
-#else
     sptr<Rosen::DisplayInfo> display =
         Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(g_drawingInfo.displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", g_drawingInfo.displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
         display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
         if (display == nullptr) {
             FI_HILOGE("Get display info failed, display is nullptr");
             return DEFAULT_SCALING;
@@ -5546,18 +5483,10 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     CHKPV(g_drawingInfo.rootNode);
     CHKPV(g_drawingInfo.surfaceNode);
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-#else
     sptr<Rosen::DisplayInfo> display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
     if (display == nullptr) {
         FI_HILOGD("Get display info failed, display:%{public}d", displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
         display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
         CHKPV(display);
     }
     screenId_ = display->GetScreenId();
@@ -5565,14 +5494,12 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     Rosen::Rotation currentRotation = GetRotation(displayId);
     FI_HILOGI("displayId:%{public}d, rotation:%{public}d",
         static_cast<int32_t>(displayId), static_cast<int32_t>(currentRotation));
-#ifdef OHOS_BUILD_PC_PRODUCT
     uint64_t rsScreenId = screenId_;
     if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId_, rsScreenId)) {
         FI_HILOGE("ConvertScreenIdToRsScreenId failed");
         return;
     }
     screenId_ = rsScreenId;
-#endif // OHOS_BUILD_PC_PRODUCT
     if (RotateDragWindow(currentRotation) != RET_OK) {
         FI_HILOGE("RotateDragWindow failed");
         return;

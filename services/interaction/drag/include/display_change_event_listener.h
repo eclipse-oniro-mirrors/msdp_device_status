@@ -44,7 +44,6 @@ private:
     void ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation);
     Rosen::Rotation GetRotation(Rosen::DisplayId displayId);
     bool IsRotation(Rosen::DisplayId displayId, Rosen::Rotation CurrentRotation);
-    sptr<Rosen::DisplayInfo> GetDisplayInfoById(Rosen::DisplayId displayId);
     sptr<Rosen::DisplayInfo> GetDisplayInfo(Rosen::DisplayId displayId);
     void HandleScreenRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation);
     void ProcessDisplayEvent(Rosen::DisplayId displayId);
