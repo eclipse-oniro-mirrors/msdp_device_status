@@ -197,7 +197,7 @@ napi_value JsCoordinationContext::ActivateCooperateWithOptions(napi_env env, nap
     napi_value argv[3] = { nullptr };
     CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
 
-    if (argc > MAX_ARGC) {
+    if (argc < ARGV_TWO) {
         THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
         return nullptr;
     }
