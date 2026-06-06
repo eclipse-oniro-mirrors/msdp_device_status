@@ -210,7 +210,7 @@ struct DrawingInfo {
     std::atomic_bool isRunning { false };
     std::atomic_bool isPreviousDefaultStyle { false };
     std::atomic_bool isCurrentDefaultStyle { false };
-    bool isInitUiDirector { true };
+    std::atomic_bool isInitUiDirector { true };
     bool isExistScalingValue { false };
     std::atomic_bool needDestroyDragWindow { false };
     int32_t sourceType { -1 };
