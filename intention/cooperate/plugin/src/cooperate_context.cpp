@@ -380,6 +380,8 @@ void Context::OnStopCooperate()
 
 void Context::OnTransitionOut()
 {
+    StoreOriginPointerSpeed();
+    StoreOriginTouchPadSpeed();
     CHKPV(eventHandler_);
     FI_HILOGI("Notify observers of transition out");
     CooperateInfo cooperateInfo = { NormalizedCursorPosition(), cooperateOptions_ };
@@ -588,7 +590,7 @@ int32_t Context::GetPointerSpeed()
     int32_t speed { -1 };
     CHKPR(env_, RET_ERR);
     env_->GetInput().GetPointerSpeed(speed);
-    FI_HILOGI("Current pointer speed:%{public}d", speed);
+    FI_HILOGI("GetPointerSpeed current pointer speed:%{public}d", speed);
     return speed;
 }
 
@@ -596,7 +598,7 @@ void Context::SetPointerSpeed(int32_t speed)
 {
     CHKPV(env_);
     env_->GetInput().SetPointerSpeed(speed);
-    FI_HILOGI("Current pointer speed:%{public}d", speed);
+    FI_HILOGI("SetPointerSpeed current pointer speed:%{public}d", speed);
 }
 
 int32_t Context::GetTouchPadSpeed()
@@ -604,7 +606,7 @@ int32_t Context::GetTouchPadSpeed()
     int32_t speed { -1 };
     CHKPR(env_, RET_ERR);
     env_->GetInput().GetTouchPadSpeed(speed);
-    FI_HILOGI("Current touchPad speed:%{public}d", speed);
+    FI_HILOGI("GetTouchPadSpeed current touchPad speed:%{public}d", speed);
     return speed;
 }
 
@@ -616,7 +618,7 @@ void Context::SetTouchPadSpeed(int32_t speed)
     }
     CHKPV(env_);
     env_->GetInput().SetTouchPadSpeed(speed);
-    FI_HILOGI("Current touchPad speed:%{public}d", speed);
+    FI_HILOGI("SetTouchPadSpeed current touchPad speed:%{public}d", speed);
 }
 
 void Context::ResetCursorPosition()
