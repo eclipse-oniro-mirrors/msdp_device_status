@@ -18,6 +18,7 @@
 
 #include <chrono>
 #include <functional>
+#include <set>
 #include <string>
 
 #include "napi/native_api.h"
@@ -31,23 +32,21 @@
 namespace OHOS {
 namespace Msdp {
 namespace UserStatusAwareness {
-constexpr uint32_t FEATURE_UNKNOWN = 0;
 constexpr uint32_t FEATURE_USER_PLAY_ABILITY_FATIGUE = 5;
 constexpr uint32_t FEATURE_ANTI_MISTOUCH = 6;
 constexpr uint32_t FEATURE_USER_GESTURE = 7;
 constexpr uint32_t FEATURE_USER_FACE = 8;
 constexpr uint32_t FEATURE_USER_PLAYING = 9;
-constexpr uint32_t FEATURE_USER_PREFERENCE_APP = 10;
 constexpr uint32_t FEATURE_USER_FACE_ANGLE = 11;
 constexpr uint32_t FEATURE_USER_BLOW = 12;
 constexpr uint32_t FEATURE_USER_MOOD = 13;
-constexpr uint32_t FEATURE_TIME_TUNNEL = 14;
 constexpr uint32_t FEATURE_COMFORT_REMINDER = 15;
-constexpr uint32_t FEATURE_UNDERAGE_MODEL = 16;
 constexpr uint32_t FEATURE_ENV_SOUND = 17;
-constexpr uint32_t FEATURE_RAPIDCAPTURE_ANTI_MISTOUCH = 18;
 constexpr uint32_t FEATURE_LEM_EXT_SCREEN_ANTI_MISTOUCH = 19;
-constexpr uint32_t FEATURE_UNSUPPORTED = 20;
+inline const std::set<uint32_t> SUPPORT_FEATURES  = {
+    FEATURE_USER_PLAY_ABILITY_FATIGUE, FEATURE_ANTI_MISTOUCH, FEATURE_USER_GESTURE, FEATURE_USER_FACE,
+    FEATURE_USER_PLAYING, FEATURE_USER_FACE_ANGLE, FEATURE_USER_BLOW, FEATURE_USER_MOOD, FEATURE_COMFORT_REMINDER,
+    FEATURE_ENV_SOUND, FEATURE_LEM_EXT_SCREEN_ANTI_MISTOUCH };
 
 constexpr int32_t PARAM_ERROR { 401 };
 constexpr int32_t SERVICE_EXCEPTION { 801 };
@@ -107,6 +106,7 @@ public:
     static napi_value CreateNapiError(napi_env env, int32_t errCode, const std::string &errMessage);
     static std::optional<std::string> GetErrMsg(int32_t errorCode);
     static void ThrowErr(napi_env env, int32_t errCode, const std::string &printMsg);
+    static bool IsSupportedFeature(uint32_t feature);
 };
 } // namespace UserStatusAwareness
 } // namespace Msdp

@@ -25,7 +25,6 @@
 #include "napi_constants.h"
 #include "underage_model_napi_error.h"
 #include "util_napi_error.h"
-#include "user_status_napi_util.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DeviceUnderageModelNapi"
@@ -156,8 +155,8 @@ bool UnderageModelNapi::SubscribeCallback(napi_env env, uint32_t type)
         auto listener = std::make_shared<UnderageModelListener>(env);
         int32_t ret = std::abs(g_underageModelObj->g_registerListenerFunc(type, listener));
         if (ret < MAX_ERROR_CODE) {
-            FI_HILOGE("RegisterListener failed, ret:%{public}d", ret);
-            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "RegisterListener failed");
+            FI_HILOGE("SubscribeCallback failed, ret:%{public}d", ret);
+            ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "SubscribeCallback failed");
             return false;
         }
         if (!Subscribe(env, type)) {
@@ -174,40 +173,42 @@ bool UnderageModelNapi::UnsubscribeCallback(napi_env env, uint32_t type)
         ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "g_underageModelObj is nullptr");
         return false;
     }
-    if (!g_underageModelObj->CheckEvents(type)) {
-        auto iter = g_underageModelObj->callbacks_.find(type);
-        if (type == UNDERAGE_MODEL_TYPE_KID && iter == g_underageModelObj->callbacks_.end()) {
-            FI_HILOGE("Failed to find callback, %{public}d", type);
-            ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Find type failed");
-            return false;
-        }
-        if (g_underageModelObj->g_unsubscribeFunc == nullptr) {
-            g_underageModelObj->g_unsubscribeFunc = reinterpret_cast<UnsubscribeFunc>(
-                dlsym(g_underageModelObj->g_userStatusHandle, UNSUBSCRIBE_FUNC_NAME.data()));
-            if (g_underageModelObj->g_unsubscribeFunc == nullptr) {
-                FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
-                ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Find symbol failed");
-                return false;
-            }
-        }
-        auto ret = g_underageModelObj->g_unsubscribeFunc(type);
-        if (ret == RET_OK) {
-            if (type == UNDERAGE_MODEL_TYPE_KID) {
-                g_underageModelObj->callbacks_.erase(iter);
-            }
-            return true;
-        } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
-            FI_HILOGE("failed to unsubscribe");
-            ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
-            return false;
-        } else if (ret == NOT_SYSTEM_ERR) {
-            FI_HILOGE("Not system app, ret:%{public}d", ret);
-            ThrowUnderageModelErr(env, PERMISSION_SYSTEM_EXCEPTION, "Not system app");
-            return false;
-        }
-        FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
-        ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
+    if (g_underageModelObj->CheckEvents(type)) { // 还有其他type及callback存在，不能去订阅
+        return true;
     }
+    // type不存在或type对应的callback为空，则去订阅能力
+    auto iter = g_underageModelObj->callbacks_.find(type);
+    if (type == UNDERAGE_MODEL_TYPE_KID && iter == g_underageModelObj->callbacks_.end()) {
+        FI_HILOGE("Failed to find callback, %{public}d", type);
+        ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Find type failed");
+        return false;
+    }
+    if (g_underageModelObj->g_unsubscribeFunc == nullptr) {
+        g_underageModelObj->g_unsubscribeFunc = reinterpret_cast<UnsubscribeFunc>(
+            dlsym(g_underageModelObj->g_userStatusHandle, UNSUBSCRIBE_FUNC_NAME.data()));
+        if (g_underageModelObj->g_unsubscribeFunc == nullptr) {
+            FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
+            ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Find symbol failed");
+            return false;
+        }
+    }
+    auto ret = g_underageModelObj->g_unsubscribeFunc(type);
+    if (ret == RET_OK) {
+        if (type == UNDERAGE_MODEL_TYPE_KID) {
+            g_underageModelObj->callbacks_.erase(iter);
+        }
+        return true;
+    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
+        FI_HILOGE("failed to unsubscribe");
+        ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
+        return false;
+    } else if (ret == NOT_SYSTEM_ERR) {
+        FI_HILOGE("Not system app, ret:%{public}d", ret);
+        ThrowUnderageModelErr(env, PERMISSION_SYSTEM_EXCEPTION, "Not system app");
+        return false;
+    }
+    FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
+    ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
     return false;
 }
 
@@ -345,8 +346,7 @@ bool UnderageModelNapi::ValidateAndGetDeviceInfo(napi_env env, napi_value arg, s
         FI_HILOGE("arg is not Array");
         return false;
     }
-    deviceInfoList = GetDeviceList(env, arg);
-    return true;
+    return GetDeviceList(env, arg, deviceInfoList);
 }
 
 bool UnderageModelNapi::InitializeCallback(napi_env env, uint32_t featureId)
@@ -395,6 +395,10 @@ bool UnderageModelNapi::InitializeCallback(napi_env env, uint32_t featureId)
 bool UnderageModelNapi::SubscribeWithDeviceInfo(napi_env env, uint32_t featureId,
     const std::vector<DeviceInfo>& deviceInfoList)
 {
+    if (g_underageModelObj->CheckEvents(featureId)) {
+        FI_HILOGI("%{public}d has subscribed", featureId);
+        return true;
+    }
     if (g_underageModelObj->g_subscribeWithdeviceInfoFunc == nullptr) {
         g_underageModelObj->g_subscribeWithdeviceInfoFunc = reinterpret_cast<SubscribeWithdeviceInfoFunc>(
             dlsym(g_underageModelObj->g_userStatusHandle, SUBSCRIBE_WITH_DEVICEINFO_FUNC_NAME.data()));
@@ -433,20 +437,21 @@ napi_value UnderageModelNapi::SubscribeUserStatus(napi_env env, napi_callback_in
         ThrowUnderageModelErr(env, PARAM_EXCEPTION, "Wrong number of parameters");
         return nullptr;
     }
-    napi_valuetype featureType = napi_undefined;
-    CHKRP(napi_typeof(env, args[0], &featureType), "napi_typeof fail");
-    if (featureType != napi_number) {
-        ThrowUnderageModelErr(env, PARAM_EXCEPTION, "Wrong type of args[0]");
+    std::array<napi_valuetype, ARG_2> argTypes = { napi_number, napi_function };
+    if (!ValidateArgsType(env, args, ARG_2, argTypes)) {
+        ThrowUnderageModelErr(env, PARAM_EXCEPTION, "validateargstype failed");
         return nullptr;
     }
     uint32_t featureId = 0;
     CHKRP(napi_get_value_uint32(env, args[0], &featureId), "napi_get_value_uint32 fail");
+    if (!UserStatusNapiUtil::IsSupportedFeature(featureId)) {
+        ThrowUnderageModelErr(env, PARAM_EXCEPTION, "featureId is invalid");
+        return nullptr;
+    }
     std::vector<DeviceInfo> deviceInfoList;
-    if (argc == ARG_3) {
-        if (!ValidateAndGetDeviceInfo(env, args[ARG_2], deviceInfoList)) {
-            ThrowUnderageModelErr(env, PARAM_EXCEPTION, "type mismatch for the args[2]");
-            return nullptr;
-        }
+    if (argc == ARG_3 && !ValidateAndGetDeviceInfo(env, args[ARG_2], deviceInfoList)) {
+        ThrowUnderageModelErr(env, PARAM_EXCEPTION, "type mismatch for the args[2]");
+        return nullptr;
     }
     if (!ConstructUnderageModel(env, jsThis)) {
         ThrowUnderageModelErr(env, SUBSCRIBE_EXCEPTION, "Failed to get g_underageModelObj");
@@ -456,15 +461,12 @@ napi_value UnderageModelNapi::SubscribeUserStatus(napi_env env, napi_callback_in
         ThrowUnderageModelErr(env, DEVICE_EXCEPTION, "Device not support");
         return nullptr;
     }
-
     if (!InitializeCallback(env, featureId)) {
         return nullptr;
     }
-
     if (!SubscribeWithDeviceInfo(env, featureId, deviceInfoList)) {
         return nullptr;
     }
-
     if (!g_underageModelObj->AddCallback(featureId, args[1])) {
         ThrowUnderageModelErr(env, SERVICE_EXCEPTION, "AddCallback failed");
         return nullptr;
@@ -483,6 +485,7 @@ napi_value UnderageModelNapi::UnsubscribeUserStatus(napi_env env, napi_callback_
     size_t argc = 2;
     napi_value args[2] = { nullptr };
     napi_value jsThis = nullptr;
+
     CHKRP(napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr), "napi_get_cb_info fail");
     bool validateArgsRes = false;
     if (argc == UNSUBSCRIBE_ONE_PARA) {
@@ -498,6 +501,10 @@ napi_value UnderageModelNapi::UnsubscribeUserStatus(napi_env env, napi_callback_
     }
     uint32_t featureId = 0;
     CHKRP(napi_get_value_uint32(env, args[0], &featureId), "napi_get_value_uint32 fail");
+    if (!UserStatusNapiUtil::IsSupportedFeature(featureId)) {
+        ThrowUnderageModelErr(env, PARAM_EXCEPTION, "featureId is invalid");
+        return nullptr;
+    }
     {
         std::lock_guard<std::mutex> guard(g_mutex);
         if (g_underageModelObj->g_userStatusHandle == nullptr && !LoadLibrary()) {
@@ -541,7 +548,7 @@ bool UnderageModelNapi::ValidateAndParseParams(napi_env env, napi_value args[], 
 
     std::string typeStr;
     if (!TransJsToStr(env, args[1], typeStr)) {
-        ThrowUnderageModelErr(env, UNSUBSCRIBE_EXCEPTION, "Trans to string failed");
+        ThrowUnderageModelErr(env, PARAM_EXCEPTION, "Trans to string failed");
         return false;
     }
     if (!ParseConfigParams(typeStr, details)) {
@@ -562,13 +569,15 @@ napi_value UnderageModelNapi::ConfigParams(napi_env env, napi_callback_info info
         ThrowUnderageModelErr(env, PARAM_EXCEPTION, "Wrong number of parameters");
         return nullptr;
     }
-
     uint32_t featureId = 0;
     std::map<std::string, std::vector<int32_t>> details;
     if (!ValidateAndParseParams(env, args, featureId, details)) {
         return nullptr;
     }
-
+    if (!UserStatusNapiUtil::IsSupportedFeature(featureId)) {
+        ThrowUnderageModelErr(env, PARAM_EXCEPTION, "featureId is invalid");
+        return nullptr;
+    }
     if (!ConstructUnderageModel(env, jsThis)) {
         ThrowUnderageModelErr(env, SERVICE_EXCEPTION, "Failed to get g_underageModelObj");
         return nullptr;
@@ -971,55 +980,64 @@ bool UnderageModelNapi::ParseConfigParams(
     return true;
 }
 
-std::vector<DeviceInfo> UnderageModelNapi::GetDeviceList(napi_env env, napi_value deviceNapiValue)
+bool UnderageModelNapi::GetDeviceList(napi_env env, napi_value deviceNapiValue,
+    std::vector<DeviceInfo>& deviceInfoList)
 {
-    if (env == nullptr) {
-        return {};
-    }
+    CHKPF(env);
     uint32_t arrayLength = 0;
-    if (napi_get_array_length(env, deviceNapiValue, &arrayLength) != napi_ok) {
-        FI_HILOGE("napi_get_array_length failed");
-        return {};
-    }
-    std::vector<DeviceInfo> deviceInfoList;
+    CHKRF(napi_get_array_length(env, deviceNapiValue, &arrayLength), "napi_get_array_length failed");
     for (size_t i = 0; i < arrayLength; i++) {
         bool hasElement = false;
-        napi_has_element(env, deviceNapiValue, i, &hasElement);
-        napi_value element = nullptr;
-        napi_get_element(env, deviceNapiValue, i, &element);
-        napi_valuetype valueType = napi_undefined;
-        napi_typeof(env, element, &valueType);
-        if (valueType != napi_object) {
-            break;
+        CHKRF(napi_has_element(env, deviceNapiValue, i, &hasElement), "napi_has_element failed");
+        if (!hasElement) {
+            FI_HILOGE("no element");
+            return false;
         }
-        std::string deviceId = GetDeviceInfoItem(env, element, "deviceId");
-        std::string networkId = GetDeviceInfoItem(env, element, "networkId");
-        std::string deviceName = GetDeviceInfoItem(env, element, "deviceName");
+        napi_value element = nullptr;
+        CHKRF(napi_get_element(env, deviceNapiValue, i, &element), "napi_get_element failed");
+        napi_valuetype valueType = napi_undefined;
+        CHKRF(napi_typeof(env, element, &valueType), "napi_typeof failed");
+        if (valueType != napi_object) {
+            FI_HILOGE("value type not napi_object.");
+            return false;
+        }
+        std::string deviceId;
+        CHKCF(GetDeviceInfoItem(env, element, "deviceId", deviceId), "get deviceId failed");
+        std::string networkId;
+        CHKCF(GetDeviceInfoItem(env, element, "networkId", networkId), "get networkId failed");
+        std::string deviceName;
+        CHKCF(GetDeviceInfoItem(env, element, "deviceName", deviceName), "get deviceName failed");
         uint32_t deviceType = 0;
         napi_value deviceTypeNApi = nullptr;
-        napi_get_named_property(env, element, "deviceType", &deviceTypeNApi);
-        napi_typeof(env, deviceTypeNApi, &valueType);
-        if (valueType == napi_number) {
-            napi_get_value_uint32(env, deviceTypeNApi, &deviceType);
+        CHKRF(napi_get_named_property(env, element, "deviceType", &deviceTypeNApi), "napi_get_named_property failed");
+        CHKRF(napi_typeof(env, deviceTypeNApi, &valueType), "napi_typeof failed");
+        if (valueType != napi_number) {
+            FI_HILOGE("value type not napi_number.");
+            return false;
         }
+        CHKRF(napi_get_value_uint32(env, deviceTypeNApi, &deviceType), "napi_get_value_uint32 failed");
         DeviceInfo deviceInfo(deviceId, deviceName, networkId, deviceType);
         deviceInfoList.emplace_back(deviceInfo);
     }
-    return deviceInfoList;
+    return true;
 }
 
-std::string UnderageModelNapi::GetDeviceInfoItem(napi_env env, napi_value value, const char *tag)
+bool UnderageModelNapi::GetDeviceInfoItem(napi_env env, napi_value value, const char *tag, std::string& result)
 {
-    napi_valuetype valueType = napi_undefined;
     napi_value napiValue = nullptr;
-    napi_get_named_property(env, value, tag, &napiValue);
-    napi_typeof(env, napiValue, &valueType);
-    char result[64] = { 0 };
-    if (valueType == napi_string) {
-        size_t bufferLen = 0;
-        napi_get_value_string_utf8(env, napiValue, result, sizeof(result), &bufferLen);
+    CHKRF(napi_get_named_property(env, value, tag, &napiValue), "napi_get_named_property failed");
+    napi_valuetype valueType = napi_undefined;
+    CHKRF(napi_typeof(env, napiValue, &valueType), "napi_typeof failed");
+    if (valueType != napi_string) {
+        return false;
     }
-    return result;
+    char temp[64] = { 0 };
+    size_t bufferLen = 0;
+    CHKRF(napi_get_value_string_utf8(env, napiValue, temp, sizeof(temp), &bufferLen),
+        "napi_get_value_string_utf8 failed");
+    temp[bufferLen] = '\0';
+    result = std::string(temp);
+    return true;
 }
 
 napi_value UnderageModelNapi::Init(napi_env env, napi_value exports)
