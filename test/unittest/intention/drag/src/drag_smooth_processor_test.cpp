@@ -32,7 +32,7 @@ using namespace testing::ext;
 HWTEST_F(DragSmoothProcessorTest, SmoothMoveEventBothEmpty, TestSize.Level0)
 {
     DragSmoothProcessor processor;
-    DragMoveEvent result = processor.SmoothMoveEvent(1000000, 16666667);
+    DragMoveEvent result = processor.SmoothMoveEvent(17000000, 16666667);
     EXPECT_EQ(result.displayX, 0.0f);
     EXPECT_EQ(result.displayY, 0.0f);
     EXPECT_EQ(result.displayId, -1);
@@ -48,12 +48,12 @@ HWTEST_F(DragSmoothProcessorTest, SmoothMoveEventBothEmpty, TestSize.Level0)
 HWTEST_F(DragSmoothProcessorTest, SmoothMoveEventWithEvents, TestSize.Level0)
 {
     DragSmoothProcessor processor;
-    DragMoveEvent event1 { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 1000000 };
-    DragMoveEvent event2 { .displayX = 30.0f, .displayY = 40.0f, .displayId = 0, .timestamp = 2000000 };
+    DragMoveEvent event1 { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 17000000 };
+    DragMoveEvent event2 { .displayX = 30.0f, .displayY = 40.0f, .displayId = 0, .timestamp = 35000000 };
     processor.InsertEvent(event1);
     processor.InsertEvent(event2);
 
-    DragMoveEvent result = processor.SmoothMoveEvent(3000000, 16666667);
+    DragMoveEvent result = processor.SmoothMoveEvent(50000000, 16666667);
     EXPECT_EQ(result.displayId, 0);
 }
 
@@ -66,15 +66,15 @@ HWTEST_F(DragSmoothProcessorTest, SmoothMoveEventWithEvents, TestSize.Level0)
 HWTEST_F(DragSmoothProcessorTest, SmoothMoveEventEmptyMoveNonEmptyHistory, TestSize.Level0)
 {
     DragSmoothProcessor processor;
-    DragMoveEvent event1 { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 1000000 };
-    DragMoveEvent event2 { .displayX = 30.0f, .displayY = 40.0f, .displayId = 0, .timestamp = 2000000 };
+    DragMoveEvent event1 { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 17000000 };
+    DragMoveEvent event2 { .displayX = 30.0f, .displayY = 40.0f, .displayId = 0, .timestamp = 35000000 };
     processor.InsertEvent(event1);
     processor.InsertEvent(event2);
 
-    DragMoveEvent first = processor.SmoothMoveEvent(3000000, 16666667);
+    DragMoveEvent first = processor.SmoothMoveEvent(50000000, 16666667);
     EXPECT_EQ(first.displayId, 0);
 
-    DragMoveEvent second = processor.SmoothMoveEvent(4000000, 16666667);
+    DragMoveEvent second = processor.SmoothMoveEvent(70000000, 16666667);
     EXPECT_EQ(second.displayId, 0);
 }
 
@@ -88,12 +88,12 @@ HWTEST_F(DragSmoothProcessorTest, SmoothMoveEventEmptyMoveNonEmptyHistory, TestS
 HWTEST_F(DragSmoothProcessorTest, SmoothMoveEventAfterReset, TestSize.Level0)
 {
     DragSmoothProcessor processor;
-    DragMoveEvent event { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 1000000 };
+    DragMoveEvent event { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 17000000 };
     processor.InsertEvent(event);
-    processor.SmoothMoveEvent(2000000, 16666667);
+    processor.SmoothMoveEvent(35000000, 16666667);
     processor.ResetParameters();
 
-    DragMoveEvent result = processor.SmoothMoveEvent(3000000, 16666667);
+    DragMoveEvent result = processor.SmoothMoveEvent(50000000, 16666667);
     EXPECT_EQ(result.displayX, 0.0f);
     EXPECT_EQ(result.displayY, 0.0f);
     EXPECT_EQ(result.displayId, -1);
@@ -109,11 +109,11 @@ HWTEST_F(DragSmoothProcessorTest, SmoothMoveEventAfterReset, TestSize.Level0)
 HWTEST_F(DragSmoothProcessorTest, ResetParametersClearsAll, TestSize.Level0)
 {
     DragSmoothProcessor processor;
-    DragMoveEvent event { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 1000000 };
+    DragMoveEvent event { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 17000000 };
     processor.InsertEvent(event);
     processor.ResetParameters();
 
-    DragMoveEvent result = processor.SmoothMoveEvent(2000000, 16666667);
+    DragMoveEvent result = processor.SmoothMoveEvent(35000000, 16666667);
     EXPECT_EQ(result.displayId, -1);
 }
 } // namespace DeviceStatus
