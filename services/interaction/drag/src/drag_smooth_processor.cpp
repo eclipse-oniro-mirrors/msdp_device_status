@@ -62,6 +62,10 @@ DragMoveEvent DragSmoothProcessor::SmoothMoveEvent(uint64_t nanoTimestamp, uint6
             return event;
         }
     }
+    if (currentEvents.empty()) {
+        FI_HILOGW("Both currentEvents and historyEvents are empty, return default event");
+        return DragMoveEvent {};
+    }
     DragMoveEvent latestEvent = currentEvents.back();
     auto resampleEvent = GetResampleEvent(historyEvents_, currentEvents, targetTimeStamp);
     historyEvents_ = currentEvents;
