@@ -51,7 +51,6 @@ private:
         const std::vector<DragMoveEvent>& current, uint64_t nanoTimestamp);
     std::vector<DragMoveEvent> moveEvents_;
     std::vector<DragMoveEvent> historyEvents_;
-    uint64_t resampleTimeStamp_ { 0 };
     std::mutex mtx_;
 };
 } // namespace DeviceStatus
