@@ -48,11 +48,11 @@ DragMoveEvent DragSmoothProcessor::SmoothMoveEvent(uint64_t nanoTimestamp, uint6
         currentEvents.swap(moveEvents_);
         historyEvents = historyEvents_;
     }
-    size_t historyEventSize = historyEvents.size();
     if (currentEvents.empty() && historyEvents.empty()) {
         FI_HILOGW("Both currentEvents and historyEvents are empty, return default event");
         return DragMoveEvent {};
     }
+    size_t historyEventSize = historyEvents.size();
     if (currentEvents.empty() && historyEventSize > 0) {
         if (historyEventSize > 1) {
             auto event = GetInterpolatedEvent(historyEvents.at(historyEventSize - PREVIOUS_HISTORY_EVENT),
