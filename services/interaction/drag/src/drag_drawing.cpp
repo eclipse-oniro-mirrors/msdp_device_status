@@ -370,6 +370,7 @@ int32_t DragDrawing::Init(const DragData &dragData, bool isLongPressDrag)
         return INIT_FAIL;
     }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    dragSmoothProcessor_.ResetParameters();
     LoadDragDropLib();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     OnStartDrag(dragAnimationData);

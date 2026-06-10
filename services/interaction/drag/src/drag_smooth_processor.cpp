@@ -40,31 +40,43 @@ void DragSmoothProcessor::InsertEvent(const DragMoveEvent &event)
 
 DragMoveEvent DragSmoothProcessor::SmoothMoveEvent(uint64_t nanoTimestamp, uint64_t vSyncPeriod)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
-    resampleTimeStamp_ = nanoTimestamp - vSyncPeriod + ONE_MS_IN_NS;
-    auto targetTimeStamp = resampleTimeStamp_;
+    auto targetTimeStamp = nanoTimestamp - vSyncPeriod + ONE_MS_IN_NS;
     std::vector<DragMoveEvent> currentEvents;
-    currentEvents.swap(moveEvents_);
-    size_t historyEventSize = historyEvents_.size();
+    std::vector<DragMoveEvent> historyEvents;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        currentEvents.swap(moveEvents_);
+        historyEvents = historyEvents_;
+    }
+    if (currentEvents.empty() && historyEvents.empty()) {
+        FI_HILOGW("Both currentEvents and historyEvents are empty, return default event");
+        return DragMoveEvent {};
+    }
+    size_t historyEventSize = historyEvents.size();
     if (currentEvents.empty() && historyEventSize > 0) {
         if (historyEventSize > 1) {
-            auto event = GetInterpolatedEvent(historyEvents_.at(historyEventSize - PREVIOUS_HISTORY_EVENT),
-                historyEvents_.back(), targetTimeStamp);
-            auto resampleEvent = event.has_value() ? event.value() : historyEvents_.back();
+            auto event = GetInterpolatedEvent(historyEvents.at(historyEventSize - PREVIOUS_HISTORY_EVENT),
+                historyEvents.back(), targetTimeStamp);
+            auto resampleEvent = event.has_value() ? event.value() : historyEvents.back();
+            std::lock_guard<std::mutex> lock(mtx_);
             historyEvents_ = currentEvents;
             historyEvents_.emplace_back(resampleEvent);
             return resampleEvent;
         } else {
-            DragMoveEvent event = historyEvents_.back();
+            DragMoveEvent event = historyEvents.back();
             event.timestamp = targetTimeStamp;
+            std::lock_guard<std::mutex> lock(mtx_);
             historyEvents_ = currentEvents;
             historyEvents_.emplace_back(event);
             return event;
         }
     }
     DragMoveEvent latestEvent = currentEvents.back();
-    auto resampleEvent = GetResampleEvent(historyEvents_, currentEvents, targetTimeStamp);
-    historyEvents_ = currentEvents;
+    auto resampleEvent = GetResampleEvent(historyEvents, currentEvents, targetTimeStamp);
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        historyEvents_ = currentEvents;
+    }
     return resampleEvent.has_value() ? resampleEvent.value() : latestEvent;
 }
 
@@ -73,7 +85,6 @@ void DragSmoothProcessor::ResetParameters()
     std::lock_guard<std::mutex> lock(mtx_);
     moveEvents_.clear();
     historyEvents_.clear();
-    resampleTimeStamp_ = 0;
 }
 
 std::optional<DragMoveEvent> DragSmoothProcessor::GetResampleEvent(const std::vector<DragMoveEvent>& history,
