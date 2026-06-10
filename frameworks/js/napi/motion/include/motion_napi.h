@@ -101,6 +101,7 @@ private:
     static std::shared_ptr<MotionNapi> GetInstance(napi_env env);
     static bool ValidateArgsType(napi_env env, napi_value *args, size_t argc,
         const std::vector<std::string> &expectedTypes);
+    static bool ValidateMotionOffArgsType(napi_env env, size_t &argc, napi_value callback);
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
     static napi_value SubscribeNamedMotion(napi_env env, napi_callback_info info, int32_t type);
     static void TryNotifyNamedInitialValue(napi_env env, int32_t type, napi_value handler,

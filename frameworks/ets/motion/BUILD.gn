@@ -38,6 +38,7 @@ taihe_shared_library("motion_so") {
   subsystem_name = "$subsystem_name"
   sources = get_target_outputs(":run_taihe")
   branch_protector_ret = "pac_ret"
+  shlib_type = "ani"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -61,7 +62,6 @@ taihe_shared_library("motion_so") {
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
-    "image_framework:image_native",
   ]
   sources += [
     "src/ani_constructor.cpp",
