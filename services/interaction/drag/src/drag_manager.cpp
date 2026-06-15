@@ -382,7 +382,6 @@ int32_t DragManager::StartDrag(
     }
     peerNetId_ = peerNetId;
     lastDisplayId_ = dragData.displayId;
-    dragAnimationType_ = dragData.dragAnimationType;
     std::string packageName = GetPackageName(pid);
     if (packageName == MSDP_BUNDLE_NAME_PARSER.GetBundleName("DEVICE_COLLABORATION")) {
         isCollaborationService_ = true;
@@ -416,6 +415,7 @@ int32_t DragManager::StartDrag(
         FI_HILOGE("Deliver nonce to input failed");
         return RET_ERR;
     }
+    dragAnimationType_ = dragData.dragAnimationType;
     SetDragState(DragState::START);
     dragDrawing_.OnStartDragExt();
     stateNotify_.StateChangedNotify(DragState::START);
