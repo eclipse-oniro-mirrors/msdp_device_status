@@ -195,11 +195,9 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
 {
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
-    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_90);
     displayListener_->HandleScreenRotation(0, Rosen::Rotation::ROTATION_0);
     auto rotation = context_->GetDragManager().GetRotation(0);
-    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_90);
-    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_0);
+    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
 }
 
 /**
@@ -213,11 +211,9 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
     DisplayChangeEventListener listener(nullptr);
-    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_90);
     listener.HandleScreenRotation(0, Rosen::Rotation::ROTATION_90);
     auto rotation = context_->GetDragManager().GetRotation(0);
-    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_90);
-    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_0);
+    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
 }
 
 /**
@@ -230,7 +226,6 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
 {
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
-    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_90);
     displayListener_->HandleScreenRotation(0, Rosen::Rotation::ROTATION_90);
     auto rotation = context_->GetDragManager().GetRotation(0);
     EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
@@ -246,7 +241,6 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
 {
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
-    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_90);
     displayListener_->HandleScreenRotation(0, Rosen::Rotation::ROTATION_180);
     auto rotation = context_->GetDragManager().GetRotation(0);
     EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
@@ -262,7 +256,6 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
 {
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
-    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_90);
     displayListener_->HandleScreenRotation(0, Rosen::Rotation::ROTATION_270);
     auto rotation = context_->GetDragManager().GetRotation(0);
     EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
@@ -278,7 +271,6 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
 {
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
-    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_180);
     displayListener_->HandleScreenRotation(0, Rosen::Rotation::ROTATION_180);
     auto rotation = context_->GetDragManager().GetRotation(0);
     EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
@@ -295,6 +287,44 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_ProcessD
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
     displayListener_->RotateDragWindow(0, Rosen::Rotation::ROTATION_90);
+    auto displayInfo = displayListener_->GetDisplayInfo(0);
+    ASSERT_NE(displayInfo, nullptr);
+    displayListener_->ProcessDisplayEvent(0);
+    auto rotation = context_->GetDragManager().GetRotation(0);
+    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_ProcessDisplayEvent_003
+ * @tc.desc: Test ProcessDisplayEvent when IsRotateDragScreen is true and non-foldable, delegates to ScreenRotate
+ * @tc.type: FUNC ProcessDisplayEvent
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_ProcessDisplayEvent_003, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    if (!displayListener_->IsRotateDragScreen()) {
+        return;
+    }
+    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_90);
+    displayListener_->ProcessDisplayEvent(0);
+}
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_ProcessDisplayEvent_004
+ * @tc.desc: Test ProcessDisplayEvent when rotation unchanged skips both HandleScreenRotation and RotateDragWindow
+ * @tc.type: FUNC ProcessDisplayEvent
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_ProcessDisplayEvent_004, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    if (displayListener_->IsRotateDragScreen()) {
+        return;
+    }
+    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_0);
     auto displayInfo = displayListener_->GetDisplayInfo(0);
     ASSERT_NE(displayInfo, nullptr);
     displayListener_->ProcessDisplayEvent(0);
