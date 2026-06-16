@@ -148,7 +148,7 @@ void ProductNameDefinitionParser::PrintProductNames()
     CALL_INFO_TRACE;
     std::shared_lock<std::shared_mutex> lock(lock_);
     for (const auto &productName: productNames_) {
-        FI_HILOGI("key:%{public}s -> value:%{public}s", productName.first.c_str(), productName.second.c_str());
+        FI_HILOGI("key:%{private}s -> value:%{private}s", productName.first.c_str(), productName.second.c_str());
     }
 }
 } // namespace DeviceStatus
