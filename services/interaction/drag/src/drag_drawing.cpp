@@ -257,6 +257,52 @@ const std::string MOUSE_DRAG_MAGIC_DEFAULT_PATH { "/system/etc/device_status/dra
 const std::string MOUSE_DRAG_CURSOR_CIRCLE_PATH { "/system/etc/device_status/drag_icon/Mouse_Drag_Cursor_Circle.png" };
 const std::string DRAG_DROP_EXTENSION_SO_PATH { "/system/lib64/drag_drop_ext/libdrag_drop_ext.z.so" };
 const std::string BIG_FOLDER_LABEL { "scb_folder" };
+
+struct DrawingInfo {
+    std::atomic_bool isRunning { false };
+    std::atomic_bool isPreviousDefaultStyle { false };
+    std::atomic_bool isCurrentDefaultStyle { false };
+    std::atomic_bool isInitUiDirector { true };
+    bool isExistScalingValue { false };
+    std::atomic_bool needDestroyDragWindow { false };
+    int32_t sourceType { -1 };
+    int32_t currentDragNum { -1 };
+    DragCursorStyle currentStyle { DragCursorStyle::DEFAULT };
+    int32_t displayId { -1 };
+    int32_t pixelMapX { -1 };
+    int32_t pixelMapY { -1 };
+    int32_t displayX { -1 };
+    int32_t displayY { -1 };
+    float x { -1.0f };
+    float y { -1.0f };
+    float currentPositionX { -1.0f };
+    float currentPositionY { -1.0f };
+    int32_t mouseWidth { 0 };
+    int32_t mouseHeight { 0 };
+    int32_t rootNodeWidth { -1 };
+    int32_t rootNodeHeight { -1 };
+    std::atomic<int64_t> startNum { -1 };
+    int32_t timerId { -1 };
+    float scalingValue { 0.0 };
+    std::vector<std::shared_ptr<Rosen::RSCanvasNode>> nodes;
+    std::vector<std::shared_ptr<Rosen::RSCanvasNode>> multiSelectedNodes;
+    std::vector<std::shared_ptr<Media::PixelMap>> multiSelectedPixelMaps;
+    std::shared_ptr<Rosen::RSNode> rootNode { nullptr };
+    std::shared_ptr<Rosen::RSNode> parentNode { nullptr };
+    std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode { nullptr };
+    std::shared_ptr<Media::PixelMap> pixelMap { nullptr };
+    std::shared_ptr<Media::PixelMap> stylePixelMap { nullptr };
+#ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
+    std::shared_ptr<Rosen::RSNode> curvesMaskNode { nullptr };
+    std::shared_ptr<Rosen::RSNode> lightNode { nullptr };
+#endif // OHOS_BUILD_INTERNAL_DROP_ANIMATION
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    IContext* context { nullptr };
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
+    ExtraInfo extraInfo;
+    FilterInfo filterInfo;
+};
+
 struct DrawingInfo g_drawingInfo;
 static std::shared_mutex g_pixelMapLock;
 struct DragData g_dragDataForSuperHub;

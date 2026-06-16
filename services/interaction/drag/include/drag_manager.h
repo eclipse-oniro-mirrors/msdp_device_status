@@ -28,12 +28,11 @@
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #include "collaboration_service_status_change.h"
-#include "data_ability_observer_stub.h"
-#include "datashare_helper.h"
 #include "display_change_event_listener.h"
-#include "display_manager.h"
 #include "drag_auth.h"
+#ifdef OHOS_ENABLE_PULLTHROW
 #include "pull_throw_listener.h"
+#endif // OHOS_ENABLE_PULLTHROW
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 #include "devicestatus_define.h"
 #include "drag_data.h"
