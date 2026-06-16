@@ -95,6 +95,7 @@ if (!is_arkui_x) {
 
     external_deps = [
       "ability_base:want",
+      "ability_runtime:dataobs_manager",
       "cJSON:cjson",
       "c_utils:utils",
       "common_event_service:cesfwk_innerkits",
