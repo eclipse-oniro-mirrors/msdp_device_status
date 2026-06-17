@@ -1103,6 +1103,11 @@ void DragDrawing::DestroyDragWindow()
     FI_HILOGI("leave");
 }
 
+bool DragDrawing::DrawIsRunning()
+{
+    return g_drawingInfo.isRunning;
+}
+
 void DragDrawing::UpdateDrawingState()
 {
     FI_HILOGD("enter");
