@@ -446,9 +446,9 @@ std::string DragManager::GetDragOutPkgName()
 int32_t DragManager::StartDrag(const DragData &dragData)
 {
     CALL_INFO_TRACE;
-    if (dragState_ == DragState::START) {	 
-        FI_HILOGE("Drag instance already exists, no need to start drag again");	 
-        return RET_ERR;	 
+    if (dragState_ == DragState::START) {
+        FI_HILOGE("Drag instance already exists, no need to start drag again");
+        return RET_ERR;
     }
     std::string packageName;
     PrintDragData(dragData, packageName);
