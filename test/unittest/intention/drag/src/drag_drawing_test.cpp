@@ -1533,11 +1533,11 @@ HWTEST_F(DragDrawingTest, DragDrawingTest64, TestSize.Level0)
 }
 
 /**
- * @tc.name: DragDrawingTest65
- * @tc.desc: Test CreateWindow with isInitUiDirector = false, rsUiDirector_ = nullptr
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: DragDrawingTest65
+* @tc.desc: Test CreateWindow with isInitUiDirector = false, rsUiDirector_ = nullptr
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(DragDrawingTest, DragDrawingTest65, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
