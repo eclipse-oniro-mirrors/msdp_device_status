@@ -336,7 +336,7 @@ public:
     void UpdateDragState(DragState dragState);
     static std::shared_ptr<Media::PixelMap> AccessGlobalPixelMapLocked();
     static void UpdateGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
-    static bool DrawIsRunning();
+    static bool IsDrawing();
     void LongPressDragZoomOutAnimation();
     void SetMultiSelectedAnimationFlag(bool needMultiSelectedAnimation);
     void ResetAnimationParameter();

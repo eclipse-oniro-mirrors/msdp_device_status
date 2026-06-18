@@ -3081,7 +3081,7 @@ HWTEST_F(DragManagerTest, DragManagerTest137, TestSize.Level0)
     g_dragMgr.dragState_ = DragState::STOP;
     int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
     ASSERT_EQ(ret, RET_OK);
-    ASSERT_TRUE(g_dragMgr.dragDrawing_.DrawIsRunning());
+    ASSERT_TRUE(g_dragMgr.dragDrawing_.IsDrawing());
     ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
     ASSERT_EQ(ret, RET_ERR);
     g_dragMgr.dragDrawing_.UpdateDrawingState();
@@ -3101,7 +3101,7 @@ HWTEST_F(DragManagerTest, DragManagerTest138, TestSize.Level0)
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
     EXPECT_TRUE(dragData);
     g_dragMgr.dragState_ = DragState::STOP;
-    ASSERT_FALSE(g_dragMgr.dragDrawing_.DrawIsRunning());
+    ASSERT_FALSE(g_dragMgr.dragDrawing_.IsDrawing());
     int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
     ASSERT_EQ(ret, RET_OK);
     DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
