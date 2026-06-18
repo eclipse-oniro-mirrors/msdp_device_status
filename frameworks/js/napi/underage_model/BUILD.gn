@@ -18,6 +18,14 @@ config("underage_mode_private_config") {
 }
 
 ohos_shared_library("userstatus_napi") {
+  cflags_cc = [
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Oz",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
+  ]
+
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true

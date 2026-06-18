@@ -23,12 +23,14 @@
 #include "device_info.h"
 #include "iunderage_model_listener.h"
 #include "user_status_data.h"
+#include "user_status_napi_util.h"
 
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 using DeviceInfo = UserStatusAwareness::DeviceInfo;
 using UserStatusData = UserStatusAwareness::UserStatusData;
+using UserStatusNapiUtil = UserStatusAwareness::UserStatusNapiUtil;
 
 typedef int32_t (*RegisterListenerFunc)(uint32_t feature,
     std::shared_ptr<UserStatusAwareness::IUnderageModelListener> listener);
@@ -103,8 +105,8 @@ private:
         const std::array<napi_valuetype, N> &expectedTypes);
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
     static bool ParseConfigParams(const std::string& params, std::map<std::string, std::vector<int32_t>> &configMap);
-    static std::vector<DeviceInfo> GetDeviceList(napi_env env, napi_value deviceNapiValue);
-    static std::string GetDeviceInfoItem(napi_env env, napi_value value, const char *tag);
+    static bool GetDeviceList(napi_env env, napi_value deviceNapiValue, std::vector<DeviceInfo>& deviceInfoList);
+    static bool GetDeviceInfoItem(napi_env env, napi_value value, const char *tag, std::string& result);
 
 private:
     napi_env env_ { nullptr };

@@ -604,6 +604,11 @@ void UserStatusNapiUtil::ThrowErr(napi_env env, int32_t errCode, const std::stri
     napi_value error = CreateNapiError(env, errCode, msg.value());
     napi_throw(env, error);
 }
+
+bool UserStatusNapiUtil::IsSupportedFeature(uint32_t feature)
+{
+    return SUPPORT_FEATURES.find(feature) != SUPPORT_FEATURES.end();
+}
 } // namespace UserStatusAwareness
 } // namespace Msdp
 } // namespace OHOS

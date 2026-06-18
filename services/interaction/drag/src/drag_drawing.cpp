@@ -356,6 +356,7 @@ int32_t DragDrawing::Init(const DragData &dragData, bool isLongPressDrag)
         return INIT_FAIL;
     }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
+    dragSmoothProcessor_.ResetParameters();
     LoadDragDropLib();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     OnStartDrag(dragAnimationData);
@@ -2825,8 +2826,8 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
 
 void DragDrawing::CreateWindow()
 {
-    if (g_drawingInfo.isInitUiDirector || rsUiDirector_ == nullptr) {
-        g_drawingInfo.isInitUiDirector = false;
+    bool isInitUiDirector = g_drawingInfo.isInitUiDirector.load();
+    if (isInitUiDirector || rsUiDirector_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
         auto connectToRenderObj = Rosen::RSInterfaces::GetInstance().GetConnectToRenderToken(rsScreenId_);
@@ -2839,6 +2840,16 @@ void DragDrawing::CreateWindow()
             CHKPV(this->handler_);
             this->handler_->PostTask(task);
             }, -1, true);
+        auto rsUIContext = rsUiDirector_->GetRSUIContext();
+        if (rsUIContext == nullptr || rsUIContext->GetRSRenderInterface() == nullptr) {
+            FI_HILOGE("CreateWindow isInitUiDirector rsUIContext or GetRSRenderInterface is nullptr");
+            handler_ = nullptr;
+            return;
+        }
+        rsUIContext->GetRSRenderInterface()->SetOnRenderProcessDiedCallback([]() {
+            g_drawingInfo.isInitUiDirector.store(true);
+        });
+        g_drawingInfo.isInitUiDirector.store(false);
     }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig;

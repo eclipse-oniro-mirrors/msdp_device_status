@@ -404,6 +404,42 @@ ohos_unittest("DisplayChangeEventListenerTest") {
   ]
 }
 
+ohos_unittest("DragSmoothProcessorTest") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  branch_protector_ret = "pac_ret"
+  module_out_path = module_output_path
+  include_dirs = [ "include" ]
+
+  defines = []
+
+  sources = [ "src/drag_smooth_processor_test.cpp" ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  configs = []
+
+  deps = [
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -412,6 +448,7 @@ group("unittest") {
     ":DragServerTest",
     ":DragClientTest",
     ":DragDataUtilTest",
+    ":DragSmoothProcessorTest",
     ":DisplayChangeEventListenerTest"
   ]
 }

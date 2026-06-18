@@ -1056,7 +1056,7 @@ napi_value MotionNapi::UnSubscribeNamedMotion(napi_env env, napi_callback_info i
         ThrowMotionErr(env, PARAM_EXCEPTION, "wrong number of arguments");
         return nullptr;
     }
-    if (argc == 1 && !ValidateArgsType(env, args, argc, EXPECTED_SUB_ARG_TYPES_FUNCTION)) {
+    if (argc == 1 && !ValidateMotionOffArgsType(env, argc, args[ARG_0])) {
         ThrowMotionErr(env, PARAM_EXCEPTION, "validateargstype failed");
         return nullptr;
     }
@@ -1378,6 +1378,26 @@ bool MotionNapi::ValidateArgsType(napi_env env, napi_value *args, size_t argc,
         }
     }
     return true;
+}
+
+bool MotionNapi::ValidateMotionOffArgsType(napi_env env, size_t &argc, napi_value callback)
+{
+    FI_HILOGD("Enter");
+    napi_valuetype valueType = napi_undefined;
+    napi_status status = napi_typeof(env, callback, &valueType);
+    if (status != napi_ok) {
+        FI_HILOGE("Error while checking argument type");
+        return false;
+    }
+    if (valueType == napi_function) {
+        // 清理指定callback
+        return true;
+    } else if (valueType == napi_undefined || valueType == napi_null) {
+        // callback属于napi_undefined或napi_null时，取消订阅接口的参数改为0个，清空当前类型的所有callback
+        argc = ARG_0;
+        return true;
+    }
+    return false;
 }
 
 bool MotionNapi::TransJsToStr(napi_env env, napi_value value, std::string &str)
