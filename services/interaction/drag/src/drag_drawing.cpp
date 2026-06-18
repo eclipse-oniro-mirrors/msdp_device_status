@@ -2885,7 +2885,7 @@ void DragDrawing::CreateWindow()
     g_drawingInfo.surfaceNode->SetPositionZ(DRAG_WINDOW_POSITION_Z);
     g_drawingInfo.surfaceNode->SetBackgroundColor(SK_ColorTRANSPARENT);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    g_drawingInfo.surfaceNode->AttachToWindowContainer(rsScreenId);
+    g_drawingInfo.surfaceNode->AttachToWindowContainer(rsScreenId_);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     g_drawingInfo.surfaceNode->SetVisible(false);
     rsUiDirector_->SendMessages();
