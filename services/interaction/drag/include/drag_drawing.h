@@ -315,7 +315,7 @@ public:
     void OnStopAnimation() override;
     int32_t EnterTextEditorArea(bool enable);
     bool GetAllowDragState();
-    void SetScreenId(uint64_t screenId);
+    void SetRsScreenId(uint64_t screenId);
     int32_t RotateDragWindowAsync(Rosen::Rotation rotation);
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void SetRotation(Rosen::DisplayId displayId, Rosen::Rotation rotation);
@@ -504,7 +504,7 @@ private:
     std::atomic_bool screenRotateState_ { false };
     void* dragExtHandler_ { nullptr };
     bool needRotatePixelMapXY_ { false };
-    uint64_t screenId_ { 0 };
+    uint64_t rsScreenId_ { 0 };
 #ifdef OHOS_ENABLE_PULLTHROW
     float pullThrowScale_ { 1.0 };
 #endif // OHOS_ENABLE_PULLTHROW

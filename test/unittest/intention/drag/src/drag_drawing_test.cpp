@@ -1531,6 +1531,50 @@ HWTEST_F(DragDrawingTest, DragDrawingTest64, TestSize.Level0)
     ret = g_dragMgr.dragDrawing_.ParseDropArea(jsonParser);
     EXPECT_TRUE(!ret);
 }
+
+/**
+* @tc.name: DragDrawingTest65
+* @tc.desc: Test SetRsScreenId with valid screenId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest65, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t screenId = 0;
+    g_dragMgr.dragDrawing_.SetRsScreenId(screenId);
+    EXPECT_EQ(g_dragMgr.dragDrawing_.rsScreenId_, 0);
+}
+
+/**
+* @tc.name: DragDrawingTest66
+* @tc.desc: Test SetRsScreenId with non-zero screenId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest66, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t screenId = 1;
+    g_dragMgr.dragDrawing_.SetRsScreenId(screenId);
+    EXPECT_NE(g_dragMgr.dragDrawing_.rsScreenId_, 0);
+}
+
+/**
+* @tc.name: DragDrawingTest67
+* @tc.desc: Test SetRsScreenId called multiple times
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest67, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.SetRsScreenId(0);
+    uint64_t first = g_dragMgr.dragDrawing_.rsScreenId_;
+    g_dragMgr.dragDrawing_.SetRsScreenId(1);
+    uint64_t second = g_dragMgr.dragDrawing_.rsScreenId_;
+    EXPECT_NE(first, second);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
