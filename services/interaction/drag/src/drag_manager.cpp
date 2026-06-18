@@ -375,7 +375,7 @@ int32_t DragManager::StartDrag(
     FI_HILOGI("enter");
     ResetMouseDragMonitorTimerId(dragData);
     if (dragState_ == DragState::START || dragState_ == DragState::MOTION_DRAGGING ||
-        DragDrawing::DrawIsRunning()) {
+        dragDrawing_.DrawIsRunning()) {
         FI_HILOGE("Drag is already running or instance exists, can not start drag again");
         return RET_ERR;
     }
@@ -446,7 +446,7 @@ std::string DragManager::GetDragOutPkgName()
 int32_t DragManager::StartDrag(const DragData &dragData)
 {
     CALL_INFO_TRACE;
-    if (dragState_ == DragState::START || DragDrawing::DrawIsRunning()) {
+    if (dragState_ == DragState::START || dragDrawing_.DrawIsRunning()) {
         FI_HILOGE("Drag is already running or instance exists, can not start drag again");
         return RET_ERR;
     }
