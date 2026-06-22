@@ -109,11 +109,8 @@ ohos_source_set("drag_data_util") {
  
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
-    "hilog:libhilog",
     "image_framework:image_native",
-    "ipc:ipc_single",
     "window_manager:libdm_lite",
   ]
  
@@ -194,12 +191,10 @@ ohos_shared_library("devicestatus_client") {
   }
 
   external_deps = [
-    "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "image_framework:image_native",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
@@ -246,6 +241,7 @@ ohos_shared_library("motion_drag_part") {
  
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_single",

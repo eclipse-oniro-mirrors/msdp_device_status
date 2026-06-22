@@ -99,16 +99,10 @@ if (!is_arkui_x) {
       "cJSON:cjson",
       "c_utils:utils",
       "common_event_service:cesfwk_innerkits",
-      "data_share:datashare_consumer",
-      "device_info_manager:distributed_device_profile_common",
-      "device_info_manager:distributed_device_profile_sdk",
       "device_manager:devicemanagersdk",
-      "dsoftbus:softbus_client",
       "eventhandler:libeventhandler",
-      "graphic_2d:libcomposer",
       "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
-      "graphic_2d:window_animation",
       "graphic_2d:2d_graphics",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
@@ -116,7 +110,6 @@ if (!is_arkui_x) {
       "image_framework:image_native",
       "init:libbegetutil",
       "input:libmmi-client",
-      "ipc:ipc_single",
       "libxml2:libxml2",
       "qos_manager:concurrent_task_client",
       "qos_manager:qos",
@@ -134,6 +127,10 @@ if (!is_arkui_x) {
     if (device_status_udmf_enabled) {
       defines += [ "MSDP_FRAMEWORK_UDMF_ENABLED" ]
       external_deps += [ "udmf:utd_client" ]
+    }
+
+    if (device_status_pullthrow_enable) {
+      external_deps += ["data_share:datashare_consumer"]
     }
 
     subsystem_name = "${device_status_subsystem_name}"
