@@ -48,6 +48,7 @@ ohos_shared_library("onscreen_napi") {
     "image_framework:image_native",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   defines = []
@@ -91,6 +92,7 @@ ohos_shared_library("screenevent_napi") {
     "image_framework:image_native",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   relative_install_dir = "module"

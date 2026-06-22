@@ -17,7 +17,6 @@
 #define DEVICE_STATUS_NAPI_H
 
 #include <map>
-#include <uv.h>
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"

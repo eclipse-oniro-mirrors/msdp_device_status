@@ -50,6 +50,7 @@ ohos_shared_library("motion_napi") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   defines = [ "LOG_DOMAIN = 0xD002210" ]

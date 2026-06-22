@@ -19,7 +19,6 @@
 #include <map>
 #include <mutex>
 #include <string>
-#include <uv.h>
 #include <vector>
 
 #include "napi/native_node_api.h"
