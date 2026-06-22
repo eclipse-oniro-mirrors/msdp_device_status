@@ -373,16 +373,16 @@ int32_t DragManager::StartDrag(
     const std::string &appCaller)
 {
     FI_HILOGI("enter");
-    isLongPressDrag_ = isLongPressDrag;
     ResetMouseDragMonitorTimerId(dragData);
-    SetCrossDragging(pid);
-    if (dragState_ == DragState::START || dragState_ == DragState::MOTION_DRAGGING) {
-        FI_HILOGE("Drag instance already exists, no need to start drag again");
+    if (dragState_ == DragState::START || dragState_ == DragState::MOTION_DRAGGING ||
+        dragDrawing_.IsDrawing()) {
+        FI_HILOGE("Drag is already running or instance exists, can not start drag again");
         return RET_ERR;
     }
+    isLongPressDrag_ = isLongPressDrag;
+    SetCrossDragging(pid);
     peerNetId_ = peerNetId;
     lastDisplayId_ = dragData.displayId;
-    dragAnimationType_ = dragData.dragAnimationType;
     std::string packageName = GetPackageName(pid);
     if (packageName == MSDP_BUNDLE_NAME_PARSER.GetBundleName("DEVICE_COLLABORATION")) {
         isCollaborationService_ = true;
@@ -416,6 +416,7 @@ int32_t DragManager::StartDrag(
         FI_HILOGE("Deliver nonce to input failed");
         return RET_ERR;
     }
+    dragAnimationType_ = dragData.dragAnimationType;
     SetDragState(DragState::START);
     dragDrawing_.OnStartDragExt();
     stateNotify_.StateChangedNotify(DragState::START);
