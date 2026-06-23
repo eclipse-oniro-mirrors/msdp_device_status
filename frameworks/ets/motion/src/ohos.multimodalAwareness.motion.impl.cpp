@@ -25,6 +25,7 @@
 #include "ani_motion_event.h"
 #undef LOG_TAG
 #define LOG_TAG "ANIMotion"
+#include "ani_user_status_event.h"
 
 using OperatingHandStatus_t = ohos::multimodalAwareness::motion::OperatingHandStatus;
 using HoldingHandStatus_t = ohos::multimodalAwareness::motion::HoldingHandStatus;
@@ -34,9 +35,12 @@ using SmartRotateEvent_t = ohos::multimodalAwareness::motion::SmartRotateEvent;
 
 namespace {
 using namespace OHOS::Msdp;
+using namespace ::ohos::multimodalAwareness::motion;
 #ifdef MOTION_ENABLE
 auto &g_motionClient = MotionClient::GetInstance();
 #endif
+std::shared_ptr<AniUserStatusEvent> g_userStatusObj = nullptr;
+constexpr uint32_t DEFAULT_HOVER_HAND_DURATION = 5; // 5 seconds
 
 OperatingHandStatus_t getRecentOperatingHandStatus()
 {
@@ -373,6 +377,67 @@ void OffSmartRotateChangeInner(::taihe::optional_view<uintptr_t> opq)
     taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
 #endif
 }
+
+void OnHoverHandChangedNoDurationInner(
+    HoverHandDetectionArea const &area, taihe::callback_view<void(HoverHandEventData const &)> callback, uintptr_t opq)
+{
+    FI_HILOGI("OnHoverHandChangedNoDurationInner enter");
+    g_userStatusObj = AniUserStatusEvent::GetInstance();
+    if (g_userStatusObj == nullptr) {
+        FI_HILOGE("g_userStatusObj is null");
+        taihe::set_business_error(SERVICE_EXCEPTION, "g_userStatusObj is null");
+        return;
+    }
+    if (!g_userStatusObj->SubscribeHoverHandEvent(area, DEFAULT_HOVER_HAND_DURATION)) {
+        FI_HILOGE("SubscribeCallback failed");
+        return;
+    }
+    if (!g_userStatusObj->AddCallback(featureId, opq)) {
+        FI_HILOGE("AddCallback failed");
+        taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
+        return;
+    }
+    FI_HILOGI("OnHoverHandChangedNoDurationInner success");
+}
+
+void OnHoverHandChangedWithDurationInner(HoverHandDetectionArea const &area, int32_t duration,
+    taihe::callback_view<void(HoverHandEventData const &)> callback, uintptr_t opq)
+{
+    FI_HILOGI("OnHoverHandChangedWithDurationInner enter");
+    g_userStatusObj = AniUserStatusEvent::GetInstance();
+    if (g_userStatusObj == nullptr) {
+        FI_HILOGE("g_userStatusObj is null");
+        taihe::set_business_error(SERVICE_EXCEPTION, "g_userStatusObj is null");
+        return;
+    }
+    if (duration <= 0) {
+        FI_HILOGE("Invalid duration");
+        taihe::set_business_error(PARAM_EXCEPTION, "Invalid duration");
+        return;
+    }
+    if (!g_userStatusObj->SubscribeHoverHandEvent(area, static_cast<uint32_t>(duration))) {
+        FI_HILOGE("SubscribeCallback failed");
+        return;
+    }
+    FI_HILOGI("OnHoverHandChangedWithDurationInner success");
+}
+
+void OffHoverHandChangedInner(::taihe::optional_view<uintptr_t> opq)
+{
+    FI_HILOGI("OffHoverHandChangedInner enter");
+    if (g_userStatusObj == nullptr) {
+        FI_HILOGE("g_userStatusObj is null");
+        taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "g_userStatusObj is null");
+        return;
+    }
+    bool result = false;
+    if (!opq.has_value()) {
+        result = g_userStatusObj->UnsubscribeHoverHandEvent(0);
+    } else {
+        result = g_userStatusObj->UnsubscribeHoverHandEvent(opq.value());
+    }
+    FI_HILOGI("UnsubscribeHoverHandEvent ret: %{public}d", result);
+}
 }  // namespace
 
 // Since these macros are auto-generate, lint will cause false positive.
@@ -388,4 +453,7 @@ TH_EXPORT_CPP_API_OnSmartRotateChangeInner(OnSmartRotateChangeInner);
 TH_EXPORT_CPP_API_OffPickupChangeInner(OffPickupChangeInner);
 TH_EXPORT_CPP_API_OffRotateChangeInner(OffRotateChangeInner);
 TH_EXPORT_CPP_API_OffSmartRotateChangeInner(OffSmartRotateChangeInner);
+TH_EXPORT_CPP_API_OnHoverHandChangedNoDurationInner(OnHoverHandChangedNoDurationInner);
+TH_EXPORT_CPP_API_OnHoverHandChangedWithDurationInner(OnHoverHandChangedWithDurationInner);
+TH_EXPORT_CPP_API_OffHoverHandChangedInner(OffHoverHandChangedInner);
 // NOLINTEND

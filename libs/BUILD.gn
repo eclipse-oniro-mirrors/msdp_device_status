@@ -56,7 +56,7 @@ ohos_shared_library("devicestatus_mock") {
 
   external_deps = [
     "c_utils:utils",
-    "cJSON:cjson_static",
+    "cJSON:cjson_static",1
     "cJSON:cjson",
     "hilog:libhilog",
   ]

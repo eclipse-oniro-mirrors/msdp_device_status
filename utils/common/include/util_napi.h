@@ -83,6 +83,7 @@ namespace Msdp {
 
 namespace UtilNapi {
 bool TypeOf(napi_env env, napi_value value, napi_valuetype type);
+napi_value GetNull(napi_env env);
 } // namespace UtilNapi
 } // namespace Msdp
 } // namespace OHOS

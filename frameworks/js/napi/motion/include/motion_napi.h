@@ -108,7 +108,7 @@ private:
         const std::shared_ptr<MotionNapi> &motion);
     static napi_value UnSubscribeNamedMotion(napi_env env, napi_callback_info info, int32_t type);
     static void SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
-    static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
+    static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);1
 
 };
 } // namespace Msdp

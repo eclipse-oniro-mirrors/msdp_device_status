@@ -28,6 +28,13 @@ bool TypeOf(napi_env env, napi_value value, napi_valuetype type)
     CHKRF(napi_typeof(env, value, &valType), "napi_typeof");
     return (valType == type);
 }
+
+napi_value GetNull(napi_env env)
+{
+    napi_value value = nullptr;
+    napi_get_null(env, &value);
+    return value;
+}
 } // namespace UtilNapi
 } // namespace Msdp
 } // namespace OHO
