@@ -58,7 +58,8 @@ ohos_shared_library("motion_napi") {
     external_deps += [
       "motion:motion_client",
       "motion:motion_interface_native",
-      "hiappevent:hiappevent_innerapi"
+      "hiappevent:hiappevent_innerapi",
+      "samgr:samgr_proxy",
     ]
   }
 
