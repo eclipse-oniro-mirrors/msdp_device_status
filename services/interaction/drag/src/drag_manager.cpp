@@ -382,8 +382,8 @@ int32_t DragManager::StartDrag(
 {
     FI_HILOGI("enter");
     ResetMouseDragMonitorTimerId(dragData);
-    if (dragState_ == DragState::START || dragState_ == DragState::MOTION_DRAGGING) {
-        FI_HILOGE("Drag instance already exists, no need to start drag again");
+    if (dragState_ == DragState::START || dragState_ == DragState::MOTION_DRAGGING || dragDrawing_.IsDrawing()) {
+        FI_HILOGE("Drag is already running or instance exists, can not start drag again");
         return RET_ERR;
     }
     int32_t currentUserId = GetCurrentUserId();
