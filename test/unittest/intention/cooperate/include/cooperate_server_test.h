@@ -59,6 +59,9 @@ private:
     Intention intention_ { Intention::COOPERATE };
     std::shared_ptr<TestContext> context_ { nullptr };
     std::shared_ptr<CooperateServer> cooperateServer_ { nullptr };
+    // 套件级共享：整套件只 create/destroy 一次插件，避免每用例反复建拆 FFRT runner + dsoftbus 单例导致的偶发竞态
+    static std::shared_ptr<TestContext> s_context_;
+    static std::shared_ptr<CooperateServer> s_cooperateServer_;
 };
 } // namespace DeviceStatus
 } // namespace Msdp

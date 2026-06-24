@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include <chrono>
 #include <memory>
+#include <thread>
 
 #include "accesstoken_kit.h"
 #include "gtest/gtest.h"
@@ -35,6 +37,7 @@ namespace DeviceStatus {
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 namespace {
+constexpr int32_t WAIT_100_MS { 100 };
 int32_t g_userData { 1 };
 uint64_t g_tokenID1 { 5 };
 const std::string COOPERATE_ACCESS_PERMISSION { "ohos.permission.COOPERATE_MANAGER" };
@@ -190,20 +193,30 @@ MockHapToken::~MockHapToken()
     EXPECT_EQ(0, SetSelfTokenID(selfToken_));
 }
 
+std::shared_ptr<TestContext> CooperateServerTest::s_context_ { nullptr };
+std::shared_ptr<CooperateServer> CooperateServerTest::s_cooperateServer_ { nullptr };
+
 CooperateServerTest::CooperateServerTest()
-{
-    context_ = std::make_shared<TestContext>();
-    cooperateServer_ = std::make_shared<CooperateServer>(context_.get());
-}
+{}
 
 void CooperateServerTest::SetUp()
-{}
+{
+    // 复用套件级共享对象：插件在 SetUpTestCase 里已加载，整套件只 create/destroy 一次
+    context_ = s_context_;
+    cooperateServer_ = s_cooperateServer_;
+}
 
 void CooperateServerTest::TearDown()
-{}
+{
+    context_ = nullptr;
+    cooperateServer_ = nullptr;
+}
 
 void CooperateServerTest::SetUpTestCase()
 {
+    s_context_ = std::make_shared<TestContext>();
+    s_cooperateServer_ = std::make_shared<CooperateServer>(s_context_.get());
+    s_context_->GetPluginManager().LoadCooperate();
     g_shellTokenId = GetSelfTokenID();
     SetTestEvironment(g_shellTokenId);
     std::vector<std::string> reqPerm;
@@ -221,6 +234,12 @@ void CooperateServerTest::TearDownTestCase()
         delete g_mock;
         g_mock = nullptr;
     }
+    s_cooperateServer_ = nullptr;
+    if (s_context_ != nullptr) {
+        s_context_->GetPluginManager().UnloadCooperate();
+        s_context_ = nullptr;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_100_MS));
 }
 
 /**
@@ -239,8 +258,11 @@ HWTEST_F(CooperateServerTest, EnableTest1, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->EnableCooperate(context, g_userData));
-    context_->GetPluginManager().UnloadCooperate();
+    int32_t ret = cooperateServer_->EnableCooperate(context, g_userData);
+    EXPECT_EQ(ret, RET_OK);
+    if (ret == RET_OK) {
+        EXPECT_EQ(cooperateServer_->DisableCooperate(context, g_userData), RET_OK);
+    }
 }
 
 /**
@@ -258,8 +280,11 @@ HWTEST_F(CooperateServerTest, EnableTest2, TestSize.Level0)
         .uid = IPCSkeleton::GetCallingUid(),
         .pid = IPCSkeleton::GetCallingPid(),
     };
-    ASSERT_NO_FATAL_FAILURE(cooperateServer_->EnableCooperate(context, g_userData));
-    context_->GetPluginManager().UnloadCooperate();
+    int32_t ret = cooperateServer_->EnableCooperate(context, g_userData);
+    EXPECT_EQ(ret, RET_OK);
+    if (ret == RET_OK) {
+        EXPECT_EQ(cooperateServer_->DisableCooperate(context, g_userData), RET_OK);
+    }
 }
 
 /**
@@ -279,7 +304,6 @@ HWTEST_F(CooperateServerTest, DisableTest1, TestSize.Level0)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->DisableCooperate(context, g_userData));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -298,7 +322,6 @@ HWTEST_F(CooperateServerTest, DisableTest2, TestSize.Level0)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->DisableCooperate(context, g_userData));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -322,7 +345,6 @@ HWTEST_F(CooperateServerTest, StartTest1, TestSize.Level0)
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperate(context,
         networkId, g_userData, startDeviceId, isCheckPermission));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -345,7 +367,6 @@ HWTEST_F(CooperateServerTest, StartTest2, TestSize.Level0)
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperate(context,
         networkId, g_userData, startDeviceId, isCheckPermission));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -373,7 +394,6 @@ HWTEST_F(CooperateServerTest, StartWithOptionsTest1, TestSize.Level0)
     };
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->StartCooperateWithOptions(context,
         networkId, g_userData, startDeviceId, options));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -395,7 +415,6 @@ HWTEST_F(CooperateServerTest, StopCooperateTest1, TestSize.Level0)
     bool isUnchained = true;
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->StopCooperate(context, g_userData, isUnchained, isCheckPermission));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -416,7 +435,6 @@ HWTEST_F(CooperateServerTest, StopCooperateTest2, TestSize.Level0)
     bool isUnchained = true;
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->StopCooperate(context, g_userData, isUnchained, isCheckPermission));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -436,7 +454,6 @@ HWTEST_F(CooperateServerTest, RegisterCooperateListenerTest1, TestSize.Level0)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterCooperateListener(context));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -455,7 +472,6 @@ HWTEST_F(CooperateServerTest, RegisterCooperateListenerTest2, TestSize.Level0)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterCooperateListener(context));
-    context_->GetPluginManager().UnloadCooperate();
 }
 /**
  * @tc.name: UnregisterCooperateListenerTest1
@@ -474,7 +490,6 @@ HWTEST_F(CooperateServerTest, UnregisterCooperateListenerTest1, TestSize.Level0)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterCooperateListener(context));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -493,7 +508,6 @@ HWTEST_F(CooperateServerTest, UnregisterCooperateListenerTest2, TestSize.Level0)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterCooperateListener(context));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -514,7 +528,6 @@ HWTEST_F(CooperateServerTest, RegisterHotAreaListenerTest1, TestSize.Level0)
     };
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterHotAreaListener(context, g_userData, isCheckPermission));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -534,7 +547,6 @@ HWTEST_F(CooperateServerTest, RegisterHotAreaListenerTest2, TestSize.Level0)
     };
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterHotAreaListener(context, g_userData, isCheckPermission));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -554,7 +566,6 @@ HWTEST_F(CooperateServerTest, UnregisterHotAreaListenerTest1, TestSize.Level0)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterHotAreaListener(context));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -573,7 +584,6 @@ HWTEST_F(CooperateServerTest, UnregisterHotAreaListenerTest2, TestSize.Level0)
         .pid = IPCSkeleton::GetCallingPid(),
     };
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterHotAreaListener(context));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -594,7 +604,6 @@ HWTEST_F(CooperateServerTest, RegisterMouseEventListenerTest1, TestSize.Level0)
     };
     std::string networkId = "networkId";
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterMouseEventListener(context, networkId));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -614,7 +623,6 @@ HWTEST_F(CooperateServerTest, RegisterMouseEventListenerTest2, TestSize.Level0)
     };
     std::string networkId = "networkId";
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->RegisterMouseEventListener(context, networkId));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -635,7 +643,6 @@ HWTEST_F(CooperateServerTest, UnregisterMouseEventListenerTest1, TestSize.Level0
     };
     std::string networkId = "networkId";
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterMouseEventListener(context, networkId));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -655,7 +662,6 @@ HWTEST_F(CooperateServerTest, UnregisterMouseEventListenerTest2, TestSize.Level0
     };
     std::string networkId = "networkId";
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->UnregisterMouseEventListener(context, networkId));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -677,7 +683,6 @@ HWTEST_F(CooperateServerTest, GetCooperateStateSyncTest1, TestSize.Level0)
     std::string udid = "udid";
     bool state = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateSync(context, udid, state));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -698,7 +703,6 @@ HWTEST_F(CooperateServerTest, GetCooperateStateSyncTest2, TestSize.Level0)
     std::string udid = "udid";
     bool state = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateSync(context, udid, state));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -721,7 +725,6 @@ HWTEST_F(CooperateServerTest, GetCooperateStateAsyncTest1, TestSize.Level0)
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateAsync(context,
         networkId, g_userData, isCheckPermission));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -743,7 +746,6 @@ HWTEST_F(CooperateServerTest, GetCooperateStateAsyncTest2, TestSize.Level0)
     bool isCheckPermission = true;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->GetCooperateStateAsync(context,
         networkId, g_userData, isCheckPermission));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -765,7 +767,6 @@ HWTEST_F(CooperateServerTest, SetDamplingCoefficientTest1, TestSize.Level0)
     uint32_t direction = 0;
     double coefficient = 0;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetDamplingCoefficient(context, direction, coefficient));
-    context_->GetPluginManager().UnloadCooperate();
 }
 
 /**
@@ -786,7 +787,6 @@ HWTEST_F(CooperateServerTest, SetDamplingCoefficientTest2, TestSize.Level0)
     uint32_t direction = 0;
     double coefficient = 0;
     ASSERT_NO_FATAL_FAILURE(cooperateServer_->SetDamplingCoefficient(context, direction, coefficient));
-    context_->GetPluginManager().UnloadCooperate();
 }
 } // namespace DeviceStatus
 } // namespace Msdp
