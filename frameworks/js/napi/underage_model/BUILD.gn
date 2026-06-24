@@ -56,6 +56,7 @@ ohos_shared_library("userstatus_napi") {
     "ipc:ipc_single",
     "napi:ace_napi",
     "json:nlohmann_json_static",
+    "node:node_header_notice",
   ]
 
   relative_install_dir = "module/multimodalawareness"

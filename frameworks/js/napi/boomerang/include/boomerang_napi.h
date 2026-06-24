@@ -21,7 +21,6 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include <uv.h>
 
 #include "boomerang_callback_stub.h"
 #include "boomerang_event.h"

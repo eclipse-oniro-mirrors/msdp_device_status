@@ -95,7 +95,8 @@
         "hiappevent",
         "runtime_core",
         "time_service",
-        "openssl"
+        "openssl",
+        "node"
       ],
       "third_party": [
         "jsoncpp"

@@ -49,6 +49,7 @@ ohos_shared_library("inputdevicecooperate") {
     "image_framework:image_native",
     "napi:ace_napi",
     "libuv:uv",
+    "node:node_header_notice",
   ]
 
   relative_install_dir = "module/multimodalinput"

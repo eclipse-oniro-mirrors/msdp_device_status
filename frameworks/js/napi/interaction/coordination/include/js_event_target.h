@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "nocopyable.h"
-#include "uv.h"
 
 #include "coordination_message.h"
 #include "i_coordination_listener.h"

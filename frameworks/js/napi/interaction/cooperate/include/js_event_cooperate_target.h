@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "nocopyable.h"
-#include "uv.h"
 
 #include "i_coordination_listener.h"
 #include "js_util_cooperate.h"
