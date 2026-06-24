@@ -381,9 +381,7 @@ int32_t DragManager::StartDrag(
     const std::string &appCaller)
 {
     FI_HILOGI("enter");
-    isLongPressDrag_ = isLongPressDrag;
     ResetMouseDragMonitorTimerId(dragData);
-    SetCrossDragging(pid);
     if (dragState_ == DragState::START || dragState_ == DragState::MOTION_DRAGGING) {
         FI_HILOGE("Drag instance already exists, no need to start drag again");
         return RET_ERR;
@@ -395,6 +393,8 @@ int32_t DragManager::StartDrag(
         return RET_ERR;
     }
     dragUserId_ = currentUserId;
+    isLongPressDrag_ = isLongPressDrag;
+    SetCrossDragging(pid);
     peerNetId_ = peerNetId;
     lastDisplayId_ = dragData.displayId;
     dragAnimationType_ = dragData.dragAnimationType;
