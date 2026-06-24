@@ -370,6 +370,7 @@ private:
     bool needLongPressDragAnimation_ { true };
     DragRadarPackageName dragPackageName_;
     int32_t dragAnimationType_ { 0 };
+    int32_t dragUserId_ { -1 };
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
     std::atomic_bool enableInternalDropAnimation_ { false };
     DragInternalAnimationWrapper internalAnimationWrapper_;

@@ -45,6 +45,7 @@
 #include "drag_hisysevent.h"
 #include "drag_security_manager.h"
 #include "fi_log.h"
+#include "ipc_skeleton.h"
 #include "msdp_bundle_name_parser.h"
 #include "utility.h"
 
@@ -110,6 +111,13 @@ constexpr double ANGLE_EPSILON {1e-9};
 constexpr int32_t DRAG_PRIORITY { 500 };
 #endif // OHOS_DRAG_ENABLE_INTERCEPTOR
 } // namespace
+
+static int32_t GetCurrentUserId()
+{
+    constexpr int32_t BASE_USER_RANGE = 200000;
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    return uid / BASE_USER_RANGE;
+}
 
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
 DragManager &DragManager::GetInstance()
@@ -380,6 +388,13 @@ int32_t DragManager::StartDrag(
         FI_HILOGE("Drag instance already exists, no need to start drag again");
         return RET_ERR;
     }
+    int32_t currentUserId = GetCurrentUserId();
+    if (dragUserId_ >= 0 && currentUserId >= 0 && currentUserId != dragUserId_) {
+        FI_HILOGE("Drag from another user, reject. currentUserId:%{public}d, dragUserId:%{public}d",
+            currentUserId, dragUserId_);
+        return RET_ERR;
+    }
+    dragUserId_ = currentUserId;
     peerNetId_ = peerNetId;
     lastDisplayId_ = dragData.displayId;
     dragAnimationType_ = dragData.dragAnimationType;
@@ -513,7 +528,8 @@ int32_t DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     int32_t displayX = pointerItem.GetDisplayX();
     int32_t displayY = pointerItem.GetDisplayY();
     int32_t sourceType = pointerEvent->GetSourceType();
-    dragDrawing_.OnDragMove(pointerEvent->GetTargetDisplayId(), displayX,
+    int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
+    dragDrawing_.OnDragMove(targetDisplayId, displayX,
         displayY, pointerEvent->GetActionTime());
     FI_HILOGD("ARKUI_X SourceType:%{public}d, pointerId:%{public}d, displayX:%{private}d, displayY:%{private}d",
         sourceType, pointerId, displayX, displayY);
@@ -550,6 +566,14 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
         ReportStopDragRadarInfo(BizState::STATE_END, StageRes::RES_FAIL, DragRadarErrCode::REPEATE_STOP_DRAG_EXCEPTION,
             pid, dragRadarPackageName);
         return RET_ERR;
+    }
+    if (dragUserId_ >= 0) {
+        int32_t currentUserId = GetCurrentUserId();
+        if (currentUserId >= 0 && currentUserId != dragUserId_) {
+            FI_HILOGE("StopDrag from another user, reject. currentUserId:%{public}d, dragUserId:%{public}d",
+                currentUserId, dragUserId_);
+            return RET_ERR;
+        }
     }
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
     dragDrawing_.NotifyDragInfo(dragOutPkgName, packageName);
@@ -614,6 +638,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     dragResult_ = static_cast<DragResult>(dropResult.result);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     SetDragState(DragState::STOP);
+    dragUserId_ = -1;
     if (GetControlCollaborationVisible()) {
         SetControlCollaborationVisible(false);
     }
@@ -1213,6 +1238,14 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if (dragUserId_ >= 0) {
+        int32_t currentUserId = GetCurrentUserId();
+        if (currentUserId >= 0 && currentUserId != dragUserId_) {
+            FI_HILOGW("OnDragMove from another user, ignore. currentUserId:%{public}d, dragUserId:%{public}d",
+                currentUserId, dragUserId_);
+            return;
+        }
+    }
     if (pointerEvent->GetSourceType() != dragData.sourceType) {
         FI_HILOGW("The pointer source type invaild, the event should be ignored,"
             "pointer sourceType:%{public}d, drag sourceType:%{public}d",
