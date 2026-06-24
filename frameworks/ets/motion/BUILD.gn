@@ -79,7 +79,8 @@ taihe_shared_library("motion_so") {
     external_deps += [
       "motion:motion_client",
       "motion:motion_interface_native",
-      "hiappevent:hiappevent_innerapi"
+      "hiappevent:hiappevent_innerapi",
+      "samgr:samgr_proxy",
     ]
   }
 }
