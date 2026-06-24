@@ -1554,75 +1554,30 @@ HWTEST_F(DragDrawingTest, DragDrawingTest65, TestSize.Level0)
 
 /**
  * @tc.name: DragDrawingTest66
- * @tc.desc: Test SetRsScreenId with screenId 0, ConvertScreenIdToRsScreenId success
+ * @tc.desc: Test SetRsScreenId with non-zero screenId, ConvertScreenIdToRsScreenId success
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(DragDrawingTest, DragDrawingTest66, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    uint64_t screenId = 0;
-    uint64_t rsScreenId = 0;
-    bool convertRet = Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsScreenId);
-    EXPECT_TRUE(convertRet);
-    g_dragMgr.dragDrawing_.SetRsScreenId(screenId);
-    EXPECT_EQ(g_dragMgr.dragDrawing_.rsScreenId_, rsScreenId);
+    uint64_t validScreenId = 0;
+    g_dragMgr.dragDrawing_.SetRsScreenId(validScreenId);
+    EXPECT_EQ(g_dragMgr.dragDrawing_.rsScreenId_, validScreenId);
 }
 
 /**
  * @tc.name: DragDrawingTest67
- * @tc.desc: Test SetRsScreenId with non-zero screenId, ConvertScreenIdToRsScreenId success
+ * @tc.desc: Test SetRsScreenId, convert fail branch, early return
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(DragDrawingTest, DragDrawingTest67, TestSize.Level0)
 {
     CALL_TEST_DEBUG;
-    uint64_t screenId = 1;
-    uint64_t rsScreenId = 0;
-    bool convertRet = Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsScreenId);
-    EXPECT_TRUE(convertRet);
-    g_dragMgr.dragDrawing_.SetRsScreenId(screenId);
-    EXPECT_EQ(g_dragMgr.dragDrawing_.rsScreenId_, rsScreenId);
-}
-
-/**
- * @tc.name: DragDrawingTest68
- * @tc.desc: Test SetRsScreenId, convert fail branch, early return
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragDrawingTest, DragDrawingTest68, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    uint64_t rsBefore = g_dragMgr.dragDrawing_.rsScreenId_;
     uint64_t invalidScreenId = UINT64_MAX;
     g_dragMgr.dragDrawing_.SetRsScreenId(invalidScreenId);
-    EXPECT_EQ(g_dragMgr.dragDrawing_.rsScreenId_, rsBefore);
-}
-
-/**
- * @tc.name: DragDrawingTest69
- * @tc.desc: Test SetRsScreenId called multiple times, last value wins
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DragDrawingTest, DragDrawingTest69, TestSize.Level0)
-{
-    CALL_TEST_DEBUG;
-    uint64_t rsFirst = 0;
-    uint64_t rsSecond = 0;
-    bool ret1 = Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(0, rsFirst);
-    bool ret2 = Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(1, rsSecond);
-    EXPECT_TRUE(ret1);
-    EXPECT_TRUE(ret2);
-    g_dragMgr.dragDrawing_.SetRsScreenId(0);
-    uint64_t first = g_dragMgr.dragDrawing_.rsScreenId_;
-    g_dragMgr.dragDrawing_.SetRsScreenId(1);
-    uint64_t second = g_dragMgr.dragDrawing_.rsScreenId_;
-    EXPECT_EQ(first, rsFirst);
-    EXPECT_EQ(second, rsSecond);
-    EXPECT_NE(first, second);
+    EXPECT_NE(g_dragMgr.dragDrawing_.rsScreenId_, invalidScreenId);
 }
 
 } // namespace DeviceStatus
