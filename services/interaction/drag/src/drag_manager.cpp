@@ -380,9 +380,8 @@ int32_t DragManager::StartDrag(
         FI_HILOGE("Drag instance already exists, no need to start drag again");
         return RET_ERR;
     }
-    if (dragData.sourceType == MMI::SOURCE_TYPE_TOUCHSCREEN) {
-        dragDisplayId_ = dragData.displayId;
-    }
+    dragDisplayId_ = dragData.displayId;
+    dragPointerId_ = dragData.pointerId;
     peerNetId_ = peerNetId;
     lastDisplayId_ = dragData.displayId;
     dragAnimationType_ = dragData.dragAnimationType;
@@ -530,6 +529,22 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     bool isStopCooperate, const DragRadarPackageName &inPackageName)
 {
     FI_HILOGI("enter");
+    if (dragState_ == DragState::STOP) {
+        FI_HILOGE("No drag instance running, can not stop drag");
+        return RET_ERR;
+    }
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if (dragDisplayId_ >= 0 && dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        int32_t stopDisplayId = -1;
+        if (dropResult.mainWindow >= 0) {
+            stopDisplayId = GetDisplayIdByWindowId(dropResult.mainWindow);
+        }
+        if (stopDisplayId >= 0 && stopDisplayId != dragDisplayId_) {
+            FI_HILOGE("StopDrag from another display, reject. stopDisplayId:%{public}d, dragDisplayId:%{public}d",
+                stopDisplayId, dragDisplayId_);
+            return RET_ERR;
+        }
+    }
     isCrossDragging_ = false;
     isCollaborationService_ = false;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
@@ -541,7 +556,6 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     } else {
         dragRadarPackageName.appCallee = packageName;
     }
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
     dragRadarPackageName.dragNum = dragData.dragNum;
     ReportStopDragRadarInfo(BizState::STATE_IDLE, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, pid,
         dragRadarPackageName);
@@ -549,12 +563,6 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
     FI_HILOGI("mainWindow:%{public}d, dragResult:%{public}d, drop packageName:%{public}s,"
         "drag out packageName:%{public}s, dragAnimationInfo:%{public}s", dropResult.mainWindow, dropResult.result,
         packageName.c_str(), dragOutPkgName.c_str(), dropResult.dragAnimationInfo.c_str());
-    if (dragState_ == DragState::STOP) {
-        FI_HILOGE("No drag instance running, can not stop drag");
-        ReportStopDragRadarInfo(BizState::STATE_END, StageRes::RES_FAIL, DragRadarErrCode::REPEATE_STOP_DRAG_EXCEPTION,
-            pid, dragRadarPackageName);
-        return RET_ERR;
-    }
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
     dragDrawing_.NotifyDragInfo(dragOutPkgName, packageName);
 #endif // OHOS_DRAG_ENABLE_ANIMATION
@@ -619,6 +627,7 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     SetDragState(DragState::STOP);
     dragDisplayId_ = -1;
+    dragPointerId_ = -1;
     if (GetControlCollaborationVisible()) {
         SetControlCollaborationVisible(false);
     }
@@ -867,6 +876,26 @@ int32_t DragManager::DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> po
     dragDrawing_.UpdateDragWindowDisplay(targetDisplayId);
     dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
     return RET_OK;
+}
+
+int32_t DragManager::GetDisplayIdByWindowId(int32_t windowId)
+{
+    FI_HILOGI("enter, windowId:%{public}d", windowId);
+    std::vector<uint64_t> windowIds = { static_cast<uint64_t>(windowId) };
+    std::unordered_map<uint64_t, Rosen::DisplayId> windowDisplayIdMap;
+    Rosen::WMError ret =
+        Rosen::WindowManagerLite::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    if (ret != Rosen::WMError::WM_OK) {
+        FI_HILOGE("GetDisplayIdByWindowId failed, ret:%{public}d", static_cast<int32_t>(ret));
+        return RET_ERR;
+    }
+    auto iter = windowDisplayIdMap.find(static_cast<uint64_t>(windowId));
+    if (iter == windowDisplayIdMap.end()) {
+        FI_HILOGE("windowId not found in map");
+        return RET_ERR;
+    }
+    FI_HILOGI("leave, displayId:%{public}d", static_cast<int32_t>(iter->second));
+    return static_cast<int32_t>(iter->second);
 }
 
 #ifdef OHOS_ENABLE_PULLTHROW
@@ -1218,9 +1247,12 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    if (dragDisplayId_ >= 0 && pointerEvent->GetTargetDisplayId() != dragDisplayId_) {
-        FI_HILOGW("OnDragMove from another display, ignore. targetDisplayId:%{public}d, dragDisplayId:%{public}d",
-            pointerEvent->GetTargetDisplayId(), dragDisplayId_);
+    if (pointerEvent->GetTargetDisplayId() != dragDisplayId_ ||
+        pointerEvent->GetPointerId() != dragPointerId_) {
+        FI_HILOGW("OnDragMove ignore. targetDisplayId:%{public}d, pointerId:%{public}d,"
+            " dragDisplayId:%{public}d, dragPointerId:%{public}d",
+            pointerEvent->GetTargetDisplayId(), pointerEvent->GetPointerId(),
+            dragDisplayId_, dragPointerId_);
         return;
     }
     if (pointerEvent->GetSourceType() != dragData.sourceType) {

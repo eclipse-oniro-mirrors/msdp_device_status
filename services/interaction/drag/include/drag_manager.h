@@ -277,6 +277,7 @@ private:
     void GetDragBehavior(const DragDropResult &dropResult, DragBehavior &dragBehavior);
     void DoLongPressDragZoomOutAnimation(int32_t displayX, int32_t displayY);
     int32_t DealPullInWindowEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t targetDisplayId);
+    int32_t GetDisplayIdByWindowId(int32_t windowId);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     int32_t NotifyAddSelectedPixelMapResult(bool result);
     void ResetMouseDragMonitorInfo();
@@ -371,6 +372,7 @@ private:
     DragRadarPackageName dragPackageName_;
     int32_t dragAnimationType_ { 0 };
     int32_t dragDisplayId_ { -1 };
+    int32_t dragPointerId_ { -1 };
 #ifdef OHOS_BUILD_INTERNAL_DROP_ANIMATION
     std::atomic_bool enableInternalDropAnimation_ { false };
     DragInternalAnimationWrapper internalAnimationWrapper_;
