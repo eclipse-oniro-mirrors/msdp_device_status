@@ -62,6 +62,9 @@ public:
     static DistanceMeasurementNapi *GetDistanceMeasurementNapi();
     static napi_value ModeInit(napi_env env, napi_value exports);
     static napi_value Init(napi_env env, napi_value exports);
+    static void DefineTechnologyType(napi_env env, napi_value exports);
+    static void DefineReportingMode(napi_env env, napi_value exports);
+    static void DefinePositionRelativeToDoor(napi_env env, napi_value exports);
     static void DefineDistanceRank(napi_env env, napi_value exports);
     static napi_value OnDistanceMeasurement(napi_env env, napi_callback_info info);
     static napi_value OffDistanceMeasurement(napi_env env, napi_callback_info info);

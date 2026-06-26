@@ -34,10 +34,13 @@ constexpr int32_t REPORT_MODE_MAX_VALUE { 1 };
 constexpr int32_t REPORT_FREQUENCY_MIN_VALUE { 0 };
 constexpr int32_t REPORT_FREQUENCY_MAX_VALUE { 999999 };
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
+constexpr int32_t NOT_SYSTEM_APP_EXCEPTION { 202 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
 constexpr int32_t SERVICE_EXCEPTION { 35100001 };
+constexpr int32_t SUBSCRIBE_EXCEPTION { 35100002 };
+constexpr int32_t UNSUBSCRIBE_EXCEPTION { 35100003 };
 constexpr int32_t PARAMETER_EXCEPTION { 35100004 };
-constexpr int32_t E_NO_PERMISSION { 60882961 };
+constexpr int32_t E_SERVICE_INNER_ERR { 60882949 };
 const std::vector<std::string> EXPECTED_ON_ARG_TYPES_R1 = {"string", "object", "function"};
 const std::vector<std::string> EXPECTED_ON_ARG_TYPES_R2 = {"string", "object"};
 const std::vector<std::string> EXPECTED_STATIC_ARG_TYPES_R1 = {"object", "function"};
@@ -48,6 +51,15 @@ const std::string SPATIAL_AWARENESS_CLIENT_SO_PATH = "libspatial_awareness_clien
 const std::string INPUT_TYPE_RANK_MEASUREMENT = "distanceMeasure";
 const std::string INPUT_TYPE_INDOOR_OR_OUTDOOR_IDENTIFY = "indoorOrOutdoorIdentify";
 const std::vector<std::string> INPUT_TYPE_VEC = {"distanceMeasure", "indoorOrOutdoorIdentify"};
+const std::map<int32_t, std::string> ANI_ERROR_MESSAGES = {
+    {PERMISSION_EXCEPTION, "Permission denied."},
+    {NOT_SYSTEM_APP_EXCEPTION, "Not system application."},
+    {DEVICE_EXCEPTION, "Capability not supported. Function can not work correctly due to limited device capabilities."},
+    {SERVICE_EXCEPTION, "Service exception."},
+    {SUBSCRIBE_EXCEPTION, "Subscription failed."},
+    {UNSUBSCRIBE_EXCEPTION, "Unsubscription failed."},
+    {PARAMETER_EXCEPTION, "Parameter invalid."}
+};
 
 void EtsSpatialAwarenessManager::OnDistanceMeasurementChanged(const CDistMeasureResponse &distMeasureRes)
 {
@@ -239,14 +251,9 @@ void EtsSpatialAwarenessManager::Unsubscribe(DistanceMeasurementConfigParams con
             FI_HILOGE("Not exist distMeasureDataSet");
             return;
         }
-        if (!opq.has_value() || iter->second.empty()) {
+        if (iter->second.empty()) {
             jsCbMap_.erase(iter);
-            FI_HILOGI("Unsubscribe callback is nullptr or jsCbMap_ content is empty.");
-        } else {
-            if (!RemoveCallback(iter, opq)) {
-                FI_HILOGI("Remove callback failed!");
-                return;
-            }
+            FI_HILOGI("Unsubscribe callback jsCbMap_ content is empty.");
         }
     }
     FI_HILOGI("Unsubscribe delete callback success");
@@ -256,13 +263,27 @@ void EtsSpatialAwarenessManager::Unsubscribe(DistanceMeasurementConfigParams con
         FI_HILOGE("Call unsubscribeDistanceMeasurement failed.");
         return;
     }
+    if (!RemoveCallback(distMeasureDataSet, opq)) {
+        FI_HILOGI("Remove callback failed!");
+        return;
+    }
     FI_HILOGI("Exit");
 }
 
-bool EtsSpatialAwarenessManager::RemoveCallback(const std::map<CDistMeasureData,
-    std::vector<std::shared_ptr<CallbackObject>>>::iterator &iter, optional_view<uintptr_t> opq)
+bool EtsSpatialAwarenessManager::RemoveCallback(const CDistMeasureData& distMeasureDataSet,
+    optional_view<uintptr_t> opq)
 {
     FI_HILOGI("Enter");
+    const auto iter = jsCbMap_.find(distMeasureDataSet);
+    if (iter == jsCbMap_.end()) {
+        FI_HILOGI("RemoveCallback data Not exist distMeasureDataSet");
+        return true;
+    }
+    if (!opq.has_value()) {
+        jsCbMap_.erase(iter);
+        FI_HILOGI("Unsubscribe callback is nullptr, remove callback by input data.");
+        return true;
+    }
     auto env = taihe::get_env();
     GlobalRefGuard guard(env, reinterpret_cast<ani_object>(opq.value()));
     if (env == nullptr || !guard) {
@@ -293,7 +314,7 @@ bool EtsSpatialAwarenessManager::VerifyParams(DistanceMeasurementConfigParams co
     uint32_t count = configParams.deviceList.size();
     if (count < DEVICES_LIST_MIN_LEN || count > DEVICES_LIST_MAX_LEN) {
         FI_HILOGE("deviceList error, count=%{public}d", count);
-        taihe::set_business_error(PARAMETER_EXCEPTION, "deviceIdList array length must be between 1 and 128.");
+        ThrowErr(PARAMETER_EXCEPTION, "deviceIdList array length must be between 1 and 128.");
         return false;
     }
 
@@ -301,7 +322,7 @@ bool EtsSpatialAwarenessManager::VerifyParams(DistanceMeasurementConfigParams co
         std::string deviceId = configParams.deviceList[i].c_str();
         if (deviceId.length() < DEVICE_ID_MIN_LEN || deviceId.length() > DEVICE_ID_MAX_LEN) {
             FI_HILOGE("device id length error, length=%{public}lu", static_cast<unsigned long>(deviceId.length()));
-            taihe::set_business_error(PARAMETER_EXCEPTION, "device id length must be between 1 and 128.");
+            ThrowErr(PARAMETER_EXCEPTION, "device id length must be between 1 and 128.");
             return false;
         }
         distMeasureDataSet.deviceIds.push_back(deviceId);
@@ -310,8 +331,7 @@ bool EtsSpatialAwarenessManager::VerifyParams(DistanceMeasurementConfigParams co
     // 选择的测距技术类型
     int32_t techType = static_cast<int32_t>(configParams.techType);
     if (!IsValidTechnologyType(techType)) {
-        taihe::set_business_error(PARAMETER_EXCEPTION,
-            "techType must be one of the values in the enum TechnologyType.");
+        ThrowErr(PARAMETER_EXCEPTION, "techType must be one of the values in the enum TechnologyType.");
         return false;
     }
     distMeasureDataSet.technologyType = techType;
@@ -319,8 +339,7 @@ bool EtsSpatialAwarenessManager::VerifyParams(DistanceMeasurementConfigParams co
     // 结果上报模式
     int32_t reportMode = static_cast<int32_t>(configParams.reportMode);
     if (!IsValidReportMode(reportMode)) {
-        taihe::set_business_error(PARAMETER_EXCEPTION,
-            "reportMode must be one of the values in the enum ReportingMode.");
+        ThrowErr(PARAMETER_EXCEPTION, "reportMode must be one of the values in the enum ReportingMode.");
         return false;
     }
     distMeasureDataSet.reportMode = reportMode;
@@ -328,7 +347,7 @@ bool EtsSpatialAwarenessManager::VerifyParams(DistanceMeasurementConfigParams co
     // 结果上报频率
     int32_t reportFreq = static_cast<int32_t>(configParams.reportFrequency);
     if (!IsValidReportFrequency(reportFreq)) {
-        taihe::set_business_error(PARAMETER_EXCEPTION, "reportFrequency must be between 0 and 999999.");
+        ThrowErr(PARAMETER_EXCEPTION, "reportFrequency must be between 0 and 999999.");
         return false;
     }
     distMeasureDataSet.reportFreq = reportFreq;
@@ -377,7 +396,7 @@ void EtsSpatialAwarenessManager::InitDependencyLibrary()
     FI_HILOGI("Enter");
     if (!LoadLibrary()) {
         FI_HILOGE("load library failed.");
-        taihe::set_business_error(DEVICE_EXCEPTION, "Device not support.");
+        ThrowErr(DEVICE_EXCEPTION, "Device not support.");
     }
     FI_HILOGI("Exit");
 }
@@ -392,7 +411,7 @@ bool EtsSpatialAwarenessManager::SubscribeDistanceMeasurement(const CDistMeasure
         FI_HILOGI("subscribeDistanceMeasurementFunc create end");
         if (subscribeDistanceMeasurementFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s", SUBSCRIBE_FUNC_NAME.data(), dlerror());
-            taihe::set_business_error(SERVICE_EXCEPTION, "Service exception.");
+            ThrowErr(SERVICE_EXCEPTION, "Service exception.");
             return false;
         }
     }
@@ -405,10 +424,10 @@ bool EtsSpatialAwarenessManager::SubscribeDistanceMeasurement(const CDistMeasure
     }
 
     FI_HILOGE("Subscribe distance measurement callback failed");
-    if (ret == E_NO_PERMISSION) {
-        taihe::set_business_error(PERMISSION_EXCEPTION, "Permission denied.");
+    if (ret == E_SERVICE_INNER_ERR) {
+        ThrowErr(SERVICE_EXCEPTION, "Service exception.");
     } else {
-        taihe::set_business_error(SERVICE_EXCEPTION, "Service exception.");
+        ThrowErr(ret, "Service check permission or device type exception.");
     }
     return false;
 }
@@ -423,7 +442,7 @@ bool EtsSpatialAwarenessManager::UnsubscribeDistanceMeasurement(const CDistMeasu
         FI_HILOGI("unsubscribeDistanceMeasurementFunc create end");
         if (unsubscribeDistanceMeasurementFunc == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
-            taihe::set_business_error(SERVICE_EXCEPTION, "Service exception.");
+            ThrowErr(SERVICE_EXCEPTION, "Service exception.");
             return false;
         }
     }
@@ -436,10 +455,10 @@ bool EtsSpatialAwarenessManager::UnsubscribeDistanceMeasurement(const CDistMeasu
     }
 
     FI_HILOGE("Unsubscribe distance measurement callback failed");
-    if (ret == E_NO_PERMISSION) {
-        taihe::set_business_error(PERMISSION_EXCEPTION, "Permission denied.");
+    if (ret == E_SERVICE_INNER_ERR) {
+        ThrowErr(SERVICE_EXCEPTION, "Service exception.");
     } else {
-        taihe::set_business_error(SERVICE_EXCEPTION, "Service exception.");
+        ThrowErr(ret, "Service check permission or device type exception.");
     }
     return false;
 }
@@ -467,6 +486,27 @@ void EtsSpatialAwarenessManager::RemoveFailCallback(const CDistMeasureData &dist
         jsCbMap.erase(cbVec);
     }
     FI_HILOGI("Exit");
+}
+
+std::optional<std::string> EtsSpatialAwarenessManager::GetDistanceMeasurementAniErrMsg(int32_t errorCode)
+{
+    auto iter = ANI_ERROR_MESSAGES.find(errorCode);
+    if (iter != ANI_ERROR_MESSAGES.end()) {
+        return iter->second;
+    }
+    FI_HILOGE("Error, messages not found");
+    return std::nullopt;
+}
+
+void EtsSpatialAwarenessManager::ThrowErr(int32_t errCode, const std::string &printMsg)
+{
+    FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", printMsg.c_str(), errCode);
+    std::optional<std::string> msg = GetDistanceMeasurementAniErrMsg(errCode);
+    if (!msg) {
+        FI_HILOGE("errCode:%{public}d is invalid", errCode);
+        msg = "Invalid error code";
+    }
+    taihe::set_business_error(errCode, msg.value());
 }
 } // namespace Msdp
 } // namespace OHOS

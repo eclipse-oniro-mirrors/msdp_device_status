@@ -158,6 +158,21 @@ bool DistanceMeasurementEventNapi::IsSameValue(const napi_env &env,
     return result;
 }
 
+bool DistanceMeasurementEventNapi::HasRegisteredCallback(const CDistMeasureData &cdistMeasureData)
+{
+    FI_HILOGI("HasRegisteredCallback Enter");
+    if (distMeasureEventMap_.empty()) {
+        FI_HILOGI("distMeasureEventMap_ is empty.");
+        return false;
+    }
+    auto iter = distMeasureEventMap_.find(cdistMeasureData);
+    if (iter == distMeasureEventMap_.end()) {
+        FI_HILOGI("cdistMeasureData not found");
+        return false;
+    }
+    return true;
+}
+
 void DistanceMeasurementEventNapi::RemoveCallback(const CDistMeasureData &cdistMeasureData)
 {
     FI_HILOGI("RemoveCallback Enter");
