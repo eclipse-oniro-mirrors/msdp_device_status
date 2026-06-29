@@ -513,8 +513,7 @@ int32_t DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     int32_t displayX = pointerItem.GetDisplayX();
     int32_t displayY = pointerItem.GetDisplayY();
     int32_t sourceType = pointerEvent->GetSourceType();
-    int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
-    dragDrawing_.OnDragMove(targetDisplayId, displayX,
+    dragDrawing_.OnDragMove(pointerEvent->GetTargetDisplayId(), displayX,
         displayY, pointerEvent->GetActionTime());
     FI_HILOGD("ARKUI_X SourceType:%{public}d, pointerId:%{public}d, displayX:%{private}d, displayY:%{private}d",
         sourceType, pointerId, displayX, displayY);
