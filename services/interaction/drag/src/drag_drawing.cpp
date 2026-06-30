@@ -80,7 +80,6 @@ constexpr float SCALE_THRESHOLD_EIGHT { 1.0F * INT32_MAX / (SVG_WIDTH + EIGHT_SI
 constexpr float SCALE_THRESHOLD_TWELVE { 1.0F * INT32_MAX / (SVG_WIDTH + TWELVE_SIZE) };
 constexpr int32_t SUCCESS_ANIMATION_DURATION { 300 };
 constexpr int32_t ANIMATION_DURATION { 400 };
-constexpr int32_t DRAG_ANIMATION_DURATION { 20 };
 constexpr int32_t VIEW_BOX_POS { 2 };
 constexpr int32_t BACKGROUND_FILTER_INDEX { 0 };
 constexpr int32_t ASYNC_ROTATE_TIME { 150 };
@@ -1188,19 +1187,8 @@ void DragDrawing::StopDestopAnimation()
             g_drawingInfo.surfaceNode->SetVisible(dragWindowVisible_.load());
         });
     } else {
-        Rosen::RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(DRAG_ANIMATION_DURATION);
-        Rosen::RSNode::Animate(g_drawingInfo.surfaceNode ? g_drawingInfo.surfaceNode->GetRSUIContext() : nullptr,
-            protocol, SPRING_ROTATION, [=]() {
-            if (g_drawingInfo.surfaceNode == nullptr) {
-                FI_HILOGE("surfaceNode is nullptr");
-                return;
-            }
-            g_drawingInfo.surfaceNode->SetVisible(!dragWindowVisible_.load());
-        }, [=]() {
-            DestroyDragWindow();
-            UpdateDrawingState();
-        });
+        DestroyDragWindow();
+        UpdateDrawingState();
     }
     FI_HILOGI("leave");
 }
