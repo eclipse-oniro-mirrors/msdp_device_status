@@ -96,7 +96,9 @@
         "runtime_core",
         "time_service",
         "openssl",
-        "node"
+        "node",
+        "egl",
+        "opengles"
       ],
       "third_party": [
         "jsoncpp"

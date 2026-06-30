@@ -161,6 +161,8 @@ ohos_unittest("CooperateServerTest") {
     "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -215,6 +217,8 @@ ohos_unittest("InputEventSerializationTest") {
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -266,6 +270,8 @@ ohos_unittest("InputEventSamplerTest") {
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -389,6 +395,8 @@ ohos_unittest("InputEventBuilderTest") {
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -461,6 +469,8 @@ ohos_unittest("InputEventInterceptorTest") {
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -532,6 +542,8 @@ ohos_unittest("CooperateTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -606,6 +618,8 @@ ohos_unittest("CooperateContextTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -681,6 +695,8 @@ ohos_unittest("CooperateFreeTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -756,6 +772,8 @@ ohos_unittest("CooperateInTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -831,6 +849,8 @@ ohos_unittest("CooperateOutTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -906,6 +926,8 @@ ohos_unittest("DsoftbusHanderTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -981,6 +1003,8 @@ ohos_unittest("EventManagerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -1056,6 +1080,8 @@ ohos_unittest("HotAreaTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -1131,6 +1157,8 @@ ohos_unittest("InputDeviceMgrTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -1205,6 +1233,8 @@ ohos_unittest("MouseLocationTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -1280,6 +1310,8 @@ ohos_unittest("StateMachineTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 

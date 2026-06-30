@@ -29,6 +29,8 @@ deps_ex = [
   "samgr:samgr_proxy",
   "c_utils:utils",
   "image_framework:image_native",
+  "egl:libEGL",
+  "opengles:libGLES",
 ]
 
 ohos_fuzztest("DeviceStatusClientFuzzTest") {

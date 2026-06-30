@@ -52,6 +52,8 @@ ohos_source_set("intention_cooperate_server") {
     "image_framework:image_native",
     "input:libmmi-client",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

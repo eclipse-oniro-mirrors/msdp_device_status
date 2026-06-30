@@ -53,6 +53,8 @@ ohos_unittest("InteractionManagerTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 

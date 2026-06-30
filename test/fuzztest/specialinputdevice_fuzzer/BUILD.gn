@@ -27,6 +27,8 @@ deps_ex = [
   "hilog:libhilog",
   "input:libmmi-client",
   "window_manager:libdm",
+  "egl:libEGL",
+  "opengles:libGLES",
 ]
 
 ###############################fuzztest#################################

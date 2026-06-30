@@ -131,6 +131,8 @@ ohos_unittest("DragDataManagerTest") {
     "ipc:ipc_single",
     "libxml2:libxml2",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -235,6 +237,8 @@ ohos_unittest("DeviceStatusMsdpClientImplTest") {
     "window_manager:libwm",
     "window_manager:libwm_lite",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 

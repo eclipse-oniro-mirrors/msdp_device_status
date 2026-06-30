@@ -64,6 +64,8 @@ ohos_unittest("device_status_algorithm_test") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
   defines = []
   if (device_status_sensor_enable) {
