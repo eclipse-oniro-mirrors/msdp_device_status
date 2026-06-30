@@ -23,8 +23,9 @@
 namespace OHOS {
 namespace Msdp {
 const std::map<int32_t, std::string> ERROR_MESSAGES = {
-    {PERMISSION_EXCEPTION, "Permission exception."},
-    {DEVICE_EXCEPTION, "The device does not support this API."},
+    {PERMISSION_EXCEPTION, "Permission denied."},
+    {NOT_SYSTEM_APP_EXCEPTION, "Not system application."},
+    {DEVICE_EXCEPTION, "Capability not supported. Function can not work correctly due to limited device capabilities."},
     {SERVICE_EXCEPTION, "Service exception."},
     {SUBSCRIBE_EXCEPTION, "Subscription failed."},
     {UNSUBSCRIBE_EXCEPTION, "Unsubscription failed."},

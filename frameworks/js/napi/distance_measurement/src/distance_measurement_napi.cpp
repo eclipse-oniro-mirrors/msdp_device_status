@@ -52,7 +52,7 @@ constexpr size_t MAX_ARG_STRING_LEN = 512;
 constexpr int32_t NAPI_INDEX_ZERO = 0;
 constexpr int32_t NAPI_INDEX_ONE = 1;
 constexpr int32_t NAPI_INDEX_TWO = 2;
-constexpr int32_t E_NO_PERMISSION { 60882961 };
+constexpr int32_t E_SERVICE_INNER_ERR { 60882949 };
 } // namespace
 
 std::mutex g_mutex;
@@ -689,11 +689,6 @@ bool DistanceMeasurementNapi::DoSubscribe(napi_env env, napi_value jsThis,
         ThrowErr(env, SUBSCRIBE_EXCEPTION, "Failed to get g_DistanceMeasurementNapi");
         return false;
     }
-    if (g_DistanceMeasurementNapi->g_distanceMeasurementHandle == nullptr && !LoadLibrary()) {
-        ThrowErr(env, DEVICE_EXCEPTION, "Device not support");
-        return false;
-    }
-
     if (!CreateDistMeasureCallback(env, callback, cdistMeasureData)) {
         FI_HILOGE("Create distance measurement callback failed");
         return false;
@@ -713,6 +708,10 @@ bool DistanceMeasurementNapi::CreateDistMeasureCallback(napi_env env,
         ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
         return false;
     }
+    if (g_DistanceMeasurementNapi->g_distanceMeasurementHandle == nullptr && !LoadLibrary()) {
+        ThrowErr(env, DEVICE_EXCEPTION, "Device not support");
+        return false;
+    }
     if (distMeasureCallback_ == nullptr) {
         FI_HILOGI("Don't find callback, to create");
         if (g_DistanceMeasurementNapi->g_subscribeDistanceMeasurementFunc == nullptr) {
@@ -730,24 +729,21 @@ bool DistanceMeasurementNapi::CreateDistMeasureCallback(napi_env env,
     } else {
         distMeasureCallback_->UpdateEnv(env);
     }
-    std::shared_ptr<OHOS::Msdp::IDistanceMeasurementListener> listener =
-        std::make_shared<DistMeasureListener>(env);
+    std::shared_ptr<OHOS::Msdp::IDistanceMeasurementListener> listener = std::make_shared<DistMeasureListener>(env);
     FI_HILOGI("g_subscribeDistanceMeasurementFunc call start");
-    int32_t ret = g_DistanceMeasurementNapi->g_subscribeDistanceMeasurementFunc(
-        listener, cdistMeasureData);
+    int32_t ret = g_DistanceMeasurementNapi->g_subscribeDistanceMeasurementFunc(listener, cdistMeasureData);
     FI_HILOGI("g_subscribeDistanceMeasurementFunc call end");
     if (ret == 0) {
         FI_HILOGI("Subscribe distance measurement callback success");
         distMeasureCallback_ = listener;
         return true;
     }
-
     FI_HILOGE("Subscribe distance measurement callback failed");
     g_DistanceMeasurementNapi->RemoveCallback(cdistMeasureData);
-    if (ret == E_NO_PERMISSION) {
-        ThrowErr(env, PERMISSION_EXCEPTION, "Permission denied.");
-    } else {
+    if (ret == E_SERVICE_INNER_ERR) {
         ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
+    } else {
+        ThrowErr(env, ret, "Service check permission or device type exception.");
     }
     return false;
 }
@@ -756,12 +752,16 @@ bool DistanceMeasurementNapi::DeleteDistMeasureCallback(napi_env env, napi_value
     CDistMeasureData cdistMeasureData)
 {
     FI_HILOGI("Enter");
-    if (distMeasureCallback_ == nullptr) {
+    if (distMeasureCallback_ == nullptr || !g_DistanceMeasurementNapi->HasRegisteredCallback(cdistMeasureData)) {
         FI_HILOGI("never before Subscribe  distance measurement callback");
         return true;
     }
     if (g_DistanceMeasurementNapi == nullptr) {
         ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
+        return false;
+    }
+    if (g_DistanceMeasurementNapi->g_distanceMeasurementHandle == nullptr && !LoadLibrary()) {
+        ThrowErr(env, DEVICE_EXCEPTION, "Device not support");
         return false;
     }
     if (g_DistanceMeasurementNapi->g_unsubscribeDistanceMeasurementFunc == nullptr) {
@@ -782,10 +782,10 @@ bool DistanceMeasurementNapi::DeleteDistMeasureCallback(napi_env env, napi_value
     }
 
     FI_HILOGE("Unsubscribe distance measurement callback failed");
-    if (ret == E_NO_PERMISSION) {
-        ThrowErr(env, PERMISSION_EXCEPTION, "Permission denied.");
-    } else {
+    if (ret == E_SERVICE_INNER_ERR) {
         ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
+    } else {
+        ThrowErr(env, ret, "Service check permission or device type exception.");
     }
     return false;
 }
@@ -793,10 +793,6 @@ bool DistanceMeasurementNapi::DeleteDistMeasureCallback(napi_env env, napi_value
 napi_value DistanceMeasurementNapi::OffDistanceMeasurement(napi_env env, napi_callback_info info)
 {
     FI_HILOGI("OffDistanceMeasurement Enter");
-    if (g_DistanceMeasurementNapi == nullptr) {
-        ThrowErr(env, UNSUBSCRIBE_EXCEPTION, "g_DistanceMeasurementNapi is nullptr");
-        return nullptr;
-    }
     size_t argc = NAPI_INDEX_TWO;
     napi_value args[NAPI_INDEX_TWO] = { 0 };
     napi_value jsThis;
@@ -832,10 +828,6 @@ napi_value DistanceMeasurementNapi::OffDistanceMeasurement(napi_env env, napi_ca
 napi_value DistanceMeasurementNapi::OffIndoorOrOutdoorIdentify(napi_env env, napi_callback_info info)
 {
     FI_HILOGI("OffIndoorOrOutdoorIdentify Enter");
-    if (g_DistanceMeasurementNapi == nullptr) {
-        ThrowErr(env, UNSUBSCRIBE_EXCEPTION, "g_DistanceMeasurementNapi is nullptr");
-        return nullptr;
-    }
     size_t argc = NAPI_INDEX_TWO;
     napi_value args[NAPI_INDEX_TWO] = { 0 };
     napi_value jsThis;
@@ -877,10 +869,6 @@ bool DistanceMeasurementNapi::DoUnsubscribe(napi_env env, napi_value jsParams,
         return false;
     }
     std::lock_guard<std::mutex> guard(g_mutex);
-    if (g_DistanceMeasurementNapi->g_distanceMeasurementHandle == nullptr && !LoadLibrary()) {
-        ThrowErr(env, DEVICE_EXCEPTION, "Device not support");
-        return false;
-    }
     CDistMeasureData cdistMeasureData {
         .type = typeStr,
         .deviceIds = distMeasureParams.deviceList,
@@ -898,6 +886,9 @@ bool DistanceMeasurementNapi::DoUnsubscribe(napi_env env, napi_value jsParams,
 napi_value DistanceMeasurementNapi::ModeInit(napi_env env, napi_value exports)
 {
     FI_HILOGI("ModeInit Enter");
+    DefineTechnologyType(env, exports);
+    DefineReportingMode(env, exports);
+    DefinePositionRelativeToDoor(env, exports);
     DefineDistanceRank(env, exports);
     FI_HILOGI("Exit");
     return exports;
@@ -936,18 +927,62 @@ void DistanceMeasurementNapi::SetUtf8StringProperty(napi_env env, napi_value tar
     SetPropertyName(env, targetObj, propName, prop);
 }
 
+void DistanceMeasurementNapi::DefineTechnologyType(napi_env env, napi_value exports)
+{
+    napi_value technologyType;
+    napi_status status = napi_create_object(env, &technologyType);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to create technologyType object");
+        return;
+    }
+    SetInt32Property(env, technologyType, TechnologyType::BLE_RSSI, "BLE_RSSI");
+    SetInt32Property(env, technologyType, TechnologyType::WIFI_RSSI, "WIFI_RSSI");
+    SetInt32Property(env, technologyType, TechnologyType::ULTRASOUND, "ULTRASOUND");
+    SetInt32Property(env, technologyType, TechnologyType::NEARLINK, "NEAR_LINK");
+    SetInt32Property(env, technologyType, TechnologyType::WIFI_BLE_RSSI, "WIFI_BLE_RSSI");
+    SetPropertyName(env, exports, "TechnologyType", technologyType);
+}
+
+void DistanceMeasurementNapi::DefineReportingMode(napi_env env, napi_value exports)
+{
+    napi_value reportingMode;
+    napi_status status = napi_create_object(env, &reportingMode);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to create reportingMode object");
+        return;
+    }
+    SetInt32Property(env, reportingMode, ReportingMode::REPORT_MODE_PERIODIC_REPORTING,
+        "REPORT_MODE_PERIODIC_REPORTING");
+    SetInt32Property(env, reportingMode, ReportingMode::REPORT_MODE_TRIGGERED_REPORTING,
+        "REPORT_MODE_TRIGGERED_REPORTING");
+    SetPropertyName(env, exports, "ReportingMode", reportingMode);
+}
+
+void DistanceMeasurementNapi::DefinePositionRelativeToDoor(napi_env env, napi_value exports)
+{
+    napi_value positionRelativeToDoor;
+    napi_status status = napi_create_object(env, &positionRelativeToDoor);
+    if (status != napi_ok) {
+        FI_HILOGE("Failed to create positionRelativeToDoor object");
+        return;
+    }
+    SetInt32Property(env, positionRelativeToDoor, PositionRelativeToDoor::TYPE_OF_OUTDOOR, "OUTDOOR");
+    SetInt32Property(env, positionRelativeToDoor, PositionRelativeToDoor::TYPE_OF_INDOOR, "INDOOR");
+    SetPropertyName(env, exports, "PositionRelativeToDoor", positionRelativeToDoor);
+}
+
 void DistanceMeasurementNapi::DefineDistanceRank(napi_env env, napi_value exports)
 {
     napi_value distanceRank;
     napi_status status = napi_create_object(env, &distanceRank);
     if (status != napi_ok) {
-        FI_HILOGE("Failed to create object");
+        FI_HILOGE("Failed to create distanceRank object");
         return;
     }
-    SetUtf8StringProperty(env, distanceRank, "rank_ultra_short", "TYPE_RANK_ULTRA_SHORT_RANGE");
-    SetUtf8StringProperty(env, distanceRank, "rank_short", "TYPE_RANK_SHORT_RANGE");
-    SetUtf8StringProperty(env, distanceRank, "rank_medium_short", "TYPE_RANK_SHORT_MEDIUM_RANGE");
-    SetUtf8StringProperty(env, distanceRank, "rank_medium", "TYPE_RANK_MEDIUM_RANGE");
+    SetUtf8StringProperty(env, distanceRank, "rankUltraShort", "RANK_ULTRA_SHORT_RANGE");
+    SetUtf8StringProperty(env, distanceRank, "rankShort", "RANK_SHORT_RANGE");
+    SetUtf8StringProperty(env, distanceRank, "rankMediumShort", "RANK_SHORT_MEDIUM_RANGE");
+    SetUtf8StringProperty(env, distanceRank, "rankMedium", "RANK_MEDIUM_RANGE");
     SetPropertyName(env, exports, "DistanceRank", distanceRank);
 }
 
