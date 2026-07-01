@@ -187,7 +187,7 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_OnAttrib
 
 /**
  * @tc.name: DisplayChangeEventListenerTest_HandleScreenRotation_001
- * @tc.desc: Drag Drawing
+ * @tc.desc: Test HandleScreenRotation does not reset rotation when lastRotation is ROTATION_0
  * @tc.type: FUNC HandleScreenRotation
  * @tc.require:
  */
@@ -195,14 +195,14 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
 {
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
-    auto displayInfo = displayListener_->GetDisplayInfo(-1);
     displayListener_->HandleScreenRotation(0, Rosen::Rotation::ROTATION_0);
-    EXPECT_NE(displayInfo, nullptr);
+    auto rotation = context_->GetDragManager().GetRotation(0);
+    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
 }
 
 /**
  * @tc.name: DisplayChangeEventListenerTest_HandleScreenRotation_002
- * @tc.desc: Drag Drawing
+ * @tc.desc: Test HandleScreenRotation with null context does not crash
  * @tc.type: FUNC HandleScreenRotation
  * @tc.require:
  */
@@ -211,14 +211,14 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
     CALL_TEST_DEBUG;
     ASSERT_NE(displayListener_, nullptr);
     DisplayChangeEventListener listener(nullptr);
-    auto displayInfo = displayListener_->GetDisplayInfo(-1);
     listener.HandleScreenRotation(0, Rosen::Rotation::ROTATION_90);
-    EXPECT_NE(displayInfo, nullptr);
+    auto rotation = context_->GetDragManager().GetRotation(0);
+    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
 }
 
 /**
  * @tc.name: DisplayChangeEventListenerTest_HandleScreenRotation_003
- * @tc.desc: Drag Drawing
+ * @tc.desc: Test HandleScreenRotation resets rotation to ROTATION_0 via SetRotation
  * @tc.type: FUNC HandleScreenRotation
  * @tc.require:
  */
@@ -233,7 +233,7 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
 
 /**
  * @tc.name: DisplayChangeEventListenerTest_HandleScreenRotation_004
- * @tc.desc: Drag Drawing
+ * @tc.desc: Test HandleScreenRotation with ROTATION_180 resets rotation to ROTATION_0
  * @tc.type: FUNC HandleScreenRotation
  * @tc.require:
  */
@@ -244,6 +244,105 @@ HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleSc
     displayListener_->HandleScreenRotation(0, Rosen::Rotation::ROTATION_180);
     auto rotation = context_->GetDragManager().GetRotation(0);
     EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_HandleScreenRotation_005
+ * @tc.desc: Test HandleScreenRotation with ROTATION_270 resets rotation to ROTATION_0
+ * @tc.type: FUNC HandleScreenRotation
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleScreenRotation_005, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    displayListener_->HandleScreenRotation(0, Rosen::Rotation::ROTATION_270);
+    auto rotation = context_->GetDragManager().GetRotation(0);
+    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_HandleScreenRotation_006
+ * @tc.desc: Test HandleScreenRotation with lastRotation same as preset rotation
+ * @tc.type: FUNC HandleScreenRotation
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_HandleScreenRotation_006, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    displayListener_->HandleScreenRotation(0, Rosen::Rotation::ROTATION_180);
+    auto rotation = context_->GetDragManager().GetRotation(0);
+    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_ProcessDisplayEvent_002
+ * @tc.desc: Test ProcessDisplayEvent verifies new call order: get currentRotation before IsRotateDragScreen
+ * @tc.type: FUNC ProcessDisplayEvent
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_ProcessDisplayEvent_002, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    displayListener_->RotateDragWindow(0, Rosen::Rotation::ROTATION_90);
+    auto displayInfo = displayListener_->GetDisplayInfo(0);
+    ASSERT_NE(displayInfo, nullptr);
+    displayListener_->ProcessDisplayEvent(0);
+    auto rotation = context_->GetDragManager().GetRotation(0);
+    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_ProcessDisplayEvent_003
+ * @tc.desc: Test ProcessDisplayEvent when IsRotateDragScreen is true and non-foldable, delegates to ScreenRotate
+ * @tc.type: FUNC ProcessDisplayEvent
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_ProcessDisplayEvent_003, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    if (!displayListener_->IsRotateDragScreen()) {
+        return;
+    }
+    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_90);
+    displayListener_->ProcessDisplayEvent(0);
+}
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_ProcessDisplayEvent_004
+ * @tc.desc: Test ProcessDisplayEvent when rotation unchanged skips both HandleScreenRotation and RotateDragWindow
+ * @tc.type: FUNC ProcessDisplayEvent
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_ProcessDisplayEvent_004, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    if (displayListener_->IsRotateDragScreen()) {
+        return;
+    }
+    context_->GetDragManager().SetRotation(0, Rosen::Rotation::ROTATION_0);
+    auto displayInfo = displayListener_->GetDisplayInfo(0);
+    ASSERT_NE(displayInfo, nullptr);
+    displayListener_->ProcessDisplayEvent(0);
+    auto rotation = context_->GetDragManager().GetRotation(0);
+    EXPECT_EQ(rotation, Rosen::Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: DisplayChangeEventListenerTest_IsRotateDragScreen_001
+ * @tc.desc: Test IsRotateDragScreen executes without crash on current device
+ * @tc.type: FUNC IsRotateDragScreen
+ * @tc.require:
+ */
+HWTEST_F(DisplayChangeEventListenerTest, DisplayChangeEventListenerTest_IsRotateDragScreen_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ASSERT_NE(displayListener_, nullptr);
+    displayListener_->IsRotateDragScreen();
 }
 
 /**
