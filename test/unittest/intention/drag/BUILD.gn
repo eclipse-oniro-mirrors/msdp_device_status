@@ -79,6 +79,8 @@ ohos_unittest("DragManagerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "common_event_service:cesfwk_innerkits",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -153,6 +155,8 @@ ohos_unittest("DragServerTest") {
     "safwk:system_ability_fwk",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -219,6 +223,8 @@ ohos_unittest("DragClientTest") {
     "safwk:system_ability_fwk",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -281,6 +287,8 @@ ohos_unittest("DragDrawingTest") {
     "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -338,6 +346,8 @@ ohos_unittest("DragDataUtilTest") {
     "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -399,6 +409,8 @@ ohos_unittest("DisplayChangeEventListenerTest") {
     "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 

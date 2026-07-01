@@ -117,6 +117,8 @@ if (!is_arkui_x) {
       "udmf:udmf_client",
       "window_manager:libdm",
       "window_manager:libwm_lite",
+      "egl:libEGL",
+      "opengles:libGLES",
     ]
 
     if (device_status_hisysevent_enable) {
@@ -170,6 +172,8 @@ if (!is_arkui_x) {
         "graphic_2d:librender_service_client",
         "input:libmmi-client",
         "window_manager:libdm",
+        "egl:libEGL",
+        "opengles:libGLES",
       ]
 
       subsystem_name = "${device_status_subsystem_name}"

@@ -88,6 +88,8 @@ ohos_unittest("TimerManagerTest") {
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 

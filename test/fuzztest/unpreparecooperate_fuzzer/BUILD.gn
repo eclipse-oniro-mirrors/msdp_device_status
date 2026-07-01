@@ -35,6 +35,8 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "window_manager:libwm",
   "window_manager:libdm",
+  "egl:libEGL",
+  "opengles:libGLES",
 ]
 
 ###############################fuzztest#################################

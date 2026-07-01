@@ -28,6 +28,8 @@ deps_ex = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "c_utils:utils",
+  "egl:libEGL",
+  "opengles:libGLES",
 ]
 
 ohos_fuzztest("DeviceStatusAgentFuzzTest") {
