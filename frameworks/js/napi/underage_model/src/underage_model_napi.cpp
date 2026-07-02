@@ -337,6 +337,11 @@ napi_value UnderageModelNapi::UnsubscribeUnderageModel(napi_env env, napi_callba
 
 bool UnderageModelNapi::ValidateAndGetDeviceInfo(napi_env env, napi_value arg, std::vector<DeviceInfo>& deviceInfoList)
 {
+    napi_valuetype type = napi_undefined;
+    CHKRF(napi_typeof(env, arg, &type), "napi_typeof fail");
+    if (type == napi_undefined || type == napi_null) { // 处理可选参数, 保持与静态接口处理一致
+        return true;
+    }
     bool isArray = false;
     if (napi_is_array(env, arg, &isArray) != napi_ok) {
         FI_HILOGE("napi_is_array failed");
@@ -492,8 +497,7 @@ napi_value UnderageModelNapi::UnsubscribeUserStatus(napi_env env, napi_callback_
         std::array<napi_valuetype, ARG_1> argTypes = { napi_number };
         validateArgsRes = ValidateArgsType(env, args, argc, argTypes);
     } else if (argc == UNSUBSCRIBE_TWO_PARA) {
-        std::array<napi_valuetype, ARG_2> argTypes = { napi_number, napi_function };
-        validateArgsRes = ValidateArgsType(env, args, argc, argTypes);
+        validateArgsRes = ValidateOptionalArgsType(env, argc, args[0], args[1]);
     }
     if (!validateArgsRes) {
         ThrowUnderageModelErr(env, PARAM_EXCEPTION, "validateargstype failed");
@@ -923,6 +927,26 @@ bool UnderageModelNapi::ValidateArgsType(napi_env env, napi_value *args, size_t 
         }
     }
     return true;
+}
+
+bool UnderageModelNapi::ValidateOptionalArgsType(napi_env env, size_t& argc, napi_value type, napi_value callback)
+{
+    napi_valuetype valueType = napi_undefined;
+    CHKRF(napi_typeof(env, type, &valueType), "napi_typeof fail");
+    if (valueType != napi_number) {
+        FI_HILOGE("Wrong argument type");
+        return false;
+    }
+
+    CHKRF(napi_typeof(env, callback, &valueType), "napi_typeof fail");
+    if (valueType == napi_function) { // 清理指定callback
+        return true;
+    } else if (valueType == napi_undefined || valueType == napi_null) {
+        argc = UNSUBSCRIBE_ONE_PARA; // callback属于napi_undefined/napi_null时, unsubscribe接口参数改为1个，清空所有callback
+        return true;
+    }
+    FI_HILOGE("Wrong argument callback");
+    return false;
 }
 
 bool UnderageModelNapi::TransJsToStr(napi_env env, napi_value value, std::string &str)
