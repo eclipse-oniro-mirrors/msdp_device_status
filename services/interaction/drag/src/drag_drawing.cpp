@@ -3584,10 +3584,12 @@ void DragDrawing::SetRsScreenId(uint64_t screenId)
 {
     FI_HILOGD("enter");
     uint64_t rsScreenId = screenId;
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if (!Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
         FI_HILOGE("ConvertScreenIdToRsScreenId failed");
         return;
     }
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     rsScreenId_ = rsScreenId;
 }
 
