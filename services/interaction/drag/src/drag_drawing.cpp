@@ -2860,6 +2860,7 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
         }
     }
     g_drawingInfo.rootNode->AddChild(g_drawingInfo.parentNode);
+    FI_HILOGI("InitCanvas done. nodes size:%{public}zu", g_drawingInfo.nodes.size());
 #ifndef OHOS_BUILD_PC_PRODUCT
     if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         std::shared_ptr<Rosen::RSCanvasNode> mouseIconNode =
@@ -2879,6 +2880,7 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
 void DragDrawing::CreateWindow()
 {
     bool isInitUiDirector = g_drawingInfo.isInitUiDirector.load();
+    FI_HILOGI("CreateWindow isInitUiDirector:%{public}s", isInitUiDirector ? "true" : "false");
     if (isInitUiDirector || rsUiDirector_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
@@ -3422,7 +3424,7 @@ void DragDrawing::PrintDragShadowInfo()
 
 bool DragDrawing::ParserFilterInfo(const std::string &filterInfoStr, FilterInfo &filterInfo)
 {
-    FI_HILOGD("FilterInfo size:%{public}zu, filterInfo:%{public}s", filterInfoStr.size(), filterInfoStr.c_str());
+    FI_HILOGI("FilterInfo size:%{public}zu, filterInfo:%{public}s", filterInfoStr.size(), filterInfoStr.c_str());
     if (filterInfoStr.empty()) {
         FI_HILOGD("FilterInfo is empty");
         return false;
