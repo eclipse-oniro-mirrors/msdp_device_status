@@ -179,31 +179,13 @@ void DisplayChangeEventListener::GetAllScreenAngles()
     }
 }
 
-sptr<Rosen::DisplayInfo> DisplayChangeEventListener::GetDisplayInfoById(Rosen::DisplayId displayId)
-{
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    if (display == nullptr) {
-        FI_HILOGE("Get display failed, display is nullptr");
-        return nullptr;
-    }
-    return display->GetDisplayInfo();
-}
-
 sptr<Rosen::DisplayInfo> DisplayChangeEventListener::GetDisplayInfo(Rosen::DisplayId displayId)
 {
-    sptr<Rosen::DisplayInfo> displayInfo = nullptr;
-#ifndef OHOS_BUILD_PC_PRODUCT
-    displayInfo = GetDisplayInfoById(displayId);
-#else
-    displayInfo = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
+    sptr<Rosen::DisplayInfo> displayInfo =
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
         FI_HILOGE("Get display info failed, display id:%{public}" PRIu64 "", displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        displayInfo = GetDisplayInfoById(0);
-#else
         displayInfo = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
         if (displayInfo == nullptr) {
             FI_HILOGE("Get display info failed, displayInfo is nullptr");
             return nullptr;

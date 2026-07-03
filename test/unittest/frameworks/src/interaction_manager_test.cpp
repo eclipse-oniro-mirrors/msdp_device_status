@@ -1070,11 +1070,7 @@ HWTEST_F(InteractionManagerTest, AddHotAreaListener_001, TestSize.Level1)
 HWTEST_F(InteractionManagerTest, AddHotAreaListener_002, TestSize.Level1)
 {
     CALL_DEBUG_ENTER;
-#ifndef OHOS_BUILD_PC_PRODUCT
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(0);
-#else
     auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
     CHKPV(display);
     g_screenWidth = display->GetWidth();
     g_screenHeight = display->GetHeight();
