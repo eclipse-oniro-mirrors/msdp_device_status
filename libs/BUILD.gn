@@ -56,7 +56,6 @@ ohos_shared_library("devicestatus_mock") {
 
   external_deps = [
     "c_utils:utils",
-    "cJSON:cjson_static",
     "cJSON:cjson",
     "hilog:libhilog",
   ]
@@ -104,7 +103,6 @@ ohos_shared_library("devicestatus_algo") {
 
   external_deps = [
     "ability_base:base",
-    "cJSON:cjson_static",
     "cJSON:cjson",
     "hilog:libhilog",
     "input:libmmi-client",
