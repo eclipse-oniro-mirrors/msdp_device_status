@@ -2864,11 +2864,23 @@ void DragDrawing::InitCanvas(int32_t width, int32_t height)
     FI_HILOGI("leave");
 }
 
+bool DragDrawing::IsInitUIDirector()
+{
+#ifdef OHOS_BUILD_CAR_PRODUCT
+    if (rsScreenId_ != lastRSScreenId_) {
+        lastRSScreenId_ = rsScreenId_;
+        FI_HILOGI("IsInitUIDirector lastRSScreenId_ != rsScreenId_");
+        return true;
+    }
+#endif
+    bool isInitUiDirector = g_drawingInfo.isInitUiDirector.load() || rsUiDirector_ == nullptr;
+    FI_HILOGI("CreateWindow isInitUiDirector:%{public}s", isInitUiDirector ? "true" : "false");
+    return isInitUiDirector;
+}
+
 void DragDrawing::CreateWindow()
 {
-    bool isInitUiDirector = g_drawingInfo.isInitUiDirector.load();
-    FI_HILOGI("CreateWindow isInitUiDirector:%{public}s", isInitUiDirector ? "true" : "false");
-    if (isInitUiDirector || rsUiDirector_ == nullptr) {
+    if (IsInitUIDirector()) {
         auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
         auto connectToRenderObj = Rosen::RSInterfaces::GetInstance().GetConnectToRenderToken(rsScreenId_);

@@ -425,7 +425,7 @@ private:
     void CalculateLightIntensity(float degreeX, float degreeY, LightIntensity &lightIntensity);
     bool ParseDropArea(JsonParser &jsonParser);
     void ResetDragAnimationParameter();
-
+    bool IsInitUIDirector();
 private:
     float currentDisplayX_ { 0.0f };
     float currentDisplayY_ { 0.0f };
@@ -461,6 +461,9 @@ private:
     void* dragExtHandler_ { nullptr };
     bool needRotatePixelMapXY_ { false };
     uint64_t rsScreenId_ { 0 };
+#ifdef OHOS_BUILD_CAR_PRODUCT
+    uint64_t lastRSScreenId_ { 0 };
+#endif
 #ifdef OHOS_ENABLE_PULLTHROW
     float pullThrowScale_ { 1.0 };
 #endif // OHOS_ENABLE_PULLTHROW
