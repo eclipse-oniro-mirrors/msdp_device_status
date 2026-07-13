@@ -5577,7 +5577,7 @@ void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)
     g_drawingInfo.surfaceNode->SetBounds(0, 0, surfaceNodeSize, surfaceNodeSize);
     g_drawingInfo.surfaceNode->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
     g_drawingInfo.surfaceNode->AttachToWindowContainer(rsScreenId_);
-    if (rsUiDirector_ == nullptr) {
+    if (rsUiDirector_ != nullptr) {
         rsUiDirector_->SendMessages();
     }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
