@@ -104,7 +104,6 @@ const std::map<const std::string, int32_t> MOTION_TYPE_MAP = {
     { "remotePhotoStandingDetect", MOTION_TYPE_REMOTE_PHOTO },
     { "holdingHandChanged", MOTION_TYPE_HOLDING_HAND_STATUS },
 };
-const constexpr char *HOVER_HAND_EVENT_NAME = "hoverHandChanged";
 std::mutex g_instancesMutex;
 std::unordered_map<napi_env, std::weak_ptr<MotionNapi>> g_instances;
 std::mutex g_exportsMutex;
@@ -1223,11 +1222,11 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("onPickupChange", OnPickupChange),
         DECLARE_NAPI_STATIC_FUNCTION("onRotateChange", OnRotateChange),
         DECLARE_NAPI_STATIC_FUNCTION("onSmartRotateChange", OnSmartRotateChange),
-        DECLARE_NAPI_STATIC_FUNCTION("onHoverHandChanged", UserStatusEventNapi::SubscribeHoverHandEvent),
+        DECLARE_NAPI_STATIC_FUNCTION("onHoverHandChange", UserStatusEventNapi::SubscribeHoverHandEvent),
         DECLARE_NAPI_STATIC_FUNCTION("offPickupChange", OffPickupChange),
         DECLARE_NAPI_STATIC_FUNCTION("offRotateChange", OffRotateChange),
         DECLARE_NAPI_STATIC_FUNCTION("offSmartRotateChange", OffSmartRotateChange),
-        DECLARE_NAPI_STATIC_FUNCTION("offHoverHandChanged", UserStatusEventNapi::UnsubscribeHoverHandEvent),
+        DECLARE_NAPI_STATIC_FUNCTION("offHoverHandChange", UserStatusEventNapi::UnsubscribeHoverHandEvent),
         DECLARE_NAPI_STATIC_FUNCTION("getRecentOperatingHandStatus", GetRecentOptHandStatus),
         DECLARE_NAPI_STATIC_PROPERTY("HoverHandAction", UserStatusEventNapi::GetHoverHandAction(env)),
     };

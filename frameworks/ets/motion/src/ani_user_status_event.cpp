@@ -15,12 +15,17 @@
 
 #include "ani_user_status_event.h"
 
+#ifdef MOTION_ENABLE
+
 #include <dlfcn.h>
 
 #include <string_view>
 #include <utility>
 
 #include "ani_motion_event.h"
+#include "ohos.multimodalAwareness.motion.HoverHandDetectionArea.ani.1.hpp"
+#include "ohos.multimodalAwareness.motion.impl.hpp"
+#include "ohos.multimodalAwareness.motion.proj.hpp"
 
 namespace OHOS {
 namespace Msdp {
@@ -29,22 +34,51 @@ constexpr int32_t MAX_ERROR_CODE = 1000;
 constexpr int32_t UNSUPP_FRATURE_ERR = 0x3A1000D;
 constexpr int32_t DEVICE_UNSUPPORT_ERR = 0x3A10028;
 constexpr int32_t NOT_SYSTEM_ERR = 0x3A10006;
+constexpr int32_t DEVICE_NOT_SUPPORT = 0x3A10029;
+constexpr int32_t POINTER_ACTION_DOWN = 2;
+constexpr int32_t POINTER_ACTION_UP = 4;
 const constexpr char *USER_STATUS_CLIENT_SO_PATH = "libuser_status_client.z.so";
 const std::string_view SUBSCRIBE_CALLBACK_FUNC_NAME = { "SubscribeCallback" };
 const std::string_view SUBSCRIBE_HOVER_HAND_FUNC_NAME = { "SubscribeHoverHandEvent" };
-const std::string_view UNSUBSCRIBE_FUNC_NAME = { "Unsubscribe" };
-
+const std::string_view UNSUBSCRIBE_FUNC_NAME = { "UnsubscribeHoverHandEvent" };
+ani_vm *AniUserStatusEvent::vm_ = nullptr;
 void AniUserStatusDataCallback::OnReceiveData(std::shared_ptr<UserStatusData> userStatusData)
 {
-    AniUserStatusEvent::GetInstance()->OnUserStatusData(std::move(userStatusData));
+    AniUserStatusEvent::GetInstance().OnUserStatusData(std::move(userStatusData));
 }
 
-std::shared_ptr<AniUserStatusEvent> AniUserStatusEvent::GetInstance()
+AniUserStatusEvent &AniUserStatusEvent::GetInstance()
 {
-    static std::once_flag flag;
-    static std::shared_ptr<AniUserStatusEvent> instance_;
-    std::call_once(flag, []() { instance_ = std::make_shared<AniUserStatusEvent>(); });
-    return instance_;
+    static AniUserStatusEvent instance;
+    return instance;
+}
+
+AniUserStatusEvent::~AniUserStatusEvent()
+{
+    if (userStatusHandle_ != nullptr) {
+        dlclose(userStatusHandle_);
+        userStatusHandle_ = nullptr;
+    }
+    subscribeCallbackFunc_ = nullptr;
+    subscribeHoverHandFunc_ = nullptr;
+    unsubscribeFunc_ = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        for (auto &iter : callbacks_) {
+            if (iter.second == nullptr) {
+                continue;
+            }
+            for (auto item : iter.second->onRefSets) {
+                auto env = taihe::get_env();
+                if (env == nullptr || ANI_OK != env->GlobalReference_Delete(item)) {
+                    FI_HILOGE("Global Reference delete fail");
+                }
+            }
+            iter.second->onRefSets.clear();
+            iter.second = nullptr;
+        }
+        callbacks_.clear();
+    }
 }
 
 bool AniUserStatusEvent::SubscribeHoverHandEvent(const HoverHandDetectionArea &area, uint32_t duration, uintptr_t opq)
@@ -64,7 +98,7 @@ bool AniUserStatusEvent::SubscribeHoverHandEvent(const HoverHandDetectionArea &a
     }
     if (!AddCallback(HOVER_HAND_FEATURE_ID, opq)) {
         FI_HILOGE("AddCallback failed");
-        taihe::set_business_error(SERVICE_EXCEPTION, "AddCallback failed");
+        taihe::set_business_error(SUBSCRIBE_EXCEPTION, "AddCallback failed");
         return false;
     }
     return true;
@@ -75,20 +109,26 @@ bool AniUserStatusEvent::UnsubscribeHoverHandEvent(uintptr_t opq)
     if (opq == 0) {
         if (!RemoveAllCallback(HOVER_HAND_FEATURE_ID)) {
             FI_HILOGE("RemoveAllCallback failed");
-            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveAllCallback failed");
+            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "RemoveAllCallback failed");
             return false;
         }
     } else {
         if (!RemoveCallback(HOVER_HAND_FEATURE_ID, opq)) {
             FI_HILOGE("RemoveCallback failed");
-            taihe::set_business_error(SERVICE_EXCEPTION, "RemoveCallback failed");
+            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "RemoveCallback failed");
             return false;
         }
     }
-    if (!UnsubscribeFromUserStatus()) {
-        FI_HILOGE("UnSubscribeCallback failed");
-        return false;
+
+    if (IsFeatureEventsEmpty(HOVER_HAND_FEATURE_ID)) {
+        if (!UnsubscribeFromUserStatus()) {
+            FI_HILOGE("UnsubscribeFromUserStatus failed");
+            return false;
+        }
+    } else {
+        FI_HILOGD("no need to call unsubscribe yet");
     }
+
     if (IsEmptyEvents()) {
         ResetCallback();
     }
@@ -97,15 +137,23 @@ bool AniUserStatusEvent::UnsubscribeHoverHandEvent(uintptr_t opq)
 
 void AniUserStatusEvent::OnUserStatusData(std::shared_ptr<UserStatusData> userStatusData)
 {
+    if (userStatusData == nullptr) {
+        FI_HILOGE("userStatusData is nullptr");
+        return;
+    }
     uint32_t featureId = userStatusData->GetFeature();
+    HoverHandAction action = ConvertToHoverHandAction(userStatusData->GetPointerAction());
+    if (action == HoverHandAction::INVALID) {
+        return;
+    }
     std::lock_guard<std::mutex> guard(mutex_);
     if (vm_ == nullptr) {
         FI_HILOGE("vm_ is nullptr");
         return;
     }
     auto typeIter = callbacks_.find(featureId);
-    if (typeIter == callbacks_.end()) {
-        FI_HILOGE("featureId: %{public}d not found", featureId);
+    if (typeIter == callbacks_.end() || typeIter->second == nullptr) {
+        FI_HILOGE("featureId: %{public}d not found or callback is nullptr", featureId);
         return;
     }
     ani_env *env = AttachAniEnv(vm_);
@@ -115,12 +163,12 @@ void AniUserStatusEvent::OnUserStatusData(std::shared_ptr<UserStatusData> userSt
     }
     for (auto handler : typeIter->second->onRefSets) {
         std::vector<ani_ref> args;
-        ani_object userDataAni = CreateHoverHandEventDataAni(env, userStatusData);
-        if (userDataAni == nullptr) {
-            HILOG_ERROR(LOG_CORE, "Failed to create userDataAni object.");
+        ani_object actionAni = CreateHoverHandActionAni(env, action);
+        if (actionAni == nullptr) {
+            HILOG_ERROR(LOG_CORE, "Failed to create actionAni object.");
             continue;
         }
-        args.push_back(static_cast<ani_ref>(userDataAni));
+        args.push_back(static_cast<ani_ref>(actionAni));
         ani_ref callResult;
         if (env->FunctionalObject_Call(static_cast<ani_fn_object>(handler), args.size(), args.data(), &callResult) !=
             ANI_OK) {
@@ -141,8 +189,7 @@ bool AniUserStatusEvent::LoadLibrary()
     if (userStatusHandle_ == nullptr) {
         userStatusHandle_ = dlopen(USER_STATUS_CLIENT_SO_PATH, RTLD_LAZY);
         if (userStatusHandle_ == nullptr) {
-            FI_HILOGE("Load failed, p is %{private}s, error after: %{public}s", USER_STATUS_CLIENT_SO_PATH.c_str(),
-                dlerror());
+            FI_HILOGE("Load failed: %{private}s, error after: %{public}s", USER_STATUS_CLIENT_SO_PATH, dlerror());
             taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
             return false;
         }
@@ -166,7 +213,7 @@ bool AniUserStatusEvent::InitializeCallback()
                 reinterpret_cast<SubscribeCallbackFunc>(dlsym(userStatusHandle_, SUBSCRIBE_CALLBACK_FUNC_NAME.data()));
             if (subscribeCallbackFunc_ == nullptr) {
                 FI_HILOGE("find symbol failed, error: %{public}s", dlerror());
-                taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Find symbol failed");
+                taihe::set_business_error(SERVICE_EXCEPTION, "Find symbol failed");
                 return false;
             }
         }
@@ -194,14 +241,14 @@ bool AniUserStatusEvent::SubscribeToUserStatus(const HoverHandDetectionArea &are
         if (subscribeHoverHandFunc_ == nullptr) {
             FI_HILOGE(
                 "%{public}s find symbol failed, error: %{public}s", SUBSCRIBE_HOVER_HAND_FUNC_NAME.data(), dlerror());
-            taihe::set_business_error(SUBSCRIBE_EXCEPTION, "Find symbol failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "Find symbol failed");
             return false;
         }
     }
     int32_t ret = subscribeHoverHandFunc_(HOVER_HAND_FEATURE_ID, area, duration);
     if (ret == RET_OK) {
         return true;
-    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
+    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR || ret == DEVICE_NOT_SUPPORT) {
         FI_HILOGE("failed to subscribe: %{public}d", ret);
         taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
         return false;
@@ -221,7 +268,7 @@ bool AniUserStatusEvent::UnsubscribeFromUserStatus()
         unsubscribeFunc_ = reinterpret_cast<UnsubscribeFunc>(dlsym(userStatusHandle_, UNSUBSCRIBE_FUNC_NAME.data()));
         if (unsubscribeFunc_ == nullptr) {
             FI_HILOGE("%{public}s find symbol failed, error: %{public}s", UNSUBSCRIBE_FUNC_NAME.data(), dlerror());
-            taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Find symbol failed");
+            taihe::set_business_error(SERVICE_EXCEPTION, "Find symbol failed");
             return false;
         }
     }
@@ -229,7 +276,7 @@ bool AniUserStatusEvent::UnsubscribeFromUserStatus()
     if (ret == RET_OK) {
         FI_HILOGI("success");
         return true;
-    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR) {
+    } else if (ret == DEVICE_UNSUPPORT_ERR || ret == UNSUPP_FRATURE_ERR || ret == DEVICE_NOT_SUPPORT) {
         FI_HILOGE("failed to unsubscribe");
         taihe::set_business_error(DEVICE_EXCEPTION, "The device does not support this API.");
         return false;
@@ -239,13 +286,14 @@ bool AniUserStatusEvent::UnsubscribeFromUserStatus()
         return false;
     }
     FI_HILOGE("Unsubscribe failed, ret: %{public}d", ret);
+    taihe::set_business_error(UNSUBSCRIBE_EXCEPTION, "Unsubscribe failed");
     return false;
 }
 
-bool AniUserStatusEvent::AddCallback(int32_t eventType, uintptr_t opq)
+bool AniUserStatusEvent::AddCallback(uint32_t eventType, uintptr_t opq)
 {
     std::lock_guard<std::mutex> guard(mutex_);
-    FI_HILOGI("event: %{public}d", eventType);
+    FI_HILOGI("event: %{public}u", eventType);
     ani_env *env = taihe::get_env();
     if (env == nullptr) {
         FI_HILOGE("ani_env is nullptr");
@@ -260,7 +308,7 @@ bool AniUserStatusEvent::AddCallback(int32_t eventType, uintptr_t opq)
     }
     auto iter = callbacks_.find(eventType);
     if (iter == callbacks_.end()) {
-        FI_HILOGD("found event: %{public}d", eventType);
+        FI_HILOGD("found event: %{public}u", eventType);
         auto listener = std::make_shared<JsUserStatusEventCallback>();
         std::set<ani_ref> onRefSets;
         listener->onRefSets = onRefSets;
@@ -274,13 +322,13 @@ bool AniUserStatusEvent::AddCallback(int32_t eventType, uintptr_t opq)
         FI_HILOGD("Insert finish");
         return true;
     }
-    FI_HILOGD("found event: %{public}d", eventType);
+    FI_HILOGD("found event: %{public}u", eventType);
     if (iter->second == nullptr || iter->second->onRefSets.empty()) {
         FI_HILOGE("listener is nullptr or onRefSets empty");
         callbacks_.erase(iter);
         return false;
     }
-    FI_HILOGD("Check type: %{public}d same handle", eventType);
+    FI_HILOGD("Check type: %{public}u same handle", eventType);
     if (!InsertRef(iter->second, onHandlerRef)) {
         FI_HILOGE("Failed to insert ref");
         callbacks_.erase(iter);
@@ -289,13 +337,13 @@ bool AniUserStatusEvent::AddCallback(int32_t eventType, uintptr_t opq)
     return true;
 }
 
-bool AniUserStatusEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
+bool AniUserStatusEvent::RemoveCallback(uint32_t eventType, uintptr_t opq)
 {
     std::lock_guard<std::mutex> guard(mutex_);
-    FI_HILOGI("event: %{public}d", eventType);
+    FI_HILOGI("event: %{public}u", eventType);
     auto iter = callbacks_.find(eventType);
     if (iter == callbacks_.end()) {
-        FI_HILOGE("EventType: %{public}d not found", eventType);
+        FI_HILOGE("EventType: %{public}u not found", eventType);
         return false;
     }
     if (iter->second == nullptr || iter->second->onRefSets.empty()) {
@@ -309,11 +357,13 @@ bool AniUserStatusEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
         FI_HILOGE("GlobalReference_Create failed");
         return false;
     }
+    bool isCallbackRegistered = false;
     auto &refSet = iter->second->onRefSets;
     for (auto it = refSet.begin(); it != refSet.end();) {
         ani_boolean isEqual = false;
-        auto isDuplicate = (taihe::get_env()->Reference_StrictEquals(onHandlerRef, *it, &isEqual) == ANI_OK) && isEqual;
+        auto isDuplicate = (env->Reference_StrictEquals(onHandlerRef, *it, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
+            isCallbackRegistered = true;
             it = refSet.erase(it);
             FI_HILOGD("callback already remove");
         } else {
@@ -327,16 +377,16 @@ bool AniUserStatusEvent::RemoveCallback(int32_t eventType, uintptr_t opq)
         FI_HILOGE("Global Reference delete fail");
         return false;
     }
-    return true;
+    return isCallbackRegistered;
 }
 
-bool AniUserStatusEvent::RemoveAllCallback(int32_t eventType)
+bool AniUserStatusEvent::RemoveAllCallback(uint32_t eventType)
 {
     std::lock_guard<std::mutex> guard(mutex_);
-    FI_HILOGI("event: %{public}d", eventType);
+    FI_HILOGI("event: %{public}u", eventType);
     auto iter = callbacks_.find(eventType);
     if (iter == callbacks_.end()) {
-        FI_HILOGE("EventType: %{public}d not found", eventType);
+        FI_HILOGE("EventType: %{public}u not found", eventType);
         return false;
     }
     if (iter->second == nullptr) {
@@ -365,6 +415,20 @@ bool AniUserStatusEvent::IsEmptyEvents()
     return callbacks_.empty();
 }
 
+bool AniUserStatusEvent::IsFeatureEventsEmpty(uint32_t featureId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = callbacks_.find(featureId);
+    if (iter == callbacks_.end()) {
+        return true;
+    }
+    if (iter->second == nullptr || iter->second->onRefSets.empty()) {
+        callbacks_.erase(iter);
+        return true;
+    }
+    return false;
+}
+
 void AniUserStatusEvent::ResetCallback()
 {
     callback_ = nullptr;
@@ -378,11 +442,14 @@ bool AniUserStatusEvent::InsertRef(std::shared_ptr<JsUserStatusEventCallback> ca
     }
     for (const auto &item : callback->onRefSets) {
         ani_boolean isEqual = false;
-        auto isDuplicate = (taihe::get_env()->Reference_StrictEquals(onHandlerRef, item, &isEqual) == ANI_OK) &&
-                           isEqual;
+        auto env = taihe::get_env();
+        if (env == nullptr) {
+            FI_HILOGE("env is nullptr");
+            return false;
+        }
+        auto isDuplicate = (env->Reference_StrictEquals(onHandlerRef, item, &isEqual) == ANI_OK) && isEqual;
         if (isDuplicate) {
-            auto env = taihe::get_env();
-            if (env == nullptr || env->GlobalReference_Delete(onHandlerRef) != ANI_OK) {
+            if (env->GlobalReference_Delete(onHandlerRef) != ANI_OK) {
                 FI_HILOGE("Global Reference delete fail");
                 return false;
             }
@@ -429,18 +496,37 @@ ani_env *AniUserStatusEvent::AttachAniEnv(ani_vm *vm)
     return workerEnv;
 }
 
-ani_object AniUserStatusEvent::CreateHoverHandEventDataAni(ani_env *env, std::shared_ptr<UserStatusData> userStatusData)
+ani_object AniUserStatusEvent::CreateHoverHandActionAni(ani_env *env, HoverHandAction action)
 {
     if (env == nullptr) {
         FI_HILOGE("env is nullptr");
         return nullptr;
     }
-    auto data = ::ohos::multimodalAwareness::motion::HoverHandEventData{
-        .coordinateX = userStatusData->GetCoordinateY(),
-        .coordinateY = userStatusData->GetCoordinateY(),
-        .action = ::ohos::multimodalAwareness::motion::HoverHandAction::from_value(userStatusData->GetPointerAction()),
-    };
-    return taihe::into_ani<ohos::multimodalAwareness::motion::HoverHandEventData>(env, data);
+    ani_enum enumType;
+    ani_enum_item enumItem = nullptr;
+    ani_status ret = env->FindEnum("@ohos.multimodalAwareness.motion.motion.HoverHandAction", &enumType);
+    if (ret != ANI_OK) {
+        FI_HILOGE("[ANI] HoverHandAction not found");
+        return enumItem;
+    }
+    ret = env->Enum_GetEnumItemByIndex(enumType, ani_int(static_cast<int32_t>(action)), &enumItem);
+    if (ret != ANI_OK) {
+        FI_HILOGE("env Enum_GetEnumItemByIndex failed");
+        return enumItem;
+    }
+    return enumItem;
+}
+
+HoverHandAction AniUserStatusEvent::ConvertToHoverHandAction(int32_t pointerAction)
+{
+    if (pointerAction == POINTER_ACTION_DOWN) {
+        return HoverHandAction::DOWN;
+    } else if (pointerAction == POINTER_ACTION_UP) {
+        return HoverHandAction::UP;
+    }
+    return HoverHandAction::INVALID;
 }
 } // namespace Msdp
 } // namespace OHOS
+
+#endif // MOTION_ENABLE

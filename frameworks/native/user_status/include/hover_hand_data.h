@@ -22,13 +22,7 @@
 namespace OHOS {
 namespace Msdp {
 namespace UserStatusAwareness {
-enum class HoverHandAction : int32_t { BEGIN = 0, DOWN = BEGIN, MOVE = 1, UP = 2, END = UP };
-
-struct HoverHandEventData {
-    int32_t coordinateX;
-    int32_t coordinateY;
-    HoverHandAction action;
-};
+enum class HoverHandAction : int32_t { INVALID = -1, BEGIN = 0, DOWN = BEGIN, UP = 1, END = UP };
 
 struct HoverHandDetectionArea : public Parcelable {
     int32_t left = 0;

@@ -31,16 +31,11 @@ namespace Msdp {
 using UserStatusData = UserStatusAwareness::UserStatusData;
 using HoverHandAction = UserStatusAwareness::HoverHandAction;
 using HoverHandDetectionArea = UserStatusAwareness::HoverHandDetectionArea;
-using HoverHandEventData = UserStatusAwareness::HoverHandEventData;
 using HoverHandOptions = UserStatusAwareness::HoverHandOptions;
 
 typedef int32_t (*SubscribeCallbackFunc)(uint32_t feature, UserStatusAwareness::UserStatusDataCallbackFunc &callback);
 typedef int32_t (*SubscribeHoverHandFunc)(uint32_t feature, const HoverHandDetectionArea &area, uint32_t duration);
-typedef int32_t (*UnsubscribeFunc)(uint32_t feature);
-
-struct JsHoverEventData {
-    static napi_value Write(napi_env env, const HoverHandEventData &eventData);
-};
+typedef int32_t (*UnsubscribeHoverHandEventFunc)(uint32_t feature);
 
 struct JsHoverHandDetectionArea {
     static bool Read(napi_env env, napi_value object, HoverHandDetectionArea &area);
@@ -77,6 +72,7 @@ public:
     bool RemoveCallback(uint32_t featureId, napi_value handler);
     bool RemoveAllCallback(uint32_t featureId);
     bool IsEmptyEvents();
+    bool IsFeatureEventsEmpty(uint32_t featureId);
 
 private:
     // initialization
@@ -92,7 +88,7 @@ private:
     static bool ParseHoverHandParams(napi_env env, napi_value *args, size_t argc, HoverHandOptions &options);
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
     static int32_t GetFeatureId(const std::string &eventName);
-    static napi_value ConvertToHoverHandEventData(napi_env env, std::shared_ptr<UserStatusData> userStatusData);
+    static HoverHandAction ConvertToHoverHandAction(int32_t pointerAction);
 
     bool InsertRef(std::shared_ptr<JsUserStatusEventCallback> listener, napi_value handler);
     bool IsSameValue(napi_env env, const napi_value &lhs, const napi_value &rhs);
@@ -109,7 +105,7 @@ private:
     void *handle_{ nullptr };
     SubscribeCallbackFunc registerListenerFunc_{ nullptr };
     SubscribeHoverHandFunc subscribeHoverHandFunc_{ nullptr };
-    UnsubscribeFunc unsubscribeFunc_{ nullptr };
+    UnsubscribeHoverHandEventFunc unsubscribeFunc_{ nullptr };
 };
 } // namespace Msdp
 } // namespace OHOS

@@ -66,12 +66,14 @@ taihe_shared_library("motion_so") {
   sources += [
     "src/ani_constructor.cpp",
     "src/ani_motion_event.cpp",
+    "src/ani_user_status_event.cpp",
     "src/ohos.multimodalAwareness.motion.impl.cpp",
   ]
   deps = [
     ":run_taihe",
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
     "${device_status_utils_path}:devicestatus_util",
+    "${device_status_interfaces_path}/innerkits:user_status_data_util",
   ]
   defines = [ "LOG_DOMAIN = 0xD002210" ]
   if (device_status_motion_enable) {

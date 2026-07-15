@@ -16,6 +16,8 @@
 #ifndef ANI_USER_STATUS_EVENT_H
 #define ANI_USER_STATUS_EVENT_H
 
+#ifdef MOTION_ENABLE
+
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -27,8 +29,6 @@
 #include "device_info.h"
 #include "fi_log.h"
 #include "hover_hand_data.h"
-#include "ohos.multimodalAwareness.motion.impl.hpp"
-#include "ohos.multimodalAwareness.motion.proj.hpp"
 #include "taihe/runtime.hpp"
 #include "user_status_data.h"
 
@@ -37,7 +37,6 @@ namespace Msdp {
 using UserStatusData = UserStatusAwareness::UserStatusData;
 using HoverHandAction = UserStatusAwareness::HoverHandAction;
 using HoverHandDetectionArea = UserStatusAwareness::HoverHandDetectionArea;
-using HoverHandEventData = UserStatusAwareness::HoverHandEventData;
 using HoverHandOptions = UserStatusAwareness::HoverHandOptions;
 
 typedef int32_t (*SubscribeCallbackFunc)(uint32_t feature, UserStatusAwareness::UserStatusDataCallbackFunc &callback);
@@ -59,7 +58,9 @@ struct JsUserStatusEventCallback {
 
 class AniUserStatusEvent {
 public:
-    static std::shared_ptr<AniUserStatusEvent> GetInstance();
+    static AniUserStatusEvent &GetInstance();
+    AniUserStatusEvent() = default;
+    ~AniUserStatusEvent();
     bool SubscribeHoverHandEvent(const HoverHandDetectionArea &area, uint32_t duration, uintptr_t opq);
     bool UnsubscribeHoverHandEvent(uintptr_t opq);
     void OnUserStatusData(std::shared_ptr<UserStatusData> userStatusData);
@@ -72,17 +73,19 @@ private:
     bool UnsubscribeFromUserStatus();
 
     // callback management
-    bool AddCallback(int32_t eventType, uintptr_t opq);
-    bool RemoveAllCallback(int32_t eventType);
-    bool RemoveCallback(int32_t eventType, uintptr_t opq);
+    bool AddCallback(uint32_t eventType, uintptr_t opq);
+    bool RemoveAllCallback(uint32_t eventType);
+    bool RemoveCallback(uint32_t eventType, uintptr_t opq);
     bool IsEmptyEvents();
+    bool IsFeatureEventsEmpty(uint32_t featureId);
     void ResetCallback();
 
     // util
     static bool InsertRef(std::shared_ptr<JsUserStatusEventCallback> callback, ani_ref onHandlerRef);
     static ani_vm *GetAniVm(ani_env *env);
     static ani_env *AttachAniEnv(ani_vm *vm);
-    ani_object CreateHoverHandEventDataAni(ani_env *env, std::shared_ptr<UserStatusData> userStatusData);
+    ani_object CreateHoverHandActionAni(ani_env *env, HoverHandAction action);
+    static HoverHandAction ConvertToHoverHandAction(int32_t pointerAction);
 
 private:
     static ani_vm *vm_;
@@ -90,7 +93,7 @@ private:
 
     // js callbacks
     std::mutex mutex_;
-    std::map<int32_t, std::shared_ptr<JsUserStatusEventCallback>> callbacks_;
+    std::map<uint32_t, std::shared_ptr<JsUserStatusEventCallback>> callbacks_;
 
     // callbacks to userStatus
     UserStatusAwareness::UserStatusDataCallbackFunc callback_{ nullptr };
@@ -100,4 +103,7 @@ private:
 };
 } // namespace Msdp
 } // namespace OHOS
+
+#endif // MOTION_ENABLE
+
 #endif // ANI_USER_STATUS_EVENT_H
