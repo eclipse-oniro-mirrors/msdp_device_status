@@ -1552,6 +1552,34 @@ HWTEST_F(DragDrawingTest, DragDrawingTest65, TestSize.Level0)
     EXPECT_FALSE(g_dragMgr.dragDrawing_.rsUiDirector_ == nullptr);
 }
 
+/**
+ * @tc.name: DragDrawingTest66
+ * @tc.desc: Test SetRsScreenId with non-zero screenId, ConvertScreenIdToRsScreenId success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest66, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t validScreenId = 0;
+    g_dragMgr.dragDrawing_.SetRsScreenId(validScreenId);
+    EXPECT_EQ(g_dragMgr.dragDrawing_.rsScreenId_, validScreenId);
+}
+
+/**
+ * @tc.name: DragDrawingTest67
+ * @tc.desc: Test SetRsScreenId, convert fail branch, early return
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest67, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t invalidScreenId = UINT64_MAX;
+    g_dragMgr.dragDrawing_.SetRsScreenId(invalidScreenId);
+    EXPECT_NE(g_dragMgr.dragDrawing_.rsScreenId_, invalidScreenId);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

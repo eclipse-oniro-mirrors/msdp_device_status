@@ -177,8 +177,7 @@ public:
         const std::string &type);
     void Unsubscribe(DistanceMeasurementConfigParams const& configParams, optional_view<uintptr_t> opq,
         const std::string &type);
-    bool RemoveCallback(const std::map<CDistMeasureData, std::vector<std::shared_ptr<CallbackObject>>>::iterator &iter,
-        optional_view<uintptr_t> opq);
+    bool RemoveCallback(const CDistMeasureData& distMeasureDataSet, optional_view<uintptr_t> opq);
     bool VerifyParams(DistanceMeasurementConfigParams const& configParams, CDistMeasureData &distMeasureDataSet);
     bool IsValidTechnologyType(int32_t techType);
     bool IsValidReportMode(int32_t reportMode);
@@ -189,6 +188,8 @@ public:
         std::map<CDistMeasureData, std::vector<std::shared_ptr<CallbackObject>>> &jsCbMap);
     bool SubscribeDistanceMeasurement(const CDistMeasureData &cdistMeasureData);
     bool UnsubscribeDistanceMeasurement(const CDistMeasureData &cdistMeasureData);
+    std::optional<std::string> GetDistanceMeasurementAniErrMsg(int32_t errorCode);
+    void ThrowErr(int32_t errCode, const std::string &printMsg);
 
     static std::shared_ptr<EtsSpatialAwarenessManager> GetInstance();
 

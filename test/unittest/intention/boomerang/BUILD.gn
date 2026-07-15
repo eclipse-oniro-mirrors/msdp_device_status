@@ -155,6 +155,8 @@ ohos_unittest("BoomerangServerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 

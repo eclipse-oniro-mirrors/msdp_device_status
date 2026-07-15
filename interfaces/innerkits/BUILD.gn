@@ -112,6 +112,8 @@ ohos_source_set("drag_data_util") {
     "graphic_2d:librender_service_client",
     "image_framework:image_native",
     "window_manager:libdm_lite",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
  
   subsystem_name = "${device_status_subsystem_name}"

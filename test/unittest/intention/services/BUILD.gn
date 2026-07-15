@@ -103,6 +103,8 @@ ohos_unittest("IntentionServiceTest") {
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 
   if (device_status_motion_enable) {
@@ -264,6 +266,8 @@ ohos_unittest("IntentionServiceNewTest") {
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
  
   if (device_status_motion_enable) {
@@ -311,6 +315,8 @@ ohos_unittest("MonitorTest") {
     "hilog:libhilog",
     "input:libmmi-client",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -354,6 +360,8 @@ ohos_unittest("EnumeratorTest") {
     "hilog:libhilog",
     "input:libmmi-client",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -395,6 +403,8 @@ ohos_unittest("DeviceTest") {
     "hilog:libhilog",
     "input:libmmi-client",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -464,6 +474,8 @@ ohos_unittest("IntentionDeviceManagerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -534,6 +546,8 @@ ohos_unittest("IntentionDumperTest") {
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:libwmutil_base",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 
@@ -604,6 +618,8 @@ ohos_unittest("BoomerangDumperTest") {
     "window_manager:libwm",
     "window_manager:libwmutil_base",
     "samgr:samgr_proxy",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 }
 group("unittest") {

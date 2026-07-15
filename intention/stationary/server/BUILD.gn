@@ -78,6 +78,8 @@ ohos_source_set("intention_stationary_server") {
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 
   if (device_status_hisysevent_enable) {

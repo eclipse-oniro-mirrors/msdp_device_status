@@ -16,7 +16,6 @@
 #ifndef SCREEN_EVENT_NAPI_H
 #define SCREEN_EVENT_NAPI_H
 
-#include <uv.h>
 #include <set>
 #include <atomic>
 

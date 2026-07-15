@@ -113,6 +113,7 @@ public:
     virtual void UpdateEnv(napi_env env, napi_value jsThis);
     virtual void ClearEnv();
     virtual bool AddCallback(const CDistMeasureData &cdistMeasureData, napi_value handler);
+    virtual bool HasRegisteredCallback(const CDistMeasureData &cdistMeasureData);
     virtual void RemoveCallback(const CDistMeasureData &cdistMeasureData);
     virtual void OnDistMeasureEvent(size_t argc, const napi_value *argv, const std::string &type);
 protected:

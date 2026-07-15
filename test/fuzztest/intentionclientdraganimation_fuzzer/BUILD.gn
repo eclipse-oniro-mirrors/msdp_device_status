@@ -23,7 +23,9 @@ deps_ex = [
     "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
-    "image_framework:image_native"
+    "image_framework:image_native",
+    "egl:libEGL",
+    "opengles:libGLES",
 ]
 
 ###############################fuzztest#################################

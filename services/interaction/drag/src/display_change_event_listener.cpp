@@ -73,44 +73,40 @@ void DisplayChangeEventListener::ProcessDisplayEvent(Rosen::DisplayId displayId)
 {
     CHKPV(context_);
     Rosen::Rotation lastRotation = context_->GetDragManager().GetRotation(displayId);
-    if (IsRotateDragScreen()) {
-        HandleScreenRotation(displayId, lastRotation);
-        return;
-    }
     sptr<Rosen::DisplayInfo> displayInfo = GetDisplayInfo(displayId);
     if (displayInfo == nullptr) {
         FI_HILOGE("displayInfo is nullptr");
         return;
     }
     Rosen::Rotation currentRotation = displayInfo->GetRotation();
+    if (IsRotateDragScreen()) {
+        if (Rosen::DisplayManager::GetInstance().IsFoldable()) {
+            HandleScreenRotation(displayId, lastRotation);
+        } else {
+            ScreenRotate(currentRotation, lastRotation);
+        }
+        return;
+    }
     if (!IsRotation(displayId, currentRotation)) {
         FI_HILOGI("No need to rotate window for display id:%{public}" PRIu64"", displayId);
         return;
     }
-
-    bool isScreenRotation = false;
-    std::vector<std::string> foldRotatePolicys;
-    GetRotatePolicy(isScreenRotation, foldRotatePolicys);
     FI_HILOGI("Current rotation:%{public}d, lastRotation:%{public}d",
         static_cast<int32_t>(currentRotation), static_cast<int32_t>(lastRotation));
-    if (isScreenRotation) {
-        ScreenRotate(currentRotation, lastRotation);
-        return;
-    }
     RotateDragWindow(displayId, currentRotation);
 }
 
 bool DisplayChangeEventListener::IsRotateDragScreen()
 {
+    bool isScreenRotation = false;
+    std::vector<std::string> foldRotatePolicys;
+    GetRotatePolicy(isScreenRotation, foldRotatePolicys);
     if (Rosen::DisplayManager::GetInstance().IsFoldable()) {
 #ifdef OHOS_ENABLE_PULLTHROW
         if (IsFoldPC()) {
             return true;
         }
 #endif // OHOS_ENABLE_PULLTHROW
-        bool isScreenRotation = false;
-        std::vector<std::string> foldRotatePolicys;
-        GetRotatePolicy(isScreenRotation, foldRotatePolicys);
         if (foldRotatePolicys.size() < MAX_INDEX_LENGTH) {
             FI_HILOGE("foldRotatePolicys is invalid");
             return false;
@@ -132,6 +128,8 @@ bool DisplayChangeEventListener::IsRotateDragScreen()
             (isFold && (foldRotatePolicys[INDEX_FOLDED] == SCREEN_ROTATION))) {
             return true;
         }
+    } else {
+        return isScreenRotation;
     }
     return false;
 }
@@ -181,31 +179,13 @@ void DisplayChangeEventListener::GetAllScreenAngles()
     }
 }
 
-sptr<Rosen::DisplayInfo> DisplayChangeEventListener::GetDisplayInfoById(Rosen::DisplayId displayId)
-{
-    sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    if (display == nullptr) {
-        FI_HILOGE("Get display failed, display is nullptr");
-        return nullptr;
-    }
-    return display->GetDisplayInfo();
-}
-
 sptr<Rosen::DisplayInfo> DisplayChangeEventListener::GetDisplayInfo(Rosen::DisplayId displayId)
 {
-    sptr<Rosen::DisplayInfo> displayInfo = nullptr;
-#ifndef OHOS_BUILD_PC_PRODUCT
-    displayInfo = GetDisplayInfoById(displayId);
-#else
-    displayInfo = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
-#endif // OHOS_BUILD_PC_PRODUCT
+    sptr<Rosen::DisplayInfo> displayInfo =
+        Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
         FI_HILOGE("Get display info failed, display id:%{public}" PRIu64 "", displayId);
-#ifndef OHOS_BUILD_PC_PRODUCT
-        displayInfo = GetDisplayInfoById(0);
-#else
         displayInfo = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(0);
-#endif // OHOS_BUILD_PC_PRODUCT
         if (displayInfo == nullptr) {
             FI_HILOGE("Get display info failed, displayInfo is nullptr");
             return nullptr;
@@ -234,7 +214,7 @@ bool DisplayChangeEventListener::IsRotation(Rosen::DisplayId displayId, Rosen::R
     if (lastRotation != currentRotation) {
         FI_HILOGI("Need to rotate window for display id:%{public}d angle from %{public}d to %{public}d",
             static_cast<int32_t>(displayId), static_cast<int32_t>(lastRotation), static_cast<int32_t>(currentRotation));
-            return true;
+        return true;
     }
     return false;
 }

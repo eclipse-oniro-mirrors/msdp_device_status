@@ -67,6 +67,8 @@ ohos_source_set("intention_boomerang_server") {
     "input:libmmi-client",
     "samgr:samgr_proxy",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 
   if (device_status_boomerang_onestep) {

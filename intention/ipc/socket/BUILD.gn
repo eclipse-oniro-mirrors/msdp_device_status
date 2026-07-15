@@ -57,6 +57,8 @@ ohos_source_set("intention_socket_server") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

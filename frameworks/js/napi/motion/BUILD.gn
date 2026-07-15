@@ -53,6 +53,7 @@ ohos_shared_library("motion_napi") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   defines = [ "LOG_DOMAIN = 0xD002210" ]
@@ -61,7 +62,8 @@ ohos_shared_library("motion_napi") {
     external_deps += [
       "motion:motion_client",
       "motion:motion_interface_native",
-      "hiappevent:hiappevent_innerapi"
+      "hiappevent:hiappevent_innerapi",
+      "samgr:samgr_proxy",
     ]
   }
 

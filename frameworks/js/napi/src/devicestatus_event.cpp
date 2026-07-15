@@ -17,7 +17,6 @@
 
 #include <js_native_api.h>
 #include <map>
-#include <uv.h>
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"

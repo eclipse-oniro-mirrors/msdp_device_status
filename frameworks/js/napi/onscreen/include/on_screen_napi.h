@@ -16,8 +16,6 @@
 #ifndef ONSCREEN_NAPI_H
 #define ONSCREEN_NAPI_H
 
-#include <uv.h>
-
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 

@@ -95,7 +95,11 @@
         "hiappevent",
         "runtime_core",
         "time_service",
-        "openssl"
+        "openssl",
+        "node",
+        "egl",
+        "opengles",
+        "taihe_ffi_gen"
       ],
       "third_party": [
         "jsoncpp"

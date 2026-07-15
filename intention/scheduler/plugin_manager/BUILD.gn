@@ -59,6 +59,8 @@ ohos_source_set("intention_plugin_manager") {
     "image_framework:image_native",
     "input:libmmi-client",
     "window_manager:libdm",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

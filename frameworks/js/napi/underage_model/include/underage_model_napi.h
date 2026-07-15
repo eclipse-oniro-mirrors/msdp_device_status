@@ -103,6 +103,7 @@ private:
     template <std::size_t N>
     static bool ValidateArgsType(napi_env env, napi_value *args, size_t argc,
         const std::array<napi_valuetype, N> &expectedTypes);
+    static bool ValidateOptionalArgsType(napi_env env, size_t& argc, napi_value type, napi_value callback);
     static bool TransJsToStr(napi_env env, napi_value value, std::string &str);
     static bool ParseConfigParams(const std::string& params, std::map<std::string, std::vector<int32_t>> &configMap);
     static bool GetDeviceList(napi_env env, napi_value deviceNapiValue, std::vector<DeviceInfo>& deviceInfoList);

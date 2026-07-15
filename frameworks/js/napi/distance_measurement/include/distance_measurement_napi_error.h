@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace Msdp {
 constexpr int32_t PERMISSION_EXCEPTION { 201 };
+constexpr int32_t NOT_SYSTEM_APP_EXCEPTION { 202 };
 constexpr int32_t DEVICE_EXCEPTION { 801 };
 constexpr int32_t SERVICE_EXCEPTION { 35100001 };
 constexpr int32_t SUBSCRIBE_EXCEPTION { 35100002 };

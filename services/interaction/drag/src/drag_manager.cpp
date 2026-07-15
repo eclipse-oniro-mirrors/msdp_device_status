@@ -1717,10 +1717,10 @@ int32_t DragManager::OnStartDrag()
         screenId = display->GetScreenId();
     }
     FI_HILOGI("Get screen id:%{public}llu", static_cast<unsigned long long>(screenId));
-    dragDrawing_.SetScreenId(screenId);
+    dragDrawing_.SetRsScreenId(screenId);
     if (Rosen::DisplayManager::GetInstance().IsFoldable() && !isHicarOrSuperLauncher) {
         if (static_cast<uint64_t>(dragData.displayId) == displayId_) {
-            dragDrawing_.SetScreenId(screenId_);
+            dragDrawing_.SetRsScreenId(screenId_);
         }
     }
     UpdateDragStylePositon();

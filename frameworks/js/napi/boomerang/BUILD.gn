@@ -65,6 +65,7 @@ ohos_shared_library("metadatabinding_napi") {
     "image_framework:pixelmap_ndk",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   relative_install_dir = "module/multimodalawareness"

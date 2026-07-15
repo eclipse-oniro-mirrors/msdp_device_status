@@ -38,6 +38,8 @@ deps_ex = [
   "image_framework:image_native",
   "window_manager:libwm",
   "window_manager:libdm",
+  "egl:libEGL",
+  "opengles:libGLES",
 ]
 
 ###############################fuzztest#################################

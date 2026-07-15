@@ -88,6 +88,8 @@ ohos_shared_library("intention_cooperate") {
     "wifi:wifi_sdk",
     "window_manager:libdm",
     "window_manager:libwmutil_base",
+    "egl:libEGL",
+    "opengles:libGLES",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"
