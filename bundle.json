@@ -98,7 +98,8 @@
         "openssl",
         "node",
         "egl",
-        "opengles"
+        "opengles",
+        "taihe_ffi_gen"
       ],
       "third_party": [
         "jsoncpp"
