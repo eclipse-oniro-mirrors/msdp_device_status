@@ -314,7 +314,7 @@ HWTEST_F(DeviceStatusManagerTest, SubmitMetadataTest, TestSize.Level0) {
 
     deviceStatusManager->notifyListener_ = boomerangCallback_;
     result = deviceStatusManager->SubmitMetadata("metadata");
-    EXPECT_EQ(result, RET_OK);
+    EXPECT_EQ(result, RET_ERR);
     GTEST_LOG_(INFO) << "SubmitMetadataTest end";
 }
 
@@ -330,7 +330,7 @@ HWTEST_F(DeviceStatusManagerTest, SubmitMetadataTest03, TestSize.Level0) {
     deviceStatusManager->hasSubmitted_ = false;
     deviceStatusManager->bundleNameCache_.emplace(boomerangCallback_, "metadata");
     int32_t result = deviceStatusManager->SubmitMetadata("");
-    EXPECT_EQ(result, RET_OK);
+    EXPECT_EQ(result, RET_ERR);
     GTEST_LOG_(INFO) << "SubmitMetadataTest03 end";
 }
 

@@ -573,7 +573,7 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
     if (callbackRet != RET_OK) {
         FI_HILOGE("Get callbackBundleName fail.");
         notifyListener_->OnNotifyMetadata(emptyMetadata);
-        return RET_OK;
+        return RET_ERR;
     }
 
     std::string applinkBundleName;
@@ -581,7 +581,7 @@ int32_t DeviceStatusManager::SubmitMetadata(const std::string &metadata)
     if (applinkRet != RET_OK) {
         FI_HILOGE("Get applinkBundleName fail.");
         notifyListener_->OnNotifyMetadata(emptyMetadata);
-        return RET_OK;
+        return RET_ERR;
     }
 
     if (callbackBundleName.compare(applinkBundleName) == 0) {
