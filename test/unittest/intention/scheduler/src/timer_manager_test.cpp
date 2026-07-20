@@ -27,7 +27,6 @@ namespace DeviceStatus {
 
 using namespace testing::ext;
 namespace {
-ContextService *g_instance = nullptr;
 constexpr int32_t TIME_WAIT_FOR_OP_MS { 100 };
 constexpr int32_t DEFAULT_DELAY_TIME { 40 };
 constexpr int32_t RETRY_TIME { 2 };
@@ -37,352 +36,22 @@ constexpr int32_t DEFAULT_UNLOAD_COOLING_TIME_MS { 600 };
 constexpr int32_t ERROR_TIMERID { -1 };
 constexpr size_t ERROR_REPEAT_COUNT { 128 };
 constexpr int32_t ERROR_INTERVAL_MS { 1000000 };
-constexpr uint64_t DOMAIN_ID { 0x002220 };
 } // namespace
-
-ContextService::ContextService()
-{
-    ddm_ = std::make_unique<DDMAdapter>();
-    FI_HILOGI("OHOS_BUILD_ENABLE_INTENTION_FRAMEWORK is on");
-    OnStart();
-}
-
-ContextService::~ContextService()
-{
-    OnStop();
-}
-
-IDelegateTasks& ContextService::GetDelegateTasks()
-{
-    return delegateTasks_;
-}
-
-IDeviceManager& ContextService::GetDeviceManager()
-{
-    return devMgr_;
-}
-
-ITimerManager& ContextService::GetTimerManager()
-{
-    return timerMgr_;
-}
-
-IDragManager& ContextService::GetDragManager()
-{
-    return dragMgr_;
-}
-
-__attribute__((no_sanitize("cfi"))) ContextService* ContextService::GetInstance()
-{
-    static std::once_flag flag;
-    std::call_once(flag, [&]() {
-        ContextService *cooContext = new (std::nothrow) ContextService();
-        CHKPL(cooContext);
-        g_instance = cooContext;
-    });
-    return g_instance;
-}
-
-ISocketSessionManager& ContextService::GetSocketSessionManager()
-{
-    return socketSessionMgr_;
-}
-
-IDDMAdapter& ContextService::GetDDM()
-{
-    return *ddm_;
-}
-
-IPluginManager& ContextService::GetPluginManager()
-{
-    return *pluginMgr_;
-}
-
-IInputAdapter& ContextService::GetInput()
-{
-    return *input_;
-}
-
-IDSoftbusAdapter& ContextService::GetDSoftbus()
-{
-    return *dsoftbusAda_;
-}
-
-bool ContextService::Init()
-{
-    CALL_DEBUG_ENTER;
-    if (EpollCreate() != RET_OK) {
-        FI_HILOGE("Create epoll failed");
-        return false;
-    }
-    if (InitDelegateTasks() != RET_OK) {
-        FI_HILOGE("Delegate tasks init failed");
-        goto INIT_FAIL;
-    }
-
-    if (InitTimerMgr() != RET_OK) {
-        FI_HILOGE("TimerMgr init failed");
-        goto INIT_FAIL;
-    }
-
-    return true;
-
-INIT_FAIL:
-    EpollClose();
-    return false;
-}
-
-__attribute__((no_sanitize("cfi"))) int32_t ContextService::InitTimerMgr()
-{
-    CALL_DEBUG_ENTER;
-    int32_t ret = timerMgr_.Init(this);
-    if (ret != RET_OK) {
-        FI_HILOGE("TimerMgr init failed");
-        return ret;
-    }
-
-    ret = AddEpoll(EPOLL_EVENT_TIMER, timerMgr_.GetTimerFd());
-    if (ret != RET_OK) {
-        FI_HILOGE("AddEpoll for timer failed");
-    }
-    return ret;
-}
-
-int32_t ContextService::InitDelegateTasks()
-{
-    CALL_DEBUG_ENTER;
-    if (!delegateTasks_.Init()) {
-        FI_HILOGE("The delegate task init failed");
-        return RET_ERR;
-    }
-    int32_t ret = AddEpoll(EPOLL_EVENT_ETASK, delegateTasks_.GetReadFd());
-    if (ret != RET_OK) {
-        FI_HILOGE("AddEpoll error ret:%{public}d", ret);
-    }
-    FI_HILOGI("AddEpoll, epollfd:%{public}d, fd:%{public}d", epollFd_, delegateTasks_.GetReadFd());
-    return ret;
-}
-
-int32_t ContextService::EpollCreate()
-{
-    CALL_DEBUG_ENTER;
-    epollFd_ = ::epoll_create1(EPOLL_CLOEXEC);
-    if (epollFd_ < 0) {
-        FI_HILOGE("epoll_create1 failed:%{public}s", ::strerror(errno));
-        return RET_ERR;
-    }
-    fdsan_exchange_owner_tag(epollFd_, 0, DOMAIN_ID);
-    return RET_OK;
-}
-
-int32_t ContextService::AddEpoll(EpollEventType type, int32_t fd)
-{
-    CALL_DEBUG_ENTER;
-    if (!(type >= EPOLL_EVENT_BEGIN && type < EPOLL_EVENT_END)) {
-        FI_HILOGE("Invalid type:%{public}d", type);
-        return RET_ERR;
-    }
-    if (fcntl(fd, F_GETFD) == -1) {
-        FI_HILOGE("Invalid fd:%{public}d", fd);
-        return RET_ERR;
-    }
-    auto eventData = static_cast<device_status_epoll_event*>(malloc(sizeof(device_status_epoll_event)));
-    if (!eventData) {
-        FI_HILOGE("Malloc failed");
-        return RET_ERR;
-    }
-    eventData->fd = fd;
-    eventData->event_type = type;
-    FI_HILOGD("EventData:[fd:%{public}d, type:%{public}d]", eventData->fd, eventData->event_type);
-
-    eventMap_[fd] = eventData;
-    struct epoll_event ev {};
-    ev.events = EPOLLIN;
-    ev.data.ptr = eventData;
-    if (EpollCtl(fd, EPOLL_CTL_ADD, ev) != RET_OK) {
-        eventMap_.erase(fd);
-        free(eventData);
-        eventData = nullptr;
-        ev.data.ptr = nullptr;
-        FI_HILOGE("EpollCtl failed");
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
-int32_t ContextService::DelEpoll(EpollEventType type, int32_t fd)
-{
-    CALL_DEBUG_ENTER;
-    if (!(type >= EPOLL_EVENT_BEGIN && type < EPOLL_EVENT_END)) {
-        FI_HILOGE("Invalid type:%{public}d", type);
-        return RET_ERR;
-    }
-    if (fcntl(fd, F_GETFD) == -1) {
-        FI_HILOGE("Invalid fd:%{public}d", fd);
-        return RET_ERR;
-    }
-    auto it = eventMap_.find(fd);
-    if (it != eventMap_.end()) {
-        free(it->second);
-        eventMap_.erase(it);
-    }
-    struct epoll_event ev {};
-    if (EpollCtl(fd, EPOLL_CTL_DEL, ev) != RET_OK) {
-        FI_HILOGE("DelEpoll failed");
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
-void ContextService::EpollClose()
-{
-    CALL_DEBUG_ENTER;
-    if (epollFd_ >= 0) {
-        if (fdsan_close_with_tag(epollFd_, DOMAIN_ID) != 0) {
-            FI_HILOGE("Close epoll fd failed, error:%{public}s, epollFd_:%{public}d", strerror(errno), epollFd_);
-        }
-        epollFd_ = -1;
-    }
-}
-
-int32_t ContextService::EpollCtl(int32_t fd, int32_t op, struct epoll_event &event)
-{
-    CALL_DEBUG_ENTER;
-    if (fd < 0) {
-        FI_HILOGE("Invalid fd:%{public}d", fd);
-        return RET_ERR;
-    }
-    if (epollFd_ < 0) {
-        FI_HILOGE("Invalid epollFd:%{public}d", epollFd_);
-        return RET_ERR;
-    }
-    if (::epoll_ctl(epollFd_, op, fd, &event) != 0) {
-        FI_HILOGE("epoll_ctl(%{public}d,%{public}d,%{public}d) failed:%{public}s", epollFd_, op, fd, ::strerror(errno));
-        return RET_ERR;
-    }
-    return RET_OK;
-}
-
-int32_t ContextService::EpollWait(int32_t maxevents, int32_t timeout, struct epoll_event &events)
-{
-    if (epollFd_ < 0) {
-        FI_HILOGE("Invalid epollFd:%{public}d", epollFd_);
-        return RET_ERR;
-    }
-    return epoll_wait(epollFd_, &events, maxevents, timeout);
-}
-
-void ContextService::OnTimeout(const struct epoll_event &ev)
-{
-    CALL_DEBUG_ENTER;
-    if ((ev.events & EPOLLIN) == EPOLLIN) {
-        uint64_t expiration {};
-        ssize_t ret = read(timerMgr_.GetTimerFd(), &expiration, sizeof(expiration));
-        if (ret < 0) {
-            FI_HILOGE("Read expiration failed:%{public}s", strerror(errno));
-        }
-        timerMgr_.ProcessTimers();
-    } else if ((ev.events & (EPOLLHUP | EPOLLERR)) != 0) {
-        FI_HILOGE("Epoll hangup:%{public}s", strerror(errno));
-    }
-}
-
-void ContextService::OnStart()
-{
-    CALL_DEBUG_ENTER;
-    uint64_t tid = GetThisThreadId();
-    delegateTasks_.SetWorkerThreadId(tid);
-
-    if (!Init()) {
-        FI_HILOGE("On start call init failed");
-        return;
-    }
-    state_ = ServiceRunningState::STATE_RUNNING;
-    ready_ = true;
-
-    worker_ = std::thread(std::bind(&ContextService::OnThread, this));
-}
-
-void ContextService::OnStop()
-{
-    CALL_DEBUG_ENTER;
-    if (timerMgr_.GetTimerFd() >= 0) {
-        if (close(timerMgr_.GetTimerFd()) < 0) {
-            FI_HILOGE("Close timer fd failed, error:%{public}s", strerror(errno));
-        }
-    }
-    if (!ready_) {
-        FI_HILOGI("ready state is false");
-        return;
-    }
-    ready_ = false;
-    state_ = ServiceRunningState::STATE_EXIT;
-    delegateTasks_.PostAsyncTask([]() -> int32_t {
-        FI_HILOGD("No asynchronous operations");
-        return RET_OK;
-    });
-    if (worker_.joinable()) {
-        worker_.join();
-    }
-    EpollClose();
-    FI_HILOGI("OnStop leave");
-}
-
-void ContextService::OnThread()
-{
-    CALL_DEBUG_ENTER;
-    SetThreadName(std::string("os_ds_service"));
-    uint64_t tid = GetThisThreadId();
-    delegateTasks_.SetWorkerThreadId(tid);
-    FI_HILOGD("Main worker thread start, tid:%{public}" PRId64 "", tid);
-
-    while (state_ == ServiceRunningState::STATE_RUNNING) {
-        struct epoll_event ev[MAX_EVENT_SIZE] {};
-        int32_t count = EpollWait(MAX_EVENT_SIZE, -1, ev[0]);
-        for (int32_t i = 0; i < count && state_ == ServiceRunningState::STATE_RUNNING; i++) {
-            auto epollEvent = reinterpret_cast<device_status_epoll_event*>(ev[i].data.ptr);
-            CHKPC(epollEvent);
-            if (epollEvent->event_type == EPOLL_EVENT_TIMER) {
-                OnTimeout(ev[i]);
-            } else if (epollEvent->event_type == EPOLL_EVENT_ETASK) {
-                OnDelegateTask(ev[i]);
-            } else {
-                FI_HILOGW("Unknown epoll event type:%{public}d", epollEvent->event_type);
-            }
-            if (epollEvent != nullptr) {
-                epollEvent = nullptr;
-            }
-        }
-    }
-    FI_HILOGD("Main worker thread stop, tid:%{public}" PRId64 "", tid);
-}
-
-void ContextService::OnDelegateTask(const struct epoll_event &ev)
-{
-    if ((ev.events & EPOLLIN) == 0) {
-        FI_HILOGW("Not epollin");
-        return;
-    }
-    DelegateTasks::TaskData data {};
-    ssize_t res = read(delegateTasks_.GetReadFd(), &data, sizeof(data));
-    if (res == -1) {
-        FI_HILOGW("Read failed erron:%{public}d", errno);
-    }
-    FI_HILOGD("RemoteRequest notify td:%{public}" PRId64 ", std:%{public}" PRId64 ""
-        ", taskId:%{public}d", GetThisThreadId(), data.tid, data.taskId);
-    delegateTasks_.ProcessTasks();
-}
 
 void TimerManagerTest::SetUpTestCase() {}
 
-void TimerManagerTest::TearDownTestCase()
+void TimerManagerTest::TearDownTestCase() {}
+
+void TimerManagerTest::SetUp()
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    context_ = std::make_shared<TestContext>();
 }
 
-void TimerManagerTest::SetUp() {}
-
-void TimerManagerTest::TearDown() {}
+void TimerManagerTest::TearDown()
+{
+    context_ = nullptr;
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_DELAY_TIME));
+}
 
 /**
  * @tc.name: TimerManagerTest_AddTimer001
@@ -392,7 +61,7 @@ void TimerManagerTest::TearDown() {}
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimer(DEFAULT_DELAY_TIME, RETRY_TIME, [this, env]() {
@@ -426,7 +95,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer001, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer002, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
     timerId_ = env->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE, [this, env]() {
         FI_HILOGI("Timer %{public}d excute one times", timerId_);
@@ -452,7 +121,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer002, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer003, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE, [this, env]() {
@@ -480,7 +149,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer003, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer004, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
     timerId_ = env->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, ERROR_REPEAT_COUNT, [this, env]() {
         FI_HILOGI("Timer %{public}d excute onetimes", timerId_);
@@ -506,7 +175,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer004, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer005, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
     timerId_ = env->GetTimerManager().AddTimer(ERROR_INTERVAL_MS, REPEAT_ONCE, [this, env]() {
         FI_HILOGI("Timer %{public}d excute onetimes", timerId_);
@@ -532,7 +201,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer005, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer006, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
     timerId_ = env->GetTimerManager().AddTimer(ERROR_INTERVAL_MS, REPEAT_ONCE, nullptr);
     if (timerId_ < 0) {
@@ -554,7 +223,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimer006, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimerAsync(DEFAULT_DELAY_TIME, RETRY_TIME, [this, env]() {
@@ -588,7 +257,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync001, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync002, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimerAsync(DEFAULT_TIMEOUT, REPEAT_ONCE, [this, env]() {
@@ -615,7 +284,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync002, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync003, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimerAsync(DEFAULT_TIMEOUT, REPEAT_ONCE, [this, env]() {
@@ -644,7 +313,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync003, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync004, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimerAsync(DEFAULT_TIMEOUT, ERROR_REPEAT_COUNT, [this, env]() {
@@ -672,7 +341,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync004, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync005, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimerAsync(ERROR_INTERVAL_MS, REPEAT_ONCE, [this, env]() {
@@ -699,7 +368,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync005, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync006, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
     timerId_ = env->GetTimerManager().AddTimerAsync(ERROR_INTERVAL_MS, REPEAT_ONCE, nullptr);
     if (timerId_ < 0) {
@@ -721,7 +390,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_AddTimerAsync006, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_GetTimerFd001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
     TimerManager *timerMgr = static_cast<TimerManager *>(&env->GetTimerManager());
     int32_t timerFd = timerMgr->GetTimerFd();
@@ -759,7 +428,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_GetTimerFd002, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_IsExist001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE, [this, env]() {
@@ -822,7 +491,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_IsExist002, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_ResetTimer001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimer(DEFAULT_UNLOAD_COOLING_TIME_MS, REPEAT_ONCE, [this, env]() {
@@ -857,7 +526,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_ResetTimer001, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_ResetTimer002, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE, [this, env]() {
@@ -893,7 +562,7 @@ HWTEST_F(TimerManagerTest, TimerManagerTest_ResetTimer002, TestSize.Level1)
 HWTEST_F(TimerManagerTest, TimerManagerTest_RemoveTimer001, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
-    auto env = ContextService::GetInstance();
+    auto env = context_;
     ASSERT_NE(env, nullptr);
 
     timerId_ = env->GetTimerManager().AddTimer(DEFAULT_TIMEOUT, REPEAT_ONCE, [this, env]() {
