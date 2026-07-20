@@ -16,7 +16,8 @@ import("../../../../device_status.gni")
 config("device_motion_private_config") {
   include_dirs = [
     "include",
-    "${device_status_frameworks_path}/js/utils/include"
+    "${device_status_frameworks_path}/js/utils/include",
+    "${device_status_frameworks_path}/native/user_status/include"
   ]
 }
 
@@ -35,12 +36,14 @@ ohos_shared_library("motion_napi") {
     "${device_status_frameworks_path}/js/napi/motion/src/motion_event_napi.cpp",
     "${device_status_frameworks_path}/js/napi/motion/src/motion_napi.cpp",
     "${device_status_frameworks_path}/js/napi/motion/src/motion_napi_error.cpp",
+    "${device_status_frameworks_path}/js/napi/motion/src/user_status_event_napi.cpp",
   ]
 
   configs = [ ":device_motion_private_config" ]
 
   deps = [
     "${device_status_utils_path}:devicestatus_util",
+    "${device_status_interfaces_path}/innerkits:user_status_data_util",
     "${device_status_frameworks_path}/js/utils:device_status_napi_utils"
   ]
 

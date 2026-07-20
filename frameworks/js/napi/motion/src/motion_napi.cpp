@@ -29,6 +29,7 @@
 #include "napi_event_utils.h"
 #endif
 #include "motion_napi_error.h"
+#include "user_status_event_napi.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DeviceMotionNapi"
@@ -1221,10 +1222,13 @@ napi_value MotionNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("onPickupChange", OnPickupChange),
         DECLARE_NAPI_STATIC_FUNCTION("onRotateChange", OnRotateChange),
         DECLARE_NAPI_STATIC_FUNCTION("onSmartRotateChange", OnSmartRotateChange),
+        DECLARE_NAPI_STATIC_FUNCTION("onHoverHandChange", UserStatusEventNapi::SubscribeHoverHandEvent),
         DECLARE_NAPI_STATIC_FUNCTION("offPickupChange", OffPickupChange),
         DECLARE_NAPI_STATIC_FUNCTION("offRotateChange", OffRotateChange),
         DECLARE_NAPI_STATIC_FUNCTION("offSmartRotateChange", OffSmartRotateChange),
+        DECLARE_NAPI_STATIC_FUNCTION("offHoverHandChange", UserStatusEventNapi::UnsubscribeHoverHandEvent),
         DECLARE_NAPI_STATIC_FUNCTION("getRecentOperatingHandStatus", GetRecentOptHandStatus),
+        DECLARE_NAPI_STATIC_PROPERTY("HoverHandAction", UserStatusEventNapi::GetHoverHandAction(env)),
     };
     MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     // 保存 exports weak ref（后续用它作为稳定 this）

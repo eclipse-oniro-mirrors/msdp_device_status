@@ -22,6 +22,7 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "util_napi.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -49,6 +50,31 @@ const std::map<int32_t, std::string> ERROR_MESSAGES = {
 napi_value CreateMotionNapiError(const napi_env &env, int32_t errorCode, const std::string &errorMsg);
 std::optional<std::string> GetMotionErrMsg(int32_t errorCode);
 void ThrowMotionErr(const napi_env &env, int32_t errorCode, const std::string &printMsg);
+
+#define CHKRF_PARAM(env, condition, errMsg)               \
+    do {                                                  \
+        if (!(condition)) {                               \
+            FI_HILOGE("check (" #condition ") failed");   \
+            ThrowMotionErr(env, PARAM_EXCEPTION, errMsg); \
+            return false;                                 \
+        }                                                 \
+    } while (0)
+#define CHKRN_PARAM(env, condition, errMsg)               \
+    do {                                                  \
+        if (!(condition)) {                               \
+            FI_HILOGE("check (" #condition ") failed");   \
+            ThrowMotionErr(env, PARAM_EXCEPTION, errMsg); \
+            return UtilNapi::GetNull(env);                \
+        }                                                 \
+    } while (0)
+#define CHKRN_THROW(env, condition, errCode, errMsg) \
+    do {                                                 \
+        if (!(condition)) {                              \
+            FI_HILOGE("call (" #condition ") failed");   \
+            ThrowMotionErr(env, errCode, errMsg);        \
+            return UtilNapi::GetNull(env);               \
+        }                                                \
+    } while (0)
 } // namespace Msdp
 } // namespae OHOS
 #endif // MOTION_NAPI_ERROR_H

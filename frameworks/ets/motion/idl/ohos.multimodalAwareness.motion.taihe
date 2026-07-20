@@ -63,6 +63,18 @@ enum LogicalOrientation : i32 {
     RIGHT = 3
 }
 
+enum HoverHandAction : i32 {
+    DOWN = 0,
+    UP = 1,
+}
+
+struct HoverHandDetectionArea {
+  left: i32;
+  top: i32;
+  width: i32;
+  height: i32;
+}
+
 struct SmartRotateEvent {
   physicalOrientation: PhysicalOrientation;
   logicalOrientation: Optional<LogicalOrientation>;
@@ -99,6 +111,15 @@ struct SmartRotateEvent {
     function offSmartRotateChange(callback?: (info: SmartRotateEvent) => void): void {
         return offSmartRotateChangeInner(callback);
       }
+    function onHoverHandChange(area: HoverHandDetectionArea, callback: (info: HoverHandAction) => void): void {
+        return onHoverHandChangeNoDurationInner(area, callback, callback);
+      }
+    function onHoverHandChange(area: HoverHandDetectionArea, duration: int, callback: (info: HoverHandAction) => void): void {
+        return onHoverHandChangeWithDurationInner(area, duration, callback, callback);
+      }
+    function offHoverHandChange(callback?: (info: HoverHandAction) => void): void {
+        return offHoverHandChangeInner(callback);
+      }
 """)
 function OnOperatingHandChangedInner(f: (info: OperatingHandStatus) => void, opq: Opaque);
 function OffOperatingHandChangedInner(opq: Optional<Opaque>);
@@ -110,3 +131,6 @@ function OnSmartRotateChangeInner(f: (info: SmartRotateEvent) => void, opq: Opaq
 function OffPickupChangeInner(opq: Optional<Opaque>);
 function OffRotateChangeInner(opq: Optional<Opaque>);
 function OffSmartRotateChangeInner(opq: Optional<Opaque>);
+function OnHoverHandChangeNoDurationInner(area: HoverHandDetectionArea, callback: (info: HoverHandAction) => void, opq: Opaque);
+function OnHoverHandChangeWithDurationInner(area: HoverHandDetectionArea, duration: i32, callback: (info: HoverHandAction) => void, opq: Opaque);
+function OffHoverHandChangeInner(opq: Optional<Opaque>);

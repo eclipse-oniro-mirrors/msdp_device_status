@@ -20,6 +20,7 @@
 #include "taihe/runtime.hpp"
 
 #ifdef MOTION_ENABLE
+#include "ani_user_status_event.h"
 #include "motion_client.h"
 #endif
 #include "ani_motion_event.h"
@@ -31,11 +32,16 @@ using HoldingHandStatus_t = ohos::multimodalAwareness::motion::HoldingHandStatus
 using PickupEvent_t = ohos::multimodalAwareness::motion::PickupEvent;
 using RotateEvent_t = ohos::multimodalAwareness::motion::RotateEvent;
 using SmartRotateEvent_t = ohos::multimodalAwareness::motion::SmartRotateEvent;
+using HoverHandDetectionArea_t = ohos::multimodalAwareness::motion::HoverHandDetectionArea;
+using HoverHandAction_t = ohos::multimodalAwareness::motion::HoverHandAction;
 
 namespace {
 using namespace OHOS::Msdp;
 #ifdef MOTION_ENABLE
 auto &g_motionClient = MotionClient::GetInstance();
+auto &g_userStatusObj = AniUserStatusEvent::GetInstance();
+constexpr uint32_t DEFAULT_HOVER_HAND_DURATION = 5; // 5 seconds
+constexpr uint32_t HOVER_HAND_MAX_DURATION = 10; // 10 seconds
 #endif
 
 OperatingHandStatus_t getRecentOperatingHandStatus()
@@ -373,6 +379,93 @@ void OffSmartRotateChangeInner(::taihe::optional_view<uintptr_t> opq)
     taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
 #endif
 }
+
+void OnHoverHandChangeNoDurationInner(
+    HoverHandDetectionArea_t const &area, taihe::callback_view<void(HoverHandAction_t)> callback, uintptr_t opq)
+{
+    FI_HILOGI("OnHoverHandChangeNoDurationInner enter");
+#ifdef MOTION_ENABLE
+    FI_HILOGI("OnHoverHandChangeNoDurationInner Enter MOTION_ENABLE");
+    if (area.left < INT32_MIN || area.left > INT32_MAX || area.top < INT32_MIN || area.top > INT32_MAX) {
+        FI_HILOGE("Invalid left or top, out of [INT32_MIN, INT32_MAX] range");
+        taihe::set_business_error(PARAM_EXCEPTION, "Invalid area");
+        return;
+    }
+    if (area.width <= 0 || area.width > INT32_MAX || area.height <= 0 || area.height > INT32_MAX) {
+        FI_HILOGE("Invalid width or height, out of [1, INT32_MAX] range");
+        taihe::set_business_error(PARAM_EXCEPTION, "Invalid area");
+        return;
+    }
+    UserStatusAwareness::HoverHandDetectionArea detectArea;
+    detectArea.top = area.top;
+    detectArea.left = area.left;
+    detectArea.width = static_cast<uint32_t>(area.width);
+    detectArea.height = static_cast<uint32_t>(area.height);
+    if (!AniUserStatusEvent::GetInstance().SubscribeHoverHandEvent(detectArea, DEFAULT_HOVER_HAND_DURATION, opq)) {
+        FI_HILOGE("SubscribeHoverHandEvent failed");
+        return;
+    }
+    FI_HILOGI("OnHoverHandChangeNoDurationInner success");
+#else
+    FI_HILOGI("OnHoverHandChangeNoDurationInner not Enter MOTION_ENABLE");
+    taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+#endif
+}
+
+void OnHoverHandChangeWithDurationInner(HoverHandDetectionArea_t const &area, int32_t duration,
+    taihe::callback_view<void(HoverHandAction_t)> callback, uintptr_t opq)
+{
+    FI_HILOGI("OnHoverHandChangeWithDurationInner enter");
+#ifdef MOTION_ENABLE
+    FI_HILOGI("OnHoverHandChangeWithDurationInner Enter MOTION_ENABLE");
+    if (duration <= 0 || duration > HOVER_HAND_MAX_DURATION) {
+        FI_HILOGE("Invalid duration");
+        taihe::set_business_error(PARAM_EXCEPTION, "Invalid duration");
+        return;
+    }
+    if (area.left < INT32_MIN || area.left > INT32_MAX || area.top < INT32_MIN || area.top > INT32_MAX) {
+        FI_HILOGE("Invalid left or top, out of [INT32_MIN, INT32_MAX] range");
+        taihe::set_business_error(PARAM_EXCEPTION, "Invalid area");
+        return;
+    }
+    if (area.width <= 0 || area.width > INT32_MAX || area.height <= 0 || area.height > INT32_MAX) {
+        FI_HILOGE("Invalid width or height, out of [1, INT32_MAX] range");
+        taihe::set_business_error(PARAM_EXCEPTION, "Invalid area");
+        return;
+    }
+    UserStatusAwareness::HoverHandDetectionArea detectArea;
+    detectArea.top = area.top;
+    detectArea.left = area.left;
+    detectArea.width = static_cast<uint32_t>(area.width);
+    detectArea.height = static_cast<uint32_t>(area.height);
+    if (!AniUserStatusEvent::GetInstance().SubscribeHoverHandEvent(detectArea, static_cast<uint32_t>(duration), opq)) {
+        FI_HILOGE("SubscribeHoverHandEvent failed");
+        return;
+    }
+    FI_HILOGI("OnHoverHandChangeWithDurationInner success");
+#else
+    FI_HILOGI("OnHoverHandChangeWithDurationInner not Enter MOTION_ENABLE");
+    taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+#endif
+}
+
+void OffHoverHandChangeInner(::taihe::optional_view<uintptr_t> opq)
+{
+    FI_HILOGI("OffHoverHandChangeInner enter");
+#ifdef MOTION_ENABLE
+    FI_HILOGI("OffHoverHandChangeInner Enter MOTION_ENABLE");
+    bool result = false;
+    if (!opq.has_value()) {
+        result = AniUserStatusEvent::GetInstance().UnsubscribeHoverHandEvent(0);
+    } else {
+        result = AniUserStatusEvent::GetInstance().UnsubscribeHoverHandEvent(opq.value());
+    }
+    FI_HILOGI("UnsubscribeHoverHandEvent ret: %{public}d", result);
+#else
+    FI_HILOGI("OffHoverHandChangeInner not Enter MOTION_ENABLE");
+    taihe::set_business_error(DEVICE_EXCEPTION, "Device not support");
+#endif
+}
 }  // namespace
 
 // Since these macros are auto-generate, lint will cause false positive.
@@ -388,4 +481,7 @@ TH_EXPORT_CPP_API_OnSmartRotateChangeInner(OnSmartRotateChangeInner);
 TH_EXPORT_CPP_API_OffPickupChangeInner(OffPickupChangeInner);
 TH_EXPORT_CPP_API_OffRotateChangeInner(OffRotateChangeInner);
 TH_EXPORT_CPP_API_OffSmartRotateChangeInner(OffSmartRotateChangeInner);
+TH_EXPORT_CPP_API_OnHoverHandChangeNoDurationInner(OnHoverHandChangeNoDurationInner);
+TH_EXPORT_CPP_API_OnHoverHandChangeWithDurationInner(OnHoverHandChangeWithDurationInner);
+TH_EXPORT_CPP_API_OffHoverHandChangeInner(OffHoverHandChangeInner);
 // NOLINTEND
