@@ -69,6 +69,7 @@ ohos_unittest("TimerManagerTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_core",
@@ -85,6 +86,7 @@ ohos_unittest("TimerManagerTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
+    "libxml2:libxml2",
     "samgr:samgr_proxy",
     "window_manager:libdm",
     "window_manager:libwm",
