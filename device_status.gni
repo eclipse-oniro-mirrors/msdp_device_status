@@ -143,6 +143,10 @@ if (device_status_device_type == "pc") {
   device_status_default_defines += [ "OHOS_BUILD_PC_PRODUCT" ]
 }
 
+if (device_status_device_type == "car") {
+  device_status_default_defines += [ "OHOS_BUILD_CAR_PRODUCT" ]
+}
+
 if (device_status_pullthrow_enable) {
   device_status_default_defines += [ "OHOS_ENABLE_PULLTHROW" ]
 }
