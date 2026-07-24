@@ -109,6 +109,15 @@
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::RegisterAwarenessCallback(OHOS::Msdp::DeviceStatus::OnScreen::AwarenessCap const&, OHOS::sptr<OHOS::Msdp::DeviceStatus::OnScreen::IRemoteOnScreenCallback>, OHOS::Msdp::DeviceStatus::OnScreen::AwarenessOptions const&)";
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::UnregisterAwarenessCallback(OHOS::Msdp::DeviceStatus::OnScreen::AwarenessCap const&, OHOS::sptr<OHOS::Msdp::DeviceStatus::OnScreen::IRemoteOnScreenCallback>)";
             "OHOS::Msdp::DeviceStatus::OnScreen::OnScreenManager::Trigger(OHOS::Msdp::DeviceStatus::OnScreen::AwarenessCap const&, OHOS::Msdp::DeviceStatus::OnScreen::AwarenessOptions const&, OHOS::Msdp::DeviceStatus::OnScreen::OnscreenAwarenessInfo&)";
+            "VTT for OHOS::Msdp::CarAwarenessCallbackStub";
+            "OHOS::Msdp::CarAwarenessCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+            "OHOS::Msdp::CarAwarenessMgr::GetInstance()";
+            "OHOS::Msdp::CarAwarenessMgr::IsCapabilitySupport(int, bool&)";
+            "OHOS::Msdp::CarAwarenessMgr::SubscribeCapability(int, OHOS::Msdp::CarAwarenessOption const&, OHOS::sptr<OHOS::Msdp::ICarAwarenessCallback>)";
+            "OHOS::Msdp::CarAwarenessMgr::UnSubscribeCapability(int, OHOS::Msdp::CarAwarenessOption const&, OHOS::sptr<OHOS::Msdp::ICarAwarenessCallback>)";
+	    "OHOS::Msdp::CarAwarenessMgr::UpdateSpatialActionZone(int)";
+            "OHOS::Msdp::CarAwarenessMgr::GetSupportCapabilityList(std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
+            "OHOS::Msdp::CarAwarenessMgr::UpdateSpatialActionStatus(int)";
             "OHOS::Msdp::DeviceStatus::InteractionManager::GetDragAnimationType(int&)";
         };
     local:

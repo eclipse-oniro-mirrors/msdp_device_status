@@ -118,6 +118,7 @@
           "//base/msdp/device_status/frameworks/js/napi/underage_model:userstatus_napi",
           "//base/msdp/device_status/frameworks/js/napi/onscreen:onscreen_napi",
           "//base/msdp/device_status/frameworks/js/napi/onscreen:screenevent_napi",
+          "//base/msdp/device_status/frameworks/js/napi/car_awareness:carawareness_napi",
           "//base/msdp/device_status/frameworks/ets/coordination:coordination_ani",
           "//base/msdp/device_status/frameworks/ets/drag:dragInteraction",
           "//base/msdp/device_status/frameworks/ets/metadataBinding:metadataBinding_ani",
