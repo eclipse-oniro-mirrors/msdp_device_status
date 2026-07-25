@@ -99,7 +99,7 @@ bool CarAwarenessMgrNapi::IsSameValue(const napi_env &env, const napi_value &lhs
 }
 
 bool CarAwarenessMgrNapi::InsertRefEx(std::shared_ptr<CarAwarenessListener> listener,
-        const napi_value &handler, bool &isNewHandler)
+    const napi_value &handler, bool &isNewHandler)
 {
     isNewHandler = false;
     if (listener == nullptr) {
