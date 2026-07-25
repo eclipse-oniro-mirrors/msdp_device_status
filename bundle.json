@@ -9,7 +9,7 @@
   "component": {
     "name": "device_status",
     "subsystem": "msdp",
-    "syscap": [
+    "syscap":[
       "SystemCapability.MultimodalAwareness.DistanceMeasurement",
       "SystemCapability.MultimodalAwareness.MetadataBinding",
       "SystemCapability.MultimodalAwareness.Motion",
