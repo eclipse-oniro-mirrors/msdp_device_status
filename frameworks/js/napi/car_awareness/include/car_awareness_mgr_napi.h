@@ -96,7 +96,7 @@ private:
 protected:
     napi_env env_;
     napi_ref thisVarRef_;
-    std::mutex g_listenersMutex;
+    std::mutex listenersMutex;
     std::map<int32_t, std::shared_ptr<CarAwarenessListener>> listenerMap_;
     std::unordered_map<int32_t, TriggerFunc> triggerMap_;
 };
