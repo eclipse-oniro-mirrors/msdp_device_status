@@ -98,7 +98,7 @@ protected:
     napi_ref thisVarRef_;
     std::mutex g_listenersMutex;
     std::map<int32_t, std::shared_ptr<CarAwarenessListener>> listenerMap_;
-    std::unordered_map<int, TriggerFunc> triggerMap_;
+    std::unordered_map<int32_t, TriggerFunc> triggerMap_;
 };
 } // namespace OHOS
 } // namespace Msdp
