@@ -35,7 +35,7 @@ public:
     ~CarAwarenessCallback() override = default;
     void OnAwarenessEvent(const CarAwarenessEvent& event) override;
     void AddNapiObject(const std::shared_ptr<CarAwarenessNapi>& object);
-    void RemoveNapiObject(const std::shared_ptr<CarAwarenessNapi>& object);
+    void RemoveNapiObject(const CarAwarenessNapi* object);
     bool HasNapiObject() const;
 
 private:
@@ -60,8 +60,8 @@ class CarAwarenessNapi : public CarAwarenessMgrNapi, public std::enable_shared_f
 public:
     explicit CarAwarenessNapi(napi_env env, napi_value thisVar);
     ~CarAwarenessNapi() override;
-    
-    static napi_value Init(napi_env env, napi_value exports);
+
+   static napi_value Init(napi_env env, napi_value exports);
 
 #ifdef CAR_AWARENESS_ENABLE
    void PostAwarenessEvent(const CarAwarenessEvent &event);
@@ -99,6 +99,7 @@ private:
     static std::shared_ptr<CarAwarenessNapi> GetExistingInstanceLocked(napi_env env);
     static void RollbackInstancesLocked(napi_env env, const std::shared_ptr<CarAwarenessNapi> &sp);
     static napi_value ExecuteAsyncTask(napi_env env);
+    static void ExecuteCompleteFuc(napi_env env, napi_status status, void *data);
     static void ThrowIpcExcuteErr(napi_env env, const int32_t errCode);
     static napi_value SubScribeCarAwareness(napi_env env, napi_value jsThis, napi_value callback,
         const int32_t type, const CarAwarenessOption &option);
