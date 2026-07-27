@@ -63,8 +63,8 @@ CarAwarenessMgrNapi::~CarAwarenessMgrNapi()
         }
     #endif
         listenerMap_.clear();
+        triggerMap_.clear();
     }
-    triggerMap_.clear();
     if (env_ != nullptr && thisVarRef_ != nullptr) {
         napi_delete_reference(env_, thisVarRef_);
     }
@@ -99,7 +99,7 @@ bool CarAwarenessMgrNapi::IsSameValue(const napi_env &env, const napi_value &lhs
 }
 
 bool CarAwarenessMgrNapi::InsertRefEx(std::shared_ptr<CarAwarenessListener> listener,
-    const napi_value &handler, bool &isNewHandler)
+        const napi_value &handler, bool &isNewHandler)
 {
     isNewHandler = false;
     if (listener == nullptr) {
@@ -285,7 +285,7 @@ void CarAwarenessMgrNapi::TriggerEvent(const int32_t type, const std::string &da
         napi_status ret = napi_get_reference_value(env_, item, &handler);
         if (ret != napi_ok) {
             FI_HILOGE("napi_get_reference_value for %{public}d failed, status: %{public}d", type, ret);
-            return;
+            continue;
         }
         // 按照Type进行对象的封装,返回至ArkTs线程
         auto it = triggerMap_.find(type);
@@ -311,10 +311,10 @@ void CarAwarenessMgrNapi::ConvertWeatherInfo(napi_value handler, const std::stri
     napi_value result = nullptr;
     NAPI_CALL_RETURN_VOID(env_, napi_create_object(env_, &result));
     napi_value value = nullptr;
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int64(env_, weatherInfo["timestamp"].get<long>(), &value));
+    NAPI_CALL_RETURN_VOID(env_, napi_create_int64(env_, weatherInfo["timestamp"].get<int64_t>(), &value));
     NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "timestamp", value));
-    int weatherValue = weatherInfo["weather"].get<int>();
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int32(env_, static_cast<int32_t>(weatherValue), &value));
+    int32_t weatherValue = weatherInfo["weather"].get<int32_t>();
+    NAPI_CALL_RETURN_VOID(env_, napi_create_int32(env_, weatherValue, &value));
     NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "weather", value));
     napi_value callResult = nullptr;
     napi_status ret = napi_call_function(env_, nullptr, handler, 1, &result, &callResult);
@@ -339,14 +339,14 @@ void CarAwarenessMgrNapi::ConvertSpatialMotionInfo(napi_value handler, const std
     napi_value result = nullptr;
     NAPI_CALL_RETURN_VOID(env_, napi_create_object(env_, &result));
     napi_value value = nullptr;
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int64(env_, motionInfo["timestamp"].get<long>(), &value));
+    NAPI_CALL_RETURN_VOID(env_, napi_create_int64(env_, motionInfo["timestamp"].get<int64_t>(), &value));
     NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "timestamp", value));
     NAPI_CALL_RETURN_VOID(env_, napi_create_double(env_, motionInfo["pointX"].get<double>(), &value));
     NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "pointX", value));
     NAPI_CALL_RETURN_VOID(env_, napi_create_double(env_, motionInfo["pointY"].get<double>(), &value));
     NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "pointY", value));
-    int eventValue = motionInfo["event"].get<int>();
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int32(env_, static_cast<int32_t>(eventValue), &value));
+    int32_t eventValue = motionInfo["event"].get<int32_t>();
+    NAPI_CALL_RETURN_VOID(env_, napi_create_int32(env_, eventValue, &value));
     NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "event", value));
     napi_value callResult = nullptr;
     napi_status ret = napi_call_function(env_, nullptr, handler, 1, &result, &callResult);
@@ -369,10 +369,10 @@ void CarAwarenessMgrNapi::ConvertRefulingInfo(napi_value handler, const std::str
     napi_value result = nullptr;
     NAPI_CALL_RETURN_VOID(env_, napi_create_object(env_, &result));
     napi_value value = nullptr;
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int64(env_, refulingInfo["timestamp"].get<long>(), &value));
+    NAPI_CALL_RETURN_VOID(env_, napi_create_int64(env_, refulingInfo["timestamp"].get<int64_t>(), &value));
     NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "timestamp", value));
-    int statusValue = refulingInfo["status"].get<int>();
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int32(env_, static_cast<int32_t>(statusValue), &value));
+    int32_t statusValue = refulingInfo["status"].get<int32_t>();
+    NAPI_CALL_RETURN_VOID(env_, napi_create_int32(env_, statusValue, &value));
     NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "status", value));
     napi_value callResult = nullptr;
     napi_status ret = napi_call_function(env_, nullptr, handler, 1, &result, &callResult);
