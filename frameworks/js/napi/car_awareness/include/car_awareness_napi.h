@@ -60,8 +60,8 @@ class CarAwarenessNapi : public CarAwarenessMgrNapi, public std::enable_shared_f
 public:
     explicit CarAwarenessNapi(napi_env env, napi_value thisVar);
     ~CarAwarenessNapi() override;
-
-   static napi_value Init(napi_env env, napi_value exports);
+    
+    static napi_value Init(napi_env env, napi_value exports);
 
 #ifdef CAR_AWARENESS_ENABLE
    void PostAwarenessEvent(const CarAwarenessEvent &event);
