@@ -384,7 +384,6 @@ napi_value CarAwarenessNapi::ExecuteAsyncTask(napi_env env)
     auto complete = [](napi_env, napi_status, void *data) {
         auto *context = static_cast<AsyncContext *>(data);
         if (context == nullptr || context->env == nullptr) {
-            FI_HILOGE("AsyncContext obj get failed");
             return;
         }
         if (context->ret != RES_SUCCESS) {
@@ -404,9 +403,8 @@ napi_value CarAwarenessNapi::ExecuteAsyncTask(napi_env env)
         }
         delete context;
     };
-    NAPI_CALL(context->env,
-        napi_create_async_work(env, nullptr, resourceName, execute, complete,
-            static_cast<void*>(context), &context->asyncWork));
+    NAPI_CALL(context->env, napi_create_async_work(env, nullptr, resourceName, execute, complete,
+        static_cast<void*>(context), &context->asyncWork));
     NAPI_CALL(context->env, napi_queue_async_work(context->env, context->asyncWork));
     return promise;
 }
