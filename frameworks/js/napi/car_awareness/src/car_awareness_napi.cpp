@@ -579,9 +579,6 @@ napi_value CarAwarenessNapi::SubscribeCap(napi_env env, napi_callback_info info,
         ThrowErrToJs(env, PARAM_ERR, "napi_get_cb_info failed");
         return nullptr;
     }
-    if (argc > ARG_1) {
-
-    }
     if (argc > ARG_1 || (argc == ARG_1 && !IsArgAllValid(env, args, argc, EXPECTED_TYPE_FUNCTION_ARG_1))) {
         ThrowErrToJs(env, PARAM_ERR, "Arguments is illegal");
         return nullptr;
