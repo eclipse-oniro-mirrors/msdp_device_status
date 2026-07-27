@@ -85,7 +85,7 @@ bool TransJsToStr(napi_env env, napi_value value, std::string &str)
         FI_HILOGE("Error string length invalid");
         return false;
     }
-    if (strlen < 0 || strlen > MAX_ARG_STRING_LEN) {
+    if (strlen == 0 || strlen > MAX_ARG_STRING_LEN) {
         FI_HILOGE("The string length invalid");
         return false;
     }
