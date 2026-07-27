@@ -51,6 +51,7 @@ public:
 
 private:
     int32_t OnEventChangeStub(MessageParcel &data);
+    bool IsValidEventType(const int32_t type);
 };
 } // namespace Msdp
 } // namespace OHOS
