@@ -23,6 +23,16 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace {
+    constexpr int32_t TYPE_PUBLIC_MIN = 101;
+    constexpr int32_t TYPE_PUBLIC_MAX = 103;
+
+    constexpr int32_t TYPE_SYSTEM_MIN = 201;
+    constexpr int32_t TYPE_SYSTEM_MAX = 205;
+
+    constexpr int MAX_DATA_LEN = 1024 * 1024;
+}
+
 int32_t CarAwarenessCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
@@ -50,11 +60,28 @@ int32_t CarAwarenessCallbackStub::OnEventChangeStub(MessageParcel &data)
     FI_HILOGD("Enter");
     CarAwarenessEvent event;
     READINT32(data, event.type, DeviceStatus::E_DEVICESTATUS_READ_PARCEL_ERROR);
+    if (!IsValidEventType(event.type)) {
+        return DeviceStatus::DEVICESTATUS_FAILED;
+    }
     READSTRING(data, event.eventData, DeviceStatus::E_DEVICESTATUS_READ_PARCEL_ERROR);
+    if (event.eventData.size() > MAX_DATA_LEN) {
+        FI_HILOGE("event too long");
+        return DeviceStatus::E_DEVICESTATUS_READ_PARCEL_ERROR;
+    }
     FI_HILOGI("Type: %{public}d", event.type);
     OnAwarenessEvent(event);
     FI_HILOGD("Exit");
     return DeviceStatus::DEVICESTATUS_OK;
+}
+
+bool CarAwarenessCallbackStub::IsValidEventType(const int32_t type)
+{
+    if ((type >= TYPE_PUBLIC_MIN && type <= TYPE_PUBLIC_MAX) ||
+        (type >= TYPE_SYSTEM_MIN && type <= TYPE_SYSTEM_MAX)) {
+        return true;
+    }
+    FI_HILOGE("Not valid type");
+    return false;
 }
 } // namespace Msdp
 } // namespace OHOS
