@@ -84,7 +84,7 @@ void CarAwarenessNapi::UnsubscribeCapNoThrow(const int32_t type)
             return;
         }
         cb = it->second;
-        cb->RemoveNapiObject(shared_from_this());
+        cb->RemoveNapiObject(this);
         if (!cb->HasNapiObject()) {
             g_typeCallbacks.erase(it);
             needUnsubSa = true;
@@ -95,7 +95,7 @@ void CarAwarenessNapi::UnsubscribeCapNoThrow(const int32_t type)
         FI_HILOGI("type no needUnsubscribe");
         return;
     }
-    // 预留IPC去订阅的逻辑
+    g_carAwarenessMgr.UnSubscribeCapability(type, CarAwarenessOption(), cb);
 }
 #endif
 
@@ -364,11 +364,13 @@ napi_value CarAwarenessNapi::ExecuteAsyncTask(napi_env env)
     napi_value promise = nullptr;
     if (napi_create_promise(env, &context->deferred, &promise) != napi_ok) {
         ThrowErrToJs(env, SERVICE_ERR, "napi_create_promise failed");
+        delete context;
         return nullptr;
     }
     napi_value resourceName = nullptr;
     if (napi_create_string_utf8(env, "GetSupportCaps", NAPI_AUTO_LENGTH, &resourceName) != napi_ok) {
         ThrowErrToJs(env, SERVICE_ERR, "napi_create_string_utf8 failed");
+        delete context;
         return nullptr;
     }
     auto execute = [](napi_env, void *data) {
@@ -434,7 +436,7 @@ bool CarAwarenessNapi::DoSubscription(napi_env env, const int32_t type,
         FI_HILOGI("Subscribe success: %{public}d", type);
         return true;
     }
-    cb->RemoveNapiObject(shared_from_this());
+    cb->RemoveNapiObject(this);
     {
         std::lock_guard<std::mutex> lk(g_callbacksMutex);
         auto it = g_typeCallbacks.find(type);
@@ -459,7 +461,7 @@ bool CarAwarenessNapi::SubscribeToSa(napi_env env, const int32_t type,
             cb = it->second;
             hasSubscribed = true;
         } else {
-            cb = new (std::nothrow) CarAwarenessCallback();
+            cb = sptr<CarAwarenessCallback>(new (std::nothrow) CarAwarenessCallback());
             if (cb == nullptr) {
                 FI_HILOGE("Failed to create MotionCallback");
                 ThrowErrToJs(env, SUBSCRIBE_ERR, "Subscribe failed");
@@ -577,7 +579,10 @@ napi_value CarAwarenessNapi::SubscribeCap(napi_env env, napi_callback_info info,
         ThrowErrToJs(env, PARAM_ERR, "napi_get_cb_info failed");
         return nullptr;
     }
-    if (argc != ARG_1 && !IsArgAllValid(env, args, argc, EXPECTED_TYPE_FUNCTION_ARG_1)) {
+    if (argc > ARG_1) {
+
+    }
+    if (argc > ARG_1 || (argc == ARG_1 && !IsArgAllValid(env, args, argc, EXPECTED_TYPE_FUNCTION_ARG_1))) {
         ThrowErrToJs(env, PARAM_ERR, "Arguments is illegal");
         return nullptr;
     }
@@ -681,7 +686,7 @@ bool CarAwarenessNapi::UnSubscribeToSa(napi_env env, const int32_t type, const C
             return false;
         }
         callback = it->second;
-        callback->RemoveNapiObject(shared_from_this());
+        callback->RemoveNapiObject(this);
         // 若仍有其它 env(线程) 在监听: 不真正触发 sa unsubscribe
         if (callback->HasNapiObject()) {
             FI_HILOGI("Still has listener on other thread");
@@ -928,7 +933,7 @@ void CarAwarenessCallback::AddNapiObject(const std::shared_ptr<CarAwarenessNapi>
     objects_.swap(compact);
 }
 
-void CarAwarenessCallback::RemoveNapiObject(const std::shared_ptr<CarAwarenessNapi>& object)
+void CarAwarenessCallback::RemoveNapiObject(const CarAwarenessNapi* object)
 {
     FI_HILOGD("Enter");
     if (!object) {
@@ -939,7 +944,7 @@ void CarAwarenessCallback::RemoveNapiObject(const std::shared_ptr<CarAwarenessNa
     objects_.erase(std::remove_if(objects_.begin(), objects_.end(),
         [&object](const std::weak_ptr<CarAwarenessNapi>& it) {
             auto sp = it.lock();
-            return !sp || sp.get() == object.get();
+            return !sp || sp.get() == object;
         }), objects_.end());
 }
 
