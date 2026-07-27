@@ -30,7 +30,7 @@ namespace {
     constexpr int32_t TYPE_SYSTEM_MIN = 201;
     constexpr int32_t TYPE_SYSTEM_MAX = 205;
 
-    constexpr int MAX_DATA_LEN = 1024 * 1024;
+    constexpr int32_t MAX_DATA_LEN = 1024 * 1024;
 }
 
 int32_t CarAwarenessCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
