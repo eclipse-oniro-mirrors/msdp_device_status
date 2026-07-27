@@ -63,8 +63,8 @@ CarAwarenessMgrNapi::~CarAwarenessMgrNapi()
         }
     #endif
         listenerMap_.clear();
-        triggerMap_.clear();
     }
+    triggerMap_.clear();
     if (env_ != nullptr && thisVarRef_ != nullptr) {
         napi_delete_reference(env_, thisVarRef_);
     }
@@ -274,13 +274,17 @@ void CarAwarenessMgrNapi::TriggerEvent(const int32_t type, const std::string &da
         FI_HILOGE("invalid event data");
         return;
     }
-    std::lock_guard<std::mutex> lock(g_listenersMutex);
-    auto typeIter = listenerMap_.find(type);
-    if (typeIter == listenerMap_.end()) {
-        FI_HILOGE("eventType: %{public}d not found", type);
-        return;
+    std::set<napi_ref> onRefSets;
+    {
+        std::lock_guard<std::mutex> lock(g_listenersMutex);
+        auto typeIter = listenerMap_.find(type);
+        if (typeIter == listenerMap_.end()) {
+            FI_HILOGE("eventType: %{public}d not found", type);
+            return;
+        }
+        onRefSets = typeIter->second->onRefSets;
     }
-    for (auto item : typeIter->second->onRefSets) {
+    for (auto item : onRefSets) {
         napi_value handler = nullptr;
         napi_status ret = napi_get_reference_value(env_, item, &handler);
         if (ret != napi_ok) {
