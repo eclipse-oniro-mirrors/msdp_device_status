@@ -357,6 +357,30 @@ bool CarAwarenessNapi::GetCarAwarenessOption(napi_env env, napi_value awarenessO
 }
 
 #ifdef CAR_AWARENESS_ENABLE
+void CarAwarenessNapi::ExecuteCompleteFuc(napi_env env, napi_status status, void *data)
+{
+    auto *context = static_cast<AsyncContext *>(data);
+    if (context == nullptr || context->env == nullptr) {
+        return;
+    }
+    if (context->ret != RES_SUCCESS) {
+        ThrowIpcExcuteErr(context->env, context->ret);
+    } else {
+        napi_value result;
+        napi_create_array(context->env, &result);
+        for (size_t i = 0; i < context->typeVecor.size(); i++) {
+            napi_value str;
+            napi_create_string_utf8(context->env, context->typeVecor[i].c_str(), NAPI_AUTO_LENGTH, &str);
+            napi_set_element(context->env, result, i, str);
+        }
+        napi_resolve_deferred(context->env, context->deferred, result);
+    }
+    if (context->env != nullptr && context->asyncWork != nullptr) {
+        napi_delete_async_work(context->env, context->asyncWork);
+    }
+    delete context;
+}
+
 napi_value CarAwarenessNapi::ExecuteAsyncTask(napi_env env)
 {
     AsyncContext *context = new AsyncContext;
@@ -381,31 +405,17 @@ napi_value CarAwarenessNapi::ExecuteAsyncTask(napi_env env)
         }
         context->ret = g_carAwarenessMgr.GetSupportCapabilityList(context->typeVecor);
     };
-    auto complete = [](napi_env, napi_status, void *data) {
-        auto *context = static_cast<AsyncContext *>(data);
-        if (context == nullptr || context->env == nullptr) {
-            return;
-        }
-        if (context->ret != RES_SUCCESS) {
-            ThrowIpcExcuteErr(context->env, context->ret);
-        } else {
-            napi_value result;
-            napi_create_array(context->env, &result);
-            for (size_t i = 0; i < context->typeVecor.size(); i++) {
-                napi_value str;
-                napi_create_string_utf8(context->env, context->typeVecor[i].c_str(), NAPI_AUTO_LENGTH, &str);
-                napi_set_element(context->env, result, i, str);
-            }
-            napi_resolve_deferred(context->env, context->deferred, result);
-        }
-        if (context->env != nullptr && context->asyncWork != nullptr) {
-            napi_delete_async_work(context->env, context->asyncWork);
-        }
+    if (napi_create_async_work(context->env, nullptr, resourceName, execute, ExecuteCompleteFuc,
+        static_cast<void*>(context), &context->asyncWork) != napi_ok) {
+        ThrowErrToJs(env, SERVICE_ERR, "napi_create_async_work failed");
         delete context;
-    };
-    NAPI_CALL(context->env, napi_create_async_work(env, nullptr, resourceName, execute, complete,
-        static_cast<void*>(context), &context->asyncWork));
-    NAPI_CALL(context->env, napi_queue_async_work(context->env, context->asyncWork));
+        return nullptr;
+    }
+    if (napi_queue_async_work(context->env, context->asyncWork) != napi_ok) {
+        ThrowErrToJs(env, SERVICE_ERR, "napi_queue_async_work failed");
+        delete context;
+        return nullptr;
+    }
     return promise;
 }
 
@@ -474,10 +484,7 @@ bool CarAwarenessNapi::SubscribeToSa(napi_env env, const int32_t type,
     // 避免 g_callbacksMutex 和 CarAwarenessCallback 的mutex_锁叠加
     cb->AddNapiObject(shared_from_this());
     // IPC的调用放在锁外, 防止服务端响应超时堵塞应用层并发
-    bool res = true;
-    if (!hasSubscribed) {
-        res = DoSubscription(env, type, option, cb);
-    }
+    bool res = DoSubscription(env, type, option, cb);
     return res;
 }
 
@@ -851,6 +858,7 @@ void CarAwarenessNapi::PostAwarenessEvent(const CarAwarenessEvent &event)
     };
     if (napi_send_event(env_, task, napi_eprio_immediate, "carAwareness.postEvent") != napi_ok) {
         FI_HILOGE("Failed to postEvent");
+        DeleteJsClassRef(env_);
     }
 }
 
