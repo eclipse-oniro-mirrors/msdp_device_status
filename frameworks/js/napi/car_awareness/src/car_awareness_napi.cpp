@@ -413,6 +413,7 @@ napi_value CarAwarenessNapi::ExecuteAsyncTask(napi_env env)
     }
     if (napi_queue_async_work(context->env, context->asyncWork) != napi_ok) {
         ThrowErrToJs(env, SERVICE_ERR, "napi_queue_async_work failed");
+        napi_delete_async_work(context->env, context->asyncWork);
         delete context;
         return nullptr;
     }
@@ -858,7 +859,6 @@ void CarAwarenessNapi::PostAwarenessEvent(const CarAwarenessEvent &event)
     };
     if (napi_send_event(env_, task, napi_eprio_immediate, "carAwareness.postEvent") != napi_ok) {
         FI_HILOGE("Failed to postEvent");
-        DeleteJsClassRef(env_);
     }
 }
 
