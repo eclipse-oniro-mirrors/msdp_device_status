@@ -14,9 +14,6 @@
  */
 
 #include "car_awareness_mgr_napi.h"
-#ifdef CAR_AWARENESS_ENABLE
-#include "car_awareness_mgr.h"
-#endif
 
 #include <nlohmann/json.hpp>
 
@@ -39,13 +36,13 @@ CarAwarenessMgrNapi::CarAwarenessMgrNapi(napi_env env, napi_value thisVar)
         [this](napi_value handler, const std::string &data) { return ConvertWeatherInfo(handler, data); };
     triggerMap_[TYPE_REFULING] =
         [this](napi_value handler, const std::string &data) { return ConvertRefulingInfo(handler, data); };
-#endif
+#endif // CAR_AWARENESS_ENABLE
 }
 
 CarAwarenessMgrNapi::~CarAwarenessMgrNapi()
 {
     {
-        std::lock_guard<std::mutex> lock(listenersMutex);
+        std::lock_guard<std::mutex> lock(listenersMutex_);
     #ifdef CAR_AWARENESS_ENABLE
         // 释放 native 侧持有的所有 JS 回调引用（napi_ref）,防止napi_ref泄露
         for (auto &typePair : listenerMap_) {
@@ -61,7 +58,7 @@ CarAwarenessMgrNapi::~CarAwarenessMgrNapi()
                 it = listener->onRefSets.erase(it);
             }
         }
-    #endif
+    #endif // CAR_AWARENESS_ENABLE
         listenerMap_.clear();
     }
     triggerMap_.clear();
@@ -74,7 +71,7 @@ CarAwarenessMgrNapi::~CarAwarenessMgrNapi()
 bool CarAwarenessMgrNapi::HasCapListener(const int32_t eventType)
 {
     FI_HILOGD("Enter");
-    std::lock_guard<std::mutex> lock(listenersMutex);
+    std::lock_guard<std::mutex> lock(listenersMutex_);
     auto typeIter = listenerMap_.find(eventType);
     if (typeIter == listenerMap_.end()) {
         FI_HILOGD("eventType listener not find");
@@ -86,7 +83,8 @@ bool CarAwarenessMgrNapi::HasCapListener(const int32_t eventType)
     return true;
 }
 
-bool CarAwarenessMgrNapi::IsSameValue(const napi_env &env, const napi_value &lhs, const napi_value &rhs)
+bool CarAwarenessMgrNapi::IsSameValue(const napi_env &env,
+    const napi_value &newHandler, const napi_value &existHandler)
 {
     FI_HILOGD("Enter");
     bool result = false;
@@ -150,7 +148,7 @@ bool CarAwarenessMgrNapi::AddCallbackEx(int32_t eventType, napi_value listenerHa
 {
     FI_HILOGD("Enter");
     isNewHandler = false;
-    std::lock_guard<std::mutex> lock(listenersMutex);
+    std::lock_guard<std::mutex> lock(listenersMutex_);
     auto iter = listenerMap_.find(eventType);
     if (iter == listenerMap_.end()) {
         FI_HILOGD("Not found type:%{public}d", eventType);
@@ -185,7 +183,7 @@ bool CarAwarenessMgrNapi::AddCallbackEx(int32_t eventType, napi_value listenerHa
 bool CarAwarenessMgrNapi::RemoveAllCallbackEx(int32_t eventType)
 {
     FI_HILOGD("RemoveAllCallbackEx in, event:%{public}d", eventType);
-    std::lock_guard<std::mutex> lock(listenersMutex);
+    std::lock_guard<std::mutex> lock(listenersMutex_);
     auto iter = listenerMap_.find(eventType);
     if (iter == listenerMap_.end()) {
         FI_HILOGW("EventType %{public}d not found", eventType);
@@ -223,7 +221,7 @@ bool CarAwarenessMgrNapi::RemoveAllCallbackEx(int32_t eventType)
 bool CarAwarenessMgrNapi::RemoveCallbackEx(int32_t eventType, napi_value listenerHandler)
 {
     FI_HILOGD("RemoveCallbackEx in, event:%{public}d", eventType);
-    std::lock_guard<std::mutex> lock(listenersMutex);
+    std::lock_guard<std::mutex> lock(listenersMutex_);
     auto iter = listenerMap_.find(eventType);
     if (iter == listenerMap_.end()) {
         FI_HILOGW("EventType %{public}d not found", eventType);
@@ -267,7 +265,7 @@ bool CarAwarenessMgrNapi::RemoveCallbackEx(int32_t eventType, napi_value listene
     return true;
 }
 
-void CarAwarenessMgrNapi::TriggerEvent(const int32_t type, const std::string &data)
+void CarAwarenessMgrNapi::TriggerEvent(int32_t type, const std::string &data)
 {
     FI_HILOGD("eventType: %{public}d", type);
     if (data.empty() || !nlohmann::json::accept(data)) {
@@ -276,7 +274,7 @@ void CarAwarenessMgrNapi::TriggerEvent(const int32_t type, const std::string &da
     }
     std::set<napi_ref> onRefSets;
     {
-        std::lock_guard<std::mutex> lock(listenersMutex);
+        std::lock_guard<std::mutex> lock(listenersMutex_);
         auto typeIter = listenerMap_.find(type);
         if (typeIter == listenerMap_.end() || typeIter->second == nullptr) {
             FI_HILOGE("eventType: %{public}d not found", type);
@@ -384,6 +382,6 @@ void CarAwarenessMgrNapi::ConvertRefulingInfo(napi_value handler, const std::str
         FI_HILOGE("napi_call_function ret %{public}d", ret);
     }
 }
-#endif
+#endif // CAR_AWARENESS_ENABLE
 } // namespace Msdp
 } // namespace OHOS
