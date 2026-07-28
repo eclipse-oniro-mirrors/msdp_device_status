@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,24 +43,6 @@ namespace {
     constexpr int32_t TYPE_CAR_STATUS = 203;
     constexpr int32_t TYPE_CAR_CFG = 204;
     constexpr int32_t TYPE_HABIT_RECOMMENDATION = 205;
-
-    const std::map<const std::string, int32_t> CAP_TYPE_MAP = {
-        { "SpatialMotion", TYPE_SPATIAL_MOTION },
-        { "RealTimeWeather", TYPE_REALTIME_WEATHER },
-        { "Refueling", TYPE_REFULING },
-        { "SpatialPoint", TYPE_SPATIAL_POINT },
-        { "SpatialGesture", TYPE_SPATIAL_GESTURE },
-        { "CarStatus", TYPE_CAR_STATUS },
-        { "CarCfg", TYPE_CAR_CFG },
-        { "HabitRecommendation", TYPE_HABIT_RECOMMENDATION }
-    };
-
-    const std::vector<std::string> EXPECTED_TYPE_NUMBER_ARG_1 = { "number" };
-    const std::vector<std::string> EXPECTED_TYPE_STRING_ARG_1 = { "string" };
-    const std::vector<std::string> EXPECTED_TYPE_FUNCTION_ARG_1 = { "function" };
-    const std::vector<std::string> EXPECTED_TYPE_FUNCTION_ARG_2 = { "string", "function" };
-    const std::vector<std::string> EXPECTED_TYPE_OBJECT_ARG_2 = { "string", "object" };
-    const std::vector<std::string> EXPECTED_TYPE_ARG_3 = { "string", "function", "object" };
 }
 
 struct CarAwarenessListener {
