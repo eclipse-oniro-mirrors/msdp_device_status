@@ -23,7 +23,7 @@
 
 #ifdef CAR_AWARENESS_ENABLE
 #include "car_awareness_callback_stub.h"
-#endif
+#endif // CAR_AWARENESS_ENABLE
 
 namespace OHOS {
 namespace Msdp {
@@ -35,7 +35,7 @@ public:
     ~CarAwarenessCallback() override = default;
     void OnAwarenessEvent(const CarAwarenessEvent& event) override;
     void AddNapiObject(const std::shared_ptr<CarAwarenessNapi>& object);
-    void RemoveNapiObject(const CarAwarenessNapi* object);
+    void RemoveNapiObject(const std::shared_ptr<CarAwarenessNapi>& object);
     bool HasNapiObject() const;
 
 private:
@@ -51,22 +51,21 @@ struct AsyncContext {
     // 延迟执行对象（用于promaise方法返回计算结果）
     napi_deferred deferred = nullptr;
 
-    int32_t ret;
-    std::vector<std::string> typeVecor;
+    int32_t asyncWorkRet;
+    std::vector<std::string> typeVector;
 };
-#endif
+#endif // CAR_AWARENESS_ENABLE
 
 class CarAwarenessNapi : public CarAwarenessMgrNapi, public std::enable_shared_from_this<CarAwarenessNapi> {
 public:
-    explicit CarAwarenessNapi(napi_env env, napi_value thisVar);
+    CarAwarenessNapi(napi_env env, napi_value thisVar);
     ~CarAwarenessNapi() override;
     
     static napi_value Init(napi_env env, napi_value exports);
 
 #ifdef CAR_AWARENESS_ENABLE
    void PostAwarenessEvent(const CarAwarenessEvent &event);
-    // 预留system接口回调 void PostAwarenessEventEx(const std::vector<CarAwarenessEvent>& events);
-#endif
+#endif // CAR_AWARENESS_ENABLE
 
 private:
     static void DefineCapabilityType(napi_env env, napi_value exports);
@@ -84,8 +83,8 @@ private:
 
     static napi_value SubscribeCapEx(napi_env env, napi_callback_info info);
     static napi_value UnSubscribeCapEx(napi_env env, napi_callback_info info);
-    static napi_value SubscribeCap(napi_env env, napi_callback_info info, const int32_t type);
-    static napi_value UnSubscribeCap(napi_env env, napi_callback_info info, const int32_t type);
+    static napi_value SubscribeCap(napi_env env, napi_callback_info info, int32_t type);
+    static napi_value UnSubscribeCap(napi_env env, napi_callback_info info, int32_t type);
     static int32_t GetCapType(napi_env env, napi_value value);
     static bool IsArgAllValid(napi_env env, napi_value *args, size_t argc,
         const std::vector<std::string> &expectedTypes);
@@ -100,23 +99,21 @@ private:
     static void RollbackInstancesLocked(napi_env env, const std::shared_ptr<CarAwarenessNapi> &sp);
     static napi_value ExecuteAsyncTask(napi_env env);
     static void ExecuteCompleteFuc(napi_env env, napi_status status, void *data);
-    static void ThrowIpcExcuteErr(napi_env env, const int32_t errCode);
+    static void ThrowIpcExcuteErr(napi_env env, int32_t errCode);
     static napi_value SubScribeCarAwareness(napi_env env, napi_value jsThis, napi_value callback,
-        const int32_t type, const CarAwarenessOption &option);
+        int32_t type, const CarAwarenessOption &option);
     static napi_value UnSubScribeCarAwareness(napi_env env, napi_value callback,
-        const int32_t type, const CarAwarenessOption &option);
+        int32_t type, const CarAwarenessOption &option);
 
-    bool SubscribeToSa(napi_env env, const int32_t type, const CarAwarenessOption &option, bool &hasSubscribed);
-    bool DoSubscription(napi_env env, const int32_t type,
+    bool SubscribeToSa(napi_env env, int32_t type, const CarAwarenessOption &option, bool &hasSubscribed);
+    bool DoSubscription(napi_env env, int32_t type,
         const CarAwarenessOption &option, const sptr<CarAwarenessCallback> cb);
-    bool UnSubscribeToSa(napi_env env, const int32_t type, const CarAwarenessOption &option);
-    bool DoUnSubscription(napi_env env, const int32_t type,
+    bool UnSubscribeToSa(napi_env env, int32_t type, const CarAwarenessOption &option);
+    bool DoUnSubscription(napi_env env, int32_t type,
         const CarAwarenessOption &option, const sptr<CarAwarenessCallback> cb);
-    void UnsubscribeAllCapsNoThrow();
-    void UnsubscribeCapNoThrow(const int32_t type);
-#endif
+#endif // CAR_AWARENESS_ENABLE
 };
-} // namespace OHOS
 } // namespace Msdp
+} // namespace OHOS
 
-#endif
+#endif // CAR_AWARENESS_NAPI_H
