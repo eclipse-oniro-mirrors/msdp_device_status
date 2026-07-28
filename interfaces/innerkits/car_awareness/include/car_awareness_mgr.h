@@ -91,4 +91,4 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 
-#endif
+#endif // CAR_AWARENESS_MANAGER_NATIVE_H
