@@ -37,4 +37,4 @@ private:
 } // namespace Msdp
 } // namespace OHOS
 
-#endif
+#endif // CAR_AWARENESS_CALLBACK_PROXY_H
