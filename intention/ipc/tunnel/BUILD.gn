@@ -121,6 +121,7 @@ ohos_source_set("msdp_kit_report") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "hiappevent:hiappevent_innerapi",
     "hilog:libhilog",
     "c_utils:utils",
