@@ -38,4 +38,4 @@ typedef struct CarAwarenessEvent {
 } // namespace Msdp
 } // namespace OHOS
 
-#endif
+#endif // CAR_AWARENESS_TYPE_INNER_H
