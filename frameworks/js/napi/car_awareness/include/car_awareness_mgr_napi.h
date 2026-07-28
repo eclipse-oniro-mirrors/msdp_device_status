@@ -62,27 +62,28 @@ public:
     bool RemoveCallbackEx(int32_t eventType, napi_value listenerHandler);
     bool HasCapListener(int32_t eventType);
 
-    void TriggerEvent(const int32_t type, const std::string &data);
+    void TriggerEvent(int32_t type, const std::string &data);
 
 protected:
     bool InsertRefEx(std::shared_ptr<CarAwarenessListener> listener,
         const napi_value &handler, bool &isNewHandler);
-    bool IsSameValue(const napi_env &env, const napi_value &lhs, const napi_value &rhs);
+    bool IsSameValue(const napi_env &env,
+        const napi_value &newHandler, const napi_value &existHandler);
 
 private:
     void ConvertWeatherInfo(napi_value handler, const std::string &data);
     void ConvertSpatialMotionInfo(napi_value handler, const std::string &data);
     void ConvertRefulingInfo(napi_value handler, const std::string &data);
-#endif
+#endif // CAR_AWARENESS_ENABLE
 
 protected:
     napi_env env_;
     napi_ref thisVarRef_;
-    std::mutex listenersMutex;
+    std::mutex listenersMutex_;
     std::map<int32_t, std::shared_ptr<CarAwarenessListener>> listenerMap_;
     std::unordered_map<int32_t, TriggerFunc> triggerMap_;
 };
-} // namespace OHOS
 } // namespace Msdp
+} // namespace OHOS
 
-#endif
+#endif // CAR_AWARENESS_MGR_NAPI_H
