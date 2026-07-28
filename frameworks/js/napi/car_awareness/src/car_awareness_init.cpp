@@ -21,7 +21,6 @@
 
 namespace OHOS {
 namespace Msdp {
-
 EXTERN_C_START
 /*
  * Function for module exports.
@@ -29,8 +28,7 @@ EXTERN_C_START
 static napi_value CarAwarenessInit(napi_env env, napi_value exports)
 {
     CALL_DEBUG_ENTER;
-    napi_value ret = CarAwarenessNapi::Init(env, exports);
-    return ret;
+    return CarAwarenessNapi::Init(env, exports);
 }
 EXTERN_C_END
 
@@ -53,6 +51,5 @@ extern "C" __attribute__((constructor)) void RegisterCarModeManageModule(void)
     FI_HILOGI("carAwareness service moudle register.");
     napi_module_register(&g_module);
 }
-
 } // namespace Msdp
 } // namespace OHOS
