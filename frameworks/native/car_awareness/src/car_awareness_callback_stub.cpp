@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,11 +63,13 @@ int32_t CarAwarenessCallbackStub::OnEventChangeStub(MessageParcel &data)
     if (!IsValidEventType(event.type)) {
         return DeviceStatus::DEVICESTATUS_FAILED;
     }
-    READSTRING(data, event.eventData, DeviceStatus::E_DEVICESTATUS_READ_PARCEL_ERROR);
-    if (event.eventData.size() > MAX_DATA_LEN) {
+    int32_t eventDataLen = 0;
+    READINT32(data, eventDataLen, DeviceStatus::E_DEVICESTATUS_READ_PARCEL_ERROR);
+    if (eventDataLen > MAX_DATA_LEN) {
         FI_HILOGE("event too long");
         return DeviceStatus::E_DEVICESTATUS_READ_PARCEL_ERROR;
     }
+    READSTRING(data, event.eventData, DeviceStatus::E_DEVICESTATUS_READ_PARCEL_ERROR);
     FI_HILOGI("Type: %{public}d", event.type);
     OnAwarenessEvent(event);
     FI_HILOGD("Exit");
