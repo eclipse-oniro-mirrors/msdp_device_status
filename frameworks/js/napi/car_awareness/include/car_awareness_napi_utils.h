@@ -57,7 +57,7 @@ void SetStringProperty(napi_env env, napi_value targetObj, const std::string &va
     const char *propName);
 void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
 bool TransJsToStr(napi_env env, napi_value value, std::string &str);
-} // namespace OHOS
 } // namespace Msdp
+} // namespace OHOS
 
-#endif
+#endif // CAR_AWARENESS_NAPI_UTILS_H
