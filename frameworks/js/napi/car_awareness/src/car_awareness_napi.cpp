@@ -15,7 +15,10 @@
 
 #include "car_awareness_napi.h"
 #include "car_awareness_napi_utils.h"
+
+#ifdef CAR_AWARENESS_ENABLE
 #include "car_awareness_mgr.h"
+#endif // CAR_AWARENESS_ENABLE
 
 #include <unordered_map>
 #include <unordered_set>
@@ -37,7 +40,7 @@ namespace {
 
     std::mutex g_callbacksMutex;
     std::unordered_map<int32_t, sptr<CarAwarenessCallback>> g_typeCallbacks;
-#endif
+#endif // CAR_AWARENESS_ENABLE
 
     // 定义静态常量
     static constexpr uint8_t ARG_0 = 0;
@@ -72,42 +75,7 @@ CarAwarenessNapi::CarAwarenessNapi(napi_env env, napi_value thisVar) : CarAwaren
 CarAwarenessNapi::~CarAwarenessNapi()
 {
     FI_HILOGI("Enter");
-#ifdef CAR_AWARENESS_ENABLE
-    UnsubscribeAllCapsNoThrow();
-#endif
 }
-
-#ifdef CAR_AWARENESS_ENABLE
-void CarAwarenessNapi::UnsubscribeAllCapsNoThrow()
-{
-    std::vector<int32_t> types;
-    types.reserve(listenerMap_.size());
-    for (auto &p : listenerMap_) {
-        types.push_back(p.first);
-    }
-    for (auto type : types) {
-        // 析构专用
-        UnsubscribeCapNoThrow(type);
-    }
-}
-
-void CarAwarenessNapi::UnsubscribeCapNoThrow(const int32_t type)
-{
-    sptr<CarAwarenessCallback> cb;
-    {
-        std::lock_guard<std::mutex> lock(g_callbacksMutex);
-        auto it = g_typeCallbacks.find(type);
-        if (it == g_typeCallbacks.end()) {
-            return;
-        }
-        cb = it->second;
-        cb->RemoveNapiObject(this);
-        if (!cb->HasNapiObject()) {
-            g_typeCallbacks.erase(it);
-        }
-    }
-}
-#endif
 
 void CarAwarenessNapi::SaveJsClassWeakRef(napi_env env, napi_value exports)
 {
@@ -268,7 +236,7 @@ void CarAwarenessNapi::RollbackInstancesLocked(napi_env env, const std::shared_p
         g_instances.erase(it);
     }
 }
-#endif
+#endif // CAR_AWARENESS_ENABLE
 
 napi_value CarAwarenessNapi::Init(napi_env env, napi_value exports)
 {
@@ -373,16 +341,16 @@ void CarAwarenessNapi::ExecuteCompleteFuc(napi_env env, napi_status status, void
     if (context == nullptr || context->env == nullptr) {
         return;
     }
-    if (context->ret != RES_SUCCESS) {
-        ThrowIpcExcuteErr(context->env, context->ret);
+    if (context->asyncWorkRet != RES_SUCCESS) {
+        ThrowIpcExcuteErr(context->env, context->asyncWorkRet);
         napi_reject_deferred(context->env, context->deferred,
-            CreateNapiError(context->env, context->ret, "GetSupportCap Err"));
+            CreateNapiError(context->env, context->asyncWorkRet, "GetSupportCap Err"));
     } else {
         napi_value result;
         napi_create_array(context->env, &result);
-        for (size_t i = 0; i < context->typeVecor.size(); i++) {
+        for (size_t i = 0; i < context->typeVector.size(); i++) {
             napi_value str;
-            napi_create_string_utf8(context->env, context->typeVecor[i].c_str(), NAPI_AUTO_LENGTH, &str);
+            napi_create_string_utf8(context->env, context->typeVector[i].c_str(), NAPI_AUTO_LENGTH, &str);
             napi_set_element(context->env, result, i, str);
         }
         napi_resolve_deferred(context->env, context->deferred, result);
@@ -415,7 +383,7 @@ napi_value CarAwarenessNapi::ExecuteAsyncTask(napi_env env)
             FI_HILOGE("AsyncContext obj get failed");
             return;
         }
-        context->ret = g_carAwarenessMgr.GetSupportCapabilityList(context->typeVecor);
+        context->asyncWorkRet = g_carAwarenessMgr.GetSupportCapabilityList(context->typeVector);
     };
     if (napi_create_async_work(context->env, nullptr, resourceName, execute, ExecuteCompleteFuc,
         static_cast<void*>(context), &context->asyncWork) != napi_ok) {
@@ -432,7 +400,7 @@ napi_value CarAwarenessNapi::ExecuteAsyncTask(napi_env env)
     return promise;
 }
 
-void CarAwarenessNapi::ThrowIpcExcuteErr(napi_env env, const int32_t errCode)
+void CarAwarenessNapi::ThrowIpcExcuteErr(napi_env env, int32_t errCode)
 {
     if (errCode == PERMISSION_ERR) {
         FI_HILOGE("Failed to subscribe");
@@ -449,7 +417,7 @@ void CarAwarenessNapi::ThrowIpcExcuteErr(napi_env env, const int32_t errCode)
     }
 }
 
-bool CarAwarenessNapi::DoSubscription(napi_env env, const int32_t type,
+bool CarAwarenessNapi::DoSubscription(napi_env env, int32_t type,
     const CarAwarenessOption &option, const sptr<CarAwarenessCallback> cb)
 {
     int32_t ret = g_carAwarenessMgr.SubscribeCapability(type, option, cb);
@@ -457,7 +425,7 @@ bool CarAwarenessNapi::DoSubscription(napi_env env, const int32_t type,
         FI_HILOGI("Subscribe success: %{public}d", type);
         return true;
     }
-    cb->RemoveNapiObject(this);
+    cb->RemoveNapiObject(shared_from_this());
     {
         std::lock_guard<std::mutex> lk(g_callbacksMutex);
         auto it = g_typeCallbacks.find(type);
@@ -469,7 +437,7 @@ bool CarAwarenessNapi::DoSubscription(napi_env env, const int32_t type,
     return false;
 }
 
-bool CarAwarenessNapi::SubscribeToSa(napi_env env, const int32_t type,
+bool CarAwarenessNapi::SubscribeToSa(napi_env env, int32_t type,
     const CarAwarenessOption &option, bool &hasSubscribed)
 {
     FI_HILOGD("Enter");
@@ -502,7 +470,7 @@ bool CarAwarenessNapi::SubscribeToSa(napi_env env, const int32_t type,
 }
 
 napi_value CarAwarenessNapi::SubScribeCarAwareness(napi_env env, napi_value jsThis, napi_value callback,
-    const int32_t type, const CarAwarenessOption &option)
+    int32_t type, const CarAwarenessOption &option)
 {
     FI_HILOGD("Enter");
     auto instance = GetInstanceByRef(env, jsThis);
@@ -527,7 +495,7 @@ napi_value CarAwarenessNapi::SubScribeCarAwareness(napi_env env, napi_value jsTh
 }
 
 napi_value CarAwarenessNapi::UnSubScribeCarAwareness(napi_env env, napi_value callback,
-    const int32_t type, const CarAwarenessOption &option)
+    int32_t type, const CarAwarenessOption &option)
 {
     auto instance = GetExistingInstanceLocked(env);
     if (instance == nullptr) {
@@ -553,7 +521,7 @@ napi_value CarAwarenessNapi::UnSubScribeCarAwareness(napi_env env, napi_value ca
     napi_get_undefined(env, &result);
     return result;
 }
-#endif
+#endif // CAR_AWARENESS_ENABLE
 
 napi_value CarAwarenessNapi::SubscribeCapEx(napi_env env, napi_callback_info info)
 {
@@ -584,10 +552,10 @@ napi_value CarAwarenessNapi::SubscribeCapEx(napi_env env, napi_callback_info inf
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     return result;
-#endif
+#endif // CAR_AWARENESS_ENABLE
 }
 
-napi_value CarAwarenessNapi::SubscribeCap(napi_env env, napi_callback_info info, const int32_t type)
+napi_value CarAwarenessNapi::SubscribeCap(napi_env env, napi_callback_info info, int32_t type)
 {
     FI_HILOGD("Enter");
     size_t argc = ARG_1;
@@ -607,7 +575,7 @@ napi_value CarAwarenessNapi::SubscribeCap(napi_env env, napi_callback_info info,
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     return result;
-#endif
+#endif // CAR_AWARENESS_ENABLE
 }
 
 int32_t CarAwarenessNapi::GetCapType(napi_env env, napi_value value)
@@ -657,10 +625,10 @@ napi_value CarAwarenessNapi::UnSubscribeCapEx(napi_env env, napi_callback_info i
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     return result;
-#endif
+#endif // CAR_AWARENESS_ENABLE
 }
 
-napi_value CarAwarenessNapi::UnSubscribeCap(napi_env env, napi_callback_info info, const int32_t type)
+napi_value CarAwarenessNapi::UnSubscribeCap(napi_env env, napi_callback_info info, int32_t type)
 {
     FI_HILOGD("Enter");
     size_t argc = ARG_1;
@@ -685,11 +653,11 @@ napi_value CarAwarenessNapi::UnSubscribeCap(napi_env env, napi_callback_info inf
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     return result;
-#endif
+#endif // CAR_AWARENESS_ENABLE
 }
 
 #ifdef CAR_AWARENESS_ENABLE
-bool CarAwarenessNapi::UnSubscribeToSa(napi_env env, const int32_t type, const CarAwarenessOption &option)
+bool CarAwarenessNapi::UnSubscribeToSa(napi_env env, int32_t type, const CarAwarenessOption &option)
 {
     FI_HILOGD("Enter");
     sptr<CarAwarenessCallback> callback;
@@ -701,7 +669,7 @@ bool CarAwarenessNapi::UnSubscribeToSa(napi_env env, const int32_t type, const C
             return false;
         }
         callback = it->second;
-        callback->RemoveNapiObject(this);
+        callback->RemoveNapiObject(shared_from_this());
         // 若仍有其它 env(线程) 在监听: 不真正触发 sa unsubscribe
         if (callback->HasNapiObject()) {
             FI_HILOGI("Still has listener on other thread");
@@ -714,7 +682,7 @@ bool CarAwarenessNapi::UnSubscribeToSa(napi_env env, const int32_t type, const C
 }
 
 // 此处的sptr<CarAwarenessCallback>参数非必选, NAPI已严格管控同一进程同一type仅一个Stub对象
-bool CarAwarenessNapi::DoUnSubscription(napi_env env, const int32_t type,
+bool CarAwarenessNapi::DoUnSubscription(napi_env env, int32_t type,
     const CarAwarenessOption &option, const sptr<CarAwarenessCallback> cb)
 {
     int32_t ret = g_carAwarenessMgr.UnSubscribeCapability(type, option, cb);
@@ -726,7 +694,7 @@ bool CarAwarenessNapi::DoUnSubscription(napi_env env, const int32_t type,
         return false;
     }
 }
-#endif
+#endif // CAR_AWARENESS_ENABLE
 
 napi_value CarAwarenessNapi::OnSpatialMotion(napi_env env, napi_callback_info info)
 {
@@ -786,7 +754,7 @@ napi_value CarAwarenessNapi::GetAllCapabilityList(napi_env env, napi_callback_in
 #else
     ThrowErrToJs(env, DEVICE_ERR, "Device not support");
     return nullptr;
-#endif
+#endif // CAR_AWARENESS_ENABLE
 }
 
 napi_value CarAwarenessNapi::UpdateSpatialActionEnableStatus(napi_env env, napi_callback_info info)
@@ -820,7 +788,7 @@ napi_value CarAwarenessNapi::UpdateSpatialActionEnableStatus(napi_env env, napi_
 #else
     ThrowErrToJs(env, DEVICE_ERR, "Device not support");
     return nullptr;
-#endif
+#endif // CAR_AWARENESS_ENABLE
 }
 
 napi_value CarAwarenessNapi::UpdateSpatialActionZone(napi_env env, napi_callback_info info)
@@ -853,7 +821,7 @@ napi_value CarAwarenessNapi::UpdateSpatialActionZone(napi_env env, napi_callback
 #else
     ThrowErrToJs(env, DEVICE_ERR, "Device not support");
     return nullptr;
-#endif
+#endif // CAR_AWARENESS_ENABLE
 }
 
 #ifdef CAR_AWARENESS_ENABLE
@@ -948,7 +916,7 @@ void CarAwarenessCallback::AddNapiObject(const std::shared_ptr<CarAwarenessNapi>
     objects_.swap(compact);
 }
 
-void CarAwarenessCallback::RemoveNapiObject(const CarAwarenessNapi* object)
+void CarAwarenessCallback::RemoveNapiObject(const std::shared_ptr<CarAwarenessNapi>& object)
 {
     FI_HILOGD("Enter");
     if (!object) {
@@ -959,7 +927,7 @@ void CarAwarenessCallback::RemoveNapiObject(const CarAwarenessNapi* object)
     objects_.erase(std::remove_if(objects_.begin(), objects_.end(),
         [&object](const std::weak_ptr<CarAwarenessNapi>& it) {
             auto sp = it.lock();
-            return !sp || sp.get() == object;
+            return !sp || sp.get() == object.get();
         }), objects_.end());
 }
 
@@ -973,6 +941,6 @@ bool CarAwarenessCallback::HasNapiObject() const
     }
     return false;
 }
-#endif
+#endif // CAR_AWARENESS_ENABLE
 } // namespace Msdp
 } // namespace OHOS
