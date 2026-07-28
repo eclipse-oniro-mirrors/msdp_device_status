@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,24 @@ namespace {
     static constexpr uint8_t ARG_1 = 1;
     static constexpr uint8_t ARG_2 = 2;
     static constexpr uint8_t ARG_3 = 3;
+
+    const std::map<const std::string, int32_t> CAP_TYPE_MAP = {
+        { "SpatialMotion", TYPE_SPATIAL_MOTION },
+        { "RealTimeWeather", TYPE_REALTIME_WEATHER },
+        { "Refueling", TYPE_REFULING },
+        { "SpatialPoint", TYPE_SPATIAL_POINT },
+        { "SpatialGesture", TYPE_SPATIAL_GESTURE },
+        { "CarStatus", TYPE_CAR_STATUS },
+        { "CarCfg", TYPE_CAR_CFG },
+        { "HabitRecommendation", TYPE_HABIT_RECOMMENDATION }
+    };
+
+    const std::vector<std::string> EXPECTED_TYPE_NUMBER_ARG_1 = { "number" };
+    const std::vector<std::string> EXPECTED_TYPE_STRING_ARG_1 = { "string" };
+    const std::vector<std::string> EXPECTED_TYPE_FUNCTION_ARG_1 = { "function" };
+    const std::vector<std::string> EXPECTED_TYPE_FUNCTION_ARG_2 = { "string", "function" };
+    const std::vector<std::string> EXPECTED_TYPE_OBJECT_ARG_2 = { "string", "object" };
+    const std::vector<std::string> EXPECTED_TYPE_ARG_3 = { "string", "function", "object" };
 }
 
 CarAwarenessNapi::CarAwarenessNapi(napi_env env, napi_value thisVar) : CarAwarenessMgrNapi(env, thisVar)
@@ -76,7 +94,6 @@ void CarAwarenessNapi::UnsubscribeAllCapsNoThrow()
 void CarAwarenessNapi::UnsubscribeCapNoThrow(const int32_t type)
 {
     sptr<CarAwarenessCallback> cb;
-    bool needUnsubSa = false;
     {
         std::lock_guard<std::mutex> lock(g_callbacksMutex);
         auto it = g_typeCallbacks.find(type);
@@ -87,15 +104,8 @@ void CarAwarenessNapi::UnsubscribeCapNoThrow(const int32_t type)
         cb->RemoveNapiObject(this);
         if (!cb->HasNapiObject()) {
             g_typeCallbacks.erase(it);
-            needUnsubSa = true;
         }
     }
-
-    if (!needUnsubSa) {
-        FI_HILOGI("type no needUnsubscribe");
-        return;
-    }
-    g_carAwarenessMgr.UnSubscribeCapability(type, CarAwarenessOption(), cb);
 }
 #endif
 
@@ -365,6 +375,8 @@ void CarAwarenessNapi::ExecuteCompleteFuc(napi_env env, napi_status status, void
     }
     if (context->ret != RES_SUCCESS) {
         ThrowIpcExcuteErr(context->env, context->ret);
+        napi_reject_deferred(context->env, context->deferred,
+            CreateNapiError(context->env, context->ret, "GetSupportCap Err"));
     } else {
         napi_value result;
         napi_create_array(context->env, &result);
@@ -529,7 +541,7 @@ napi_value CarAwarenessNapi::UnSubScribeCarAwareness(napi_env env, napi_value ca
         remove_res = instance->RemoveCallbackEx(type, callback);
     }
     if (!remove_res) {
-        ThrowErrToJs(env, SERVICE_ERR, "RemoveCallback failed");
+        FI_HILOGW("RemoveCallback failed");
         return nullptr;
     }
     if (!instance->HasCapListener(type)) {
@@ -558,7 +570,7 @@ napi_value CarAwarenessNapi::SubscribeCapEx(napi_env env, napi_callback_info inf
     }
     int32_t type = GetCapType(env, args[ARG_0]);
     if (type == INVALID_CAP_TYPE) {
-        ThrowErrToJs(env, PARAM_ERR, "Capability is illegal");
+        ThrowErrToJs(env, SPECIFIC_ERR, "Capability is illegal");
         return nullptr;
     }
     CarAwarenessOption option;
@@ -630,7 +642,7 @@ napi_value CarAwarenessNapi::UnSubscribeCapEx(napi_env env, napi_callback_info i
     }
     int32_t type = GetCapType(env, args[ARG_0]);
     if (type == INVALID_CAP_TYPE) {
-        ThrowErrToJs(env, PARAM_ERR, "Capability is illegal");
+        ThrowErrToJs(env, SPECIFIC_ERR, "Capability is illegal");
         return nullptr;
     }
     CarAwarenessOption option;
