@@ -487,8 +487,6 @@ napi_value CarAwarenessNapi::SubScribeCarAwareness(napi_env env, napi_value jsTh
         ThrowErrToJs(env, SERVICE_ERR, "AddCallback failed");
         return nullptr;
     }
-    // 如果服务已经订阅且线程首次注册, 业务有诉求的场景下可以考虑此处调用Get接口返回缓存数据
-    // 当前预留逻辑, 后续按需添加, 也可以在服务端首次注册的时候进行回调, 文博确认即可
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     return result;
