@@ -34,6 +34,7 @@ declare_args() {
   device_status_boomerang_onestep = false
   device_status_boomerang_support_hdr = false
   device_status_phone_standard_lite = false
+  device_status_car_awareness_enable = false
 
   # origin variables sets
   if (!is_arkui_x) {
@@ -51,6 +52,9 @@ declare_args() {
       }
       if (defined(global_parts_info.msdp_motion)) {
         device_status_motion_enable = true
+      }
+      if (defined(global_parts_info.carservice_car_awareness)) {
+        device_status_car_awareness_enable = true
       }
     }
   } else {  # is_arkui_x

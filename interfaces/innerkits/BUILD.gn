@@ -24,6 +24,7 @@ config("devicestatus_public_config") {
     "${device_status_utils_path}/include",
     "${device_status_interfaces_path}/innerkits/include",
     "${device_status_interfaces_path}/innerkits/interaction/include",
+    "${device_status_interfaces_path}/innerkits/car_awareness/include",
     "${device_status_frameworks_path}/native/user_status/include",
     "${device_status_root_path}/utils/ipc/include",
     "${device_status_root_path}/services/communication/base/",
@@ -148,6 +149,8 @@ ohos_shared_library("devicestatus_client") {
     "${device_status_frameworks_path}/native/src/on_screen_manager.cpp",
     "${device_status_frameworks_path}/native/src/on_screen_callback_proxy.cpp",
     "${device_status_frameworks_path}/native/src/on_screen_callback_stub.cpp",
+    "${device_status_frameworks_path}/native/car_awareness/src/car_awareness_callback_stub.cpp",
+    "${device_status_frameworks_path}/native/car_awareness/src/car_awareness_mgr.cpp"
   ]
 
   if (device_status_intention_framework) {
