@@ -14,6 +14,8 @@
  */
 
 #include "car_awareness_mgr_napi.h"
+#include "napi_constants.h"
+#include "util_napi.h"
 
 #include <nlohmann/json.hpp>
 
@@ -152,7 +154,7 @@ bool CarAwarenessMgrNapi::AddCallbackEx(int32_t eventType, napi_value listenerHa
     auto iter = listenerMap_.find(eventType);
     if (iter == listenerMap_.end()) {
         FI_HILOGD("Not found type:%{public}d", eventType);
-        std::shared_ptr<CarAwarenessListener> listener = std::make_shared<CarAwarenessListener>();
+        auto listener = std::make_shared<CarAwarenessListener>();
         std::set<napi_ref> onRefSets;
         listener->onRefSets = onRefSets;
         napi_ref onHandlerRef = nullptr;
@@ -260,7 +262,7 @@ bool CarAwarenessMgrNapi::RemoveCallbackEx(int32_t eventType, napi_value listene
         ++it;
     }
     if (iter->second->onRefSets.empty()) {
-        listenerMap_.erase(eventType);
+        listenerMap_.erase(iter);
     }
     return true;
 }
@@ -293,7 +295,7 @@ void CarAwarenessMgrNapi::TriggerEvent(int32_t type, const std::string &data)
         auto it = triggerMap_.find(type);
         if (it == triggerMap_.end()) {
             FI_HILOGE("Trigger Func not registered");
-            return;
+            continue;
         }
         it->second(handler, data);
     }
@@ -307,22 +309,26 @@ void CarAwarenessMgrNapi::ConvertWeatherInfo(napi_value handler, const std::stri
         return;
     }
     if (!weatherInfo["timestamp"].is_number_integer() || !weatherInfo["weather"].is_number_integer()) {
-        FI_HILOGW("WeatherInfo Format err");
+        FI_HILOGW("WeatherInfo Format error");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
     napi_value result = nullptr;
-    NAPI_CALL_RETURN_VOID(env_, napi_create_object(env_, &result));
+    CHKRV_SCOPE(env_, napi_create_object(env_, &result), DeviceStatus::CREATE_OBJECT, scope);
     napi_value value = nullptr;
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int64(env_, weatherInfo["timestamp"].get<int64_t>(), &value));
-    NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "timestamp", value));
+    CHKRV_SCOPE(env_, napi_create_int64(env_, weatherInfo["timestamp"].get<int64_t>(), &value),
+        DeviceStatus::CREATE_INT32, scope);
+    CHKRV_SCOPE(env_, napi_set_named_property(env_, result, "timestamp", value),
+        DeviceStatus::SET_NAMED_PROPERTY, scope);
     int32_t weatherValue = weatherInfo["weather"].get<int32_t>();
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int32(env_, weatherValue, &value));
-    NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "weather", value));
+    CHKRV_SCOPE(env_, napi_create_int32(env_, weatherValue, &value), DeviceStatus::CREATE_INT32, scope);
+    CHKRV_SCOPE(env_, napi_set_named_property(env_, result, "weather", value),
+        DeviceStatus::SET_NAMED_PROPERTY, scope);
     napi_value callResult = nullptr;
-    napi_status ret = napi_call_function(env_, nullptr, handler, 1, &result, &callResult);
-    if (ret != napi_ok) {
-        FI_HILOGE("napi_call_function ret %{public}d", ret);
-    }
+    CHKRV_SCOPE(env_, napi_call_function(env_, nullptr, handler, 1, &result, &callResult),
+        DeviceStatus::CALL_FUNCTION, scope);
+    napi_close_handle_scope(env_, scope);
 }
 
 void CarAwarenessMgrNapi::ConvertSpatialMotionInfo(napi_value handler, const std::string &data)
@@ -335,26 +341,34 @@ void CarAwarenessMgrNapi::ConvertSpatialMotionInfo(napi_value handler, const std
     }
     if (!motionInfo["timestamp"].is_number_integer() || !motionInfo["pointX"].is_number_float()
         || !motionInfo["pointY"].is_number_float() || !motionInfo["event"].is_number_integer()) {
-        FI_HILOGW("SpatialMotionInfo Format err");
+        FI_HILOGW("SpatialMotionInfo Format error");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
     napi_value result = nullptr;
-    NAPI_CALL_RETURN_VOID(env_, napi_create_object(env_, &result));
+    CHKRV_SCOPE(env_, napi_create_object(env_, &result), DeviceStatus::CREATE_OBJECT, scope);
     napi_value value = nullptr;
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int64(env_, motionInfo["timestamp"].get<int64_t>(), &value));
-    NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "timestamp", value));
-    NAPI_CALL_RETURN_VOID(env_, napi_create_double(env_, motionInfo["pointX"].get<double>(), &value));
-    NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "pointX", value));
-    NAPI_CALL_RETURN_VOID(env_, napi_create_double(env_, motionInfo["pointY"].get<double>(), &value));
-    NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "pointY", value));
+    CHKRV_SCOPE(env_, napi_create_int64(env_, motionInfo["timestamp"].get<int64_t>(), &value),
+       DeviceStatus::CREATE_INT64, scope);
+    CHKRV_SCOPE(env_, napi_set_named_property(env_, result, "timestamp", value),
+        DeviceStatus::SET_NAMED_PROPERTY, scope);
+    CHKRV_SCOPE(env_, napi_create_double(env_, motionInfo["pointX"].get<double>(), &value),
+        DeviceStatus::CREATE_INT64, scope);
+    CHKRV_SCOPE(env_, napi_set_named_property(env_, result, "pointX", value),
+        DeviceStatus::SET_NAMED_PROPERTY, scope);
+    CHKRV_SCOPE(env_, napi_create_double(env_, motionInfo["pointY"].get<double>(), &value),
+        DeviceStatus::CREATE_INT64, scope);
+    CHKRV_SCOPE(env_, napi_set_named_property(env_, result, "pointY", value),
+        DeviceStatus::SET_NAMED_PROPERTY, scope);
     int32_t eventValue = motionInfo["event"].get<int32_t>();
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int32(env_, eventValue, &value));
-    NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "event", value));
+    CHKRV_SCOPE(env_, napi_create_int32(env_, eventValue, &value), DeviceStatus::CREATE_INT32, scope);
+    CHKRV_SCOPE(env_, napi_set_named_property(env_, result, "event", value),
+        DeviceStatus::SET_NAMED_PROPERTY, scope);
     napi_value callResult = nullptr;
-    napi_status ret = napi_call_function(env_, nullptr, handler, 1, &result, &callResult);
-    if (ret != napi_ok) {
-        FI_HILOGE("napi_call_function ret %{public}d", ret);
-    }
+    CHKRV_SCOPE(env_, napi_call_function(env_, nullptr, handler, 1, &result, &callResult),
+        DeviceStatus::CALL_FUNCTION, scope);
+    napi_close_handle_scope(env_, scope);
 }
 
 void CarAwarenessMgrNapi::ConvertRefulingInfo(napi_value handler, const std::string &data)
@@ -365,22 +379,26 @@ void CarAwarenessMgrNapi::ConvertRefulingInfo(napi_value handler, const std::str
         return;
     }
     if (!refulingInfo["timestamp"].is_number_integer() || !refulingInfo["status"].is_number_integer()) {
-        FI_HILOGW("RefulingInfo Format err");
+        FI_HILOGW("RefulingInfo Format error");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
     napi_value result = nullptr;
-    NAPI_CALL_RETURN_VOID(env_, napi_create_object(env_, &result));
+    CHKRV_SCOPE(env_, napi_create_object(env_, &result), DeviceStatus::CREATE_OBJECT, scope);
     napi_value value = nullptr;
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int64(env_, refulingInfo["timestamp"].get<int64_t>(), &value));
-    NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "timestamp", value));
+    CHKRV_SCOPE(env_, napi_create_int64(env_, refulingInfo["timestamp"].get<int64_t>(), &value),
+        DeviceStatus::CREATE_INT64, scope);
+    CHKRV_SCOPE(env_, napi_set_named_property(env_, result, "timestamp", value),
+        DeviceStatus::SET_NAMED_PROPERTY, scope);
     int32_t statusValue = refulingInfo["status"].get<int32_t>();
-    NAPI_CALL_RETURN_VOID(env_, napi_create_int32(env_, statusValue, &value));
-    NAPI_CALL_RETURN_VOID(env_, napi_set_named_property(env_, result, "status", value));
+    CHKRV_SCOPE(env_, napi_create_int32(env_, statusValue, &value), DeviceStatus::CREATE_INT32, scope);
+    CHKRV_SCOPE(env_, napi_set_named_property(env_, result, "status", value),
+        DeviceStatus::SET_NAMED_PROPERTY, scope);
     napi_value callResult = nullptr;
-    napi_status ret = napi_call_function(env_, nullptr, handler, 1, &result, &callResult);
-    if (ret != napi_ok) {
-        FI_HILOGE("napi_call_function ret %{public}d", ret);
-    }
+    CHKRV_SCOPE(env_, napi_call_function(env_, nullptr, handler, 1, &result, &callResult),
+        DeviceStatus::CALL_FUNCTION, scope);
+    napi_close_handle_scope(env_, scope);
 }
 #endif // CAR_AWARENESS_ENABLE
 } // namespace Msdp
