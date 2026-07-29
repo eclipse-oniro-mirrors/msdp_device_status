@@ -88,7 +88,7 @@ bool CarAwarenessMgrNapi::IsSameValue(const napi_env &env,
 {
     FI_HILOGD("Enter");
     bool result = false;
-    napi_status status = napi_strict_equals(env, lhs, rhs, &result);
+    napi_status status = napi_strict_equals(env, newHandler, existHandler, &result);
     if (status != napi_ok) {
         FI_HILOGE("napi_strict_equals failed");
         return result;
