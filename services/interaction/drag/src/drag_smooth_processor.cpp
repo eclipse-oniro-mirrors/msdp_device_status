@@ -172,6 +172,7 @@ std::optional<DragMoveEvent> DragSmoothProcessor::GetInterpolatedEvent(const Dra
             (currentAvgEvent.timestamp - historyAvgEvent.timestamp);
         if (alpha > 1.5f) {
             alpha = 1.5f;
+            FI_HILOGD("alpha:%{public}f", alpha);
         }
         event.displayX = currentAvgEvent.displayX + alpha * (currentAvgEvent.displayX - historyAvgEvent.displayX);
         event.displayY = currentAvgEvent.displayY + alpha * (currentAvgEvent.displayY - historyAvgEvent.displayY);
