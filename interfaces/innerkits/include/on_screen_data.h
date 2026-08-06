@@ -104,6 +104,7 @@ struct OnScreenCallingContext {
     int32_t uid = -1;
     int32_t pid = -1;
     // caller: ipc caller
+    int32_t windowId = -1;
     std::string caller;
     std::string navDstName;
     std::string pageUrl;
