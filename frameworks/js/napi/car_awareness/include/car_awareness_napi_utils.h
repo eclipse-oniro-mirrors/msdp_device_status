@@ -33,7 +33,6 @@ constexpr int32_t PARAM_ERR { 401 };
 constexpr int32_t DEVICE_ERR { 801 };
 constexpr int32_t SERVICE_ERR { 34000001 };
 constexpr int32_t SPECIFIC_ERR { 34000002 };
-constexpr int32_t SUBSCRIBE_ERR { 34000003 };
 
 const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {PERMISSION_ERR, "Permission check failed."},
@@ -41,11 +40,9 @@ const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {PARAM_ERR, "Params check failed."},
     {DEVICE_ERR, "The device does not support this API."},
     {SERVICE_ERR, "Service exception. Possible causes: 1. A system error, such as null pointer, "
-        "container-related exception; 2. N-API invocation exception, invalid N-API status."},
+        "container-related exception; 2. N-API invocation exception, invalid N-API status; "
+        "3. Bind native object to js wrapper failed."},
     {SPECIFIC_ERR, "Specific capability not support"},
-    {SUBSCRIBE_ERR, "Subscribe failed. Possible causes: "
-        "1. Bind native object to js wrapper failed; 2. N-API invocation exception; "
-        "3. IPC request exception."}
 };
 
 constexpr size_t MAX_ARG_STRING_LEN = 512;

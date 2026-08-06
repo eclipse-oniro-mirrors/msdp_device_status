@@ -1399,6 +1399,114 @@ void IntentionClient::ServiceProxyLoadCallback::OnLoadSystemAbilityFail(int32_t 
 {
     FI_HILOGE("Load SA:%{public}d failed", systemAbilityId);
 }
+
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+int32_t IntentionClient::SubscribeCapability(
+    int32_t type, const CarAwarenessOption &option, const sptr<ICarAwarenessCallback> &cb)
+{
+    CALL_INFO_TRACE;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    SequenceableCarAwarenessOption seqOption(option);
+    auto ret = devicestatusProxy_->SubscribeCapability(type, seqOption, cb);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:SubscribeCapability failed %{public}d", ret);
+    }
+    return ret;
+}
+ 
+int32_t IntentionClient::UnSubscribeCapability(
+    int32_t type, const CarAwarenessOption &option, const sptr<ICarAwarenessCallback> &cb)
+{
+    CALL_INFO_TRACE;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    SequenceableCarAwarenessOption seqOption(option);
+    auto ret = devicestatusProxy_->UnSubscribeCapability(type, seqOption, cb);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:UnSubscribeCapability failed %{public}d", ret);
+    }
+    return ret;
+}
+ 
+int32_t IntentionClient::UpdateSpatialActionStatus(int32_t eventId)
+{
+    CALL_INFO_TRACE;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    auto ret = devicestatusProxy_->UpdateSpatialActionStatus(eventId);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:UpdateSpatialActionStatus failed %{public}d", ret);
+    }
+    return ret;
+}
+ 
+int32_t IntentionClient::UpdateSpatialActionZone(int32_t zoneId)
+{
+    CALL_INFO_TRACE;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    auto ret = devicestatusProxy_->UpdateSpatialActionZone(zoneId);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:UpdateSpatialActionZone failed %{public}d", ret);
+    }
+    return ret;
+}
+ 
+int32_t IntentionClient::GetSupportCapabilityList(std::vector<std::string> &capabilities)
+{
+    CALL_INFO_TRACE;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    std::vector<std::string> result;
+    auto ret = devicestatusProxy_->GetSupportCapabilityList(result);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:GetSupportCapabilityList failed %{public}d", ret);
+    }
+    capabilities = std::move(result);
+    return ret;
+}
+ 
+int32_t IntentionClient::GetCarAwareness(int32_t type, const CarAwarenessOption &option,
+                                         std::vector<CarAwarenessEvent> &events)
+{
+    CALL_INFO_TRACE;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    SequenceableCarAwarenessOption seqOption(option);
+    SequenceableCarAwarenessEventArray seqEventsArray(events);
+    auto ret = devicestatusProxy_->GetCarAwareness(type, seqOption, seqEventsArray);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:GetCarAwareness failed %{public}d", ret);
+    }
+    events = std::move(seqEventsArray.events_);
+    return ret;
+}
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

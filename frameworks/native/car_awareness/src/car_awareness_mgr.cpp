@@ -14,45 +14,50 @@
  */
 
 #include "car_awareness_mgr.h"
+#include "intention_manager.h"
 
 namespace OHOS {
 namespace Msdp {
-CarAwarenessMgr& CarAwarenessMgr::GetInstance()
+namespace DeviceStatus {
+CarAwarenessMgr &CarAwarenessMgr::GetInstance()
 {
     static CarAwarenessMgr instance;
     return instance;
 }
 
-int32_t CarAwarenessMgr::SubscribeCapability(const int32_t type, const CarAwarenessOption &option,
-    const sptr<ICarAwarenessCallback> cb)
+int32_t CarAwarenessMgr::SubscribeCapability(int32_t type, const CarAwarenessOption &option,
+                                             sptr<ICarAwarenessCallback> cb)
 {
-    return 0;
+    return INTER_MGR_IMPL.SubscribeCapability(type, option, cb);
 }
 
-int32_t CarAwarenessMgr::UnSubscribeCapability(const int32_t type, const CarAwarenessOption &option,
-    const sptr<ICarAwarenessCallback> cb)
+int32_t CarAwarenessMgr::UnSubscribeCapability(int32_t type, const CarAwarenessOption &option,
+                                               const sptr<ICarAwarenessCallback> cb)
 {
-    return 0;
+    return INTER_MGR_IMPL.UnSubscribeCapability(type, option, cb);
 }
 
-int32_t CarAwarenessMgr::IsCapabilitySupport(const int32_t type, bool &isSupport)
+int32_t CarAwarenessMgr::GetSupportCapabilityList(std::vector<std::string> &capabilities)
 {
-    return 0;
+    return INTER_MGR_IMPL.GetSupportCapabilityList(capabilities);
 }
 
-int32_t CarAwarenessMgr::GetSupportCapabilityList(std::vector<std::string> &capabilityVec)
+int32_t CarAwarenessMgr::UpdateSpatialActionZone(int32_t zoneId)
 {
-    return 0;
+    return INTER_MGR_IMPL.UpdateSpatialActionZone(zoneId);
 }
 
-int32_t CarAwarenessMgr::UpdateSpatialActionZone(const int32_t zoneId)
+int32_t CarAwarenessMgr::UpdateSpatialActionStatus(int32_t eventId)
 {
-    return 0;
+    return INTER_MGR_IMPL.UpdateSpatialActionStatus(eventId);
 }
 
-int32_t CarAwarenessMgr::UpdateSpatialActionStatus(const int32_t eventId)
+int32_t CarAwarenessMgr::GetCarAwareness(int32_t type, const CarAwarenessOption &option,
+                                         std::vector<CarAwarenessEvent> &events)
 {
-    return 0;
+    return INTER_MGR_IMPL.GetCarAwareness(type, option, events);
 }
-} // namespace Msdp
-} // namespace OHOS
+
+}  // namespace DeviceStatus
+}  // namespace Msdp
+}  // namespace OHOS

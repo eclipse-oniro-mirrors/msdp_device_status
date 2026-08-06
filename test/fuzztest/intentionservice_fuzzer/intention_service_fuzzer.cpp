@@ -585,6 +585,47 @@ public:
         (void)args;
         return 0;
     }
+    
+    // CarAwareness
+    ErrCode SubscribeCapability(int32_t type, const SequenceableCarAwarenessOption &option,
+        const sptr<ICarAwarenessCallback> &cb) override
+    {
+        (void)type;
+        (void)option;
+        (void)cb;
+        return 0;
+    }
+    ErrCode UnSubscribeCapability(int32_t type, const SequenceableCarAwarenessOption &option,
+        const sptr<ICarAwarenessCallback> &cb) override
+    {
+        (void)type;
+        (void)option;
+        (void)cb;
+        return 0;
+    }
+    ErrCode UpdateSpatialActionStatus(int32_t eventId) override
+    {
+        (void)eventId;
+        return 0;
+    }
+    ErrCode UpdateSpatialActionZone(int32_t zoneId) override
+    {
+        (void)zoneId;
+        return 0;
+    }
+    ErrCode GetSupportCapabilityList(std::vector<std::string> &capabilities) override
+    {
+        (void)capabilities;
+        return 0;
+    }
+    ErrCode GetCarAwareness(int32_t type, const SequenceableCarAwarenessOption &option,
+        SequenceableCarAwarenessEventArray &events) override
+    {
+        (void)type;
+        (void)option;
+        (void)events;
+        return 0;
+    }
 };
 
 static inline void DoSleep(void)

@@ -26,6 +26,7 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DeviceStatus {
 class CarAwarenessMgr {
 public:
     /**
@@ -41,8 +42,8 @@ public:
      * @param cb car awareness event callback
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      */
-    int32_t SubscribeCapability(const int32_t type,
-        const CarAwarenessOption &option, const sptr<ICarAwarenessCallback> cb);
+    int32_t SubscribeCapability(int32_t type, const CarAwarenessOption &option,
+                                const sptr<ICarAwarenessCallback> cb);
 
     /**
      * @brief UnSubscribe car awareness capability By type.
@@ -51,44 +52,47 @@ public:
      * @param cb car awareness event callback
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      */
-    int32_t UnSubscribeCapability(const int32_t type,
-        const CarAwarenessOption &option, const sptr<ICarAwarenessCallback> cb);
-
-    /**
-     * @brief Determine whether the specified capability is supported.
-     * @param type type of capability
-     * @param isSupport result obtained by interface
-     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
-     */
-    int32_t IsCapabilitySupport(const int32_t type, bool &isSupport);
+    int32_t UnSubscribeCapability(int32_t type, const CarAwarenessOption &option,
+                                  const sptr<ICarAwarenessCallback> cb);
 
     /**
      * @brief Query the set of supported capabilities.
-     * @param capabilityVec result obtained by interface
+     * @param capabilities result obtained by interface
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      */
-    int32_t GetSupportCapabilityList(std::vector<std::string> &capabilityVec);
+    int32_t GetSupportCapabilityList(std::vector<std::string> &capabilities);
 
     /**
      * @brief Update zoneId of SpatialAction Capability.
      * @param zoneId id of audio zone
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      */
-    int32_t UpdateSpatialActionZone(const int32_t zoneId);
+    int32_t UpdateSpatialActionZone(int32_t zoneId);
 
     /**
      * @brief Update enable status of SpatialAction Capability.
      * @param eventId event id corresponding to the enable status
      * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
      */
-    int32_t UpdateSpatialActionStatus(const int32_t eventId);
+    int32_t UpdateSpatialActionStatus(int32_t eventId);
+
+    /**
+     * @brief Get car awareness capability result by type.
+     * @param type type of capability
+     * @param option optional args for sysapi
+     * @param events resulting events
+     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
+     */
+    int32_t GetCarAwareness(int32_t type, const CarAwarenessOption &option,
+                            std::vector<CarAwarenessEvent> &events);
 
 private:
     CarAwarenessMgr() = default;
     ~CarAwarenessMgr() = default;
     DISALLOW_COPY_AND_MOVE(CarAwarenessMgr);
 };
-} // namespace Msdp
-} // namespace OHOS
+}  // namespace DeviceStatus
+}  // namespace Msdp
+}  // namespace OHOS
 
 #endif // CAR_AWARENESS_MANAGER_NATIVE_H

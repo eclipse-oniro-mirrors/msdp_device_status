@@ -132,7 +132,7 @@ ohos_shared_library("devicestatus_client") {
   }
 
   defines = []
-
+  
   branch_protector_ret = "pac_ret"
 
   version_script = "libdevicestatus_client_map"
@@ -149,8 +149,6 @@ ohos_shared_library("devicestatus_client") {
     "${device_status_frameworks_path}/native/src/on_screen_manager.cpp",
     "${device_status_frameworks_path}/native/src/on_screen_callback_proxy.cpp",
     "${device_status_frameworks_path}/native/src/on_screen_callback_stub.cpp",
-    "${device_status_frameworks_path}/native/car_awareness/src/car_awareness_callback_stub.cpp",
-    "${device_status_frameworks_path}/native/car_awareness/src/car_awareness_mgr.cpp"
   ]
 
   if (device_status_intention_framework) {
@@ -159,6 +157,14 @@ ohos_shared_library("devicestatus_client") {
     if (device_status_interaction_coordination) {
       sources += [ "${device_status_frameworks_path}/native/interaction/src/coordination_manager_impl.cpp" ]
     }
+  }
+
+  if (device_status_car_awareness_enable) {
+    sources += [
+      "${device_status_frameworks_path}/native/car_awareness/src/car_awareness_callback_stub.cpp",
+      "${device_status_frameworks_path}/native/car_awareness/src/car_awareness_mgr.cpp",
+      "${device_status_frameworks_path}/native/car_awareness/src/car_awareness_callback_proxy.cpp"
+    ]
   }
 
   configs = [ "${device_status_utils_path}:devicestatus_utils_config" ]
@@ -195,6 +201,10 @@ ohos_shared_library("devicestatus_client") {
     ]
   }
 
+  if (device_status_car_awareness_enable) {
+    deps += [ "${device_status_root_path}/intention/car_awareness/client:intention_car_awareness_client" ]
+  }
+
   external_deps = [
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_base",
@@ -205,9 +215,13 @@ ohos_shared_library("devicestatus_client") {
     "samgr:samgr_proxy",
     "window_manager:libdm",
   ]
-
+  
   if(device_status_phone_standard_lite){
     defines += [ "DEVICE_STATUS_PHONE_STANDARD_LITE" ]
+  }
+
+  if(device_status_car_awareness_enable){
+    defines += [ "DEVICE_STATUS_CAR_AWARENESS_ENABLE" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

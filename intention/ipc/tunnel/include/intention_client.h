@@ -73,7 +73,7 @@ public:
     int32_t GetShadowOffset(ShadowOffset &shadowOffset);
     int32_t GetDragData(DragData &dragData);
     int32_t UpdatePreviewStyle(const PreviewStyle &previewStyle);
-	int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
+    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle &previewStyle, const PreviewAnimation &animation);
     int32_t RotateDragWindowSync(const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     int32_t SetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
     void ResetDragWindowScreenId(uint64_t displayId, uint64_t screenId);
@@ -130,6 +130,17 @@ public:
         const sptr<OnScreen::IRemoteOnScreenCallback>& callback);
     int32_t Trigger(const OnScreen::AwarenessCap& cap, const OnScreen::AwarenessOptions& option,
         OnScreen::OnscreenAwarenessInfo& info);
+
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    // CarAwareness
+    int32_t SubscribeCapability(int32_t type, const CarAwarenessOption &option, const sptr<ICarAwarenessCallback> &cb);
+    int32_t UnSubscribeCapability(int32_t type, const CarAwarenessOption &option,
+                                  const sptr<ICarAwarenessCallback> &cb);
+    int32_t UpdateSpatialActionStatus(int32_t eventId);
+    int32_t UpdateSpatialActionZone(int32_t zoneId);
+    int32_t GetSupportCapabilityList(std::vector<std::string> &capabilities);
+    int32_t GetCarAwareness(int32_t type, const CarAwarenessOption &option, std::vector<CarAwarenessEvent> &events);
+#endif  // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 
 private:
     class DeathRecipient : public IRemoteObject::DeathRecipient {

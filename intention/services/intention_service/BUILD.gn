@@ -52,13 +52,18 @@ ohos_shared_library("intention_service") {
         [ "${device_status_root_path}/services/interaction/drag/include" ]
   }
 
+  if (device_status_car_awareness_enable) {
+    include_dirs +=
+        [ "${device_status_root_path}/intention/car_awareness/server/include" ]
+  }
+
   sources = [
     "${device_status_frameworks_path}/native/src/boomerang_callback_proxy.cpp",
     "src/boomerang_dumper.cpp",
     "src/intention_dumper.cpp",
     "src/intention_service.cpp",
   ]
-
+  
   public_configs = [ ":intention_service_config" ]
 
   deps = [
@@ -75,6 +80,10 @@ ohos_shared_library("intention_service") {
 
   if (device_status_interaction_coordination) {
     deps += [ "${device_status_root_path}/intention/cooperate/server:intention_cooperate_server" ]
+  }
+
+  if (device_status_car_awareness_enable) {
+    deps += [ "${device_status_root_path}/intention/car_awareness/server:intention_car_awareness_server" ]
   }
 
   external_deps = [
@@ -103,7 +112,7 @@ ohos_shared_library("intention_service") {
     external_deps += [ "motion:motion_interface_native" ]
   }
 
-  if (device_status_sensor_enable) {
+if (device_status_sensor_enable) {
     defines += [ "DEVICE_STATUS_SENSOR_ENABLE" ]
     external_deps += [ "sensor:sensor_interface_native" ]
   }
@@ -113,6 +122,10 @@ ohos_shared_library("intention_service") {
     external_deps += [
       "window_manager:libwm",
     ]
+  }
+
+  if(device_status_car_awareness_enable){
+    defines += [ "DEVICE_STATUS_CAR_AWARENESS_ENABLE" ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"

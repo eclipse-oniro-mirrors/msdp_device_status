@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableCooperateOptions;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragData;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragResult;
@@ -29,11 +29,14 @@ sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessCap;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessInfo;
 sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessOption;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragEventData;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableCarAwarenessOption;
+sequenceable OHOS.Msdp.DeviceStatus.SequenceableCarAwarenessEventArray;
 interface OHOS.Msdp.DeviceStatus.IRemoteBoomerangCallback;
 interface OHOS.Msdp.DeviceStatus.IRemoteDevStaCallback;
 interface OHOS.Msdp.DeviceStatus.OnScreen.IRemoteOnScreenCallback;
 sequenceable OHOS.Media.PixelMap;
- 
+interface OHOS.Msdp.ICarAwarenessCallback;
+
 interface OHOS.Msdp.IIntention {
     // Socket
     void Socket([in] String programName, [in] int moduleType, [out] FileDescriptorSan socketFd, [out] int tokenType);
@@ -54,7 +57,7 @@ interface OHOS.Msdp.IIntention {
     void GetCooperateStateSync([in] String udid, [out] boolean state);
     void GetCooperateStateAsync([in] String networkId, [in] int userData, [in] boolean isCheckPermission);
     void SetDamplingCoefficient([in] unsigned int direction, [in] double coefficient);
- 
+
     // Drag
     void StartDrag([in] SequenceableDragData sequenceableDragData);
     void StopDrag([in] SequenceableDragResult sequenceableDragResult);
@@ -98,7 +101,7 @@ interface OHOS.Msdp.IIntention {
     void BoomerangEncodeImage([in] sharedptr<PixelMap> pixelMap, [in] String metadata,
         [in] IRemoteBoomerangCallback encodeCallback);
     void BoomerangDecodeImage([in] sharedptr<PixelMap> pixelMap, [in] IRemoteBoomerangCallback decodeCallback);
- 
+
     // Stationary
     void SubscribeStationaryCallback([in] int type, [in] int event, [in] int latency,
         [in] IRemoteDevStaCallback subCallback);
@@ -118,4 +121,12 @@ interface OHOS.Msdp.IIntention {
     void RegisterAwarenessCallback([in] SequenceableOnscreenAwarenessCap cap, [in] IRemoteOnScreenCallback onScreenCallback, [in] SequenceableOnscreenAwarenessOption awarenessOption);
     void UnregisterAwarenessCallback([in] SequenceableOnscreenAwarenessCap cap, [in] IRemoteOnScreenCallback onScreenCallback);
     void Trigger([in] SequenceableOnscreenAwarenessCap cap, [in] SequenceableOnscreenAwarenessOption awarenessOption, [out] SequenceableOnscreenAwarenessInfo outInfo);
+   
+    // CarAwareness
+    void SubscribeCapability([in] int type, [in] SequenceableCarAwarenessOption carAwarenessoption, [in] ICarAwarenessCallback cb);
+    void UnSubscribeCapability([in] int type, [in] SequenceableCarAwarenessOption carAwarenessoption, [in] ICarAwarenessCallback cb);
+    void UpdateSpatialActionStatus([in] int eventId);
+    void UpdateSpatialActionZone([in] int zoneId);
+    void GetSupportCapabilityList([out] String[] capabilities);
+    void GetCarAwareness([in] int type, [in] SequenceableCarAwarenessOption carAwarenessoption, [out] SequenceableCarAwarenessEventArray events);
 }
