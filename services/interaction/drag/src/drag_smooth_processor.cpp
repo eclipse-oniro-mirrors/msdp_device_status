@@ -170,6 +170,10 @@ std::optional<DragMoveEvent> DragSmoothProcessor::GetInterpolatedEvent(const Dra
     } else if (nanoTimestamp > currentAvgEvent.timestamp) {
         float alpha = static_cast<float>(nanoTimestamp - currentAvgEvent.timestamp) /
             (currentAvgEvent.timestamp - historyAvgEvent.timestamp);
+        if (alpha > 1.5f) {
+            FI_HILOGD("alpha:%{public}f", alpha);
+            alpha = 1.5f;
+        }
         event.displayX = currentAvgEvent.displayX + alpha * (currentAvgEvent.displayX - historyAvgEvent.displayX);
         event.displayY = currentAvgEvent.displayY + alpha * (currentAvgEvent.displayY - historyAvgEvent.displayY);
         event.timestamp = nanoTimestamp;

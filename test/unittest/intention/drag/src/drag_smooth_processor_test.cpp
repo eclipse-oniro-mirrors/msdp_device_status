@@ -116,6 +116,137 @@ HWTEST_F(DragSmoothProcessorTest, ResetParametersClearsAll, TestSize.Level0)
     DragMoveEvent result = processor.SmoothMoveEvent(35000000, 16666667);
     EXPECT_EQ(result.displayId, -1);
 }
+
+/**
+* @tc.name: GetInterpolatedEvent1
+* @tc.desc: Verify GetInterpolatedEvent returns nullopt when nanoTimestamp <= historyAvgEvent.timestamp.
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragSmoothProcessorTest, GetInterpolatedEvent1, TestSize.Level0)
+{
+    DragSmoothProcessor processor;
+    DragMoveEvent historyAvgEvent { .displayX = 100.0f, .displayY = 200.0f, .displayId = 0, .timestamp = 50000000 };
+    DragMoveEvent currentAvgEvent { .displayX = 300.0f, .displayY = 400.0f, .displayId = 0, .timestamp = 60000000 };
+
+    auto result = processor.GetInterpolatedEvent(historyAvgEvent, currentAvgEvent, 50000000);
+    EXPECT_FALSE(result.has_value());
+
+    auto result2 = processor.GetInterpolatedEvent(historyAvgEvent, currentAvgEvent, 30000000);
+    EXPECT_FALSE(result2.has_value());
+}
+
+/**
+* @tc.name: GetInterpolatedEvent2
+* @tc.desc: Verify GetInterpolatedEvent returns nullopt when nanoTimestamp == currentAvgEvent.timestamp.
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragSmoothProcessorTest, GetInterpolatedEvent2, TestSize.Level0)
+{
+    DragSmoothProcessor processor;
+    DragMoveEvent historyAvgEvent { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 10000000 };
+    DragMoveEvent currentAvgEvent { .displayX = 30.0f, .displayY = 40.0f, .displayId = 0, .timestamp = 20000000 };
+
+    auto result = processor.GetInterpolatedEvent(historyAvgEvent, currentAvgEvent, 20000000);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+* @tc.name: GetInterpolatedEvent3
+* @tc.desc: Verify GetInterpolatedEvent returns nullopt when currentAvgEvent.timestamp <= historyAvgEvent.timestamp.
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragSmoothProcessorTest, GetInterpolatedEvent3, TestSize.Level0)
+{
+    DragSmoothProcessor processor;
+    DragMoveEvent historyAvgEvent { .displayX = 100.0f, .displayY = 200.0f, .displayId = 0, .timestamp = 50000000 };
+    DragMoveEvent currentAvgEvent { .displayX = 150.0f, .displayY = 250.0f, .displayId = 0, .timestamp = 30000000 };
+
+    auto result = processor.GetInterpolatedEvent(historyAvgEvent, currentAvgEvent, 40000000);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+* @tc.name: GetInterpolatedEvent4
+* @tc.desc: Verify GetInterpolatedEvent returns nullopt when
+*           (currentAvgEvent.timestamp - historyAvgEvent.timestamp) > INTERPOLATION_THRESHOLD (100ms).
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragSmoothProcessorTest, GetInterpolatedEvent4, TestSize.Level0)
+{
+    DragSmoothProcessor processor;
+    DragMoveEvent historyAvgEvent { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 10000000 };
+    DragMoveEvent currentAvgEvent { .displayX = 50.0f, .displayY = 60.0f, .displayId = 0, .timestamp = 120000000 };
+
+    auto result = processor.GetInterpolatedEvent(historyAvgEvent, currentAvgEvent, 60000000);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+* @tc.name: GetInterpolatedEvent5
+* @tc.desc: Verify GetInterpolatedEvent performs normal interpolation when
+*           historyAvgEvent.timestamp < nanoTimestamp < currentAvgEvent.timestamp (alpha <= 1.5).
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragSmoothProcessorTest, GetInterpolatedEvent5, TestSize.Level0)
+{
+    DragSmoothProcessor processor;
+    DragMoveEvent historyAvgEvent { .displayX = 0.0f, .displayY = 0.0f, .displayId = 0, .timestamp = 10000000 };
+    DragMoveEvent currentAvgEvent { .displayX = 100.0f, .displayY = 100.0f, .displayId = 1, .timestamp = 20000000 };
+
+    auto result = processor.GetInterpolatedEvent(historyAvgEvent, currentAvgEvent, 15000000);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FLOAT_EQ(result->displayX, 50.0f);
+    EXPECT_FLOAT_EQ(result->displayY, 50.0f);
+    EXPECT_EQ(result->timestamp, 15000000);
+    EXPECT_EQ(result->displayId, 1);
+}
+
+/**
+* @tc.name: GetInterpolatedEvent6
+* @tc.desc: Verify GetInterpolatedEvent performs normal extrapolation when
+*           nanoTimestamp > currentAvgEvent.timestamp and alpha <= 1.5f.
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragSmoothProcessorTest, GetInterpolatedEvent6, TestSize.Level0)
+{
+    DragSmoothProcessor processor;
+    DragMoveEvent historyAvgEvent { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 10000000 };
+    DragMoveEvent currentAvgEvent { .displayX = 30.0f, .displayY = 40.0f, .displayId = 1, .timestamp = 20000000 };
+
+    auto result = processor.GetInterpolatedEvent(historyAvgEvent, currentAvgEvent, 25000000);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FLOAT_EQ(result->displayX, 40.0f);
+    EXPECT_FLOAT_EQ(result->displayY, 50.0f);
+    EXPECT_EQ(result->timestamp, 25000000);
+    EXPECT_EQ(result->displayId, 1);
+}
+
+/**
+* @tc.name: GetInterpolatedEvent7
+* @tc.desc: Verify GetInterpolatedEvent clamps alpha to 1.5f during extrapolation when
+*           nanoTimestamp is far beyond currentAvgEvent.timestamp (alpha > 1.5f).
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragSmoothProcessorTest, GetInterpolatedEvent7, TestSize.Level0)
+{
+    DragSmoothProcessor processor;
+    DragMoveEvent historyAvgEvent { .displayX = 10.0f, .displayY = 20.0f, .displayId = 0, .timestamp = 10000000 };
+    DragMoveEvent currentAvgEvent { .displayX = 30.0f, .displayY = 40.0f, .displayId = 1, .timestamp = 20000000 };
+
+    auto result = processor.GetInterpolatedEvent(historyAvgEvent, currentAvgEvent, 50000000);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FLOAT_EQ(result->displayX, 40.0f);
+    EXPECT_FLOAT_EQ(result->displayY, 50.0f);
+    EXPECT_EQ(result->timestamp, 50000000);
+    EXPECT_EQ(result->displayId, 1);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
