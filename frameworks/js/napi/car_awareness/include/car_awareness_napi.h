@@ -34,8 +34,8 @@ public:
     CarAwarenessCallback() = default;
     ~CarAwarenessCallback() override = default;
     void OnAwarenessEvent(const CarAwarenessEvent& event) override;
-    void AddNapiObject(const std::shared_ptr<CarAwarenessNapi>& object);
-    void RemoveNapiObject(const std::shared_ptr<CarAwarenessNapi>& object);
+    void AddNapiObject(const std::weak_ptr<CarAwarenessNapi> object);
+    void RemoveNapiObject(const std::weak_ptr<CarAwarenessNapi> object);
     bool HasNapiObject() const;
 
 private:
@@ -52,7 +52,16 @@ struct AsyncContext {
     napi_deferred deferred = nullptr;
 
     int32_t asyncWorkRet;
-    std::vector<std::string> typeVector;
+};
+
+struct CapabilityContext : AsyncContext {
+    std::vector<std::string> typeVector; // out
+};
+
+struct AwarenessEventContext : AsyncContext {
+    int32_t type; // in
+    CarAwarenessOption option; // in
+    std::vector<CarAwarenessEvent> events; // out
 };
 #endif // CAR_AWARENESS_ENABLE
 
@@ -80,6 +89,7 @@ private:
     static napi_value GetAllCapabilityList(napi_env env, napi_callback_info info);
     static napi_value UpdateSpatialActionEnableStatus(napi_env env, napi_callback_info info);
     static napi_value UpdateSpatialActionZone(napi_env env, napi_callback_info info);
+    static napi_value GetCarAwareness(napi_env env, napi_callback_info info);
 
     static napi_value SubscribeCapEx(napi_env env, napi_callback_info info);
     static napi_value UnSubscribeCapEx(napi_env env, napi_callback_info info);
@@ -97,8 +107,10 @@ private:
     static std::shared_ptr<CarAwarenessNapi> GetInstanceByRef(napi_env env, napi_value jsThis);
     static std::shared_ptr<CarAwarenessNapi> GetExistingInstanceLocked(napi_env env);
     static void RollbackInstancesLocked(napi_env env, const std::shared_ptr<CarAwarenessNapi> &sp);
-    static napi_value ExecuteAsyncTask(napi_env env);
-    static void ExecuteCompleteFuc(napi_env env, napi_status status, void *data);
+    static napi_value ExecuteAsyncTask(AsyncContext *context, const char* taskName,
+        napi_async_execute_callback executeFunc, napi_async_complete_callback completeFunc);
+    static void ExecuteGetCapCompleteFunc(napi_env env, napi_status status, void *data);
+    static void ExecuteGetEventCompleteFunc(napi_env env, napi_status status, void *data);
     static void ThrowIpcExcuteErr(napi_env env, int32_t errCode);
     static napi_value SubScribeCarAwareness(napi_env env, napi_value jsThis, napi_value callback,
         int32_t type, const CarAwarenessOption &option);

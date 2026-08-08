@@ -577,6 +577,48 @@ int32_t IntentionManager::GetDragAnimationType(int32_t &animationType)
     CALL_DEBUG_ENTER;
     return drag_.GetDragAnimationType(animationType);
 }
+
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+int32_t IntentionManager::SubscribeCapability(int32_t type, const CarAwarenessOption &option,
+                                              sptr<ICarAwarenessCallback> cb)
+{
+    CALL_INFO_TRACE;
+    return carAwareness_.SubscribeCapability(type, option, cb);
+}
+
+int32_t IntentionManager::UnSubscribeCapability(int32_t type, const CarAwarenessOption &option,
+                                                sptr<ICarAwarenessCallback> cb)
+{
+    CALL_INFO_TRACE;
+    return carAwareness_.UnSubscribeCapability(type, option, cb);
+}
+
+int32_t IntentionManager::UpdateSpatialActionStatus(int32_t eventId)
+{
+    CALL_INFO_TRACE;
+    return carAwareness_.UpdateSpatialActionStatus(eventId);
+}
+
+int32_t IntentionManager::UpdateSpatialActionZone(int32_t zoneId)
+{
+    CALL_INFO_TRACE;
+    return carAwareness_.UpdateSpatialActionZone(zoneId);
+}
+
+int32_t IntentionManager::GetSupportCapabilityList(std::vector<std::string> &capabilities)
+{
+    CALL_INFO_TRACE;
+    return carAwareness_.GetSupportCapabilityList(capabilities);
+}
+
+int32_t IntentionManager::GetCarAwareness(int32_t type, const CarAwarenessOption &option,
+                                          std::vector<CarAwarenessEvent> &events)
+{
+    CALL_INFO_TRACE;
+    return carAwareness_.GetCarAwareness(type, option, events);
+}
+
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

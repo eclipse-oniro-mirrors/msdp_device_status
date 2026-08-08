@@ -35,7 +35,7 @@ typedef struct CarAwarenessEvent {
     int32_t type = -1;
     std::string eventData;
 } CarAwarenessEvent;
-} // namespace Msdp
-} // namespace OHOS
+}  // namespace Msdp
+}  // namespace OHOS
 
 #endif // CAR_AWARENESS_TYPE_INNER_H

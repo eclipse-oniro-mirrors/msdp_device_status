@@ -36,8 +36,9 @@ namespace {
     constexpr int32_t INVALID_CAP_TYPE = -1;
     constexpr int32_t TYPE_SPATIAL_MOTION = 101;
     constexpr int32_t TYPE_REALTIME_WEATHER = 102;
-    constexpr int32_t TYPE_REFULING = 103;
+    constexpr int32_t TYPE_REFUELING = 103;
 
+    constexpr int32_t SYSTEM_API_TYPES_START = 200;
     constexpr int32_t TYPE_SPATIAL_POINT = 201;
     constexpr int32_t TYPE_SPATIAL_GESTURE = 202;
     constexpr int32_t TYPE_CAR_STATUS = 203;

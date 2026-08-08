@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*
+/*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@
 
 #include "icar_awareness_callback.h"
 
-#include <iremote_stub.h>
 #include <nocopyable.h>
 
+#include "iremote_stub.h"
 #include "message_option.h"
 #include "message_parcel.h"
 
@@ -47,13 +47,13 @@ public:
     virtual ~CarAwarenessCallbackStub() = default;
     DISALLOW_COPY_AND_MOVE(CarAwarenessCallbackStub);
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    virtual void OnAwarenessEvent(const CarAwarenessEvent& event) override {};
+    virtual void OnAwarenessEvent(const CarAwarenessEvent &event) override {};
 
 private:
     int32_t OnEventChangeStub(MessageParcel &data);
     bool IsValidEventType(const int32_t type);
 };
-} // namespace Msdp
-} // namespace OHOS
+}  // namespace Msdp
+}  // namespace OHOS
 
 #endif // CAR_AWARENESS_CALLBACK_STUB_H

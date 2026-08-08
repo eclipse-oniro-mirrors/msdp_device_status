@@ -25,16 +25,16 @@ namespace OHOS {
 namespace Msdp {
 class CarAwarenessCallbackProxy : public IRemoteProxy<ICarAwarenessCallback> {
 public:
-    explicit CarAwarenessCallbackProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<ICarAwarenessCallback>(impl) {}
-    ~OnScreenCallbackProxy() = default;
+    explicit CarAwarenessCallbackProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<ICarAwarenessCallback>(impl)
+    {}
+    ~CarAwarenessCallbackProxy() = default;
     DISALLOW_COPY_AND_MOVE(CarAwarenessCallbackProxy);
-    virtual void OnAwarenessEvent(const CarAwarenessEvent& event) override;
+    virtual void OnAwarenessEvent(const CarAwarenessEvent &event) override;
 
 private:
     static inline BrokerDelegator<CarAwarenessCallbackProxy> delegator_;
 };
-} // namespace Msdp
-} // namespace OHOS
+}  // namespace Msdp
+}  // namespace OHOS
 
-#endif // CAR_AWARENESS_CALLBACK_PROXY_H
+#endif  // CAR_AWARENESS_CALLBACK_PROXY_H

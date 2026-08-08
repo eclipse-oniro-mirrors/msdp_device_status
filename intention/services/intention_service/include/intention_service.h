@@ -30,7 +30,9 @@
 #include "sequenceable_drag_visible.h"
 #include "socket_server.h"
 #include "stationary_server.h"
-
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+#include "car_awareness_server.h"
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
@@ -157,6 +159,17 @@ public:
     ErrCode Trigger(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
         const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption,
         OnScreen::SequenceableOnscreenAwarenessInfo& info) override;
+    
+    // CarAwareness
+    ErrCode SubscribeCapability(int32_t type, const SequenceableCarAwarenessOption &option,
+        const sptr<ICarAwarenessCallback> &cb) override;
+    ErrCode UnSubscribeCapability(int32_t type, const SequenceableCarAwarenessOption &option,
+        const sptr<ICarAwarenessCallback> &cb) override;
+    ErrCode UpdateSpatialActionStatus(int32_t eventId) override;
+    ErrCode UpdateSpatialActionZone(int32_t zoneId) override;
+    ErrCode GetSupportCapabilityList(std::vector<std::string> &capabilities) override;
+    ErrCode GetCarAwareness(int32_t type, const SequenceableCarAwarenessOption &option,
+        SequenceableCarAwarenessEventArray &events) override;
 
     // hidumper
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
@@ -185,6 +198,9 @@ private:
     BoomerangServer boomerang_;
     BoomerangDumper boomerangDumper_;
     OnScreen::OnScreenServer onScreen_;
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    CarAwarenessServer carAwareness_;
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 };
 } // namespace DeviceStatus
 } // namespace Msdp

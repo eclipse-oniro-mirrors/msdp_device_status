@@ -35,6 +35,9 @@ namespace {
 #ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
 constexpr int32_t RET_NO_SUPPORT = 801;
 #endif
+#ifndef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+constexpr int32_t CAR_AWARENESS_NOT_SUPPORTED = 801;
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 };
 IntentionService::IntentionService(IContext *context)
     : context_(context), socketServer_(context),
@@ -159,7 +162,7 @@ ErrCode IntentionService::StartCooperate(const std::string& remoteNetworkId, int
     return RET_OK;
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
-
+ 
 ErrCode IntentionService::StartCooperateWithOptions(const std::string& remoteNetworkId, int32_t userData,
     int32_t startDeviceId, bool checkPermission, const SequenceableCooperateOptions& options)
 {
@@ -852,6 +855,7 @@ ErrCode IntentionService::Trigger(const OnScreen::SequenceableOnscreenAwarenessC
         OnScreen::OnscreenAwarenessInfo awarenessInfo;
         int32_t ret = onScreen_.Trigger(context, cap.cap_, awarenessOption.option_, awarenessInfo);
         if (ret != RET_OK) {
+            FI_HILOGE("onScreen Trigger failed with ret:%{public}d", ret);
             return ret;
         }
         info.info_ = awarenessInfo;
@@ -939,6 +943,77 @@ void IntentionService::NotifyCooperateState(const CooperateStateNoticeLite &noti
     }
 }
 #endif // OHOS_BUILD_ENABLE_COORDINATION
+
+ErrCode IntentionService::SubscribeCapability(int32_t type, const SequenceableCarAwarenessOption &option,
+                                              const sptr<ICarAwarenessCallback> &cb)
+{
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, type, option, cb] {
+        return carAwareness_.SubscribeCapability(context, type, option.option_, cb);
+    });
+#else
+    return CAR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+}
+
+ErrCode IntentionService::UnSubscribeCapability(int32_t type, const SequenceableCarAwarenessOption &option,
+                                                const sptr<ICarAwarenessCallback> &cb)
+{
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, type, option, cb] {
+        return carAwareness_.UnSubscribeCapability(context, type, option.option_, cb);
+    });
+#else
+    return CAR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+}
+
+ErrCode IntentionService::UpdateSpatialActionStatus(int32_t eventId)
+{
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    CallingContext context = GetCallingContext();
+    return PostSyncTask(
+        [this, &context, eventId] { return carAwareness_.UpdateSpatialActionStatus(context, eventId); });
+#else
+    return CAR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+}
+
+ErrCode IntentionService::UpdateSpatialActionZone(int32_t zoneId)
+{
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, zoneId] { return carAwareness_.UpdateSpatialActionZone(context, zoneId); });
+#else
+    return CAR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+}
+
+ErrCode IntentionService::GetSupportCapabilityList(std::vector<std::string> &capabilities)
+{
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    CallingContext context = GetCallingContext();
+    return PostSyncTask(
+        [this, &context, &capabilities] { return carAwareness_.GetSupportCapabilityList(context, capabilities); });
+#else
+    return CAR_AWARENESS_NOT_SUPPORTED;
+#endif  // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+}
+
+ErrCode IntentionService::GetCarAwareness(int32_t type, const SequenceableCarAwarenessOption &option,
+                                          SequenceableCarAwarenessEventArray &events)
+{
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    CallingContext context = GetCallingContext();
+    return PostSyncTask([this, &context, type, option, &events] {
+        return carAwareness_.GetCarAwareness(context, type, option.option_, events.events_);
+    });
+#else
+    return CAR_AWARENESS_NOT_SUPPORTED;
+#endif  // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

@@ -36,7 +36,7 @@ CarAwarenessMgrNapi::CarAwarenessMgrNapi(napi_env env, napi_value thisVar)
         [this](napi_value handler, const std::string &data) { return ConvertSpatialMotionInfo(handler, data); };
     triggerMap_[TYPE_REALTIME_WEATHER] =
         [this](napi_value handler, const std::string &data) { return ConvertWeatherInfo(handler, data); };
-    triggerMap_[TYPE_REFULING] =
+    triggerMap_[TYPE_REFUELING] =
         [this](napi_value handler, const std::string &data) { return ConvertRefulingInfo(handler, data); };
 #endif // CAR_AWARENESS_ENABLE
 }
@@ -45,7 +45,7 @@ CarAwarenessMgrNapi::~CarAwarenessMgrNapi()
 {
     {
         std::lock_guard<std::mutex> lock(listenersMutex_);
-    #ifdef CAR_AWARENESS_ENABLE
+#ifdef CAR_AWARENESS_ENABLE
         // 释放 native 侧持有的所有 JS 回调引用（napi_ref）,防止napi_ref泄露
         for (auto &typePair : listenerMap_) {
             auto &listener = typePair.second;
@@ -60,7 +60,7 @@ CarAwarenessMgrNapi::~CarAwarenessMgrNapi()
                 it = listener->onRefSets.erase(it);
             }
         }
-    #endif // CAR_AWARENESS_ENABLE
+#endif // CAR_AWARENESS_ENABLE
         listenerMap_.clear();
     }
     triggerMap_.clear();

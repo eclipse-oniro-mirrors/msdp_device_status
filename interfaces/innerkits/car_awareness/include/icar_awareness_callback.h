@@ -25,14 +25,11 @@ namespace OHOS {
 namespace Msdp {
 class ICarAwarenessCallback : public IRemoteBroker {
 public:
-    enum {
-        EVENT_CHANGE = 0,
-        EVENT_CHANGE_SYSTEM
-    };
-    virtual void OnAwarenessEvent(const CarAwarenessEvent& event) = 0;
+    enum { EVENT_CHANGE = 0, EVENT_CHANGE_SYSTEM };
+    virtual void OnAwarenessEvent(const CarAwarenessEvent &event) = 0;
     // 预留System: virtual void OnAwarenessEventEx(const std::vector<CarAwarenessEvent>& events) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.ICarAwarenessCallback");
 };
-} // namespace Msdp
-} // namespace OHOS
-#endif // ICAR_AWARENESS_CALLBACK_IPC_H
+}  // namespace Msdp
+}  // namespace OHOS
+#endif  // ICAR_AWARENESS_CALLBACK_IPC_H

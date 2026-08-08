@@ -28,6 +28,9 @@
 #include "on_screen_client.h"
 #include "socket_client.h"
 #include "stationary_client.h"
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+#include "car_awareness_client.h"
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 
 namespace OHOS {
 namespace Msdp {
@@ -124,6 +127,15 @@ public:
     int32_t Trigger(const OnScreen::AwarenessCap& cap, const OnScreen::AwarenessOptions& option,
         OnScreen::OnscreenAwarenessInfo& info);
 
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    int32_t SubscribeCapability(int32_t type, const CarAwarenessOption &option, sptr<ICarAwarenessCallback> cb);
+    int32_t UnSubscribeCapability(int32_t type, const CarAwarenessOption &option, sptr<ICarAwarenessCallback> cb);
+    int32_t UpdateSpatialActionStatus(int32_t eventId);
+    int32_t UpdateSpatialActionZone(int32_t zoneId);
+    int32_t GetSupportCapabilityList(std::vector<std::string> &capabilities);
+    int32_t GetCarAwareness(int32_t type, const CarAwarenessOption &option,
+        std::vector<CarAwarenessEvent> &events);
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 private:
     void InitClient();
     void InitMsgHandler();
@@ -135,6 +147,9 @@ private:
     StationaryClient stationary_;
     BoomerangClient boomerang_;
     OnScreen::OnScreenClient onScreen_;
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    CarAwarenessClient carAwareness_;
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
     bool isScreenRotation_ { false };
     std::vector<std::string> foldRotatePolicys_ {};
 };
