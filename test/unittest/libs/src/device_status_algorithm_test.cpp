@@ -413,7 +413,7 @@ HWTEST_F(DeviceStatusAlgorithmTest, DeviceStatusAlgorithmTest017, TestSize.Level
     g_manager->GetSensorTypeId(Type::TYPE_ABSOLUTE_STILL);
     int32_t sensorTypeId = SENSOR_TYPE_ID_NONE;
     int32_t ret = g_manager->CheckSensorTypeId(sensorTypeId);
-    ASSERT_TRUE(ret);
+    ASSERT_FALSE(ret);
     ret = g_manager->UnregisterSensor(Type::TYPE_ABSOLUTE_STILL);
     ASSERT_TRUE(ret);
 }
