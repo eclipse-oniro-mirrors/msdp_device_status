@@ -36,9 +36,9 @@ function offMetadataInner(bundleName: String, opq: Optional<Opaque>);
 
 function submitMetadata(metadata: String): void;
 
-@gen_promise("notifyMetadataBindingEvent")
+@promise("notifyMetadataBindingEvent")
 function notifyMetadataBindingEventPromise(bundleName: String): String;
-@gen_promise("encodeImage")
+@promise("encodeImage")
 function encodeImagePromise(srcImage: @sts_type("image.PixelMap") Opaque, metadata: String): @sts_type("image.PixelMap") Opaque;
-@gen_promise("decodeImage")
+@promise("decodeImage")
 function decodeImagePromise(encodedImage: @sts_type("image.PixelMap") Opaque): String;
