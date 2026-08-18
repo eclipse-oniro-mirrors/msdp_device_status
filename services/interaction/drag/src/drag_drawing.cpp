@@ -134,8 +134,8 @@ constexpr float ROTATION_360 { 360.0f };
 constexpr float ZOOM_IN_SCALE { 1.03f };
 constexpr float ZOOM_OUT_SCALE { 0.9f };
 constexpr float ZOOM_END_SCALE { 1.0f };
-constexpr float ROTATION_ANGLE_MAX { 40.0f };
-constexpr float ROTATION_ANGLE_MIN { -40.0f };
+constexpr float ROTATION_ANGLE_MAX { 25.0f };
+constexpr float ROTATION_ANGLE_MIN { -25.0f };
 constexpr float DEFAULT_CONTENT_LIGHT_INTENSITY { 0.0f };
 const Rosen::Vector4f DEFAULT_CONTENT_LIGHT_COLOR { 1.0f, 1.0f, 1.0f, 1.0f };
 const Rosen::Vector3f CONTENT_LIGHT_POSITION_LEFT_TOP { -1.0f, -1.0f, 4.0f };
@@ -175,10 +175,6 @@ constexpr int32_t DRAG_AREA_WIDTH_INDEX { 0 };
 constexpr int32_t DRAG_AREA_HEIGHT_INDEX { 1 };
 constexpr int32_t DEFAULT_DRAG_AREA_WIDTH { 2 };
 constexpr int32_t DEFAULT_DRAG_AREA_HEIGHT { 2 };
-constexpr int32_t DRAG_AREA_WIDTH_FOUR { 4 };
-constexpr int32_t DRAG_AREA_HEIGHT_FOUR { 4 };
-constexpr int32_t DRAG_AREA_WIDTH_SIX { 6 };
-constexpr int32_t DRAG_AREA_HEIGHT_SIX { 6 };
 constexpr int32_t DRAG_SIZE_WIDTH_INDEX { 0 };
 constexpr int32_t DRAG_SIZE_HEIGHT_INDEX { 1 };
 constexpr size_t DROP_POSITION_SIZE { 2 };
@@ -205,14 +201,12 @@ constexpr float BEZIER_067 { 0.67f };
 constexpr float BEZIER_100 { 1.00f };
 constexpr float MIN_OPACITY { 0.0f };
 constexpr float MAX_OPACITY { 1.0f };
-constexpr float ADJUST_MENT { 0.25f };
-constexpr float ADJUST_MENT_DEGREE { 0.15 };
-constexpr float DEFAULT_SENSITIVITY { 0.2f };
-constexpr float SENSITIVITY_FIRST { 0.3f };
-constexpr float SENSITIVITY_SECOND { 0.25f };
-constexpr float SENSITIVITY_THIRD { 0.15f };
+constexpr float ADJUST_MENT { 0.4f };
+constexpr float ADJUST_MENT_DEGREE { 0.3f };
+constexpr float DEFAULT_SENSITIVITY { 2.0f };
 constexpr float ADJUST_LIGHT { 0.8f };
-constexpr float ADJUST_DEGREE { 0.7f };
+constexpr float ADJUST_DEGREE { 0.5f };
+constexpr float HALF_LIGHT { 0.5f };
 constexpr int32_t TIME_DRAG_CHANGE_STYLE { 50 };
 constexpr int32_t TIME_DRAG_STYLE { 100 };
 constexpr int32_t TIME_STOP_FAIL_WINDOW { 125 };
@@ -562,26 +556,8 @@ void DragDrawing::CalculateRotation(float targetPositionX, float targetPositionY
     currentDisplayY_ = ((1 - ADJUST_MENT) * currentDisplayY_) + (ADJUST_MENT * targetPositionY);
     float deltaX = targetPositionX - currentDisplayX_;
     float deltaY = targetPositionY - currentDisplayY_;
-    float sensitivity = DEFAULT_SENSITIVITY;
-    if (dropArea_.size() == DROP_POSITION_SIZE) {
-        int32_t dropAreaWidth = dropArea_.at(DRAG_AREA_WIDTH_INDEX);
-        int32_t dropAreaHeight = dropArea_.at(DRAG_AREA_HEIGHT_INDEX);
-        if ((dropAreaWidth <= DEFAULT_DRAG_AREA_WIDTH) && (dropAreaHeight <= DEFAULT_DRAG_AREA_HEIGHT)) {
-            sensitivity = SENSITIVITY_FIRST;
-        } else if (((dropAreaWidth == DEFAULT_DRAG_AREA_WIDTH) && (dropAreaHeight == DRAG_AREA_HEIGHT_FOUR)) ||
-            ((dropAreaWidth == DRAG_AREA_WIDTH_FOUR) && (dropAreaHeight == DEFAULT_DRAG_AREA_HEIGHT))) {
-            sensitivity = SENSITIVITY_SECOND;
-        } else if ((dropAreaWidth == DRAG_AREA_WIDTH_FOUR) && (dropAreaHeight == DRAG_AREA_HEIGHT_FOUR)) {
-            sensitivity = DEFAULT_SENSITIVITY;
-        } else if (((dropAreaWidth >= DRAG_AREA_WIDTH_FOUR) && (dropAreaHeight >= DRAG_AREA_HEIGHT_SIX)) ||
-            ((dropAreaWidth >= DRAG_AREA_WIDTH_SIX) && (dropAreaHeight >= DRAG_AREA_HEIGHT_FOUR))) {
-            sensitivity = SENSITIVITY_THIRD;
-        } else {
-            sensitivity = DEFAULT_SENSITIVITY;
-        }
-    }
-    degreeX = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, deltaY * sensitivity));
-    degreeY = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, -deltaX * sensitivity));
+    degreeX = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, deltaY * DEFAULT_SENSITIVITY));
+    degreeY = std::max(ROTATION_ANGLE_MIN, std::min(ROTATION_ANGLE_MAX, -deltaX * DEFAULT_SENSITIVITY));
     currentDegreeX_ = ((1 - ADJUST_MENT_DEGREE) * currentDegreeX_) + (ADJUST_MENT_DEGREE * degreeX);
     currentDegreeY_ = ((1 - ADJUST_MENT_DEGREE) * currentDegreeY_) + (ADJUST_MENT_DEGREE * degreeY);
     degreeX = currentDegreeX_;
@@ -597,11 +573,18 @@ void DragDrawing::CalculateRotation(float targetPositionX, float targetPositionY
             dropAreaWidth, dropAreaHeight);
         return;
     }
-    if (dropAreaWidth > DEFAULT_DRAG_AREA_WIDTH) {
-        degreeY = (ADJUST_DEGREE * DEFAULT_DRAG_AREA_WIDTH / (dropAreaWidth * 1.0f)) * degreeY;
+    if (dropAreaWidth != DEFAULT_DRAG_AREA_WIDTH) {
+        degreeY = (DEFAULT_DRAG_AREA_WIDTH / (dropAreaWidth * 1.0f)) * degreeY;
     }
-    if (dropAreaHeight > DEFAULT_DRAG_AREA_HEIGHT) {
-        degreeX = (ADJUST_DEGREE * DEFAULT_DRAG_AREA_HEIGHT / (dropAreaHeight * 1.0f)) * degreeX;
+    if (dropAreaHeight != DEFAULT_DRAG_AREA_HEIGHT) {
+        degreeX = (DEFAULT_DRAG_AREA_HEIGHT / (dropAreaHeight * 1.0f)) * degreeX;
+    }
+ 
+    if (dropAreaWidth < DEFAULT_DRAG_AREA_WIDTH) {
+        degreeY = ADJUST_DEGREE * degreeY;
+    }
+    if (dropAreaHeight < DEFAULT_DRAG_AREA_HEIGHT) {
+        degreeX = ADJUST_DEGREE * degreeX;
     }
 }
 
@@ -613,13 +596,13 @@ void DragDrawing::CalculateLightIntensity(float degreeX, float degreeY, LightInt
             lightIntensity.lightLeftTop = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
         } else if ((DragWindowRotateInfo_.rotation == ROTATION_90) ||
             (DragWindowRotateInfo_.rotation == ROTATION_180)) {
-            lightIntensity.lightRightBottom = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+            lightIntensity.lightRightBottom = degreeY / ROTATION_ANGLE_MAX * ADJUST_LIGHT * HALF_LIGHT;
         }
     }
     if (degreeY < -1.0f) {
         if ((DragWindowRotateInfo_.rotation == ROTATION_0) ||
             (DragWindowRotateInfo_.rotation == ROTATION_270)) {
-            lightIntensity.lightRightBottom = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+            lightIntensity.lightRightBottom = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT * HALF_LIGHT;
         } else if ((DragWindowRotateInfo_.rotation == ROTATION_90) ||
             (DragWindowRotateInfo_.rotation == ROTATION_180)) {
             lightIntensity.lightLeftTop = std::fabs(degreeY) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
@@ -628,7 +611,7 @@ void DragDrawing::CalculateLightIntensity(float degreeX, float degreeY, LightInt
     if (degreeX > 1.0f) {
         if ((DragWindowRotateInfo_.rotation == ROTATION_0)
             || (DragWindowRotateInfo_.rotation == ROTATION_90)) {
-            lightIntensity.lightRightBottom = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+            lightIntensity.lightRightBottom = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT * HALF_LIGHT;
         } else if ((DragWindowRotateInfo_.rotation == ROTATION_180) ||
             (DragWindowRotateInfo_.rotation == ROTATION_270)) {
             lightIntensity.lightLeftTop = degreeX / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
@@ -640,7 +623,7 @@ void DragDrawing::CalculateLightIntensity(float degreeX, float degreeY, LightInt
             lightIntensity.lightLeftTop = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
         } else if ((DragWindowRotateInfo_.rotation == ROTATION_180) ||
             (DragWindowRotateInfo_.rotation == ROTATION_270)) {
-            lightIntensity.lightRightBottom = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT;
+            lightIntensity.lightRightBottom = std::fabs(degreeX) / ROTATION_ANGLE_MAX * ADJUST_LIGHT * HALF_LIGHT;
         }
     }
 }
