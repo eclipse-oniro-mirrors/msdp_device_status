@@ -579,7 +579,6 @@ void DragDrawing::CalculateRotation(float targetPositionX, float targetPositionY
     if (dropAreaHeight != DEFAULT_DRAG_AREA_HEIGHT) {
         degreeX = (DEFAULT_DRAG_AREA_HEIGHT / (dropAreaHeight * 1.0f)) * degreeX;
     }
- 
     if (dropAreaWidth < DEFAULT_DRAG_AREA_WIDTH) {
         degreeY = ADJUST_DEGREE * degreeY;
     }
