@@ -1580,6 +1580,50 @@ HWTEST_F(DragDrawingTest, DragDrawingTest67, TestSize.Level0)
     EXPECT_NE(g_dragMgr.dragDrawing_.rsScreenId_, invalidScreenId);
 }
 
+/**
+* @tc.name: DragDrawingTest68
+* @tc.desc: Test CalculateRotation
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest68, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.currentDisplayX_ = 200.0f;
+    g_dragMgr.dragDrawing_.currentDisplayY_ = 200.0f;
+    g_dragMgr.dragDrawing_.currentDegreeX_ = 0.0f;
+    g_dragMgr.dragDrawing_.currentDegreeY_ = 0.0f;
+    float degreeX = 0.0f;
+    float degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 2, 4 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeX, 25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 4, 2 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeY, 25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 1, 2 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeX, 25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 2, 1 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_GE(degreeY, -25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 2, 2 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeY, 25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 4, 4 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeY, 25.0f);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
