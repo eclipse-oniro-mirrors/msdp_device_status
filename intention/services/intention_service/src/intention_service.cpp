@@ -824,9 +824,20 @@ ErrCode IntentionService::RegisterAwarenessCallback(const OnScreen::Sequenceable
     return RET_NO_SUPPORT;
 #else
     CallingContext context = GetCallingContext();
-    return PostSyncTask([this, &context, cap, onScreenCallback, awarenessOption] {
-        return onScreen_.RegisterAwarenessCallback(context, cap.cap_, onScreenCallback, awarenessOption.option_);
-    });
+    CHKPR(context_, RET_ERR);
+    auto expired = std::make_shared<std::atomic_bool>(false);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
+        [this, context, cap, onScreenCallback, awarenessOption, expired] () -> int32_t {
+            if (expired->load()) {
+                FI_HILOGI("RegisterAwarenessCallback expired, skip execution");
+                return ETASKS_WAIT_TIMEOUT;
+            }
+            return onScreen_.RegisterAwarenessCallback(context, cap.cap_, onScreenCallback, awarenessOption.option_);
+        });
+    if (ret == ETASKS_WAIT_TIMEOUT) {
+        expired->store(true);
+    }
+    return ret;
 #endif
 }
 
@@ -837,9 +848,20 @@ ErrCode IntentionService::UnregisterAwarenessCallback(const OnScreen::Sequenceab
     return RET_NO_SUPPORT;
 #else
     CallingContext context = GetCallingContext();
-    return PostSyncTask([this, &context, cap, onScreenCallback] {
-        return onScreen_.UnregisterAwarenessCallback(context, cap.cap_, onScreenCallback);
-    });
+    CHKPR(context_, RET_ERR);
+    auto expired = std::make_shared<std::atomic_bool>(false);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
+        [this, context, cap, onScreenCallback, expired] () -> int32_t {
+            if (expired->load()) {
+                FI_HILOGI("UnregisterAwarenessCallback expired, skip execution");
+                return ETASKS_WAIT_TIMEOUT;
+            }
+            return onScreen_.UnregisterAwarenessCallback(context, cap.cap_, onScreenCallback);
+        });
+    if (ret == ETASKS_WAIT_TIMEOUT) {
+        expired->store(true);
+    }
+    return ret;
 #endif
 }
 
