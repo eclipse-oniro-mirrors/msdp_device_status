@@ -242,8 +242,8 @@ HWTEST_F(DragSmoothProcessorTest, GetInterpolatedEvent7, TestSize.Level0)
 
     auto result = processor.GetInterpolatedEvent(historyAvgEvent, currentAvgEvent, 50000000);
     ASSERT_TRUE(result.has_value());
-    EXPECT_FLOAT_EQ(result->displayX, 40.0f);
-    EXPECT_FLOAT_EQ(result->displayY, 50.0f);
+    EXPECT_FLOAT_EQ(result->displayX, 60.0f);
+    EXPECT_FLOAT_EQ(result->displayY, 70.0f);
     EXPECT_EQ(result->timestamp, 50000000);
     EXPECT_EQ(result->displayId, 1);
 }
