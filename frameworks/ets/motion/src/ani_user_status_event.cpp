@@ -382,8 +382,8 @@ bool AniUserStatusEvent::RemoveCallback(uint32_t eventType, uintptr_t opq)
 
 bool AniUserStatusEvent::RemoveAllCallback(uint32_t eventType)
 {
+    FI_HILOGI("SubEvent op=off_all kit=Motion Sta Kit event=%{public}u", eventType);
     std::lock_guard<std::mutex> guard(mutex_);
-    FI_HILOGI("event: %{public}u", eventType);
     auto iter = callbacks_.find(eventType);
     if (iter == callbacks_.end()) {
         FI_HILOGE("EventType: %{public}u not found", eventType);

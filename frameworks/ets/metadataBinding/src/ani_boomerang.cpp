@@ -156,6 +156,7 @@ bool AniBoomerangEvent::OffOnce(int32_t eventType, ani_ref handler)
 
 bool AniBoomerangEvent::RemoveAllCallback(int32_t eventType, bool isEvent)
 {
+    FI_HILOGI("SubEvent op=off_all kit=Metadata Binding Sta Kit event=%{public}d", eventType);
     std::list<std::shared_ptr<AniBoomerangEventListener>> eventList;
     if (isEvent) {
         if (events_.find(eventType) == events_.end()) {

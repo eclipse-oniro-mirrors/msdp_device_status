@@ -174,6 +174,7 @@ bool DeviceStatusEvent::OffOnce(int32_t eventType, napi_value handler)
 bool DeviceStatusEvent::RemoveAllCallback(int32_t eventType)
 {
     CALL_DEBUG_ENTER;
+    FI_HILOGI("SubEvent op=off_all kit=Stationary Kit event=%{public}d", eventType);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
         FI_HILOGE("evenType %{public}d not found", eventType);

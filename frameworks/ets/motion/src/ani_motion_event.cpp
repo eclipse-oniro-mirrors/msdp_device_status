@@ -262,7 +262,7 @@ bool AniMotionEvent::AddCallback(int32_t eventType, uintptr_t opq, ani_vm* vm)
 
 bool AniMotionEvent::RemoveAllCallback(int32_t eventType)
 {
-    FI_HILOGI("RemoveAllCallback in, event: %{public}d", eventType);
+    FI_HILOGI("SubEvent op=off_all kit=Motion Sta Kit event=%{public}d", eventType);
     std::lock_guard<std::mutex> guard(mutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {

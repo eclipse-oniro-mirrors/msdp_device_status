@@ -184,6 +184,7 @@ bool BoomerangEvent::OffOnce(int32_t eventType, napi_value handler)
 bool BoomerangEvent::RemoveAllCallback(int32_t eventType)
 {
     CALL_DEBUG_ENTER;
+    FI_HILOGI("SubEvent op=off_all kit=Metadata Binding Kit event=%{public}d", eventType);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
         FI_HILOGE("evenType %{public}d not found", eventType);
