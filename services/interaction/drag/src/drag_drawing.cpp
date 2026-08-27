@@ -1961,21 +1961,15 @@ void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode
     std::shared_ptr<Media::PixelMap> stylePixelMap)
 {
     FI_HILOGD("enter");
-    CHKPV(dragStyleNode);
-    CHKPV(stylePixelMap);
 #ifdef OHOS_DRAG_ENABLE_ANIMATION
-    if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-        CHKPV(runner);
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
-    }
-    if (drawSVGModifier_ != nullptr) {
+    if ((drawSVGModifier_ != nullptr) && (dragStyleNode != nullptr)) {
         dragStyleNode->RemoveModifier(drawSVGModifier_);
-        drawSVGModifier_ = nullptr;
     }
-    CHKPV(handler_);
+    drawSVGModifier_ = nullptr;
     OnDragStyleAnimation();
 #else // OHOS_DRAG_ENABLE_ANIMATION
+    CHKPV(dragStyleNode);
+    CHKPV(stylePixelMap);
     DrawStyle(dragStyleNode, stylePixelMap);
 #endif // OHOS_DRAG_ENABLE_ANIMATION
     FI_HILOGD("leave");
