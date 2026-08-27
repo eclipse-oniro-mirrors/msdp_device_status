@@ -184,7 +184,7 @@ bool CarAwarenessMgrNapi::AddCallbackEx(int32_t eventType, napi_value listenerHa
 
 bool CarAwarenessMgrNapi::RemoveAllCallbackEx(int32_t eventType)
 {
-    FI_HILOGD("RemoveAllCallbackEx in, event:%{public}d", eventType);
+    FI_HILOGI("SubEvent op=off_all kit=Car Awareness Kit event=%{public}d", eventType);
     std::lock_guard<std::mutex> lock(listenersMutex_);
     auto iter = listenerMap_.find(eventType);
     if (iter == listenerMap_.end()) {

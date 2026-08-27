@@ -105,7 +105,7 @@ bool MotionEventNapi::AddCallbackEx(int32_t eventType, napi_value handler, bool 
 
 bool MotionEventNapi::RemoveAllCallback(int32_t eventType)
 {
-    FI_HILOGD("RemoveAllCallback in, event:%{public}d", eventType);
+    FI_HILOGI("SubEvent op=off_all kit=Motion Kit event=%{public}d", eventType);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {
         FI_HILOGE("EventType %{public}d not found", eventType);

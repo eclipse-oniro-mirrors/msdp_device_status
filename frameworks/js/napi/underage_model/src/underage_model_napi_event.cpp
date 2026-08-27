@@ -116,7 +116,7 @@ bool UnderageModelNapiEvent::AddCallback(uint32_t eventType, napi_value handler)
 
 bool UnderageModelNapiEvent::RemoveAllCallback(uint32_t eventType)
 {
-    FI_HILOGD("RemoveAllCallback in, event:%{public}d", eventType);
+    FI_HILOGI("SubEvent op=off_all kit=User Status Kit event=%{public}u", eventType);
     std::lock_guard<std::mutex> lock(eventsMutex_);
     auto iter = events_.find(eventType);
     if (iter == events_.end()) {

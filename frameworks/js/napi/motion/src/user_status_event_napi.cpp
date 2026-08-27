@@ -495,6 +495,7 @@ bool UserStatusEventNapi::RemoveCallback(uint32_t featureId, napi_value handler)
 
 bool UserStatusEventNapi::RemoveAllCallback(uint32_t featureId)
 {
+    FI_HILOGI("SubEvent op=off_all kit=Motion Kit type=%{public}u", featureId);
     std::lock_guard<std::mutex> lock(jsCallbacksMutex_);
     auto iter = jsCallbacks_.find(featureId);
     if (iter == jsCallbacks_.end()) {
