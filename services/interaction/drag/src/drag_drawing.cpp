@@ -1113,6 +1113,7 @@ void DragDrawing::DestroyDragWindow()
     CHKPV(rsUiDirector_);
     rsUiDirector_->SetRoot(-1);
     rsUiDirector_->SendMessages();
+    ResetAnimationParameter();
     FI_HILOGI("leave");
 }
 
@@ -1973,10 +1974,7 @@ void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode
         drawSVGModifier_ = nullptr;
     }
     CHKPV(handler_);
-    if (!handler_->PostTask([this] { this->OnDragStyleAnimation(); })) {
-        FI_HILOGE("Drag style animation failed");
-        DrawStyle(dragStyleNode, stylePixelMap);
-    }
+    OnDragStyleAnimation();
 #else // OHOS_DRAG_ENABLE_ANIMATION
     DrawStyle(dragStyleNode, stylePixelMap);
 #endif // OHOS_DRAG_ENABLE_ANIMATION
@@ -4520,7 +4518,6 @@ void DragDrawing::ResetAnimationFlag(bool isForce)
     DestroyDragWindow();
     g_drawingInfo.isRunning = false;
     g_drawingInfo.timerId = -1;
-    ResetAnimationParameter();
     FI_HILOGI("leave");
 }
 
