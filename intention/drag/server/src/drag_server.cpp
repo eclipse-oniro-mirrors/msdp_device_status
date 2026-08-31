@@ -49,7 +49,9 @@ int32_t DragServer::StartDrag(CallingContext &context, const DragData &dragData)
     auto session = env_->GetSocketSessionManager().FindSessionByPid(context.pid);
     CHKPR(session, RET_ERR);
     session->SetProgramName(GetPackageName(context.tokenId));
-    return env_->GetDragManager().StartDrag(dragData, context.pid);
+    AppCallerInfo appCallerInfo;
+    appCallerInfo.uid = context.uid;
+    return env_->GetDragManager().StartDrag(dragData, context.pid, "", false, appCallerInfo);
 }
 
 int32_t DragServer::StopDrag(CallingContext &context, const DragDropResult &dropResult)

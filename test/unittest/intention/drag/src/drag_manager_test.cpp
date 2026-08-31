@@ -3108,6 +3108,47 @@ HWTEST_F(DragManagerTest, DragManagerTest138, TestSize.Level0)
     ret = g_dragMgr.StopDrag(dropResult);
     ASSERT_EQ(ret, RET_OK);
 }
+
+/**
+ * @tc.name: DragManagerTest139
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest139, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragState_ = DragState::STOP;
+    ASSERT_FALSE(g_dragMgr.dragDrawing_.IsDrawing());
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_ERR);
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+}
+
+/**
+ * @tc.name: DragManagerTest140
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest140, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragState_ = DragState::STOP;
+    ASSERT_FALSE(g_dragMgr.dragDrawing_.IsDrawing());
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

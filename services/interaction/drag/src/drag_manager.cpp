@@ -30,6 +30,7 @@
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
 #ifdef MSDP_FRAMEWORK_UDMF_ENABLED
 #include "device_manager.h"
+#include "os_account_manager.h"
 #include "parameters.h"
 #include "udmf_client.h"
 #endif // MSDP_FRAMEWORK_UDMF_ENABLED
@@ -54,6 +55,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
+constexpr int32_t INVALID_USER_ID { -1 };
 constexpr int32_t TIMEOUT_MS { 3000 };
 constexpr int32_t INTERVAL_MS { 500 };
 constexpr int32_t POWER_SQUARED { 2 };
@@ -370,7 +372,7 @@ DragRadarPackageName DragManager::GetDragRadarPackageName(int32_t pid, const std
 
 int32_t DragManager::StartDrag(
     const DragData &dragData, int32_t pid, const std::string &peerNetId, bool isLongPressDrag,
-    const std::string &appCaller)
+    const AppCallerInfo &appCallerInfo)
 {
     FI_HILOGI("enter");
     ResetMouseDragMonitorTimerId(dragData);
@@ -388,7 +390,7 @@ int32_t DragManager::StartDrag(
         isCollaborationService_ = true;
         FI_HILOGI("Drag by device collaboration");
     }
-    DragRadarPackageName dragRadarPackageName = GetDragRadarPackageName(pid, packageName, appCaller);
+    DragRadarPackageName dragRadarPackageName = GetDragRadarPackageName(pid, packageName, appCallerInfo.appCaller);
     dragRadarPackageName.dragNum = dragData.dragNum;
     ReportStartDragRadarInfo(BizState::STATE_BEGIN, StageRes::RES_IDLE, DragRadarErrCode::DRAG_SUCCESS, peerNetId,
         dragRadarPackageName);
@@ -401,7 +403,7 @@ int32_t DragManager::StartDrag(
             dragRadarPackageName);
         return RET_ERR;
     }
-    if (OnStartDrag(dragRadarPackageName, pid) != RET_OK) {
+    if (OnStartDrag(dragRadarPackageName, pid, appCallerInfo.uid) != RET_OK) {
 #ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteStartDrag(dragState_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
 #endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
@@ -1503,7 +1505,7 @@ std::string DragManager::GetDragCursorStyle(DragCursorStyle value) const
     return style;
 }
 
-MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor)
+MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor, int32_t uid)
 {
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     MMI::ExtraData extraData;
@@ -1514,8 +1516,9 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor)
     extraData.pullId = pullId_;
     extraData.drawCursor = drawCursor;
     extraData.eventId = DRAG_DATA_MGR.GetEventId();
-    FI_HILOGD("sourceType:%{public}d, pointerId:%{public}d, eventId:%{public}d",
-        extraData.sourceType, extraData.pointerId, extraData.eventId);
+    extraData.userId = GetUserId(uid);
+    FI_HILOGI("sourceType:%{public}d, pointerId:%{public}d, eventId:%{public}d, uid:%{private}d, localId:%{public}d",
+        extraData.sourceType, extraData.pointerId, extraData.eventId, uid, extraData.userId);
     return extraData;
 }
 
@@ -1688,7 +1691,7 @@ int32_t DragManager::RemoveKeyEventMonitor()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-int32_t DragManager::OnStartDrag(const struct DragRadarPackageName &dragRadarPackageName, int32_t pid)
+int32_t DragManager::OnStartDrag(const struct DragRadarPackageName &dragRadarPackageName, int32_t pid, int32_t uid)
 #else
 int32_t DragManager::OnStartDrag()
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
@@ -1700,13 +1703,6 @@ int32_t DragManager::OnStartDrag()
         SetControlCollaborationVisible(false);
     }
     DragData dragData = DRAG_DATA_MGR.GetDragData();
-    bool drawCursor = false;
-#ifdef OHOS_BUILD_PC_PRODUCT
-    if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        drawCursor = true;
-    }
-#endif // OHOS_BUILD_PC_PRODUCT
-    auto extraData = CreateExtraData(true, drawCursor);
     bool isHicarOrSuperLauncher = false;
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     sptr<Rosen::Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(dragData.displayId);
@@ -1761,7 +1757,7 @@ int32_t DragManager::OnStartDrag()
     }
     FI_HILOGI("Start drag, appened extra data");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    ret = AddDragEvent(dragData, dragRadarPackageName);
+    ret = AddDragEvent(dragData, dragRadarPackageName, uid);
     if (ret != RET_OK) {
         FI_HILOGE("Failed to add drag event handler");
         return RET_ERR;
@@ -1927,6 +1923,19 @@ void DragManager::StateChangedNotify(DragState state)
         stateChangedCallback_(state);
     }
     FI_HILOGD("leave");
+}
+
+int32_t DragManager::GetUserId(int32_t uid)
+{
+    FI_HILOGI("enter");
+    int32_t userId = INVALID_USER_ID;
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    int32_t ret = (uid != -1) ? AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId) :
+        AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(dragData.displayId, userId);
+    FI_HILOGI("dragData.displayId:%{public}d, uid:%{public}d, userId:%{public}d, ret:%{public}d",
+        dragData.displayId, uid, userId, ret);
+    FI_HILOGI("leave");
+    return userId;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
@@ -2709,7 +2718,8 @@ void DragManager::SetSVGFilePath(const std::string &filePath)
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-int32_t DragManager::AddDragEvent(const DragData &dragData, const struct DragRadarPackageName &dragRadarPackageName)
+int32_t DragManager::AddDragEvent(const DragData &dragData, const struct DragRadarPackageName &dragRadarPackageName,
+    int32_t uid)
 {
     bool drawCursor = false;
 #ifdef OHOS_BUILD_PC_PRODUCT
@@ -2717,7 +2727,7 @@ int32_t DragManager::AddDragEvent(const DragData &dragData, const struct DragRad
         drawCursor = true;
     }
 #endif // OHOS_BUILD_PC_PRODUCT
-    auto extraData = CreateExtraData(true, drawCursor);
+    auto extraData = CreateExtraData(true, drawCursor, uid);
     if (MMI::InputManager::GetInstance()->AppendExtraData(extraData) != RET_OK) {
         FI_HILOGE("Failed to append extra data to MMI");
         dragDrawing_.DestroyDragWindow();

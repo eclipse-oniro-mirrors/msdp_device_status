@@ -270,6 +270,11 @@ struct DragEventData {
     double coordinateX = 0.0;
     double coordinateY = 0.0;
 };
+
+struct AppCallerInfo {
+    std::string appCaller;
+    int32_t uid { -1 };
+};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

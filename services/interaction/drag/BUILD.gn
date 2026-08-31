@@ -119,6 +119,7 @@ if (!is_arkui_x) {
       "window_manager:libwm_lite",
       "egl:libEGL",
       "opengles:libGLES",
+      "os_account:os_account_innerkits",
     ]
 
     if (device_status_hisysevent_enable) {

@@ -49,7 +49,7 @@ public:
     virtual int32_t RemoveSubscriptListener(int32_t pid) = 0;
     virtual int32_t StartDrag(
         const DragData &dragData, int32_t pid, const std::string &peerNetId = "", bool isLongPressDrag = false,
-        const std::string &appCaller = "") = 0;
+        const AppCallerInfo &appCallerInfo = {}) = 0;
     virtual int32_t GetUdKey(int32_t pid, std::string &udKey, bool isSystemService) const = 0;
 #else
     virtual int32_t StartDrag(const DragData &dragData) = 0;
