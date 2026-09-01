@@ -1515,11 +1515,13 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor, int3
     extraData.pullId = pullId_;
     extraData.drawCursor = drawCursor;
     extraData.eventId = DRAG_DATA_MGR.GetEventId();
+#ifndef OHOS_BUILD_ENABLE_ARKUI_X
     if (userId == -1) {
         int32_t ret = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(dragData.displayId, userId);
         FI_HILOGI("dragData.displayId:%{public}d, localId:%{public}d, ret:%{public}d",
             dragData.displayId, userId, ret);
     }
+#endif // OHOS_BUILD_ENABLE_ARKUI_X
     extraData.userId = userId;
     FI_HILOGD("sourceType:%{public}d, pointerId:%{public}d, eventId:%{public}d",
         extraData.sourceType, extraData.pointerId, extraData.eventId);
@@ -2720,7 +2722,7 @@ int32_t DragManager::AddDragEvent(const DragData &dragData, const struct DragRad
 #endif // OHOS_BUILD_PC_PRODUCT
     int32_t userId = -1;
     if (uid != -1) {
-        int32_t  ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+        int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
         FI_HILOGI("localId:%{public}d, ret:%{public}d", userId, ret);
     }
     auto extraData = CreateExtraData(true, drawCursor, userId);
