@@ -107,7 +107,7 @@ public:
     int32_t RemoveSubscriptListener(int32_t pid) override;
     int32_t StartDrag(
         const DragData &dragData, int32_t pid, const std::string &peerNetId = "",
-        bool isLongPressDrag = false, const std::string &appCaller = "") override;
+        bool isLongPressDrag = false, const AppCallerInfo &appCallerInfo = {}) override;
 #else
     int32_t StartDrag(const DragData &dragData) override;
     int32_t UpdatePointerAction(std::shared_ptr<MMI::PointerEvent> pointerEvent);
@@ -252,7 +252,7 @@ private:
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     int32_t InitDataManager(const DragData &dragData, const std::string &appCaller = "");
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    int32_t OnStartDrag(const struct DragRadarPackageName &dragRadarPackageName, int32_t pid = -1);
+    int32_t OnStartDrag(const struct DragRadarPackageName &dragRadarPackageName, int32_t pid = -1, int32_t uid = -1);
 #else
     int32_t OnStartDrag();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
@@ -261,10 +261,11 @@ private:
     std::string GetDragState(DragState value) const;
     std::string GetDragResult(DragResult value) const;
     std::string GetDragCursorStyle(DragCursorStyle value) const;
-    static MMI::ExtraData CreateExtraData(bool appended, bool drawCursor = false);
+    static MMI::ExtraData CreateExtraData(bool appended, bool drawCursor = false, int32_t userId = -1);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void StateChangedNotify(DragState state);
-    int32_t AddDragEvent(const DragData &dragData, const struct DragRadarPackageName &dragRadarPackageName);
+    int32_t AddDragEvent(const DragData &dragData, const struct DragRadarPackageName &dragRadarPackageName,
+        int32_t uid = -1);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void CtrlKeyStyleChangedNotify(DragCursorStyle style, DragAction action);
     int32_t HandleDragResult(DragResult result, bool hasCustomAnimation, int32_t pid);
