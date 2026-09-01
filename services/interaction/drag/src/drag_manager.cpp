@@ -1521,8 +1521,8 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor, int3
             dragData.displayId, userId, ret);
     }
     extraData.userId = userId;
-    FI_HILOGI("sourceType:%{public}d, pointerId:%{public}d, eventId:%{public}d, uid:%{private}d, localId:%{public}d",
-        extraData.sourceType, extraData.pointerId, extraData.eventId, uid, extraData.userId);
+    FI_HILOGI("sourceType:%{public}d, pointerId:%{public}d, eventId:%{public}d, localId:%{public}d",
+        extraData.sourceType, extraData.pointerId, extraData.eventId, extraData.userId);
     return extraData;
 }
 
