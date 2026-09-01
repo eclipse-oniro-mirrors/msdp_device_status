@@ -55,7 +55,6 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace {
-constexpr int32_t INVALID_USER_ID { -1 };
 constexpr int32_t TIMEOUT_MS { 3000 };
 constexpr int32_t INTERVAL_MS { 500 };
 constexpr int32_t POWER_SQUARED { 2 };
@@ -1505,7 +1504,7 @@ std::string DragManager::GetDragCursorStyle(DragCursorStyle value) const
     return style;
 }
 
-MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor, int32_t uid)
+MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor, int32_t userId)
 {
     DragData dragData = DRAG_DATA_MGR.GetDragData();
     MMI::ExtraData extraData;
@@ -1516,7 +1515,12 @@ MMI::ExtraData DragManager::CreateExtraData(bool appended, bool drawCursor, int3
     extraData.pullId = pullId_;
     extraData.drawCursor = drawCursor;
     extraData.eventId = DRAG_DATA_MGR.GetEventId();
-    extraData.userId = GetUserId(uid);
+    if (userId == -1) {
+        int32_t ret = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(dragData.displayId, userId);
+        FI_HILOGI("dragData.displayId:%{public}d, localId:%{public}d, ret:%{public}d",
+            dragData.displayId, userId, ret);
+    }
+    extraData.userId = userId;
     FI_HILOGI("sourceType:%{public}d, pointerId:%{public}d, eventId:%{public}d, uid:%{private}d, localId:%{public}d",
         extraData.sourceType, extraData.pointerId, extraData.eventId, uid, extraData.userId);
     return extraData;
@@ -1923,19 +1927,6 @@ void DragManager::StateChangedNotify(DragState state)
         stateChangedCallback_(state);
     }
     FI_HILOGD("leave");
-}
-
-int32_t DragManager::GetUserId(int32_t uid)
-{
-    FI_HILOGI("enter");
-    int32_t userId = INVALID_USER_ID;
-    DragData dragData = DRAG_DATA_MGR.GetDragData();
-    int32_t ret = (uid != -1) ? AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId) :
-        AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(dragData.displayId, userId);
-    FI_HILOGI("dragData.displayId:%{public}d, uid:%{public}d, userId:%{public}d, ret:%{public}d",
-        dragData.displayId, uid, userId, ret);
-    FI_HILOGI("leave");
-    return userId;
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
@@ -2727,7 +2718,12 @@ int32_t DragManager::AddDragEvent(const DragData &dragData, const struct DragRad
         drawCursor = true;
     }
 #endif // OHOS_BUILD_PC_PRODUCT
-    auto extraData = CreateExtraData(true, drawCursor, uid);
+    int32_t userId = -1;
+    if (uid != -1) {
+        int32_t  ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+        FI_HILOGI("localId:%{public}d, ret:%{public}d", userId, ret);
+    }
+    auto extraData = CreateExtraData(true, drawCursor, userId);
     if (MMI::InputManager::GetInstance()->AppendExtraData(extraData) != RET_OK) {
         FI_HILOGE("Failed to append extra data to MMI");
         dragDrawing_.DestroyDragWindow();

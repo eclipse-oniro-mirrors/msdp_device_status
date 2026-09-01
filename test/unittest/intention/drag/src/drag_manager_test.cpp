@@ -2890,6 +2890,265 @@ HWTEST_F(DragManagerTest, DragManagerTest129, TestSize.Level0)
     ASSERT_TRUE(result);
     g_dragMgr.dragState_ = DragState::STOP;
 }
+
+/**
+ * @tc.name: DragManagerTest130
+ * @tc.desc: Test IsAncoDragCallback with POINTER_ACTION_PULL_CANCEL
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest130, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
+    pointerEvent->AddPointerItem(pointerItem);
+    g_dragMgr.dragState_ = DragState::START;
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL);
+    ASSERT_TRUE(result);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest131
+ * @tc.desc: Test IsAncoDragCallback returns false when conditions not met
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest131, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    dragData.pointerId = 1;
+    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    DRAG_DATA_MGR.Init(dragData);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(2); // Different from dragData.pointerId
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(2);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
+    pointerEvent->AddPointerItem(pointerItem);
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: DragManagerTest132
+ * @tc.desc: Test IsAncoDragCallback with null context for cancel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest132, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    DragData dragData;
+    dragData.pointerId = 1;
+    dragData.sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    DRAG_DATA_MGR.Init(dragData);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerId(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetToolType(MMI::PointerEvent::TOOL_TYPE_FINGER);
+    pointerEvent->AddPointerItem(pointerItem);
+    g_dragMgr.context_ = nullptr;
+    g_dragMgr.dragState_ = DragState::START;
+    bool result = g_dragMgr.IsAncoDragCallback(pointerEvent, MMI::PointerEvent::POINTER_ACTION_UP);
+    ASSERT_FALSE(result);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+#endif // OHOS_BUILD_ENABLE_ANCO
+
+/**
+ * @tc.name: DragManagerTest133
+ * @tc.desc: Test OnStartDrag with mouse monitor state and different displayId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest133, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    constexpr int32_t NEW_DISPLAY_ID { 1 };
+    constexpr int32_t VALID_COORD { 100 };
+    g_dragMgr.mouseDragMonitorState_ = true;
+    g_dragMgr.existMouseMoveDragCallback_ = true;
+    g_dragMgr.mouseDragMonitorDisplayX_ = VALID_COORD;
+    g_dragMgr.mouseDragMonitorDisplayY_ = VALID_COORD;
+    g_dragMgr.mouseDragMonitorDisplayId_ = NEW_DISPLAY_ID;
+    g_dragMgr.dragState_ = DragState::STOP;
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+    g_dragMgr.mouseDragMonitorState_ = false;
+    g_dragMgr.existMouseMoveDragCallback_ = false;
+    g_dragMgr.mouseDragMonitorDisplayX_ = -1;
+    g_dragMgr.mouseDragMonitorDisplayY_ = -1;
+    g_dragMgr.mouseDragMonitorDisplayId_ = -1;
+}
+
+/**
+ * @tc.name: DragManagerTest134
+ * @tc.desc: Test OnStartDrag with mouse monitor state and same displayId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest134, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    ASSERT_TRUE(dragData);
+    constexpr int32_t VALID_COORD { 100 };
+    g_dragMgr.mouseDragMonitorState_ = true;
+    g_dragMgr.existMouseMoveDragCallback_ = true;
+    g_dragMgr.mouseDragMonitorDisplayX_ = VALID_COORD;
+    g_dragMgr.mouseDragMonitorDisplayY_ = VALID_COORD;
+    g_dragMgr.mouseDragMonitorDisplayId_ = DISPLAY_ID;
+    g_dragMgr.dragState_ = DragState::STOP;
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragState_ = DragState::STOP;
+    g_dragMgr.mouseDragMonitorState_ = false;
+    g_dragMgr.existMouseMoveDragCallback_ = false;
+    g_dragMgr.mouseDragMonitorDisplayX_ = -1;
+    g_dragMgr.mouseDragMonitorDisplayY_ = -1;
+    g_dragMgr.mouseDragMonitorDisplayId_ = -1;
+}
+
+/**
+ * @tc.name: DragManagerTest135
+ * @tc.desc: Test StartDrag blocked when dragState_ is START
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest135, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragState_ = DragState::START;
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_ERR);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest136
+ * @tc.desc: Test StartDrag blocked when dragState_ is MOTION_DRAGGING
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest136, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragState_ = DragState::MOTION_DRAGGING;
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_ERR);
+    g_dragMgr.dragState_ = DragState::STOP;
+}
+
+/**
+ * @tc.name: DragManagerTest137
+ * @tc.desc: Test StartDrag blocked when DragDrawing::IsRunning is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest137, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragState_ = DragState::STOP;
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    ASSERT_TRUE(g_dragMgr.dragDrawing_.IsDrawing());
+    ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_ERR);
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+}
+
+/**
+ * @tc.name: DragManagerTest138
+ * @tc.desc: Test StartDrag passes when all conditions are false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest138, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragState_ = DragState::STOP;
+    ASSERT_FALSE(g_dragMgr.dragDrawing_.IsDrawing());
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: DragManagerTest139
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest139, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragState_ = DragState::STOP;
+    ASSERT_FALSE(g_dragMgr.dragDrawing_.IsDrawing());
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_ERR);
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+}
+
+/**
+ * @tc.name: DragManagerTest140
+ * @tc.desc: Drag Drawing
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragManagerTest, DragManagerTest140, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, POINTER_ID, DRAG_NUM_ONE, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    g_dragMgr.dragState_ = DragState::STOP;
+    ASSERT_FALSE(g_dragMgr.dragDrawing_.IsDrawing());
+    int32_t ret = g_dragMgr.StartDrag(dragData.value(), -1, std::string(), false);
+    ASSERT_EQ(ret, RET_OK);
+    DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, TARGET_MAIN_WINDOW };
+    ret = g_dragMgr.StopDrag(dropResult);
+    ASSERT_EQ(ret, RET_OK);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
