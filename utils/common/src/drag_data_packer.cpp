@@ -111,6 +111,41 @@ int32_t DragDataPacker::UnMarshallingDragAnimationType(Parcel &data, DragData &d
     return RET_OK;
 }
 
+int32_t DragDataPacker::MarshallingFilenameExtensions(const DragData &dragData, Parcel &data)
+{
+    std::vector<std::string> filenameExtensions = dragData.filenameExtensions;
+    if (filenameExtensions.empty()) {
+        FI_HILOGE("Invalid parameter filenameExtensions");
+        return RET_ERR;
+    }
+    int32_t fileNum = static_cast<int32_t>(filenameExtensions.size());
+    if (fileNum < 0) {
+        FI_HILOGE("fileNum overflow, size=%{public}d", fileNum);
+        return RET_ERR;
+    }
+    WRITEINT32(data, fileNum, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    for (int32_t i = 0; i < fileNum; i++) {
+        WRITESTRING(data, filenameExtensions[i], E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    }
+    return RET_OK;
+}
+ 
+int32_t DragDataPacker::UnMarshallingFilenameExtensions(Parcel &data, DragData &dragData)
+{
+    int32_t fileNum = 0;
+    READINT32(data, fileNum, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    if ((fileNum <= 0) && (fileNum > MAX_BUF_SIZE)) {
+        FI_HILOGE("Invalid fileNum:%{public}d", fileNum);
+        return RET_ERR;
+    }
+    for (int32_t i = 0; i < fileNum; i++) {
+        std::string filenameExtension;
+        READSTRING(data, filenameExtension, E_DEVICESTATUS_READ_PARCEL_ERROR);
+        dragData.filenameExtensions.push_back(filenameExtension);
+    }
+    return RET_OK;
+}
+
 int32_t DragDataPacker::MarshallingMaterialFilter(const DragData &dragData, Parcel &data)
 {
     if (!(data).WriteBool(dragData.isSetMaterialFilter)) {

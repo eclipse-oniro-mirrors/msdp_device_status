@@ -65,6 +65,8 @@
             "OHOS::Msdp::DeviceStatus::DragDataPacker::UnMarshallingMaterialFilter(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
             "OHOS::Msdp::DeviceStatus::DragDataPacker::MarshallingDragAnimationType(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&)";
             "OHOS::Msdp::DeviceStatus::DragDataPacker::UnMarshallingDragAnimationType(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
+            "OHOS::Msdp::DeviceStatus::DragDataPacker::MarshallingFilenameExtensions(OHOS::Msdp::DeviceStatus::DragData const&, OHOS::Parcel&)";
+            "OHOS::Msdp::DeviceStatus::DragDataPacker::UnMarshallingFilenameExtensions(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::DragData&)";
             "OHOS::Msdp::DeviceStatus::DragDataPacker::CheckDragData(OHOS::Msdp::DeviceStatus::DragData const&)";
             "OHOS::Msdp::DeviceStatus::ShadowPacker::PackUpShadowInfo(OHOS::Msdp::DeviceStatus::ShadowInfo const&, OHOS::Parcel&, bool)";
             "OHOS::Msdp::DeviceStatus::ShadowPacker::UnPackShadowInfo(OHOS::Parcel&, OHOS::Msdp::DeviceStatus::ShadowInfo&, bool)";

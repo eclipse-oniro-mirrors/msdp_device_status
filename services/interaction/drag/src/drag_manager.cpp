@@ -297,6 +297,9 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
         dragData.hasCoordinateCorrected, summarys.c_str(), GetAnonyString(packageName).c_str(), dragData.isDragDelay,
         detailedSummarys.c_str(), summaryFormat.c_str(), dragData.summaryVersion, dragData.summaryTotalSize,
         dragData.summaryTag.c_str(), dragData.materialId, dragData.isSetMaterialFilter, dragData.dragAnimationType);
+    for (const auto& filenameExtension : dragData.filenameExtensions) {
+        FI_HILOGI("filenameExtension:%{public}s", filenameExtension.c_str());
+    }
     if (dragData.materialFilter != nullptr) {
         FI_HILOGI("materialFilter not is nullptr");
     } else {
