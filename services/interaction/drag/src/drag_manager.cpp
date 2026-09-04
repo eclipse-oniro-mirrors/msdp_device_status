@@ -295,7 +295,7 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
         " hasCanceledAnimation:%{public}d, udKey:%{public}s, hasCoordinateCorrected:%{public}d, summarys:%{public}s,"
         " packageName:%{public}s, isDragDelay:%{public}d, detailedSummarys:%{public}s, summaryFormat:%{public}s,"
         " summaryVersion:%{public}d, totalSize:%{public} " PRId64 ", summaryTag:%{public}s, materialId:%{public}d,"
-        " isSetMaterialFilter:%{public}d, dragAnimationType:%{public}d",
+        " isSetMaterialFilter:%{public}d, dragAnimationType:%{public}d, filenameExtension:%{public}s",
         dragData.sourceType, dragData.pointerId, dragData.displayId, dragData.displayX, dragData.displayY,
         dragData.dragNum, dragData.hasCanceledAnimation, GetAnonyString(dragData.udKey).c_str(),
         dragData.hasCoordinateCorrected, summarys.c_str(), GetAnonyString(packageName).c_str(), dragData.isDragDelay,
