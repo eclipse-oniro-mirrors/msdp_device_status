@@ -113,29 +113,12 @@ int32_t DragDataPacker::UnMarshallingDragAnimationType(Parcel &data, DragData &d
 
 int32_t DragDataPacker::MarshallingFilenameExtensions(const DragData &dragData, Parcel &data)
 {
-    int32_t fileNum = static_cast<int32_t>(dragData.filenameExtensions.size());
-    WRITEINT32(data, fileNum, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
-    for (int32_t i = 0; i < fileNum; i++) {
-        WRITESTRING(data, dragData.filenameExtensions[i], E_DEVICESTATUS_WRITE_PARCEL_ERROR);
-    }
-    return RET_OK;
+    return FilenameExtensions::Marshalling(dragData.filenameExtensions, data);
 }
 
 int32_t DragDataPacker::UnMarshallingFilenameExtensions(Parcel &data, DragData &dragData)
 {
-    size_t readAbleSize = data.GetReadableBytes();
-    int32_t fileNum = 0;
-    READINT32(data, fileNum, E_DEVICESTATUS_READ_PARCEL_ERROR);
-    if ((fileNum < 0) || (static_cast<size_t>(fileNum) > readAbleSize) || (fileNum > MAX_BUF_SIZE)) {
-        FI_HILOGE("Invalid fileNum:%{public}d", fileNum);
-        return RET_ERR;
-    }
-    for (int32_t i = 0; i < fileNum; i++) {
-        std::string filenameExtension;
-        READSTRING(data, filenameExtension, E_DEVICESTATUS_READ_PARCEL_ERROR);
-        dragData.filenameExtensions.push_back(filenameExtension);
-    }
-    return RET_OK;
+    return FilenameExtensions::UnMarshalling(data, dragData.filenameExtensions);
 }
 
 int32_t DragDataPacker::MarshallingMaterialFilter(const DragData &dragData, Parcel &data)
@@ -432,6 +415,33 @@ int32_t SummaryFormat::UnMarshalling(Parcel &parcel, std::map<std::string, std::
         std::string key;
         READSTRING(parcel, key, E_DEVICESTATUS_READ_PARCEL_ERROR);
         READINT32VECTOR(parcel, val[key], E_DEVICESTATUS_READ_PARCEL_ERROR);
+    }
+    return RET_OK;
+}
+
+int32_t FilenameExtensions::Marshalling(const std::vector<std::string> &val, Parcel &parcel)
+{
+    int32_t fileNum = static_cast<int32_t>(val.size());
+    WRITEINT32(parcel, fileNum, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    for (int32_t i = 0; i < fileNum; i++) {
+        WRITESTRING(parcel, val[i], E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    }
+    return RET_OK;
+}
+
+int32_t FilenameExtensions::UnMarshalling(Parcel &parcel, std::vector<std::string> &val)
+{
+    size_t readAbleSize = parcel.GetReadableBytes();
+    int32_t fileNum = 0;
+    READINT32(parcel, fileNum, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    if ((fileNum < 0) || (static_cast<size_t>(fileNum) > readAbleSize) || (fileNum > MAX_BUF_SIZE)) {
+        FI_HILOGE("Invalid fileNum:%{public}d", fileNum);
+        return RET_ERR;
+    }
+    for (int32_t i = 0; i < fileNum; i++) {
+        std::string filenameExtension;
+        READSTRING(parcel, filenameExtension, E_DEVICESTATUS_READ_PARCEL_ERROR);
+        val.push_back(filenameExtension);
     }
     return RET_OK;
 }

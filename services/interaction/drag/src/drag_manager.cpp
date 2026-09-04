@@ -286,6 +286,10 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
         detailedSummarys += str;
     }
     std::string summaryFormat = GetSummaryFormatStrings(dragData.summaryFormat);
+    std::string filenameExtensions;
+    for (const auto& filenameExtension : dragData.filenameExtensions) {
+        filenameExtensions += filenameExtension + ";";
+    }
     FI_HILOGI("SourceType:%{public}d, pointerId:%{public}d, displayId:%{public}d,"
         " displayX:%{private}d, displayY:%{private}d, dragNum:%{public}d,"
         " hasCanceledAnimation:%{public}d, udKey:%{public}s, hasCoordinateCorrected:%{public}d, summarys:%{public}s,"
@@ -296,10 +300,8 @@ void DragManager::PrintDragData(const DragData &dragData, const std::string &pac
         dragData.dragNum, dragData.hasCanceledAnimation, GetAnonyString(dragData.udKey).c_str(),
         dragData.hasCoordinateCorrected, summarys.c_str(), GetAnonyString(packageName).c_str(), dragData.isDragDelay,
         detailedSummarys.c_str(), summaryFormat.c_str(), dragData.summaryVersion, dragData.summaryTotalSize,
-        dragData.summaryTag.c_str(), dragData.materialId, dragData.isSetMaterialFilter, dragData.dragAnimationType);
-    for (const auto& filenameExtension : dragData.filenameExtensions) {
-        FI_HILOGI("filenameExtension:%{public}s", filenameExtension.c_str());
-    }
+        dragData.summaryTag.c_str(), dragData.materialId, dragData.isSetMaterialFilter, dragData.dragAnimationType,
+        filenameExtensions.c_str());
     if (dragData.materialFilter != nullptr) {
         FI_HILOGI("materialFilter not is nullptr");
     } else {

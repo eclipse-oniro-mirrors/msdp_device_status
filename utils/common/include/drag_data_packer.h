@@ -74,6 +74,12 @@ public:
     static int32_t Marshalling(const std::map<std::string, std::vector<int32_t>> &val, Parcel &parcel);
     static int32_t UnMarshalling(Parcel &parcel, std::map<std::string, std::vector<int32_t>> &val);
 };
+
+class FilenameExtensions {
+public:
+    static int32_t Marshalling(const std::vector<std::string> &val, Parcel &parcel);
+    static int32_t UnMarshalling(Parcel &parcel, std::vector<std::string> &val);
+};
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
