@@ -573,7 +573,8 @@ int32_t DragManager::StopDrag(const DragDropResult &dropResult, const std::strin
         ret = RET_ERR;
     }
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    if (dropResult.result == DragResult::DRAG_SUCCESS && dropResult.mainWindow > 0) {
+    if (dropResult.result == DragResult::DRAG_SUCCESS && dropResult.mainWindow > 0 &&
+        pid > 0 && DragSecurityManager::GetInstance().VerifySecurityPid(pid)) {
         Rosen::WMError result = Rosen::WindowManagerLite::GetInstance().RaiseWindowToTop(dropResult.mainWindow);
         if (result != Rosen::WMError::WM_OK) {
             FI_HILOGE("Raise window to top failed, mainWindow:%{public}d", dropResult.mainWindow);
