@@ -1435,6 +1435,197 @@ HWTEST_F(DragDrawingTest, DragDrawingTest60, TestSize.Level0)
 }
 
 /**
+* @tc.name: DragDrawingTest61
+* @tc.desc: Test StopDestopAnimation with dragWindowVisible true
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest61, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData.value().dragAnimationType = static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH);
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.dragWindowVisible_ = true;
+    g_dragMgr.dragDrawing_.StopDestopAnimation();
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+
+/**
+* @tc.name: DragDrawingTest62
+* @tc.desc: Test StopDestopAnimation with dragWindowVisible false
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest62, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::optional<DragData> dragData = CreateDragData(
+        MMI::PointerEvent::SOURCE_TYPE_MOUSE, POINTER_ID, 1, false, SHADOW_NUM_ONE);
+    EXPECT_TRUE(dragData);
+    dragData.value().dragAnimationType = static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH);
+    int32_t ret = g_dragMgr.dragDrawing_.Init(dragData.value(), g_context);
+    ASSERT_EQ(ret, RET_OK);
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+    g_dragMgr.dragDrawing_.dragWindowVisible_ = false;
+    g_dragMgr.dragDrawing_.StopDestopAnimation();
+    g_dragMgr.dragDrawing_.newMaterialHandler_ = nullptr;
+    g_dragMgr.dragDrawing_.DestroyDragWindow();
+    g_dragMgr.dragDrawing_.UpdateDrawingState();
+}
+ 
+/**
+* @tc.name: DragDrawingTest63
+* @tc.desc: Test CalculateRotation with negative movement
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest63, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.currentDisplayX_ = 200.0f;
+    g_dragMgr.dragDrawing_.currentDisplayY_ = 200.0f;
+    g_dragMgr.dragDrawing_.currentDegreeX_ = 0.0f;
+    g_dragMgr.dragDrawing_.currentDegreeY_ = 0.0f;
+    float degreeX = 0.0f;
+    float degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 2, 2 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_GE(degreeX, -40.0f);
+    g_dragMgr.dragDrawing_.dropArea_ = { 4, 2 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeX, 40.0f);
+    g_dragMgr.dragDrawing_.dropArea_ = { 4, 4 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeX, 40.0f);
+    g_dragMgr.dragDrawing_.dropArea_ = { 4, 6 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_GE(degreeY, -40.0f);
+    g_dragMgr.dragDrawing_.dropArea_ = { 6, 4 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeY, 40.0f);
+}
+
+/**
+* @tc.name: DragDrawingTest64
+* @tc.desc: Test ParseDropArea
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest64, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    JsonParser jsonParser("{\"dropArea\":\"2,2\"}");
+    g_dragMgr.dragDrawing_.dragAnimationType_ = 0;
+    bool ret = g_dragMgr.dragDrawing_.ParseDropArea(jsonParser);
+    EXPECT_TRUE(ret);
+    g_dragMgr.dragDrawing_.dragAnimationType_ = 1;
+    ret = g_dragMgr.dragDrawing_.ParseDropArea(jsonParser);
+    EXPECT_TRUE(!ret);
+}
+
+/**
+* @tc.name: DragDrawingTest65
+* @tc.desc: Test CreateWindow with isInitUiDirector = false, rsUiDirector_ = nullptr
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest65, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.rsUiDirector_ = nullptr;
+
+    g_dragMgr.dragDrawing_.CreateWindow();
+
+    g_dragMgr.dragDrawing_.rsUiDirector_ = nullptr;
+
+    g_dragMgr.dragDrawing_.CreateWindow();
+
+    EXPECT_FALSE(g_dragMgr.dragDrawing_.rsUiDirector_ == nullptr);
+}
+
+/**
+ * @tc.name: DragDrawingTest66
+ * @tc.desc: Test SetRsScreenId with non-zero screenId, ConvertScreenIdToRsScreenId success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest66, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t validScreenId = 0;
+    g_dragMgr.dragDrawing_.SetRsScreenId(validScreenId);
+    EXPECT_EQ(g_dragMgr.dragDrawing_.rsScreenId_, validScreenId);
+}
+
+/**
+ * @tc.name: DragDrawingTest67
+ * @tc.desc: Test SetRsScreenId, convert fail branch, early return
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DragDrawingTest, DragDrawingTest67, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t invalidScreenId = UINT64_MAX;
+    g_dragMgr.dragDrawing_.SetRsScreenId(invalidScreenId);
+    EXPECT_NE(g_dragMgr.dragDrawing_.rsScreenId_, invalidScreenId);
+}
+
+/**
+* @tc.name: DragDrawingTest68
+* @tc.desc: Test CalculateRotation
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest68, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    g_dragMgr.dragDrawing_.currentDisplayX_ = 200.0f;
+    g_dragMgr.dragDrawing_.currentDisplayY_ = 200.0f;
+    g_dragMgr.dragDrawing_.currentDegreeX_ = 0.0f;
+    g_dragMgr.dragDrawing_.currentDegreeY_ = 0.0f;
+    float degreeX = 0.0f;
+    float degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 2, 4 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeX, 25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 4, 2 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeY, 25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 1, 2 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeX, 25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 2, 1 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_GE(degreeY, -25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 2, 2 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeY, 25.0f);
+    degreeX = 0.0f;
+    degreeY = 0.0f;
+    g_dragMgr.dragDrawing_.dropArea_ = { 4, 4 };
+    g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
+    EXPECT_LE(degreeY, 25.0f);
+}
+
+/**
 * @tc.name: DragDrawingTest69
 * @tc.desc: On drag style
 * @tc.type: FUNC
