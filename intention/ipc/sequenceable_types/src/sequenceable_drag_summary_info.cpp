@@ -72,7 +72,8 @@ SequenceableDragSummaryInfo* SequenceableDragSummaryInfo::Unmarshalling(Parcel &
     if (FilenameExtensions::UnMarshalling(parcel, sequenceDragSummary->dragSummaryInfo_.filenameExtensions)
         != RET_OK) {
         FI_HILOGE("UnMarshalling filenameExtensions failed");
-        break;
+        delete sequenceDragSummary;
+        return nullptr;
     }
     return sequenceDragSummary;
 }
