@@ -1624,6 +1624,33 @@ HWTEST_F(DragDrawingTest, DragDrawingTest68, TestSize.Level0)
     g_dragMgr.dragDrawing_.CalculateRotation(100.0f, 100.0f, degreeX, degreeY);
     EXPECT_LE(degreeY, 25.0f);
 }
+
+/**
+* @tc.name: DragDrawingTest69
+* @tc.desc: On drag style
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DragDrawingTest, DragDrawingTest69, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    uint64_t invalidScreenId = UINT64_MAX;
+    std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = nullptr;
+    std::shared_ptr<Media::PixelMap> stylePixelMap = nullptr;
+    g_dragMgr.dragDrawing_.OnDragStyle(dragStyleNode, stylePixelMap);
+    dragStyleNode = Rosen::RSCanvasNode::Create();
+    stylePixelMap = nullptr;
+    g_dragMgr.dragDrawing_.OnDragStyle(dragStyleNode, stylePixelMap);
+    dragStyleNode = nullptr;
+    stylePixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    g_dragMgr.dragDrawing_.OnDragStyle(dragStyleNode, stylePixelMap);
+    dragStyleNode = Rosen::RSCanvasNode::Create();
+    stylePixelMap = CreatePixelMap(PIXEL_MAP_WIDTH, PIXEL_MAP_HEIGHT);
+    g_dragMgr.dragDrawing_.OnDragStyle(dragStyleNode, stylePixelMap);
+    uint64_t invalidScreenId = UINT64_MAX;
+    g_dragMgr.dragDrawing_.SetRsScreenId(invalidScreenId);
+    EXPECT_NE(g_dragMgr.dragDrawing_.rsScreenId_, invalidScreenId);
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
