@@ -111,6 +111,16 @@ int32_t DragDataPacker::UnMarshallingDragAnimationType(Parcel &data, DragData &d
     return RET_OK;
 }
 
+int32_t DragDataPacker::MarshallingFilenameExtensions(const DragData &dragData, Parcel &data)
+{
+    return SummaryPacker::Marshalling(dragData.filenameExtensions, data);
+}
+
+int32_t DragDataPacker::UnMarshallingFilenameExtensions(Parcel &data, DragData &dragData)
+{
+    return SummaryPacker::UnMarshalling(data, dragData.filenameExtensions);
+}
+
 int32_t DragDataPacker::MarshallingMaterialFilter(const DragData &dragData, Parcel &data)
 {
     if (!(data).WriteBool(dragData.isSetMaterialFilter)) {
@@ -360,6 +370,33 @@ int32_t SummaryPacker::UnMarshalling(Parcel &parcel, SummaryMap &val)
         std::string key;
         READSTRING(parcel, key, E_DEVICESTATUS_READ_PARCEL_ERROR);
         READINT64(parcel, val[key], E_DEVICESTATUS_READ_PARCEL_ERROR);
+    }
+    return RET_OK;
+}
+
+int32_t SummaryPacker::Marshalling(const std::vector<std::string> &val, Parcel &parcel)
+{
+    int32_t fileNum = static_cast<int32_t>(val.size());
+    WRITEINT32(parcel, fileNum, E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    for (int32_t i = 0; i < fileNum; i++) {
+        WRITESTRING(parcel, val[i], E_DEVICESTATUS_WRITE_PARCEL_ERROR);
+    }
+    return RET_OK;
+}
+
+int32_t SummaryPacker::UnMarshalling(Parcel &parcel, std::vector<std::string> &val)
+{
+    size_t readAbleSize = parcel.GetReadableBytes();
+    int32_t fileNum = 0;
+    READINT32(parcel, fileNum, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    if ((fileNum < 0) || (static_cast<size_t>(fileNum) > readAbleSize) || (fileNum > MAX_BUF_SIZE)) {
+        FI_HILOGE("Invalid fileNum:%{public}d", fileNum);
+        return RET_ERR;
+    }
+    for (int32_t i = 0; i < fileNum; i++) {
+        std::string filenameExtension;
+        READSTRING(parcel, filenameExtension, E_DEVICESTATUS_READ_PARCEL_ERROR);
+        val.push_back(filenameExtension);
     }
     return RET_OK;
 }

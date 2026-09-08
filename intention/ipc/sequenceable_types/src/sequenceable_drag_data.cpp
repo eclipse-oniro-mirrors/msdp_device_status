@@ -45,6 +45,10 @@ bool SequenceableDragData::Marshalling(Parcel &parcel) const
         FI_HILOGE("Marshalling dragAnimationType failed");
         return false;
     }
+    if (DragDataPacker::MarshallingFilenameExtensions(dragData_, parcel) != RET_OK) {
+        FI_HILOGE("Marshalling filenameExtensions failed");
+        return false;
+    }
     return true;
 }
 
@@ -79,6 +83,11 @@ SequenceableDragData* SequenceableDragData::Unmarshalling(Parcel &parcel)
     }
     if (DragDataPacker::UnMarshallingDragAnimationType(parcel, sequenceDragData->dragData_) != RET_OK) {
         FI_HILOGE("UnMarshalling dragAnimationType failed");
+        delete sequenceDragData;
+        return nullptr;
+    }
+    if (DragDataPacker::UnMarshallingFilenameExtensions(parcel, sequenceDragData->dragData_) != RET_OK) {
+        FI_HILOGE("UnMarshalling filenameExtensions failed");
         delete sequenceDragData;
         return nullptr;
     }

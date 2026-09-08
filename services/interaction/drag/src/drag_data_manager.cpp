@@ -168,6 +168,7 @@ void DragDataManager::GetSummaryInfo(DragSummaryInfo &dragSummaryInfo)
     dragSummaryInfo.summaryFormat = dragData_.summaryFormat;
     dragSummaryInfo.version = dragData_.summaryVersion;
     dragSummaryInfo.totalSize = dragData_.summaryTotalSize;
+    dragSummaryInfo.filenameExtensions = dragData_.filenameExtensions;
 }
 
 float DragDataManager::GetDragOriginDpi() const

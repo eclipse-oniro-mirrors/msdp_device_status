@@ -37,17 +37,17 @@ int32_t DragDataUtil::MarshallingDetailedSummarys(const DragData &dragData, Parc
 {
     return DragDataPacker::MarshallingDetailedSummarys(dragData, data);
 }
- 
+
 int32_t DragDataUtil::UnMarshallingDetailedSummarys(Parcel &data, DragData &dragData)
 {
     return DragDataPacker::UnMarshallingDetailedSummarys(data, dragData);
 }
- 
+
 int32_t DragDataUtil::MarshallingSummaryExpanding(const DragData &dragData, Parcel &data)
 {
     return DragDataPacker::MarshallingSummaryExpanding(dragData, data);
 }
- 
+
 int32_t DragDataUtil::UnMarshallingSummaryExpanding(Parcel &data, DragData &dragData)
 {
     return DragDataPacker::UnMarshallingSummaryExpanding(data, dragData);
@@ -57,20 +57,30 @@ int32_t DragDataUtil::MarshallingMaterialId(const DragData &dragData, Parcel &da
 {
     return DragDataPacker::MarshallingMaterialId(dragData, data);
 }
- 
+
 int32_t DragDataUtil::UnMarshallingMaterialId(Parcel &data, DragData &dragData)
 {
     return DragDataPacker::UnMarshallingMaterialId(data, dragData);
 }
- 
+
 int32_t DragDataUtil::MarshallingMaterialFilter(const DragData &dragData, Parcel &data)
 {
     return DragDataPacker::MarshallingMaterialFilter(dragData, data);
 }
- 
+
 int32_t DragDataUtil::UnMarshallingMaterialFilter(Parcel &data, DragData &dragData)
 {
     return DragDataPacker::UnMarshallingMaterialFilter(data, dragData);
+}
+
+int32_t DragDataUtil::MarshallingFilenameExtensions(const DragData &dragData, Parcel &data)
+{
+    return DragDataPacker::MarshallingFilenameExtensions(dragData, data);
+}
+ 
+int32_t DragDataUtil::UnMarshallingFilenameExtensions(Parcel &data, DragData &dragData)
+{
+    return DragDataPacker::UnMarshallingFilenameExtensions(data, dragData);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

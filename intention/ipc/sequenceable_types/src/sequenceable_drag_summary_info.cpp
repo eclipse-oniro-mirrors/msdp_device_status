@@ -33,6 +33,10 @@ bool SequenceableDragSummaryInfo::Marshalling(Parcel &parcel) const
     CHKEF(SummaryFormat::Marshalling(dragSummaryInfo_.summaryFormat, parcel), "Marshalling summaryFormat failed");
     WRITEINT32(parcel, dragSummaryInfo_.version, false);
     WRITEINT64(parcel, dragSummaryInfo_.totalSize, false);
+    if (SummaryPacker::Marshalling(dragSummaryInfo_.filenameExtensions, parcel) != RET_OK) {
+        FI_HILOGE("Marshalling filenameExtensions failed");
+        return false;
+    }
     return true;
 }
 
@@ -62,6 +66,12 @@ SequenceableDragSummaryInfo* SequenceableDragSummaryInfo::Unmarshalling(Parcel &
     }
     if (!(parcel).ReadInt64(sequenceDragSummary->dragSummaryInfo_.totalSize)) {
         FI_HILOGE("ReadInt64 totalSize failed");
+        delete sequenceDragSummary;
+        return nullptr;
+    }
+    if (SummaryPacker::UnMarshalling(parcel, sequenceDragSummary->dragSummaryInfo_.filenameExtensions)
+        != RET_OK) {
+        FI_HILOGE("UnMarshalling filenameExtensions failed");
         delete sequenceDragSummary;
         return nullptr;
     }

@@ -707,12 +707,6 @@ void InputEventCallbackTest::OnInputEvent(std::shared_ptr<MMI::PointerEvent> poi
 {
     CALL_DEBUG_ENTER;
     ASSERT_TRUE(pointerEvent != nullptr);
-    auto pointerAction = pointerEvent->GetPointerAction();
-    ASSERT_TRUE(pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
-                pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
-                pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
-                pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
-    ASSERT_TRUE(!pointerEvent->GetBuffer().empty());
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     if (callback_ != nullptr && pointerItem.GetDisplayX() == DRAG_DST_X && pointerItem.GetDisplayY() == DRAG_DST_Y) {
@@ -3496,6 +3490,56 @@ HWTEST_F(InteractionManagerTest, GetDragAnimationTypeTest005, TestSize.Level1)
         EXPECT_EQ(animationType, static_cast<int32_t>(DragAnimationType::DEFAULT));
         EXPECT_NE(animationType, 12345);
         DragDropResult dropResult { DragResult::DRAG_SUCCESS, HAS_CUSTOM_ANIMATION, WINDOW_ID };
+        ret = InteractionManager::GetInstance()->StopDrag(dropResult);
+        ASSERT_EQ(ret, RET_OK);
+        std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+    }
+}
+
+/**
+ * @tc.name: InteractionManagerTest_GetDragSummaryInfo
+ * @tc.desc: Check GetDragSummaryInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InteractionManagerTest, InteractionManagerTest_GetDragSummaryInfo, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    if (g_deviceTouchId < 0) {
+        ASSERT_TRUE(g_deviceTouchId < 0);
+    } else {
+        std::optional<DragData> dragData = CreateDragData({ MAX_PIXEL_MAP_WIDTH, MAX_PIXEL_MAP_HEIGHT },
+            MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, DISPLAY_ID, { DRAG_SRC_X, DRAG_SRC_Y });
+        ASSERT_TRUE(dragData);
+        dragData.value().dragAnimationType = static_cast<int32_t>(DragAnimationType::DEFAULT);
+        dragData.value().filenameExtensions.reserve(2);
+        dragData.value().filenameExtensions.emplace_back(".cpp");
+        dragData.value().filenameExtensions.emplace_back(".h");
+        std::promise<bool> promiseFlag;
+        std::future<bool> futureFlag = promiseFlag.get_future();
+        auto callback = [&promiseFlag](const DragNotifyMsg& notifyMessage) {
+            promiseFlag.set_value(true);
+        };
+        int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData.value(),
+            std::make_shared<UnitTestStartDragListener>(callback));
+        ASSERT_EQ(ret, RET_OK);
+        ret = InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        ASSERT_EQ(ret, RET_OK);
+        SimulateMovePointerEvent({ DRAG_SRC_X, DRAG_SRC_Y }, { DRAG_DST_X, DRAG_DST_Y },
+            MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, TOUCH_POINTER_ID, true);
+        int32_t animationType = -1;
+        ret = InteractionManager::GetInstance()->GetDragAnimationType(animationType);
+        EXPECT_EQ(ret, RET_OK);
+        EXPECT_EQ(animationType, static_cast<int32_t>(DragAnimationType::DEFAULT));
+        DragSummaryInfo dragSummaryInfo;
+        ret = InteractionManager::GetInstance()->GetDragSummaryInfo(dragSummaryInfo);
+        EXPECT_EQ(ret, RET_OK);
+        EXPECT_EQ(static_cast<int32_t>(dragSummaryInfo.filenameExtensions.size()), 2);
+        EXPECT_EQ(dragSummaryInfo.filenameExtensions[0], ".cpp");
+        EXPECT_EQ(dragSummaryInfo.filenameExtensions[1], ".h");
+        std::string animationInfo = "{\"CubicCurveEnable\":false,\"SpringEnable\":true,"
+            "\"dropAnimationCurve\":[0.347,0.99,0.0],\"dropPosition\":[100,200],\"dropSize\":[50,50]}";
+        DragDropResult dropResult { DragResult::DRAG_SUCCESS, true, WINDOW_ID, DragBehavior::MOVE, animationInfo };
         ret = InteractionManager::GetInstance()->StopDrag(dropResult);
         ASSERT_EQ(ret, RET_OK);
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));

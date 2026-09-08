@@ -44,6 +44,8 @@ public:
     static int32_t UnMarshallingMaterialFilter(Parcel &data, DragData &dragData);
     static int32_t MarshallingDragAnimationType(const DragData &dragData, Parcel &data);
     static int32_t UnMarshallingDragAnimationType(Parcel &data, DragData &dragData);
+    static int32_t MarshallingFilenameExtensions(const DragData &dragData, Parcel &data);
+    static int32_t UnMarshallingFilenameExtensions(Parcel &data, DragData &dragData);
 };
 
 class ShadowPacker {
@@ -59,6 +61,8 @@ class SummaryPacker {
 public:
     static int32_t Marshalling(const SummaryMap &val, Parcel &parcel);
     static int32_t UnMarshalling(Parcel &parcel, SummaryMap &val);
+    static int32_t Marshalling(const std::vector<std::string> &val, Parcel &parcel);
+    static int32_t UnMarshalling(Parcel &parcel, std::vector<std::string> &val);
 };
 
 class ShadowOffsetPacker {

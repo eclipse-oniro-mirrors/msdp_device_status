@@ -84,6 +84,7 @@ struct DragData {
     bool isSetMaterialFilter { false };
     std::shared_ptr<Rosen::Filter> materialFilter { nullptr };
     int32_t dragAnimationType { -1 };
+    std::vector<std::string> filenameExtensions;
     std::string appCallee;
     std::string appCaller;
 
@@ -99,7 +100,8 @@ struct DragData {
                detailedSummarys == other.detailedSummarys && summaryFormat == other.summaryFormat &&
                summaryTotalSize == other.summaryTotalSize && summaryVersion == other.summaryVersion &&
                summaryTag == other.summaryTag && materialId == other.materialId &&
-               isSetMaterialFilter == other.isSetMaterialFilter && dragAnimationType == other.dragAnimationType;
+               isSetMaterialFilter == other.isSetMaterialFilter && dragAnimationType == other.dragAnimationType &&
+               filenameExtensions == other.filenameExtensions;
     }
 
     bool operator != (const DragData &other) const
@@ -261,6 +263,7 @@ struct DragSummaryInfo {
     std::map<std::string, int64_t> summarys;
     std::map<std::string, int64_t> detailedSummarys;
     std::map<std::string, std::vector<int32_t>> summaryFormat;
+    std::vector<std::string> filenameExtensions;
     int32_t version { 0 };
     int64_t totalSize { -1 };
 };
