@@ -1113,6 +1113,7 @@ void DragDrawing::DestroyDragWindow()
     CHKPV(rsUiDirector_);
     rsUiDirector_->SetRoot(-1);
     rsUiDirector_->SendMessages();
+    ResetAnimationParameter();
     FI_HILOGI("leave");
 }
 
@@ -1960,24 +1961,15 @@ void DragDrawing::OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode
     std::shared_ptr<Media::PixelMap> stylePixelMap)
 {
     FI_HILOGD("enter");
+#ifdef OHOS_DRAG_ENABLE_ANIMATION
+    if ((drawSVGModifier_ != nullptr) && (dragStyleNode != nullptr)) {
+        dragStyleNode->RemoveModifier(drawSVGModifier_);
+    }
+    drawSVGModifier_ = nullptr;
+    OnDragStyleAnimation();
+#else // OHOS_DRAG_ENABLE_ANIMATION
     CHKPV(dragStyleNode);
     CHKPV(stylePixelMap);
-#ifdef OHOS_DRAG_ENABLE_ANIMATION
-    if (handler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME);
-        CHKPV(runner);
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(std::move(runner));
-    }
-    if (drawSVGModifier_ != nullptr) {
-        dragStyleNode->RemoveModifier(drawSVGModifier_);
-        drawSVGModifier_ = nullptr;
-    }
-    CHKPV(handler_);
-    if (!handler_->PostTask([this] { this->OnDragStyleAnimation(); })) {
-        FI_HILOGE("Drag style animation failed");
-        DrawStyle(dragStyleNode, stylePixelMap);
-    }
-#else // OHOS_DRAG_ENABLE_ANIMATION
     DrawStyle(dragStyleNode, stylePixelMap);
 #endif // OHOS_DRAG_ENABLE_ANIMATION
     FI_HILOGD("leave");
@@ -4520,7 +4512,6 @@ void DragDrawing::ResetAnimationFlag(bool isForce)
     DestroyDragWindow();
     g_drawingInfo.isRunning = false;
     g_drawingInfo.timerId = -1;
-    ResetAnimationParameter();
     FI_HILOGI("leave");
 }
 
