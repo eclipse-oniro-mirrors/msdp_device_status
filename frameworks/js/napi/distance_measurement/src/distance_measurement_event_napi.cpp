@@ -161,6 +161,7 @@ bool DistanceMeasurementEventNapi::IsSameValue(const napi_env &env,
 bool DistanceMeasurementEventNapi::HasRegisteredCallback(const CDistMeasureData &cdistMeasureData)
 {
     FI_HILOGI("HasRegisteredCallback Enter");
+    std::lock_guard<std::mutex> lock(mutex_);
     if (distMeasureEventMap_.empty()) {
         FI_HILOGI("distMeasureEventMap_ is empty.");
         return false;

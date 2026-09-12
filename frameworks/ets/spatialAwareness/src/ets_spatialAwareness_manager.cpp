@@ -274,6 +274,7 @@ bool EtsSpatialAwarenessManager::RemoveCallback(const CDistMeasureData& distMeas
     optional_view<uintptr_t> opq)
 {
     FI_HILOGI("Enter");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     const auto iter = jsCbMap_.find(distMeasureDataSet);
     if (iter == jsCbMap_.end()) {
         FI_HILOGI("RemoveCallback data Not exist distMeasureDataSet");
