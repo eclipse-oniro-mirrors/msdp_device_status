@@ -280,6 +280,18 @@ ohos_unittest("IntentionServiceNewTest") {
     defines += [ "SENSOR_ENABLE" ]
     external_deps += [ "sensor:sensor_interface_native" ]
   }
+
+  if (device_status_car_awareness_enable) {
+    defines += [ "DEVICE_STATUS_CAR_AWARENESS_ENABLE" ]
+    include_dirs += [
+      "${device_status_root_path}/intention/car_awareness/server/include",
+      "${device_status_root_path}/interfaces/innerkits/car_awareness/include"
+    ]
+    deps += [
+      "${device_status_root_path}/intention/car_awareness/server:intention_car_awareness_server",
+      "${device_status_interfaces_path}/innerkits:devicestatus_client"
+    ]
+  }
 }
 
 ohos_unittest("MonitorTest") {

@@ -20,6 +20,7 @@
 #include "car_awareness_mgr.h"
 #endif // CAR_AWARENESS_ENABLE
 
+#include <nlohmann/json.hpp>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -329,9 +330,60 @@ bool CarAwarenessNapi::IsArgAllValid(napi_env env, napi_value *args, size_t argc
     return true;
 }
 
-bool CarAwarenessNapi::GetCarAwarenessOption(napi_env env, napi_value awarenessOption, CarAwarenessOption &option)
+bool CarAwarenessNapi::GetCarAwarenessOption(napi_env env, napi_value awarenessOption, int32_t type,
+    CarAwarenessOption &option)
 {
-    // 预留参数解析逻辑, 待手势识别明确参数后处理
+    if (type == TYPE_CAR_STATUS) {
+        return GetCarStatusAwarenessOption(env, awarenessOption, option);
+    }
+    return true;
+}
+
+bool CarAwarenessNapi::GetCarStatusAwarenessOption(napi_env env, napi_value awarenessOption, CarAwarenessOption &option)
+{
+    napi_value parameters;
+    napi_status status = napi_get_named_property(env, awarenessOption, "parameters", &parameters);
+    if (status != napi_ok) {
+        FI_HILOGE("failed to get parameters property, napi_status=%{public}d", status);
+        return false;
+    }
+
+    napi_value keys;
+    uint32_t length;
+    if (napi_get_property_names(env, parameters, &keys) != napi_ok ||
+        napi_get_array_length(env, keys, &length) != napi_ok) {
+        FI_HILOGE("failed to get property names or length");
+        return false;
+    }
+
+    for (uint32_t i = 0; i < length; i++) {
+        napi_value key;
+        if (napi_get_element(env, keys, i, &key) != napi_ok) {
+            FI_HILOGE("failed to get key at index %{public}d", i);
+            continue;
+        }
+        
+        std::string keyStr;
+        if (!TransJsToStr(env, key, keyStr)) {
+            FI_HILOGE("failed to convert key at index %{public}d to string", i);
+            continue;
+        }
+
+        napi_value value;
+        if (napi_get_named_property(env, parameters, keyStr.c_str(), &value) != napi_ok) {
+            FI_HILOGE("failed to get value for key: %{public}s", keyStr.c_str());
+            continue;
+        }
+        
+        std::string valueStr;
+        if (!TransJsToStr(env, value, valueStr)) {
+            FI_HILOGE("failed to convert value for key: %{public}s to string", keyStr.c_str());
+            continue;
+        }
+        
+        FI_HILOGI("GetCarStatusAwarenessOption: key=%{public}s, value=%{public}s", keyStr.c_str(), valueStr.c_str());
+        option.entityInfo[keyStr] = valueStr;
+    }
     return true;
 }
 
@@ -368,7 +420,6 @@ void CarAwarenessNapi::ExecuteGetEventCompleteFunc(napi_env env, napi_status sta
     if (context == nullptr || context->env == nullptr) {
         return;
     }
-    // 预留数据采集实现，当前返回空
     if (context->asyncWorkRet != RES_SUCCESS) {
         ThrowIpcExcuteErr(context->env, context->asyncWorkRet);
         napi_reject_deferred(context->env, context->deferred,
@@ -376,6 +427,17 @@ void CarAwarenessNapi::ExecuteGetEventCompleteFunc(napi_env env, napi_status sta
     } else {
         napi_value result;
         napi_create_array(context->env, &result);
+        size_t resultIndex = 0;
+        for (size_t i = 0; i < context->events.size(); i++) {
+            std::string &eventData = context->events[i].eventData;
+            if (eventData.empty() || eventData == "[]" || !nlohmann::json::accept(eventData)) {
+                FI_HILOGW("skip invalid eventData at index %{public}zu, data: %{public}s", i, eventData.c_str());
+                continue;
+            }
+            nlohmann::json eventJson = nlohmann::json::parse(eventData);
+            napi_value eventObj = ConvertJsonValueToNapiValue(context->env, eventJson);
+            napi_set_element(context->env, result, resultIndex++, eventObj);
+        }
         napi_resolve_deferred(context->env, context->deferred, result);
     }
 
@@ -481,7 +543,7 @@ bool CarAwarenessNapi::SubscribeToSa(napi_env env, int32_t type,
 
     cb->AddNapiObject(weak_from_this());
 
-    if (hasSubscribed) {
+    if (hasSubscribed && type != TYPE_CAR_STATUS) {
         return true;
     }
 
@@ -561,7 +623,7 @@ napi_value CarAwarenessNapi::SubscribeCapEx(napi_env env, napi_callback_info inf
         return nullptr;
     }
     CarAwarenessOption option;
-    if (argc == ARG_3 && !GetCarAwarenessOption(env, args[ARG_2], option)) {
+    if (argc == ARG_3 && !GetCarAwarenessOption(env, args[ARG_2], type, option)) {
         ThrowErrToJs(env, PARAM_ERR, "option param is invalid");
         return nullptr;
     }
@@ -635,7 +697,7 @@ napi_value CarAwarenessNapi::UnSubscribeCapEx(napi_env env, napi_callback_info i
         return nullptr;
     }
     CarAwarenessOption option;
-    if (argc == ARG_3 && !GetCarAwarenessOption(env, args[ARG_2], option)) {
+    if (argc == ARG_3 && !GetCarAwarenessOption(env, args[ARG_2], type, option)) {
         ThrowErrToJs(env, PARAM_ERR, "option param is invalid");
         return nullptr;
     }
@@ -884,7 +946,7 @@ napi_value CarAwarenessNapi::GetCarAwareness(napi_env env, napi_callback_info in
         return nullptr;
     }
     CarAwarenessOption option;
-    if (argc == ARG_2 && !GetCarAwarenessOption(env, args[ARG_1], option)) {
+    if (argc == ARG_2 && !GetCarAwarenessOption(env, args[ARG_1], type, option)) {
         ThrowErrToJs(env, PARAM_ERR, "option param is invalid");
         return nullptr;
     }

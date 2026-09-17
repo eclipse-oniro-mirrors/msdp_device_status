@@ -1,0 +1,214 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../../device_status.gni")
+
+module_output_path = "${device_status_part_name}/device_status/unit_out"
+
+ohos_unittest("CarAwarenessServerTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  cflags = [ "-fno-access-control" ]
+
+  module_out_path = module_output_path
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/intention/car_awareness/server/include",
+    "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
+    "${device_status_root_path}/libs/interface",
+    "${device_status_service_path}/communication/service/include",
+  ]
+  sources = [ "src/car_awareness_server_test.cpp" ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_root_path}/intention/common/epoll:intention_epoll",
+    "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
+    "${device_status_root_path}/intention/services/device_manager:intention_device_manager",
+    "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_server_stub",
+    "${device_status_root_path}/intention/services/intention_service:intention_service_test",
+  ]
+
+  if (device_status_car_awareness_enable) {
+    deps += [
+      "${device_status_root_path}/intention/car_awareness/client:intention_car_awareness_client",
+      "${device_status_root_path}/intention/car_awareness/server:intention_car_awareness_server" 
+    ]
+  }
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken_shared",
+    "access_token:libprivacy_sdk",
+    "access_token:libtokensetproc_shared",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "os_account:os_account_innerkits",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "qos_manager:concurrent_task_client",
+    "qos_manager:qos",
+  ]
+
+  defines = []
+  if (device_status_car_awareness_enable) {
+    defines += [ "DEVICE_STATUS_CAR_AWARENESS_ENABLE" ]
+  }
+}
+
+ohos_unittest("CarAwarenessClientTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  cflags = [ "-fno-access-control" ]
+
+  module_out_path = module_output_path
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/intention/car_awareness/client/include",
+    "${device_status_root_path}/intention/car_awareness/server/include",
+    "${device_status_root_path}/intention/ipc/tunnel/include",
+    "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
+    "${device_status_root_path}/libs/interface",
+    "${device_status_service_path}/communication/service/include",
+  ]
+  sources = [ "src/car_awareness_client_test.cpp" ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_root_path}/intention/common/epoll:intention_epoll",
+    "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
+    "${device_status_root_path}/intention/services/device_manager:intention_device_manager",
+    "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_server_stub",
+    "${device_status_root_path}/intention/services/intention_service:intention_service_test",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
+    "${device_status_root_path}/intention/car_awareness/client:intention_car_awareness_client",
+  ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "os_account:os_account_innerkits",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "qos_manager:concurrent_task_client",
+    "qos_manager:qos",
+  ]
+
+  defines = []
+  if (device_status_car_awareness_enable) {
+    defines += [ "DEVICE_STATUS_CAR_AWARENESS_ENABLE" ]
+  }
+}
+
+ohos_unittest("CarAwarenessServerNewTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  cflags = [ "-fno-access-control", "-Dprivate=public" ]
+
+  module_out_path = module_output_path
+  include_dirs = [
+    "include",
+    "${device_status_root_path}/intention/car_awareness/server/include",
+    "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
+    "${device_status_root_path}/libs/interface",
+    "${device_status_service_path}/communication/service/include",
+  ]
+  sources = [ "src/car_awareness_server_new_test.cpp" ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_root_path}/intention/common/epoll:intention_epoll",
+    "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
+    "${device_status_root_path}/intention/services/device_manager:intention_device_manager",
+    "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_server_stub",
+    "${device_status_root_path}/intention/services/intention_service:intention_service_test",
+  ]
+
+  if (device_status_car_awareness_enable) {
+    deps += [
+      "${device_status_root_path}/intention/car_awareness/client:intention_car_awareness_client",
+      "${device_status_root_path}/intention/car_awareness/server:intention_car_awareness_server" 
+    ]
+  }
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken_shared",
+    "access_token:libprivacy_sdk",
+    "access_token:libtokensetproc_shared",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "os_account:os_account_innerkits",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "qos_manager:concurrent_task_client",
+    "qos_manager:qos",
+  ]
+
+  defines = []
+  if (device_status_car_awareness_enable) {
+    defines += [ "DEVICE_STATUS_CAR_AWARENESS_ENABLE" ]
+  }
+}
+
+group("unittest") {
+  testonly = true
+  deps = [
+    ":CarAwarenessServerTest",
+    ":CarAwarenessServerNewTest",
+    ":CarAwarenessClientTest"
+  ]
+}

@@ -23,11 +23,58 @@
 namespace OHOS {
 namespace Msdp {
 
-// 如需新增类型, 在后面插入
-using ValueObj = std::variant<bool, int32_t, std::string>;
+#define WRITEBOOL_CHECK_RET(parcel, data, ...) \
+    do { \
+        if (!(parcel).WriteBool(data)) { \
+            FI_HILOGE("WriteBool "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
 
+#define WRITEINT32_CHECK_RET(parcel, data, ...) \
+    do { \
+        if (!(parcel).WriteInt32(data)) { \
+            FI_HILOGE("WriteInt32 "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
+
+#define WRITESTRING_CHECK_RET(parcel, data, ...) \
+    do { \
+        if (!(parcel).WriteString(data)) { \
+            FI_HILOGE("WriteString "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
+
+#define READBOOL_CHECK_RET(parcel, data, ...) \
+    do { \
+        if (!(parcel).ReadBool(data)) { \
+            FI_HILOGE("ReadBool "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
+
+#define READINT32_CHECK_RET(parcel, data, ...) \
+    do { \
+        if (!(parcel).ReadInt32(data)) { \
+            FI_HILOGE("ReadInt32 "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
+
+#define READSTRING_CHECK_RET(parcel, data, ...) \
+    do { \
+        if (!(parcel).ReadString(data)) { \
+            FI_HILOGE("ReadString "#data" failed"); \
+            return __VA_ARGS__; \
+        } \
+    } while (0)
+
+// 修改后的CarAwarenessOption - 使用扁平化map
+// key=device名称（如"hvac"），value=function列表（逗号分隔，如"ac_on,ac_off"）
 typedef struct CarAwarenessOption {
-    std::map<std::string, std::map<std::string, ValueObj>> entityInfo;
+    std::map<std::string, std::string> entityInfo;
     CarAwarenessOption() = default;
 } CarAwarenessOption;
 

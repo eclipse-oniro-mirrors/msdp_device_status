@@ -28,6 +28,7 @@
 #include "napi/native_node_api.h"
 
 #include "fi_log.h"
+#include <nlohmann/json.hpp>
 
 namespace OHOS {
 namespace Msdp {
@@ -75,6 +76,7 @@ private:
     void ConvertWeatherInfo(napi_value handler, const std::string &data);
     void ConvertSpatialMotionInfo(napi_value handler, const std::string &data);
     void ConvertRefulingInfo(napi_value handler, const std::string &data);
+    void ConvertCarStatusInfo(napi_value handler, const std::string &data);
 #endif // CAR_AWARENESS_ENABLE
 
 protected:

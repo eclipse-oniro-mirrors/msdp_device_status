@@ -14,6 +14,7 @@
  */
 
 #include "car_awareness_mgr_napi.h"
+#include "car_awareness_napi_utils.h"
 #include "napi_constants.h"
 #include "util_napi.h"
 
@@ -38,6 +39,8 @@ CarAwarenessMgrNapi::CarAwarenessMgrNapi(napi_env env, napi_value thisVar)
         [this](napi_value handler, const std::string &data) { return ConvertWeatherInfo(handler, data); };
     triggerMap_[TYPE_REFUELING] =
         [this](napi_value handler, const std::string &data) { return ConvertRefulingInfo(handler, data); };
+    triggerMap_[TYPE_CAR_STATUS] =
+        [this](napi_value handler, const std::string &data) { return ConvertCarStatusInfo(handler, data); };
 #endif // CAR_AWARENESS_ENABLE
 }
 
@@ -397,6 +400,25 @@ void CarAwarenessMgrNapi::ConvertRefulingInfo(napi_value handler, const std::str
         DeviceStatus::SET_NAMED_PROPERTY, scope);
     napi_value callResult = nullptr;
     CHKRV_SCOPE(env_, napi_call_function(env_, nullptr, handler, 1, &result, &callResult),
+        DeviceStatus::CALL_FUNCTION, scope);
+    napi_close_handle_scope(env_, scope);
+}
+
+void CarAwarenessMgrNapi::ConvertCarStatusInfo(napi_value handler, const std::string &data)
+{
+    if (data.empty() || !nlohmann::json::accept(data)) {
+        FI_HILOGE("invalid car status data");
+        return;
+    }
+ 
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
+ 
+    nlohmann::json jsonData = nlohmann::json::parse(data);
+    napi_value jsValue = ConvertJsonValueToNapiValue(env_, jsonData);
+ 
+    napi_value callResult = nullptr;
+    CHKRV_SCOPE(env_, napi_call_function(env_, nullptr, handler, 1, &jsValue, &callResult),
         DeviceStatus::CALL_FUNCTION, scope);
     napi_close_handle_scope(env_, scope);
 }

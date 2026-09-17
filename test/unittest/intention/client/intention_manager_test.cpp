@@ -18,6 +18,10 @@
 #include "intention_manager.h"
 #include "iremote_on_screen_callback.h"
 #include "on_screen_data.h"
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+#include "car_awareness_type.h"
+#include "icar_awareness_callback.h"
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 using namespace testing::ext;
 #undef LOG_TAG
 #define LOG_TAG "IntentionManagerTest"
@@ -42,7 +46,18 @@ public:
         return nullptr;
     }
 };
- 
+
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+class ICarAwarenessCallbackTest : public ICarAwarenessCallback {
+public:
+    void OnAwarenessEvent(const CarAwarenessEvent &event) override{};
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+
 /**
  * @tc.name: IntentionManagerTest_RegisterAwarenessCallback
  * @tc.desc: Check RegisterAwarenessCallback

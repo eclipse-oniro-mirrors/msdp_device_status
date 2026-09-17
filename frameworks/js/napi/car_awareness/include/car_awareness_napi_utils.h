@@ -22,6 +22,7 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include <nlohmann/json.hpp>
 
 namespace OHOS {
 namespace Msdp {
@@ -54,6 +55,7 @@ void SetStringProperty(napi_env env, napi_value targetObj, const std::string &va
     const char *propName);
 void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
 bool TransJsToStr(napi_env env, napi_value value, std::string &str);
+napi_value ConvertJsonValueToNapiValue(napi_env env, const nlohmann::json &jsonVal);
 } // namespace Msdp
 } // namespace OHOS
 

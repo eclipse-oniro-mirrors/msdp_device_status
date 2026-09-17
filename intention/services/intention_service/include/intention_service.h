@@ -170,7 +170,7 @@ public:
     ErrCode GetSupportCapabilityList(std::vector<std::string> &capabilities) override;
     ErrCode GetCarAwareness(int32_t type, const SequenceableCarAwarenessOption &option,
         SequenceableCarAwarenessEventArray &events) override;
-
+    ErrorCode InitCarAwareness();
     // hidumper
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
 

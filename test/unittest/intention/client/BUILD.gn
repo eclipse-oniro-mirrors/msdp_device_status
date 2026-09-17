@@ -23,7 +23,10 @@ ohos_unittest("IntentionManagerTest") {
     debug = false
     blocklist = "./../../ipc_blocklist.txt"
   }
- 
+  defines = device_status_default_defines
+  if (device_status_car_awareness_enable) {
+    defines += [ "DEVICE_STATUS_CAR_AWARENESS_ENABLE" ]
+  }
   module_out_path = module_output_path
   include_dirs = [ 
     "${device_status_root_path}/intention/frameworks/client/include",
@@ -51,7 +54,11 @@ ohos_unittest("IntentionManagerTest") {
     "${device_status_root_path}/intention/ipc/sequenceable_types:sequenceable_types",
     "${device_status_root_path}/intention/onscreen/client:intention_on_screen_client",
   ]
- 
+
+  if (device_status_car_awareness_enable) {
+    deps += [ "${device_status_root_path}/intention/car_awareness/client:intention_car_awareness_client" ]
+  }
+
   external_deps = [
     "googletest:gtest_main",
     "hilog:libhilog",
