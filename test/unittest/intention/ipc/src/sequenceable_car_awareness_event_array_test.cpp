@@ -75,7 +75,8 @@ HWTEST_F(
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Unmarshalling_NegativeSize, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Unmarshalling_NegativeSize,
+    TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Parcel parcel;
@@ -90,7 +91,8 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Unmarshalling_ZeroSize, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Unmarshalling_ZeroSize,
+    TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Parcel parcel;
@@ -105,7 +107,8 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_MarshallingAndUnmarshalling, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_MarshallingAndUnmarshalling,
+    TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Parcel parcel;

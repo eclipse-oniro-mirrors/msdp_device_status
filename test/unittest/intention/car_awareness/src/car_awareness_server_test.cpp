@@ -708,8 +708,6 @@ HWTEST_F(CarAwarenessServerTest, SubscribeCapability004, TestSize.Level0)
     OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(g_tokenId);
 }
 
-
-
 /**
  * @tc.name: UnSubscribeCapability003
  * @tc.desc: Test func named UnSubscribeCapability with TYPE_REALTIME_WEATHER

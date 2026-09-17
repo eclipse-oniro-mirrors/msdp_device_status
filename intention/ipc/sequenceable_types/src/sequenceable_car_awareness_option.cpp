@@ -28,8 +28,8 @@ bool SequenceableCarAwarenessOption::Marshalling(Parcel &parcel) const
 {
     WRITEINT32_CHECK_RET(parcel, static_cast<int32_t>(option_.entityInfo.size()), false);
     for (auto const &[key, value] : option_.entityInfo) {
-        WRITEINT32_CHECK_RET(parcel, key, false);
-        WRITEINT32_CHECK_RET(parcel, value, false);
+        WRITESTRING_CHECK_RET(parcel, key, false);
+        WRITESTRING_CHECK_RET(parcel, value, false);
     }
     return true;
 }
@@ -54,7 +54,8 @@ bool SequenceableCarAwarenessOption::ReadFromParcel(Parcel &parcel)
         std::string key;
         READSTRING_CHECK_RET(parcel, key, false);
         std::string value;
-        READSTRING_CHECK_RET(parcel, value, false)
+        READSTRING_CHECK_RET(parcel, value, false);
+        option_.entityInfo[key] = value;
     }
     return true;
 }

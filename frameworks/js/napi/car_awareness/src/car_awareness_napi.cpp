@@ -381,7 +381,6 @@ bool CarAwarenessNapi::GetCarStatusAwarenessOption(napi_env env, napi_value awar
             continue;
         }
         
-        FI_HILOGI("GetCarStatusAwarenessOption: key=%{public}s, value=%{public}s", keyStr.c_str(), valueStr.c_str());
         option.entityInfo[keyStr] = valueStr;
     }
     return true;

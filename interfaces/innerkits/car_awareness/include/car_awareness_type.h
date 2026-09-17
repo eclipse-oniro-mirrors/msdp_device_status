@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 #include <variant>
+#include "fi_log.h"
 
 namespace OHOS {
 namespace Msdp {

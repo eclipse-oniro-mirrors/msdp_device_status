@@ -383,6 +383,10 @@ int32_t CarAwarenessServer::GetCarAwareness(const CallingContext &context, int32
         std::vector<std::string> results;
         CarAwareness::CarAwarenessOptions convertedOption;
         convertedOption.metadata_keys = option.entityInfo;
+        if (algoHandle_.pAlgorithm == nullptr) {
+            FI_HILOGE("algoHandle_.pAlgorithm is nullptr");
+            return RET_ERR;
+        }
         int32_t ret = algoHandle_.pAlgorithm->GetCarAwareness("CarStatus", convertedOption, results);
         if (ret != 0) {
             FI_HILOGE("GetCarAwareness failed, ret=%{public}d", ret);
@@ -608,6 +612,7 @@ int32_t CarAwarenessServer::SubscribeCarStatusWithOption(const std::string &feat
     int32_t algoRet = SubscribeAlgo(featureName, option);
     if (algoRet != RET_OK) {
         callbacks_[featureName].pop_back();
+        RemoveDeathRecipient(cb)
         return algoRet;
     }
 
@@ -641,8 +646,6 @@ int32_t CarAwarenessServer::UpdateExistingCarStatusClient(
 int32_t CarAwarenessServer::UnSubscribeCarStatus(const std::string &featureName, pid_t callingPid,
     const CarAwarenessOption &option)
 {
-    // (void)option;
-    // std::lock_guard<std::mutex> lock(callbackMtx_);
     auto it = callbacks_.find(featureName);
     if (it == callbacks_.end()) {
         return RET_OK;

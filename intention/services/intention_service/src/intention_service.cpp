@@ -1037,7 +1037,7 @@ ErrCode IntentionService::GetCarAwareness(int32_t type, const SequenceableCarAwa
 #endif  // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 }
 
-ErrCode IntentionService:InitCarAwareness()
+ErrCode IntentionService::InitCarAwareness()
 {
 #ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
     return PostSyncTask([this]{
