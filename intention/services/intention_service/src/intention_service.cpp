@@ -1040,8 +1040,7 @@ ErrCode IntentionService::GetCarAwareness(int32_t type, const SequenceableCarAwa
 ErrCode IntentionService::InitCarAwareness()
 {
 #ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
-    return PostSyncTask([this]
-    {
+    return PostSyncTask([this] {
         return carAwareness_.LoadAlgoLib();
     });
 #else
