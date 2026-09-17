@@ -50,9 +50,18 @@ void CarAwarenessCallbackProxy::OnAwarenessEvent(const CarAwarenessEvent &event)
         return;
     }
 
-    WRITEINT32(data, event.type);
-    WRITEINT32(data, event.eventData.size());
-    WRITESTRING(data, event.eventData);
+    auto result = WriteInt32(data, event.type);
+    if (!result.success) {
+        return false;
+    }
+    auto result = WriteInt32(data, event.eventData.size());
+    if (!result.success) {
+        return false;
+    }
+    auto result = WriteString(data, event.eventData);
+    if (!result.success) {
+        return false;
+    }
 
     int32_t ret = remote->SendRequest(static_cast<int32_t>(ICarAwarenessCallback::EVENT_CHANGE), data, reply, option);
     if (ret != 0) {

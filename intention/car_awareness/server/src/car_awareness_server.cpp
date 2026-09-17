@@ -612,7 +612,7 @@ int32_t CarAwarenessServer::SubscribeCarStatusWithOption(const std::string &feat
     int32_t algoRet = SubscribeAlgo(featureName, option);
     if (algoRet != RET_OK) {
         callbacks_[featureName].pop_back();
-        RemoveDeathRecipient(cb)
+        RemoveDeathRecipient(cb);
         return algoRet;
     }
 

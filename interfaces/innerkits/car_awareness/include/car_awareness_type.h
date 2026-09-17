@@ -24,53 +24,75 @@
 namespace OHOS {
 namespace Msdp {
 
-#define WRITEBOOL_CHECK_RET(parcel, data, ...) \
-    do { \
-        if (!(parcel).WriteBool(data)) { \
-            FI_HILOGE("WriteBool "#data" failed"); \
-            return __VA_ARGS__; \
-        } \
-    } while (0)
+struct WriteResult {
+    bool success = true;
+};
 
-#define WRITEINT32_CHECK_RET(parcel, data, ...) \
-    do { \
-        if (!(parcel).WriteInt32(data)) { \
-            FI_HILOGE("WriteInt32 "#data" failed"); \
-            return __VA_ARGS__; \
-        } \
-    } while (0)
+template<typename Parcel>
+inline WriteResult WriteBool(Parcel& parcel, bool data)
+{
+    WriteResult result;
+    if (!parcel.WriteBool(data)) {
+        FI_HILOGE("WriteBool failed");
+        result.success = false;
+    }
+    return result;
+}
 
-#define WRITESTRING_CHECK_RET(parcel, data, ...) \
-    do { \
-        if (!(parcel).WriteString(data)) { \
-            FI_HILOGE("WriteString "#data" failed"); \
-            return __VA_ARGS__; \
-        } \
-    } while (0)
+template<typename Parcel>
+inline WriteResult WriteInt32(Parcel& parcel, int32_t data)
+{
+    WriteResult result;
+    if (!parcel.WriteInt32(data)) {
+        FI_HILOGE("WriteInt32 failed");
+        result.success = false;
+    }
+    return result;
+}
 
-#define READBOOL_CHECK_RET(parcel, data, ...) \
-    do { \
-        if (!(parcel).ReadBool(data)) { \
-            FI_HILOGE("ReadBool "#data" failed"); \
-            return __VA_ARGS__; \
-        } \
-    } while (0)
+template<typename Parcel>
+inline WriteResult WriteString(Parcel& parcel, const std::string& data)
+{
+    WriteResult result;
+    if (!parcel.WriteString(data)) {
+        FI_HILOGE("WriteString failed");
+        result.success = false;
+    }
+    return result;
+}
 
-#define READINT32_CHECK_RET(parcel, data, ...) \
-    do { \
-        if (!(parcel).ReadInt32(data)) { \
-            FI_HILOGE("ReadInt32 "#data" failed"); \
-            return __VA_ARGS__; \
-        } \
-    } while (0)
+template<typename Parcel>
+inline WriteResult ReadBool(Parcel& parcel, bool& data)
+{
+    WriteResult result;
+    if (!parcel.ReadBool(data)) {
+        FI_HILOGE("ReadBool failed");
+        result.success = false;
+    }
+    return result;
+}
 
-#define READSTRING_CHECK_RET(parcel, data, ...) \
-    do { \
-        if (!(parcel).ReadString(data)) { \
-            FI_HILOGE("ReadString "#data" failed"); \
-            return __VA_ARGS__; \
-        } \
-    } while (0)
+template<typename Parcel>
+inline WriteResult ReadInt32(Parcel& parcel, int32_t& data)
+{
+    WriteResult result;
+    if (!parcel.ReadInt32(data)) {
+        FI_HILOGE("ReadInt32 failed");
+        result.success = false;
+    }
+    return result;
+}
+
+template<typename Parcel>
+inline WriteResult ReadString(Parcel& parcel, std::string& data)
+{
+    WriteResult result;
+    if (!parcel.ReadString(data)) {
+        FI_HILOGE("ReadString failed");
+        result.success = false;
+    }
+    return result;
+}
 
 // 修改后的CarAwarenessOption - 使用扁平化map
 // key=device名称（如"hvac"），value=function列表（逗号分隔，如"ac_on,ac_off"）
