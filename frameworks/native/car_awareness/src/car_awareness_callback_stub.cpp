@@ -59,16 +59,16 @@ int32_t CarAwarenessCallbackStub::OnEventChangeStub(MessageParcel &data)
 {
     FI_HILOGD("Enter");
     CarAwarenessEvent event;
-    auto result = ReadInt32(data, event.type);
-    if (!result.success) {
+    auto typeResult = ReadInt32(data, event.type);
+    if (!typeResult.success) {
         return DeviceStatus::E_DEVICESTATUS_READ_PARCEL_ERROR;
     }
     if (!IsValidEventType(event.type)) {
         return DeviceStatus::DEVICESTATUS_FAILED;
     }
     int32_t eventDataLen = 0;
-    auto result = ReadInt32(data, eventDataLen);
-    if (!result.success) {
+    auto lenResult = ReadInt32(data, eventDataLen);
+    if (!lenResult.success) {
         return DeviceStatus::E_DEVICESTATUS_READ_PARCEL_ERROR;
     }
     if (eventDataLen > MAX_DATA_LEN || eventDataLen < 0) {
