@@ -21,7 +21,8 @@ config("intention_tunnel_public_config") {
     "${device_status_root_path}/intention/ipc/sequenceable_types/include",
     "${device_status_root_path}/interfaces/innerkits/interaction/include",
     "${device_status_root_path}/interfaces/innerkits/include",
-    "${device_status_root_path}/interfaces/innerkits/car_awareness/include"
+    "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
+    "${device_status_root_path}/utils/common/include"
   ]
 }
 
