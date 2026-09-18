@@ -29,12 +29,12 @@ bool SequenceableCarAwarenessEventArray::Marshalling(Parcel &parcel) const
         return false;
     }
     for (const auto &event : events_) {
-        auto result = WriteInt32(parcel, event.type);
-        if (!result.success) {
+        auto typeResult = WriteInt32(parcel, event.type);
+        if (!typeResult.success) {
             return false;
         }
-        auto result = WriteString(parcel, event.eventData);
-        if (!result.success) {
+        auto dataResult = WriteString(parcel, event.eventData);
+        if (!dataResult.success) {
             return false;
         }
     }
@@ -55,8 +55,8 @@ SequenceableCarAwarenessEventArray* SequenceableCarAwarenessEventArray::Unmarsha
 bool SequenceableCarAwarenessEventArray::ReadFromParcel(Parcel &parcel)
 {
     int32_t size = 0;
-    auto result = ReadInt32(parcel, size);
-    if (!result.success) {
+    auto sizeResult = ReadInt32(parcel, size);
+    if (!sizeResult.success) {
         return false;
     }
     if (size < 0) {
@@ -65,11 +65,14 @@ bool SequenceableCarAwarenessEventArray::ReadFromParcel(Parcel &parcel)
     }
     for (int32_t i = 0; i < size; i++) {
         CarAwarenessEvent event;
-        auto result = ReadInt32(parcel, event.type);
-        if (!result.success) {
+        auto typeResult = ReadInt32(parcel, event.type);
+        if (!typeResult.success) {
             return false;
         }
-        READSTRING(parcel, event.eventData, false);
+        auto dataResult = ReadString(parcel, event.eventData);
+        if (!dataResult.success) {
+            return false;
+        }
         events_.push_back(event);
     }
     return true;

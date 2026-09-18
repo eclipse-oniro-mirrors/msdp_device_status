@@ -21,7 +21,6 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace {
 constexpr int32_t MAX_ENTITY_INFO_ITEM_SIZE = 50;
 
 bool SequenceableCarAwarenessOption::Marshalling(Parcel &parcel) const
@@ -31,12 +30,12 @@ bool SequenceableCarAwarenessOption::Marshalling(Parcel &parcel) const
         return false;
     }
     for (auto const &[key, value] : option_.entityInfo) {
-        auto result = WriteString(parcel, key);
-        if (!result.success) {
+        auto keyResult = WriteString(parcel, key);
+        if (!keyResult.success) {
             return false;
         }
-        auto result = WriteString(parcel, value);
-        if (!result.success) {
+        auto valueResult = WriteString(parcel, value);
+        if (!valueResult.success) {
             return false;
         }
     }
@@ -57,20 +56,20 @@ SequenceableCarAwarenessOption* SequenceableCarAwarenessOption::Unmarshalling(Pa
 bool SequenceableCarAwarenessOption::ReadFromParcel(Parcel &parcel)
 {
     int32_t size;
-    auto result = ReadInt32(parcel, size);
-    if (!result.success) {
+    auto sizeResult = ReadInt32(parcel, size);
+    if (!sizeResult.success) {
         return false;
     }
     CHKCF(size <= MAX_ENTITY_INFO_ITEM_SIZE, "info size over limit");
     for (int32_t i = 0; i < size; i++) {
         std::string key;
-        auto result = ReadString(parcel, key);
-        if (!result.success) {
+        auto keyResult = ReadString(parcel, key);
+        if (!keyResult.success) {
             return false;
         }
         std::string value;
-        auto result = ReadString(parcel, value);
-        if (!result.success) {
+        auto valueResult = ReadString(parcel, value);
+        if (!valueResult.success) {
             return false;
         }
         option_.entityInfo[key] = value;
