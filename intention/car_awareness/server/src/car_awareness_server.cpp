@@ -160,7 +160,6 @@ void CarAwarenessServer::OnResultFromAlgo(const std::string &featureName, const 
 
 int32_t CarAwarenessServer::AddClientToCallbacks(const std::string &featureName, CarAwarenessClientInfo &info)
 {
-    std::unique_lock<std::mutex> lock(callbackMtx_, std::adopt_lock);
     auto &callbacks = callbacks_[featureName];
 
     // 理论上一个pid只能对一个type的特性做一个订阅，如果重复了，不允许订阅
@@ -232,7 +231,7 @@ int32_t CarAwarenessServer::SubscribeCapability(const CallingContext &context, i
 
     CarAwarenessClientInfo clientInfo = {.pid = callingPid, .cb = cb};
     {
-        std::unique_lock<std::mutex> lock(callbackMtx_);
+        std::lock_guard<std::mutex> lock(callbackMtx_);
         auto it = callbacks_.find(featureName);
         if (it != callbacks_.end()) { // 算法已订阅，把client添加到callback列表
             return AddClientToCallbacks(featureName, clientInfo);
@@ -250,6 +249,7 @@ int32_t CarAwarenessServer::SubscribeCapability(const CallingContext &context, i
     // 启动算法并订阅结果
     int32_t algoRet = SubscribeAlgo(featureName);
     if (algoRet != RET_OK) { // 订阅失败的时候删除添加的client回调
+        std::lock_guard<std::mutex> lock(callbackMtx_);
         EraseCallback(featureName, callingPid);
     }
 
@@ -267,6 +267,7 @@ int32_t CarAwarenessServer::UnSubscribeCapability(const CallingContext &context,
         return permissionCheckResult;
     }
 
+    std::lock_guard<std::mutex> lock(callbackMtx_);
     pid_t callingPid = context.pid;
     FI_HILOGI("callingpid:%{public}d type:%{public}d", callingPid, type);
 
@@ -369,7 +370,6 @@ int32_t CarAwarenessServer::GetCarAwareness(const CallingContext &context, int32
         return COMMON_NOT_SYSTEM_APP;
     }
 
-    std::lock_guard<std::mutex> lockGrd(algoMtx_);
     if (LoadAlgoLib() != RET_OK) {
         FI_HILOGE("LoadAlgoLib failed");
         return RET_ERR;
@@ -380,13 +380,13 @@ int32_t CarAwarenessServer::GetCarAwareness(const CallingContext &context, int32
     }
 
     if (type == TYPE_CAR_STATUS) {
+        std::vector<std::string> results;
+        CarAwareness::CarAwarenessOptions convertedOption;
+        convertedOption.metadata_keys = option.entityInfo;
         if (algoHandle_.pAlgorithm == nullptr) {
             FI_HILOGE("algoHandle_.pAlgorithm is nullptr");
             return RET_ERR;
         }
-        std::vector<std::string> results;
-        CarAwareness::CarAwarenessOptions convertedOption;
-        convertedOption.metadata_keys = option.entityInfo;
         int32_t ret = algoHandle_.pAlgorithm->GetCarAwareness("CarStatus", convertedOption, results);
         if (ret != 0) {
             FI_HILOGE("GetCarAwareness failed, ret=%{public}d", ret);
@@ -456,7 +456,6 @@ void CarAwarenessServer::UnSubscribeAlgo(const std::string &featureName)
 
 bool CarAwarenessServer::EraseCallback(const std::string &featureName, pid_t clientPid)
 {
-    std::lock_guard<std::mutex> lock(callbackMtx_);
     FI_HILOGI("featureName:%{public}s, clientPid:%{public}d", featureName.c_str(), clientPid);
     auto it = callbacks_.find(featureName);
     if (it == callbacks_.end()) {
@@ -647,7 +646,8 @@ int32_t CarAwarenessServer::UpdateExistingCarStatusClient(
 int32_t CarAwarenessServer::UnSubscribeCarStatus(const std::string &featureName, pid_t callingPid,
     const CarAwarenessOption &option)
 {
-    std::lock_guard<std::mutex> lock(callbackMtx_);
+    // Note: Caller must hold callbackMtx_ before calling this function
+    // 注意：调用方须持有callbackMtx_锁
     auto it = callbacks_.find(featureName);
     if (it == callbacks_.end()) {
         return RET_OK;
