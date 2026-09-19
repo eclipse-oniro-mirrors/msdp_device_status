@@ -249,7 +249,6 @@ int32_t CarAwarenessServer::SubscribeCapability(const CallingContext &context, i
     // 启动算法并订阅结果
     int32_t algoRet = SubscribeAlgo(featureName);
     if (algoRet != RET_OK) { // 订阅失败的时候删除添加的client回调
-        std::lock_guard<std::mutex> lock(callbackMtx_);
         EraseCallback(featureName, callingPid);
     }
 
@@ -267,7 +266,6 @@ int32_t CarAwarenessServer::UnSubscribeCapability(const CallingContext &context,
         return permissionCheckResult;
     }
 
-    std::lock_guard<std::mutex> lock(callbackMtx_);
     pid_t callingPid = context.pid;
     FI_HILOGI("callingpid:%{public}d type:%{public}d", callingPid, type);
 
@@ -456,6 +454,7 @@ void CarAwarenessServer::UnSubscribeAlgo(const std::string &featureName)
 
 bool CarAwarenessServer::EraseCallback(const std::string &featureName, pid_t clientPid)
 {
+    std::lock_guard<std::mutex> lock(callbackMtx_);
     FI_HILOGI("featureName:%{public}s, clientPid:%{public}d", featureName.c_str(), clientPid);
     auto it = callbacks_.find(featureName);
     if (it == callbacks_.end()) {
@@ -630,7 +629,8 @@ int32_t CarAwarenessServer::UpdateExistingCarStatusClient(
     CarAwarenessClientInfo &clientInfo)
 {
     if (clientInfo.pid != callingPid) {
-        return RET_OK + 1;
+        FI_HILOGE("clientInfo pid is not match for calling pid:%{public}d", callingPid);
+        return RET_ERR;
     }
     clientInfo.cb = cb;
     clientInfo.option = option;
@@ -646,8 +646,7 @@ int32_t CarAwarenessServer::UpdateExistingCarStatusClient(
 int32_t CarAwarenessServer::UnSubscribeCarStatus(const std::string &featureName, pid_t callingPid,
     const CarAwarenessOption &option)
 {
-    // Note: Caller must hold callbackMtx_ before calling this function
-    // 注意：调用方须持有callbackMtx_锁
+    std::lock_guard<std::mutex> lock(callbackMtx_);
     auto it = callbacks_.find(featureName);
     if (it == callbacks_.end()) {
         return RET_OK;
