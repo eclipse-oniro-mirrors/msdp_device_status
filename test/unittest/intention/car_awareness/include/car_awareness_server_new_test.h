@@ -98,6 +98,58 @@ private:
     CarAwareness::CarAwarenessOptions lastOptions_;
 };
 
+class MockCarAwarenessMgr : public CarAwareness::ICarAwarenessMgr {
+public:
+    MockCarAwarenessMgr() : callCount_(0), lastCapability_("") {}
+
+    int32_t Initialize() override { return RET_OK; }
+    void Deinitialize() override {}
+    void GetAllCapability(std::vector<std::string> &capabilities) override {}
+    bool IsCapabilitySupport(const std::string &capability) override { return true; }
+
+    int32_t OnCarAwareness(const std::string &capability, CarAwareness::CarAwarenessCallback callback,
+                           const CarAwareness::CarAwarenessOptions &options = CarAwareness::CarAwarenessOptions())
+                           override
+    {
+        callCount_++;
+        lastCapability_ = capability;
+        lastCallback_ = callback;
+        lastOptions_ = options;
+        return RET_OK;
+    }
+
+    void OffCarAwareness(const std::string &capability, CarAwareness::CarAwarenessCallback callback = nullptr,
+                         const CarAwareness::CarAwarenessOptions &options = CarAwareness::CarAwarenessOptions())
+                         override
+    {
+        callCount_++;
+        lastCapability_ = capability;
+        lastOptions_ = options;
+    }
+
+    int32_t UpdateSpatialActionStatus(bool isEnable) override { return RET_OK; }
+    int32_t UpdateSpatialActionZone(int32_t zoneId) override { return RET_OK; }
+    int32_t GetCarAwareness(const std::string &capability, const CarAwareness::CarAwarenessOptions &options,
+                            std::vector<std::string> &results) override {
+        callCount_++;
+        lastCapability_ = capability;
+        lastOptions_ = options;
+        results.push_back(R"([{"device":"TestDevice","function":[{"function_name":"TestFunc"}]}])");
+        return 0;
+    }
+
+    int32_t GetCallCount() const { return callCount_; }
+    std::string GetLastCapability() const { return lastCapability_; }
+    CarAwareness::CarAwarenessOptions GetLastOptions() const { return lastOptions_; }
+    CarAwareness::CarAwarenessCallback GetLastCallback() const { return lastCallback_; }
+
+private:
+    int32_t callCount_;
+    std::string lastCapability_;
+    CarAwareness::CarAwarenessCallback lastCallback_;
+    CarAwareness::CarAwarenessOptions lastOptions_;
+};
+
 class CarAwarenessServerNewTest : public testing::Test {
 public:
     static void SetUpTestCase();

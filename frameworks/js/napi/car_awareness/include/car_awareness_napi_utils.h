@@ -55,7 +55,7 @@ void SetStringProperty(napi_env env, napi_value targetObj, const std::string &va
     const char *propName);
 void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
 bool TransJsToStr(napi_env env, napi_value value, std::string &str);
-napi_value ConvertJsonValueToNapiValue(napi_env env, const nlohmann::json &jsonVal);
+napi_value ConvertJsonValueToNapiValue(napi_env env, const nlohmann::json &jsonVal, int depth = 0);
 } // namespace Msdp
 } // namespace OHOS
 

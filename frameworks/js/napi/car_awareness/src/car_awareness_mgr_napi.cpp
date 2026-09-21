@@ -306,6 +306,10 @@ void CarAwarenessMgrNapi::TriggerEvent(int32_t type, const std::string &data)
 
 void CarAwarenessMgrNapi::ConvertWeatherInfo(napi_value handler, const std::string &data)
 {
+    if (data.empty() || !nlohmann::json::accept(data)) {
+        FI_HILOGW("WeatherInfo is invalid");
+        return;
+    }
     nlohmann::json weatherInfo = nlohmann::json::parse(data);
     if (!weatherInfo.contains("timestamp") || !weatherInfo.contains("weather")) {
         FI_HILOGW("WeatherInfo is invalid");
@@ -316,7 +320,10 @@ void CarAwarenessMgrNapi::ConvertWeatherInfo(napi_value handler, const std::stri
         return;
     }
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env_, &scope);
+    if (napi_open_handle_scope(env_, &scope) != napi_ok) {
+        FI_HILOGE("napi_open_handle_scope failed");
+        return;
+    }
     napi_value result = nullptr;
     CHKRV_SCOPE(env_, napi_create_object(env_, &result), DeviceStatus::CREATE_OBJECT, scope);
     napi_value value = nullptr;
@@ -336,6 +343,10 @@ void CarAwarenessMgrNapi::ConvertWeatherInfo(napi_value handler, const std::stri
 
 void CarAwarenessMgrNapi::ConvertSpatialMotionInfo(napi_value handler, const std::string &data)
 {
+    if (data.empty() || !nlohmann::json::accept(data)) {
+        FI_HILOGW("SpatialMotionInfo is invalid");
+        return;
+    }
     nlohmann::json motionInfo = nlohmann::json::parse(data);
     if (!motionInfo.contains("timestamp") || !motionInfo.contains("pointX")
         || !motionInfo.contains("pointY") || !motionInfo.contains("event")) {
@@ -348,7 +359,10 @@ void CarAwarenessMgrNapi::ConvertSpatialMotionInfo(napi_value handler, const std
         return;
     }
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env_, &scope);
+    if (napi_open_handle_scope(env_, &scope) != napi_ok) {
+        FI_HILOGE("napi_open_handle_scope failed");
+        return;
+    }
     napi_value result = nullptr;
     CHKRV_SCOPE(env_, napi_create_object(env_, &result), DeviceStatus::CREATE_OBJECT, scope);
     napi_value value = nullptr;
@@ -376,6 +390,10 @@ void CarAwarenessMgrNapi::ConvertSpatialMotionInfo(napi_value handler, const std
 
 void CarAwarenessMgrNapi::ConvertRefulingInfo(napi_value handler, const std::string &data)
 {
+    if (data.empty() || !nlohmann::json::accept(data)) {
+        FI_HILOGW("RefulingInfo is invalid");
+        return;
+    }
     nlohmann::json refulingInfo = nlohmann::json::parse(data);
     if (!refulingInfo.contains("timestamp") || !refulingInfo.contains("status")) {
         FI_HILOGW("RefulingInfo is invalid");
@@ -386,7 +404,10 @@ void CarAwarenessMgrNapi::ConvertRefulingInfo(napi_value handler, const std::str
         return;
     }
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env_, &scope);
+    if (napi_open_handle_scope(env_, &scope) != napi_ok) {
+        FI_HILOGE("napi_open_handle_scope failed");
+        return;
+    }
     napi_value result = nullptr;
     CHKRV_SCOPE(env_, napi_create_object(env_, &result), DeviceStatus::CREATE_OBJECT, scope);
     napi_value value = nullptr;
@@ -412,11 +433,19 @@ void CarAwarenessMgrNapi::ConvertCarStatusInfo(napi_value handler, const std::st
     }
  
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env_, &scope);
- 
+    if (napi_open_handle_scope(env_, &scope) != napi_ok) {
+        FI_HILOGE("napi_open_handle_scope failed");
+        return;
+    }
+  
     nlohmann::json jsonData = nlohmann::json::parse(data);
     napi_value jsValue = ConvertJsonValueToNapiValue(env_, jsonData);
- 
+    if (jsValue == nullptr) {
+        FI_HILOGE("ConvertJsonValueToNapiValue failed");
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
+
     napi_value callResult = nullptr;
     CHKRV_SCOPE(env_, napi_call_function(env_, nullptr, handler, 1, &jsValue, &callResult),
         DeviceStatus::CALL_FUNCTION, scope);

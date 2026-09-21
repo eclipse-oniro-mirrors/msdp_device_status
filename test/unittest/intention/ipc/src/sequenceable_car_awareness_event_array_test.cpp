@@ -19,6 +19,7 @@
 #include "parcel.h"
 #include "fi_log.h"
 #include "car_awareness_type.h"
+#include "mock/mock_parcel_control.h"
 
 #undef LOG_TAG
 #define LOG_TAG "SequenceableCarAwarenessEventArrayTest"
@@ -29,7 +30,7 @@ namespace DeviceStatus {
 class SequenceableCarAwarenessEventArrayTest : public testing::Test {
 public:
     void SetUp(){};
-    void TearDown(){};
+    void TearDown(){ ResetMockFlags(); };
     static void SetUpTestCase(){};
     static void TearDownTestCase(){};
 };
@@ -126,6 +127,147 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
     if (unmarshallResult != nullptr) {
         EXPECT_EQ(unmarshallResult->events_.size(), events.size());
     }
+}
+
+/**
+ * @tc.name: SequenceableCarAwarenessEventArrayTest_Marshalling_LargeData
+ * @tc.desc: Check Marshalling with large amount of data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Marshalling_LargeData, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    Parcel parcel;
+    std::vector<CarAwarenessEvent> events;
+    std::string largeString(1024 * 10, 'x');
+    for (int32_t i = 0; i < 100; ++i) {
+        events.push_back({i, largeString});
+    }
+    auto sequenceableCarAwarenessEventArray = std::make_shared<SequenceableCarAwarenessEventArray>(events);
+    EXPECT_NE(sequenceableCarAwarenessEventArray, nullptr);
+    bool result = sequenceableCarAwarenessEventArray->Marshalling(parcel);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SequenceableCarAwarenessEventArrayTest_Marshalling_WriteInt32Fail
+ * @tc.desc: Test Marshalling when WriteInt32 fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Marshalling_WriteInt32Fail, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ResetMockFlags();
+    SetWriteInt32Fail(true);
+    Parcel parcel;
+    std::vector<CarAwarenessEvent> events = {{1, "eventData1"}};
+    auto sequenceableCarAwarenessEventArray = std::make_shared<SequenceableCarAwarenessEventArray>(events);
+    EXPECT_NE(sequenceableCarAwarenessEventArray, nullptr);
+    bool result = sequenceableCarAwarenessEventArray->Marshalling(parcel);
+    EXPECT_FALSE(result);
+    ResetMockFlags();
+}
+
+/**
+ * @tc.name: SequenceableCarAwarenessEventArrayTest_Marshalling_WriteInt32TypeFail
+ * @tc.desc: Test Marshalling when WriteInt32 for type fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Marshalling_WriteInt32TypeFail, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ResetMockFlags();
+    Parcel parcel;
+    std::vector<CarAwarenessEvent> events = {{1, "eventData1"}};
+    auto sequenceableCarAwarenessEventArray = std::make_shared<SequenceableCarAwarenessEventArray>(events);
+    EXPECT_NE(sequenceableCarAwarenessEventArray, nullptr);
+    SetWriteInt32Fail(true);
+    bool result = sequenceableCarAwarenessEventArray->Marshalling(parcel);
+    EXPECT_FALSE(result);
+    ResetMockFlags();
+}
+
+/**
+ * @tc.name: SequenceableCarAwarenessEventArrayTest_Marshalling_WriteStringDataFail
+ * @tc.desc: Test Marshalling when WriteString for data fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Marshalling_WriteStringDataFail, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ResetMockFlags();
+    Parcel parcel;
+    std::vector<CarAwarenessEvent> events = {{1, "eventData1"}};
+    auto sequenceableCarAwarenessEventArray = std::make_shared<SequenceableCarAwarenessEventArray>(events);
+    EXPECT_NE(sequenceableCarAwarenessEventArray, nullptr);
+    SetWriteStringFail(true);
+    bool result = sequenceableCarAwarenessEventArray->Marshalling(parcel);
+    EXPECT_FALSE(result);
+    ResetMockFlags();
+}
+
+/**
+ * @tc.name: SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadInt32SizeFail
+ * @tc.desc: Test ReadFromParcel when ReadInt32 for size fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadInt32SizeFail, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ResetMockFlags();
+    SetReadInt32Fail(true);
+    Parcel parcel;
+    auto sequenceableCarAwarenessEventArray = std::make_shared<SequenceableCarAwarenessEventArray>();
+    EXPECT_NE(sequenceableCarAwarenessEventArray, nullptr);
+    bool result = sequenceableCarAwarenessEventArray->ReadFromParcel(parcel);
+    EXPECT_FALSE(result);
+    ResetMockFlags();
+}
+
+/**
+ * @tc.name: SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadInt32TypeFail
+ * @tc.desc: Test ReadFromParcel when ReadInt32 for type fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadInt32TypeFail, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ResetMockFlags();
+    Parcel parcel;
+    parcel.WriteInt32(1);
+    SetReadInt32Fail(true);
+    auto sequenceableCarAwarenessEventArray = std::make_shared<SequenceableCarAwarenessEventArray>();
+    EXPECT_NE(sequenceableCarAwarenessEventArray, nullptr);
+    bool result = sequenceableCarAwarenessEventArray->ReadFromParcel(parcel);
+    EXPECT_FALSE(result);
+    ResetMockFlags();
+}
+
+/**
+ * @tc.name: SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadStringDataFail
+ * @tc.desc: Test ReadFromParcel when ReadString for data fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadStringDataFail, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    ResetMockFlags();
+    Parcel parcel;
+    parcel.WriteInt32(1);
+    parcel.WriteInt32(1);
+    SetReadStringFail(true);
+    auto sequenceableCarAwarenessEventArray = std::make_shared<SequenceableCarAwarenessEventArray>();
+    EXPECT_NE(sequenceableCarAwarenessEventArray, nullptr);
+    bool result = sequenceableCarAwarenessEventArray->ReadFromParcel(parcel);
+    EXPECT_FALSE(result);
+    ResetMockFlags();
 }
 }  // namespace DeviceStatus
 }  // namespace Msdp

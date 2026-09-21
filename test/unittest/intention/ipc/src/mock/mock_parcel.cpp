@@ -22,6 +22,33 @@ static uint64_t expectUint64Values_ = 0;
 static std::string g_expectStrValues = "";
 static bool g_expectBool = false;
 static std::vector<std::string> g_expectVector;
+thread_local bool g_mockWriteInt32Fail = false;
+thread_local bool g_mockWriteStringFail = false;
+thread_local bool g_mockReadInt32Fail = false;
+thread_local bool g_mockReadStringFail = false;
+void SetWriteInt32Fail(bool fail)
+{
+    g_mockWriteInt32Fail = fail;
+}
+void SetWriteStringFail(bool fail)
+{
+    g_mockWriteStringFail = fail;
+}
+void SetReadInt32Fail(bool fail)
+{
+    g_mockReadInt32Fail = fail;
+}
+void SetReadStringFail(bool fail)
+{
+    g_mockReadStringFail = fail;
+}
+void ResetMockFlags()
+{
+    g_mockWriteInt32Fail = false;
+    g_mockWriteStringFail = false;
+    g_mockReadInt32Fail = false;
+    g_mockReadStringFail = false;
+}
 bool Parcel::WriteStringVector(const std::vector<std::string> &expectVector)
 {
     g_expectVector = expectVector;
@@ -36,12 +63,18 @@ bool Parcel::ReadStringVector(std::vector<std::string> *val)
  
 bool Parcel::WriteInt32(int32_t values)
 {
+    if (g_mockWriteInt32Fail) {
+        return false;
+    }
     g_expectInt32Values = values;
     return true;
 }
  
 bool Parcel::ReadInt32(int32_t &values)
 {
+    if (g_mockReadInt32Fail) {
+        return false;
+    }
     values = g_expectInt32Values;
     return true;
 }
@@ -84,12 +117,18 @@ bool Parcel::WriteUint64(uint64_t values)
  
 bool Parcel::WriteString(const std::string &value)
 {
+    if (g_mockWriteStringFail) {
+        return false;
+    }
     g_expectStrValues = value;
     return true;
 }
  
 bool Parcel::ReadString(std::string &value)
 {
+    if (g_mockReadStringFail) {
+        return false;
+    }
     value = g_expectStrValues;
     return true;
 }

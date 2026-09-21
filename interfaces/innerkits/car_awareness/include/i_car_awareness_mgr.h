@@ -77,7 +77,7 @@ public:
      * @param callback The callback function to unregister (nullptr to unregister all).
      */
     virtual void OffCarAwareness(const std::string &capability, CarAwarenessCallback callback = nullptr,
-        const CarAwarenessOptions &options = CarAwarenessOptions()) = 0;
+                                const CarAwarenessOptions &options = CarAwarenessOptions()) = 0;
 
     /**
      * @brief Updates the spatial action enable/disable status.
@@ -92,7 +92,7 @@ public:
      * @return Returns 0 on success, error code on failure.
      */
     virtual int32_t UpdateSpatialActionZone(int32_t zoneId) = 0;
-
+    
     /**
      * @brief Gets car awareness data synchronously.
      * @param capability The capability type to query.

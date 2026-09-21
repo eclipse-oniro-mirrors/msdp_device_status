@@ -18,80 +18,44 @@
 
 #include <map>
 #include <string>
-#include <variant>
-#include "fi_log.h"
 
 namespace OHOS {
 namespace Msdp {
 
-struct WriteResult {
-    bool success = true;
-};
-
 template<typename Parcel>
-inline WriteResult WriteBool(Parcel& parcel, bool data)
+inline bool WriteBool(Parcel& parcel, bool data)
 {
-    WriteResult result;
-    if (!parcel.WriteBool(data)) {
-        FI_HILOGE("WriteBool failed");
-        result.success = false;
-    }
-    return result;
+    return parcel.WriteBool(data);
 }
 
 template<typename Parcel>
-inline WriteResult WriteInt32(Parcel& parcel, int32_t data)
+inline bool WriteInt32(Parcel& parcel, int32_t data)
 {
-    WriteResult result;
-    if (!parcel.WriteInt32(data)) {
-        FI_HILOGE("WriteInt32 failed");
-        result.success = false;
-    }
-    return result;
+    return parcel.WriteInt32(data);
 }
 
 template<typename Parcel>
-inline WriteResult WriteString(Parcel& parcel, const std::string& data)
+inline bool WriteString(Parcel& parcel, const std::string& data)
 {
-    WriteResult result;
-    if (!parcel.WriteString(data)) {
-        FI_HILOGE("WriteString failed");
-        result.success = false;
-    }
-    return result;
+    return parcel.WriteString(data);
 }
 
 template<typename Parcel>
-inline WriteResult ReadBool(Parcel& parcel, bool& data)
+inline bool ReadBool(Parcel& parcel, bool& data)
 {
-    WriteResult result;
-    if (!parcel.ReadBool(data)) {
-        FI_HILOGE("ReadBool failed");
-        result.success = false;
-    }
-    return result;
+    return parcel.ReadBool(data);
 }
 
 template<typename Parcel>
-inline WriteResult ReadInt32(Parcel& parcel, int32_t& data)
+inline bool ReadInt32(Parcel& parcel, int32_t& data)
 {
-    WriteResult result;
-    if (!parcel.ReadInt32(data)) {
-        FI_HILOGE("ReadInt32 failed");
-        result.success = false;
-    }
-    return result;
+    return parcel.ReadInt32(data);
 }
 
 template<typename Parcel>
-inline WriteResult ReadString(Parcel& parcel, std::string& data)
+inline bool ReadString(Parcel& parcel, std::string& data)
 {
-    WriteResult result;
-    if (!parcel.ReadString(data)) {
-        FI_HILOGE("ReadString failed");
-        result.success = false;
-    }
-    return result;
+    return parcel.ReadString(data);
 }
 
 // 修改后的CarAwarenessOption - 使用扁平化map

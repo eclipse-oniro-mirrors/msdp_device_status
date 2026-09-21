@@ -219,5 +219,123 @@ napi_value ConvertJsonValueToNapiValue(napi_env env, const nlohmann::json &jsonV
     }
     return result;
 }
+
+static napi_value CreateJsonString(napi_env env, const std::string &str)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_string_utf8(env, str.c_str(), NAPI_AUTO_LENGTH, &result);
+    if (CheckNapiCall(env, status, "napi_create_string_utf8")) {
+        return nullptr;
+    }
+    return result;
+}
+
+static napi_value CreateJsonInt64(napi_env env, int64_t val)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_int64(env, val, &result);
+    if (CheckNapiCall(env, status, "napi_create_int64")) {
+        return nullptr;
+    }
+    return result;
+}
+
+static napi_value CreateJsonDouble(napi_env env, double val)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_double(env, val, &result);
+    if (CheckNapiCall(env, status, "napi_create_double")) {
+        return nullptr;
+    }
+    return result;
+}
+
+static napi_value CreateJsonBool(napi_env env, bool val)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_get_boolean(env, val, &result);
+    if (CheckNapiCall(env, status, "napi_get_boolean")) {
+        return nullptr;
+    }
+    return result;
+}
+
+static napi_value ConvertJsonObject(napi_env env, const nlohmann::json &jsonVal, int depth)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_object(env, &result);
+    if (CheckNapiCall(env, status, "napi_create_object")) {
+        return nullptr;
+    }
+
+    for (auto &[key, val] : jsonVal.items()) {
+        napi_value propValue = ConvertJsonValueToNapiValue(env, val, depth + 1);
+        if (propValue == nullptr) {
+            return nullptr;
+        }
+        napi_value propName = nullptr;
+        status = napi_create_string_utf8(env, key.c_str(), NAPI_AUTO_LENGTH, &propName);
+        if (CheckNapiCall(env, status, "napi_create_string_utf8")) {
+            return nullptr;
+        }
+        status = napi_set_property(env, result, propName, propValue);
+        if (CheckNapiCall(env, status, "napi_set_property")) {
+            return nullptr;
+        }
+    }
+    return result;
+}
+
+static napi_value ConvertJsonArray(napi_env env, const nlohmann::json &jsonVal, int depth)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_array(env, &result);
+    if (CheckNapiCall(env, status, "napi_create_array")) {
+        return nullptr;
+    }
+
+    uint32_t index = 0;
+    for (const auto &item : jsonVal) {
+        napi_value itemVal = ConvertJsonValueToNapiValue(env, item, depth + 1);
+        if (itemVal == nullptr) {
+            return nullptr;
+        }
+        status = napi_set_element(env, result, index, itemVal);
+        if (CheckNapiCall(env, status, "napi_set_element")) {
+            return nullptr;
+        }
+        index++;
+    }
+    return result;
+}
+
+constexpr int MAX_JSON_DEPTH = 64;
+
+napi_value ConvertJsonValueToNapiValue(napi_env env, const nlohmann::json &jsonVal, int depth)
+{
+    if (depth > MAX_JSON_DEPTH) {
+        FI_HILOGE("JSON depth exceeds limit");
+        return nullptr;
+    }
+    if (jsonVal.is_object()) {
+        return ConvertJsonObject(env, jsonVal, depth);
+    } else if (jsonVal.is_array()) {
+        return ConvertJsonArray(env, jsonVal, depth);
+    } else if (jsonVal.is_string()) {
+        return CreateJsonString(env, jsonVal.get<std::string>());
+    } else if (jsonVal.is_number_integer()) {
+        return CreateJsonInt64(env, jsonVal.get<int64_t>());
+    } else if (jsonVal.is_number_float()) {
+        return CreateJsonDouble(env, jsonVal.get<double>());
+    } else if (jsonVal.is_boolean()) {
+        return CreateJsonBool(env, jsonVal.get<bool>());
+    }
+    napi_value result = nullptr;
+    napi_status status = napi_get_undefined(env, &result);
+    if (CheckNapiCall(env, status, "napi_get_undefined")) {
+        return nullptr;
+    }
+    return result;
+}
 } // namespace Msdp
 } // namespace OHOS
