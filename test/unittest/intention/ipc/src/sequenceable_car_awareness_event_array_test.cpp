@@ -135,7 +135,8 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Marshalling_LargeData, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest,
+    SequenceableCarAwarenessEventArrayTest_Marshalling_LargeData, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     Parcel parcel;
@@ -156,7 +157,8 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Marshalling_WriteInt32Fail, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest,
+    SequenceableCarAwarenessEventArrayTest_Marshalling_WriteInt32Fail, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     ResetMockFlags();
@@ -176,7 +178,8 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Marshalling_WriteInt32TypeFail, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest,
+    SequenceableCarAwarenessEventArrayTest_Marshalling_WriteInt32TypeFail, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     ResetMockFlags();
@@ -196,7 +199,8 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_Marshalling_WriteStringDataFail, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest,
+    SequenceableCarAwarenessEventArrayTest_Marshalling_WriteStringDataFail, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     ResetMockFlags();
@@ -216,7 +220,8 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadInt32SizeFail, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest,
+    SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadInt32SizeFail, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     ResetMockFlags();
@@ -235,7 +240,8 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadInt32TypeFail, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest,
+    SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadInt32TypeFail, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     ResetMockFlags();
@@ -255,7 +261,8 @@ HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventAr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SequenceableCarAwarenessEventArrayTest, SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadStringDataFail, TestSize.Level1)
+HWTEST_F(SequenceableCarAwarenessEventArrayTest,
+    SequenceableCarAwarenessEventArrayTest_ReadFromParcel_ReadStringDataFail, TestSize.Level1)
 {
     CALL_TEST_DEBUG;
     ResetMockFlags();

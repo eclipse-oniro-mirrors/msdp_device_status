@@ -130,7 +130,8 @@ public:
     int32_t UpdateSpatialActionStatus(bool isEnable) override { return RET_OK; }
     int32_t UpdateSpatialActionZone(int32_t zoneId) override { return RET_OK; }
     int32_t GetCarAwareness(const std::string &capability, const CarAwareness::CarAwarenessOptions &options,
-                            std::vector<std::string> &results) override {
+                            std::vector<std::string> &results) override
+    {
         callCount_++;
         lastCapability_ = capability;
         lastOptions_ = options;
