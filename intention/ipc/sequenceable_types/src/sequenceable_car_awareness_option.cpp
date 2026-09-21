@@ -25,17 +25,14 @@ constexpr int32_t MAX_ENTITY_INFO_ITEM_SIZE = 50;
 
 bool SequenceableCarAwarenessOption::Marshalling(Parcel &parcel) const
 {
-    auto result = WriteInt32(parcel, static_cast<int32_t>(option_.entityInfo.size()));
-    if (!result.success) {
+    if (!WriteInt32(parcel, static_cast<int32_t>(option_.entityInfo.size()))) {
         return false;
     }
     for (auto const &[key, value] : option_.entityInfo) {
-        auto keyResult = WriteString(parcel, key);
-        if (!keyResult.success) {
+        if (!WriteString(parcel, key)) {
             return false;
         }
-        auto valueResult = WriteString(parcel, value);
-        if (!valueResult.success) {
+        if (!WriteString(parcel, value)) {
             return false;
         }
     }
@@ -56,20 +53,17 @@ SequenceableCarAwarenessOption* SequenceableCarAwarenessOption::Unmarshalling(Pa
 bool SequenceableCarAwarenessOption::ReadFromParcel(Parcel &parcel)
 {
     int32_t size;
-    auto sizeResult = ReadInt32(parcel, size);
-    if (!sizeResult.success) {
+    if (!ReadInt32(parcel, size)) {
         return false;
     }
-    CHKCF(size <= MAX_ENTITY_INFO_ITEM_SIZE, "info size over limit");
+    CHKCF(size >= 0 && size <= MAX_ENTITY_INFO_ITEM_SIZE, "info size over limit");
     for (int32_t i = 0; i < size; i++) {
         std::string key;
-        auto keyResult = ReadString(parcel, key);
-        if (!keyResult.success) {
+        if (!ReadString(parcel, key)) {
             return false;
         }
         std::string value;
-        auto valueResult = ReadString(parcel, value);
-        if (!valueResult.success) {
+        if (!ReadString(parcel, value)) {
             return false;
         }
         option_.entityInfo[key] = value;
