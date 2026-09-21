@@ -32,6 +32,8 @@
 #include "stationary_server.h"
 #ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
 #include "car_awareness_server.h"
+#else
+constexpr int32_t CAR_AWARENESS_NOT_SUPPORTED = 801;
 #endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 namespace OHOS {
 namespace Msdp {
@@ -170,7 +172,7 @@ public:
     ErrCode GetSupportCapabilityList(std::vector<std::string> &capabilities) override;
     ErrCode GetCarAwareness(int32_t type, const SequenceableCarAwarenessOption &option,
         SequenceableCarAwarenessEventArray &events) override;
-
+    ErrCode InitCarAwareness();
     // hidumper
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
 

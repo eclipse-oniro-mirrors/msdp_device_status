@@ -31,4 +31,8 @@ group("intention_test") {
     "stationary:unittest",
     "onscreen:unittest"
   ]
+
+  if (device_status_car_awareness_enable) {
+    deps += [ "car_awareness:unittest" ]
+  }
 }

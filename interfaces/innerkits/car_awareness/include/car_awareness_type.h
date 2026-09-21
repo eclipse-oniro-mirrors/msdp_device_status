@@ -18,16 +18,50 @@
 
 #include <map>
 #include <string>
-#include <variant>
 
 namespace OHOS {
 namespace Msdp {
 
-// 如需新增类型, 在后面插入
-using ValueObj = std::variant<bool, int32_t, std::string>;
+template<typename Parcel>
+inline bool WriteBool(Parcel& parcel, bool data)
+{
+    return parcel.WriteBool(data);
+}
 
+template<typename Parcel>
+inline bool WriteInt32(Parcel& parcel, int32_t data)
+{
+    return parcel.WriteInt32(data);
+}
+
+template<typename Parcel>
+inline bool WriteString(Parcel& parcel, const std::string& data)
+{
+    return parcel.WriteString(data);
+}
+
+template<typename Parcel>
+inline bool ReadBool(Parcel& parcel, bool& data)
+{
+    return parcel.ReadBool(data);
+}
+
+template<typename Parcel>
+inline bool ReadInt32(Parcel& parcel, int32_t& data)
+{
+    return parcel.ReadInt32(data);
+}
+
+template<typename Parcel>
+inline bool ReadString(Parcel& parcel, std::string& data)
+{
+    return parcel.ReadString(data);
+}
+
+// 修改后的CarAwarenessOption - 使用扁平化map
+// key=device名称（如"hvac"），value=function列表（逗号分隔，如"ac_on,ac_off"）
 typedef struct CarAwarenessOption {
-    std::map<std::string, std::map<std::string, ValueObj>> entityInfo;
+    std::map<std::string, std::string> entityInfo;
     CarAwarenessOption() = default;
 } CarAwarenessOption;
 

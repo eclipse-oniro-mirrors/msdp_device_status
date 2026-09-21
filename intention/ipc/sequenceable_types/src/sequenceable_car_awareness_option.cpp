@@ -21,75 +21,19 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
-namespace {
-constexpr int32_t BOOL_INDEX = 0;
-constexpr int32_t INT32_INDEX = 1;
-constexpr int32_t STRING_INDEX = 2;
 constexpr int32_t MAX_ENTITY_INFO_ITEM_SIZE = 50;
-
-bool WriteValueObj(Parcel &parcel, const ValueObj &obj)
-{
-    int32_t typeIndex = static_cast<int32_t>(obj.index());
-    WRITEINT32(parcel, typeIndex, false);
-    bool result = std::visit([&parcel](auto &&arg) {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, bool>) {
-            WRITEBOOL(parcel, arg, false);
-            return true;
-        } else if constexpr (std::is_same_v<T, int32_t>) {
-            WRITEINT32(parcel, arg, false);
-            return true;
-        } else if constexpr (std::is_same_v<T, std::string>) {
-            WRITESTRING(parcel, arg, false);
-            return true;
-        }
-        return false;
-    }, obj);
-    return result;
-}
-
-bool ReadValueObj(Parcel &parcel, ValueObj &obj)
-{
-    int32_t typeIndex;
-    READINT32(parcel, typeIndex, false);
-    switch (typeIndex) {
-        case BOOL_INDEX: {
-            bool result;
-            READBOOL(parcel, result, false);
-            obj = result;
-            break;
-        }
-        case INT32_INDEX: {
-            int32_t result;
-            READINT32(parcel, result, false);
-            obj = result;
-            break;
-        }
-        case STRING_INDEX: {
-            std::string result;
-            READSTRING(parcel, result, false);
-            obj = result;
-            break;
-        }
-        default:
-            FI_HILOGE("unknown typeIndex:%{public}d", typeIndex);
-            return false;
-    }
-    return true;
-}
-} // namespace
 
 bool SequenceableCarAwarenessOption::Marshalling(Parcel &parcel) const
 {
-    WRITEINT32(parcel, static_cast<int32_t>(option_.entityInfo.size()), false);
-    for (auto const &[k, v] : option_.entityInfo) {
-        WRITESTRING(parcel, k, false);
-        WRITEINT32(parcel, static_cast<int32_t>(v.size()), false);
-        for (auto const &[ik, iv] : v) {
-            WRITESTRING(parcel, ik, false);
-            if (!WriteValueObj(parcel, iv)) {
-                return false;
-            }
+    if (!WriteInt32(parcel, static_cast<int32_t>(option_.entityInfo.size()))) {
+        return false;
+    }
+    for (auto const &[key, value] : option_.entityInfo) {
+        if (!WriteString(parcel, key)) {
+            return false;
+        }
+        if (!WriteString(parcel, value)) {
+            return false;
         }
     }
     return true;
@@ -109,21 +53,20 @@ SequenceableCarAwarenessOption* SequenceableCarAwarenessOption::Unmarshalling(Pa
 bool SequenceableCarAwarenessOption::ReadFromParcel(Parcel &parcel)
 {
     int32_t size;
-    READINT32(parcel, size, false);
-    CHKCF(size <= MAX_ENTITY_INFO_ITEM_SIZE, "info size over limit");
+    if (!ReadInt32(parcel, size)) {
+        return false;
+    }
+    CHKCF(size >= 0 && size <= MAX_ENTITY_INFO_ITEM_SIZE, "info size over limit");
     for (int32_t i = 0; i < size; i++) {
         std::string key;
-        READSTRING(parcel, key, false);
-        int32_t innerSize;
-        READINT32(parcel, innerSize, false);
-        CHKCF(innerSize <= MAX_ENTITY_INFO_ITEM_SIZE, "inner info size over limit");
-        for (int32_t j = 0; j < innerSize; j++) {
-            std::string innerKey;
-            READSTRING(parcel, innerKey, false);
-            if (!ReadValueObj(parcel, option_.entityInfo[key][innerKey])) {
-                return false;
-            }
+        if (!ReadString(parcel, key)) {
+            return false;
         }
+        std::string value;
+        if (!ReadString(parcel, value)) {
+            return false;
+        }
+        option_.entityInfo[key] = value;
     }
     return true;
 }

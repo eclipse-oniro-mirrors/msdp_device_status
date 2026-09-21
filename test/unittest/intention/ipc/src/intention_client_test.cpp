@@ -23,6 +23,11 @@
 #include "devicestatus_common.h"
 #include "i_context.h"
 #include "iremote_on_screen_callback.h"
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+#include "car_awareness_type.h"
+#include "icar_awareness_callback.h"
+#include "car_awareness_callback_stub.h"
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 
 namespace OHOS {
 namespace Msdp {
@@ -787,6 +792,115 @@ HWTEST_F(IntentionClientTest, IntentionClientTest_ResetDragWindowScreenId_002, T
     uint64_t screenId = UINT64_MAX;
     env->ResetDragWindowScreenId(displayId, screenId);
 }
+
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+class ICarAwarenessCallbackTest : public CarAwarenessCallbackStub {
+public:
+    void OnAwarenessEvent(const CarAwarenessEvent &event) override
+    {
+        FI_HILOGI("OnAwarenessEvent called, type:%{public}d", event.type);
+    }
+};
+
+/**
+ * @tc.name: IntentionClientTest_SubscribeCapability_001
+ * @tc.desc: Test SubscribeCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionClientTest, IntentionClientTest_SubscribeCapability_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = IntentionClient::GetInstance();
+    ASSERT_NE(env, nullptr);
+    CarAwarenessOption option;
+    sptr<ICarAwarenessCallbackTest> callback = new (std::nothrow) ICarAwarenessCallbackTest();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = env->SubscribeCapability(1, option, callback);
+    ASSERT_NE(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionClientTest_UnsubscribeCapability_001
+ * @tc.desc: Test UnsubscribeCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionClientTest, IntentionClientTest_UnsubscribeCapability_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = IntentionClient::GetInstance();
+    ASSERT_NE(env, nullptr);
+    CarAwarenessOption option;
+    sptr<ICarAwarenessCallbackTest> callback = new (std::nothrow) ICarAwarenessCallbackTest();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = env->UnsubscribeCapability(1, option, callback);
+    ASSERT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionClientTest_UpdateSpatialActionStatus_001
+ * @tc.desc: Test UpdateSpatialActionStatus
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionClientTest, IntentionClientTest_UpdateSpatialActionStatus_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = IntentionClient::GetInstance();
+    ASSERT_NE(env, nullptr);
+    int32_t ret = env->UpdateSpatialActionStatus(1);
+    ASSERT_NE(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionClientTest_UpdateSpatialActionZone_001
+ * @tc.desc: Test UpdateSpatialActionZone
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionClientTest, IntentionClientTest_UpdateSpatialActionZone_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = IntentionClient::GetInstance();
+    ASSERT_NE(env, nullptr);
+    int32_t ret = env->UpdateSpatialActionZone(1);
+    ASSERT_NE(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionClientTest_GetSupportCapabilityList_001
+ * @tc.desc: Test GetSupportCapabilityList
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionClientTest, IntentionClientTest_GetSupportCapabilityList_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = IntentionClient::GetInstance();
+    ASSERT_NE(env, nullptr);
+    std::vector<std::string> capabilities;
+    int32_t ret = env->GetSupportCapabilityList(capabilities);
+    EXPECT_EQ(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionClientTest_GetCarAwareness_001
+ * @tc.desc: Test GetCarAwareness
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionClientTest, IntentionClientTest_GetCarAwareness_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = IntentionClient::GetInstance();
+    ASSERT_NE(env, nullptr);
+    CarAwarenessOption option;
+    std::vector<CarAwarenessEvent> events;
+    int32_t ret = env->GetCarAwareness(1, option, events);
+    EXPECT_TRUE(ret == RET_OK || ret == RET_ERR);
+}
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

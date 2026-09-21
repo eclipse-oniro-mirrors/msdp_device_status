@@ -17,14 +17,16 @@
 #ifndef ICAR_AWARENESS_MANAGER_H
 #define ICAR_AWARENESS_MANAGER_H
 
+#include <map>
 #include <string>
+#include <vector>
 
 namespace OHOS {
 namespace CarAwareness {
 using CarAwarenessCallback = std::function<void(const std::string &type, const std::string &result)>;
 
 struct CarAwarenessOptions {
-    std::vector<std::string> metadata_keys;
+    std::map<std::string, std::string> metadata_keys;
 };
 
 class ICarAwarenessMgr {
@@ -74,7 +76,8 @@ public:
      * @param capability The capability to stop monitoring.
      * @param callback The callback function to unregister (nullptr to unregister all).
      */
-    virtual void OffCarAwareness(const std::string &capability, CarAwarenessCallback callback = nullptr) = 0;
+    virtual void OffCarAwareness(const std::string &capability, CarAwarenessCallback callback = nullptr,
+                                const CarAwarenessOptions &options = CarAwarenessOptions()) = 0;
 
     /**
      * @brief Updates the spatial action enable/disable status.
@@ -89,6 +92,16 @@ public:
      * @return Returns 0 on success, error code on failure.
      */
     virtual int32_t UpdateSpatialActionZone(int32_t zoneId) = 0;
+    
+    /**
+     * @brief Gets car awareness data synchronously.
+     * @param capability The capability type to query.
+     * @param options Configuration options for the query.
+     * @param results[out] Vector to be populated with query results.
+     * @return Returns 0 on success, error code on failure.
+     */
+    virtual int32_t GetCarAwareness(const std::string &capability, const CarAwarenessOptions &options,
+                                std::vector<std::string> &results) = 0;
 };
 
 using CreateCarAwarenessMgrFuncPtr = ICarAwarenessMgr *(*)(void);

@@ -62,6 +62,7 @@ private:
 struct CarAwarenessClientInfo {
     pid_t pid;
     sptr<ICarAwarenessCallback> cb;
+    CarAwarenessOption option;
 };
 
 class CarAwarenessServer {
@@ -77,9 +78,9 @@ public:
     int32_t GetSupportCapabilityList(const CallingContext &context, std::vector<std::string> &capabilities);
     int32_t GetCarAwareness(const CallingContext &context, int32_t type, const CarAwarenessOption &option,
                             std::vector<CarAwarenessEvent> &events);
+    int32_t LoadAlgoLib();
 
 private:
-    int32_t LoadAlgoLib();
     int32_t UnloadAlgoLib();
     void OnCarAwarenessCallbackDied(const wptr<IRemoteObject> &remote);
     bool AddDeathRecipient(const sptr<ICarAwarenessCallback> &cb);
@@ -91,7 +92,15 @@ private:
     int32_t AddClientToCallbacks(const std::string &featureName, CarAwarenessClientInfo &info);
     void UnSubscribeAlgo(const std::string &featureName);
     bool CheckSystemCall(const CallingContext &context);
-    int32_t SubscribeAlgo(const std::string &featureName);
+    int32_t SubscribeAlgo(const std::string &featureName, const CarAwarenessOption &option = CarAwarenessOption());
+    int32_t SubscribeCarStatusWithOption(const std::string &featureName, pid_t callingPid,
+        const CarAwarenessOption &option, const sptr<ICarAwarenessCallback> &cb);
+    bool IsOptionEmpty(const CarAwarenessOption &option);
+    int32_t UpdateExistingCarStatusClient(const std::string &featureName, pid_t callingPid,
+        const CarAwarenessOption &option, const sptr<ICarAwarenessCallback> &cb,
+        CarAwarenessClientInfo &clientInfo);
+    int32_t UnSubscribeCarStatus(const std::string &featureName, pid_t callingPid,
+        const CarAwarenessOption &option);
 
     sptr<IRemoteObject::DeathRecipient> deathRecipient_{nullptr};
     std::mutex algoMtx_;
@@ -100,6 +109,7 @@ private:
     CarAwarenessPluginHandle algoHandle_;
     CarAwareness::CarAwarenessCallback algoCb_ = nullptr;
 };
+
 }  // namespace DeviceStatus
 }  // namespace Msdp
 }  // namespace OHOS

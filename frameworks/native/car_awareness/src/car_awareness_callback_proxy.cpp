@@ -44,15 +44,21 @@ void CarAwarenessCallbackProxy::OnAwarenessEvent(const CarAwarenessEvent &event)
         return;
     }
     
-    int32_t eventDataLen = event.eventData.size();
+    int32_t eventDataLen = static_cast<int32_t>(event.eventData.size());
     if (eventDataLen > MAX_DATA_LEN || eventDataLen < 0) {
         FI_HILOGE("eventData too long");
         return;
     }
 
-    WRITEINT32(data, event.type);
-    WRITEINT32(data, event.eventData.size());
-    WRITESTRING(data, event.eventData);
+    if (!WriteInt32(data, event.type)) {
+        return;
+    }
+    if (!WriteInt32(data, eventDataLen)) {
+        return;
+    }
+    if (!WriteString(data, event.eventData)) {
+        return;
+    }
 
     int32_t ret = remote->SendRequest(static_cast<int32_t>(ICarAwarenessCallback::EVENT_CHANGE), data, reply, option);
     if (ret != 0) {

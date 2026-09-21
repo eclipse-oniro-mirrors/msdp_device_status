@@ -123,6 +123,7 @@ void DeviceStatusService::OnStart()
         return;
     }
     intention_->ListenLiveBroadcast();
+    intention_->InitCarAwareness();
     state_ = ServiceRunningState::STATE_RUNNING;
     ready_ = true;
     worker_ = std::thread([this] { this->OnThread(); });

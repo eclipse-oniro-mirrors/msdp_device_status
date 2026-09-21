@@ -1036,6 +1036,18 @@ ErrCode IntentionService::GetCarAwareness(int32_t type, const SequenceableCarAwa
     return CAR_AWARENESS_NOT_SUPPORTED;
 #endif  // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 }
+
+ErrCode IntentionService::InitCarAwareness()
+{
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    return PostSyncTask([this] {
+        return carAwareness_.LoadAlgoLib();
+    });
+#else
+    return CAR_AWARENESS_NOT_SUPPORTED;
+#endif  // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

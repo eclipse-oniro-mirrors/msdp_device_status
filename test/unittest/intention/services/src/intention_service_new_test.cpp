@@ -27,7 +27,12 @@
 #include "ipc_skeleton.h"
 #include "plugin_manager.h"
 #include "iremote_on_screen_callback.h"
- 
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+#include "car_awareness_callback_stub.h"
+#include "sequenceable_car_awareness_option.h"
+#include "sequenceable_car_awareness_event_array.h"
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+
 #undef LOG_TAG
 #define LOG_TAG "IntentionServiceNewTest"
  
@@ -284,6 +289,115 @@ HWTEST_F(IntentionServiceNewTest, Trigger, TestSize.Level1)
     EXPECT_NE(result, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
 }
+
+
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+class TestCarAwarenessCallback : public CarAwarenessCallbackStub {
+public:
+    void OnAwarenessEvent(const CarAwarenessEvent &event) override
+    {
+        FI_HILOGI("OnAwarenessEvent called, type:%{public}d", event.type);
+    }
+};
+
+/**
+ * @tc.name: IntentionServiceNewTest_SubscribeCapability_001
+ * @tc.desc: Test SubscribeCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceNewTest, IntentionServiceNewTest_SubscribeCapability_001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    SequenceableCarAwarenessOption option;
+    sptr<TestCarAwarenessCallback> callback = new (std::nothrow) TestCarAwarenessCallback();
+    ASSERT_NE(callback, nullptr);
+    EXPECT_NE(intentionService_, nullptr);
+    ErrCode ret = intentionService_->SubscribeCapability(1, option, callback);
+    EXPECT_NE(ret, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
+/**
+ * @tc.name: IntentionServiceNewTest_UnSubscribeCapability_001
+ * @tc.desc: Test UnSubscribeCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceNewTest, IntentionServiceNewTest_UnSubscribeCapability_001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    SequenceableCarAwarenessOption option;
+    sptr<TestCarAwarenessCallback> callback = new (std::nothrow) TestCarAwarenessCallback();
+    ASSERT_NE(callback, nullptr);
+    EXPECT_NE(intentionService_, nullptr);
+    ErrCode ret = intentionService_->UnSubscribeCapability(1, option, callback);
+    EXPECT_EQ(ret, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
+/**
+ * @tc.name: IntentionServiceNewTest_UpdateSpatialActionStatus_001
+ * @tc.desc: Test UpdateSpatialActionStatus
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceNewTest, IntentionServiceNewTest_UpdateSpatialActionStatus_001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    EXPECT_NE(intentionService_, nullptr);
+    ErrCode ret = intentionService_->UpdateSpatialActionStatus(1);
+    EXPECT_NE(ret, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
+/**
+ * @tc.name: IntentionServiceNewTest_UpdateSpatialActionZone_001
+ * @tc.desc: Test UpdateSpatialActionZone
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceNewTest, IntentionServiceNewTest_UpdateSpatialActionZone_001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    EXPECT_NE(intentionService_, nullptr);
+    ErrCode ret = intentionService_->UpdateSpatialActionZone(1);
+    EXPECT_NE(ret, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
+/**
+ * @tc.name: IntentionServiceNewTest_GetSupportCapabilityList_001
+ * @tc.desc: Test GetSupportCapabilityList
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceNewTest, IntentionServiceNewTest_GetSupportCapabilityList_001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    std::vector<std::string> capabilities;
+    EXPECT_NE(intentionService_, nullptr);
+    ErrCode ret = intentionService_->GetSupportCapabilityList(capabilities);
+    EXPECT_EQ(ret, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+
+/**
+ * @tc.name: IntentionServiceNewTest_GetCarAwareness_001
+ * @tc.desc: Test GetCarAwareness
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceNewTest, IntentionServiceNewTest_GetCarAwareness_001, TestSize.Level0)
+{
+    CALL_TEST_DEBUG;
+    SequenceableCarAwarenessOption option;
+    SequenceableCarAwarenessEventArray events;
+    ErrCode ret = intentionService_->GetCarAwareness(1, option, events);
+    EXPECT_TRUE(ret == 0 || ret == -1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 }  // namespace DeviceStatus
 }  // namespace Msdp
 }  // namespace OHOS

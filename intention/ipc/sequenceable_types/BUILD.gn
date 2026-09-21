@@ -36,6 +36,7 @@ ohos_source_set("sequenceable_types") {
     "${device_status_root_path}/interfaces/innerkits/include",
     "${device_status_root_path}/interfaces/innerkits/interaction/include",
     "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
+    "${device_status_root_path}/utils/common/include"
   ]
 
   sources = [

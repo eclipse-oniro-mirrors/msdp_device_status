@@ -24,10 +24,16 @@ namespace DeviceStatus {
 
 bool SequenceableCarAwarenessEventArray::Marshalling(Parcel &parcel) const
 {
-    WRITEINT32(parcel, static_cast<int32_t>(events_.size()), false);
+    if (!WriteInt32(parcel, static_cast<int32_t>(events_.size()))) {
+        return false;
+    }
     for (const auto &event : events_) {
-        WRITEINT32(parcel, event.type, false);
-        WRITESTRING(parcel, event.eventData, false);
+        if (!WriteInt32(parcel, event.type)) {
+            return false;
+        }
+        if (!WriteString(parcel, event.eventData)) {
+            return false;
+        }
     }
     return true;
 }
@@ -46,15 +52,22 @@ SequenceableCarAwarenessEventArray* SequenceableCarAwarenessEventArray::Unmarsha
 bool SequenceableCarAwarenessEventArray::ReadFromParcel(Parcel &parcel)
 {
     int32_t size = 0;
-    READINT32(parcel, size, false);
-    if (size < 0) {
+    if (!ReadInt32(parcel, size)) {
+        return false;
+    }
+    constexpr int32_t MAX_EVENT_ARRAY_SIZE = 1000;
+    if (size < 0 || size > MAX_EVENT_ARRAY_SIZE) {
         FI_HILOGE("size:%{public}d is invalid", size);
         return false;
     }
     for (int32_t i = 0; i < size; i++) {
         CarAwarenessEvent event;
-        READINT32(parcel, event.type, false);
-        READSTRING(parcel, event.eventData, false);
+        if (!ReadInt32(parcel, event.type)) {
+            return false;
+        }
+        if (!ReadString(parcel, event.eventData)) {
+            return false;
+        }
         events_.push_back(event);
     }
     return true;
