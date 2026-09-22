@@ -30,13 +30,15 @@ constexpr int32_t DEVICE_EXCEPTION { 801 };
 constexpr int32_t SERVICE_EXCEPTION { 32500001 };
 constexpr int32_t SUBSCRIBE_EXCEPTION { 32500002 };
 constexpr int32_t UNSUBSCRIBE_EXCEPTION { 32500003 };
+constexpr int32_t SERVICE_NOT_STARTED_EXCEPTION { 32500004 };
 const std::map<int32_t, std::string> ERROR_MESSAGES = {
     {NO_SYSTEM_API, "Permission check failed. A non-system application uses the system API."},
     {PARAM_EXCEPTION, "Params check failed."},
     {DEVICE_EXCEPTION, "The device does not support this API."},
     {SERVICE_EXCEPTION, "Service exception."},
     {SUBSCRIBE_EXCEPTION, "Subscription failed."},
-    {UNSUBSCRIBE_EXCEPTION, "Unsubscription failed."}
+    {UNSUBSCRIBE_EXCEPTION, "Unsubscription failed."},
+    {SERVICE_NOT_STARTED_EXCEPTION, "Service not started."}
 };
 
 napi_value CreateDeviceStatusNapiError(const napi_env &env, int32_t errCode, const std::string &errMessage);

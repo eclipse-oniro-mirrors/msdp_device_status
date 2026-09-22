@@ -626,6 +626,26 @@ public:
         (void)events;
         return 0;
     }
+
+    // BehaviorAwareness
+    ErrCode SubscribePerception(const BehaviorAwareness::SequenceableSubscribeOptions &options,
+        const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &behaviorCallback) override
+    {
+        (void)options;
+        (void)behaviorCallback;
+        return 0;
+    }
+    ErrCode UnsubscribePerception(
+        const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &behaviorCallback) override
+    {
+        (void)behaviorCallback;
+        return 0;
+    }
+    ErrCode SubmitFeedback(const BehaviorAwareness::SequenceableFeedbackData &feedback) override
+    {
+        (void)feedback;
+        return 0;
+    }
 };
 
 static inline void DoSleep(void)

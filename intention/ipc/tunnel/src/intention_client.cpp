@@ -1262,6 +1262,70 @@ int32_t IntentionClient::Trigger(const OnScreen::AwarenessCap& cap, const OnScre
 #endif
 }
 
+int32_t IntentionClient::SubscribePerception(const BehaviorAwareness::SubscribeOptions &options,
+    const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback)
+{
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return BehaviorAwareness::SERVICE_EXCEPTION;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, BehaviorAwareness::SERVICE_EXCEPTION);
+    BehaviorAwareness::SequenceableSubscribeOptions seqOptions(options);
+    auto ret = devicestatusProxy_->SubscribePerception(seqOptions, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:SubscribePerception failed, ret:%{public}d", ret);
+    }
+    return ret;
+#endif
+}
+
+int32_t IntentionClient::UnsubscribePerception(
+    const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback)
+{
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return BehaviorAwareness::SERVICE_EXCEPTION;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, BehaviorAwareness::SERVICE_EXCEPTION);
+    auto ret = devicestatusProxy_->UnsubscribePerception(callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:UnsubscribePerception failed, ret:%{public}d", ret);
+    }
+    return ret;
+#endif
+}
+
+int32_t IntentionClient::SubmitFeedback(const BehaviorAwareness::FeedbackData &feedback)
+{
+#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+    return RET_NO_SUPPORT;
+#else
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return BehaviorAwareness::SERVICE_EXCEPTION;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, BehaviorAwareness::SERVICE_EXCEPTION);
+    BehaviorAwareness::SequenceableFeedbackData seqFeedback(feedback);
+    auto ret = devicestatusProxy_->SubmitFeedback(seqFeedback);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:SubmitFeedback failed, ret:%{public}d", ret);
+    }
+    return ret;
+#endif
+}
+
 void IntentionClient::ResetProxy(const wptr<IRemoteObject> &remote)
 {
     CALL_DEBUG_ENTER;
@@ -1336,6 +1400,11 @@ void IntentionClient::UnsubscribeSaListener()
     }
 }
 
+void IntentionClient::SetSaReviveCallback(std::function<void()> callback)
+{
+    saReviveCallback_ = callback;
+}
+
 void IntentionClient::DeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     CALL_DEBUG_ENTER;
@@ -1364,6 +1433,9 @@ void IntentionClient::ServiceStatusListener::OnAddSystemAbility(int32_t systemAb
         return;
     }
     parent->ResetDragWindowScreenId(parent->deathDisplayId_.load(), parent->deathScreenId_.load());
+    if (parent->saReviveCallback_ != nullptr) {
+        parent->saReviveCallback_();
+    }
     parent->UnsubscribeSaListener();
 }
 

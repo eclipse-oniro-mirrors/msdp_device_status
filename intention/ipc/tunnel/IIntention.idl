@@ -31,10 +31,13 @@ sequenceable OHOS.Msdp.DeviceStatus.OnScreen.SequenceableOnscreenAwarenessOption
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableDragEventData;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableCarAwarenessOption;
 sequenceable OHOS.Msdp.DeviceStatus.SequenceableCarAwarenessEventArray;
+sequenceable OHOS.Msdp.DeviceStatus.BehaviorAwareness.SequenceableSubscribeOptions;
+sequenceable OHOS.Msdp.DeviceStatus.BehaviorAwareness.SequenceableFeedbackData;
 interface OHOS.Msdp.DeviceStatus.IRemoteBoomerangCallback;
 interface OHOS.Msdp.DeviceStatus.IRemoteDevStaCallback;
 interface OHOS.Msdp.DeviceStatus.OnScreen.IRemoteOnScreenCallback;
 sequenceable OHOS.Media.PixelMap;
+interface OHOS.Msdp.DeviceStatus.BehaviorAwareness.IRemoteBehaviorAwarenessCallback;
 interface OHOS.Msdp.ICarAwarenessCallback;
 
 interface OHOS.Msdp.IIntention {
@@ -129,4 +132,9 @@ interface OHOS.Msdp.IIntention {
     void UpdateSpatialActionZone([in] int zoneId);
     void GetSupportCapabilityList([out] String[] capabilities);
     void GetCarAwareness([in] int type, [in] SequenceableCarAwarenessOption carAwarenessoption, [out] SequenceableCarAwarenessEventArray events);
+
+    // BehaviorAwareness
+    void SubscribePerception([in] SequenceableSubscribeOptions options, [in] IRemoteBehaviorAwarenessCallback behaviorCallback);
+    void UnsubscribePerception([in] IRemoteBehaviorAwarenessCallback behaviorCallback);
+    void SubmitFeedback([in] SequenceableFeedbackData feedback);
 }

@@ -21,9 +21,9 @@ config("intention_tunnel_public_config") {
     "${device_status_root_path}/intention/ipc/sequenceable_types/include",
     "${device_status_root_path}/interfaces/innerkits/interaction/include",
     "${device_status_root_path}/interfaces/innerkits/include",
-    "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
-    "${device_status_root_path}/utils/common/include"
-  ]
+     "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
+     "${device_status_utils_path}/include",
+   ]
 }
 
 idl_gen_interface("intention_interface") {
@@ -97,8 +97,11 @@ ohos_source_set("intention_server_stub") {
     sources += [ "${device_status_frameworks_path}/native/car_awareness/src/car_awareness_callback_proxy.cpp" ]
   }
 
+  sources += [ "${device_status_frameworks_path}/native/src/behavior_awareness_callback_proxy.cpp" ]
+
   deps = [
     ":intention_interface",
+    "${device_status_utils_path}:devicestatus_util",
     "${device_status_root_path}/intention/ipc/sequenceable_types:sequenceable_types"
   ]
   external_deps = [
