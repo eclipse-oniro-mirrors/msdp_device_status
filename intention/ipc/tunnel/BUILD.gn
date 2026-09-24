@@ -139,6 +139,7 @@ ohos_source_set("msdp_kit_report") {
     "c_utils:utils",
     "ability_runtime:wantagent_innerkits",
     "time_service:time_client",
+    "icu:shared_icuuc",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
