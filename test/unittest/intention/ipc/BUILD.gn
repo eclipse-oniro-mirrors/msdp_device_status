@@ -578,6 +578,7 @@ ohos_unittest("MsdpKitReportNewTest") {
     "googletest:gtest_main",
     "hiappevent:hiappevent_innerapi",
     "hilog:libhilog",
+    "icu:shared_icuuc",
     "time_service:time_client"
   ]
 }

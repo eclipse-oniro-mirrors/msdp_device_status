@@ -70,6 +70,7 @@
         "eventhandler",
         "device_manager",
         "sensor",
+        "icu",
         "init",
         "input",
         "json",
