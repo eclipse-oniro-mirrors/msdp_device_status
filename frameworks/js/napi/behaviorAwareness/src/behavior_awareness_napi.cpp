@@ -15,6 +15,9 @@
 
 #include "behavior_awareness_napi.h"
 
+#include <accesstoken_kit.h>
+#include <ipc_skeleton.h>
+
 #include "devicestatus_define.h"
 #include "fi_log.h"
 #include "util_napi.h"
@@ -46,6 +49,18 @@ constexpr size_t PATTERN_COUNT = 3;
 constexpr size_t SOUND_MODE_COUNT = 3;
 std::mutex g_mtx;
 sptr<BehaviorAwarenessNapiCallback> g_callback = nullptr;
+
+bool CheckCallerIsSystemApp()
+{
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
+        tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        return true;
+    }
+    auto fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::AccessTokenKit::IsSystemAppByFullTokenID(fullTokenId);
+}
 
 void RejectPromise(napi_env env, napi_deferred deferred, int32_t errCode, const std::string &printMsg)
 {
@@ -521,6 +536,11 @@ napi_value BehaviorAwarenessNapi::OffPerception(napi_env env, napi_callback_info
     FI_HILOGI("OffPerception: enter");
     napi_deferred deferred = nullptr;
     napi_value promise = CreatePromise(env, &deferred);
+    if (!CheckCallerIsSystemApp()) {
+        FI_HILOGE("OffPerception: non-system app");
+        RejectPromise(env, deferred, RET_NO_SYSTEM_API, "non-system app");
+        return promise;
+    }
     size_t argc = ARG_1;
     napi_value args[ARG_1] = { nullptr };
     napi_value jsThis = nullptr;

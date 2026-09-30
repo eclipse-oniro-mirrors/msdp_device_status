@@ -76,6 +76,7 @@ taihe_shared_library("behaviorAwareness_ani") {
     "${root_out_dir}/gen/base/msdp/device_status/intention/ipc/tunnel",
   ]
   sources += [
+    "src/ani_constructor.cpp",
     "src/behavior_awareness_manager.cpp",
     "src/behavior_awareness_callback_taihe.cpp",
     "src/ohos.multimodalAwareness.behaviorAwareness.impl.cpp",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@ static { loadLibraryWithPermissionCheck("behaviorAwareness_ani.z", "@ohos.multim
 """)
 
 enum PerceptionDomain : String {
-    HABIT_AWARENESS = "habitAwareness",
+    HABIT_AWARENESS = "habitAwareness"
 }
 
 enum PatternType : String {
     TIME_PATTERN = "timePattern",
     LOCATION_PATTERN = "locationPattern",
-    EVENT_PATTERN = "eventPattern",
+    EVENT_PATTERN = "eventPattern"
 }
 
 enum EventType : String {
@@ -46,7 +46,7 @@ enum EventType : String {
     BATTERY_BELOW = "batteryBelow",
     BLUETOOTH_CONNECT = "bluetoothConnect",
     BLUETOOTH_DISCONNECT = "bluetoothDisconnect",
-    PHONE_RING = "phoneRing",
+    PHONE_RING = "phoneRing"
 }
 
 enum ActionType : String {
@@ -66,13 +66,13 @@ enum ActionType : String {
     SCREEN_BRIGHTNESS = "screenBrightness",
     VOLUME = "volume",
     SHUTDOWN = "shutdown",
-    REBOOT = "reboot",
+    REBOOT = "reboot"
 }
 
 enum SoundMode : String {
     VIBRATE = "vibrate",
     SILENT = "silent",
-    RING = "ring",
+    RING = "ring"
 }
 
 enum BluetoothDeviceType : i32 {
@@ -83,7 +83,7 @@ enum BluetoothDeviceType : i32 {
     GLASSES = 4,
     WATCH = 5,
     SPEAKER = 6,
-    OTHERS = 7,
+    OTHERS = 7
 }
 
 enum FeedbackType : i32 {
@@ -91,34 +91,34 @@ enum FeedbackType : i32 {
     IGNORE = 1,
     REJECT = 2,
     EDIT = 3,
-    NOT_PUSHED = 4,
+    NOT_PUSHED = 4
 }
 
 enum RecurrenceType : String {
     DAILY = "daily",
     WEEKLY = "weekly",
     MONTHLY = "monthly",
-    WORKDAY = "workday",
+    WORKDAY = "workday"
 }
 
 enum LocationType : String {
     HOME = "home",
     COMPANY = "company",
-    CUSTOM = "custom",
+    CUSTOM = "custom"
 }
 
 enum Operation : String {
     ON = "on",
     OFF = "off",
-    TOGGLE = "toggle",
+    TOGGLE = "toggle"
 }
 
 enum AdjustmentDirection : String {
     UP = "up",
-    DOWN = "down",
+    DOWN = "down"
 }
 
-struct SubscribeOptions {
+struct SubscribeInfo {
     domain: PerceptionDomain;
     patternTypes: Optional<Array<PatternType>>;
 }
@@ -133,18 +133,18 @@ struct PerceptionEvent {
 
 struct FeedbackData {
     perceptionEventId: String;
-    feedbackType: i32;
+    feedbackType: FeedbackType;
     feedbackTime: i64;
 }
 
 @rename("onPerception")
-function OnPerception(
-    options: SubscribeOptions,
+@promise function OnPerception(
+    info: SubscribeInfo,
     callback: (data: PerceptionEvent) => void): void;
 
 @rename("offPerception")
-function OffPerception(
+@promise function OffPerception(
     callback: Optional<(data: PerceptionEvent) => void>): void;
 
 @rename("submitFeedback")
-function SubmitFeedback(feedback: FeedbackData): void;
+@promise function SubmitFeedback(feedback: FeedbackData): void;

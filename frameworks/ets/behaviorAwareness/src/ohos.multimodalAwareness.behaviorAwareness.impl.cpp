@@ -14,6 +14,8 @@
  */
 
 #include "ohos.multimodalAwareness.behaviorAwareness.impl.h"
+#include <accesstoken_kit.h>
+#include <ipc_skeleton.h>
 #include "devicestatus_define.h"
 #include "behavior_awareness_callback_taihe.h"
 #include "behavior_awareness_manager.h"
@@ -26,6 +28,18 @@ using namespace ohos::multimodalAwareness::behaviorAwareness;
 using namespace OHOS::Msdp::DeviceStatus::BehaviorAwareness;
 
 sptr<BehaviorAwarenessCallbackTaihe> g_callback = nullptr;
+
+bool CheckCallerIsSystemApp()
+{
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
+        tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        return true;
+    }
+    auto fullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::AccessTokenKit::IsSystemAppByFullTokenID(fullTokenId);
+}
 
 enum BehaviorAwarenessErrCode {
     RET_NO_SYSTEM_API = 202,
@@ -79,20 +93,20 @@ static int32_t ConvertPatternType(const std::string &ptStr)
     return -1;
 }
 
-void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeOptions options,
+void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo info,
     callback_view<void(ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)> callback)
 {
     FI_HILOGI("OnPerception: onPerception entry");
     OHOS::Msdp::DeviceStatus::BehaviorAwareness::SubscribeOptions nativeOptions;
-    std::string domainStr(static_cast<const char*>(options.domain));
+    std::string domainStr(static_cast<const char*>(info.domain));
     if (domainStr == "habitAwareness") {
         nativeOptions.domain = OHOS::Msdp::DeviceStatus::BehaviorAwareness::PerceptionDomain::HABIT_AWARENESS;
     } else {
         ThrowBehaviorAwarenessErr(RET_PARAM_EXCEPTION, "invalid domain");
         return;
     }
-    if (options.patternTypes.has_value()) {
-        for (auto pt : options.patternTypes.value()) {
+    if (info.patternTypes.has_value()) {
+        for (auto pt : info.patternTypes.value()) {
             std::string ptStr(static_cast<const char*>(pt));
             int32_t ptVal = ConvertPatternType(ptStr);
             if (ptVal >= 0) {
@@ -119,6 +133,11 @@ void OffPerception(
     optional_view<callback<void(ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)>> callback)
 {
     FI_HILOGI("OffPerception: offPerception entry");
+    if (!CheckCallerIsSystemApp()) {
+        FI_HILOGE("OffPerception: non-system app");
+        ThrowBehaviorAwarenessErr(RET_NO_SYSTEM_API, "non-system app");
+        return;
+    }
     sptr<IRemoteBehaviorAwarenessCallback> cb = nullptr;
     if (g_callback != nullptr) {
         cb = g_callback;

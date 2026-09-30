@@ -28,7 +28,7 @@
 
 namespace ANI::MultimodalAwareness {
 
-void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeOptions options,
+void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo info,
     taihe::callback_view<void(ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)> callback);
 void OffPerception(
     taihe::optional_view<taihe::callback<void(
