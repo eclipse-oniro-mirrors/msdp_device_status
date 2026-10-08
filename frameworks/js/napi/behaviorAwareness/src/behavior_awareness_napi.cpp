@@ -62,6 +62,28 @@ bool CheckCallerIsSystemApp()
     return Security::AccessToken::AccessTokenKit::IsSystemAppByFullTokenID(fullTokenId);
 }
 
+bool IsMatchTypeImpl(napi_env env, napi_value value, napi_valuetype type);
+sptr<IRemoteBehaviorAwarenessCallback> FindMatchingCallback(napi_env env, napi_value userCb);
+
+sptr<IRemoteBehaviorAwarenessCallback> ResolveUnsubscribeCallback(napi_env env, napi_value *args, size_t argc)
+{
+    if (argc >= ARG_1 && IsMatchTypeImpl(env, args[ARG_0], napi_function)) {
+        return FindMatchingCallback(env, args[ARG_0]);
+    }
+    std::lock_guard<std::mutex> lk(g_mtx);
+    return g_callback;
+}
+
+void ClearGlobalCallback(napi_env env)
+{
+    std::lock_guard<std::mutex> lk(g_mtx);
+    if (g_callback != nullptr && g_callback->callbackRef_ != nullptr) {
+        napi_delete_reference(env, g_callback->callbackRef_);
+        g_callback->callbackRef_ = nullptr;
+    }
+    g_callback = nullptr;
+}
+
 void RejectPromise(napi_env env, napi_deferred deferred, int32_t errCode, const std::string &printMsg)
 {
     FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", printMsg.c_str(), errCode);
@@ -548,23 +570,11 @@ napi_value BehaviorAwarenessNapi::OffPerception(napi_env env, napi_callback_info
         RejectPromise(env, deferred, RET_SERVICE_EXCEPTION, "napi_get_cb_info failed");
         return promise;
     }
-    sptr<IRemoteBehaviorAwarenessCallback> cb = nullptr;
     if (argc >= ARG_1 && !IsMatchType(env, args[ARG_0], napi_function)) {
         RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "callback must be function or omitted");
         return promise;
     }
-    if (argc >= ARG_1 && IsMatchType(env, args[ARG_0], napi_function)) {
-        cb = FindMatchingCallback(env, args[ARG_0]);
-        if (cb == nullptr) {
-            RejectPromise(env, deferred, RET_UNSUBSCRIBE_EXCEPTION,
-                (g_callback == nullptr) ? "no active subscription" : "callback does not match");
-            return promise;
-        }
-    }
-    if (cb == nullptr && g_callback != nullptr) {
-        std::lock_guard<std::mutex> lk(g_mtx);
-        cb = g_callback;
-    }
+    auto cb = ResolveUnsubscribeCallback(env, args, argc);
     if (cb == nullptr) {
         RejectPromise(env, deferred, RET_UNSUBSCRIBE_EXCEPTION, "no active subscription");
         return promise;
@@ -574,14 +584,7 @@ napi_value BehaviorAwarenessNapi::OffPerception(napi_env env, napi_callback_info
         RejectPromise(env, deferred, errNum, "unsubscribe failed");
         return promise;
     }
-    {
-        std::lock_guard<std::mutex> lk(g_mtx);
-        if (g_callback != nullptr && g_callback->callbackRef_ != nullptr) {
-            napi_delete_reference(env, g_callback->callbackRef_);
-            g_callback->callbackRef_ = nullptr;
-        }
-        g_callback = nullptr;
-    }
+    ClearGlobalCallback(env);
     FI_HILOGI("OffPerception: success");
     return ResolvePromise(env, deferred);
 }
