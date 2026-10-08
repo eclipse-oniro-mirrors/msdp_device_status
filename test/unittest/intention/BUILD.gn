@@ -20,6 +20,7 @@ group("intention_test") {
 
   deps += [
     "adapters:unittest",
+    "behavior_awareness:unittest",
     "boomerang:unittest",
     "client:unittest",
     "common:unittest",
