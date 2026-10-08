@@ -15,8 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#include <sstream>
-
 #include "accesstoken_kit.h"
 #include "behavior_awareness_callback_stub.h"
 #include "behavior_awareness_data.h"
@@ -38,11 +36,6 @@ using namespace Security::AccessToken;
 using namespace BehaviorAwareness;
 
 namespace {
-constexpr uint64_t NON_SYSTEM_TOKEN = 0;
-static constexpr int32_t DEFAULT_API_VERSION = 12;
-uint64_t g_shellTokenId = 0;
-std::mutex g_lockSetToken;
-
 class TestCallback : public BehaviorAwarenessCallbackStub {
 public:
     void OnBehaviorAwareness(const PerceptionEventData &event) override
@@ -52,134 +45,41 @@ public:
     std::vector<PerceptionEventData> receivedEvents_;
 };
 
-class MockNativeToken {
-public:
-    explicit MockNativeToken(const std::string &process) : selfToken_(GetSelfTokenID())
-    {
-        uint64_t selfTokenId = GetSelfTokenID();
-        EXPECT_EQ(0, SetSelfTokenID(g_shellTokenId));
-        std::string dumpInfo;
-        AtmToolsParamInfo info;
-        info.processName = process;
-        AccessTokenKit::DumpTokenInfo(info, dumpInfo);
-        size_t pos = dumpInfo.find("\"tokenID\": ");
-        if (pos != std::string::npos) {
-            pos += std::string("\"tokenID\": ").length();
-            std::string numStr;
-            while (pos < dumpInfo.length() && std::isdigit(dumpInfo[pos])) {
-                numStr += dumpInfo[pos];
-                ++pos;
-            }
-            std::istringstream iss(numStr);
-            AccessTokenID tokenID;
-            iss >> tokenID;
-            nativeToken_ = tokenID;
-        }
-        SetSelfTokenID(selfTokenId);
-        SetSelfTokenID(nativeToken_);
-    }
-    ~MockNativeToken() { SetSelfTokenID(selfToken_); }
-private:
-    uint64_t selfToken_;
-    uint32_t nativeToken_ { 0 };
-};
-
-class MockHapToken {
-public:
-    explicit MockHapToken(const std::string &bundle, bool isSystemApp = true)
-        : selfToken_(GetSelfTokenID())
-    {
-        HapInfoParams infoParams = {
-            .userID = 0,
-            .bundleName = bundle,
-            .instIndex = 0,
-            .appIDDesc = "BehaviorAwarenessTestAppID",
-            .apiVersion = DEFAULT_API_VERSION,
-            .isSystemApp = isSystemApp,
-            .appDistributionType = "",
-        };
-        HapPolicyParams policyParams = {
-            .apl = APL_NORMAL,
-            .domain = "behavior_awareness_test_domain",
-        };
-        AccessTokenIDEx tokenIdEx = {0};
-        uint64_t selfTokenId = GetSelfTokenID();
-        EXPECT_EQ(0, SetSelfTokenID(g_shellTokenId));
-        std::string dumpInfo;
-        AtmToolsParamInfo info;
-        info.processName = "foundation";
-        AccessTokenKit::DumpTokenInfo(info, dumpInfo);
-        size_t pos = dumpInfo.find("\"tokenID\": ");
-        AccessTokenID foundationToken = 0;
-        if (pos != std::string::npos) {
-            pos += std::string("\"tokenID\": ").length();
-            std::string numStr;
-            while (pos < dumpInfo.length() && std::isdigit(dumpInfo[pos])) {
-                numStr += dumpInfo[pos];
-                ++pos;
-            }
-            std::istringstream iss(numStr);
-            iss >> foundationToken;
-        }
-        SetSelfTokenID(foundationToken);
-        int32_t ret = AccessTokenKit::InitHapToken(infoParams, policyParams, tokenIdEx);
-        SetSelfTokenID(selfTokenId);
-        EXPECT_EQ(ret, RET_SUCCESS);
-        mockToken_ = tokenIdEx.tokenIdExStruct.tokenID;
-        fullTokenId_ = tokenIdEx.tokenIDEx;
-        EXPECT_NE(mockToken_, INVALID_TOKENID);
-        EXPECT_EQ(0, SetSelfTokenID(fullTokenId_));
-    }
-    ~MockHapToken()
-    {
-        if (mockToken_ != INVALID_TOKENID) {
-            uint64_t selfTokenId = GetSelfTokenID();
-            EXPECT_EQ(0, SetSelfTokenID(g_shellTokenId));
-            std::string dumpInfo;
-            AtmToolsParamInfo info;
-            info.processName = "foundation";
-            AccessTokenKit::DumpTokenInfo(info, dumpInfo);
-            size_t pos = dumpInfo.find("\"tokenID\": ");
-            AccessTokenID foundationToken = 0;
-            if (pos != std::string::npos) {
-                pos += std::string("\"tokenID\": ").length();
-                std::string numStr;
-                while (pos < dumpInfo.length() && std::isdigit(dumpInfo[pos])) {
-                    numStr += dumpInfo[pos];
-                    ++pos;
-                }
-                std::istringstream iss(numStr);
-                iss >> foundationToken;
-            }
-            SetSelfTokenID(foundationToken);
-            AccessTokenKit::DeleteToken(mockToken_);
-            SetSelfTokenID(selfTokenId);
-        }
-        SetSelfTokenID(selfToken_);
-    }
-    uint64_t GetFullTokenId() const { return fullTokenId_; }
-    uint32_t GetTokenId() const { return mockToken_; }
-private:
-    uint64_t selfToken_;
-    uint32_t mockToken_ { 0 };
-    uint64_t fullTokenId_ { 0 };
-};
-
-CallingContext MakeSystemContext(const MockHapToken &hap)
+uint64_t NativeTokenGet()
 {
+    uint64_t tokenId;
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 0,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = nullptr,
+        .acls = nullptr,
+        .aplStr = "system_basic",
+    };
+    infoInstance.processName = "BehaviorAwarenessServerTest";
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    AccessTokenKit::ReloadNativeTokenInfo();
+    return tokenId;
+}
+
+CallingContext MakeSystemContext()
+{
+    NativeTokenGet();
     return CallingContext {
-        .fullTokenId = hap.GetFullTokenId(),
-        .tokenId = hap.GetTokenId(),
-        .uid = 1000,
-        .pid = 1000,
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
     };
 }
 
 CallingContext MakeNonSystemContext()
 {
     return CallingContext {
-        .fullTokenId = NON_SYSTEM_TOKEN,
-        .tokenId = static_cast<uint32_t>(NON_SYSTEM_TOKEN),
+        .fullTokenId = 0,
+        .tokenId = 0,
         .uid = 10000,
         .pid = 10000,
     };
@@ -207,8 +107,8 @@ PerceptionEventData MakeEvent(const std::string &id)
 
 class BehaviorAwarenessServerTest : public testing::Test {
 public:
-    static void SetUpTestCase() { g_shellTokenId = GetSelfTokenID(); }
-    static void TearDownTestCase() { g_shellTokenId = 0; }
+    static void SetUpTestCase() {}
+    static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown() {}
     BehaviorAwarenessServer server_;
@@ -218,8 +118,7 @@ public:
 
 HWTEST_F(BehaviorAwarenessServerTest, SubscribePerception001, TestSize.Level1)
 {
-    MockHapToken hap("BehaviorAwarenessTest");
-    auto ctx = MakeSystemContext(hap);
+    auto ctx = MakeSystemContext();
     auto options = MakeOptions();
     auto callback = sptr<TestCallback>::MakeSptr();
     ASSERT_NE(callback, nullptr);
@@ -229,8 +128,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubscribePerception001, TestSize.Level1)
 
 HWTEST_F(BehaviorAwarenessServerTest, SubscribePerception002, TestSize.Level1)
 {
-    MockHapToken hap("BehaviorAwarenessTest");
-    auto ctx = MakeSystemContext(hap);
+    auto ctx = MakeSystemContext();
     auto options = MakeOptions();
     auto cb1 = sptr<TestCallback>::MakeSptr();
     auto cb2 = sptr<TestCallback>::MakeSptr();
@@ -257,8 +155,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubscribePerception003, TestSize.Level1)
 
 HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception001, TestSize.Level1)
 {
-    MockHapToken hap("BehaviorAwarenessTest");
-    auto ctx = MakeSystemContext(hap);
+    auto ctx = MakeSystemContext();
     auto options = MakeOptions();
     auto callback = sptr<TestCallback>::MakeSptr();
     ASSERT_NE(callback, nullptr);
@@ -268,8 +165,7 @@ HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception001, TestSize.Level1)
 
 HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception002, TestSize.Level1)
 {
-    MockHapToken hap("BehaviorAwarenessTest");
-    auto ctx = MakeSystemContext(hap);
+    auto ctx = MakeSystemContext();
     auto options = MakeOptions();
     auto callback = sptr<TestCallback>::MakeSptr();
     ASSERT_NE(callback, nullptr);
@@ -290,8 +186,7 @@ HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception003, TestSize.Level1)
 
 HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception004, TestSize.Level1)
 {
-    MockHapToken hap("BehaviorAwarenessTest");
-    auto ctx = MakeSystemContext(hap);
+    auto ctx = MakeSystemContext();
     auto callback = sptr<TestCallback>::MakeSptr();
     ASSERT_NE(callback, nullptr);
     int32_t ret = server_.UnsubscribePerception(ctx, callback);
@@ -300,8 +195,7 @@ HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception004, TestSize.Level1)
 
 HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception005, TestSize.Level1)
 {
-    MockHapToken hap("BehaviorAwarenessTest");
-    auto ctx = MakeSystemContext(hap);
+    auto ctx = MakeSystemContext();
     auto options = MakeOptions();
     auto registered = sptr<TestCallback>::MakeSptr();
     auto mismatch = sptr<TestCallback>::MakeSptr();
@@ -316,8 +210,7 @@ HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception005, TestSize.Level1)
 
 HWTEST_F(BehaviorAwarenessServerTest, NotifyClient001, TestSize.Level1)
 {
-    MockHapToken hap("BehaviorAwarenessTest");
-    auto ctx = MakeSystemContext(hap);
+    auto ctx = MakeSystemContext();
     auto options = MakeOptions();
     auto callback = sptr<TestCallback>::MakeSptr();
     ASSERT_NE(callback, nullptr);
@@ -329,8 +222,7 @@ HWTEST_F(BehaviorAwarenessServerTest, NotifyClient001, TestSize.Level1)
 
 HWTEST_F(BehaviorAwarenessServerTest, NotifyClient002, TestSize.Level1)
 {
-    MockHapToken hap("BehaviorAwarenessTest");
-    auto ctx = MakeSystemContext(hap);
+    auto ctx = MakeSystemContext();
     auto options = MakeOptions();
     auto callback = sptr<TestCallback>::MakeSptr();
     ASSERT_NE(callback, nullptr);
@@ -346,8 +238,7 @@ HWTEST_F(BehaviorAwarenessServerTest, NotifyClient002, TestSize.Level1)
 
 HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback001, TestSize.Level1)
 {
-    MockHapToken hap("BehaviorAwarenessTest");
-    auto ctx = MakeSystemContext(hap);
+    auto ctx = MakeSystemContext();
     FeedbackData feedback {
         .perceptionEventId = "fb-001",
         .feedbackType = FeedbackType::ACCEPT,

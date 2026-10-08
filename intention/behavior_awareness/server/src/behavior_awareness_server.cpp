@@ -49,6 +49,16 @@ private:
 namespace {
 std::string GetCallerBundleName(const CallingContext &context)
 {
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
+        tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        Security::AccessToken::NativeTokenInfo tokenInfo;
+        if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(context.tokenId, tokenInfo) != RET_OK) {
+            FI_HILOGE("GetNativeTokenInfo failed, tokenId:%{public}u", context.tokenId);
+            return "";
+        }
+        return tokenInfo.processName;
+    }
     Security::AccessToken::HapTokenInfo hapInfo;
     int32_t ret = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(context.tokenId, hapInfo);
     if (ret != RET_OK) {
@@ -60,6 +70,11 @@ std::string GetCallerBundleName(const CallingContext &context)
 
 bool IsCallerSystemApp(const CallingContext &context)
 {
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
+        tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        return true;
+    }
     return Security::AccessToken::AccessTokenKit::IsSystemAppByFullTokenID(context.fullTokenId);
 }
 } // namespace

@@ -28,7 +28,6 @@ ohos_unittest("BehaviorAwarenessServerTest") {
 
   module_out_path = module_output_path
   include_dirs = [
-    "include",
     "${device_status_root_path}/intention/behavior_awareness/server/include",
     "${device_status_root_path}/interfaces/innerkits/include",
     "${device_status_root_path}/intention/prototype/include",
