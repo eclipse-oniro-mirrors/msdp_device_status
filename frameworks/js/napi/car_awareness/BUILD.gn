@@ -49,7 +49,8 @@ ohos_shared_library("carawareness_napi") {
     "hilog:libhilog",
     "napi:ace_napi",
     "ipc:ipc_single",
-    "json:nlohmann_json_static"
+    "json:nlohmann_json_static",
+    "node:node_header_notice"
   ]
 
   if (device_status_car_awareness_enable) {
