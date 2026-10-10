@@ -145,6 +145,19 @@ void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo in
     FI_HILOGI("OnPerception: success, key:%{public}s", key.c_str());
 }
 
+std::vector<std::pair<std::string, sptr<BehaviorAwarenessCallbackTaihe>>> CollectMatchingTaihe(
+    const taihe::callback_view<void(ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)> &userCb)
+{
+    std::vector<std::pair<std::string, sptr<BehaviorAwarenessCallbackTaihe>>> matches;
+    std::lock_guard<std::mutex> lk(g_mtx);
+    for (auto &item : g_callbacks) {
+        if (item.second != nullptr && item.second->Matches(userCb)) {
+            matches.emplace_back(item.first, item.second);
+        }
+    }
+    return matches;
+}
+
 void OffPerception(
     optional_view<callback<void(ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)>> callback)
 {
@@ -166,15 +179,7 @@ void OffPerception(
         return;
     }
     auto userCb = callback.value();
-    std::vector<std::pair<std::string, sptr<BehaviorAwarenessCallbackTaihe>>> matches;
-    {
-        std::lock_guard<std::mutex> lk(g_mtx);
-        for (auto &item : g_callbacks) {
-            if (item.second != nullptr && item.second->Matches(userCb)) {
-                matches.emplace_back(item.first, item.second);
-            }
-        }
-    }
+    auto matches = CollectMatchingTaihe(userCb);
     if (matches.empty()) {
         ThrowBehaviorAwarenessErr(RET_UNSUBSCRIBE_EXCEPTION, "no active subscription");
         return;

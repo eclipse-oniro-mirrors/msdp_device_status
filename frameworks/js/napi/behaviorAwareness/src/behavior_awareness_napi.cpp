@@ -81,6 +81,65 @@ void ClearAllCallbacks(napi_env env)
     g_callbacks.clear();
 }
 
+sptr<BehaviorAwarenessNapiCallback> FindOrCreateCallbackStub(napi_env env, const std::string &key, bool &isNewStub)
+{
+    std::lock_guard<std::mutex> lk(g_mtx);
+    auto iter = g_callbacks.find(key);
+    if (iter != g_callbacks.end()) {
+        return iter->second;
+    }
+    sptr<BehaviorAwarenessNapiCallback> stub = new (std::nothrow) BehaviorAwarenessNapiCallback(env);
+    if (stub != nullptr) {
+        g_callbacks[key] = stub;
+        isNewStub = true;
+    }
+    return stub;
+}
+
+void SwapCallbackRef(napi_env env, const sptr<BehaviorAwarenessNapiCallback> &stub, napi_ref newRef)
+{
+    std::lock_guard<std::mutex> lk(g_mtx);
+    if (stub->callbackRef_ != nullptr) {
+        napi_delete_reference(env, stub->callbackRef_);
+    }
+    stub->callbackRef_ = newRef;
+}
+
+std::vector<std::pair<std::string, sptr<BehaviorAwarenessNapiCallback>>> CollectMatchingCallbacks(
+    napi_env env, napi_value userCb)
+{
+    std::vector<std::pair<std::string, sptr<BehaviorAwarenessNapiCallback>>> matches;
+    std::lock_guard<std::mutex> lk(g_mtx);
+    for (auto &item : g_callbacks) {
+        const sptr<BehaviorAwarenessNapiCallback> &cb = item.second;
+        if (cb == nullptr || cb->callbackRef_ == nullptr) {
+            continue;
+        }
+        napi_value registeredCb = nullptr;
+        napi_get_reference_value(env, cb->callbackRef_, &registeredCb);
+        bool strictEqual = false;
+        napi_strict_equals(env, userCb, registeredCb, &strictEqual);
+        if (strictEqual) {
+            matches.emplace_back(item.first, cb);
+        }
+    }
+    return matches;
+}
+
+void EraseMatchingCallbacks(napi_env env,
+    const std::vector<std::pair<std::string, sptr<BehaviorAwarenessNapiCallback>>> &matches)
+{
+    std::lock_guard<std::mutex> lk(g_mtx);
+    for (auto &m : matches) {
+        auto iter = g_callbacks.find(m.first);
+        if (iter != g_callbacks.end() && iter->second != nullptr && iter->second->callbackRef_ != nullptr) {
+            napi_delete_reference(env, iter->second->callbackRef_);
+            iter->second->callbackRef_ = nullptr;
+        }
+        g_callbacks.erase(m.first);
+    }
+}
+
 void RejectPromise(napi_env env, napi_deferred deferred, int32_t errCode, const std::string &printMsg)
 {
     FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", printMsg.c_str(), errCode);
@@ -511,21 +570,10 @@ napi_value BehaviorAwarenessNapi::OnPerception(napi_env env, napi_callback_info 
     }
     std::string key = BuildSubscriptionKey(options);
     bool isNewStub = false;
-    sptr<BehaviorAwarenessNapiCallback> stub;
-    {
-        std::lock_guard<std::mutex> lk(g_mtx);
-        auto iter = g_callbacks.find(key);
-        if (iter != g_callbacks.end()) {
-            stub = iter->second;
-        } else {
-            stub = new (std::nothrow) BehaviorAwarenessNapiCallback(env);
-            if (stub == nullptr) {
-                RejectPromise(env, deferred, RET_SERVICE_EXCEPTION, "failed to create callback");
-                return promise;
-            }
-            g_callbacks[key] = stub;
-            isNewStub = true;
-        }
+    sptr<BehaviorAwarenessNapiCallback> stub = FindOrCreateCallbackStub(env, key, isNewStub);
+    if (stub == nullptr) {
+        RejectPromise(env, deferred, RET_SERVICE_EXCEPTION, "failed to create callback");
+        return promise;
     }
     napi_ref newRef = nullptr;
     napi_create_reference(env, args[ARG_1], ARG_1, &newRef);
@@ -541,13 +589,7 @@ napi_value BehaviorAwarenessNapi::OnPerception(napi_env env, napi_callback_info 
         RejectPromise(env, deferred, errNum, "subscribe failed");
         return promise;
     }
-    {
-        std::lock_guard<std::mutex> lk(g_mtx);
-        if (stub->callbackRef_ != nullptr) {
-            napi_delete_reference(env, stub->callbackRef_);
-        }
-        stub->callbackRef_ = newRef;
-    }
+    SwapCallbackRef(env, stub, newRef);
     FI_HILOGI("OnPerception: success, key:%{public}s, isNew:%{public}d", key.c_str(), isNewStub);
     return ResolvePromise(env, deferred);
 }
@@ -573,25 +615,8 @@ napi_value BehaviorAwarenessNapi::OffPerception(napi_env env, napi_callback_info
         RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "callback must be function or omitted");
         return promise;
     }
-    bool hasCallback = (argc >= ARG_1) && IsMatchTypeImpl(env, args[ARG_0], napi_function);
-    if (hasCallback) {
-        std::vector<std::pair<std::string, sptr<BehaviorAwarenessNapiCallback>>> matches;
-        {
-            std::lock_guard<std::mutex> lk(g_mtx);
-            for (auto &item : g_callbacks) {
-                const sptr<BehaviorAwarenessNapiCallback> &cb = item.second;
-                if (cb == nullptr || cb->callbackRef_ == nullptr) {
-                    continue;
-                }
-                napi_value registeredCb = nullptr;
-                napi_get_reference_value(env, cb->callbackRef_, &registeredCb);
-                bool strictEqual = false;
-                napi_strict_equals(env, args[ARG_0], registeredCb, &strictEqual);
-                if (strictEqual) {
-                    matches.emplace_back(item.first, cb);
-                }
-            }
-        }
+    if ((argc >= ARG_1) && IsMatchTypeImpl(env, args[ARG_0], napi_function)) {
+        auto matches = CollectMatchingCallbacks(env, args[ARG_0]);
         if (matches.empty()) {
             RejectPromise(env, deferred, RET_UNSUBSCRIBE_EXCEPTION, "no active subscription");
             return promise;
@@ -603,17 +628,7 @@ napi_value BehaviorAwarenessNapi::OffPerception(napi_env env, napi_callback_info
                 lastErr = err;
             }
         }
-        {
-            std::lock_guard<std::mutex> lk(g_mtx);
-            for (auto &m : matches) {
-                auto iter = g_callbacks.find(m.first);
-                if (iter != g_callbacks.end() && iter->second != nullptr && iter->second->callbackRef_ != nullptr) {
-                    napi_delete_reference(env, iter->second->callbackRef_);
-                    iter->second->callbackRef_ = nullptr;
-                }
-                g_callbacks.erase(m.first);
-            }
-        }
+        EraseMatchingCallbacks(env, matches);
         if (lastErr != RET_OK) {
             RejectPromise(env, deferred, lastErr, "unsubscribe failed");
             return promise;
