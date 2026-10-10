@@ -38,6 +38,9 @@ public:
     void OnBehaviorAwareness(
         const OHOS::Msdp::DeviceStatus::BehaviorAwareness::PerceptionEventData &event) override;
 
+    bool Matches(const taihe::callback_view<void(
+        ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)> &other) const;
+
 private:
     std::mutex mutex_;
     std::shared_ptr<taihe::callback<void(

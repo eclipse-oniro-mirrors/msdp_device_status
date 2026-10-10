@@ -17,8 +17,10 @@
 #define BEHAVIOR_AWARENESS_MANAGER_H
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <mutex>
+#include <string>
 
 #include "nocopyable.h"
 #include "behavior_awareness_data.h"
@@ -44,10 +46,13 @@ private:
     BehaviorAwarenessManager();
     void InitSaReviveCallback();
 
+    struct CachedSubscription {
+        SubscribeOptions options;
+        sptr<IRemoteBehaviorAwarenessCallback> callback;
+    };
+
     std::mutex mtx_;
-    SubscribeOptions lastOptions_;
-    sptr<IRemoteBehaviorAwarenessCallback> lastCallback_;
-    bool hasSubscription_ { false };
+    std::map<std::string, CachedSubscription> subscriptions_;
 };
 } // namespace BehaviorAwareness
 } // namespace DeviceStatus

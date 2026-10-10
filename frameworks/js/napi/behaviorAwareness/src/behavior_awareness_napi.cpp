@@ -18,6 +18,11 @@
 #include <accesstoken_kit.h>
 #include <ipc_skeleton.h>
 
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "devicestatus_define.h"
 #include "fi_log.h"
 #include "util_napi.h"
@@ -48,7 +53,7 @@ constexpr size_t ADJUSTMENT_COUNT = 2;
 constexpr size_t PATTERN_COUNT = 3;
 constexpr size_t SOUND_MODE_COUNT = 3;
 std::mutex g_mtx;
-sptr<BehaviorAwarenessNapiCallback> g_callback = nullptr;
+std::map<std::string, sptr<BehaviorAwarenessNapiCallback>> g_callbacks;
 
 bool CheckCallerIsSystemApp()
 {
@@ -63,25 +68,17 @@ bool CheckCallerIsSystemApp()
 }
 
 bool IsMatchTypeImpl(napi_env env, napi_value value, napi_valuetype type);
-sptr<IRemoteBehaviorAwarenessCallback> FindMatchingCallback(napi_env env, napi_value userCb);
 
-sptr<IRemoteBehaviorAwarenessCallback> ResolveUnsubscribeCallback(napi_env env, napi_value *args, size_t argc)
-{
-    if (argc >= ARG_1 && IsMatchTypeImpl(env, args[ARG_0], napi_function)) {
-        return FindMatchingCallback(env, args[ARG_0]);
-    }
-    std::lock_guard<std::mutex> lk(g_mtx);
-    return g_callback;
-}
-
-void ClearGlobalCallback(napi_env env)
+void ClearAllCallbacks(napi_env env)
 {
     std::lock_guard<std::mutex> lk(g_mtx);
-    if (g_callback != nullptr && g_callback->callbackRef_ != nullptr) {
-        napi_delete_reference(env, g_callback->callbackRef_);
-        g_callback->callbackRef_ = nullptr;
+    for (auto &item : g_callbacks) {
+        if (item.second != nullptr && item.second->callbackRef_ != nullptr) {
+            napi_delete_reference(env, item.second->callbackRef_);
+            item.second->callbackRef_ = nullptr;
+        }
     }
-    g_callback = nullptr;
+    g_callbacks.clear();
 }
 
 void RejectPromise(napi_env env, napi_deferred deferred, int32_t errCode, const std::string &printMsg)
@@ -266,21 +263,6 @@ bool ParsePatternTypes(napi_env env, napi_value patternVal, SubscribeOptions &op
     return true;
 }
 
-sptr<IRemoteBehaviorAwarenessCallback> FindMatchingCallback(napi_env env, napi_value userCb)
-{
-    std::lock_guard<std::mutex> lk(g_mtx);
-    if (g_callback == nullptr) {
-        return nullptr;
-    }
-    napi_value registeredCb = nullptr;
-    napi_get_reference_value(env, g_callback->callbackRef_, &registeredCb);
-    bool strictEqual = false;
-    napi_strict_equals(env, userCb, registeredCb, &strictEqual);
-    if (!strictEqual) {
-        return nullptr;
-    }
-    return g_callback;
-}
 } // namespace
 
 BehaviorAwarenessNapiCallback::~BehaviorAwarenessNapiCallback()
@@ -522,34 +504,46 @@ napi_value BehaviorAwarenessNapi::OnPerception(napi_env env, napi_callback_info 
         RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "callback must be function");
         return promise;
     }
+    std::string key = BuildSubscriptionKey(options);
+    bool isNewStub = false;
+    sptr<BehaviorAwarenessNapiCallback> stub;
     {
         std::lock_guard<std::mutex> lk(g_mtx);
-        if (g_callback == nullptr) {
-            g_callback = new (std::nothrow) BehaviorAwarenessNapiCallback(env);
-        }
-        if (g_callback == nullptr) {
-            RejectPromise(env, deferred, RET_SERVICE_EXCEPTION, "failed to create callback");
-            return promise;
+        auto iter = g_callbacks.find(key);
+        if (iter != g_callbacks.end()) {
+            stub = iter->second;
+        } else {
+            stub = new (std::nothrow) BehaviorAwarenessNapiCallback(env);
+            if (stub == nullptr) {
+                RejectPromise(env, deferred, RET_SERVICE_EXCEPTION, "failed to create callback");
+                return promise;
+            }
+            g_callbacks[key] = stub;
+            isNewStub = true;
         }
     }
     napi_ref newRef = nullptr;
     napi_create_reference(env, args[ARG_1], ARG_1, &newRef);
-    int32_t errNum = BehaviorAwarenessManager::GetInstance().SubscribePerception(options, g_callback);
+    int32_t errNum = BehaviorAwarenessManager::GetInstance().SubscribePerception(options, stub);
     if (errNum != RET_OK) {
         if (newRef != nullptr) {
             napi_delete_reference(env, newRef);
+        }
+        if (isNewStub) {
+            std::lock_guard<std::mutex> lk(g_mtx);
+            g_callbacks.erase(key);
         }
         RejectPromise(env, deferred, errNum, "subscribe failed");
         return promise;
     }
     {
         std::lock_guard<std::mutex> lk(g_mtx);
-        if (g_callback->callbackRef_ != nullptr) {
-            napi_delete_reference(env, g_callback->callbackRef_);
+        if (stub->callbackRef_ != nullptr) {
+            napi_delete_reference(env, stub->callbackRef_);
         }
-        g_callback->callbackRef_ = newRef;
+        stub->callbackRef_ = newRef;
     }
-    FI_HILOGI("OnPerception: success");
+    FI_HILOGI("OnPerception: success, key:%{public}s, isNew:%{public}d", key.c_str(), isNewStub);
     return ResolvePromise(env, deferred);
 }
 
@@ -574,17 +568,59 @@ napi_value BehaviorAwarenessNapi::OffPerception(napi_env env, napi_callback_info
         RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "callback must be function or omitted");
         return promise;
     }
-    auto cb = ResolveUnsubscribeCallback(env, args, argc);
-    if (cb == nullptr) {
-        RejectPromise(env, deferred, RET_UNSUBSCRIBE_EXCEPTION, "no active subscription");
-        return promise;
+    bool hasCallback = (argc >= ARG_1) && IsMatchTypeImpl(env, args[ARG_0], napi_function);
+    if (hasCallback) {
+        std::vector<std::pair<std::string, sptr<BehaviorAwarenessNapiCallback>>> matches;
+        {
+            std::lock_guard<std::mutex> lk(g_mtx);
+            for (auto &item : g_callbacks) {
+                const sptr<BehaviorAwarenessNapiCallback> &cb = item.second;
+                if (cb == nullptr || cb->callbackRef_ == nullptr) {
+                    continue;
+                }
+                napi_value registeredCb = nullptr;
+                napi_get_reference_value(env, cb->callbackRef_, &registeredCb);
+                bool strictEqual = false;
+                napi_strict_equals(env, args[ARG_0], registeredCb, &strictEqual);
+                if (strictEqual) {
+                    matches.emplace_back(item.first, cb);
+                }
+            }
+        }
+        if (matches.empty()) {
+            RejectPromise(env, deferred, RET_UNSUBSCRIBE_EXCEPTION, "no active subscription");
+            return promise;
+        }
+        int32_t lastErr = RET_OK;
+        for (auto &m : matches) {
+            int32_t err = BehaviorAwarenessManager::GetInstance().UnsubscribePerception(m.second);
+            if (err != RET_OK) {
+                lastErr = err;
+            }
+        }
+        {
+            std::lock_guard<std::mutex> lk(g_mtx);
+            for (auto &m : matches) {
+                auto iter = g_callbacks.find(m.first);
+                if (iter != g_callbacks.end() && iter->second != nullptr && iter->second->callbackRef_ != nullptr) {
+                    napi_delete_reference(env, iter->second->callbackRef_);
+                    iter->second->callbackRef_ = nullptr;
+                }
+                g_callbacks.erase(m.first);
+            }
+        }
+        if (lastErr != RET_OK) {
+            RejectPromise(env, deferred, lastErr, "unsubscribe failed");
+            return promise;
+        }
+    } else {
+        int32_t errNum = BehaviorAwarenessManager::GetInstance().UnsubscribePerception(nullptr);
+        if (errNum != RET_OK) {
+            RejectPromise(env, deferred, errNum, "unsubscribe failed");
+            return promise;
+        }
+        ClearAllCallbacks(env);
     }
-    int32_t errNum = BehaviorAwarenessManager::GetInstance().UnsubscribePerception(cb);
-    if (errNum != RET_OK) {
-        RejectPromise(env, deferred, errNum, "unsubscribe failed");
-        return promise;
-    }
-    ClearGlobalCallback(env);
     FI_HILOGI("OffPerception: success");
     return ResolvePromise(env, deferred);
 }

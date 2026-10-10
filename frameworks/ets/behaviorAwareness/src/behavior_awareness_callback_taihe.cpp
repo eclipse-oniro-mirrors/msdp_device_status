@@ -48,4 +48,13 @@ void BehaviorAwarenessCallbackTaihe::OnBehaviorAwareness(const PerceptionEventDa
     (*callback_)(taiheEvent);
     FI_HILOGD("OnBehaviorAwareness: event pushed, id:%{public}s", event.perceptionEventId.c_str());
 }
+
+bool BehaviorAwarenessCallbackTaihe::Matches(const taihe::callback_view<void(
+    ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)> &other) const
+{
+    if (callback_ == nullptr) {
+        return false;
+    }
+    return *callback_ == other;
+}
 } // namespace ANI::MultimodalAwareness

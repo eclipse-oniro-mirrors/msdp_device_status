@@ -16,6 +16,11 @@
 #include "ohos.multimodalAwareness.behaviorAwareness.impl.h"
 #include <accesstoken_kit.h>
 #include <ipc_skeleton.h>
+#include <map>
+#include <mutex>
+#include <string>
+#include <utility>
+#include <vector>
 #include "devicestatus_define.h"
 #include "behavior_awareness_callback_taihe.h"
 #include "behavior_awareness_manager.h"
@@ -27,7 +32,8 @@ using namespace taihe;
 using namespace ohos::multimodalAwareness::behaviorAwareness;
 using namespace OHOS::Msdp::DeviceStatus::BehaviorAwareness;
 
-sptr<BehaviorAwarenessCallbackTaihe> g_callback = nullptr;
+std::mutex g_mtx;
+std::map<std::string, sptr<BehaviorAwarenessCallbackTaihe>> g_callbacks;
 
 bool CheckCallerIsSystemApp()
 {
@@ -126,7 +132,12 @@ void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo in
         ThrowBehaviorAwarenessErr(errNum, "subscribe failed");
         return;
     }
-    g_callback = newCallback;
+    std::string key = OHOS::Msdp::DeviceStatus::BehaviorAwareness::BuildSubscriptionKey(nativeOptions);
+    {
+        std::lock_guard<std::mutex> lk(g_mtx);
+        g_callbacks[key] = newCallback;
+    }
+    FI_HILOGI("OnPerception: success, key:%{public}s", key.c_str());
 }
 
 void OffPerception(
@@ -138,20 +149,49 @@ void OffPerception(
         ThrowBehaviorAwarenessErr(RET_NO_SYSTEM_API, "non-system app");
         return;
     }
-    sptr<IRemoteBehaviorAwarenessCallback> cb = nullptr;
-    if (g_callback != nullptr) {
-        cb = g_callback;
+    if (!callback.has_value()) {
+        int32_t errNum = BehaviorAwarenessManager::GetInstance().UnsubscribePerception(nullptr);
+        if (errNum != RET_OK) {
+            ThrowBehaviorAwarenessErr(errNum, "unsubscribe failed");
+            return;
+        }
+        std::lock_guard<std::mutex> lk(g_mtx);
+        g_callbacks.clear();
+        FI_HILOGI("OffPerception: all subscriptions removed");
+        return;
     }
-    if (cb == nullptr) {
+    auto userCb = callback.value();
+    std::vector<std::pair<std::string, sptr<BehaviorAwarenessCallbackTaihe>>> matches;
+    {
+        std::lock_guard<std::mutex> lk(g_mtx);
+        for (auto &item : g_callbacks) {
+            if (item.second != nullptr && item.second->Matches(userCb)) {
+                matches.emplace_back(item.first, item.second);
+            }
+        }
+    }
+    if (matches.empty()) {
         ThrowBehaviorAwarenessErr(RET_UNSUBSCRIBE_EXCEPTION, "no active subscription");
         return;
     }
-    int32_t errNum = BehaviorAwarenessManager::GetInstance().UnsubscribePerception(cb);
-    if (errNum != RET_OK) {
-        ThrowBehaviorAwarenessErr(errNum, "unsubscribe failed");
+    int32_t lastErr = RET_OK;
+    for (auto &m : matches) {
+        int32_t err = BehaviorAwarenessManager::GetInstance().UnsubscribePerception(m.second);
+        if (err != RET_OK) {
+            lastErr = err;
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lk(g_mtx);
+        for (auto &m : matches) {
+            g_callbacks.erase(m.first);
+        }
+    }
+    if (lastErr != RET_OK) {
+        ThrowBehaviorAwarenessErr(lastErr, "unsubscribe failed");
         return;
     }
-    g_callback = nullptr;
+    FI_HILOGI("OffPerception: removed %{public}zu subscription(s)", matches.size());
 }
 
 void SubmitFeedback(ohos::multimodalAwareness::behaviorAwareness::FeedbackData feedback)

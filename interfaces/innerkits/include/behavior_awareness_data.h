@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -65,6 +66,16 @@ struct FeedbackData {
     FeedbackType feedbackType { FeedbackType::ACCEPT };
     int64_t feedbackTime { 0 };
 };
+
+inline std::string BuildSubscriptionKey(const SubscribeOptions &options)
+{
+    std::ostringstream oss;
+    oss << static_cast<int32_t>(options.domain);
+    for (int32_t pt : options.patternTypes) {
+        oss << ":" << pt;
+    }
+    return oss.str();
+}
 } // namespace BehaviorAwareness
 } // namespace DeviceStatus
 } // namespace Msdp

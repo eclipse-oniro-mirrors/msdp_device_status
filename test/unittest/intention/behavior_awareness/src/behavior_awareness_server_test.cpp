@@ -93,6 +93,14 @@ SubscribeOptions MakeOptions()
     };
 }
 
+SubscribeOptions MakeOptionsWithPattern(int32_t pt)
+{
+    return SubscribeOptions {
+        .domain = PerceptionDomain::HABIT_AWARENESS,
+        .patternTypes = { pt },
+    };
+}
+
 PerceptionEventData MakeEvent(const std::string &id)
 {
     return PerceptionEventData {
@@ -149,6 +157,57 @@ HWTEST_F(BehaviorAwarenessServerTest, SubscribePerception003, TestSize.Level1)
     ASSERT_NE(callback, nullptr);
     int32_t ret = server_.SubscribePerception(ctx, options, callback);
     EXPECT_EQ(ret, BehaviorAwareness::COMMON_NOT_SYSTEM_APP);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubscribePerception004_MultiKeyCoexist, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto optionsTime = MakeOptionsWithPattern(static_cast<int32_t>(PatternType::TIME_PATTERN));
+    auto optionsLocation = MakeOptionsWithPattern(static_cast<int32_t>(PatternType::LOCATION_PATTERN));
+    auto cbTime = sptr<TestCallback>::MakeSptr();
+    auto cbLocation = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cbTime, nullptr);
+    ASSERT_NE(cbLocation, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, optionsTime, cbTime), RET_OK);
+    EXPECT_EQ(server_.SubscribePerception(ctx, optionsLocation, cbLocation), RET_OK);
+    server_.NotifyClient(MakeEvent("evt-multi"));
+    EXPECT_EQ(cbTime->receivedEvents_.size(), 1u);
+    EXPECT_EQ(cbLocation->receivedEvents_.size(), 1u);
+}
+
+/* ==================== BuildSubscriptionKey ==================== */
+
+HWTEST_F(BehaviorAwarenessServerTest, BuildSubscriptionKey001, TestSize.Level1)
+{
+    SubscribeOptions options {
+        .domain = PerceptionDomain::HABIT_AWARENESS,
+        .patternTypes = {},
+    };
+    EXPECT_EQ(BuildSubscriptionKey(options), "0");
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, BuildSubscriptionKey002, TestSize.Level1)
+{
+    SubscribeOptions options {
+        .domain = PerceptionDomain::HABIT_AWARENESS,
+        .patternTypes = { static_cast<int32_t>(PatternType::TIME_PATTERN) },
+    };
+    EXPECT_EQ(BuildSubscriptionKey(options), "0:0");
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, BuildSubscriptionKey003_OrderSensitive, TestSize.Level1)
+{
+    SubscribeOptions optionsA {
+        .domain = PerceptionDomain::HABIT_AWARENESS,
+        .patternTypes = { static_cast<int32_t>(PatternType::TIME_PATTERN),
+                          static_cast<int32_t>(PatternType::LOCATION_PATTERN) },
+    };
+    SubscribeOptions optionsB {
+        .domain = PerceptionDomain::HABIT_AWARENESS,
+        .patternTypes = { static_cast<int32_t>(PatternType::LOCATION_PATTERN),
+                          static_cast<int32_t>(PatternType::TIME_PATTERN) },
+    };
+    EXPECT_NE(BuildSubscriptionKey(optionsA), BuildSubscriptionKey(optionsB));
 }
 
 /* ==================== UnsubscribePerception ==================== */
