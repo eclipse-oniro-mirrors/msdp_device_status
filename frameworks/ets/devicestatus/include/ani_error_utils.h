@@ -29,7 +29,6 @@ constexpr int32_t DEVICE_EXCEPTION { 801 };
 constexpr int32_t SERVICE_EXCEPTION { 32500001 };
 constexpr int32_t SUBSCRIBE_EXCEPTION { 32500002 };
 constexpr int32_t UNSUBSCRIBE_EXCEPTION { 32500003 };
-constexpr int32_t SERVICE_NOT_STARTED_EXCEPTION { 32500004 };
 
 }}}
 #endif

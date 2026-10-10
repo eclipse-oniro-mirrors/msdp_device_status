@@ -488,6 +488,11 @@ napi_value BehaviorAwarenessNapi::OnPerception(napi_env env, napi_callback_info 
     FI_HILOGI("OnPerception: enter");
     napi_deferred deferred = nullptr;
     napi_value promise = CreatePromise(env, &deferred);
+    if (!CheckCallerIsSystemApp()) {
+        FI_HILOGE("OnPerception: non-system app");
+        RejectPromise(env, deferred, RET_NO_SYSTEM_API, "non-system app");
+        return promise;
+    }
     size_t argc = ARG_2;
     napi_value args[ARG_2] = { nullptr };
     napi_value jsThis = nullptr;
@@ -630,6 +635,11 @@ napi_value BehaviorAwarenessNapi::SubmitFeedback(napi_env env, napi_callback_inf
     FI_HILOGI("SubmitFeedback: enter");
     napi_deferred deferred = nullptr;
     napi_value promise = CreatePromise(env, &deferred);
+    if (!CheckCallerIsSystemApp()) {
+        FI_HILOGE("SubmitFeedback: non-system app");
+        RejectPromise(env, deferred, RET_NO_SYSTEM_API, "non-system app");
+        return promise;
+    }
     size_t argc = ARG_1;
     napi_value args[ARG_1] = { nullptr };
     napi_value jsThis = nullptr;

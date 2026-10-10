@@ -102,8 +102,7 @@
         "node",
         "egl",
         "opengles",
-        "taihe_ffi_gen",
-        "googletest"
+        "taihe_ffi_gen"
       ],
       "third_party": [
         "jsoncpp"

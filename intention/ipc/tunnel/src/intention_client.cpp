@@ -1265,7 +1265,7 @@ int32_t IntentionClient::Trigger(const OnScreen::AwarenessCap& cap, const OnScre
 int32_t IntentionClient::SubscribePerception(const BehaviorAwareness::SubscribeOptions &options,
     const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback)
 {
-#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+#ifndef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
     return RET_NO_SUPPORT;
 #else
     CALL_DEBUG_ENTER;
@@ -1287,7 +1287,7 @@ int32_t IntentionClient::SubscribePerception(const BehaviorAwareness::SubscribeO
 int32_t IntentionClient::UnsubscribePerception(
     const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback)
 {
-#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+#ifndef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
     return RET_NO_SUPPORT;
 #else
     CALL_DEBUG_ENTER;
@@ -1307,7 +1307,7 @@ int32_t IntentionClient::UnsubscribePerception(
 
 int32_t IntentionClient::SubmitFeedback(const BehaviorAwareness::FeedbackData &feedback)
 {
-#ifdef DEVICE_STATUS_PHONE_STANDARD_LITE
+#ifndef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
     return RET_NO_SUPPORT;
 #else
     CALL_DEBUG_ENTER;

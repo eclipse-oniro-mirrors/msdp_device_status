@@ -103,6 +103,11 @@ void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo in
     callback_view<void(ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)> callback)
 {
     FI_HILOGI("OnPerception: onPerception entry");
+    if (!CheckCallerIsSystemApp()) {
+        FI_HILOGE("OnPerception: non-system app");
+        ThrowBehaviorAwarenessErr(RET_NO_SYSTEM_API, "non-system app");
+        return;
+    }
     OHOS::Msdp::DeviceStatus::BehaviorAwareness::SubscribeOptions nativeOptions;
     std::string domainStr(static_cast<const char*>(info.domain));
     if (domainStr == "habitAwareness") {
@@ -197,6 +202,11 @@ void OffPerception(
 void SubmitFeedback(ohos::multimodalAwareness::behaviorAwareness::FeedbackData feedback)
 {
     FI_HILOGI("SubmitFeedback: submitFeedback entry");
+    if (!CheckCallerIsSystemApp()) {
+        FI_HILOGE("SubmitFeedback: non-system app");
+        ThrowBehaviorAwarenessErr(RET_NO_SYSTEM_API, "non-system app");
+        return;
+    }
     OHOS::Msdp::DeviceStatus::BehaviorAwareness::FeedbackData nativeFeedback;
     nativeFeedback.perceptionEventId = std::string(feedback.perceptionEventId.c_str());
     nativeFeedback.feedbackType = static_cast<OHOS::Msdp::DeviceStatus::BehaviorAwareness::FeedbackType>(
