@@ -1262,12 +1262,10 @@ int32_t IntentionClient::Trigger(const OnScreen::AwarenessCap& cap, const OnScre
 #endif
 }
 
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 int32_t IntentionClient::SubscribePerception(const BehaviorAwareness::SubscribeOptions &options,
     const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback)
 {
-#ifndef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
-    return RET_NO_SUPPORT;
-#else
     CALL_DEBUG_ENTER;
     if (Connect() != RET_OK) {
         FI_HILOGE("can not get proxy");
@@ -1281,15 +1279,13 @@ int32_t IntentionClient::SubscribePerception(const BehaviorAwareness::SubscribeO
         FI_HILOGE("proxy:SubscribePerception failed, ret:%{public}d", ret);
     }
     return ret;
-#endif
 }
+#endif
 
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 int32_t IntentionClient::UnsubscribePerception(
     const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback)
 {
-#ifndef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
-    return RET_NO_SUPPORT;
-#else
     CALL_DEBUG_ENTER;
     if (Connect() != RET_OK) {
         FI_HILOGE("can not get proxy");
@@ -1302,14 +1298,12 @@ int32_t IntentionClient::UnsubscribePerception(
         FI_HILOGE("proxy:UnsubscribePerception failed, ret:%{public}d", ret);
     }
     return ret;
-#endif
 }
+#endif
 
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 int32_t IntentionClient::SubmitFeedback(const BehaviorAwareness::FeedbackData &feedback)
 {
-#ifndef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
-    return RET_NO_SUPPORT;
-#else
     CALL_DEBUG_ENTER;
     if (Connect() != RET_OK) {
         FI_HILOGE("can not get proxy");
@@ -1323,8 +1317,8 @@ int32_t IntentionClient::SubmitFeedback(const BehaviorAwareness::FeedbackData &f
         FI_HILOGE("proxy:SubmitFeedback failed, ret:%{public}d", ret);
     }
     return ret;
-#endif
 }
+#endif
 
 void IntentionClient::ResetProxy(const wptr<IRemoteObject> &remote)
 {

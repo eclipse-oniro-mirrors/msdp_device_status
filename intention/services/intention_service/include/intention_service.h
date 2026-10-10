@@ -18,7 +18,11 @@
 
 #include "nocopyable.h"
 
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 #include "behavior_awareness_server.h"
+#else
+constexpr int32_t BEHAVIOR_AWARENESS_NOT_SUPPORTED = 801;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 #include "boomerang_dumper.h"
 #include "boomerang_server.h"
 #include "cooperate_server.h"
@@ -209,7 +213,9 @@ private:
     BoomerangServer boomerang_;
     BoomerangDumper boomerangDumper_;
     OnScreen::OnScreenServer onScreen_;
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
     BehaviorAwareness::BehaviorAwarenessServer behaviorAwareness_;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 #ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
     CarAwarenessServer carAwareness_;
 #endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE

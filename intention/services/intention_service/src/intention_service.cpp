@@ -38,6 +38,9 @@ constexpr int32_t RET_NO_SUPPORT = 801;
 #ifndef DEVICE_STATUS_CAR_AWARENESS_ENABLE
 constexpr int32_t CAR_AWARENESS_NOT_SUPPORTED = 801;
 #endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+#ifndef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+constexpr int32_t BEHAVIOR_AWARENESS_NOT_SUPPORTED = 801;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 };
 IntentionService::IntentionService(IContext *context)
     : context_(context), socketServer_(context),
@@ -1052,6 +1055,7 @@ ErrCode IntentionService::SubscribePerception(
     const BehaviorAwareness::SequenceableSubscribeOptions &options,
     const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &behaviorCallback)
 {
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
     CallingContext context = GetCallingContext();
     CHKPR(context_, RET_ERR);
     auto expired = std::make_shared<std::atomic_bool>(false);
@@ -1070,11 +1074,17 @@ ErrCode IntentionService::SubscribePerception(
         expired->store(true);
     }
     return ret;
+#else
+    (void)options;
+    (void)behaviorCallback;
+    return BEHAVIOR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 }
 
 ErrCode IntentionService::UnsubscribePerception(
     const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &behaviorCallback)
 {
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
     CallingContext context = GetCallingContext();
     CHKPR(context_, RET_ERR);
     auto expired = std::make_shared<std::atomic_bool>(false);
@@ -1091,10 +1101,15 @@ ErrCode IntentionService::UnsubscribePerception(
         expired->store(true);
     }
     return ret;
+#else
+    (void)behaviorCallback;
+    return BEHAVIOR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 }
 
 ErrCode IntentionService::SubmitFeedback(const BehaviorAwareness::SequenceableFeedbackData &feedback)
 {
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
     CallingContext context = GetCallingContext();
     CHKPR(context_, RET_ERR);
     auto expired = std::make_shared<std::atomic_bool>(false);
@@ -1111,6 +1126,10 @@ ErrCode IntentionService::SubmitFeedback(const BehaviorAwareness::SequenceableFe
         expired->store(true);
     }
     return ret;
+#else
+    (void)feedback;
+    return BEHAVIOR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 }
 } // namespace DeviceStatus
 } // namespace Msdp

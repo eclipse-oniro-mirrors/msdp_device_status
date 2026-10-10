@@ -72,8 +72,16 @@ ohos_shared_library("behaviorawareness_napi") {
   if (device_status_phone_standard_lite) {
     defines += [ "DEVICE_STATUS_PHONE_STANDARD_LITE" ]
   }
+  defines += [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
 
   relative_install_dir = "module/multimodalawareness"
   subsystem_name = "msdp"
   part_name = "${device_status_part_name}"
+}
+
+group("behaviorawareness_napi_module") {
+  deps = []
+  if (device_status_behavior_awareness_enable) {
+    deps = [ ":behaviorawareness_napi" ]
+  }
 }

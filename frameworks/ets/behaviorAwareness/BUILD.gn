@@ -98,11 +98,13 @@ taihe_shared_library("behaviorAwareness_ani") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+
+  defines = [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
 }
 
 group("behaviorAwareness_module") {
   deps = []
-  if (!device_status_phone_standard_lite) {
+  if (device_status_behavior_awareness_enable) {
     deps = [
       ":behaviorAwareness_etc",
       ":behaviorAwareness_ani",

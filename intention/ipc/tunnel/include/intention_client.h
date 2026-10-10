@@ -133,11 +133,13 @@ public:
         OnScreen::OnscreenAwarenessInfo& info);
 
     // BehaviorAwareness
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
     int32_t SubscribePerception(const BehaviorAwareness::SubscribeOptions &options,
         const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback);
     int32_t UnsubscribePerception(
         const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback);
     int32_t SubmitFeedback(const BehaviorAwareness::FeedbackData &feedback);
+#endif
 
     void SetSaReviveCallback(std::function<void()> callback);
 
