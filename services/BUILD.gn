@@ -189,6 +189,10 @@ ohos_shared_library("devicestatus_service") {
     ]
   }
 
+  if (device_status_behavior_awareness_enable) {
+    defines += [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
+  }
+
   subsystem_name = "${device_status_subsystem_name}"
   part_name = "${device_status_part_name}"
 }
@@ -262,6 +266,10 @@ ohos_static_library("devicestatus_static_service") {
   if (device_status_motion_enable) {
     defines += [ "MOTION_ENABLE" ]
     external_deps += [ "motion:motion_interface_native" ]
+  }
+
+  if (device_status_behavior_awareness_enable) {
+    defines += [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"
