@@ -18,6 +18,7 @@
 #ifndef INTENTION_CLIENT_H
 #define INTENTION_CLIENT_H
 
+#include <functional>
 #include <memory>
 
 #include "iintention.h"
@@ -131,6 +132,17 @@ public:
     int32_t Trigger(const OnScreen::AwarenessCap& cap, const OnScreen::AwarenessOptions& option,
         OnScreen::OnscreenAwarenessInfo& info);
 
+    // BehaviorAwareness
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+    int32_t SubscribePerception(const BehaviorAwareness::SubscribeOptions &options,
+        const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback);
+    int32_t UnsubscribePerception(
+        const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback);
+    int32_t SubmitFeedback(const BehaviorAwareness::FeedbackData &feedback);
+#endif
+
+    void SetSaReviveCallback(std::function<void()> callback);
+
 #ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
     // CarAwareness
     int32_t SubscribeCapability(int32_t type, const CarAwarenessOption &option, const sptr<ICarAwarenessCallback> &cb);
@@ -191,6 +203,7 @@ private:
     static std::shared_ptr<IntentionClient> instance_;
     std::atomic_uint64_t deathDisplayId_ { UINT64_MAX };
     std::atomic_uint64_t deathScreenId_ { UINT64_MAX };
+    std::function<void()> saReviveCallback_ { nullptr };
 };
 
 #define INTENTION_CLIENT OHOS::Msdp::DeviceStatus::IntentionClient::GetInstance()

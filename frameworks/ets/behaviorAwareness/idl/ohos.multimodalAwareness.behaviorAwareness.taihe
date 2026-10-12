@@ -1,0 +1,150 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.multimodalAwareness.behaviorAwareness", "behaviorAwareness")
+@!sts_inject("""
+static { loadLibraryWithPermissionCheck("behaviorAwareness_ani.z", "@ohos.multimodalAwareness.behaviorAwareness"); }
+""")
+
+enum PerceptionDomain : String {
+    HABIT_AWARENESS = "habitAwareness"
+}
+
+enum PatternType : String {
+    TIME_PATTERN = "timePattern",
+    LOCATION_PATTERN = "locationPattern",
+    EVENT_PATTERN = "eventPattern"
+}
+
+enum EventType : String {
+    DAILY_TIME = "dailyTime",
+    WEEKLY_TIME = "weeklyTime",
+    MONTHLY_TIME = "monthlyTime",
+    WORKDAY_TIME = "workdayTime",
+    LOCATION_ARRIVE = "locationArrive",
+    APP_LAUNCH = "appLaunch",
+    APP_EXIT = "appExit",
+    APP_USAGE_SINGLE = "appUsageSingle",
+    APP_USAGE_DAILY = "appUsageDaily",
+    ALARM_DISMISS = "alarmDismiss",
+    CHARGE_START = "chargeStart",
+    CHARGE_END = "chargeEnd",
+    CHARGE_FULL = "chargeFull",
+    BATTERY_ABOVE = "batteryAbove",
+    BATTERY_BELOW = "batteryBelow",
+    BLUETOOTH_CONNECT = "bluetoothConnect",
+    BLUETOOTH_DISCONNECT = "bluetoothDisconnect",
+    PHONE_RING = "phoneRing"
+}
+
+enum ActionType : String {
+    APP_CLOSE = "appClose",
+    APP_OPEN = "appOpen",
+    EYE_PROTECT_MODE = "eyeProtectMode",
+    DARK_MODE = "darkMode",
+    PERSONAL_HOTSPOT = "personalHotspot",
+    MOBILE_DATA = "mobileData",
+    WIFI = "wifi",
+    AIRPLANE_MODE = "airplaneMode",
+    BLUETOOTH = "bluetooth",
+    NFC = "nfc",
+    ROTATION_LOCK = "rotationLock",
+    POWER_SAVING = "powerSaving",
+    SOUND_MODE = "soundMode",
+    SCREEN_BRIGHTNESS = "screenBrightness",
+    VOLUME = "volume",
+    SHUTDOWN = "shutdown",
+    REBOOT = "reboot"
+}
+
+enum SoundMode : String {
+    VIBRATE = "vibrate",
+    SILENT = "silent",
+    RING = "ring"
+}
+
+enum BluetoothDeviceType : i32 {
+    DEFAULT = 0,
+    CAR = 1,
+    HEADSET = 2,
+    HEARING = 3,
+    GLASSES = 4,
+    WATCH = 5,
+    SPEAKER = 6,
+    OTHERS = 7
+}
+
+enum FeedbackType : i32 {
+    ACCEPT = 0,
+    IGNORE = 1,
+    REJECT = 2,
+    EDIT = 3,
+    NOT_PUSHED = 4
+}
+
+enum RecurrenceType : String {
+    DAILY = "daily",
+    WEEKLY = "weekly",
+    MONTHLY = "monthly",
+    WORKDAY = "workday"
+}
+
+enum LocationType : String {
+    HOME = "home",
+    COMPANY = "company",
+    CUSTOM = "custom"
+}
+
+enum Operation : String {
+    ON = "on",
+    OFF = "off",
+    TOGGLE = "toggle"
+}
+
+enum AdjustmentDirection : String {
+    UP = "up",
+    DOWN = "down"
+}
+
+struct SubscribeInfo {
+    domain: PerceptionDomain;
+    patternTypes: Optional<Array<PatternType>>;
+}
+
+struct PerceptionEvent {
+    perceptionEventId: String;
+    domain: PerceptionDomain;
+    confidence: i32;
+    generateTime: i64;
+    payload: @record Map<String, Opaque>;
+}
+
+struct FeedbackData {
+    perceptionEventId: String;
+    feedbackType: FeedbackType;
+    feedbackTime: i64;
+}
+
+@rename("onPerception")
+@promise function OnPerception(
+    info: SubscribeInfo,
+    callback: (data: PerceptionEvent) => void): void;
+
+@rename("offPerception")
+@promise function OffPerception(
+    callback: Optional<(data: PerceptionEvent) => void>): void;
+
+@rename("submitFeedback")
+@promise function SubmitFeedback(feedback: FeedbackData): void;

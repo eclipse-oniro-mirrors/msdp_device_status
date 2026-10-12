@@ -32,6 +32,10 @@ group("intention_test") {
     "onscreen:unittest"
   ]
 
+  if (device_status_behavior_awareness_enable) {
+    deps += [ "behavior_awareness:unittest" ]
+  }
+
   if (device_status_car_awareness_enable) {
     deps += [ "car_awareness:unittest" ]
   }

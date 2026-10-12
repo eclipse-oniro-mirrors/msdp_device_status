@@ -23,6 +23,7 @@ config("intention_service_config") {
     "${device_status_root_path}/intention/prototype/include",
     "${device_status_root_path}/intention/boomerang/server/include",
     "${device_status_root_path}/intention/onscreen/server/include",
+    "${device_status_root_path}/intention/behavior_awareness/server/include",
   ]
 }
 
@@ -57,6 +58,11 @@ ohos_shared_library("intention_service") {
         [ "${device_status_root_path}/intention/car_awareness/server/include" ]
   }
 
+  if (device_status_behavior_awareness_enable) {
+    include_dirs +=
+        [ "${device_status_root_path}/intention/behavior_awareness/server/include" ]
+  }
+
   sources = [
     "${device_status_frameworks_path}/native/src/boomerang_callback_proxy.cpp",
     "src/boomerang_dumper.cpp",
@@ -75,7 +81,7 @@ ohos_shared_library("intention_service") {
     "${device_status_root_path}/intention/stationary/server:intention_stationary_server",
     "${device_status_root_path}/utils/common:devicestatus_util",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
-    "${device_status_root_path}/intention/onscreen/server:intention_on_screen_server"
+    "${device_status_root_path}/intention/onscreen/server:intention_on_screen_server",
   ]
 
   if (device_status_interaction_coordination) {
@@ -84,6 +90,10 @@ ohos_shared_library("intention_service") {
 
   if (device_status_car_awareness_enable) {
     deps += [ "${device_status_root_path}/intention/car_awareness/server:intention_car_awareness_server" ]
+  }
+
+  if (device_status_behavior_awareness_enable) {
+    deps += [ "${device_status_root_path}/intention/behavior_awareness/server:behavior_awareness_server" ]
   }
 
   external_deps = [
@@ -126,6 +136,10 @@ if (device_status_sensor_enable) {
 
   if(device_status_car_awareness_enable){
     defines += [ "DEVICE_STATUS_CAR_AWARENESS_ENABLE" ]
+  }
+
+  if (device_status_behavior_awareness_enable) {
+    defines += [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"

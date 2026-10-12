@@ -122,6 +122,15 @@
             "OHOS::Msdp::DeviceStatus::CarAwarenessMgr::GetSupportCapabilityList(std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
             "OHOS::Msdp::DeviceStatus::CarAwarenessMgr::UpdateSpatialActionStatus(int)";
             "OHOS::Msdp::DeviceStatus::CarAwarenessMgr::GetCarAwareness(int, OHOS::Msdp::CarAwarenessOption const&, std::__h::vector<OHOS::Msdp::CarAwarenessEvent, std::__h::allocator<OHOS::Msdp::CarAwarenessEvent>>&)";
+
+            "VTT for OHOS::Msdp::DeviceStatus::BehaviorAwareness::BehaviorAwarenessCallbackStub";
+            "OHOS::Msdp::DeviceStatus::BehaviorAwareness::BehaviorAwarenessCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+
+            "OHOS::Msdp::DeviceStatus::IntentionClient::GetInstance()";
+            "OHOS::Msdp::DeviceStatus::IntentionClient::SubscribePerception(OHOS::Msdp::DeviceStatus::BehaviorAwareness::SubscribeOptions const&, OHOS::sptr<OHOS::Msdp::DeviceStatus::BehaviorAwareness::IRemoteBehaviorAwarenessCallback> const&)";
+            "OHOS::Msdp::DeviceStatus::IntentionClient::UnsubscribePerception(OHOS::sptr<OHOS::Msdp::DeviceStatus::BehaviorAwareness::IRemoteBehaviorAwarenessCallback> const&)";
+            "OHOS::Msdp::DeviceStatus::IntentionClient::SubmitFeedback(OHOS::Msdp::DeviceStatus::BehaviorAwareness::FeedbackData const&)";
+            "OHOS::Msdp::DeviceStatus::IntentionClient::SetSaReviveCallback(std::__h::function<void ()>)";
         };
     local:
         *;

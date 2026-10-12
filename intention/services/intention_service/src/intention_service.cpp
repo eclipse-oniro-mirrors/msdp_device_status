@@ -38,6 +38,9 @@ constexpr int32_t RET_NO_SUPPORT = 801;
 #ifndef DEVICE_STATUS_CAR_AWARENESS_ENABLE
 constexpr int32_t CAR_AWARENESS_NOT_SUPPORTED = 801;
 #endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
+#ifndef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+constexpr int32_t BEHAVIOR_AWARENESS_NOT_SUPPORTED = 801;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 };
 IntentionService::IntentionService(IContext *context)
     : context_(context), socketServer_(context),
@@ -1048,6 +1051,86 @@ ErrCode IntentionService::InitCarAwareness()
 #endif  // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 }
 
+ErrCode IntentionService::SubscribePerception(
+    const BehaviorAwareness::SequenceableSubscribeOptions &options,
+    const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &behaviorCallback)
+{
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+    CallingContext context = GetCallingContext();
+    CHKPR(context_, RET_ERR);
+    auto expired = std::make_shared<std::atomic_bool>(false);
+    auto &optionsRef = options;
+    auto &callbackRef = behaviorCallback;
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
+        [this, context, &optionsRef, &callbackRef, expired]() -> int32_t {
+            if (expired->load()) {
+                FI_HILOGI("SubscribePerception expired, skip execution");
+                return ETASKS_WAIT_TIMEOUT;
+            }
+            return behaviorAwareness_.SubscribePerception(
+                context, optionsRef.options_, callbackRef);
+        });
+    if (ret == ETASKS_WAIT_TIMEOUT) {
+        expired->store(true);
+    }
+    return ret;
+#else
+    (void)options;
+    (void)behaviorCallback;
+    return BEHAVIOR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+}
+
+ErrCode IntentionService::UnsubscribePerception(
+    const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &behaviorCallback)
+{
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+    CallingContext context = GetCallingContext();
+    CHKPR(context_, RET_ERR);
+    auto expired = std::make_shared<std::atomic_bool>(false);
+    auto &callbackRef = behaviorCallback;
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
+        [this, context, &callbackRef, expired]() -> int32_t {
+            if (expired->load()) {
+                FI_HILOGI("UnsubscribePerception expired, skip execution");
+                return ETASKS_WAIT_TIMEOUT;
+            }
+            return behaviorAwareness_.UnsubscribePerception(context, callbackRef);
+        });
+    if (ret == ETASKS_WAIT_TIMEOUT) {
+        expired->store(true);
+    }
+    return ret;
+#else
+    (void)behaviorCallback;
+    return BEHAVIOR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+}
+
+ErrCode IntentionService::SubmitFeedback(const BehaviorAwareness::SequenceableFeedbackData &feedback)
+{
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+    CallingContext context = GetCallingContext();
+    CHKPR(context_, RET_ERR);
+    auto expired = std::make_shared<std::atomic_bool>(false);
+    auto &feedbackRef = feedback;
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask(
+        [this, context, &feedbackRef, expired]() -> int32_t {
+            if (expired->load()) {
+                FI_HILOGI("SubmitFeedback expired, skip execution");
+                return ETASKS_WAIT_TIMEOUT;
+            }
+            return behaviorAwareness_.SubmitFeedback(context, feedbackRef.data_);
+        });
+    if (ret == ETASKS_WAIT_TIMEOUT) {
+        expired->store(true);
+    }
+    return ret;
+#else
+    (void)feedback;
+    return BEHAVIOR_AWARENESS_NOT_SUPPORTED;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

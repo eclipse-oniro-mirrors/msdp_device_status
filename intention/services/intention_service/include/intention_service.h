@@ -18,6 +18,11 @@
 
 #include "nocopyable.h"
 
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+#include "behavior_awareness_server.h"
+#else
+constexpr int32_t BEHAVIOR_AWARENESS_NOT_SUPPORTED = 801;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 #include "boomerang_dumper.h"
 #include "boomerang_server.h"
 #include "cooperate_server.h"
@@ -173,6 +178,14 @@ public:
     ErrCode GetCarAwareness(int32_t type, const SequenceableCarAwarenessOption &option,
         SequenceableCarAwarenessEventArray &events) override;
     ErrCode InitCarAwareness();
+
+    // BehaviorAwareness
+    ErrCode SubscribePerception(const BehaviorAwareness::SequenceableSubscribeOptions &options,
+        const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &behaviorCallback) override;
+    ErrCode UnsubscribePerception(
+        const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &behaviorCallback) override;
+    ErrCode SubmitFeedback(const BehaviorAwareness::SequenceableFeedbackData &feedback) override;
+
     // hidumper
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
 
@@ -200,6 +213,9 @@ private:
     BoomerangServer boomerang_;
     BoomerangDumper boomerangDumper_;
     OnScreen::OnScreenServer onScreen_;
+#ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+    BehaviorAwareness::BehaviorAwarenessServer behaviorAwareness_;
+#endif // DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
 #ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
     CarAwarenessServer carAwareness_;
 #endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
