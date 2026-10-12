@@ -40,14 +40,14 @@ enum PickupEvent : i32 {
 
 enum RotateEvent : i32 {
     UNCHANGED = -1,
-    UNRIGHT = 0,
+    UPRIGHT = 0,
     LEFT = 1,
     INVERTED = 2,
     RIGHT = 3
 }
 
 enum PhysicalOrientation : i32 {
-    UNRIGHT = 0,
+    UPRIGHT = 0,
     LEFT = 1,
     INVERTED = 2,
     RIGHT = 3,
@@ -57,7 +57,7 @@ enum PhysicalOrientation : i32 {
 
 enum LogicalOrientation : i32 {
     UNKNOWN = -1,
-    UNRIGHT = 0,
+    UPRIGHT = 0,
     LEFT = 1,
     INVERTED = 2,
     RIGHT = 3
