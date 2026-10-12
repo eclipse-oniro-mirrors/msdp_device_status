@@ -47,6 +47,7 @@ ohos_shared_library("draginteraction") {
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
+    "libuv:uv",
     "napi:ace_napi",
     "node:node_header_notice",
   ]
