@@ -19,7 +19,7 @@
       "SystemCapability.MultimodalAwareness.OnScreenAwareness",
       "SystemCapability.MultimodalAwareness.UserStatus",
       "SystemCapability.MultimodalAwareness.DeviceStatus",
-      "SystemCapability.MultimodalAwareness.CarAwareness"
+      "SystemCapability.MultimodalAwareness.CarAwareness = false"
     ],
     "hisysevent_config": [
       "//base/msdp/device_status/hisysevent.yaml",
