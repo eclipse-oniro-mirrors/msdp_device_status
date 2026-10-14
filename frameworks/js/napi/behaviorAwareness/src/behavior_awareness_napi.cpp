@@ -43,6 +43,7 @@ constexpr int32_t FEEDBACK_IGNORE = 1;
 constexpr int32_t FEEDBACK_REJECT = 2;
 constexpr int32_t FEEDBACK_EDIT = 3;
 constexpr int32_t FEEDBACK_NOT_PUSHED = 4;
+constexpr size_t FEEDBACK_TYPE_COUNT = 5;
 constexpr size_t EVENT_TYPE_COUNT = 18;
 constexpr size_t ACTION_TYPE_COUNT = 17;
 constexpr size_t BT_TYPE_COUNT = 8;
@@ -272,7 +273,7 @@ void RegisterIntEnums(napi_env env, napi_value exports)
         {"REJECT", FEEDBACK_REJECT}, {"EDIT", FEEDBACK_EDIT},
         {"NOT_PUSHED", FEEDBACK_NOT_PUSHED}
     };
-    RegisterIntEnum(env, exports, "FeedbackType", feedbackE, ARG_2 + ARG_1);
+    RegisterIntEnum(env, exports, "FeedbackType", feedbackE, FEEDBACK_TYPE_COUNT);
 
     IntEnumEntry btE[] = {
         {"DEFAULT", 0}, {"CAR", 1}, {"HEADSET", 2}, {"HEARING", 3},
