@@ -302,18 +302,30 @@ bool IsMatchTypeImpl(napi_env env, napi_value value, napi_valuetype type)
 
 bool ParsePatternTypes(napi_env env, napi_value patternVal, SubscribeOptions &options)
 {
+    napi_valuetype valType = napi_undefined;
+    napi_typeof(env, patternVal, &valType);
+    if (valType == napi_undefined || valType == napi_null) {
+        FI_HILOGE("patternTypes must be an array");
+        return false;
+    }
     bool isArray = false;
     napi_is_array(env, patternVal, &isArray);
     if (!isArray) {
-        return true;
+        FI_HILOGE("patternTypes must be an array");
+        return false;
     }
     uint32_t length = 0;
     napi_get_array_length(env, patternVal, &length);
+    if (length == 0) {
+        FI_HILOGE("patternTypes must not be empty");
+        return false;
+    }
     for (uint32_t i = 0; i < length; ++i) {
         napi_value elem = nullptr;
         napi_get_element(env, patternVal, i, &elem);
         if (!IsMatchTypeImpl(env, elem, napi_string)) {
-            continue;
+            FI_HILOGE("patternTypes[%{public}u] is not a string", i);
+            return false;
         }
         char pbuf[64] = {0};
         size_t plen = 0;
@@ -325,6 +337,9 @@ bool ParsePatternTypes(napi_env env, napi_value patternVal, SubscribeOptions &op
             options.patternTypes.push_back(static_cast<int32_t>(PatternType::LOCATION_PATTERN));
         } else if (ps == "eventPattern") {
             options.patternTypes.push_back(static_cast<int32_t>(PatternType::EVENT_PATTERN));
+        } else {
+            FI_HILOGE("patternTypes[%{public}u] value '%{public}s' is invalid", i, ps.c_str());
+            return false;
         }
     }
     return true;
@@ -432,7 +447,9 @@ bool BehaviorAwarenessNapi::GetSubscribeOptions(napi_env env, napi_value jsOptio
     napi_has_named_property(env, jsOptions, "patternTypes", &hasProp);
     if (hasProp) {
         napi_get_named_property(env, jsOptions, "patternTypes", &patternVal);
-        ParsePatternTypes(env, patternVal, options);
+        if (!ParsePatternTypes(env, patternVal, options)) {
+            return false;
+        }
     }
     return true;
 }

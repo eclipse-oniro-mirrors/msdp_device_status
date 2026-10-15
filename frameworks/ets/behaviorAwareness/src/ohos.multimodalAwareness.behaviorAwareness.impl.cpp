@@ -106,12 +106,19 @@ void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo in
         return;
     }
     if (info.patternTypes.has_value()) {
-        for (auto pt : info.patternTypes.value()) {
+        auto &pts = info.patternTypes.value();
+        if (pts.empty()) {
+            ThrowBehaviorAwarenessErr(RET_PARAM_EXCEPTION, "patternTypes must not be empty");
+            return;
+        }
+        for (auto pt : pts) {
             std::string ptStr(static_cast<const char*>(pt));
             int32_t ptVal = ConvertPatternType(ptStr);
-            if (ptVal >= 0) {
-                nativeOptions.patternTypes.push_back(ptVal);
+            if (ptVal < 0) {
+                ThrowBehaviorAwarenessErr(RET_PARAM_EXCEPTION, "invalid patternType");
+                return;
             }
+            nativeOptions.patternTypes.push_back(ptVal);
         }
     }
     auto callbackPtr = std::make_shared<taihe::callback<
