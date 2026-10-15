@@ -32,11 +32,13 @@ ohos_unittest("BehaviorAwarenessServerTest") {
     "${device_status_root_path}/interfaces/innerkits/include",
     "${device_status_root_path}/intention/prototype/include",
   ]
-  sources = [ "src/behavior_awareness_server_test.cpp" ]
+  sources = [
+    "src/behavior_awareness_server_test.cpp",
+    "${device_status_root_path}/intention/behavior_awareness/server/src/behavior_awareness_server.cpp",
+  ]
 
   deps = [
     "${device_status_interfaces_path}/innerkits:devicestatus_client",
-    "${device_status_root_path}/intention/behavior_awareness/server:behavior_awareness_server",
     "${device_status_root_path}/intention/prototype:intention_prototype",
     "${device_status_root_path}/utils/ipc:devicestatus_ipc",
     "${device_status_utils_path}:devicestatus_util",
@@ -92,10 +94,165 @@ ohos_unittest("BehaviorAwarenessIntegrationTest") {
   ]
 }
 
+ohos_unittest("BehaviorAwarenessManagerTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  cflags = [ "-fno-access-control" ]
+
+  module_out_path = module_output_path
+  include_dirs = [
+    "mock",
+    "${device_status_root_path}/frameworks/ets/behaviorAwareness/include",
+    "${device_status_root_path}/frameworks/ets/behaviorAwareness/src",
+    "${device_status_root_path}/intention/behavior_awareness/server/include",
+    "${device_status_root_path}/interfaces/innerkits/include",
+    "${device_status_root_path}/intention/prototype/include",
+    "${device_status_root_path}/intention/ipc/tunnel/include",
+    "${device_status_root_path}/intention/ipc/sequenceable_types/include",
+    "${device_status_root_path}/interfaces/innerkits/interaction/include",
+    "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
+    "${device_status_utils_path}/include",
+    "${root_out_dir}/gen/base/msdp/device_status/intention/ipc/tunnel",
+  ]
+  sources = [
+    "src/behavior_awareness_manager_test.cpp",
+    "${device_status_root_path}/frameworks/ets/behaviorAwareness/src/behavior_awareness_manager.cpp",
+  ]
+
+  configs = [
+    "${device_status_intention_path}/ipc/tunnel:intention_tunnel_public_config",
+  ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/behavior_awareness/server:behavior_awareness_server",
+    "${device_status_intention_path}/ipc/tunnel:intention_client",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+
+  include_dirs += [
+    "${device_status_root_path}/intention/ipc/sequenceable_types/include",
+    "${device_status_root_path}/interfaces/innerkits/interaction/include",
+    "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
+    "${device_status_root_path}/frameworks/ets/behaviorAwareness/src",
+  ]
+
+  defines = [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
+}
+
+ohos_unittest("BehaviorAwarenessCallbackTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  cflags = [ "-fno-access-control" ]
+
+  module_out_path = module_output_path
+  include_dirs = [
+    "${device_status_root_path}/interfaces/innerkits/include",
+    "${device_status_root_path}/intention/prototype/include",
+    "${device_status_root_path}/intention/ipc/tunnel/include",
+    "${device_status_root_path}/intention/ipc/sequenceable_types/include",
+    "${device_status_root_path}/interfaces/innerkits/interaction/include",
+    "${device_status_root_path}/interfaces/innerkits/car_awareness/include",
+    "${device_status_root_path}/utils/common/include",
+    "${root_out_dir}/gen/base/msdp/device_status/intention/ipc/tunnel",
+  ]
+  sources = [
+    "src/behavior_awareness_callback_test.cpp",
+    "${device_status_root_path}/frameworks/native/src/behavior_awareness_callback_stub.cpp",
+    "${device_status_root_path}/frameworks/native/src/behavior_awareness_callback_proxy.cpp",
+  ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_intention_path}/ipc/tunnel:intention_client",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+
+  defines = [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
+}
+
+ohos_unittest("BehaviorAwarenessSequenceableTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+
+  cflags = [ "-fno-access-control" ]
+
+  module_out_path = module_output_path
+  include_dirs = [
+    "${device_status_root_path}/interfaces/innerkits/include",
+    "${device_status_root_path}/intention/ipc/sequenceable_types/include",
+    "${device_status_utils_path}/include",
+    "${device_status_utils_path}",
+  ]
+  sources = [
+    "src/behavior_awareness_sequenceable_test.cpp",
+    "${device_status_root_path}/intention/ipc/sequenceable_types/src/sequenceable_feedback_data.cpp",
+    "${device_status_root_path}/intention/ipc/sequenceable_types/src/sequenceable_subscribe_options.cpp",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+  ]
+
+  defines = [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":BehaviorAwarenessServerTest",
     ":BehaviorAwarenessIntegrationTest",
+    ":BehaviorAwarenessManagerTest",
+    ":BehaviorAwarenessCallbackTest",
+    ":BehaviorAwarenessSequenceableTest",
   ]
 }

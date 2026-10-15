@@ -1263,6 +1263,7 @@ int32_t IntentionClient::Trigger(const OnScreen::AwarenessCap& cap, const OnScre
 }
 
 #ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+// LCOV_EXCL_START
 int32_t IntentionClient::SubscribePerception(const BehaviorAwareness::SubscribeOptions &options,
     const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback)
 {
@@ -1280,9 +1281,11 @@ int32_t IntentionClient::SubscribePerception(const BehaviorAwareness::SubscribeO
     }
     return ret;
 }
+// LCOV_EXCL_STOP
 #endif
 
 #ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+// LCOV_EXCL_START
 int32_t IntentionClient::UnsubscribePerception(
     const sptr<BehaviorAwareness::IRemoteBehaviorAwarenessCallback> &callback)
 {
@@ -1299,9 +1302,11 @@ int32_t IntentionClient::UnsubscribePerception(
     }
     return ret;
 }
+// LCOV_EXCL_STOP
 #endif
 
 #ifdef DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE
+// LCOV_EXCL_START
 int32_t IntentionClient::SubmitFeedback(const BehaviorAwareness::FeedbackData &feedback)
 {
     CALL_DEBUG_ENTER;
@@ -1318,6 +1323,7 @@ int32_t IntentionClient::SubmitFeedback(const BehaviorAwareness::FeedbackData &f
     }
     return ret;
 }
+// LCOV_EXCL_STOP
 #endif
 
 void IntentionClient::ResetProxy(const wptr<IRemoteObject> &remote)

@@ -318,6 +318,83 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback002, TestSize.Level1)
     int32_t ret = server_.SubmitFeedback(ctx, feedback);
     EXPECT_EQ(ret, BehaviorAwareness::COMMON_NOT_SYSTEM_APP);
 }
+
+/* ==================== Branch coverage: edge cases ==================== */
+
+HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception_Null_EmptyCache_ReturnsError, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, nullptr), BehaviorAwareness::UNSUBSCRIBE_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, NotifyClient_NullCallbackInSubscription_Skipped, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.subscriptions_["other_bundle:0:0"].callback = nullptr;
+    server_.NotifyClient(MakeEvent("evt-null-cb"));
+    EXPECT_EQ(cb->receivedEvents_.size(), 1u);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, RemoveMatchingSubscription_NullCallbackInCache_Skipped, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.subscriptions_[server_.subscriptions_.begin()->first].callback = nullptr;
+    int32_t ret = server_.UnsubscribePerception(ctx, cb);
+    EXPECT_EQ(ret, BehaviorAwareness::UNSUBSCRIBE_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, RemoveAllSubscriptions_SkipOtherBundle, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.subscriptions_["other_bundle:0:0"] = { PerceptionDomain::HABIT_AWARENESS, {}, cb };
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, nullptr), RET_OK);
+    EXPECT_TRUE(server_.subscriptions_.find("other_bundle:0:0") != server_.subscriptions_.end());
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, OnRemoteDied_NoMatchingSubscription, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    auto otherCb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(otherCb, nullptr);
+    server_.OnRemoteDied(otherCb->AsObject());
+    EXPECT_FALSE(server_.subscriptions_.empty());
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, RemoveMatchingSubscription_SkipOtherBundle, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    auto otherCb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(otherCb, nullptr);
+    server_.subscriptions_["other_bundle:0:0"] = { PerceptionDomain::HABIT_AWARENESS, {}, otherCb };
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, cb), RET_OK);
+    EXPECT_TRUE(server_.subscriptions_.find("other_bundle:0:0") != server_.subscriptions_.end());
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, OnRemoteDied_MatchingSubscription_Cleaned, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    EXPECT_FALSE(server_.subscriptions_.empty());
+    server_.OnRemoteDied(cb->AsObject());
+    EXPECT_TRUE(server_.subscriptions_.empty());
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
