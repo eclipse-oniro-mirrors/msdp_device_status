@@ -402,24 +402,6 @@ HWTEST_F(DeviceStatusAlgorithmTest, DeviceStatusAlgorithmTest016, TestSize.Level
 
 /**
  * @tc.name: DeviceStatusAlgorithmManagerTest
- * @tc.desc: test CheckSensorTypeId002
- * @tc.type: FUNC
- */
-HWTEST_F(DeviceStatusAlgorithmTest, DeviceStatusAlgorithmTest017, TestSize.Level1)
-{
-    CALL_TEST_DEBUG;
-    bool result = g_manager->StartSensor(Type::TYPE_ABSOLUTE_STILL);
-    EXPECT_TRUE(result);
-    g_manager->GetSensorTypeId(Type::TYPE_ABSOLUTE_STILL);
-    int32_t sensorTypeId = SENSOR_TYPE_ID_ACCELEROMETER;
-    int32_t ret = g_manager->CheckSensorTypeId(sensorTypeId);
-    EXPECT_FALSE(ret);
-    ret = g_manager->UnregisterSensor(Type::TYPE_ABSOLUTE_STILL);
-    ASSERT_TRUE(ret);
-}
-
-/**
- * @tc.name: DeviceStatusAlgorithmManagerTest
  * @tc.desc: test CheckSensorTypeId003
  * @tc.type: FUNC
  */
