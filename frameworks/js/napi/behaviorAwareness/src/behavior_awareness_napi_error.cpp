@@ -24,14 +24,6 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace BehaviorAwareness {
-std::map<int32_t, std::string> NAPI_ERROR_MESSAGES = {
-    { RET_NO_SYSTEM_API,
-        "Permission verification failed. A non-system application uses the system API." },
-    { RET_PARAM_EXCEPTION, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified; "
-        "2. Incorrect parameter types; 3. Parameter verification failed." },
-    { RET_SERVICE_EXCEPTION, "Service exception." },
-    { RET_UNSUBSCRIBE_EXCEPTION, "Unsubscription failed." },
-};
 
 napi_value CreateBehaviorAwarenessNapiError(const napi_env &env, int32_t errCode,
     const std::string &errMessage)
@@ -48,12 +40,12 @@ napi_value CreateBehaviorAwarenessNapiError(const napi_env &env, int32_t errCode
 
 std::optional<std::string> GetBehaviorAwarenessErrMsg(int32_t errCode)
 {
-    auto iter = NAPI_ERROR_MESSAGES.find(errCode);
-    if (iter != NAPI_ERROR_MESSAGES.end()) {
-        return iter->second;
+    auto msg = GetErrMsg(errCode);
+    if (msg.empty()) {
+        FI_HILOGE("Error messages not found");
+        return std::nullopt;
     }
-    FI_HILOGE("Error messages not found");
-    return std::nullopt;
+    return msg;
 }
 
 void ThrowBehaviorAwarenessErr(const napi_env &env, int32_t errCode, const std::string &printMsg)

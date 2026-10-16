@@ -34,6 +34,8 @@ public:
     ~BehaviorAwarenessServer() = default;
     DISALLOW_COPY_AND_MOVE(BehaviorAwarenessServer);
 
+    static bool CheckDeviceType();
+
     int32_t SubscribePerception(const CallingContext &context, const SubscribeOptions &options,
         const sptr<IRemoteBehaviorAwarenessCallback> &callback);
     int32_t UnsubscribePerception(const CallingContext &context,
@@ -51,6 +53,8 @@ private:
         const sptr<IRemoteBehaviorAwarenessCallback> &callback);
     void InitDeathRecipient();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
+
+    static const std::vector<std::string> SUPPORT_DEVICE_TYPE_;
 
     std::unordered_map<std::string, SubscriptionInfo> subscriptions_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;

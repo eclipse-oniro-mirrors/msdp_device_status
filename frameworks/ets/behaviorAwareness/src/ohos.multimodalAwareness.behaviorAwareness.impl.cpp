@@ -21,9 +21,10 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "devicestatus_define.h"
 #include "behavior_awareness_callback_taihe.h"
 #include "behavior_awareness_manager.h"
+#include "devicestatus_define.h"
+#include "parameters.h"
 
 namespace ANI::MultimodalAwareness {
 using namespace OHOS;
@@ -31,6 +32,7 @@ using namespace OHOS::Msdp::DeviceStatus;
 using namespace taihe;
 using namespace ohos::multimodalAwareness::behaviorAwareness;
 using namespace OHOS::Msdp::DeviceStatus::BehaviorAwareness;
+namespace BA = OHOS::Msdp::DeviceStatus::BehaviorAwareness;
 
 std::mutex g_mtx;
 std::map<std::string, sptr<BehaviorAwarenessCallbackTaihe>> g_callbacks;
@@ -47,38 +49,20 @@ bool CheckCallerIsSystemApp()
     return Security::AccessToken::AccessTokenKit::IsSystemAppByFullTokenID(fullTokenId);
 }
 
-enum BehaviorAwarenessErrCode {
-    RET_NO_SYSTEM_API = 202,
-    RET_PARAM_EXCEPTION = 401,
-    RET_SERVICE_EXCEPTION = 32500001,
-    RET_UNSUBSCRIBE_EXCEPTION = 32500003,
-};
-
-std::map<int32_t, std::string> ERROR_MESSAGES = {
-    { RET_NO_SYSTEM_API, "Permission verification failed. A non-system application uses the system API." },
-    { RET_PARAM_EXCEPTION, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified; "
-        "2. Incorrect parameter types; 3. Parameter verification failed." },
-    { RET_SERVICE_EXCEPTION, "Service exception." },
-    { RET_UNSUBSCRIBE_EXCEPTION, "Unsubscription failed." },
-};
-
-std::string GetErrMsg(int32_t errCode)
+bool CheckDeviceType()
 {
-    auto iter = ERROR_MESSAGES.find(errCode);
-    if (iter != ERROR_MESSAGES.end()) {
-        return iter->second;
-    }
-    FI_HILOGE("Error messages not found");
-    return "";
+    std::string deviceType = OHOS::system::GetParameter(
+        BA::DEVICE_TYPE_PARA_NAME, "");
+    return deviceType == BA::SUPPORTED_DEVICE_TYPE;
 }
 
 void ThrowBehaviorAwarenessErr(int32_t errCode, const std::string &printMsg)
 {
     FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", printMsg.c_str(), errCode);
-    auto msg = GetErrMsg(errCode);
+    auto msg = BA::GetErrMsg(errCode);
     if (msg.empty()) {
         FI_HILOGE("errCode:%{public}d is invalid", errCode);
-        taihe::set_business_error(RET_SERVICE_EXCEPTION, "Service exception.");
+        taihe::set_business_error(BA::SERVICE_EXCEPTION, "Service exception.");
         return;
     }
     taihe::set_business_error(errCode, msg.c_str());
@@ -105,15 +89,20 @@ void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo in
     FI_HILOGI("OnPerception: onPerception entry");
     if (!CheckCallerIsSystemApp()) {
         FI_HILOGE("OnPerception: non-system app");
-        ThrowBehaviorAwarenessErr(RET_NO_SYSTEM_API, "non-system app");
+        ThrowBehaviorAwarenessErr(BA::COMMON_NOT_SYSTEM_APP, "non-system app");
         return;
     }
-    OHOS::Msdp::DeviceStatus::BehaviorAwareness::SubscribeOptions nativeOptions;
+    if (!CheckDeviceType()) {
+        FI_HILOGE("OnPerception: device not support");
+        ThrowBehaviorAwarenessErr(BA::DEVICE_NOT_SUPPORT, "device not support");
+        return;
+    }
+    BA::SubscribeOptions nativeOptions;
     std::string domainStr(static_cast<const char*>(info.domain));
     if (domainStr == "habitAwareness") {
-        nativeOptions.domain = OHOS::Msdp::DeviceStatus::BehaviorAwareness::PerceptionDomain::HABIT_AWARENESS;
+        nativeOptions.domain = BA::PerceptionDomain::HABIT_AWARENESS;
     } else {
-        ThrowBehaviorAwarenessErr(RET_PARAM_EXCEPTION, "invalid domain");
+        ThrowBehaviorAwarenessErr(BA::PARAM_EXCEPTION, "invalid domain");
         return;
     }
     if (info.patternTypes.has_value()) {
@@ -129,7 +118,7 @@ void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo in
         void(ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)>>(callback);
     auto newCallback = new (std::nothrow) BehaviorAwarenessCallbackTaihe(callbackPtr);
     if (newCallback == nullptr) {
-        ThrowBehaviorAwarenessErr(RET_SERVICE_EXCEPTION, "failed to create callback");
+        ThrowBehaviorAwarenessErr(BA::SERVICE_EXCEPTION, "failed to create callback");
         return;
     }
     int32_t errNum = BehaviorAwarenessManager::GetInstance().SubscribePerception(nativeOptions, newCallback);
@@ -137,7 +126,7 @@ void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo in
         ThrowBehaviorAwarenessErr(errNum, "subscribe failed");
         return;
     }
-    std::string key = OHOS::Msdp::DeviceStatus::BehaviorAwareness::BuildSubscriptionKey(nativeOptions);
+    std::string key = BA::BuildSubscriptionKey(nativeOptions);
     {
         std::lock_guard<std::mutex> lk(g_mtx);
         g_callbacks[key] = newCallback;
@@ -164,7 +153,12 @@ void OffPerception(
     FI_HILOGI("OffPerception: offPerception entry");
     if (!CheckCallerIsSystemApp()) {
         FI_HILOGE("OffPerception: non-system app");
-        ThrowBehaviorAwarenessErr(RET_NO_SYSTEM_API, "non-system app");
+        ThrowBehaviorAwarenessErr(BA::COMMON_NOT_SYSTEM_APP, "non-system app");
+        return;
+    }
+    if (!CheckDeviceType()) {
+        FI_HILOGE("OffPerception: device not support");
+        ThrowBehaviorAwarenessErr(BA::DEVICE_NOT_SUPPORT, "device not support");
         return;
     }
     if (!callback.has_value()) {
@@ -181,7 +175,7 @@ void OffPerception(
     auto userCb = callback.value();
     auto matches = CollectMatchingTaihe(userCb);
     if (matches.empty()) {
-        ThrowBehaviorAwarenessErr(RET_UNSUBSCRIBE_EXCEPTION, "no active subscription");
+        ThrowBehaviorAwarenessErr(BA::UNSUBSCRIBE_EXCEPTION, "no active subscription");
         return;
     }
     int32_t lastErr = RET_OK;
@@ -209,12 +203,17 @@ void SubmitFeedback(ohos::multimodalAwareness::behaviorAwareness::FeedbackData f
     FI_HILOGI("SubmitFeedback: submitFeedback entry");
     if (!CheckCallerIsSystemApp()) {
         FI_HILOGE("SubmitFeedback: non-system app");
-        ThrowBehaviorAwarenessErr(RET_NO_SYSTEM_API, "non-system app");
+        ThrowBehaviorAwarenessErr(BA::COMMON_NOT_SYSTEM_APP, "non-system app");
         return;
     }
-    OHOS::Msdp::DeviceStatus::BehaviorAwareness::FeedbackData nativeFeedback;
+    if (!CheckDeviceType()) {
+        FI_HILOGE("SubmitFeedback: device not support");
+        ThrowBehaviorAwarenessErr(BA::DEVICE_NOT_SUPPORT, "device not support");
+        return;
+    }
+    BA::FeedbackData nativeFeedback;
     nativeFeedback.perceptionEventId = std::string(feedback.perceptionEventId.c_str());
-    nativeFeedback.feedbackType = static_cast<OHOS::Msdp::DeviceStatus::BehaviorAwareness::FeedbackType>(
+    nativeFeedback.feedbackType = static_cast<BA::FeedbackType>(
         static_cast<int32_t>(feedback.feedbackType));
     nativeFeedback.feedbackTime = feedback.feedbackTime;
     int32_t errNum = BehaviorAwarenessManager::GetInstance().SubmitFeedback(nativeFeedback);

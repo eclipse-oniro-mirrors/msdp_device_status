@@ -27,8 +27,13 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace BehaviorAwareness {
 constexpr int32_t COMMON_NOT_SYSTEM_APP = 202;
+constexpr int32_t PARAM_EXCEPTION = 401;
+constexpr int32_t DEVICE_NOT_SUPPORT = 801;
 constexpr int32_t SERVICE_EXCEPTION = 32500001;
 constexpr int32_t UNSUBSCRIBE_EXCEPTION = 32500003;
+
+constexpr const char *DEVICE_TYPE_PARA_NAME = "const.product.devicetype";
+constexpr const char *SUPPORTED_DEVICE_TYPE = "phone";
 
 enum class PerceptionDomain : int32_t {
     HABIT_AWARENESS = 0,
@@ -75,6 +80,29 @@ inline std::string BuildSubscriptionKey(const SubscribeOptions &options)
         oss << ":" << pt;
     }
     return oss.str();
+}
+
+inline const std::map<int32_t, std::string>& GetErrorMsgMap()
+{
+    static const std::map<int32_t, std::string> messages = {
+        { COMMON_NOT_SYSTEM_APP, "Permission verification failed. A non-system application uses the system API." },
+        { PARAM_EXCEPTION, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified; "
+            "2. Incorrect parameter types; 3. Parameter verification failed." },
+        { DEVICE_NOT_SUPPORT, "Capability not supported. Possible causes: "
+            "1. The hardware does not support the capability." },
+        { SERVICE_EXCEPTION, "Service exception." }, { UNSUBSCRIBE_EXCEPTION, "Unsubscription failed." },
+    };
+    return messages;
+}
+
+inline std::string GetErrMsg(int32_t errCode)
+{
+    auto& messages = GetErrorMsgMap();
+    auto iter = messages.find(errCode);
+    if (iter != messages.end()) {
+        return iter->second;
+    }
+    return "";
 }
 } // namespace BehaviorAwareness
 } // namespace DeviceStatus

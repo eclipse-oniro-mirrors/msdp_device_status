@@ -23,6 +23,7 @@
 #include "fi_log.h"
 #include "ipc_skeleton.h"
 #include "nativetoken_kit.h"
+#include "parameters.h"
 #include "token_setproc.h"
 
 #undef LOG_TAG
@@ -117,8 +118,14 @@ class BehaviorAwarenessServerTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
+    void SetUp() override
+    {
+        std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
+        if (deviceType != "phone") {
+            GTEST_SKIP() << "BehaviorAwareness only supports phone, current device: " << deviceType;
+        }
+    }
+    void TearDown() override {}
     BehaviorAwarenessServer server_;
 };
 
@@ -394,6 +401,52 @@ HWTEST_F(BehaviorAwarenessServerTest, OnRemoteDied_MatchingSubscription_Cleaned,
     EXPECT_FALSE(server_.subscriptions_.empty());
     server_.OnRemoteDied(cb->AsObject());
     EXPECT_TRUE(server_.subscriptions_.empty());
+}
+
+/* ==================== DeviceType check (801) ==================== */
+
+class BehaviorAwarenessServerDeviceTypeTest : public testing::Test {
+public:
+    static void SetUpTestCase() {}
+    static void TearDownTestCase() {}
+    void SetUp() override
+    {
+        savedTypes_ = BehaviorAwarenessServer::SUPPORT_DEVICE_TYPE_;
+        const_cast<std::vector<std::string>&>(BehaviorAwarenessServer::SUPPORT_DEVICE_TYPE_).clear();
+    }
+    void TearDown() override
+    {
+        const_cast<std::vector<std::string>&>(BehaviorAwarenessServer::SUPPORT_DEVICE_TYPE_) = savedTypes_;
+    }
+    BehaviorAwarenessServer server_;
+    std::vector<std::string> savedTypes_;
+};
+
+HWTEST_F(BehaviorAwarenessServerDeviceTypeTest, SubscribePerception_UnsupportedDevice_Returns801, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), BehaviorAwareness::DEVICE_NOT_SUPPORT);
+}
+
+HWTEST_F(BehaviorAwarenessServerDeviceTypeTest, UnsubscribePerception_UnsupportedDevice_Returns801, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, cb), BehaviorAwareness::DEVICE_NOT_SUPPORT);
+}
+
+HWTEST_F(BehaviorAwarenessServerDeviceTypeTest, SubmitFeedback_UnsupportedDevice_Returns801, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "fb-001",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::DEVICE_NOT_SUPPORT);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

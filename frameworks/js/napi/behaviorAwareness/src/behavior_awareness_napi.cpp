@@ -25,6 +25,7 @@
 
 #include "devicestatus_define.h"
 #include "fi_log.h"
+#include "parameters.h"
 #include "util_napi.h"
 
 #undef LOG_TAG
@@ -66,6 +67,12 @@ bool CheckCallerIsSystemApp()
     }
     auto fullTokenId = IPCSkeleton::GetCallingFullTokenID();
     return Security::AccessToken::AccessTokenKit::IsSystemAppByFullTokenID(fullTokenId);
+}
+
+bool CheckDeviceType()
+{
+    std::string deviceType = OHOS::system::GetParameter(DEVICE_TYPE_PARA_NAME, "");
+    return deviceType == SUPPORTED_DEVICE_TYPE;
 }
 
 bool IsMatchTypeImpl(napi_env env, napi_value value, napi_valuetype type);
@@ -147,7 +154,7 @@ void RejectPromise(napi_env env, napi_deferred deferred, int32_t errCode, const 
     auto msg = GetBehaviorAwarenessErrMsg(errCode);
     if (!msg) {
         FI_HILOGE("errCode:%{public}d is invalid, fallback to SERVICE_EXCEPTION", errCode);
-        errCode = RET_SERVICE_EXCEPTION;
+        errCode = SERVICE_EXCEPTION;
         msg = "Service exception.";
     }
     napi_value error = CreateBehaviorAwarenessNapiError(env, errCode, msg.value());
@@ -543,37 +550,50 @@ bool BehaviorAwarenessNapi::SetPropertyName(napi_env env, napi_value targetObj,
     return true;
 }
 
+bool CheckAccess(napi_env env, napi_deferred deferred, const char *apiName)
+{
+    if (!CheckCallerIsSystemApp()) {
+        FI_HILOGE("%{public}s: non-system app", apiName);
+        RejectPromise(env, deferred, COMMON_NOT_SYSTEM_APP, "non-system app");
+        return false;
+    }
+    if (!CheckDeviceType()) {
+        FI_HILOGE("%{public}s: device not support", apiName);
+        RejectPromise(env, deferred, DEVICE_NOT_SUPPORT, "device not support");
+        return false;
+    }
+    return true;
+}
+
 napi_value BehaviorAwarenessNapi::OnPerception(napi_env env, napi_callback_info info)
 {
     FI_HILOGI("OnPerception: enter");
     napi_deferred deferred = nullptr;
     napi_value promise = CreatePromise(env, &deferred);
-    if (!CheckCallerIsSystemApp()) {
-        FI_HILOGE("OnPerception: non-system app");
-        RejectPromise(env, deferred, RET_NO_SYSTEM_API, "non-system app");
+    if (!CheckAccess(env, deferred, "OnPerception")) {
         return promise;
     }
     size_t argc = ARG_2;
     napi_value args[ARG_2] = { nullptr };
     napi_value jsThis = nullptr;
     if (napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr) != napi_ok || argc < ARG_2) {
-        RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "expected 2 args: options, callback");
+        RejectPromise(env, deferred, PARAM_EXCEPTION, "expected 2 args: options, callback");
         return promise;
     }
     SubscribeOptions options;
     if (!GetSubscribeOptions(env, args[ARG_0], options)) {
-        RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "options is invalid");
+        RejectPromise(env, deferred, PARAM_EXCEPTION, "options is invalid");
         return promise;
     }
     if (!IsMatchType(env, args[ARG_1], napi_function)) {
-        RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "callback must be function");
+        RejectPromise(env, deferred, PARAM_EXCEPTION, "callback must be function");
         return promise;
     }
     std::string key = BuildSubscriptionKey(options);
     bool isNewStub = false;
     sptr<BehaviorAwarenessNapiCallback> stub = FindOrCreateCallbackStub(env, key, isNewStub);
     if (stub == nullptr) {
-        RejectPromise(env, deferred, RET_SERVICE_EXCEPTION, "failed to create callback");
+        RejectPromise(env, deferred, SERVICE_EXCEPTION, "failed to create callback");
         return promise;
     }
     napi_ref newRef = nullptr;
@@ -600,26 +620,24 @@ napi_value BehaviorAwarenessNapi::OffPerception(napi_env env, napi_callback_info
     FI_HILOGI("OffPerception: enter");
     napi_deferred deferred = nullptr;
     napi_value promise = CreatePromise(env, &deferred);
-    if (!CheckCallerIsSystemApp()) {
-        FI_HILOGE("OffPerception: non-system app");
-        RejectPromise(env, deferred, RET_NO_SYSTEM_API, "non-system app");
+    if (!CheckAccess(env, deferred, "OffPerception")) {
         return promise;
     }
     size_t argc = ARG_1;
     napi_value args[ARG_1] = { nullptr };
     napi_value jsThis = nullptr;
     if (napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr) != napi_ok) {
-        RejectPromise(env, deferred, RET_SERVICE_EXCEPTION, "napi_get_cb_info failed");
+        RejectPromise(env, deferred, SERVICE_EXCEPTION, "napi_get_cb_info failed");
         return promise;
     }
     if (argc >= ARG_1 && !IsMatchType(env, args[ARG_0], napi_function)) {
-        RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "callback must be function or omitted");
+        RejectPromise(env, deferred, PARAM_EXCEPTION, "callback must be function or omitted");
         return promise;
     }
     if ((argc >= ARG_1) && IsMatchTypeImpl(env, args[ARG_0], napi_function)) {
         auto matches = CollectMatchingCallbacks(env, args[ARG_0]);
         if (matches.empty()) {
-            RejectPromise(env, deferred, RET_UNSUBSCRIBE_EXCEPTION, "no active subscription");
+            RejectPromise(env, deferred, UNSUBSCRIBE_EXCEPTION, "no active subscription");
             return promise;
         }
         int32_t lastErr = RET_OK;
@@ -651,21 +669,19 @@ napi_value BehaviorAwarenessNapi::SubmitFeedback(napi_env env, napi_callback_inf
     FI_HILOGI("SubmitFeedback: enter");
     napi_deferred deferred = nullptr;
     napi_value promise = CreatePromise(env, &deferred);
-    if (!CheckCallerIsSystemApp()) {
-        FI_HILOGE("SubmitFeedback: non-system app");
-        RejectPromise(env, deferred, RET_NO_SYSTEM_API, "non-system app");
+    if (!CheckAccess(env, deferred, "SubmitFeedback")) {
         return promise;
     }
     size_t argc = ARG_1;
     napi_value args[ARG_1] = { nullptr };
     napi_value jsThis = nullptr;
     if (napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr) != napi_ok || argc < ARG_1) {
-        RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "expected 1 arg: feedback");
+        RejectPromise(env, deferred, PARAM_EXCEPTION, "expected 1 arg: feedback");
         return promise;
     }
     FeedbackData feedback;
     if (!GetFeedbackData(env, args[ARG_0], feedback)) {
-        RejectPromise(env, deferred, RET_PARAM_EXCEPTION, "feedback is invalid");
+        RejectPromise(env, deferred, PARAM_EXCEPTION, "feedback is invalid");
         return promise;
     }
     int32_t errNum = BehaviorAwarenessManager::GetInstance().SubmitFeedback(feedback);
