@@ -98,7 +98,7 @@
         "hiappevent",
         "runtime_core",
         "time_service",
-        "openssl",
+        "openhitls",
         "node",
         "egl",
         "opengles",
