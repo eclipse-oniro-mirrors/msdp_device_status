@@ -23,6 +23,7 @@
 #include "fi_log.h"
 #include "ipc_skeleton.h"
 #include "nativetoken_kit.h"
+#include "parameters.h"
 #include "token_setproc.h"
 
 #undef LOG_TAG
@@ -80,8 +81,14 @@ class BehaviorAwarenessIntegrationTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
+    void SetUp() override
+    {
+        std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
+        if (deviceType != "phone") {
+            GTEST_SKIP() << "BehaviorAwareness only supports phone, current device: " << deviceType;
+        }
+    }
+    void TearDown() override {}
 };
 
 /**

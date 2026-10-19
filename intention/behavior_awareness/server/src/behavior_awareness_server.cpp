@@ -22,6 +22,7 @@
 #include "hap_token_info.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#include "parameters.h"
 
 #undef LOG_TAG
 #define LOG_TAG "BehaviorAwarenessServer"
@@ -47,6 +48,7 @@ private:
 };
 
 namespace {
+
 std::string GetCallerBundleName(const CallingContext &context)
 {
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(context.tokenId);
@@ -79,6 +81,15 @@ bool IsCallerSystemApp(const CallingContext &context)
 }
 } // namespace
 
+const std::vector<std::string> BehaviorAwarenessServer::SUPPORT_DEVICE_TYPE_ = { "phone" };
+
+bool BehaviorAwarenessServer::CheckDeviceType()
+{
+    std::string deviceType = OHOS::system::GetParameter(DEVICE_TYPE_PARA_NAME, "");
+    return std::find(SUPPORT_DEVICE_TYPE_.begin(), SUPPORT_DEVICE_TYPE_.end(), deviceType)
+        != SUPPORT_DEVICE_TYPE_.end();
+}
+
 std::string BehaviorAwarenessServer::BuildSubscriptionKey(const std::string &bundleName,
     const SubscribeOptions &options)
 {
@@ -97,6 +108,10 @@ int32_t BehaviorAwarenessServer::SubscribePerception(const CallingContext &conte
     if (!IsCallerSystemApp(context)) {
         FI_HILOGE("SubscribePerception: non-system app");
         return COMMON_NOT_SYSTEM_APP;
+    }
+    if (!CheckDeviceType()) {
+        FI_HILOGE("SubscribePerception: device not support");
+        return DEVICE_NOT_SUPPORT;
     }
     std::string bundleName = GetCallerBundleName(context);
     if (bundleName.empty()) {
@@ -181,6 +196,10 @@ int32_t BehaviorAwarenessServer::UnsubscribePerception(const CallingContext &con
         FI_HILOGE("UnsubscribePerception: non-system app");
         return COMMON_NOT_SYSTEM_APP;
     }
+    if (!CheckDeviceType()) {
+        FI_HILOGE("UnsubscribePerception: device not support");
+        return DEVICE_NOT_SUPPORT;
+    }
     std::string bundleName = GetCallerBundleName(context);
     if (bundleName.empty()) {
         FI_HILOGE("UnsubscribePerception: failed to get caller bundleName");
@@ -209,6 +228,10 @@ int32_t BehaviorAwarenessServer::SubmitFeedback(const CallingContext &context, c
     if (!IsCallerSystemApp(context)) {
         FI_HILOGE("SubmitFeedback: non-system app");
         return COMMON_NOT_SYSTEM_APP;
+    }
+    if (!CheckDeviceType()) {
+        FI_HILOGE("SubmitFeedback: device not support");
+        return DEVICE_NOT_SUPPORT;
     }
     std::string bundleName = GetCallerBundleName(context);
     FI_HILOGI("SubmitFeedback: bundleName:%{public}s, eventId:%{public}s, type:%{public}d",

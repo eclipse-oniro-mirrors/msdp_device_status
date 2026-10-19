@@ -16,6 +16,8 @@
 #ifndef BEHAVIOR_AWARENESS_NAPI_ERROR_H
 #define BEHAVIOR_AWARENESS_NAPI_ERROR_H
 
+#include "behavior_awareness_data.h"
+
 #include <map>
 #include <optional>
 #include <string>
@@ -27,14 +29,6 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace BehaviorAwareness {
-enum BehaviorAwarenessNapiErrCode {
-    RET_NO_SYSTEM_API = 202,
-    RET_PARAM_EXCEPTION = 401,
-    RET_SERVICE_EXCEPTION = 32500001,
-    RET_UNSUBSCRIBE_EXCEPTION = 32500003,
-};
-
-extern std::map<int32_t, std::string> NAPI_ERROR_MESSAGES;
 
 napi_value CreateBehaviorAwarenessNapiError(const napi_env &env, int32_t errCode,
     const std::string &errMessage);
