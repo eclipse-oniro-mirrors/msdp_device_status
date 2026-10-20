@@ -17,6 +17,7 @@
 
 #include <dlfcn.h>
 #include <string>
+#include <unordered_set>
 #include "devicestatus_define.h"
 
 #include "accesstoken_kit.h"
@@ -40,7 +41,7 @@ const std::string SPATIALACTION_PERMISSION = "ohos.permission.vehicle.MMA_SPATIA
 const std::string WEATHER_PERMISSION = "ohos.permission.vehicle.MMA_WEATHER";
 const std::string ENERGYREFILL_PERMISSION = "ohos.permission.vehicle.MMA_ENERGYREFILL";
 const std::string CAR_AWARENESS_LIB_PATH = "/system/lib64/libcar_awareness_service.z.so";
-const std::string CLIENT_PID_KEY = "__client_pid__";
+const std::string CLIENT_PID_KEY = "client_pid";
 
 constexpr int32_t CAR_AWARENESS_SPECIFIC_ERR = 34000002;
 
@@ -50,8 +51,10 @@ constexpr int32_t TYPE_REFULING = 103;
 constexpr int32_t TYPE_SPATIAL_POINT = 201;
 constexpr int32_t TYPE_SPATIAL_GESTURE = 202;
 constexpr int32_t TYPE_CAR_STATUS = 203;
-constexpr int32_t TYPE_CAR_CFG = 204;
-constexpr int32_t TYPE_HABIT_RECOMMENDATION = 205;
+constexpr int32_t TYPE_HABIT_RECOMMENDATION = 204;
+constexpr int32_t TYPE_SPATIAL_DRAW = 205;
+constexpr int32_t TYPE_GESTURE_CLOSEDOOR = 206;
+constexpr int32_t TYPE_OCCUPANT_SENSE = 207;
 
 constexpr int32_t SYSTEM_API_TYPES_START = 200;
 
@@ -62,8 +65,10 @@ const std::map<int32_t, std::string> FEATURE_TYPE_TO_NAME = {
     {TYPE_SPATIAL_POINT, "SpatialPoint"},
     {TYPE_SPATIAL_GESTURE, "SpatialGesture"},
     {TYPE_CAR_STATUS, "CarStatus"},
-    {TYPE_CAR_CFG, "CarCfg"},
-    {TYPE_HABIT_RECOMMENDATION, "HabitRecommendation"}
+    {TYPE_HABIT_RECOMMENDATION, "HabitRecommendation"},
+    {TYPE_SPATIAL_DRAW, "SpatialDraw"},
+    {TYPE_GESTURE_CLOSEDOOR, "GestureCloseDoor"},
+    {TYPE_OCCUPANT_SENSE, "OccupantSense"}
 };
 
 const std::map<std::string, int32_t> FEATURE_NAME_TO_TYPE = {
@@ -73,9 +78,13 @@ const std::map<std::string, int32_t> FEATURE_NAME_TO_TYPE = {
     {"SpatialPoint", TYPE_SPATIAL_POINT},
     {"SpatialGesture", TYPE_SPATIAL_GESTURE},
     {"CarStatus", TYPE_CAR_STATUS},
-    {"CarCfg", TYPE_CAR_CFG},
-    {"HabitRecommendation", TYPE_HABIT_RECOMMENDATION}
+    {"HabitRecommendation", TYPE_HABIT_RECOMMENDATION},
+    {"SpatialDraw", TYPE_SPATIAL_DRAW},
+    {"GestureCloseDoor", TYPE_GESTURE_CLOSEDOOR},
+    {"OccupantSense", TYPE_OCCUPANT_SENSE}
 };
+
+const std::unordered_set<std::string> CONDITIONAL_FEATURES = {"OccupantSense"};
 }  // namespace
 
 CarAwarenessServer::CarAwarenessServer()
@@ -134,21 +143,27 @@ int32_t CarAwarenessServer::CheckSubPermissionByType(const CallingContext &conte
 void CarAwarenessServer::OnResultFromAlgo(const std::string &featureName, const std::string &result)
 {
     std::lock_guard<std::mutex> lock(callbackMtx_);
+
+    // 对条件触发特性：更新缓存结果
+    if (CONDITIONAL_FEATURES.count(featureName) != 0) {
+        algoResultCache_[featureName] = result;
+    }
+
     auto cbIt = callbacks_.find(featureName);
     if (cbIt == callbacks_.end()) {
         FI_HILOGW("No callback found for featureName:%{public}s", featureName.c_str());
         return;
     }
-
     auto callbacks = cbIt->second;
 
-    if (FEATURE_NAME_TO_TYPE.find(featureName) == FEATURE_NAME_TO_TYPE.end()) {
+    auto it = FEATURE_NAME_TO_TYPE.find(featureName);
+    if (it == FEATURE_NAME_TO_TYPE.end()) {
         FI_HILOGE("unknown feature name: %{public}s", featureName.c_str());
         return;
     }
 
     CarAwarenessEvent event;
-    event.type = FEATURE_NAME_TO_TYPE.at(featureName);
+    event.type = it->second;
     event.eventData = result;
     std::thread t([callbacks, result, event]() {
         for (auto const &clientInfo : callbacks) {
@@ -177,15 +192,24 @@ int32_t CarAwarenessServer::AddClientToCallbacks(const std::string &featureName,
     return RET_OK;
 }
 
-int32_t CarAwarenessServer::SubscribeAlgo(const std::string &featureName, const CarAwarenessOption &option)
+bool CarAwarenessServer::loadAndCheckAlgoLib()
 {
-    std::lock_guard<std::mutex> lockGrd(algoMtx_);
     if (LoadAlgoLib() != RET_OK) {
         FI_HILOGE("LoadAlgoLib failed");
-        return RET_ERR;
+        return false;
     }
     if (algoHandle_.pAlgorithm == nullptr) {
         FI_HILOGE("algoHandle_.pAlgorithm is nullptr");
+        return false;
+    }
+
+    return true;
+}
+
+int32_t CarAwarenessServer::SubscribeAlgo(const std::string &featureName, const CarAwarenessOption &option)
+{
+    std::lock_guard<std::mutex> lockGrd(algoMtx_);
+    if (!loadAndCheckAlgoLib()) {
         return RET_ERR;
     }
 
@@ -197,6 +221,32 @@ int32_t CarAwarenessServer::SubscribeAlgo(const std::string &featureName, const 
     CarAwareness::CarAwarenessOptions convertedOption;
     convertedOption.metadata_keys = option.entityInfo;
     return algoHandle_.pAlgorithm->OnCarAwareness(featureName, algoCb_, convertedOption);
+}
+
+void CarAwarenessServer::NotifyClientCached(int32_t type, const sptr<ICarAwarenessCallback> &cb)
+{
+    auto it = FEATURE_TYPE_TO_NAME.find(type);
+    if (it == FEATURE_TYPE_TO_NAME.end()) {
+        FI_HILOGE("unknown feature type: %{public}d", type);
+        return;
+    }
+
+    auto resultIt = algoResultCache_.find(it->second);
+    if (resultIt == algoResultCache_.end()) {
+        FI_HILOGD("no need to notify client with cached result, feature: %{public}s", it->second.c_str());
+        return;
+    }
+
+    if (resultIt->second.empty()) {
+        FI_HILOGE("cache result is empty, feature: %{public}s", it->second.c_str());
+        return;
+    }
+
+    CarAwarenessEvent event;
+    event.type = type;
+    event.eventData = resultIt->second;
+    std::thread t([event, cb]() { cb->OnAwarenessEvent(event); });
+    t.detach();
 }
 
 int32_t CarAwarenessServer::SubscribeCapability(const CallingContext &context, int32_t type,
@@ -213,12 +263,13 @@ int32_t CarAwarenessServer::SubscribeCapability(const CallingContext &context, i
         return permissionCheckResult;
     }
 
-    if (FEATURE_TYPE_TO_NAME.find(type) == FEATURE_TYPE_TO_NAME.end()) {
+    auto it = FEATURE_TYPE_TO_NAME.find(type);
+    if (it == FEATURE_TYPE_TO_NAME.end()) {
         FI_HILOGE("unknown feature type:%{public}d", type);
         return CAR_AWARENESS_SPECIFIC_ERR;
     }
 
-    std::string featureName = FEATURE_TYPE_TO_NAME.at(type);
+    std::string featureName = it->second;
     pid_t callingPid = context.pid;
 
     FI_HILOGI("callingpid:%{public}d", callingPid);
@@ -233,7 +284,8 @@ int32_t CarAwarenessServer::SubscribeCapability(const CallingContext &context, i
     {
         std::lock_guard<std::mutex> lock(callbackMtx_);
         auto it = callbacks_.find(featureName);
-        if (it != callbacks_.end()) { // 算法已订阅，把client添加到callback列表
+        if (it != callbacks_.end()) {  // 算法已订阅，把client添加到callback列表
+            NotifyClientCached(type, cb); // 条件触发的feature：回调缓存结果
             return AddClientToCallbacks(featureName, clientInfo);
         }
 
@@ -273,7 +325,7 @@ int32_t CarAwarenessServer::UnSubscribeCapability(const CallingContext &context,
         FI_HILOGW("unknown feature type:%{public}d", type);
         return RET_OK;
     }
-
+    
     std::string featureName = FEATURE_TYPE_TO_NAME.at(type);
 
     if (type == TYPE_CAR_STATUS) {
@@ -298,12 +350,7 @@ int32_t CarAwarenessServer::UpdateSpatialActionStatus(const CallingContext &cont
         return COMMON_PERMISSION_CHECK_ERROR;
     }
 
-    if (LoadAlgoLib() != RET_OK) {
-        FI_HILOGE("LoadAlgoLib failed");
-        return RET_ERR;
-    }
-    if (algoHandle_.pAlgorithm == nullptr) {
-        FI_HILOGE("algoHandle_.pAlgorithm is nullptr");
+    if (!loadAndCheckAlgoLib()) {
         return RET_ERR;
     }
 
@@ -326,12 +373,7 @@ int32_t CarAwarenessServer::UpdateSpatialActionZone(const CallingContext &contex
     }
 
     std::lock_guard<std::mutex> lockGrd(algoMtx_);
-    if (LoadAlgoLib() != RET_OK) {
-        FI_HILOGE("LoadAlgoLib failed");
-        return RET_ERR;
-    }
-    if (algoHandle_.pAlgorithm == nullptr) {
-        FI_HILOGE("algoHandle_.pAlgorithm is nullptr");
+    if (!loadAndCheckAlgoLib()) {
         return RET_ERR;
     }
 
@@ -345,13 +387,7 @@ int32_t CarAwarenessServer::GetSupportCapabilityList(const CallingContext &conte
 {
     (void)context;
     std::lock_guard<std::mutex> lockGrd(algoMtx_);
-
-    if (LoadAlgoLib() != RET_OK) {
-        FI_HILOGE("LoadAlgoLib failed");
-        return RET_ERR;
-    }
-    if (algoHandle_.pAlgorithm == nullptr) {
-        FI_HILOGE("algoHandle_.pAlgorithm is nullptr");
+    if (!loadAndCheckAlgoLib()) {
         return RET_ERR;
     }
 
@@ -368,15 +404,11 @@ int32_t CarAwarenessServer::GetCarAwareness(const CallingContext &context, int32
         return COMMON_NOT_SYSTEM_APP;
     }
 
-    if (LoadAlgoLib() != RET_OK) {
-        FI_HILOGE("LoadAlgoLib failed");
+    std::lock_guard<std::mutex> lockGrd(algoMtx_);
+    if (!loadAndCheckAlgoLib()) {
         return RET_ERR;
     }
-    if (algoHandle_.pAlgorithm == nullptr) {
-        FI_HILOGE("algoHandle_.pAlgorithm is nullptr");
-        return RET_ERR;
-    }
-
+    
     if (type == TYPE_CAR_STATUS) {
         std::vector<std::string> results;
         CarAwareness::CarAwarenessOptions convertedOption;
@@ -392,6 +424,7 @@ int32_t CarAwarenessServer::GetCarAwareness(const CallingContext &context, int32
         }
         CarAwarenessEvent event;
         event.type = TYPE_CAR_STATUS;
+        // 根据报文取result的第一个数，作为后续处理需要的关键数据
         event.eventData = results.empty() ? "[]" : results[0];
         events.push_back(event);
         return RET_OK;
@@ -440,15 +473,13 @@ void CarAwarenessServer::RemoveDeathRecipient(const sptr<ICarAwarenessCallback> 
 void CarAwarenessServer::UnSubscribeAlgo(const std::string &featureName)
 {
     std::lock_guard<std::mutex> lockGrd(algoMtx_);
-    if (LoadAlgoLib() != RET_OK) {
-        FI_HILOGE("LoadAlgoLib failed");
-        return;
-    }
-    if (algoHandle_.pAlgorithm == nullptr) {
-        FI_HILOGE("algoHandle_.pAlgorithm is nullptr");
+    if (!loadAndCheckAlgoLib()) {
         return;
     }
     algoHandle_.pAlgorithm->OffCarAwareness(featureName);
+    if (CONDITIONAL_FEATURES.count(featureName) != 0) {
+        algoResultCache_.erase(featureName);  // off 时候清除缓存
+    }
     FI_HILOGI("unsubscribe algo success, capability=%{public}s", featureName.c_str());
 }
 
@@ -531,7 +562,7 @@ int32_t CarAwarenessServer::LoadAlgoLib()
     algoHandle_.create =
         reinterpret_cast<CarAwareness::CreateCarAwarenessMgrFuncPtr>(dlsym(algoHandle_.handle, "CreateInstance"));
     if (algoHandle_.create == nullptr) {
-        FI_HILOGE("get create fail");
+        FI_HILOGE("get create fail, error:%{public}s", dlerror());
         dlclose(algoHandle_.handle);
         algoHandle_.Clear();
         return RET_ERR;
@@ -539,7 +570,7 @@ int32_t CarAwarenessServer::LoadAlgoLib()
 
     algoHandle_.destroy = reinterpret_cast<void (*)()>(dlsym(algoHandle_.handle, "Destroy"));
     if (algoHandle_.destroy == nullptr) {
-        FI_HILOGE("get destroy fail");
+        FI_HILOGE("get destroy fail, error:%{public}s", dlerror());
         dlclose(algoHandle_.handle);
         algoHandle_.Clear();
         return RET_ERR;
@@ -584,15 +615,29 @@ int32_t CarAwarenessServer::SubscribeCarStatusWithOption(const std::string &feat
         return RET_ERR;
     }
 
-    std::lock_guard<std::mutex> lock(callbackMtx_);
-    auto it = callbacks_.find(featureName);
-    if (it != callbacks_.end()) {
-        for (auto &clientInfo : it->second) {
-            int32_t result = UpdateExistingCarStatusClient(featureName, callingPid, option, cb, clientInfo);
-            if (result == RET_OK) {
-                return RET_OK;
+    bool existingClientUpdated = false;
+    {
+        std::lock_guard<std::mutex> lock(callbackMtx_);
+        auto it = callbacks_.find(featureName);
+        if (it != callbacks_.end()) {
+            for (auto &clientInfo : it->second) {
+                int32_t result = UpdateExistingCarStatusClient(featureName, callingPid, option, cb, clientInfo);
+                if (result == RET_OK) {
+                    existingClientUpdated = true;
+                    break;
+                }
             }
         }
+    }
+
+    if (existingClientUpdated) {
+        std::lock_guard<std::mutex> lockGrd(algoMtx_);
+        if (algoHandle_.pAlgorithm != nullptr) {
+            CarAwareness::CarAwarenessOptions convertedOption;
+            convertedOption.metadata_keys = option.entityInfo;
+            algoHandle_.pAlgorithm->OnCarAwareness(featureName, algoCb_, convertedOption);
+        }
+        return RET_OK;
     }
 
     CarAwarenessClientInfo clientInfo = {
@@ -606,10 +651,14 @@ int32_t CarAwarenessServer::SubscribeCarStatusWithOption(const std::string &feat
         return RET_ERR;
     }
 
-    callbacks_[featureName].push_back(clientInfo);
+    {
+        std::lock_guard<std::mutex> lock(callbackMtx_);
+        callbacks_[featureName].push_back(clientInfo);
+    }
 
     int32_t algoRet = SubscribeAlgo(featureName, option);
     if (algoRet != RET_OK) {
+        std::lock_guard<std::mutex> lock(callbackMtx_);
         callbacks_[featureName].pop_back();
         RemoveDeathRecipient(cb);
         return algoRet;
@@ -629,17 +678,11 @@ int32_t CarAwarenessServer::UpdateExistingCarStatusClient(
     CarAwarenessClientInfo &clientInfo)
 {
     if (clientInfo.pid != callingPid) {
-        FI_HILOGE("clientInfo pid is not match for calling pid:%{public}d", callingPid);
+        FI_HILOGI("clientInfo pid is not match for calling pid:%{public}d", callingPid);
         return RET_ERR;
     }
     clientInfo.cb = cb;
     clientInfo.option = option;
-    std::lock_guard<std::mutex> lockGrd(algoMtx_);
-    if (algoHandle_.pAlgorithm != nullptr) {
-        CarAwareness::CarAwarenessOptions convertedOption;
-        convertedOption.metadata_keys = option.entityInfo;
-        algoHandle_.pAlgorithm->OnCarAwareness(featureName, algoCb_, convertedOption);
-    }
     return RET_OK;
 }
 
@@ -654,7 +697,7 @@ int32_t CarAwarenessServer::UnSubscribeCarStatus(const std::string &featureName,
 
     auto &callbacks = it->second;
     sptr<ICarAwarenessCallback> cbToRemove = nullptr;
-
+    
     for (size_t i = 0; i < callbacks.size(); ++i) {
         if (callbacks[i].pid == callingPid) {
             cbToRemove = callbacks[i].cb;

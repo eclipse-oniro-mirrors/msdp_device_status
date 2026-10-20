@@ -28,7 +28,7 @@ namespace {
     constexpr int32_t TYPE_PUBLIC_MAX = 103;
 
     constexpr int32_t TYPE_SYSTEM_MIN = 201;
-    constexpr int32_t TYPE_SYSTEM_MAX = 205;
+    constexpr int32_t TYPE_SYSTEM_MAX = 299;
 
     constexpr int32_t MAX_DATA_LEN = 1024 * 1024;
 }
