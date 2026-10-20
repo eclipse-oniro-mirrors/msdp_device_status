@@ -33,7 +33,7 @@ enum EventType : String {
     WEEKLY_TIME = "weeklyTime",
     MONTHLY_TIME = "monthlyTime",
     WORKDAY_TIME = "workdayTime",
-    LOCATION_ARRIVE = "locationArrive",
+    LOCATION = "location",
     APP_LAUNCH = "appLaunch",
     APP_EXIT = "appExit",
     APP_USAGE_SINGLE = "appUsageSingle",
@@ -92,6 +92,11 @@ enum FeedbackType : i32 {
     REJECT = 2,
     EDIT = 3,
     NOT_PUSHED = 4
+}
+
+enum LocationStatusType : String {
+    ENTER = "enter",
+    EXIT = "exit"
 }
 
 enum RecurrenceType : String {

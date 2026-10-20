@@ -50,6 +50,7 @@ constexpr size_t ACTION_TYPE_COUNT = 17;
 constexpr size_t BT_TYPE_COUNT = 8;
 constexpr size_t RECURRENCE_COUNT = 4;
 constexpr size_t LOCATION_COUNT = 3;
+constexpr size_t LOCATION_STATUS_COUNT = 2;
 constexpr size_t OPERATION_COUNT = 3;
 constexpr size_t ADJUSTMENT_COUNT = 2;
 constexpr size_t PATTERN_COUNT = 3;
@@ -228,7 +229,7 @@ void RegisterStringEnums(napi_env env, napi_value exports)
     StringEnumEntry etE[] = {
         {"DAILY_TIME", "dailyTime"}, {"WEEKLY_TIME", "weeklyTime"},
         {"MONTHLY_TIME", "monthlyTime"}, {"WORKDAY_TIME", "workdayTime"},
-        {"LOCATION_ARRIVE", "locationArrive"}, {"APP_LAUNCH", "appLaunch"},
+        {"LOCATION", "location"}, {"APP_LAUNCH", "appLaunch"},
         {"APP_EXIT", "appExit"}, {"APP_USAGE_SINGLE", "appUsageSingle"},
         {"APP_USAGE_DAILY", "appUsageDaily"}, {"ALARM_DISMISS", "alarmDismiss"},
         {"CHARGE_START", "chargeStart"}, {"CHARGE_END", "chargeEnd"},
@@ -249,7 +250,10 @@ void RegisterStringEnums(napi_env env, napi_value exports)
         {"VOLUME", "volume"}, {"SHUTDOWN", "shutdown"}, {"REBOOT", "reboot"}
     };
     RegisterStringEnum(env, exports, "ActionType", actE, ACTION_TYPE_COUNT);
+}
 
+void RegisterStringEnumsExtended(napi_env env, napi_value exports)
+{
     StringEnumEntry soundE[] = {
         {"VIBRATE", "vibrate"}, {"SILENT", "silent"}, {"RING", "ring"}
     };
@@ -265,6 +269,11 @@ void RegisterStringEnums(napi_env env, napi_value exports)
         {"HOME", "home"}, {"COMPANY", "company"}, {"CUSTOM", "custom"}
     };
     RegisterStringEnum(env, exports, "LocationType", locE, LOCATION_COUNT);
+
+    StringEnumEntry locStatusE[] = {
+        {"ENTER", "enter"}, {"EXIT", "exit"}
+    };
+    RegisterStringEnum(env, exports, "LocationStatusType", locStatusE, LOCATION_STATUS_COUNT);
 
     StringEnumEntry opE[] = { {"ON", "on"}, {"OFF", "off"}, {"TOGGLE", "toggle"} };
     RegisterStringEnum(env, exports, "Operation", opE, OPERATION_COUNT);
@@ -386,6 +395,7 @@ napi_value BehaviorAwarenessNapi::Init(napi_env env, napi_value exports)
         return nullptr;
     }
     RegisterStringEnums(env, exports);
+    RegisterStringEnumsExtended(env, exports);
     RegisterIntEnums(env, exports);
     FI_HILOGD("Exit");
     return exports;
