@@ -326,6 +326,94 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback002, TestSize.Level1)
     EXPECT_EQ(ret, BehaviorAwareness::COMMON_NOT_SYSTEM_APP);
 }
 
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback003_EmptyEventId_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback004_FeedbackTypeOutOfRange_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "BehaviorAwareness_1",
+        .feedbackType = static_cast<FeedbackType>(5),
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback005_NegativeFeedbackType_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "BehaviorAwareness_1",
+        .feedbackType = static_cast<FeedbackType>(-1),
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback006_ZeroFeedbackTime_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "BehaviorAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 0,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback007_NegativeFeedbackTime_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "BehaviorAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = -1,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback008_InvalidEventIdNoUnderscore_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "invalidformat",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback009_InvalidEventIdNonNumericSuffix_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "BehaviorAwareness_abc",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback010_ValidParam_ReturnsRetOk, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "BehaviorAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+}
+
 /* ==================== Branch coverage: edge cases ==================== */
 
 HWTEST_F(BehaviorAwarenessServerTest, UnsubscribePerception_Null_EmptyCache_ReturnsError, TestSize.Level1)

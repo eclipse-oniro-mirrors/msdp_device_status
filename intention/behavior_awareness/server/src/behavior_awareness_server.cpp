@@ -17,11 +17,13 @@
 
 #include <functional>
 #include <sstream>
+#include <string>
 
 #include "accesstoken_kit.h"
 #include "hap_token_info.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#include "feedback_store.h"
 #include "parameters.h"
 
 #undef LOG_TAG
@@ -222,6 +224,38 @@ int32_t BehaviorAwarenessServer::UnsubscribePerception(const CallingContext &con
     return ret;
 }
 
+int32_t BehaviorAwarenessServer::ValidateFeedback(const FeedbackData &feedback)
+{
+    if (feedback.perceptionEventId.empty()) {
+        FI_HILOGE("ValidateFeedback: perceptionEventId is empty");
+        return PARAM_EXCEPTION;
+    }
+    size_t pos = feedback.perceptionEventId.find('_');
+    if (pos == std::string::npos || pos + 1 >= feedback.perceptionEventId.length()) {
+        FI_HILOGE("ValidateFeedback: perceptionEventId format invalid, missing '_' separator or empty suffix, "
+            "value:%{public}s", feedback.perceptionEventId.c_str());
+        return PARAM_EXCEPTION;
+    }
+    try {
+        std::stoll(feedback.perceptionEventId.substr(pos + 1));
+    } catch (const std::exception &e) {
+        FI_HILOGE("ValidateFeedback: perceptionEventId id suffix cannot parse to valid int, value:%{public}s, "
+            "reason:%{public}s", feedback.perceptionEventId.c_str(), e.what());
+        return PARAM_EXCEPTION;
+    }
+    int32_t ft = static_cast<int32_t>(feedback.feedbackType);
+    if (ft < static_cast<int32_t>(FeedbackType::ACCEPT) ||
+        ft > static_cast<int32_t>(FeedbackType::NOT_PUSHED)) {
+        FI_HILOGE("ValidateFeedback: feedbackType out of range, value:%{public}d", ft);
+        return PARAM_EXCEPTION;
+    }
+    if (feedback.feedbackTime <= 0) {
+        FI_HILOGE("ValidateFeedback: feedbackTime invalid, value:%{public}" PRId64, feedback.feedbackTime);
+        return PARAM_EXCEPTION;
+    }
+    return RET_OK;
+}
+
 int32_t BehaviorAwarenessServer::SubmitFeedback(const CallingContext &context, const FeedbackData &feedback)
 {
     CALL_DEBUG_ENTER;
@@ -233,9 +267,42 @@ int32_t BehaviorAwarenessServer::SubmitFeedback(const CallingContext &context, c
         FI_HILOGE("SubmitFeedback: device not support");
         return DEVICE_NOT_SUPPORT;
     }
+    int32_t ret = ValidateFeedback(feedback);
+    if (ret != RET_OK) {
+        FI_HILOGE("SubmitFeedback: param invalid, eventId:%{public}s, ret:%{public}d",
+            feedback.perceptionEventId.c_str(), ret);
+        return ret;
+    }
+    try {
+        FeedbackData normalized = feedback;
+        ret = FeedbackStore::GetInstance().InsertFeedback(normalized);
+    } catch (const std::bad_alloc &e) {
+        // EX-4: Memory allocation failure during normalization.
+        // Fault tolerance: return RET_OK, do not throw 32500001 to the caller.
+        FI_HILOGE("SubmitFeedback: data process exception (bad_alloc), eventId:%{public}s, reason:%{public}s",
+            feedback.perceptionEventId.c_str(), e.what());
+        return RET_OK;
+    } catch (const std::exception &e) {
+        // EX-4: feedback JSON serialization failure.
+        // Fault tolerance: return RET_OK, do not throw 32500001 to the caller.
+        FI_HILOGE("SubmitFeedback: feedback JSON serialize failed, eventId:%{public}s, stage:normalize, "
+            "reason:%{public}s", feedback.perceptionEventId.c_str(), e.what());
+        return RET_OK;
+    } catch (...) {
+        // EX-4: Unknown data-processing exception.
+        // Fault tolerance: return RET_OK, do not throw 32500001 to the caller.
+        FI_HILOGE("SubmitFeedback: unknown data process exception, eventId:%{public}s",
+            feedback.perceptionEventId.c_str());
+        return RET_OK;
+    }
+    // AC-1.5: FeedbackStore::InsertFeedback internally handles all RDB I/O
+    // exceptions (database missing, UPDATE failure, null rdbStore_) by logging
+    // HILOG_ERROR and returning RET_OK. The ret value here is always RET_OK
+    // under the fault-tolerance strategy — 32500001 is never propagated.
     std::string bundleName = GetCallerBundleName(context);
-    FI_HILOGI("SubmitFeedback: bundleName:%{public}s, eventId:%{public}s, type:%{public}d",
-        bundleName.c_str(), feedback.perceptionEventId.c_str(), static_cast<int32_t>(feedback.feedbackType));
+    FI_HILOGI("SubmitFeedback: success, bundleName:%{public}s, eventId:%{public}s, type:%{public}d",
+        bundleName.c_str(), feedback.perceptionEventId.c_str(),
+        static_cast<int32_t>(feedback.feedbackType));
     return RET_OK;
 }
 

@@ -43,7 +43,8 @@
       "device_status_boomerang_onestep",
       "device_status_boomerang_support_hdr",
       "device_status_phone_standard_lite",
-      "device_status_car_awareness_enable"
+      "device_status_car_awareness_enable",
+      "device_status_behavior_awareness_enable"
     ],
     "adapted_system_type": [
       "standard"
@@ -86,6 +87,7 @@
         "dfs_service",
         "qos_manager",
         "memmgr",
+        "relational_store",
         "os_account",
         "libxml2",
         "wifi",

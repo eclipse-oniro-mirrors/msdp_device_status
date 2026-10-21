@@ -1,0 +1,70 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../device_status.gni")
+
+module_output_path = "${device_status_fuzz_output_path}"
+
+ohos_fuzztest("SubmitFeedbackFuzzTest") {
+  module_out_path = module_output_path
+  fuzz_config_file = "."
+
+  include_dirs = [
+    "./",
+    "${device_status_root_path}/intention/behavior_awareness/server/include",
+    "${device_status_root_path}/interfaces/innerkits/include",
+    "${device_status_root_path}/intention/prototype/include",
+    "${device_status_root_path}/utils/common/include",
+  ]
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+
+  sources = [
+    "./submitfeedback_fuzzer.cpp",
+    "${device_status_root_path}/intention/behavior_awareness/server/src/behavior_awareness_server.cpp",
+    "${device_status_root_path}/intention/behavior_awareness/server/src/feedback_store.cpp",
+  ]
+
+  configs = [ "${device_status_utils_path}:devicestatus_utils_config" ]
+
+  deps = [
+    "${device_status_interfaces_path}/innerkits:devicestatus_client",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ipc:ipc_single",
+    "relational_store:relational_store_native",
+  ]
+
+  defines = [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
+}
+
+group("fuzztest") {
+  testonly = true
+  deps = [ ":SubmitFeedbackFuzzTest" ]
+}
