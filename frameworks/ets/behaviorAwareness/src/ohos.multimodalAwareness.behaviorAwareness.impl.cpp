@@ -18,6 +18,7 @@
 #include <ipc_skeleton.h>
 #include <map>
 #include <mutex>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -83,6 +84,35 @@ static int32_t ConvertPatternType(const std::string &ptStr)
     return -1;
 }
 
+static bool ParsePatternTypes(const ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo &info,
+    BA::SubscribeOptions &nativeOptions)
+{
+    if (!info.patternTypes.has_value()) {
+        return true;
+    }
+    auto &pts = info.patternTypes.value();
+    if (pts.empty()) {
+        ThrowBehaviorAwarenessErr(BA::PARAM_EXCEPTION, "patternTypes must not be empty");
+        return false;
+    }
+    std::set<int32_t> seen;
+    for (auto pt : pts) {
+        std::string ptStr(static_cast<const char*>(pt));
+        int32_t ptVal = ConvertPatternType(ptStr);
+        if (ptVal < 0) {
+            ThrowBehaviorAwarenessErr(BA::PARAM_EXCEPTION, "invalid patternType");
+            return false;
+        }
+        if (seen.count(ptVal) > 0) {
+            ThrowBehaviorAwarenessErr(BA::PARAM_EXCEPTION, "duplicate patternType");
+            return false;
+        }
+        seen.insert(ptVal);
+        nativeOptions.patternTypes.push_back(ptVal);
+    }
+    return true;
+}
+
 void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo info,
     callback_view<void(ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)> callback)
 {
@@ -105,21 +135,8 @@ void OnPerception(ohos::multimodalAwareness::behaviorAwareness::SubscribeInfo in
         ThrowBehaviorAwarenessErr(BA::PARAM_EXCEPTION, "invalid domain");
         return;
     }
-    if (info.patternTypes.has_value()) {
-        auto &pts = info.patternTypes.value();
-        if (pts.empty()) {
-            ThrowBehaviorAwarenessErr(RET_PARAM_EXCEPTION, "patternTypes must not be empty");
-            return;
-        }
-        for (auto pt : pts) {
-            std::string ptStr(static_cast<const char*>(pt));
-            int32_t ptVal = ConvertPatternType(ptStr);
-            if (ptVal < 0) {
-                ThrowBehaviorAwarenessErr(RET_PARAM_EXCEPTION, "invalid patternType");
-                return;
-            }
-            nativeOptions.patternTypes.push_back(ptVal);
-        }
+    if (!ParsePatternTypes(info, nativeOptions)) {
+        return;
     }
     auto callbackPtr = std::make_shared<taihe::callback<
         void(ohos::multimodalAwareness::behaviorAwareness::PerceptionEvent const &)>>(callback);

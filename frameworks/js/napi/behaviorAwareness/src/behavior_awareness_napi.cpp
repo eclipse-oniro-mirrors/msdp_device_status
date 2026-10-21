@@ -19,6 +19,7 @@
 #include <ipc_skeleton.h>
 
 #include <map>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -300,6 +301,20 @@ bool IsMatchTypeImpl(napi_env env, napi_value value, napi_valuetype type)
     return true;
 }
 
+int32_t ConvertPatternType(const std::string &patternStr)
+{
+    if (patternStr == "timePattern") {
+        return static_cast<int32_t>(PatternType::TIME_PATTERN);
+    }
+    if (patternStr == "locationPattern") {
+        return static_cast<int32_t>(PatternType::LOCATION_PATTERN);
+    }
+    if (patternStr == "eventPattern") {
+        return static_cast<int32_t>(PatternType::EVENT_PATTERN);
+    }
+    return -1;
+}
+
 bool ParsePatternTypes(napi_env env, napi_value patternVal, SubscribeOptions &options)
 {
     napi_valuetype valType = napi_undefined;
@@ -320,6 +335,7 @@ bool ParsePatternTypes(napi_env env, napi_value patternVal, SubscribeOptions &op
         FI_HILOGE("patternTypes must not be empty");
         return false;
     }
+    std::set<int32_t> seen;
     for (uint32_t i = 0; i < length; ++i) {
         napi_value elem = nullptr;
         napi_get_element(env, patternVal, i, &elem);
@@ -330,17 +346,18 @@ bool ParsePatternTypes(napi_env env, napi_value patternVal, SubscribeOptions &op
         char pbuf[64] = {0};
         size_t plen = 0;
         napi_get_value_string_utf8(env, elem, pbuf, sizeof(pbuf), &plen);
-        std::string ps(pbuf);
-        if (ps == "timePattern") {
-            options.patternTypes.push_back(static_cast<int32_t>(PatternType::TIME_PATTERN));
-        } else if (ps == "locationPattern") {
-            options.patternTypes.push_back(static_cast<int32_t>(PatternType::LOCATION_PATTERN));
-        } else if (ps == "eventPattern") {
-            options.patternTypes.push_back(static_cast<int32_t>(PatternType::EVENT_PATTERN));
-        } else {
-            FI_HILOGE("patternTypes[%{public}u] value '%{public}s' is invalid", i, ps.c_str());
+        std::string patternStr(pbuf);
+        int32_t ptVal = ConvertPatternType(patternStr);
+        if (ptVal < 0) {
+            FI_HILOGE("patternTypes[%{public}u] value '%{public}s' is invalid", i, patternStr.c_str());
             return false;
         }
+        if (seen.count(ptVal) > 0) {
+            FI_HILOGE("patternTypes[%{public}u] duplicate pattern '%{public}s'", i, patternStr.c_str());
+            return false;
+        }
+        seen.insert(ptVal);
+        options.patternTypes.push_back(ptVal);
     }
     return true;
 }
