@@ -57,8 +57,8 @@ ohos_shared_library("drag_auth") {
     "input:libmmi-client",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
-    "openhitls:openhitls_crypto",
-    "openhitls:openhitls_bsl"
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared"
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

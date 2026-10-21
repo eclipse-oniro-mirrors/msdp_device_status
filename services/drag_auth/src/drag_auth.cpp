@@ -17,16 +17,15 @@
 #include "fi_log.h"
 #include <algorithm>
 #include <chrono>
+#include <openssl/bio.h>
+#include <openssl/buffer.h>
+#include <openssl/crypto.h>
+#include <openssl/hmac.h>
+#include <openssl/rand.h>
+#include <openssl/evp.h>
 #include <securec.h>
 #include <vector>
 #include <cstring>
-
-#include "bsl_base64.h"
-#include "bsl_errno.h"
-#include "crypt_eal_init.h"
-#include "crypt_eal_mac.h"
-#include "crypt_eal_rand.h"
-#include "crypt_errno.h"
 
 #undef LOG_TAG
 #define LOG_TAG "DragAuth"
@@ -36,6 +35,7 @@ namespace Msdp {
 namespace DeviceStatus {
 
 namespace {
+    const int32_t RAND_BYTES_SUCCESS { 1 };
     constexpr uint64_t NONCE_TIMEOUT_MS { 3000 }; // drag timeout
     const int32_t MAX_BASE64_LENGTH { 1024 };
     const int32_t SECURITY_DATA_LEN { 17 };
@@ -47,30 +47,22 @@ DragAuth& DragAuth::GetInstance()
     return instance;
 }
 
-DragAuth::DragAuth()
-{
-    // The shared library constructor of openHiTLS only initializes CPU capability detection.
-    // BSL/LOCK/RAND modules must be initialized explicitly and idempotently by bits.
-    int32_t ret = CRYPT_EAL_Init(CRYPT_EAL_INIT_ALL);
-    if (ret != CRYPT_SUCCESS) {
-        FI_HILOGE("CRYPT_EAL_Init failed, ret:%{public}d", ret);
-    }
-}
+DragAuth::DragAuth() {}
 
 std::string DragAuth::GenerateNonce()
 {
     CALL_INFO_TRACE;
     constexpr size_t NONCE_LEN = NONCE_SIZE;
     nonceBin_.resize(NONCE_LEN);
-    if (CRYPT_EAL_Randbytes(nonceBin_.data(), static_cast<uint32_t>(nonceBin_.size())) != CRYPT_SUCCESS) {
-        FI_HILOGE("CRYPT_EAL_Randbytes failed");
+    if (RAND_bytes(nonceBin_.data(), static_cast<int>(nonceBin_.size())) != RAND_BYTES_SUCCESS) {
+        FI_HILOGE("RAND_bytes failed");
         ResetNonce();
         return "";
     }
     nonceB64_ = Base64Encode(nonceBin_);
     return nonceB64_;
 }
-
+ 
 std::vector<uint8_t> DragAuth::GenerateSignature(const std::vector<uint8_t>& nonce,
     const DragEventData& dragSecurityData)
 {
@@ -84,33 +76,14 @@ std::vector<uint8_t> DragAuth::GenerateSignature(const std::vector<uint8_t>& non
         FI_HILOGE("Failed to serialize event data");
         return {};
     }
-    CRYPT_EAL_MacCtx *ctx = CRYPT_EAL_MacNewCtx(CRYPT_MAC_HMAC_SHA384);
-    if (ctx == nullptr) {
-        FI_HILOGE("CRYPT_EAL_MacNewCtx failed");
-        return {};
-    }
-    uint8_t digest[HMAC_SHA384_SIZE] = {0};
-    uint32_t len = HMAC_SHA384_SIZE;
-    int32_t ret = CRYPT_EAL_MacInit(ctx, nonce.data(), static_cast<uint32_t>(nonce.size()));
-    if (ret != CRYPT_SUCCESS) {
-        FI_HILOGE("CRYPT_EAL_MacInit failed, ret:%{public}d", ret);
-        CRYPT_EAL_MacFreeCtx(ctx);
-        return {};
-    }
-    ret = CRYPT_EAL_MacUpdate(ctx, reinterpret_cast<const uint8_t*>(dataStr.data()),
-        static_cast<uint32_t>(dataStr.size()));
-    if (ret != CRYPT_SUCCESS) {
-        FI_HILOGE("CRYPT_EAL_MacUpdate failed, ret:%{public}d", ret);
-        CRYPT_EAL_MacFreeCtx(ctx);
-        return {};
-    }
-    ret = CRYPT_EAL_MacFinal(ctx, digest, &len);
-    if (ret != CRYPT_SUCCESS) {
-        FI_HILOGE("CRYPT_EAL_MacFinal failed, ret:%{public}d", ret);
-        CRYPT_EAL_MacFreeCtx(ctx);
-        return {};
-    }
-    CRYPT_EAL_MacFreeCtx(ctx);
+    unsigned char digest[EVP_MAX_MD_SIZE] = {0};
+    unsigned int len = 0;
+    HMAC(EVP_sha384(),
+        nonce.data(),
+        static_cast<int>(nonce.size()),
+        reinterpret_cast<const unsigned char*>(dataStr.data()), dataStr.size(),
+        digest,
+        &len);
     return std::vector<uint8_t>(digest, digest + len);
 }
  
@@ -182,11 +155,7 @@ bool DragAuth::ConstantTimeCompare(const uint8_t* a, const uint8_t* b, size_t le
     if (!a || !b || len == 0) {
         return false;
     }
-    volatile uint8_t diff = 0;
-    for (size_t i = 0; i < len; ++i) {
-        diff |= static_cast<uint8_t>(a[i] ^ b[i]);
-    }
-    if (diff != 0) {
+    if (CRYPTO_memcmp(a, b, len) != 0) {
         FI_HILOGE("ConstantTimeCompare failed");
         return false;
     }
@@ -199,21 +168,20 @@ std::string DragAuth::Base64Encode(const uint8_t* data, size_t len)
         FI_HILOGE("data or len error");
         return "";
     }
-    // CHECK Base64encode formula for calculating length, BSL_BASE64_Encode uses uint32_t length
-    if (len > static_cast<size_t>((UINT32_MAX - 4) / 4 * 3)) {
+    // CHECK Base64encode formula for calculating length
+    if (len > (SIZE_MAX - 2) / 4 * 3) {
         FI_HILOGE("Len too large");
         return "";
     }
     // Base64encode formula for calculating length
     size_t outLen = 4 * ((len + 2) / 3);
-    std::vector<char> outBuf(outLen + 1);
-    uint32_t encodedLen = static_cast<uint32_t>(outBuf.size());
-    int32_t ret = BSL_BASE64_Encode(data, static_cast<uint32_t>(len), outBuf.data(), &encodedLen);
-    if (ret != BSL_SUCCESS) {
-        FI_HILOGE("BSL_BASE64_Encode failed, ret:%{public}d", ret);
+    std::vector<unsigned char> outBuf(outLen + 1);
+    int encodedLen = EVP_EncodeBlock(outBuf.data(), data, static_cast<int>(len));
+    if (encodedLen <= 0) {
+        FI_HILOGE("Base64Encode error");
         return "";
     }
-    return std::string(outBuf.data(), encodedLen);
+    return std::string(reinterpret_cast<char*>(outBuf.data()), encodedLen);
 }
  
 std::string DragAuth::Base64Encode(const std::vector<uint8_t>& vec)
@@ -227,15 +195,32 @@ std::vector<uint8_t> DragAuth::Base64Decode(const std::string& b64)
         FI_HILOGE("B64 is empty or too long");
         return {};
     }
-    std::vector<uint8_t> outBuf(HITLS_BASE64_DECODE_LENGTH(b64.length()));
-    uint32_t outLen = static_cast<uint32_t>(outBuf.size());
-    int32_t ret = BSL_BASE64_Decode(b64.data(), static_cast<uint32_t>(b64.size()), outBuf.data(), &outLen);
-    if (ret != BSL_SUCCESS) {
-        FI_HILOGE("BSL_BASE64_Decode failed, ret:%{public}d", ret);
+    
+    BIO* b64Bio = BIO_new(BIO_f_base64());
+    if (!b64Bio) {
+        FI_HILOGE("Failed to create base64 BIO");
         return {};
     }
-    outBuf.resize(outLen);
-    return outBuf;
+    
+    BIO* memBio = BIO_new_mem_buf(b64.data(), static_cast<int>(b64.size()));
+    if (!memBio) {
+        BIO_free(b64Bio);
+        FI_HILOGE("Failed to create memory BIO");
+        return {};
+    }
+    BIO_push(b64Bio, memBio);
+    BIO_set_flags(b64Bio, BIO_FLAGS_BASE64_NO_NL);
+ 
+    std::vector<uint8_t> result;
+    uint8_t buf[256];
+    int bytesRead = 0;
+ 
+    while ((bytesRead = BIO_read(b64Bio, buf, sizeof(buf))) > 0) {
+        result.insert(result.end(), buf, buf + bytesRead);
+    }
+ 
+    BIO_free_all(b64Bio);
+    return result;
 }
 } // namespace DeviceStatus
 } // namespace Msdp
