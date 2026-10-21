@@ -30,11 +30,13 @@ public:
     enum {
         ON_SCREEN_CHANGE = 0,
         ON_SCREEN_AWAREENSS = 1,
+        ON_STATE_MGMT_INFO = 3,
     };
 
     virtual void OnScreenChange(const std::string& changeInfo) = 0;
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     virtual void OnScreenAwareness(const OnscreenAwarenessInfo& info) = 0;
+    virtual void OnStateMgmtInfo(const std::vector<std::string>& results) = 0;
 #endif
 
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.msdp.IRemoteOnScreenCallback");

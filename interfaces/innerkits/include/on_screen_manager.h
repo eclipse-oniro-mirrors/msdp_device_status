@@ -59,6 +59,8 @@ public:
     int32_t UnregisterScreenEventCallback(int32_t windowId, std::string event, sptr<IRemoteOnScreenCallback> callback);
     int32_t IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus);
     int32_t GetLiveStatus();
+    int32_t OnStateMgmtInfo(const StateMgmtInfo& info, sptr<IRemoteOnScreenCallback> callback,
+        const AwarenessOptions& option);
 
     int32_t RegisterAwarenessCallback(const AwarenessCap& cap, sptr<IRemoteOnScreenCallback> callback,
         const AwarenessOptions& option);

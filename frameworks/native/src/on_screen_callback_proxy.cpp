@@ -91,6 +91,30 @@ void OnScreenCallbackProxy::OnScreenAwareness(const OnscreenAwarenessInfo& info)
         return;
     }
 }
+
+void OnScreenCallbackProxy::OnStateMgmtInfo(const std::vector<std::string>& results)
+{
+    sptr<IRemoteObject> remote = Remote();
+    CHKPV(remote);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(OnScreenCallbackProxy::GetDescriptor())) {
+        FI_HILOGE("Write descrptor failed");
+        return;
+    }
+    WRITEINT32(data, static_cast<int32_t>(results.size()));
+    for (const auto& result : results) {
+        WRITESTRING(data, result);
+    }
+    int32_t ret = remote->SendRequest(static_cast<int32_t>(IRemoteOnScreenCallback::ON_STATE_MGMT_INFO),
+        data, reply, option);
+    if (ret != RET_OK) {
+        FI_HILOGE("SendRequest is failed, error code:%{public}d", ret);
+        return;
+    }
+}
 #endif
 } // namespace OnScreen
 } // namespace DeviceStatus

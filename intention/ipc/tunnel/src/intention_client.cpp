@@ -1192,6 +1192,26 @@ int32_t IntentionClient::GetLiveStatus()
     return devicestatusProxy_->GetLiveStatus();
 }
 
+int32_t IntentionClient::GetStateMgmtInfo(const StateMgmtInfo& info,
+    const sptr<IRemoteOnScreenCallback> callback)
+{
+    CALL_DEBUG_ENTER;
+    if (Connect() != RET_OK) {
+        FI_HILOGE("can not get proxy");
+        return RET_ERR;
+    }
+    std::lock_guard lock(mutex_);
+    CHKPR(devicestatusProxy_, RET_ERR);
+    CHKPR(callback, RET_ERR);
+    OnScreen::SequenceableStateMgmtInfo seqInfo(info);
+    auto ret = devicestatusProxy_->GetStateMgmtInfo(seqInfo, callback);
+    if (ret != RET_OK) {
+        FI_HILOGE("proxy:GetStateMgmtInfo failed");
+        return ret;
+    }
+    return RET_OK;
+}
+
 int32_t IntentionClient::RegisterAwarenessCallback(const OnScreen::AwarenessCap& cap,
     const sptr<OnScreen::IRemoteOnScreenCallback>& callback, const OnScreen::AwarenessOptions& option)
 {

@@ -37,12 +37,14 @@ public:
     virtual void OnScreenChange(const std::string& changeInfo) override {}
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     virtual void OnScreenAwareness(const OnscreenAwarenessInfo& info) override {}
+    virtual void OnStateMgmtInfo(const std::vector<std::string>& results) override {};
 #endif
 
 private:
     int32_t OnScreenChangeStub(MessageParcel &data);
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     int32_t OnScreenAwarenessStub(MessageParcel &data);
+    int32_t OnStateMgmtInfoStub(MessageParcel &data);
 #endif
 };
 } // namespace OnScreen

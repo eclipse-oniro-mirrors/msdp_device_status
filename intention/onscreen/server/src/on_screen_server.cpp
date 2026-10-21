@@ -28,9 +28,12 @@
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 #include "bundle_info.h"
 #include "bundle_mgr_proxy.h"
+#include "focus_change_info.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "ui_content_proxy.h"
+#include "window_manager.h"
 #endif
 
 #undef LOG_TAG
@@ -245,6 +248,54 @@ int32_t OnScreenServer::IsParallelFeatureEnabled(const CallingContext& context,
         return ret;
     }
     return RET_OK;
+}
+
+int32_t OnScreenServer::GetStateMgmtInfo(const StateMgmtInfo& info, const sptr<IRemoteOnScreenCallback>& callback)
+{
+    if (callback == nullptr) {
+        FI_HILOGE("callback is nullptr");
+        return RET_ERR;
+    }
+    FI_HILOGI("GetStateMgmtInfo enter, componentName:%{public}s, propertyName:%{public}s, jsonPath:%{public}s, "
+        "onlyVisible:%{public}d", info.componentName.c_str(), info.propertyName.c_str(), info.jsonPath.c_str(),
+        info.onlyVisible);
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
+    Rosen::FocusChangeInfo focusInfo;
+    Rosen::windowManager::GetInstance().GetFocusWindowInfo(focusInfo);
+    int32_t windowId = focusInfo.windowId_;
+    sptr<IRemoteObject> remoteObj = nullptr;
+    auto ret = Rosen::windowManager::GetInstance().GetUIContentRemoteObj(windowId, remoteObj);
+    if (remoteObj == nullptr) {
+        FI_HILOGE("GetUIContentRemoteObj failed, windowId=%{public}d, ret=%{public}d", windowId,
+            static_cast<int32_t>(ret));
+        return RET_ERR;
+    }
+    sptr<Ace::IUiContentService> contentService = iface_cast<Ace::IUiContentService>(remoteObj);
+    if (contentService == nullptr) {
+        FI_HILOGE("iface_cast IUiContentService failed, windowId=%{public}d", windowId);
+        return RET_ERR;
+    }
+    if (!contentService->IsConnect()) {
+        auto connectCallback = [windowId](std::string result) {
+            FI_HILOGE("window %{public}d connect callback got %{public}s", windowId, result.c_str());
+        };
+        int32_t ret = contentService->Connect(connectCallback);
+        FI_HILOGE("Connect return ret=%{public}d", ret);
+        if (ret != RET_OK) {
+            FI_HILOGE("Connect failed, ret=%{public}d", ret);
+            return ret;
+        }
+    }
+
+    sptr<IRemoteOnScreenCallback> cb = callback;
+    auto eventCallback = [cb](std::vector<std::string> results) {
+        FI_HILOGI("GetStateMgmtInfo callback, results size=%{public}zu", results.size());
+    };
+    return contentService->GetStateMgmtInfo(info.componentName, info.propertyName, info.jsonPath,
+        eventCallback, info.onlyVisible);
+#else
+    return RET_OK;
+#endif
 }
 
 int32_t OnScreenServer::GetLiveStatus()

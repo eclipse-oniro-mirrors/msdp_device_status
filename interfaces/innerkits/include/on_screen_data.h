@@ -98,6 +98,13 @@ struct ControlEvent {
     int64_t hookId = 0;
 };
 
+struct StateMgmtInfo {
+    std::string componentName;
+    std::string propertyName;
+    std::string jsonPath;
+    bool onlyVisible = false;
+};
+
 struct OnScreenCallingContext {
     uint64_t fullTokenId = 0;
     uint32_t tokenId = 0;

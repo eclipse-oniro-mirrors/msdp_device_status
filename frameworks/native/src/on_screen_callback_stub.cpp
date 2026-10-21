@@ -48,6 +48,9 @@ int32_t OnScreenCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         case static_cast<int32_t>(ON_SCREEN_AWAREENSS): {
             return OnScreenAwarenessStub(data);
         }
+        case static_cast<int32_t>(ON_STATE_MGMT_INFO): {
+            return OnstateMgmtInfoStub(data);
+        }
 #endif
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -88,6 +91,21 @@ int32_t OnScreenCallbackStub::OnScreenAwarenessStub(MessageParcel &data)
         info.entityInfo.push_back(entity);
     }
     OnScreenAwareness(info);
+    return RET_OK;
+}
+
+int32_t OnScreenCallbackStub::OnstateMgmtInfoStub(MessageParcel &data)
+{
+    CALL_DEBUG_ENTER;
+    int32_t size = 0;
+    READINT32(data, size, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    std::vector<std::string> results;
+    for (int32_t i = 0: i < size; i++) {
+        std::string result;
+        READSTRING(data, result, E_DEVICESTATUS_READ_PARCEL_ERROR);
+        results.push_back(result);
+    }
+    OnstateMgmtInfo(results);
     return RET_OK;
 }
 #endif
