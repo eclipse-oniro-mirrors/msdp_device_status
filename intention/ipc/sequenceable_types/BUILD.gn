@@ -61,7 +61,7 @@ ohos_source_set("sequenceable_types") {
     "src/sequenceable_car_awareness_event_array.cpp",
     "src/sequenceable_subscribe_options.cpp",
     "src/sequenceable_feedback_data.cpp",
-    "src/sequenceable_state_mdmt_info.cpp",
+    "src/sequenceable_state_mgmt_info.cpp",
   ]
 
   public_configs = [ ":sequenceable_types_public_config" ]

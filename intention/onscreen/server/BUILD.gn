@@ -65,7 +65,7 @@ ohos_source_set("intention_on_screen_server") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
-    "window_managar:libwm",
+    "window_manager:libwm",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

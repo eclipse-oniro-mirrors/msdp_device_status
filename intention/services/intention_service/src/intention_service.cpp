@@ -778,15 +778,15 @@ ErrCode IntentionService::ListenLiveBroadcast()
 }
 
 ErrCode IntentionService::GetStateMgmtInfo(const OnScreen::SequenceableStateMgmtInfo& info,
-        const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback)
+    const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback)
 {
-    if(onScreenCallback == nullptr) {
+    if (onScreenCallback == nullptr) {
         FI_HILOGE("onScreenCallback is nullptr");
         return RET_ERR;
     }
     OnScreen::StateMgmtInfo rawInfo = info.stateMgmtInfo_;
     auto cb = onScreenCallback;
-    return PostSyncTask([this, rawInfo, cb = std::move(cb)]{
+    return PostSyncTask([this, rawInfo, cb = std::move(cb)] {
         return onScreen_.GetStateMgmtInfo(rawInfo, cb);
     });
 }

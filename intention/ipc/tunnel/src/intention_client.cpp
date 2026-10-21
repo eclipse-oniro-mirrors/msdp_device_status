@@ -1192,8 +1192,8 @@ int32_t IntentionClient::GetLiveStatus()
     return devicestatusProxy_->GetLiveStatus();
 }
 
-int32_t IntentionClient::GetStateMgmtInfo(const StateMgmtInfo& info,
-    const sptr<IRemoteOnScreenCallback> callback)
+int32_t IntentionClient::GetStateMgmtInfo(const OnScreen::StateMgmtInfo& info,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& callback)
 {
     CALL_DEBUG_ENTER;
     if (Connect() != RET_OK) {
@@ -1206,7 +1206,7 @@ int32_t IntentionClient::GetStateMgmtInfo(const StateMgmtInfo& info,
     OnScreen::SequenceableStateMgmtInfo seqInfo(info);
     auto ret = devicestatusProxy_->GetStateMgmtInfo(seqInfo, callback);
     if (ret != RET_OK) {
-        FI_HILOGE("proxy:GetStateMgmtInfo failed");
+        FI_HILOGE("proxy::GetStateMgmtInfo fail");
         return ret;
     }
     return RET_OK;

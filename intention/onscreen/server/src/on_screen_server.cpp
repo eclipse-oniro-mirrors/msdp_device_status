@@ -261,10 +261,10 @@ int32_t OnScreenServer::GetStateMgmtInfo(const StateMgmtInfo& info, const sptr<I
         info.onlyVisible);
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     Rosen::FocusChangeInfo focusInfo;
-    Rosen::windowManager::GetInstance().GetFocusWindowInfo(focusInfo);
+    Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusInfo);
     int32_t windowId = focusInfo.windowId_;
     sptr<IRemoteObject> remoteObj = nullptr;
-    auto ret = Rosen::windowManager::GetInstance().GetUIContentRemoteObj(windowId, remoteObj);
+    auto ret = Rosen::WindowManager::GetInstance().GetUIContentRemoteObj(windowId, remoteObj);
     if (remoteObj == nullptr) {
         FI_HILOGE("GetUIContentRemoteObj failed, windowId=%{public}d, ret=%{public}d", windowId,
             static_cast<int32_t>(ret));
@@ -277,10 +277,10 @@ int32_t OnScreenServer::GetStateMgmtInfo(const StateMgmtInfo& info, const sptr<I
     }
     if (!contentService->IsConnect()) {
         auto connectCallback = [windowId](std::string result) {
-            FI_HILOGE("window %{public}d connect callback got %{public}s", windowId, result.c_str());
+            FI_HILOGD("window %{public}d connect callback got %{public}s", windowId, result.c_str());
         };
         int32_t ret = contentService->Connect(connectCallback);
-        FI_HILOGE("Connect return ret=%{public}d", ret);
+        FI_HILOGD("Connect return %{public}d", ret);
         if (ret != RET_OK) {
             FI_HILOGE("Connect failed, ret=%{public}d", ret);
             return ret;
@@ -290,6 +290,9 @@ int32_t OnScreenServer::GetStateMgmtInfo(const StateMgmtInfo& info, const sptr<I
     sptr<IRemoteOnScreenCallback> cb = callback;
     auto eventCallback = [cb](std::vector<std::string> results) {
         FI_HILOGI("GetStateMgmtInfo callback, results size=%{public}zu", results.size());
+        if (cb != nullptr) {
+            cb->OnStateMgmtInfo(results);
+        }
     };
     return contentService->GetStateMgmtInfo(info.componentName, info.propertyName, info.jsonPath,
         eventCallback, info.onlyVisible);

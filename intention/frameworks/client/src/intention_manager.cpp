@@ -551,8 +551,8 @@ int32_t IntentionManager::GetLiveStatus()
     return onScreen_.GetLiveStatus();
 }
 
-int32_t IntentionManager::GetStateMgmtInfo(const StateMgmtInfo& info,
-    sptr<IRemoteOnScreenCallback> callback)
+int32_t IntentionManager::GetStateMgmtInfo(const OnScreen::StateMgmtInfo& info,
+    sptr<OnScreen::IRemoteOnScreenCallback> callback)
 {
     CALL_DEBUG_ENTER;
     return onScreen_.GetStateMgmtInfo(info, callback);

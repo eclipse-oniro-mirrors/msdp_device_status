@@ -94,18 +94,18 @@ int32_t OnScreenCallbackStub::OnScreenAwarenessStub(MessageParcel &data)
     return RET_OK;
 }
 
-int32_t OnScreenCallbackStub::OnstateMgmtInfoStub(MessageParcel &data)
+int32_t OnScreenCallbackStub::OnStateMgmtInfoStub(MessageParcel &data)
 {
     CALL_DEBUG_ENTER;
     int32_t size = 0;
     READINT32(data, size, E_DEVICESTATUS_READ_PARCEL_ERROR);
     std::vector<std::string> results;
-    for (int32_t i = 0: i < size; i++) {
+    for (int32_t i = 0; i < size; i++) {
         std::string result;
         READSTRING(data, result, E_DEVICESTATUS_READ_PARCEL_ERROR);
         results.push_back(result);
     }
-    OnstateMgmtInfo(results);
+    OnStateMgmtInfo(results);
     return RET_OK;
 }
 #endif

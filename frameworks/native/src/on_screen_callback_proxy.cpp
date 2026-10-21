@@ -101,7 +101,7 @@ void OnScreenCallbackProxy::OnStateMgmtInfo(const std::vector<std::string>& resu
     MessageOption option;
 
     if (!data.WriteInterfaceToken(OnScreenCallbackProxy::GetDescriptor())) {
-        FI_HILOGE("Write descrptor failed");
+        FI_HILOGE("Write descriptor failed");
         return;
     }
     WRITEINT32(data, static_cast<int32_t>(results.size()));
