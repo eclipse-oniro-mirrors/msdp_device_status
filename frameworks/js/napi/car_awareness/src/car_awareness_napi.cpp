@@ -282,7 +282,6 @@ void CarAwarenessNapi::DefineCapabilityType(napi_env env, napi_value exports)
     SetStringProperty(env, capability, "RealTimeWeather", "REALTIME_WEATHER");
     SetStringProperty(env, capability, "Refueling", "REFUELING");
     SetStringProperty(env, capability, "CarStatus", "CAR_STATUS");
-    SetStringProperty(env, capability, "CarCfg", "CAR_CFG");
     SetStringProperty(env, capability, "HabitRecommendation", "HABIT_RECOMMENDATION");
     SetStringProperty(env, capability, "SpatialDraw", "SPATIAL_DRAW");
     SetStringProperty(env, capability, "GestureCloseDoor", "GESTURE_CLOSEDOOR");
