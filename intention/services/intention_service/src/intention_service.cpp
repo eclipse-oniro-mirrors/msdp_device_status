@@ -785,9 +785,10 @@ ErrCode IntentionService::GetStateMgmtInfo(const OnScreen::SequenceableStateMgmt
         return RET_ERR;
     }
     OnScreen::StateMgmtInfo rawInfo = info.stateMgmtInfo_;
+    CallingContext context = GetCallingContext();
     auto cb = onScreenCallback;
-    return PostSyncTask([this, rawInfo, cb = std::move(cb)] {
-        return onScreen_.GetStateMgmtInfo(rawInfo, cb);
+    return PostSyncTask([this, context, rawInfo, cb = std::move(cb)] {
+        return onScreen_.GetStateMgmtInfo(context, rawInfo, cb);
     });
 }
 

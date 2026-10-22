@@ -57,7 +57,6 @@ ohos_source_set("intention_on_screen_server") {
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
-    "ace_engine:ui_session",
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
@@ -65,7 +64,6 @@ ohos_source_set("intention_on_screen_server") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
-    "window_manager:libwm",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

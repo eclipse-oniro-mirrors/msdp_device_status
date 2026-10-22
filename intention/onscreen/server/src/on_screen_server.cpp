@@ -250,7 +250,8 @@ int32_t OnScreenServer::IsParallelFeatureEnabled(const CallingContext& context,
     return RET_OK;
 }
 
-int32_t OnScreenServer::GetStateMgmtInfo(const StateMgmtInfo& info, const sptr<IRemoteOnScreenCallback>& callback)
+int32_t OnScreenServer::GetStateMgmtInfo(const CallingContext &context, const StateMgmtInfo& info,
+    const sptr<IRemoteOnScreenCallback>& callback)
 {
     if (callback == nullptr) {
         FI_HILOGE("callback is nullptr");
@@ -260,42 +261,24 @@ int32_t OnScreenServer::GetStateMgmtInfo(const StateMgmtInfo& info, const sptr<I
         "onlyVisible:%{public}d", info.componentName.c_str(), info.propertyName.c_str(), info.jsonPath.c_str(),
         info.onlyVisible);
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
-    Rosen::FocusChangeInfo focusInfo;
-    Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusInfo);
-    int32_t windowId = focusInfo.windowId_;
-    sptr<IRemoteObject> remoteObj = nullptr;
-    auto ret = Rosen::WindowManager::GetInstance().GetUIContentRemoteObj(windowId, remoteObj);
-    if (remoteObj == nullptr) {
-        FI_HILOGE("GetUIContentRemoteObj failed, windowId=%{public}d, ret=%{public}d", windowId,
-            static_cast<int32_t>(ret));
-        return RET_ERR;
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
+        return RET_NO_SUPPORT;
     }
-    sptr<Ace::IUiContentService> contentService = iface_cast<Ace::IUiContentService>(remoteObj);
-    if (contentService == nullptr) {
-        FI_HILOGE("iface_cast IUiContentService failed, windowId=%{public}d", windowId);
-        return RET_ERR;
-    }
-    if (!contentService->IsConnect()) {
-        auto connectCallback = [windowId](std::string result) {
-            FI_HILOGD("window %{public}d connect callback got %{public}s", windowId, result.c_str());
-        };
-        int32_t ret = contentService->Connect(connectCallback);
-        FI_HILOGD("Connect return %{public}d", ret);
-        if (ret != RET_OK) {
-            FI_HILOGE("Connect failed, ret=%{public}d", ret);
-            return ret;
-        }
-    }
-
-    sptr<IRemoteOnScreenCallback> cb = callback;
-    auto eventCallback = [cb](std::vector<std::string> results) {
-        FI_HILOGI("GetStateMgmtInfo callback, results size=%{public}zu", results.size());
-        if (cb != nullptr) {
-            cb->OnStateMgmtInfo(results);
-        }
+    OnScreenCallingContext onScreeContext {
+        .fullTokenId = context.fullTokenId,
+        .tokenId = context.tokenId,
+        .uid = context.uid,
+        .pid = context.pid,
     };
-    return contentService->GetStateMgmtInfo(info.componentName, info.propertyName, info.jsonPath,
-        eventCallback, info.onlyVisible);
+    std::vector<std::string> results;
+    int32_t ret = handleMMA_.pAlgorithm->GetStateMgmtInfo(onScreeContext, info, results);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to GetStateMgmtInfo, err=%{public}d", ret);
+        return ret;
+    }
+    callback->OnStateMgmtInfo(results);
+    return RET_OK;
 #else
     return RET_OK;
 #endif
