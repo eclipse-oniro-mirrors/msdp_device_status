@@ -56,8 +56,10 @@ auto &g_carAwarenessMgr = DeviceStatus::CarAwarenessMgr::GetInstance();
         { "SpatialPoint", TYPE_SPATIAL_POINT },
         { "SpatialGesture", TYPE_SPATIAL_GESTURE },
         { "CarStatus", TYPE_CAR_STATUS },
-        { "CarCfg", TYPE_CAR_CFG },
-        { "HabitRecommendation", TYPE_HABIT_RECOMMENDATION }
+        { "HabitRecommendation", TYPE_HABIT_RECOMMENDATION },
+        { "SpatialDraw", TYPE_SPATIAL_DRAW },
+        { "GestureCloseDoor", TYPE_GESTURE_CLOSEDOOR },
+        { "OccupantSense", TYPE_OCCUPANT_SENSE }
     };
 
     const std::vector<std::string> EXPECTED_TYPE_NUMBER_ARG_1 = { "number" };
@@ -280,8 +282,10 @@ void CarAwarenessNapi::DefineCapabilityType(napi_env env, napi_value exports)
     SetStringProperty(env, capability, "RealTimeWeather", "REALTIME_WEATHER");
     SetStringProperty(env, capability, "Refueling", "REFUELING");
     SetStringProperty(env, capability, "CarStatus", "CAR_STATUS");
-    SetStringProperty(env, capability, "CarCfg", "CAR_CFG");
     SetStringProperty(env, capability, "HabitRecommendation", "HABIT_RECOMMENDATION");
+    SetStringProperty(env, capability, "SpatialDraw", "SPATIAL_DRAW");
+    SetStringProperty(env, capability, "GestureCloseDoor", "GESTURE_CLOSEDOOR");
+    SetStringProperty(env, capability, "OccupantSense", "OCCUPANT_SENSE");
     SetPropertyName(env, exports, "Capability", capability);
 }
 
@@ -356,6 +360,12 @@ bool CarAwarenessNapi::GetCarStatusAwarenessOption(napi_env env, napi_value awar
         return false;
     }
 
+    constexpr uint32_t MAX_OPTION_PARAMETERS = 100;
+    if (length > MAX_OPTION_PARAMETERS) {
+        FI_HILOGE("too many parameters: %{public}u", length);
+        return false;
+    }
+
     for (uint32_t i = 0; i < length; i++) {
         napi_value key;
         if (napi_get_element(env, keys, i, &key) != napi_ok) {
@@ -393,20 +403,23 @@ void CarAwarenessNapi::ExecuteGetCapCompleteFunc(napi_env env, napi_status statu
     if (context == nullptr || context->env == nullptr) {
         return;
     }
-        if (context->asyncWorkRet != RES_SUCCESS) {
-            ThrowIpcExcuteErr(context->env, context->asyncWorkRet);
-            napi_reject_deferred(context->env, context->deferred,
-                CreateNapiError(context->env, context->asyncWorkRet, "GetSupportCap Err"));
-        } else {
-            napi_value result;
-            napi_create_array(context->env, &result);
-            for (size_t i = 0; i < context->typeVector.size(); i++) {
-                napi_value str;
-                napi_create_string_utf8(context->env, context->typeVector[i].c_str(), NAPI_AUTO_LENGTH, &str);
-                napi_set_element(context->env, result, i, str);
-            }
-            napi_resolve_deferred(context->env, context->deferred, result);
+    if (context->asyncWorkRet != RES_SUCCESS) {
+        auto errMsgOpt = GetErrMsg(context->asyncWorkRet);
+        napi_reject_deferred(
+            context->env,
+            context->deferred,
+            CreateNapiError(
+                context->env, context->asyncWorkRet, errMsgOpt ? errMsgOpt.value() : "GetCapability Err"));
+    } else {
+        napi_value result;
+        napi_create_array(context->env, &result);
+        for (size_t i = 0; i < context->typeVector.size(); i++) {
+            napi_value str;
+            napi_create_string_utf8(context->env, context->typeVector[i].c_str(), NAPI_AUTO_LENGTH, &str);
+            napi_set_element(context->env, result, i, str);
         }
+        napi_resolve_deferred(context->env, context->deferred, result);
+    }
     if (context->env != nullptr && context->asyncWork != nullptr) {
         napi_delete_async_work(context->env, context->asyncWork);
     }
@@ -420,22 +433,37 @@ void CarAwarenessNapi::ExecuteGetEventCompleteFunc(napi_env env, napi_status sta
         return;
     }
     if (context->asyncWorkRet != RES_SUCCESS) {
-        ThrowIpcExcuteErr(context->env, context->asyncWorkRet);
-        napi_reject_deferred(context->env, context->deferred,
-            CreateNapiError(context->env, context->asyncWorkRet, "GetCarAwareness Err"));
+        auto errMsgOpt = GetErrMsg(context->asyncWorkRet);
+        napi_reject_deferred(
+            context->env,
+            context->deferred,
+            CreateNapiError(
+                context->env, context->asyncWorkRet, errMsgOpt ? errMsgOpt.value() : "GetCarAwareness Err"));
     } else {
         napi_value result;
         napi_create_array(context->env, &result);
         size_t resultIndex = 0;
         for (size_t i = 0; i < context->events.size(); i++) {
             std::string &eventData = context->events[i].eventData;
-            if (eventData.empty() || eventData == "[]" || !nlohmann::json::accept(eventData)) {
-                FI_HILOGW("skip invalid eventData at index %{public}zu, data: %{public}s", i, eventData.c_str());
+            if (eventData.empty() || eventData == "[]") {
+                FI_HILOGW("skip invalid eventData at index %{public}zu", i);
+                continue;
+            }
+            if (!nlohmann::json::accept(eventData)) {
+                FI_HILOGW("skip invalid eventData at index %{public}zu", i);
                 continue;
             }
             nlohmann::json eventJson = nlohmann::json::parse(eventData);
             napi_value eventObj = ConvertJsonValueToNapiValue(context->env, eventJson);
-            napi_set_element(context->env, result, resultIndex++, eventObj);
+            if (eventObj == nullptr) {
+                FI_HILOGE("ConvertJsonValueToNapiValue failed at index %{public}zu", i);
+                continue;
+            }
+            if (napi_set_element(context->env, result, resultIndex, eventObj) != napi_ok) {
+                FI_HILOGE("napi_set_element failed at index %{public}zu", i);
+                continue;
+            }
+            resultIndex++;
         }
         napi_resolve_deferred(context->env, context->deferred, result);
     }
@@ -505,10 +533,9 @@ bool CarAwarenessNapi::DoSubscription(napi_env env, int32_t type,
         return true;
     }
     cb->RemoveNapiObject(weak_from_this());
-
-        auto it = g_typeCallbacks.find(type);
-        if (it != g_typeCallbacks.end() && it->second == cb) {
-            g_typeCallbacks.erase(it);
+    auto it = g_typeCallbacks.find(type);
+    if (it != g_typeCallbacks.end() && it->second == cb) {
+        g_typeCallbacks.erase(it);
     }
     ThrowIpcExcuteErr(env, ret);
     return false;
@@ -542,6 +569,7 @@ bool CarAwarenessNapi::SubscribeToSa(napi_env env, int32_t type,
 
     cb->AddNapiObject(weak_from_this());
 
+    // 同一个pid的请求下carstatus支持不同option的多次订阅，并且规定一个pid只维护一个callback，后面订阅的option会覆盖之前的option
     if (hasSubscribed && type != TYPE_CAR_STATUS) {
         return true;
     }

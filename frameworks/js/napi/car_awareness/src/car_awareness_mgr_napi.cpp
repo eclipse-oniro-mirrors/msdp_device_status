@@ -39,8 +39,6 @@ CarAwarenessMgrNapi::CarAwarenessMgrNapi(napi_env env, napi_value thisVar)
         [this](napi_value handler, const std::string &data) { return ConvertWeatherInfo(handler, data); };
     triggerMap_[TYPE_REFUELING] =
         [this](napi_value handler, const std::string &data) { return ConvertRefulingInfo(handler, data); };
-    triggerMap_[TYPE_CAR_STATUS] =
-        [this](napi_value handler, const std::string &data) { return ConvertCarStatusInfo(handler, data); };
 #endif // CAR_AWARENESS_ENABLE
 }
 
@@ -297,10 +295,11 @@ void CarAwarenessMgrNapi::TriggerEvent(int32_t type, const std::string &data)
         // 按照Type进行对象的封装,返回至ArkTs线程
         auto it = triggerMap_.find(type);
         if (it == triggerMap_.end()) {
-            FI_HILOGE("Trigger Func not registered");
-            continue;
+            FI_HILOGI("call sys listener");
+            ConvertSysAwareInfo(handler, data);
+        } else {
+            it->second(handler, data);
         }
-        it->second(handler, data);
     }
 }
 
@@ -425,10 +424,10 @@ void CarAwarenessMgrNapi::ConvertRefulingInfo(napi_value handler, const std::str
     napi_close_handle_scope(env_, scope);
 }
 
-void CarAwarenessMgrNapi::ConvertCarStatusInfo(napi_value handler, const std::string &data)
+void CarAwarenessMgrNapi::ConvertSysAwareInfo(napi_value handler, const std::string &data)
 {
     if (data.empty() || !nlohmann::json::accept(data)) {
-        FI_HILOGE("invalid car status data");
+        FI_HILOGE("invalid format data");
         return;
     }
  

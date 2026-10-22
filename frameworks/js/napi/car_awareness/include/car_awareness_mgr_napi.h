@@ -43,8 +43,10 @@ namespace {
     constexpr int32_t TYPE_SPATIAL_POINT = 201;
     constexpr int32_t TYPE_SPATIAL_GESTURE = 202;
     constexpr int32_t TYPE_CAR_STATUS = 203;
-    constexpr int32_t TYPE_CAR_CFG = 204;
-    constexpr int32_t TYPE_HABIT_RECOMMENDATION = 205;
+    constexpr int32_t TYPE_HABIT_RECOMMENDATION = 204;
+    constexpr int32_t TYPE_SPATIAL_DRAW = 205;
+    constexpr int32_t TYPE_GESTURE_CLOSEDOOR = 206;
+    constexpr int32_t TYPE_OCCUPANT_SENSE = 207;
 }
 
 struct CarAwarenessListener {
@@ -76,7 +78,7 @@ private:
     void ConvertWeatherInfo(napi_value handler, const std::string &data);
     void ConvertSpatialMotionInfo(napi_value handler, const std::string &data);
     void ConvertRefulingInfo(napi_value handler, const std::string &data);
-    void ConvertCarStatusInfo(napi_value handler, const std::string &data);
+    void ConvertSysAwareInfo(napi_value handler, const std::string &data);
 #endif // CAR_AWARENESS_ENABLE
 
 protected:

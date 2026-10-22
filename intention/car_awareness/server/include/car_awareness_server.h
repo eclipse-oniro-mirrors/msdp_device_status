@@ -82,6 +82,7 @@ public:
 
 private:
     int32_t UnloadAlgoLib();
+    bool loadAndCheckAlgoLib();
     void OnCarAwarenessCallbackDied(const wptr<IRemoteObject> &remote);
     bool AddDeathRecipient(const sptr<ICarAwarenessCallback> &cb);
     void RemoveDeathRecipient(const sptr<ICarAwarenessCallback> &cb);
@@ -101,6 +102,7 @@ private:
         CarAwarenessClientInfo &clientInfo);
     int32_t UnSubscribeCarStatus(const std::string &featureName, pid_t callingPid,
         const CarAwarenessOption &option);
+    void NotifyClientCached(int32_t type, const sptr<ICarAwarenessCallback> &cb);
 
     sptr<IRemoteObject::DeathRecipient> deathRecipient_{nullptr};
     std::mutex algoMtx_;
@@ -108,6 +110,7 @@ private:
     std::map<std::string, std::vector<CarAwarenessClientInfo>> callbacks_;
     CarAwarenessPluginHandle algoHandle_;
     CarAwareness::CarAwarenessCallback algoCb_ = nullptr;
+    std::map<std::string, std::string> algoResultCache_;
 };
 
 }  // namespace DeviceStatus

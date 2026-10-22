@@ -48,7 +48,7 @@ static napi_module g_module = {.nm_version = 1,
  */
 extern "C" __attribute__((constructor)) void RegisterCarModeManageModule(void)
 {
-    FI_HILOGI("carAwareness service moudle register.");
+    FI_HILOGI("carAwareness service module register.");
     napi_module_register(&g_module);
 }
 } // namespace Msdp
