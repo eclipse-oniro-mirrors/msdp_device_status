@@ -271,34 +271,29 @@ int32_t BehaviorAwarenessServer::SubmitFeedback(const CallingContext &context, c
     if (ret != RET_OK) {
         FI_HILOGE("SubmitFeedback: param invalid, eventId:%{public}s, ret:%{public}d",
             feedback.perceptionEventId.c_str(), ret);
-        return ret;
+        return RET_OK;
     }
     try {
         FeedbackData normalized = feedback;
         ret = FeedbackStore::GetInstance().InsertFeedback(normalized);
+        if (ret != RET_OK) {
+            FI_HILOGE("SubmitFeedback: InsertFeedback failed, ret:%{public}d, eventId:%{public}s",
+                ret, feedback.perceptionEventId.c_str());
+            return RET_OK;
+        }
     } catch (const std::bad_alloc &e) {
-        // EX-4: Memory allocation failure during normalization.
-        // Fault tolerance: return RET_OK, do not throw 32500001 to the caller.
-        FI_HILOGE("SubmitFeedback: data process exception (bad_alloc), eventId:%{public}s, reason:%{public}s",
+        FI_HILOGE("SubmitFeedback: bad_alloc, eventId:%{public}s, reason:%{public}s",
             feedback.perceptionEventId.c_str(), e.what());
         return RET_OK;
     } catch (const std::exception &e) {
-        // EX-4: feedback JSON serialization failure.
-        // Fault tolerance: return RET_OK, do not throw 32500001 to the caller.
-        FI_HILOGE("SubmitFeedback: feedback JSON serialize failed, eventId:%{public}s, stage:normalize, "
-            "reason:%{public}s", feedback.perceptionEventId.c_str(), e.what());
+        FI_HILOGE("SubmitFeedback: exception, eventId:%{public}s, reason:%{public}s",
+            feedback.perceptionEventId.c_str(), e.what());
         return RET_OK;
     } catch (...) {
-        // EX-4: Unknown data-processing exception.
-        // Fault tolerance: return RET_OK, do not throw 32500001 to the caller.
-        FI_HILOGE("SubmitFeedback: unknown data process exception, eventId:%{public}s",
+        FI_HILOGE("SubmitFeedback: unknown exception, eventId:%{public}s",
             feedback.perceptionEventId.c_str());
         return RET_OK;
     }
-    // AC-1.5: FeedbackStore::InsertFeedback internally handles all RDB I/O
-    // exceptions (database missing, UPDATE failure, null rdbStore_) by logging
-    // HILOG_ERROR and returning RET_OK. The ret value here is always RET_OK
-    // under the fault-tolerance strategy — 32500001 is never propagated.
     std::string bundleName = GetCallerBundleName(context);
     FI_HILOGI("SubmitFeedback: success, bundleName:%{public}s, eventId:%{public}s, type:%{public}d",
         bundleName.c_str(), feedback.perceptionEventId.c_str(),

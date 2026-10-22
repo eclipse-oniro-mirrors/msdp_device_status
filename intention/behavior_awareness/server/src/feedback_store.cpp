@@ -73,11 +73,11 @@ void FeedbackStore::SetDatabasePathForTesting(const std::string &path)
 
 int32_t FeedbackStore::InitRdbStore()
 {
-    // DD-8: do not create a new database; return RET_OK if file is missing.
+    // DD-8: do not create a new database; return error if file is missing.
     if (access(databasePath_.c_str(), F_OK) != 0) {
-        FI_HILOGE("InitRdbStore: database file does not exist, errCode:%{public}d, path:%{public}s",
+        FI_HILOGE("InitRdbStore: db file not exist, err:%{public}d, path:%{public}s",
             SERVICE_EXCEPTION, databasePath_.c_str());
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     NativeRdb::RdbStoreConfig config;
     config.SetPath(databasePath_);
@@ -85,17 +85,14 @@ int32_t FeedbackStore::InitRdbStore()
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     int32_t errCode = NativeRdb::E_OK;
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, errCode);
-    // Fault tolerance: GetRdbStore failure returns RET_OK.
     if (rdbStore_ == nullptr || errCode != NativeRdb::E_OK) {
-        FI_HILOGE("InitRdbStore: GetRdbStore failed, errCode:%{public}d, rdbErrCode:%{public}d, path:%{public}s",
-            SERVICE_EXCEPTION, errCode, databasePath_.c_str());
-        return RET_OK;
+        FI_HILOGE("InitRdbStore: GetRdbStore failed, err:%{public}d, rdbErr:%{public}d",
+            SERVICE_EXCEPTION, errCode);
+        return SERVICE_EXCEPTION;
     }
     int32_t ret = EnsureTable();
-    // Fault tolerance: EnsureTable failure returns RET_OK.
     if (ret != RET_OK) {
-        FI_HILOGE("InitRdbStore: EnsureTable failed, errCode:%{public}d", SERVICE_EXCEPTION);
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     inited_ = true;
     return RET_OK;
@@ -103,17 +100,15 @@ int32_t FeedbackStore::InitRdbStore()
 
 int32_t FeedbackStore::EnsureTable()
 {
-    // Fault tolerance: rdbStore_ is null.
     if (rdbStore_ == nullptr) {
-        FI_HILOGE("EnsureTable: rdbStore_ is null, errCode:%{public}d", SERVICE_EXCEPTION);
-        return RET_OK;
+        FI_HILOGE("EnsureTable: rdbStore_ is null, err:%{public}d", SERVICE_EXCEPTION);
+        return SERVICE_EXCEPTION;
     }
     int32_t errCode = rdbStore_->ExecuteSql(CREATE_TABLE_SQL);
-    // Fault tolerance: DDL failure returns RET_OK.
     if (errCode != NativeRdb::E_OK) {
-        FI_HILOGE("EnsureTable: ExecuteSql failed, errCode:%{public}d, rdbErrCode:%{public}d",
+        FI_HILOGE("EnsureTable: ExecuteSql failed, err:%{public}d, rdbErr:%{public}d",
             SERVICE_EXCEPTION, errCode);
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     return RET_OK;
 }
@@ -154,56 +149,48 @@ int32_t FeedbackStore::ParseFeedbackType(const std::string &feedbackJson)
     }
 }
 
-int32_t FeedbackStore::GenerateTaskId(const std::string &perceptionEventId, int64_t feedbackTime, std::string &out)
-{
-    out = perceptionEventId + "_" + std::to_string(feedbackTime);
-    return RET_OK;
-}
-
 int32_t FeedbackStore::QueryFeedbackType(int64_t id, bool &recordFound, int32_t &outType)
 {
     recordFound = false;
     outType = -1;
-    // Fault tolerance: rdbStore_ is null.
     if (rdbStore_ == nullptr) {
-        FI_HILOGE("QueryFeedbackType: rdbStore_ is null, errCode:%{public}d, id:%{public}" PRId64,
+        FI_HILOGE("QueryFeedbackType: rdbStore_ null, err:%{public}d, id:%{public}" PRId64,
             SERVICE_EXCEPTION, id);
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     NativeRdb::RdbPredicates predicates(PERCEPTION_DB_TABLE);
     predicates.EqualTo("id", std::to_string(id));
     std::vector<std::string> columns = { "feedback" };
     auto resultSet = rdbStore_->Query(predicates, columns);
-    // Fault tolerance: Query returned null.
     if (resultSet == nullptr) {
-        FI_HILOGE("QueryFeedbackType: Query returned null, errCode:%{public}d, id:%{public}" PRId64,
+        FI_HILOGE("QueryFeedbackType: Query null, err:%{public}d, id:%{public}" PRId64,
             SERVICE_EXCEPTION, id);
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
-    // No matching row — record does not exist (EX-6).
     if (resultSet->GoToNextRow() != NativeRdb::E_OK) {
+        resultSet->Close();
         return RET_OK;
     }
     recordFound = true;
     std::string feedbackJson;
     int32_t ret = resultSet->GetString(0, feedbackJson);
-    // Fault tolerance: column read failure.
     if (ret != NativeRdb::E_OK) {
-        FI_HILOGE("QueryFeedbackType: GetString failed, errCode:%{public}d, rdbErrCode:%{public}d, id:%{public}" PRId64,
-            SERVICE_EXCEPTION, ret, id);
-        return RET_OK;
+        FI_HILOGE("QueryFeedbackType: GetString failed, err:%{public}d, rdbErr:%{public}d",
+            SERVICE_EXCEPTION, ret);
+        resultSet->Close();
+        return SERVICE_EXCEPTION;
     }
     outType = ParseFeedbackType(feedbackJson);
+    resultSet->Close();
     return RET_OK;
 }
 
 int32_t FeedbackStore::UpdateFeedbackField(int64_t id, const std::string &feedbackJson, int64_t updateTime)
 {
-    // Fault tolerance: rdbStore_ is null.
     if (rdbStore_ == nullptr) {
-        FI_HILOGE("UpdateFeedbackField: rdbStore_ is null, errCode:%{public}d, id:%{public}" PRId64,
+        FI_HILOGE("UpdateFeedbackField: rdbStore_ null, err:%{public}d, id:%{public}" PRId64,
             SERVICE_EXCEPTION, id);
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     NativeRdb::ValuesBucket values;
     values.PutString("feedback", feedbackJson);
@@ -212,11 +199,10 @@ int32_t FeedbackStore::UpdateFeedbackField(int64_t id, const std::string &feedba
     predicates.EqualTo("id", std::to_string(id));
     int32_t changedRows = 0;
     int32_t ret = rdbStore_->Update(changedRows, values, predicates);
-    // Fault tolerance: UPDATE failure returns RET_OK.
     if (ret != NativeRdb::E_OK) {
-        FI_HILOGE("UpdateFeedbackField: Update failed, errCode:%{public}d, rdbErrCode:%{public}d, "
-            "id:%{public}" PRId64 ", changedRows:%{public}d", SERVICE_EXCEPTION, ret, id, changedRows);
-        return RET_OK;
+        FI_HILOGE("UpdateFeedbackField: Update failed, err:%{public}d, rdbErr:%{public}d, "
+            "id:%{public}" PRId64 ", changed:%{public}d", SERVICE_EXCEPTION, ret, id, changedRows);
+        return SERVICE_EXCEPTION;
     }
     return RET_OK;
 }
@@ -226,11 +212,8 @@ int32_t FeedbackStore::ProcessFeedback(int64_t id, const FeedbackData &feedback)
     int32_t existingType = -1;
     bool recordFound = false;
     int32_t ret = QueryFeedbackType(id, recordFound, existingType);
-    // Fault tolerance: QueryFeedbackType failed.
     if (ret != RET_OK) {
-        FI_HILOGE("ProcessFeedback: query failed, err:%{public}d, id:%{public}" PRId64,
-            SERVICE_EXCEPTION, id);
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     // EX-6: record not found, do not INSERT.
     if (!recordFound) {
@@ -245,20 +228,14 @@ int32_t FeedbackStore::ProcessFeedback(int64_t id, const FeedbackData &feedback)
     }
     std::string feedbackJson;
     ret = SerializeFeedbackJson(newType, feedback.feedbackTime, feedbackJson);
-    // Fault tolerance: JSON serialization failed (EX-4).
     if (ret != RET_OK) {
-        FI_HILOGE("ProcessFeedback: serialize failed, err:%{public}d, id:%{public}" PRId64,
-            SERVICE_EXCEPTION, id);
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     FI_HILOGI("ProcessFeedback: updating, id:%{public}" PRId64 ", old:%{public}d, new:%{public}d",
         id, existingType, newType);
     ret = UpdateFeedbackField(id, feedbackJson, feedback.feedbackTime);
-    // Fault tolerance: UpdateFeedbackField failed.
     if (ret != RET_OK) {
-        FI_HILOGE("ProcessFeedback: update failed, err:%{public}d, id:%{public}" PRId64,
-            SERVICE_EXCEPTION, id);
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     return RET_OK;
 }
@@ -268,25 +245,22 @@ int32_t FeedbackStore::InsertFeedback(const FeedbackData &feedback)
     std::lock_guard<std::mutex> lock(mtx_);
     if (!inited_) {
         int32_t ret = InitRdbStore();
-        // Fault tolerance: InitRdbStore failed or rdbStore_ still null.
         if (ret != RET_OK || rdbStore_ == nullptr) {
             FI_HILOGE("InsertFeedback: init failed, err:%{public}d, eventId:%{public}s",
                 SERVICE_EXCEPTION, feedback.perceptionEventId.c_str());
-            return RET_OK;
+            return SERVICE_EXCEPTION;
         }
     }
-    // Fault tolerance: rdbStore_ is null.
     if (rdbStore_ == nullptr) {
         FI_HILOGE("InsertFeedback: rdbStore_ null, err:%{public}d, eventId:%{public}s",
             SERVICE_EXCEPTION, feedback.perceptionEventId.c_str());
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     int64_t id = MapEventIdToId(feedback.perceptionEventId);
-    // Defensive check: invalid id mapping.
     if (id <= 0) {
         FI_HILOGE("InsertFeedback: invalid id, err:%{public}d, eventId:%{public}s",
             SERVICE_EXCEPTION, feedback.perceptionEventId.c_str());
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     return ProcessFeedback(id, feedback);
 }
@@ -294,30 +268,28 @@ int32_t FeedbackStore::InsertFeedback(const FeedbackData &feedback)
 int32_t FeedbackStore::QueryFeedback(const std::string &perceptionEventId, FeedbackRecord &out)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    // Fault tolerance: rdbStore_ is null.
     if (rdbStore_ == nullptr) {
-        FI_HILOGE("QueryFeedback: rdbStore_ is null, errCode:%{public}d, eventId:%{public}s",
+        FI_HILOGE("QueryFeedback: rdbStore_ null, err:%{public}d, eventId:%{public}s",
             SERVICE_EXCEPTION, perceptionEventId.c_str());
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     int64_t id = MapEventIdToId(perceptionEventId);
     if (id <= 0) {
-        FI_HILOGE("QueryFeedback: invalid id mapping, errCode:%{public}d, eventId:%{public}s",
+        FI_HILOGE("QueryFeedback: invalid id, err:%{public}d, eventId:%{public}s",
             SERVICE_EXCEPTION, perceptionEventId.c_str());
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
     NativeRdb::RdbPredicates predicates(PERCEPTION_DB_TABLE);
     predicates.EqualTo("id", std::to_string(id));
     std::vector<std::string> columns = { "id", "feedback", "created_time", "update_time" };
     auto resultSet = rdbStore_->Query(predicates, columns);
-    // Fault tolerance: Query returned null.
     if (resultSet == nullptr) {
-        FI_HILOGE("QueryFeedback: Query returned null, errCode:%{public}d, eventId:%{public}s",
+        FI_HILOGE("QueryFeedback: Query null, err:%{public}d, eventId:%{public}s",
             SERVICE_EXCEPTION, perceptionEventId.c_str());
-        return RET_OK;
+        return SERVICE_EXCEPTION;
     }
-    // No matching row — record does not exist.
     if (resultSet->GoToNextRow() != NativeRdb::E_OK) {
+        resultSet->Close();
         return RET_OK;
     }
     out.perceptionEventId = perceptionEventId;
@@ -338,24 +310,23 @@ int32_t FeedbackStore::QueryFeedback(const std::string &perceptionEventId, Feedb
     if (ret == NativeRdb::E_OK) {
         out.updateTime = updateTime;
     }
+    resultSet->Close();
     return RET_OK;
 }
 
 int32_t FeedbackStore::QueryAll(std::vector<FeedbackRecord> &out)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    // Fault tolerance: rdbStore_ is null.
     if (rdbStore_ == nullptr) {
-        FI_HILOGE("QueryAll: rdbStore_ is null, errCode:%{public}d", SERVICE_EXCEPTION);
-        return RET_OK;
+        FI_HILOGE("QueryAll: rdbStore_ null, err:%{public}d", SERVICE_EXCEPTION);
+        return SERVICE_EXCEPTION;
     }
     NativeRdb::RdbPredicates predicates(PERCEPTION_DB_TABLE);
     std::vector<std::string> columns = { "id", "feedback", "created_time", "update_time" };
     auto resultSet = rdbStore_->Query(predicates, columns);
-    // Fault tolerance: Query returned null.
     if (resultSet == nullptr) {
-        FI_HILOGE("QueryAll: Query returned null, errCode:%{public}d", SERVICE_EXCEPTION);
-        return RET_OK;
+        FI_HILOGE("QueryAll: Query null, err:%{public}d", SERVICE_EXCEPTION);
+        return SERVICE_EXCEPTION;
     }
     while (resultSet->GoToNextRow() == NativeRdb::E_OK) {
         FeedbackRecord record;
@@ -383,23 +354,23 @@ int32_t FeedbackStore::QueryAll(std::vector<FeedbackRecord> &out)
         }
         out.push_back(record);
     }
+    resultSet->Close();
     return RET_OK;
 }
 
 void FeedbackStore::Clear()
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    // Fault tolerance: rdbStore_ is null.
     if (rdbStore_ == nullptr) {
-        FI_HILOGE("Clear: rdbStore_ is null, errCode:%{public}d", SERVICE_EXCEPTION);
+        FI_HILOGE("Clear: rdbStore_ null, err:%{public}d", SERVICE_EXCEPTION);
         return;
     }
     NativeRdb::RdbPredicates predicates(PERCEPTION_DB_TABLE);
     int32_t deletedRows = 0;
     int32_t ret = rdbStore_->Delete(deletedRows, predicates);
-    // Fault tolerance: DELETE failure.
     if (ret != NativeRdb::E_OK) {
-        FI_HILOGE("Clear: Delete failed, errCode:%{public}d, rdbErrCode:%{public}d", SERVICE_EXCEPTION, ret);
+        FI_HILOGE("Clear: Delete failed, err:%{public}d, rdbErr:%{public}d",
+            SERVICE_EXCEPTION, ret);
     }
 }
 } // namespace BehaviorAwareness
