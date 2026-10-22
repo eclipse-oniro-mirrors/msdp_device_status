@@ -273,25 +273,10 @@ int32_t BehaviorAwarenessServer::SubmitFeedback(const CallingContext &context, c
             feedback.perceptionEventId.c_str(), ret);
         return RET_OK;
     }
-    try {
-        FeedbackData normalized = feedback;
-        ret = FeedbackStore::GetInstance().InsertFeedback(normalized);
-        if (ret != RET_OK) {
-            FI_HILOGE("SubmitFeedback: InsertFeedback failed, ret:%{public}d, eventId:%{public}s",
-                ret, feedback.perceptionEventId.c_str());
-            return RET_OK;
-        }
-    } catch (const std::bad_alloc &e) {
-        FI_HILOGE("SubmitFeedback: bad_alloc, eventId:%{public}s, reason:%{public}s",
-            feedback.perceptionEventId.c_str(), e.what());
-        return RET_OK;
-    } catch (const std::exception &e) {
-        FI_HILOGE("SubmitFeedback: exception, eventId:%{public}s, reason:%{public}s",
-            feedback.perceptionEventId.c_str(), e.what());
-        return RET_OK;
-    } catch (...) {
-        FI_HILOGE("SubmitFeedback: unknown exception, eventId:%{public}s",
-            feedback.perceptionEventId.c_str());
+    ret = FeedbackStore::GetInstance().InsertFeedback(feedback);
+    if (ret != RET_OK) {
+        FI_HILOGE("SubmitFeedback: InsertFeedback failed, ret:%{public}d, eventId:%{public}s",
+            ret, feedback.perceptionEventId.c_str());
         return RET_OK;
     }
     std::string bundleName = GetCallerBundleName(context);
