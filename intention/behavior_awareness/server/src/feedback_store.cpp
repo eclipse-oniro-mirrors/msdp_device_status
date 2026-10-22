@@ -32,6 +32,10 @@ namespace BehaviorAwareness {
 
 namespace {
 constexpr const char *KEY_FEEDBACK_TYPE = "\"feedbackType\":";
+constexpr int32_t COL_ID = 0;
+constexpr int32_t COL_FEEDBACK = 1;
+constexpr int32_t COL_CREATED_TIME = 2;
+constexpr int32_t COL_UPDATE_TIME = 3;
 constexpr const char *CREATE_TABLE_SQL =
     "CREATE TABLE IF NOT EXISTS habit_perceptions ("
     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -217,6 +221,48 @@ int32_t FeedbackStore::UpdateFeedbackField(int64_t id, const std::string &feedba
     return RET_OK;
 }
 
+int32_t FeedbackStore::ProcessFeedback(int64_t id, const FeedbackData &feedback)
+{
+    int32_t existingType = -1;
+    bool recordFound = false;
+    int32_t ret = QueryFeedbackType(id, recordFound, existingType);
+    // Fault tolerance: QueryFeedbackType failed.
+    if (ret != RET_OK) {
+        FI_HILOGE("ProcessFeedback: query failed, err:%{public}d, id:%{public}" PRId64,
+            SERVICE_EXCEPTION, id);
+        return RET_OK;
+    }
+    // EX-6: record not found, do not INSERT.
+    if (!recordFound) {
+        FI_HILOGW("ProcessFeedback: record not found, id:%{public}" PRId64, id);
+        return RET_OK;
+    }
+    int32_t newType = static_cast<int32_t>(feedback.feedbackType);
+    // EX-7: idempotent, skip UPDATE.
+    if (existingType >= 0 && existingType == newType) {
+        FI_HILOGI("ProcessFeedback: idempotent, id:%{public}" PRId64, id);
+        return RET_OK;
+    }
+    std::string feedbackJson;
+    ret = SerializeFeedbackJson(newType, feedback.feedbackTime, feedbackJson);
+    // Fault tolerance: JSON serialization failed (EX-4).
+    if (ret != RET_OK) {
+        FI_HILOGE("ProcessFeedback: serialize failed, err:%{public}d, id:%{public}" PRId64,
+            SERVICE_EXCEPTION, id);
+        return RET_OK;
+    }
+    FI_HILOGI("ProcessFeedback: updating, id:%{public}" PRId64 ", old:%{public}d, new:%{public}d",
+        id, existingType, newType);
+    ret = UpdateFeedbackField(id, feedbackJson, feedback.feedbackTime);
+    // Fault tolerance: UpdateFeedbackField failed.
+    if (ret != RET_OK) {
+        FI_HILOGE("ProcessFeedback: update failed, err:%{public}d, id:%{public}" PRId64,
+            SERVICE_EXCEPTION, id);
+        return RET_OK;
+    }
+    return RET_OK;
+}
+
 int32_t FeedbackStore::InsertFeedback(const FeedbackData &feedback)
 {
     std::lock_guard<std::mutex> lock(mtx_);
@@ -224,65 +270,25 @@ int32_t FeedbackStore::InsertFeedback(const FeedbackData &feedback)
         int32_t ret = InitRdbStore();
         // Fault tolerance: InitRdbStore failed or rdbStore_ still null.
         if (ret != RET_OK || rdbStore_ == nullptr) {
-            FI_HILOGE("InsertFeedback: InitRdbStore failed, errCode:%{public}d, eventId:%{public}s",
+            FI_HILOGE("InsertFeedback: init failed, err:%{public}d, eventId:%{public}s",
                 SERVICE_EXCEPTION, feedback.perceptionEventId.c_str());
             return RET_OK;
         }
     }
     // Fault tolerance: rdbStore_ is null.
     if (rdbStore_ == nullptr) {
-        FI_HILOGE("InsertFeedback: rdbStore_ is null, errCode:%{public}d, eventId:%{public}s",
+        FI_HILOGE("InsertFeedback: rdbStore_ null, err:%{public}d, eventId:%{public}s",
             SERVICE_EXCEPTION, feedback.perceptionEventId.c_str());
         return RET_OK;
     }
     int64_t id = MapEventIdToId(feedback.perceptionEventId);
     // Defensive check: invalid id mapping.
     if (id <= 0) {
-        FI_HILOGE("InsertFeedback: invalid id mapping, errCode:%{public}d, eventId:%{public}s, id:%{public}" PRId64,
-            SERVICE_EXCEPTION, feedback.perceptionEventId.c_str(), id);
-        return RET_OK;
-    }
-    int32_t existingType = -1;
-    bool recordFound = false;
-    int32_t ret = QueryFeedbackType(id, recordFound, existingType);
-    // Fault tolerance: QueryFeedbackType failed.
-    if (ret != RET_OK) {
-        FI_HILOGE("InsertFeedback: QueryFeedbackType failed, errCode:%{public}d, eventId:%{public}s, id:%{public}" PRId64,
-            SERVICE_EXCEPTION, feedback.perceptionEventId.c_str(), id);
-        return RET_OK;
-    }
-    // EX-6: record not found, do not INSERT.
-    if (!recordFound) {
-        FI_HILOGW("InsertFeedback: record not found, eventId:%{public}s, id:%{public}" PRId64,
-            feedback.perceptionEventId.c_str(), id);
-        return RET_OK;
-    }
-    int32_t newType = static_cast<int32_t>(feedback.feedbackType);
-    // EX-7: idempotent, skip UPDATE.
-    if (existingType >= 0 && existingType == newType) {
-        FI_HILOGI("InsertFeedback: idempotent hit, eventId:%{public}s, id:%{public}" PRId64,
-            feedback.perceptionEventId.c_str(), id);
-        return RET_OK;
-    }
-    std::string feedbackJson;
-    ret = SerializeFeedbackJson(newType, feedback.feedbackTime, feedbackJson);
-    // Fault tolerance: JSON serialization failed (EX-4).
-    if (ret != RET_OK) {
-        FI_HILOGE("InsertFeedback: SerializeFeedbackJson failed, errCode:%{public}d, eventId:%{public}s",
+        FI_HILOGE("InsertFeedback: invalid id, err:%{public}d, eventId:%{public}s",
             SERVICE_EXCEPTION, feedback.perceptionEventId.c_str());
         return RET_OK;
     }
-    FI_HILOGI("InsertFeedback: updating feedback, eventId:%{public}s, id:%{public}" PRId64
-        ", oldType:%{public}d, newType:%{public}d",
-        feedback.perceptionEventId.c_str(), id, existingType, newType);
-    ret = UpdateFeedbackField(id, feedbackJson, feedback.feedbackTime);
-    // Fault tolerance: UpdateFeedbackField failed (error already logged inside).
-    if (ret != RET_OK) {
-        FI_HILOGE("InsertFeedback: UpdateFeedbackField failed, errCode:%{public}d, eventId:%{public}s, id:%{public}" PRId64,
-            SERVICE_EXCEPTION, feedback.perceptionEventId.c_str(), id);
-        return RET_OK;
-    }
-    return RET_OK;
+    return ProcessFeedback(id, feedback);
 }
 
 int32_t FeedbackStore::QueryFeedback(const std::string &perceptionEventId, FeedbackRecord &out)
@@ -317,18 +323,18 @@ int32_t FeedbackStore::QueryFeedback(const std::string &perceptionEventId, Feedb
     out.perceptionEventId = perceptionEventId;
     out.id = id;
     std::string feedbackJson;
-    int32_t ret = resultSet->GetString(1, feedbackJson);
+    int32_t ret = resultSet->GetString(COL_FEEDBACK, feedbackJson);
     if (ret == NativeRdb::E_OK) {
         out.feedbackJson = feedbackJson;
         out.feedbackType = ParseFeedbackType(feedbackJson);
     }
     int64_t createdTime = 0;
-    ret = resultSet->GetLong(2, createdTime);
+    ret = resultSet->GetLong(COL_CREATED_TIME, createdTime);
     if (ret == NativeRdb::E_OK) {
         out.createdTime = createdTime;
     }
     int64_t updateTime = 0;
-    ret = resultSet->GetLong(3, updateTime);
+    ret = resultSet->GetLong(COL_UPDATE_TIME, updateTime);
     if (ret == NativeRdb::E_OK) {
         out.updateTime = updateTime;
     }
@@ -354,24 +360,24 @@ int32_t FeedbackStore::QueryAll(std::vector<FeedbackRecord> &out)
     while (resultSet->GoToNextRow() == NativeRdb::E_OK) {
         FeedbackRecord record;
         int64_t id = 0;
-        int32_t ret = resultSet->GetLong(0, id);
+        int32_t ret = resultSet->GetLong(COL_ID, id);
         if (ret != NativeRdb::E_OK) {
             continue;
         }
         record.id = id;
         std::string feedbackJson;
-        ret = resultSet->GetString(1, feedbackJson);
+        ret = resultSet->GetString(COL_FEEDBACK, feedbackJson);
         if (ret == NativeRdb::E_OK) {
             record.feedbackJson = feedbackJson;
             record.feedbackType = ParseFeedbackType(feedbackJson);
         }
         int64_t createdTime = 0;
-        ret = resultSet->GetLong(2, createdTime);
+        ret = resultSet->GetLong(COL_CREATED_TIME, createdTime);
         if (ret == NativeRdb::E_OK) {
             record.createdTime = createdTime;
         }
         int64_t updateTime = 0;
-        ret = resultSet->GetLong(3, updateTime);
+        ret = resultSet->GetLong(COL_UPDATE_TIME, updateTime);
         if (ret == NativeRdb::E_OK) {
             record.updateTime = updateTime;
         }

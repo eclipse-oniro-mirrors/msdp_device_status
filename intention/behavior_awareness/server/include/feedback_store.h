@@ -71,6 +71,7 @@ private:
     int64_t MapEventIdToId(const std::string &perceptionEventId);
     int32_t QueryFeedbackType(int64_t id, bool &recordFound, int32_t &outType);
     int32_t UpdateFeedbackField(int64_t id, const std::string &feedbackJson, int64_t updateTime);
+    int32_t ProcessFeedback(int64_t id, const FeedbackData &feedback);
 
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
     std::mutex mtx_;
