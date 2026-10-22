@@ -35,7 +35,6 @@ namespace BehaviorAwareness {
 constexpr const char *PERCEPTION_DB_PATH =
     "/data/service/el1/public/database/distributeddata/rdb/system_data/behavior_sequence/perception.db";
 constexpr const char *PERCEPTION_DB_TABLE = "habit_perceptions";
-constexpr int32_t PERCEPTION_DB_VERSION = 1;
 constexpr int32_t INVALID_ID = 0;
 
 struct FeedbackRecord {
