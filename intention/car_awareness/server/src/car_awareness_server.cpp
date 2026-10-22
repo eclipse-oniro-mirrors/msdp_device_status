@@ -472,21 +472,14 @@ void CarAwarenessServer::RemoveDeathRecipient(const sptr<ICarAwarenessCallback> 
 
 void CarAwarenessServer::UnSubscribeAlgo(const std::string &featureName)
 {
-    {
-        std::lock_guard<std::mutex> lockGrd(algoMtx_);
-        if (!loadAndCheckAlgoLib()) {
-            return;
-        }
-        algoHandle_.pAlgorithm->OffCarAwareness(featureName);
+    std::lock_guard<std::mutex> lockGrd(algoMtx_);
+    if (!loadAndCheckAlgoLib()) {
+        return;
     }
-
-    {
-        std::lock_guard<std::mutex> lock(callbackMtx_);
-        if (CONDITIONAL_FEATURES.count(featureName) != 0) {
-            algoResultCache_.erase(featureName);  // off 时候清除缓存
-        }
+    algoHandle_.pAlgorithm->OffCarAwareness(featureName);
+    if (CONDITIONAL_FEATURES.count(featureName) != 0) {
+        algoResultCache_.erase(featureName);  // off 时候清除缓存
     }
-
     FI_HILOGI("unsubscribe algo success, capability=%{public}s", featureName.c_str());
 }
 
