@@ -154,11 +154,21 @@ int32_t InputAdapter::EnableInputDevice(bool enable)
 
 void InputAdapter::SimulateInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
+    if (pointerEvent == nullptr) {
+        FI_HILOGE("PointerEvent is null");
+        return;
+    }
+    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_NEED_UPDATE_LAST_INPUT_TIME);
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent);
 }
 
 void InputAdapter::SimulateInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
 {
+    if (keyEvent == nullptr) {
+        FI_HILOGE("KeyEvent is null");
+        return;
+    }
+    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_NEED_UPDATE_LAST_INPUT_TIME);
     MMI::InputManager::GetInstance()->SimulateInputEvent(keyEvent);
 }
 
