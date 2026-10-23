@@ -265,14 +265,14 @@ int32_t OnScreenServer::GetStateMgmtInfo(const CallingContext &context, const St
         FI_HILOGE("failed to load algo lib");
         return RET_NO_SUPPORT;
     }
-    OnScreenCallingContext onScreeContext {
+    OnScreenCallingContext onScreenContext {
         .fullTokenId = context.fullTokenId,
         .tokenId = context.tokenId,
         .uid = context.uid,
         .pid = context.pid,
     };
     std::vector<std::string> results;
-    int32_t ret = handleMMA_.pAlgorithm->GetStateMgmtInfo(onScreeContext, info, results);
+    int32_t ret = handle_.pAlgorithm->GetStateMgmtInfo(onScreenContext, info, results);
     if (ret != RET_OK) {
         FI_HILOGE("failed to GetStateMgmtInfo, err=%{public}d", ret);
         return ret;

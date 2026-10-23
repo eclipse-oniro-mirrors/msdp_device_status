@@ -49,7 +49,7 @@ int32_t OnScreenCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data
             return OnScreenAwarenessStub(data);
         }
         case static_cast<int32_t>(ON_STATE_MGMT_INFO): {
-            return OnstateMgmtInfoStub(data);
+            return OnStateMgmtInfoStub(data);
         }
 #endif
         default:
