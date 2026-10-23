@@ -54,7 +54,7 @@ ohos_source_set("behavior_awareness_server") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
-    "relational_store:relational_store_native",
+    "relational_store:native_rdb",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

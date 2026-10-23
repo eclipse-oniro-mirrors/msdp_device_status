@@ -58,7 +58,7 @@ ohos_fuzztest("SubmitFeedbackFuzzTest") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
-    "relational_store:relational_store_native",
+    "relational_store:native_rdb",
   ]
 
   defines = [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]

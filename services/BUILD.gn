@@ -96,7 +96,7 @@ external_deps_set = [
   "os_account:os_account_innerkits",
   "qos_manager:concurrent_task_client",
   "qos_manager:qos",
-  "relational_store:relational_store_native",
+  "relational_store:native_rdb",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libwm",
