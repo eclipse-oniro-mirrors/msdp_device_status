@@ -28,12 +28,9 @@
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 #include "bundle_info.h"
 #include "bundle_mgr_proxy.h"
-#include "focus_change_info.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
-#include "ui_content_proxy.h"
-#include "window_manager.h"
 #endif
 
 #undef LOG_TAG
