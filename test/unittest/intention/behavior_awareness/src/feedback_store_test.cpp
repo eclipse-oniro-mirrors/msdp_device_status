@@ -22,6 +22,7 @@
 #include "behavior_awareness_data.h"
 #include "feedback_store.h"
 #include "rdb_helper.h"
+#include "rdb_open_callback.h"
 #include "rdb_store.h"
 #include "rdb_store_config.h"
 
@@ -52,19 +53,29 @@ constexpr const char *CREATE_TABLE_SQL =
     "created_time INTEGER DEFAULT 0, "
     "update_time INTEGER DEFAULT 0)";
 
+class FeedbackTestCallback : public NativeRdb::RdbOpenCallback {
+public:
+    int32_t OnCreate(NativeRdb::RdbStore &rdbStore) override
+    {
+        return rdbStore.ExecuteSql(CREATE_TABLE_SQL);
+    }
+    int32_t OnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion) override
+    {
+        return NativeRdb::E_OK;
+    }
+};
+
 void SetupTestDatabase(const std::string &path)
 {
     unlink(path.c_str());
-    NativeRdb::RdbStoreConfig config;
-    config.SetPath(path);
-    config.SetBundleName("test");
+    NativeRdb::RdbStoreConfig config(path);
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     int32_t errCode = NativeRdb::E_OK;
-    auto store = NativeRdb::RdbHelper::GetRdbStore(config, errCode);
+    FeedbackTestCallback callback;
+    auto store = NativeRdb::RdbHelper::GetRdbStore(config, 1, callback, errCode);
     if (store == nullptr) {
         return;
     }
-    store->ExecuteSql(CREATE_TABLE_SQL);
     store->ExecuteSql(
         "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (1, 'time', 'switch', '{}')");
     store->ExecuteSql(

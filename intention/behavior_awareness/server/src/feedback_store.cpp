@@ -19,7 +19,10 @@
 
 #include "abs_result_set.h"
 #include "rdb_helper.h"
+#include "rdb_open_callback.h"
 #include "rdb_predicates.h"
+#include "rdb_store_config.h"
+#include "value_object.h"
 #include "values_bucket.h"
 
 #undef LOG_TAG
@@ -36,6 +39,7 @@ constexpr int32_t COL_ID = 0;
 constexpr int32_t COL_FEEDBACK = 1;
 constexpr int32_t COL_CREATED_TIME = 2;
 constexpr int32_t COL_UPDATE_TIME = 3;
+constexpr int32_t DB_VERSION = 1;
 constexpr const char *CREATE_TABLE_SQL =
     "CREATE TABLE IF NOT EXISTS habit_perceptions ("
     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -53,6 +57,18 @@ constexpr const char *CREATE_TABLE_SQL =
     "feedback TEXT DEFAULT '{}', "
     "created_time INTEGER DEFAULT 0, "
     "update_time INTEGER DEFAULT 0)";
+
+class FeedbackStoreCallback : public NativeRdb::RdbOpenCallback {
+public:
+    int32_t OnCreate(NativeRdb::RdbStore &rdbStore) override
+    {
+        return rdbStore.ExecuteSql(CREATE_TABLE_SQL);
+    }
+    int32_t OnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion) override
+    {
+        return NativeRdb::E_OK;
+    }
+};
 }
 
 FeedbackStore &FeedbackStore::GetInstance()
@@ -73,18 +89,16 @@ void FeedbackStore::SetDatabasePathForTesting(const std::string &path)
 
 int32_t FeedbackStore::InitRdbStore()
 {
-    // DD-8: do not create a new database; return error if file is missing.
     if (access(databasePath_.c_str(), F_OK) != 0) {
         FI_HILOGE("InitRdbStore: db file not exist, err:%{public}d, path:%{public}s",
             SERVICE_EXCEPTION, databasePath_.c_str());
         return SERVICE_EXCEPTION;
     }
-    NativeRdb::RdbStoreConfig config;
-    config.SetPath(databasePath_);
-    config.SetBundleName("msdp");
+    NativeRdb::RdbStoreConfig config(databasePath_);
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     int32_t errCode = NativeRdb::E_OK;
-    rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, errCode);
+    FeedbackStoreCallback callback;
+    rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, DB_VERSION, callback, errCode);
     if (rdbStore_ == nullptr || errCode != NativeRdb::E_OK) {
         FI_HILOGE("InitRdbStore: GetRdbStore failed, err:%{public}d, rdbErr:%{public}d",
             SERVICE_EXCEPTION, errCode);
