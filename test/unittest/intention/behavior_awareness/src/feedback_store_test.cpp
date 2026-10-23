@@ -29,6 +29,8 @@
 #undef LOG_TAG
 #define LOG_TAG "FeedbackStoreTest"
 
+using namespace testing::ext;
+
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
