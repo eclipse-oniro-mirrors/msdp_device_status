@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 #include <functional>
 #include <sstream>
+#include <charconv>
 #include <string>
 
 #include "accesstoken_kit.h"
@@ -236,11 +237,12 @@ int32_t BehaviorAwarenessServer::ValidateFeedback(const FeedbackData &feedback)
             "value:%{public}s", feedback.perceptionEventId.c_str());
         return PARAM_EXCEPTION;
     }
-    try {
-        std::stoll(feedback.perceptionEventId.substr(pos + 1));
-    } catch (const std::exception &e) {
+    std::string suffix = feedback.perceptionEventId.substr(pos + 1);
+    int64_t parsedValue = 0;
+    auto [ptr, ec] = std::from_chars(suffix.data(), suffix.data() + suffix.size(), parsedValue);
+    if (ec != std::errc() || ptr != suffix.data() + suffix.size()) {
         FI_HILOGE("ValidateFeedback: perceptionEventId id suffix cannot parse to valid int, value:%{public}s, "
-            "reason:%{public}s", feedback.perceptionEventId.c_str(), e.what());
+            "suffix:%{public}s", feedback.perceptionEventId.c_str(), suffix.c_str());
         return PARAM_EXCEPTION;
     }
     int32_t ft = static_cast<int32_t>(feedback.feedbackType);

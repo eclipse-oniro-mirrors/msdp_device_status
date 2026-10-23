@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@
 #include <mutex>
 #include <string>
 #include <vector>
+
+#include "nocopyable.h"
 
 #include "behavior_awareness_data.h"
 #include "devicestatus_define.h"

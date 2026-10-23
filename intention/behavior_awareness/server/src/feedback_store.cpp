@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 
 #include "feedback_store.h"
 
+#include <cstdlib>
+#include <charconv>
 #include <unistd.h>
 
 #include "abs_result_set.h"
@@ -133,13 +135,15 @@ int64_t FeedbackStore::MapEventIdToId(const std::string &perceptionEventId)
     if (pos == std::string::npos || pos + 1 >= perceptionEventId.length()) {
         return INVALID_ID;
     }
-    try {
-        return std::stoll(perceptionEventId.substr(pos + 1));
-    } catch (const std::exception &e) {
-        FI_HILOGE("MapEventIdToId: parse failed, eventId:%{public}s, reason:%{public}s",
-            perceptionEventId.c_str(), e.what());
+    std::string suffix = perceptionEventId.substr(pos + 1);
+    int64_t result = 0;
+    auto [ptr, ec] = std::from_chars(suffix.data(), suffix.data() + suffix.size(), result);
+    if (ec != std::errc() || ptr != suffix.data() + suffix.size()) {
+        FI_HILOGE("MapEventIdToId: parse failed, eventId:%{public}s, suffix:%{public}s",
+            perceptionEventId.c_str(), suffix.c_str());
         return INVALID_ID;
     }
+    return result;
 }
 
 int32_t FeedbackStore::SerializeFeedbackJson(int32_t feedbackType, int64_t feedbackTime, std::string &out)
@@ -156,11 +160,13 @@ int32_t FeedbackStore::ParseFeedbackType(const std::string &feedbackJson)
         return -1;
     }
     pos += std::char_traits<char>::length(KEY_FEEDBACK_TYPE);
-    try {
-        return std::stoi(feedbackJson.substr(pos));
-    } catch (const std::exception &) {
+    std::string numStr = feedbackJson.substr(pos);
+    int32_t result = 0;
+    auto [ptr, ec] = std::from_chars(numStr.data(), numStr.data() + numStr.size(), result);
+    if (ec != std::errc()) {
         return -1;
     }
+    return static_cast<int32_t>(result);
 }
 
 int32_t FeedbackStore::QueryFeedbackType(int64_t id, bool &recordFound, int32_t &outType)
