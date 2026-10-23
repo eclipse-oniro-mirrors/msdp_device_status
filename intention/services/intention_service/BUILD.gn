@@ -140,6 +140,7 @@ if (device_status_sensor_enable) {
 
   if (device_status_behavior_awareness_enable) {
     defines += [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
+    external_deps += [ "relational_store:native_rdb" ]
   }
 
   subsystem_name = "${device_status_subsystem_name}"
