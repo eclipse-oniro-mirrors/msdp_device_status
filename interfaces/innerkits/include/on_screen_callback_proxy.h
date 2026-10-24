@@ -35,6 +35,7 @@ public:
     virtual void OnScreenChange(const std::string& changeInfo) override;
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
     virtual void OnScreenAwareness(const OnscreenAwarenessInfo& info) override;
+    virtual void OnStateMgmtInfo(const std::vector<std::string>& results) override;
 #endif
 
 private:

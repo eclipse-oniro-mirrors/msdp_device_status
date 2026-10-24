@@ -549,7 +549,15 @@ public:
     {
         return 0;
     }
-    
+
+    ErrCode GetStateMgmtInfo(const OnScreen::SequenceableStateMgmtInfo& info,
+        const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override
+    {
+        (void)info;
+        (void)onScreenCallback;
+        return 0;
+    }
+
     ErrCode RegisterAwarenessCallback(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
         const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback,
         const OnScreen::SequenceableOnscreenAwarenessOption& awarenessOption) override

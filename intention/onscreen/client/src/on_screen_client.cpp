@@ -78,6 +78,11 @@ int32_t OnScreenClient::GetLiveStatus()
 {
     return INTENTION_CLIENT->GetLiveStatus();
 }
+
+int32_t OnScreenClient::GetStateMgmtInfo(const StateMgmtInfo& info, const sptr<IRemoteOnScreenCallback>& callback)
+{
+    return INTENTION_CLIENT->GetStateMgmtInfo(info, callback);
+}
 // LCOV_EXCL_STOP
 
 int32_t OnScreenClient::RegisterAwarenessCallback(const AwarenessCap& cap,

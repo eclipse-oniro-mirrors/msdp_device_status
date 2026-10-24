@@ -69,6 +69,11 @@ int32_t OnScreenManager::GetLiveStatus()
     return INTER_MGR_IMPL.GetLiveStatus();
 }
 
+int32_t OnScreenManager::GetStateMgmtInfo(const StateMgmtInfo& info, sptr<IRemoteOnScreenCallback> callback)
+{
+    return INTER_MGR_IMPL.GetStateMgmtInfo(info, callback);
+}
+
 int32_t OnScreenManager::RegisterAwarenessCallback(const AwarenessCap& cap, sptr<IRemoteOnScreenCallback> callback,
     const AwarenessOptions& option)
 {

@@ -777,6 +777,21 @@ ErrCode IntentionService::ListenLiveBroadcast()
     });
 }
 
+ErrCode IntentionService::GetStateMgmtInfo(const OnScreen::SequenceableStateMgmtInfo& info,
+    const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback)
+{
+    if (onScreenCallback == nullptr) {
+        FI_HILOGE("onScreenCallback is nullptr");
+        return RET_ERR;
+    }
+    OnScreen::StateMgmtInfo rawInfo = info.stateMgmtInfo_;
+    CallingContext context = GetCallingContext();
+    auto cb = onScreenCallback;
+    return PostSyncTask([this, context, rawInfo, cb = std::move(cb)] {
+        return onScreen_.GetStateMgmtInfo(context, rawInfo, cb);
+    });
+}
+
 int32_t IntentionService::Dump(int32_t fd, const std::vector<std::u16string> &args)
 {
     if (fd < 0) {

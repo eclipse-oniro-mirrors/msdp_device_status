@@ -157,6 +157,8 @@ public:
     ErrCode IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus) override;
     ErrCode ListenLiveBroadcast() override;
     int32_t GetLiveStatus() override;
+    ErrCode GetStateMgmtInfo(const OnScreen::SequenceableStateMgmtInfo& info,
+        const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback) override;
 
     ErrCode RegisterAwarenessCallback(const OnScreen::SequenceableOnscreenAwarenessCap& cap,
         const sptr<OnScreen::IRemoteOnScreenCallback>& onScreenCallback,

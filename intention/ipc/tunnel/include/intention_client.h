@@ -124,6 +124,8 @@ public:
         const sptr<OnScreen::IRemoteOnScreenCallback>& callback);
     int32_t IsParallelFeatureEnabled(int32_t windowId, int32_t& outStatus);
     int32_t GetLiveStatus();
+    int32_t GetStateMgmtInfo(const OnScreen::StateMgmtInfo& info,
+        const sptr<OnScreen::IRemoteOnScreenCallback>& callback);
 
     int32_t RegisterAwarenessCallback(const OnScreen::AwarenessCap& cap,
         const sptr<OnScreen::IRemoteOnScreenCallback>& callback, const OnScreen::AwarenessOptions& option);

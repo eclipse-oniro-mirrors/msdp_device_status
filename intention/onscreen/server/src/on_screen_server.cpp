@@ -247,6 +247,40 @@ int32_t OnScreenServer::IsParallelFeatureEnabled(const CallingContext& context,
     return RET_OK;
 }
 
+int32_t OnScreenServer::GetStateMgmtInfo(const CallingContext &context, const StateMgmtInfo& info,
+    const sptr<IRemoteOnScreenCallback>& callback)
+{
+    if (callback == nullptr) {
+        FI_HILOGE("callback is nullptr");
+        return RET_ERR;
+    }
+    FI_HILOGI("GetStateMgmtInfo enter, componentName:%{public}s, propertyName:%{public}s, jsonPath:%{public}s, "
+        "onlyVisible:%{public}d", info.componentName.c_str(), info.propertyName.c_str(), info.jsonPath.c_str(),
+        info.onlyVisible);
+#ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
+    if (ConnectAlgoLib() != RET_OK) {
+        FI_HILOGE("failed to load algo lib");
+        return RET_NO_SUPPORT;
+    }
+    OnScreenCallingContext onScreenContext {
+        .fullTokenId = context.fullTokenId,
+        .tokenId = context.tokenId,
+        .uid = context.uid,
+        .pid = context.pid,
+    };
+    std::vector<std::string> results;
+    int32_t ret = handle_.pAlgorithm->GetStateMgmtInfo(onScreenContext, info, results);
+    if (ret != RET_OK) {
+        FI_HILOGE("failed to GetStateMgmtInfo, err=%{public}d", ret);
+        return ret;
+    }
+    callback->OnStateMgmtInfo(results);
+    return RET_OK;
+#else
+    return RET_OK;
+#endif
+}
+
 int32_t OnScreenServer::GetLiveStatus()
 {
     FI_HILOGI("get live status");
