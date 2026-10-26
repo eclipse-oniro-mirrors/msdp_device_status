@@ -961,7 +961,7 @@ HWTEST_F(UtilityTest, UtityTest_StartWith1_003, TestSize.Level1)
 
 /**
  * @tc.name: UtityTest_StartWith1_004
- * @tc.desc:
+ * @tc.desc: Check string start With
  * @tc.type: FUNC
  * @tc.require:
  */
