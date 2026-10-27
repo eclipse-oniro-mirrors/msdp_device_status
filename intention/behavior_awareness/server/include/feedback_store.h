@@ -65,7 +65,7 @@ public:
 private:
     FeedbackStore();
     int32_t InitRdbStore();
-    int32_t EnsureTable();
+    int32_t EnsureTable(const std::shared_ptr<NativeRdb::Transaction> &transaction);
     int32_t SerializeFeedbackJson(int32_t feedbackType, int64_t feedbackTime, std::string &out);
     int32_t ParseFeedbackType(const std::string &feedbackJson);
     int64_t MapEventIdToId(const std::string &perceptionEventId);

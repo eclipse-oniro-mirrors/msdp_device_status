@@ -24,6 +24,7 @@
 #include "rdb_open_callback.h"
 #include "rdb_predicates.h"
 #include "rdb_store_config.h"
+#include "transaction.h"
 #include "value_object.h"
 #include "values_bucket.h"
 
@@ -106,23 +107,43 @@ int32_t FeedbackStore::InitRdbStore()
             SERVICE_EXCEPTION, errCode);
         return SERVICE_EXCEPTION;
     }
-    int32_t ret = EnsureTable();
+    auto [trxErr, transaction] = rdbStore_->CreateTransaction(NativeRdb::Transaction::IMMEDIATE);
+    if (trxErr != NativeRdb::E_OK || transaction == nullptr) {
+        FI_HILOGE("InitRdbStore: CreateTransaction failed, err:%{public}d, rdbErr:%{public}d",
+            SERVICE_EXCEPTION, trxErr);
+        return SERVICE_EXCEPTION;
+    }
+    int32_t ret = EnsureTable(transaction);
     if (ret != RET_OK) {
+        int32_t rollRet = transaction->Rollback();
+        FI_HILOGE("InitRdbStore: EnsureTable failed, rollback:%{public}d, err:%{public}d",
+            rollRet, SERVICE_EXCEPTION);
+        return SERVICE_EXCEPTION;
+    }
+    int32_t commitRet = transaction->Commit();
+    if (commitRet != NativeRdb::E_OK) {
+        int32_t rollRet = transaction->Rollback();
+        FI_HILOGE("InitRdbStore: Commit failed, rollback:%{public}d, rdbErr:%{public}d",
+            rollRet, commitRet);
         return SERVICE_EXCEPTION;
     }
     inited_ = true;
     return RET_OK;
 }
 
-int32_t FeedbackStore::EnsureTable()
+int32_t FeedbackStore::EnsureTable(const std::shared_ptr<NativeRdb::Transaction> &transaction)
 {
     if (rdbStore_ == nullptr) {
         FI_HILOGE("EnsureTable: rdbStore_ is null, err:%{public}d", SERVICE_EXCEPTION);
         return SERVICE_EXCEPTION;
     }
-    int32_t errCode = rdbStore_->ExecuteSql(CREATE_TABLE_SQL);
+    if (transaction == nullptr) {
+        FI_HILOGE("EnsureTable: transaction is null, err:%{public}d", SERVICE_EXCEPTION);
+        return SERVICE_EXCEPTION;
+    }
+    auto [errCode, value] = transaction->Execute(CREATE_TABLE_SQL);
     if (errCode != NativeRdb::E_OK) {
-        FI_HILOGE("EnsureTable: ExecuteSql failed, err:%{public}d, rdbErr:%{public}d",
+        FI_HILOGE("EnsureTable: Execute failed, err:%{public}d, rdbErr:%{public}d",
             SERVICE_EXCEPTION, errCode);
         return SERVICE_EXCEPTION;
     }
