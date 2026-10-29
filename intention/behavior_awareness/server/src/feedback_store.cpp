@@ -93,9 +93,9 @@ void FeedbackStore::SetDatabasePathForTesting(const std::string &path)
 int32_t FeedbackStore::InitRdbStore()
 {
     if (access(databasePath_.c_str(), F_OK) != 0) {
-        FI_HILOGE("InitRdbStore: db file not exist, err:%{public}d, path:%{public}s",
-            SERVICE_EXCEPTION, databasePath_.c_str());
-        return SERVICE_EXCEPTION;
+        FI_HILOGE("InitRdbStore: db file not exist, path:%{public}s, tolerant return",
+            databasePath_.c_str());
+        return RET_OK;
     }
     NativeRdb::RdbStoreConfig config(databasePath_);
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
@@ -190,6 +190,23 @@ int32_t FeedbackStore::ParseFeedbackType(const std::string &feedbackJson)
     return static_cast<int32_t>(result);
 }
 
+int64_t FeedbackStore::ParseFeedbackTime(const std::string &feedbackJson)
+{
+    constexpr const char *KEY_FEEDBACK_TIME = "\"feedbackTime\":";
+    size_t pos = feedbackJson.find(KEY_FEEDBACK_TIME);
+    if (pos == std::string::npos) {
+        return 0;
+    }
+    pos += std::char_traits<char>::length(KEY_FEEDBACK_TIME);
+    std::string numStr = feedbackJson.substr(pos);
+    int64_t result = 0;
+    auto [ptr, ec] = std::from_chars(numStr.data(), numStr.data() + numStr.size(), result);
+    if (ec != std::errc()) {
+        return 0;
+    }
+    return result;
+}
+
 int32_t FeedbackStore::QueryFeedbackType(int64_t id, bool &recordFound, int32_t &outType)
 {
     recordFound = false;
@@ -254,15 +271,14 @@ int32_t FeedbackStore::ProcessFeedback(int64_t id, const FeedbackData &feedback)
     bool recordFound = false;
     int32_t ret = QueryFeedbackType(id, recordFound, existingType);
     if (ret != RET_OK) {
-        return SERVICE_EXCEPTION;
+        FI_HILOGE("ProcessFeedback: query failed, tolerant, id:%{public}" PRId64, id);
+        return RET_OK;
     }
-    // EX-6: record not found, do not INSERT.
     if (!recordFound) {
         FI_HILOGW("ProcessFeedback: record not found, id:%{public}" PRId64, id);
         return RET_OK;
     }
     int32_t newType = static_cast<int32_t>(feedback.feedbackType);
-    // EX-7: idempotent, skip UPDATE.
     if (existingType >= 0 && existingType == newType) {
         FI_HILOGI("ProcessFeedback: idempotent, id:%{public}" PRId64, id);
         return RET_OK;
@@ -270,13 +286,15 @@ int32_t FeedbackStore::ProcessFeedback(int64_t id, const FeedbackData &feedback)
     std::string feedbackJson;
     ret = SerializeFeedbackJson(newType, feedback.feedbackTime, feedbackJson);
     if (ret != RET_OK) {
-        return SERVICE_EXCEPTION;
+        FI_HILOGE("ProcessFeedback: serialize failed, tolerant, id:%{public}" PRId64, id);
+        return RET_OK;
     }
     FI_HILOGI("ProcessFeedback: updating, id:%{public}" PRId64 ", old:%{public}d, new:%{public}d",
         id, existingType, newType);
     ret = UpdateFeedbackField(id, feedbackJson, feedback.feedbackTime);
     if (ret != RET_OK) {
-        return SERVICE_EXCEPTION;
+        FI_HILOGE("ProcessFeedback: update failed, tolerant, id:%{public}" PRId64, id);
+        return RET_OK;
     }
     return RET_OK;
 }
@@ -286,22 +304,22 @@ int32_t FeedbackStore::InsertFeedback(const FeedbackData &feedback)
     std::lock_guard<std::mutex> lock(mtx_);
     if (!inited_) {
         int32_t ret = InitRdbStore();
-        if (ret != RET_OK || rdbStore_ == nullptr) {
+        if (ret != RET_OK) {
             FI_HILOGE("InsertFeedback: init failed, err:%{public}d, eventId:%{public}s",
-                SERVICE_EXCEPTION, feedback.perceptionEventId.c_str());
-            return SERVICE_EXCEPTION;
+                ret, feedback.perceptionEventId.c_str());
+            return ret;
         }
     }
     if (rdbStore_ == nullptr) {
-        FI_HILOGE("InsertFeedback: rdbStore_ null, err:%{public}d, eventId:%{public}s",
-            SERVICE_EXCEPTION, feedback.perceptionEventId.c_str());
-        return SERVICE_EXCEPTION;
+        FI_HILOGE("InsertFeedback: rdbStore_ null (db not exist), tolerant, eventId:%{public}s",
+            feedback.perceptionEventId.c_str());
+        return RET_OK;
     }
     int64_t id = MapEventIdToId(feedback.perceptionEventId);
     if (id <= 0) {
-        FI_HILOGE("InsertFeedback: invalid id, err:%{public}d, eventId:%{public}s",
-            SERVICE_EXCEPTION, feedback.perceptionEventId.c_str());
-        return SERVICE_EXCEPTION;
+        FI_HILOGE("InsertFeedback: invalid id, eventId:%{public}s",
+            feedback.perceptionEventId.c_str());
+        return RET_OK;
     }
     return ProcessFeedback(id, feedback);
 }
@@ -340,6 +358,7 @@ int32_t FeedbackStore::QueryFeedback(const std::string &perceptionEventId, Feedb
     if (ret == NativeRdb::E_OK) {
         out.feedbackJson = feedbackJson;
         out.feedbackType = ParseFeedbackType(feedbackJson);
+        out.feedbackTime = ParseFeedbackTime(feedbackJson);
     }
     int64_t createdTime = 0;
     ret = resultSet->GetLong(COL_CREATED_TIME, createdTime);
@@ -382,6 +401,7 @@ int32_t FeedbackStore::QueryAll(std::vector<FeedbackRecord> &out)
         if (ret == NativeRdb::E_OK) {
             record.feedbackJson = feedbackJson;
             record.feedbackType = ParseFeedbackType(feedbackJson);
+            record.feedbackTime = ParseFeedbackTime(feedbackJson);
         }
         int64_t createdTime = 0;
         ret = resultSet->GetLong(COL_CREATED_TIME, createdTime);

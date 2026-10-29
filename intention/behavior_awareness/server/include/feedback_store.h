@@ -68,6 +68,7 @@ private:
     int32_t EnsureTable(const std::shared_ptr<NativeRdb::Transaction> &transaction);
     int32_t SerializeFeedbackJson(int32_t feedbackType, int64_t feedbackTime, std::string &out);
     int32_t ParseFeedbackType(const std::string &feedbackJson);
+    int64_t ParseFeedbackTime(const std::string &feedbackJson);
     int64_t MapEventIdToId(const std::string &perceptionEventId);
     int32_t QueryFeedbackType(int64_t id, bool &recordFound, int32_t &outType);
     int32_t UpdateFeedbackField(int64_t id, const std::string &feedbackJson, int64_t updateTime);

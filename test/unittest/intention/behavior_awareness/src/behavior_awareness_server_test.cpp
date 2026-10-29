@@ -20,11 +20,17 @@
 #include "behavior_awareness_data.h"
 #include "behavior_awareness_server.h"
 #include "devicestatus_define.h"
+#include "feedback_store.h"
 #include "fi_log.h"
 #include "ipc_skeleton.h"
 #include "nativetoken_kit.h"
 #include "parameters.h"
+#include "rdb_helper.h"
+#include "rdb_open_callback.h"
+#include "rdb_store.h"
+#include "rdb_store_config.h"
 #include "token_setproc.h"
+#include "unistd.h"
 
 #undef LOG_TAG
 #define LOG_TAG "BehaviorAwarenessServerTest"
@@ -306,7 +312,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback001, TestSize.Level1)
 {
     auto ctx = MakeSystemContext();
     FeedbackData feedback {
-        .perceptionEventId = "fb-001",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
@@ -341,7 +347,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback004_FeedbackTypeOutOfRange_R
 {
     auto ctx = MakeSystemContext();
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = static_cast<FeedbackType>(5),
         .feedbackTime = 1000,
     };
@@ -352,7 +358,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback005_NegativeFeedbackType_Ret
 {
     auto ctx = MakeSystemContext();
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = static_cast<FeedbackType>(-1),
         .feedbackTime = 1000,
     };
@@ -363,7 +369,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback006_ZeroFeedbackTime_Returns
 {
     auto ctx = MakeSystemContext();
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 0,
     };
@@ -374,7 +380,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback007_NegativeFeedbackTime_Ret
 {
     auto ctx = MakeSystemContext();
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = -1,
     };
@@ -396,7 +402,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback009_InvalidEventIdNonNumeric
 {
     auto ctx = MakeSystemContext();
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_abc",
+        .perceptionEventId = "habitAwareness_abc",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
@@ -407,9 +413,187 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback010_ValidParam_ReturnsRetOk,
 {
     auto ctx = MakeSystemContext();
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback012_DbNotExist_Tolerant_ReturnsRetOk, TestSize.Level1)
+{
+    FeedbackStore::GetInstance().SetDatabasePathForTesting("/data/local/tmp/nonexistent_server_db.db");
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+    FeedbackStore::GetInstance().SetDatabasePathForTesting(PERCEPTION_DB_PATH);
+}
+
+/* ==================== SubmitFeedback: perceptionEventId format validation (BR-8) ==================== */
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_InvalidDomainPrefix_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "invalidDomain_123",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_EmptyDomainPrefix_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "_123",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_NegativeId_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_-1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_EmptyIdSuffix_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_ZeroId_ReturnsRetOk, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_0",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_ValidHabitAwarenessFormat_ReturnsRetOk, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_123",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_CaseSensitivePrefix_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "HabitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_MultipleUnderscores_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_1_2",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_LargeId_ReturnsRetOk, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_2147483647",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_SuffixWithLeadingSpace_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_ 123",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_SuffixWithTrailingSpace_Returns401, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_123 ",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_AllFiveFeedbackTypes_ReturnsRetOk, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackType types[] = {
+        FeedbackType::ACCEPT,
+        FeedbackType::IGNORE,
+        FeedbackType::REJECT,
+        FeedbackType::EDIT,
+        FeedbackType::NOT_PUSHED,
+    };
+    for (int32_t i = 0; i < static_cast<int32_t>(sizeof(types) / sizeof(types[0])); ++i) {
+        FeedbackData feedback {
+            .perceptionEventId = "habitAwareness_1",
+            .feedbackType = types[i],
+            .feedbackTime = 1000 + i,
+        };
+        EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+    }
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_MaxFeedbackType_ReturnsRetOk, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::NOT_PUSHED,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_MinFeedbackType_ReturnsRetOk, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1,
     };
     EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
 }
@@ -535,6 +719,155 @@ HWTEST_F(BehaviorAwarenessServerDeviceTypeTest, SubmitFeedback_UnsupportedDevice
         .feedbackTime = 1000,
     };
     EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::DEVICE_NOT_SUPPORT);
+}
+
+namespace {
+constexpr const char *SERVER_TEST_DB_PATH = "/data/local/tmp/test_server_perception.db";
+constexpr const char *SERVER_CREATE_TABLE_SQL =
+    "CREATE TABLE IF NOT EXISTS habit_perceptions ("
+    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+    "e TEXT NOT NULL, "
+    "e_param TEXT DEFAULT '{}', "
+    "a TEXT NOT NULL, "
+    "a_param TEXT DEFAULT '{}', "
+    "score REAL DEFAULT 0, "
+    "confidence REAL DEFAULT 0, "
+    "lift_degree REAL DEFAULT 0.9, "
+    "novelty REAL DEFAULT 0.9, "
+    "count INTEGER DEFAULT 0, "
+    "pool TEXT DEFAULT 'general', "
+    "perception_count INTEGER DEFAULT 0, "
+    "feedback TEXT DEFAULT '{}', "
+    "created_time INTEGER DEFAULT 0, "
+    "update_time INTEGER DEFAULT 0)";
+
+class ServerFeedbackTestCallback : public NativeRdb::RdbOpenCallback {
+public:
+    int32_t OnCreate(NativeRdb::RdbStore &rdbStore) override
+    {
+        return rdbStore.ExecuteSql(SERVER_CREATE_TABLE_SQL);
+    }
+    int32_t OnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion) override
+    {
+        return NativeRdb::E_OK;
+    }
+};
+
+void SetupServerTestDatabase(const std::string &path)
+{
+    unlink(path.c_str());
+    NativeRdb::RdbStoreConfig config(path);
+    config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
+    int32_t errCode = NativeRdb::E_OK;
+    ServerFeedbackTestCallback callback;
+    auto store = NativeRdb::RdbHelper::GetRdbStore(config, 1, callback, errCode);
+    if (store == nullptr) {
+        return;
+    }
+    store->ExecuteSql(
+        "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (1, 'time', 'switch', '{}')");
+}
+} // namespace
+
+class SubmitFeedbackPersistTest : public testing::Test {
+public:
+    static void SetUpTestCase() {}
+    static void TearDownTestCase() {}
+    void SetUp() override
+    {
+        std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
+        if (deviceType != "phone") {
+            GTEST_SKIP() << "BehaviorAwareness only supports phone, current device: " << deviceType;
+        }
+        SetupServerTestDatabase(SERVER_TEST_DB_PATH);
+        FeedbackStore::GetInstance().SetDatabasePathForTesting(SERVER_TEST_DB_PATH);
+        NativeTokenGet();
+    }
+    void TearDown() override
+    {
+        FeedbackStore::GetInstance().Clear();
+        FeedbackStore::GetInstance().SetDatabasePathForTesting(PERCEPTION_DB_PATH);
+        unlink(SERVER_TEST_DB_PATH);
+    }
+    BehaviorAwarenessServer server_;
+};
+
+HWTEST_F(SubmitFeedbackPersistTest, SubmitFeedback008_FiveTypes_SameEventId_UpdatedToLast, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackType types[] = {
+        FeedbackType::ACCEPT,
+        FeedbackType::IGNORE,
+        FeedbackType::REJECT,
+        FeedbackType::EDIT,
+        FeedbackType::NOT_PUSHED,
+    };
+    for (int32_t i = 0; i < 5; ++i) {
+        FeedbackData feedback {
+            .perceptionEventId = "habitAwareness_1",
+            .feedbackType = types[i],
+            .feedbackTime = 1000 + i,
+        };
+        EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+    }
+    FeedbackRecord record;
+    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("habitAwareness_1", record), RET_OK);
+    EXPECT_EQ(record.feedbackType, static_cast<int32_t>(FeedbackType::NOT_PUSHED));
+}
+
+HWTEST_F(SubmitFeedbackPersistTest, SubmitFeedback009_Idempotent_SameEventIdSameType, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+    std::vector<FeedbackRecord> records;
+    FeedbackStore::GetInstance().QueryAll(records);
+    int32_t count = 0;
+    for (const auto &r : records) {
+        if (r.id == 1) {
+            ++count;
+        }
+    }
+    EXPECT_EQ(count, 1);
+}
+
+HWTEST_F(SubmitFeedbackPersistTest, SubmitFeedback010_Success_RecordsPersisted, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+    FeedbackRecord record;
+    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("habitAwareness_1", record), RET_OK);
+    EXPECT_EQ(record.feedbackType, static_cast<int32_t>(FeedbackType::ACCEPT));
+    EXPECT_EQ(record.feedbackTime, 1000);
+}
+
+HWTEST_F(SubmitFeedbackPersistTest, SubmitFeedback_Ac1_7_ServiceException_ReturnsServiceException, TestSize.Level1)
+{
+    const char *invalidDbPath = "/data/local/tmp/invalid_server_perception.db";
+    FILE *f = fopen(invalidDbPath, "w");
+    ASSERT_NE(f, nullptr);
+    fputs("not a database", f);
+    fclose(f);
+    FeedbackStore::GetInstance().SetDatabasePathForTesting(invalidDbPath);
+    auto ctx = MakeSystemContext();
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), SERVICE_EXCEPTION);
+    FeedbackStore::GetInstance().SetDatabasePathForTesting(SERVER_TEST_DB_PATH);
+    unlink(invalidDbPath);
 }
 } // namespace DeviceStatus
 } // namespace Msdp

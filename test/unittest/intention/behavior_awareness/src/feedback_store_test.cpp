@@ -16,7 +16,10 @@
 #include <gtest/gtest.h>
 #include <unistd.h>
 
+#include <cstdio>
 #include <string>
+#include <thread>
+#include <vector>
 
 #include "abs_result_set.h"
 #include "behavior_awareness_data.h"
@@ -82,6 +85,14 @@ void SetupTestDatabase(const std::string &path)
         "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (1, 'time', 'switch', '{}')");
     store->ExecuteSql(
         "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (2, 'time', 'switch', '{}')");
+    char sql[256];
+    for (int i = 3; i <= 10; ++i) {
+        snprintf(sql, sizeof(sql),
+            "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (%d, 'time', 'switch', '{}')", i);
+        store->ExecuteSql(sql);
+    }
+    store->ExecuteSql(
+        "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (2147483647, 'time', 'switch', '{}')");
 }
 } // namespace
 
@@ -106,15 +117,15 @@ public:
 HWTEST_F(FeedbackStoreTest, InsertFeedback_Success, TestSize.Level1)
 {
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
     EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
     FeedbackRecord record;
-    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("BehaviorAwareness_1", record), RET_OK);
+    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("habitAwareness_1", record), RET_OK);
     EXPECT_EQ(record.feedbackType, static_cast<int32_t>(FeedbackType::ACCEPT));
-    EXPECT_EQ(record.feedbackTime, 0);
+    EXPECT_EQ(record.feedbackTime, 1000);
 }
 
 HWTEST_F(FeedbackStoreTest, InsertFeedback_FiveTypes_SameEventId_UpdatedToLast, TestSize.Level1)
@@ -128,21 +139,21 @@ HWTEST_F(FeedbackStoreTest, InsertFeedback_FiveTypes_SameEventId_UpdatedToLast, 
     };
     for (int32_t i = 0; i < 5; ++i) {
         FeedbackData feedback {
-            .perceptionEventId = "BehaviorAwareness_1",
+            .perceptionEventId = "habitAwareness_1",
             .feedbackType = types[i],
             .feedbackTime = 1000 + i,
         };
         EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
     }
     FeedbackRecord record;
-    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("BehaviorAwareness_1", record), RET_OK);
+    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("habitAwareness_1", record), RET_OK);
     EXPECT_EQ(record.feedbackType, static_cast<int32_t>(FeedbackType::NOT_PUSHED));
 }
 
 HWTEST_F(FeedbackStoreTest, InsertFeedback_Idempotent_SameType, TestSize.Level1)
 {
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
@@ -162,31 +173,31 @@ HWTEST_F(FeedbackStoreTest, InsertFeedback_Idempotent_SameType, TestSize.Level1)
 HWTEST_F(FeedbackStoreTest, InsertFeedback_Update_DifferentType, TestSize.Level1)
 {
     FeedbackData fb1 {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
     EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(fb1), RET_OK);
     FeedbackData fb2 {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::REJECT,
         .feedbackTime = 2000,
     };
     EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(fb2), RET_OK);
     FeedbackRecord record;
-    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("BehaviorAwareness_1", record), RET_OK);
+    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("habitAwareness_1", record), RET_OK);
     EXPECT_EQ(record.feedbackType, static_cast<int32_t>(FeedbackType::REJECT));
 }
 
 HWTEST_F(FeedbackStoreTest, InsertFeedback_Mapping_DifferentEventId, TestSize.Level1)
 {
     FeedbackData fb1 {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
     FeedbackData fb2 {
-        .perceptionEventId = "BehaviorAwareness_2",
+        .perceptionEventId = "habitAwareness_2",
         .feedbackType = FeedbackType::IGNORE,
         .feedbackTime = 2000,
     };
@@ -194,8 +205,8 @@ HWTEST_F(FeedbackStoreTest, InsertFeedback_Mapping_DifferentEventId, TestSize.Le
     EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(fb2), RET_OK);
     FeedbackRecord rec1;
     FeedbackRecord rec2;
-    FeedbackStore::GetInstance().QueryFeedback("BehaviorAwareness_1", rec1);
-    FeedbackStore::GetInstance().QueryFeedback("BehaviorAwareness_2", rec2);
+    FeedbackStore::GetInstance().QueryFeedback("habitAwareness_1", rec1);
+    FeedbackStore::GetInstance().QueryFeedback("habitAwareness_2", rec2);
     EXPECT_EQ(rec1.feedbackType, static_cast<int32_t>(FeedbackType::ACCEPT));
     EXPECT_EQ(rec2.feedbackType, static_cast<int32_t>(FeedbackType::IGNORE));
 }
@@ -204,7 +215,7 @@ HWTEST_F(FeedbackStoreTest, InsertFeedback_DbNotExist_Tolerant_ReturnsRetOk, Tes
 {
     FeedbackStore::GetInstance().SetDatabasePathForTesting("/data/local/tmp/nonexistent_db.db");
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
@@ -212,35 +223,96 @@ HWTEST_F(FeedbackStoreTest, InsertFeedback_DbNotExist_Tolerant_ReturnsRetOk, Tes
     FeedbackStore::GetInstance().SetDatabasePathForTesting(TEST_DB_PATH);
 }
 
-HWTEST_F(FeedbackStoreTest, InsertFeedback_RdbStoreNull_Tolerant_ReturnsRetOk, TestSize.Level1)
+HWTEST_F(FeedbackStoreTest, InsertFeedback_InvalidDbFile_ReturnsServiceException, TestSize.Level1)
 {
-    FeedbackStore::GetInstance().SetDatabasePathForTesting("/data/local/tmp/nonexistent_db.db");
+    const char *invalidDbPath = "/data/local/tmp/invalid_perception.db";
+    FILE *f = fopen(invalidDbPath, "w");
+    ASSERT_NE(f, nullptr);
+    fputs("not a database", f);
+    fclose(f);
+    FeedbackStore::GetInstance().SetDatabasePathForTesting(invalidDbPath);
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
-    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), SERVICE_EXCEPTION);
     FeedbackStore::GetInstance().SetDatabasePathForTesting(TEST_DB_PATH);
+    unlink(invalidDbPath);
 }
 
 HWTEST_F(FeedbackStoreTest, InsertFeedback_RecordNotFound_WarnNoInsert, TestSize.Level1)
 {
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_999",
+        .perceptionEventId = "habitAwareness_999",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
     EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
     FeedbackRecord record;
-    FeedbackStore::GetInstance().QueryFeedback("BehaviorAwareness_999", record);
+    FeedbackStore::GetInstance().QueryFeedback("habitAwareness_999", record);
     EXPECT_EQ(record.id, 0);
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_LargeEventId, TestSize.Level1)
+{
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_2147483647",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+    FeedbackRecord record;
+    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("habitAwareness_2147483647", record), RET_OK);
+    EXPECT_EQ(record.feedbackType, static_cast<int32_t>(FeedbackType::ACCEPT));
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_Timestamp_Preserved, TestSize.Level1)
+{
+    int64_t largeTime = 1700000000000;
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::EDIT,
+        .feedbackTime = largeTime,
+    };
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+    FeedbackRecord record;
+    EXPECT_EQ(FeedbackStore::GetInstance().QueryFeedback("habitAwareness_1", record), RET_OK);
+    EXPECT_EQ(record.feedbackTime, largeTime);
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_Concurrent_NoRace, TestSize.Level1)
+{
+    const int threadCount = 10;
+    std::vector<std::thread> threads;
+    for (int i = 1; i <= threadCount; ++i) {
+        threads.emplace_back([i]() {
+            FeedbackData feedback {
+                .perceptionEventId = "habitAwareness_" + std::to_string(i),
+                .feedbackType = FeedbackType::ACCEPT,
+                .feedbackTime = 1000 + i,
+            };
+            EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+        });
+    }
+    for (auto &t : threads) {
+        t.join();
+    }
+    std::vector<FeedbackRecord> records;
+    FeedbackStore::GetInstance().QueryAll(records);
+    int updated = 0;
+    for (const auto &r : records) {
+        if (r.feedbackType == static_cast<int32_t>(FeedbackType::ACCEPT) && r.feedbackTime > 0) {
+            ++updated;
+        }
+    }
+    EXPECT_EQ(updated, threadCount);
 }
 
 HWTEST_F(FeedbackStoreTest, Clear_RemovesAllRecords, TestSize.Level1)
 {
     FeedbackData feedback {
-        .perceptionEventId = "BehaviorAwareness_1",
+        .perceptionEventId = "habitAwareness_1",
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
@@ -249,6 +321,101 @@ HWTEST_F(FeedbackStoreTest, Clear_RemovesAllRecords, TestSize.Level1)
     std::vector<FeedbackRecord> records;
     FeedbackStore::GetInstance().QueryAll(records);
     EXPECT_TRUE(records.empty());
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_ZeroId_Tolerant_ReturnsRetOk, TestSize.Level1)
+{
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_0",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+    FeedbackRecord record;
+    FeedbackStore::GetInstance().QueryFeedback("habitAwareness_0", record);
+    EXPECT_EQ(record.id, 0);
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_NegativeId_Tolerant_ReturnsRetOk, TestSize.Level1)
+{
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_-1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_NonNumericSuffix_Tolerant_ReturnsRetOk, TestSize.Level1)
+{
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_abc",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_NoUnderscore_Tolerant_ReturnsRetOk, TestSize.Level1)
+{
+    FeedbackData feedback {
+        .perceptionEventId = "invalidformat",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_EmptyEventId_Tolerant_ReturnsRetOk, TestSize.Level1)
+{
+    FeedbackData feedback {
+        .perceptionEventId = "",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_EmptySuffix_Tolerant_ReturnsRetOk, TestSize.Level1)
+{
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_MultipleUnderscores_Tolerant_ReturnsRetOk, TestSize.Level1)
+{
+    FeedbackData feedback {
+        .perceptionEventId = "habitAwareness_1_2",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
+    EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+}
+
+HWTEST_F(FeedbackStoreTest, InsertFeedback_AllFiveFeedbackTypes_Success, TestSize.Level1)
+{
+    FeedbackType types[] = {
+        FeedbackType::ACCEPT,
+        FeedbackType::IGNORE,
+        FeedbackType::REJECT,
+        FeedbackType::EDIT,
+        FeedbackType::NOT_PUSHED,
+    };
+    for (int32_t i = 0; i < static_cast<int32_t>(sizeof(types) / sizeof(types[0])); ++i) {
+        FeedbackData feedback {
+            .perceptionEventId = "habitAwareness_2",
+            .feedbackType = types[i],
+            .feedbackTime = 1000 + i,
+        };
+        EXPECT_EQ(FeedbackStore::GetInstance().InsertFeedback(feedback), RET_OK);
+        FeedbackRecord record;
+        FeedbackStore::GetInstance().QueryFeedback("habitAwareness_2", record);
+        EXPECT_EQ(record.feedbackType, static_cast<int32_t>(types[i]));
+    }
 }
 } // namespace BehaviorAwareness
 } // namespace DeviceStatus
