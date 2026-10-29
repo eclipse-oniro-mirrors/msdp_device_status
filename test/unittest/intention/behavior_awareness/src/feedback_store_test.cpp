@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ namespace DeviceStatus {
 namespace BehaviorAwareness {
 namespace {
 constexpr const char *TEST_DB_PATH = "/data/local/tmp/test_perception.db";
+constexpr int32_t TEST_RECORD_COUNT = 10;
 constexpr const char *CREATE_TABLE_SQL =
     "CREATE TABLE IF NOT EXISTS habit_perceptions ("
     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -85,10 +86,9 @@ void SetupTestDatabase(const std::string &path)
         "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (1, 'time', 'switch', '{}')");
     store->ExecuteSql(
         "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (2, 'time', 'switch', '{}')");
-    char sql[256];
-    for (int i = 3; i <= 10; ++i) {
-        snprintf(sql, sizeof(sql),
-            "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (%d, 'time', 'switch', '{}')", i);
+    for (int i = 3; i <= TEST_RECORD_COUNT; ++i) {
+        std::string sql = "INSERT INTO habit_perceptions (id, e, a, feedback) VALUES (" +
+            std::to_string(i) + ", 'time', 'switch', '{}')";
         store->ExecuteSql(sql);
     }
     store->ExecuteSql(
