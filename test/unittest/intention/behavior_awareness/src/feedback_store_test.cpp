@@ -39,7 +39,7 @@ namespace Msdp {
 namespace DeviceStatus {
 namespace BehaviorAwareness {
 namespace {
-constexpr const char *TEST_DB_PATH = "/data/local/tmp/test_perception.db";
+constexpr const char *TEST_DB_PATH = "/data/local/tmp/test_habit_perceptions.db";
 constexpr int32_t TEST_RECORD_COUNT = 10;
 constexpr const char *CREATE_TABLE_SQL =
     "CREATE TABLE IF NOT EXISTS habit_perceptions ("
@@ -225,7 +225,7 @@ HWTEST_F(FeedbackStoreTest, InsertFeedback_DbNotExist_Tolerant_ReturnsRetOk, Tes
 
 HWTEST_F(FeedbackStoreTest, InsertFeedback_InvalidDbFile_ReturnsServiceException, TestSize.Level1)
 {
-    const char *invalidDbPath = "/data/local/tmp/invalid_perception.db";
+    const char *invalidDbPath = "/data/local/tmp/invalid_habit_perceptions.db";
     FILE *f = fopen(invalidDbPath, "w");
     ASSERT_NE(f, nullptr);
     fputs("not a database", f);

@@ -479,7 +479,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_EmptyIdSuffix_Returns401, T
     EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
-HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_ZeroId_ReturnsRetOk, TestSize.Level1)
+HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_ZeroId_Returns401, TestSize.Level1)
 {
     auto ctx = MakeSystemContext();
     FeedbackData feedback {
@@ -487,7 +487,7 @@ HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_ZeroId_ReturnsRetOk, TestSi
         .feedbackType = FeedbackType::ACCEPT,
         .feedbackTime = 1000,
     };
-    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), RET_OK);
+    EXPECT_EQ(server_.SubmitFeedback(ctx, feedback), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerTest, SubmitFeedback_ValidHabitAwarenessFormat_ReturnsRetOk, TestSize.Level1)
@@ -722,7 +722,7 @@ HWTEST_F(BehaviorAwarenessServerDeviceTypeTest, SubmitFeedback_UnsupportedDevice
 }
 
 namespace {
-constexpr const char *SERVER_TEST_DB_PATH = "/data/local/tmp/test_server_perception.db";
+constexpr const char *SERVER_TEST_DB_PATH = "/data/local/tmp/test_server_habit_perceptions.db";
 constexpr const char *SERVER_CREATE_TABLE_SQL =
     "CREATE TABLE IF NOT EXISTS habit_perceptions ("
     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -853,7 +853,7 @@ HWTEST_F(SubmitFeedbackPersistTest, SubmitFeedback010_Success_RecordsPersisted, 
 
 HWTEST_F(SubmitFeedbackPersistTest, SubmitFeedback_Ac1_7_ServiceException_ReturnsServiceException, TestSize.Level1)
 {
-    const char *invalidDbPath = "/data/local/tmp/invalid_server_perception.db";
+    const char *invalidDbPath = "/data/local/tmp/invalid_server_habit_perceptions.db";
     FILE *f = fopen(invalidDbPath, "w");
     ASSERT_NE(f, nullptr);
     fputs("not a database", f);

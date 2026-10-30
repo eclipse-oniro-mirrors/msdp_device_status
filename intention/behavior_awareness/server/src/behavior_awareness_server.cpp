@@ -251,8 +251,8 @@ int32_t BehaviorAwarenessServer::ValidateFeedback(const FeedbackData &feedback)
             "suffix:%{public}s", feedback.perceptionEventId.c_str(), suffix.c_str());
         return PARAM_EXCEPTION;
     }
-    if (parsedValue < 0) {
-        FI_HILOGE("ValidateFeedback: perceptionEventId id is negative, value:%{public}s, id:%{public}" PRId64,
+    if (parsedValue <= 0) {
+        FI_HILOGE("ValidateFeedback: perceptionEventId id is non-positive, value:%{public}s, id:%{public}" PRId64,
             feedback.perceptionEventId.c_str(), parsedValue);
         return PARAM_EXCEPTION;
     }
