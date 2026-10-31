@@ -32,7 +32,6 @@ ohos_shared_library("behaviorawareness_napi") {
     "${device_status_frameworks_path}/js/napi/behaviorAwareness/src/behavior_awareness_napi.cpp",
     "${device_status_frameworks_path}/js/napi/behaviorAwareness/src/behavior_awareness_napi_error.cpp",
     "${device_status_frameworks_path}/native/src/behavior_awareness_callback_stub.cpp",
-    "${device_status_frameworks_path}/native/src/behavior_awareness_callback_proxy.cpp",
     "${device_status_frameworks_path}/ets/behaviorAwareness/src/behavior_awareness_manager.cpp",
   ]
 

@@ -100,7 +100,9 @@ ohos_source_set("intention_server_stub") {
     sources += [ "${device_status_frameworks_path}/native/car_awareness/src/car_awareness_callback_proxy.cpp" ]
   }
 
-  sources += [ "${device_status_frameworks_path}/native/src/behavior_awareness_callback_proxy.cpp" ]
+  if (device_status_behavior_awareness_enable) {
+    sources += [ "${device_status_frameworks_path}/native/src/behavior_awareness_callback_proxy.cpp" ]
+  }
 
   deps = [
     ":intention_interface",

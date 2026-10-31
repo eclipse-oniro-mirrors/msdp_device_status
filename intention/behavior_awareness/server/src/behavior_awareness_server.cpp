@@ -125,6 +125,7 @@ int32_t BehaviorAwarenessServer::SubscribePerception(const CallingContext &conte
     FI_HILOGI("SubscribePerception: bundleName:%{public}s, domain:%{public}d, key:%{public}s",
         bundleName.c_str(), static_cast<int32_t>(options.domain), key.c_str());
 
+    std::lock_guard<std::mutex> lock(mtx_);
     auto iter = subscriptions_.find(key);
     if (iter != subscriptions_.end()) {
         // Same key exists — overwrite callback (not error)
@@ -153,6 +154,7 @@ int32_t BehaviorAwarenessServer::SubscribePerception(const CallingContext &conte
 
 int32_t BehaviorAwarenessServer::RemoveAllSubscriptions(const std::string &bundleName)
 {
+    std::lock_guard<std::mutex> lock(mtx_);
     int32_t removed = 0;
     for (auto it = subscriptions_.begin(); it != subscriptions_.end();) {
         if (it->first.find(bundleName + ":") != 0) {
@@ -171,6 +173,7 @@ int32_t BehaviorAwarenessServer::RemoveAllSubscriptions(const std::string &bundl
 int32_t BehaviorAwarenessServer::RemoveMatchingSubscription(
     const std::string &bundleName, const sptr<IRemoteBehaviorAwarenessCallback> &callback)
 {
+    std::lock_guard<std::mutex> lock(mtx_);
     for (auto it = subscriptions_.begin(); it != subscriptions_.end(); ++it) {
         if (it->first.find(bundleName + ":") != 0) {
             continue;
@@ -302,13 +305,20 @@ int32_t BehaviorAwarenessServer::SubmitFeedback(const CallingContext &context, c
 void BehaviorAwarenessServer::NotifyClient(const PerceptionEventData &event)
 {
     CALL_DEBUG_ENTER;
-    FI_HILOGD("NotifyClient: pushing event to %{public}zu subscribers", subscriptions_.size());
-    for (auto &[key, info] : subscriptions_) {
-        if (info.callback == nullptr) {
-            FI_HILOGE("NotifyClient: callback is null for key:%{public}s", key.c_str());
-            continue;
+    std::vector<sptr<IRemoteBehaviorAwarenessCallback>> callbacks;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        FI_HILOGD("NotifyClient: pushing event to %{public}zu subscribers", subscriptions_.size());
+        for (auto &[key, info] : subscriptions_) {
+            if (info.callback == nullptr) {
+                FI_HILOGE("NotifyClient: callback is null for key:%{public}s", key.c_str());
+                continue;
+            }
+            callbacks.push_back(info.callback);
         }
-        info.callback->OnBehaviorAwareness(event);
+    }
+    for (const auto &callback : callbacks) {
+        callback->OnBehaviorAwareness(event);
     }
 }
 
@@ -347,14 +357,17 @@ void BehaviorAwarenessServer::OnRemoteDied(const wptr<IRemoteObject> &remote)
         return;
     }
     int32_t cleaned = 0;
-    for (auto it = subscriptions_.begin(); it != subscriptions_.end();) {
-        if (it->second.callback != nullptr && it->second.callback->AsObject() == client) {
-            std::string key = it->first;
-            it = subscriptions_.erase(it);
-            ++cleaned;
-            FI_HILOGI("OnRemoteDied: cleaned subscription for key:%{public}s", key.c_str());
-        } else {
-            ++it;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        for (auto it = subscriptions_.begin(); it != subscriptions_.end();) {
+            if (it->second.callback != nullptr && it->second.callback->AsObject() == client) {
+                std::string key = it->first;
+                it = subscriptions_.erase(it);
+                ++cleaned;
+                FI_HILOGI("OnRemoteDied: cleaned subscription for key:%{public}s", key.c_str());
+            } else {
+                ++it;
+            }
         }
     }
     if (cleaned == 0) {
