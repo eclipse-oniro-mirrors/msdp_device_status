@@ -1239,6 +1239,81 @@ HWTEST_F(UtilityTest, UtityTest_RemoveTrailingChars2_005, TestSize.Level1)
     Utility::RemoveTrailingChars(path1, path2);
     ASSERT_STREQ(path2.c_str(), "abc");
 }
+
+/**
+ * @tc.name: UtityTest_CopyNulstr_005
+ * @tc.desc: Copy string when dest size is 1, only null terminator is written.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UtilityTest, UtityTest_CopyNulstr_005, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    char dest[] = "x";
+    size_t size = 1;
+    char src[] = "hello";
+    size_t len = Utility::CopyNulstr(dest, size, src);
+    EXPECT_EQ(len, 0);
+    EXPECT_EQ(dest[0], '\0');
+}
+
+/**
+ * @tc.name: UtityTest_CopyNulstr_006
+ * @tc.desc: Copy string shorter than dest buffer, no truncation occurs.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UtilityTest, UtityTest_CopyNulstr_006, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    char dest[SIZE2] = {0};
+    char src[] = "hi";
+    size_t len = Utility::CopyNulstr(dest, SIZE2, src);
+    EXPECT_EQ(len, strlen(src));
+    EXPECT_STREQ(dest, "hi");
+}
+
+/**
+ * @tc.name: UtityTest_Anonymize1_006
+ * @tc.desc: Enter a network ID shorter than SUBSTR_ID_LENGTH, anonymized to all stars.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UtilityTest, UtityTest_Anonymize1_006, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    const char *id = "abc";
+    std::string ret = Utility::Anonymize(id);
+    ASSERT_NO_FATAL_FAILURE(Utility::IsEqual("**********", ret.c_str()));
+}
+
+/**
+ * @tc.name: UtityTest_DFXRadarAnonymize_001
+ * @tc.desc: DFX radar anonymize a normal network ID, middle part masked to 2 stars.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UtilityTest, UtityTest_DFXRadarAnonymize_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    std::string ret = Utility::DFXRadarAnonymize(NETWORK_ID.c_str());
+    FI_HILOGI("DFXRadarAnonymize result: %{public}s", ret.c_str());
+    ASSERT_NO_FATAL_FAILURE(Utility::IsEqual("abcd1**456ef", ret.c_str()));
+}
+
+/**
+ * @tc.name: UtityTest_DFXRadarAnonymize_002
+ * @tc.desc: DFX radar anonymize null pointer, returns all stars.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(UtilityTest, UtityTest_DFXRadarAnonymize_002, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    const char *id = nullptr;
+    std::string ret = Utility::DFXRadarAnonymize(id);
+    ASSERT_NO_FATAL_FAILURE(Utility::IsEqual("**********", ret.c_str()));
+}
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
