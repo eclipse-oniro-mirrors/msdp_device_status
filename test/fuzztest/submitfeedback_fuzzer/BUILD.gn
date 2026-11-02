@@ -33,7 +33,12 @@ ohos_fuzztest("SubmitFeedbackFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fno-lto",
   ]
+
+  cflags_cc = [ "-fno-lto" ]
+
+  ldflags = [ "-fno-lto" ]
 
   sources = [
     "./submitfeedback_fuzzer.cpp",
