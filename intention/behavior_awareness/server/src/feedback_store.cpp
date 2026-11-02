@@ -267,33 +267,39 @@ int32_t FeedbackStore::UpdateFeedbackField(int64_t id, const std::string &feedba
 
 int32_t FeedbackStore::ProcessFeedback(int64_t id, const FeedbackData &feedback)
 {
+    const std::string &eventId = feedback.perceptionEventId;
     int32_t existingType = -1;
     bool recordFound = false;
     int32_t ret = QueryFeedbackType(id, recordFound, existingType);
     if (ret != RET_OK) {
-        FI_HILOGE("ProcessFeedback: query failed, tolerant, id:%{public}" PRId64, id);
+        FI_HILOGE("ProcessFeedback: query failed, tolerant, eventId:%{public}s, id:%{public}" PRId64,
+            eventId.c_str(), id);
         return RET_OK;
     }
     if (!recordFound) {
-        FI_HILOGW("ProcessFeedback: record not found, id:%{public}" PRId64, id);
+        FI_HILOGW("ProcessFeedback: record not found, eventId:%{public}s, id:%{public}" PRId64,
+            eventId.c_str(), id);
         return RET_OK;
     }
     int32_t newType = static_cast<int32_t>(feedback.feedbackType);
     if (existingType >= 0 && existingType == newType) {
-        FI_HILOGI("ProcessFeedback: idempotent, id:%{public}" PRId64, id);
+        FI_HILOGI("ProcessFeedback: idempotent, eventId:%{public}s, id:%{public}" PRId64,
+            eventId.c_str(), id);
         return RET_OK;
     }
     std::string feedbackJson;
     ret = SerializeFeedbackJson(newType, feedback.feedbackTime, feedbackJson);
     if (ret != RET_OK) {
-        FI_HILOGE("ProcessFeedback: serialize failed, tolerant, id:%{public}" PRId64, id);
+        FI_HILOGE("ProcessFeedback: serialize failed, tolerant, eventId:%{public}s, id:%{public}" PRId64,
+            eventId.c_str(), id);
         return RET_OK;
     }
-    FI_HILOGI("ProcessFeedback: updating, id:%{public}" PRId64 ", old:%{public}d, new:%{public}d",
-        id, existingType, newType);
+    FI_HILOGI("ProcessFeedback: updating, eventId:%{public}s, id:%{public}" PRId64 ", old:%{public}d, new:%{public}d",
+        eventId.c_str(), id, existingType, newType);
     ret = UpdateFeedbackField(id, feedbackJson, feedback.feedbackTime);
     if (ret != RET_OK) {
-        FI_HILOGE("ProcessFeedback: update failed, tolerant, id:%{public}" PRId64, id);
+        FI_HILOGE("ProcessFeedback: update failed, tolerant, eventId:%{public}s, id:%{public}" PRId64,
+            eventId.c_str(), id);
         return RET_OK;
     }
     return RET_OK;
@@ -305,8 +311,8 @@ int32_t FeedbackStore::InsertFeedback(const FeedbackData &feedback)
     if (!inited_) {
         int32_t ret = InitRdbStore();
         if (ret != RET_OK) {
-            FI_HILOGE("InsertFeedback: init failed, err:%{public}d, eventId:%{public}s",
-                ret, feedback.perceptionEventId.c_str());
+            FI_HILOGE("InsertFeedback: init failed, service not started, err:%{public}d, "
+                "eventId:%{public}s", ret, feedback.perceptionEventId.c_str());
             return ret;
         }
     }

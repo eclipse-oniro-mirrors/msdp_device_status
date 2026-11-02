@@ -15,16 +15,16 @@
 
 #include "behavior_awareness_server.h"
 
+#include <charconv>
 #include <functional>
 #include <sstream>
-#include <charconv>
 #include <string>
 
 #include "accesstoken_kit.h"
-#include "hap_token_info.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
 #include "feedback_store.h"
+#include "hap_token_info.h"
 #include "parameters.h"
 
 #undef LOG_TAG
@@ -288,8 +288,8 @@ int32_t BehaviorAwarenessServer::SubmitFeedback(const CallingContext &context, c
     }
     ret = FeedbackStore::GetInstance().InsertFeedback(feedback);
     if (ret != RET_OK) {
-        FI_HILOGE("SubmitFeedback: InsertFeedback failed, ret:%{public}d, eventId:%{public}s",
-            ret, feedback.perceptionEventId.c_str());
+        FI_HILOGE("SubmitFeedback: InsertFeedback failed, service not started, ret:%{public}d, "
+            "eventId:%{public}s", ret, feedback.perceptionEventId.c_str());
         return ret;
     }
     std::string bundleName = GetCallerBundleName(context);
