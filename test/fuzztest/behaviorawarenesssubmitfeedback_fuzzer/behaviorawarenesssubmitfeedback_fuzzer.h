@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SUBMITFEEDBACK_FUZZER_H
-#define SUBMITFEEDBACK_FUZZER_H
+#ifndef BEHAVIORAWARENESSSUBMITFEEDBACK_FUZZER_H
+#define BEHAVIORAWARENESSSUBMITFEEDBACK_FUZZER_H
 
 #include <cstdint>
 #include <string>
@@ -27,14 +27,14 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace BehaviorAwareness {
-class SubmitFeedbackFuzzer {
+class BehaviorAwarenessSubmitFeedbackFuzzer {
 public:
-    SubmitFeedbackFuzzer() = default;
-    ~SubmitFeedbackFuzzer() = default;
+    BehaviorAwarenessSubmitFeedbackFuzzer() = default;
+    ~BehaviorAwarenessSubmitFeedbackFuzzer() = default;
     void FuzzSubmitFeedback(const uint8_t *data, size_t size);
 };
 } // namespace BehaviorAwareness
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
-#endif // SUBMITFEEDBACK_FUZZER_H
+#endif // BEHAVIORAWARENESSSUBMITFEEDBACK_FUZZER_H

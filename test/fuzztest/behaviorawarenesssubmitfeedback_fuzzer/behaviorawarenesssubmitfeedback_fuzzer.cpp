@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "submitfeedback_fuzzer.h"
+#include "behaviorawarenesssubmitfeedback_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -29,7 +29,7 @@
 #include "token_setproc.h"
 
 #undef LOG_TAG
-#define LOG_TAG "SubmitFeedbackFuzzer"
+#define LOG_TAG "BehaviorAwarenessSubmitFeedbackFuzzer"
 
 namespace OHOS {
 namespace Msdp {
@@ -54,7 +54,7 @@ void InitNativeToken()
         .acls = nullptr,
         .aplStr = "system_basic",
     };
-    infoInstance.processName = "SubmitFeedbackFuzzer";
+    infoInstance.processName = "BehaviorAwarenessSubmitFeedbackFuzzer";
     uint64_t tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
     Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
@@ -73,7 +73,7 @@ CallingContext MakeSystemContext()
 }
 } // namespace
 
-void SubmitFeedbackFuzzer::FuzzSubmitFeedback(const uint8_t *data, size_t size)
+void BehaviorAwarenessSubmitFeedbackFuzzer::FuzzSubmitFeedback(const uint8_t *data, size_t size)
 {
     if (size < sizeof(int32_t) + sizeof(int64_t)) {
         return;
@@ -99,7 +99,7 @@ void SubmitFeedbackFuzzer::FuzzSubmitFeedback(const uint8_t *data, size_t size)
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    OHOS::Msdp::DeviceStatus::BehaviorAwareness::SubmitFeedbackFuzzer fuzzer;
+    OHOS::Msdp::DeviceStatus::BehaviorAwareness::BehaviorAwarenessSubmitFeedbackFuzzer fuzzer;
     fuzzer.FuzzSubmitFeedback(data, size);
     return 0;
 }

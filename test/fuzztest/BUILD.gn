@@ -87,7 +87,7 @@ group("device_status_fuzztest") {
     "intentionservice_fuzzer:fuzztest",
     "intentiononscreen_fuzzer:fuzztest",
     "intentionstationary_fuzzer:fuzztest",
-    "submitfeedback_fuzzer:fuzztest",
+    "behaviorawarenesssubmitfeedback_fuzzer:fuzztest",
   ]
   if (device_status_interaction_coordination) {
     deps += [

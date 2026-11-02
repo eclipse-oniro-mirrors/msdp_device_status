@@ -16,7 +16,7 @@ import("../../../device_status.gni")
 
 module_output_path = "${device_status_fuzz_output_path}"
 
-ohos_fuzztest("SubmitFeedbackFuzzTest") {
+ohos_fuzztest("BehaviorAwarenessSubmitFeedbackFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "."
 
@@ -41,7 +41,7 @@ ohos_fuzztest("SubmitFeedbackFuzzTest") {
   ldflags = [ "-fno-lto" ]
 
   sources = [
-    "./submitfeedback_fuzzer.cpp",
+    "./behaviorawarenesssubmitfeedback_fuzzer.cpp",
     "${device_status_root_path}/intention/behavior_awareness/server/src/behavior_awareness_server.cpp",
     "${device_status_root_path}/intention/behavior_awareness/server/src/feedback_store.cpp",
   ]
@@ -71,5 +71,5 @@ ohos_fuzztest("SubmitFeedbackFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":SubmitFeedbackFuzzTest" ]
+  deps = [ ":BehaviorAwarenessSubmitFeedbackFuzzTest" ]
 }

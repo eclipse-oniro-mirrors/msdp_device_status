@@ -250,7 +250,7 @@ ohos_unittest("BehaviorAwarenessSequenceableTest") {
   defines = [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
 }
 
-ohos_unittest("FeedbackStoreTest") {
+ohos_unittest("BehaviorAwarenessFeedbackStoreTest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -268,7 +268,7 @@ ohos_unittest("FeedbackStoreTest") {
   ]
   sources = [
     "${device_status_root_path}/intention/behavior_awareness/server/src/feedback_store.cpp",
-    "src/feedback_store_test.cpp",
+    "src/behavior_awareness_feedback_store_test.cpp",
   ]
 
   deps = [
@@ -293,7 +293,7 @@ ohos_unittest("FeedbackStoreTest") {
   defines = [ "DEVICE_STATUS_BEHAVIOR_AWARENESS_ENABLE" ]
 }
 
-ohos_unittest("FeedbackConcurrentTest") {
+ohos_unittest("BehaviorAwarenessFeedbackConcurrentTest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -313,7 +313,7 @@ ohos_unittest("FeedbackConcurrentTest") {
   sources = [
     "${device_status_root_path}/intention/behavior_awareness/server/src/behavior_awareness_server.cpp",
     "${device_status_root_path}/intention/behavior_awareness/server/src/feedback_store.cpp",
-    "src/feedback_concurrent_test.cpp",
+    "src/behavior_awareness_feedback_concurrent_test.cpp",
   ]
 
   deps = [
@@ -347,7 +347,7 @@ group("unittest") {
     ":BehaviorAwarenessManagerTest",
     ":BehaviorAwarenessSequenceableTest",
     ":BehaviorAwarenessServerTest",
-    ":FeedbackConcurrentTest",
-    ":FeedbackStoreTest",
+    ":BehaviorAwarenessFeedbackConcurrentTest",
+    ":BehaviorAwarenessFeedbackStoreTest",
   ]
 }
