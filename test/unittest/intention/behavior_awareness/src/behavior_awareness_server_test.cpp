@@ -898,93 +898,159 @@ public:
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_EmptyEventId, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_NoUnderscore, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "nounderscore", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "nounderscore",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_UnderscoreAtEnd, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_InvalidPrefix, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "invalidPrefix_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "invalidPrefix_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_NonNumericSuffix, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_abc", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_abc",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_PartialNumericSuffix, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_12abc", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_12abc",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_NegativeId, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_-1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_-1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_ZeroId, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_0", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_0",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_FeedbackTypeTooLow, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = static_cast<FeedbackType>(-1), .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = static_cast<FeedbackType>(-1),
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_FeedbackTypeTooHigh, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = static_cast<FeedbackType>(5), .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = static_cast<FeedbackType>(5),
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_ZeroFeedbackTime, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 0 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 0,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_NegativeFeedbackTime, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = -1 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = -1,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_ValidInput, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), RET_OK);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_ValidLargeId, TestSize.Level1)
 {
-    FeedbackData fb { .perceptionEventId = "habitAwareness_999999", .feedbackType = FeedbackType::NOT_PUSHED, .feedbackTime = 1 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_999999",
+        .feedbackType = FeedbackType::NOT_PUSHED,
+        .feedbackTime = 1,
+    };
     EXPECT_EQ(server_.ValidateFeedback(fb), RET_OK);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_AllFeedbackTypesValid, TestSize.Level1)
 {
-    FeedbackType types[] = { FeedbackType::ACCEPT, FeedbackType::IGNORE, FeedbackType::REJECT, FeedbackType::EDIT, FeedbackType::NOT_PUSHED };
+    FeedbackType types[] = {
+        FeedbackType::ACCEPT,
+        FeedbackType::IGNORE,
+        FeedbackType::REJECT,
+        FeedbackType::EDIT,
+        FeedbackType::NOT_PUSHED,
+    };
     for (auto t : types) {
-        FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = t, .feedbackTime = 1000 };
+        FeedbackData fb {
+            .perceptionEventId = "habitAwareness_1",
+            .feedbackType = t,
+            .feedbackTime = 1000,
+        };
         EXPECT_EQ(server_.ValidateFeedback(fb), RET_OK);
     }
 }
@@ -992,21 +1058,33 @@ HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_AllFeedbackTypesVal
 HWTEST_F(BehaviorAwarenessServerBranchTest, SubmitFeedback_NonSystemApp, TestSize.Level1)
 {
     auto ctx = MakeNonSystemContext();
-    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.SubmitFeedback(ctx, fb), BehaviorAwareness::COMMON_NOT_SYSTEM_APP);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, SubmitFeedback_SystemApp_InvalidParam, TestSize.Level1)
 {
     auto ctx = MakeSystemContext();
-    FeedbackData fb { .perceptionEventId = "", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.SubmitFeedback(ctx, fb), BehaviorAwareness::PARAM_EXCEPTION);
 }
 
 HWTEST_F(BehaviorAwarenessServerBranchTest, SubmitFeedback_SystemApp_Valid_TolerantOk, TestSize.Level1)
 {
     auto ctx = MakeSystemContext();
-    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.SubmitFeedback(ctx, fb), RET_OK);
 }
 
@@ -1242,7 +1320,11 @@ HWTEST_F(BehaviorAwarenessServerBranchTest, SubmitFeedback_InsertFeedbackFails, 
     fclose(f);
     FeedbackStore::GetInstance().SetDatabasePathForTesting(invalidDbPath);
     auto ctx = MakeSystemContext();
-    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    FeedbackData fb {
+        .perceptionEventId = "habitAwareness_1",
+        .feedbackType = FeedbackType::ACCEPT,
+        .feedbackTime = 1000,
+    };
     EXPECT_EQ(server_.SubmitFeedback(ctx, fb), SERVICE_EXCEPTION);
     FeedbackStore::GetInstance().SetDatabasePathForTesting("/data/local/tmp/nonexistent_branch_db.db");
     unlink(invalidDbPath);
