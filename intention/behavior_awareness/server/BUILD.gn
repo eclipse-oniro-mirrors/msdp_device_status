@@ -37,7 +37,10 @@ ohos_source_set("behavior_awareness_server") {
     "${device_status_root_path}/intention/prototype/include",
   ]
 
-  sources = [ "src/behavior_awareness_server.cpp" ]
+  sources = [
+    "src/behavior_awareness_server.cpp",
+    "src/feedback_store.cpp",
+  ]
 
   public_configs = [ ":behavior_awareness_server_public_config" ]
 
@@ -51,6 +54,7 @@ ohos_source_set("behavior_awareness_server") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
+    "relational_store:native_rdb",
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

@@ -39,6 +39,8 @@ enum class PerceptionDomain : int32_t {
     HABIT_AWARENESS = 0,
 };
 
+constexpr const char *PERCEPTION_DOMAIN_HABIT_AWARENESS_STR = "habitAwareness";
+
 enum class PatternType : int32_t {
     TIME_PATTERN = 0,
     LOCATION_PATTERN = 1,

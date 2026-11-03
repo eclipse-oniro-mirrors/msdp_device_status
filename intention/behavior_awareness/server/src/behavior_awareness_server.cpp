@@ -15,13 +15,16 @@
 
 #include "behavior_awareness_server.h"
 
+#include <charconv>
 #include <functional>
 #include <sstream>
+#include <string>
 
 #include "accesstoken_kit.h"
-#include "hap_token_info.h"
 #include "devicestatus_common.h"
 #include "devicestatus_define.h"
+#include "feedback_store.h"
+#include "hap_token_info.h"
 #include "parameters.h"
 
 #undef LOG_TAG
@@ -222,6 +225,50 @@ int32_t BehaviorAwarenessServer::UnsubscribePerception(const CallingContext &con
     return ret;
 }
 
+int32_t BehaviorAwarenessServer::ValidateFeedback(const FeedbackData &feedback)
+{
+    if (feedback.perceptionEventId.empty()) {
+        FI_HILOGE("ValidateFeedback: perceptionEventId is empty");
+        return PARAM_EXCEPTION;
+    }
+    size_t pos = feedback.perceptionEventId.find('_');
+    if (pos == std::string::npos || pos + 1 >= feedback.perceptionEventId.length()) {
+        FI_HILOGE("ValidateFeedback: perceptionEventId format invalid, missing '_' separator or empty suffix, "
+            "value:%{public}s", feedback.perceptionEventId.c_str());
+        return PARAM_EXCEPTION;
+    }
+    std::string prefix = feedback.perceptionEventId.substr(0, pos);
+    if (prefix != PERCEPTION_DOMAIN_HABIT_AWARENESS_STR) {
+        FI_HILOGE("ValidateFeedback: perceptionEventId prefix is not a valid PerceptionDomain enum value, "
+            "prefix:%{public}s, value:%{public}s", prefix.c_str(), feedback.perceptionEventId.c_str());
+        return PARAM_EXCEPTION;
+    }
+    std::string suffix = feedback.perceptionEventId.substr(pos + 1);
+    int64_t parsedValue = 0;
+    auto [ptr, ec] = std::from_chars(suffix.data(), suffix.data() + suffix.size(), parsedValue);
+    if (ec != std::errc() || ptr != suffix.data() + suffix.size()) {
+        FI_HILOGE("ValidateFeedback: perceptionEventId id suffix cannot parse to valid int, value:%{public}s, "
+            "suffix:%{public}s", feedback.perceptionEventId.c_str(), suffix.c_str());
+        return PARAM_EXCEPTION;
+    }
+    if (parsedValue <= 0) {
+        FI_HILOGE("ValidateFeedback: perceptionEventId id is non-positive, value:%{public}s, id:%{public}" PRId64,
+            feedback.perceptionEventId.c_str(), parsedValue);
+        return PARAM_EXCEPTION;
+    }
+    int32_t ft = static_cast<int32_t>(feedback.feedbackType);
+    if (ft < static_cast<int32_t>(FeedbackType::ACCEPT) ||
+        ft > static_cast<int32_t>(FeedbackType::NOT_PUSHED)) {
+        FI_HILOGE("ValidateFeedback: feedbackType out of range, value:%{public}d", ft);
+        return PARAM_EXCEPTION;
+    }
+    if (feedback.feedbackTime <= 0) {
+        FI_HILOGE("ValidateFeedback: feedbackTime invalid, value:%{public}" PRId64, feedback.feedbackTime);
+        return PARAM_EXCEPTION;
+    }
+    return RET_OK;
+}
+
 int32_t BehaviorAwarenessServer::SubmitFeedback(const CallingContext &context, const FeedbackData &feedback)
 {
     CALL_DEBUG_ENTER;
@@ -233,9 +280,22 @@ int32_t BehaviorAwarenessServer::SubmitFeedback(const CallingContext &context, c
         FI_HILOGE("SubmitFeedback: device not support");
         return DEVICE_NOT_SUPPORT;
     }
+    int32_t ret = ValidateFeedback(feedback);
+    if (ret != RET_OK) {
+        FI_HILOGE("SubmitFeedback: param invalid, eventId:%{public}s, ret:%{public}d",
+            feedback.perceptionEventId.c_str(), ret);
+        return ret;
+    }
+    ret = FeedbackStore::GetInstance().InsertFeedback(feedback);
+    if (ret != RET_OK) {
+        FI_HILOGE("SubmitFeedback: InsertFeedback failed, service not started, ret:%{public}d, "
+            "eventId:%{public}s", ret, feedback.perceptionEventId.c_str());
+        return ret;
+    }
     std::string bundleName = GetCallerBundleName(context);
-    FI_HILOGI("SubmitFeedback: bundleName:%{public}s, eventId:%{public}s, type:%{public}d",
-        bundleName.c_str(), feedback.perceptionEventId.c_str(), static_cast<int32_t>(feedback.feedbackType));
+    FI_HILOGI("SubmitFeedback: success, bundleName:%{public}s, eventId:%{public}s, type:%{public}d",
+        bundleName.c_str(), feedback.perceptionEventId.c_str(),
+        static_cast<int32_t>(feedback.feedbackType));
     return RET_OK;
 }
 

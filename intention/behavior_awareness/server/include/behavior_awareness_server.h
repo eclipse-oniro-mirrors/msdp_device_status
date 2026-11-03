@@ -44,6 +44,7 @@ public:
     void NotifyClient(const PerceptionEventData &event);
 
 private:
+    int32_t ValidateFeedback(const FeedbackData &feedback);
     std::string BuildSubscriptionKey(const std::string &bundleName, const SubscribeOptions &options);
     void SaveSubscription(const std::string &key, const SubscribeOptions &options,
         const sptr<IRemoteBehaviorAwarenessCallback> &callback);
