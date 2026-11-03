@@ -57,7 +57,8 @@ taihe_shared_library("multimodalawareness_devicestatus_ani") {
     "src/ani_constructor.cpp",
     "src/ohos.multimodalAwareness.deviceStatus.impl.cpp",
     "src/ani_error_utils.cpp",
-    "src/ani_devicestatus_observer.cpp"
+    "src/ani_devicestatus_observer.cpp",
+    "src/ani_drop_event.cpp",
   ]
 
   deps = [
@@ -73,6 +74,15 @@ taihe_shared_library("multimodalawareness_devicestatus_ani") {
     "ipc:ipc_single",
     "hiappevent:hiappevent_innerapi"
   ]
+
+  if (device_status_motion_enable) {
+    defines = [ "MOTION_ENABLE" ]
+    external_deps += [
+      "init:libbegetutil",
+      "motion:motion_client",
+      "motion:motion_interface_native",
+    ]
+  }
 
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"

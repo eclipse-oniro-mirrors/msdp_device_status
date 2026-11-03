@@ -37,6 +37,7 @@ ohos_shared_library("devicestatus_napi") {
     "${device_status_frameworks_path}/js/napi/device_status/src/device_status_napi.cpp",
     "${device_status_frameworks_path}/js/napi/device_status/src/device_status_napi_error.cpp",
     "${device_status_frameworks_path}/js/napi/device_status/src/device_status_napi_event.cpp",
+    "${device_status_frameworks_path}/js/napi/device_status/src/drop_event_napi.cpp",
   ]
 
   configs = [ ":device_status_napi_private_config" ]
@@ -56,6 +57,15 @@ ohos_shared_library("devicestatus_napi") {
     "hiappevent:hiappevent_innerapi",
     "node:node_header_notice",
   ]
+
+  if (device_status_motion_enable) {
+    defines = [ "MOTION_ENABLE" ]
+    external_deps += [
+      "init:libbegetutil",
+      "motion:motion_client",
+      "motion:motion_interface_native",
+    ]
+  }
 
   relative_install_dir = "module/multimodalawareness"
   subsystem_name = "msdp"

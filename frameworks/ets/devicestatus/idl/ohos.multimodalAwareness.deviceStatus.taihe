@@ -40,3 +40,11 @@ struct DeviceRotationRadian {
 
 @gen_promise("getDeviceRotationRadian")
 function getDeviceRotationRadianSync(): DeviceRotationRadian;
+
+enum DropDetectionStatus : i32 {
+  STATUS_NORMAL = 0,
+  STATUS_DROPPED = 1,
+}
+
+function OnDropDetect(f: (info: DropDetectionStatus) => void) : void;
+function OffDropDetect(callbackOpt: Optional<(info: DropDetectionStatus) => void>) : void;
