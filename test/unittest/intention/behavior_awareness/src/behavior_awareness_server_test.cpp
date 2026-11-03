@@ -869,6 +869,393 @@ HWTEST_F(SubmitFeedbackPersistTest, SubmitFeedback_Ac1_7_ServiceException_Return
     FeedbackStore::GetInstance().SetDatabasePathForTesting(SERVER_TEST_DB_PATH);
     unlink(invalidDbPath);
 }
+/* ==================== Branch Coverage Supplement ==================== */
+
+class BehaviorAwarenessServerBranchTest : public testing::Test {
+public:
+    static void SetUpTestCase() {}
+    static void TearDownTestCase() {}
+    void SetUp() override
+    {
+        savedTypes_ = BehaviorAwarenessServer::SUPPORT_DEVICE_TYPE_;
+        std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
+        auto &supportTypes = const_cast<std::vector<std::string>&>(
+            BehaviorAwarenessServer::SUPPORT_DEVICE_TYPE_);
+        if (std::find(supportTypes.begin(), supportTypes.end(), deviceType) == supportTypes.end()) {
+            supportTypes.push_back(deviceType);
+        }
+        FeedbackStore::GetInstance().SetDatabasePathForTesting("/data/local/tmp/nonexistent_branch_db.db");
+        NativeTokenGet();
+    }
+    void TearDown() override
+    {
+        const_cast<std::vector<std::string>&>(BehaviorAwarenessServer::SUPPORT_DEVICE_TYPE_) = savedTypes_;
+        FeedbackStore::GetInstance().SetDatabasePathForTesting(PERCEPTION_DB_PATH);
+    }
+    BehaviorAwarenessServer server_;
+    std::vector<std::string> savedTypes_;
+};
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_EmptyEventId, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_NoUnderscore, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "nounderscore", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_UnderscoreAtEnd, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_InvalidPrefix, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "invalidPrefix_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_NonNumericSuffix, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_abc", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_PartialNumericSuffix, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_12abc", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_NegativeId, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_-1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_ZeroId, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_0", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_FeedbackTypeTooLow, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = static_cast<FeedbackType>(-1), .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_FeedbackTypeTooHigh, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = static_cast<FeedbackType>(5), .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_ZeroFeedbackTime, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 0 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_NegativeFeedbackTime, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = -1 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_ValidInput, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_ValidLargeId, TestSize.Level1)
+{
+    FeedbackData fb { .perceptionEventId = "habitAwareness_999999", .feedbackType = FeedbackType::NOT_PUSHED, .feedbackTime = 1 };
+    EXPECT_EQ(server_.ValidateFeedback(fb), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, ValidateFeedback_AllFeedbackTypesValid, TestSize.Level1)
+{
+    FeedbackType types[] = { FeedbackType::ACCEPT, FeedbackType::IGNORE, FeedbackType::REJECT, FeedbackType::EDIT, FeedbackType::NOT_PUSHED };
+    for (auto t : types) {
+        FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = t, .feedbackTime = 1000 };
+        EXPECT_EQ(server_.ValidateFeedback(fb), RET_OK);
+    }
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubmitFeedback_NonSystemApp, TestSize.Level1)
+{
+    auto ctx = MakeNonSystemContext();
+    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, fb), BehaviorAwareness::COMMON_NOT_SYSTEM_APP);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubmitFeedback_SystemApp_InvalidParam, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData fb { .perceptionEventId = "", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, fb), BehaviorAwareness::PARAM_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubmitFeedback_SystemApp_Valid_TolerantOk, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, fb), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubscribePerception_SystemApp_Success, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubscribePerception_NonSystemApp, TestSize.Level1)
+{
+    auto ctx = MakeNonSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), BehaviorAwareness::COMMON_NOT_SYSTEM_APP);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubscribePerception_Overwrite_Existing, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb1 = sptr<TestCallback>::MakeSptr();
+    auto cb2 = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb1, nullptr);
+    ASSERT_NE(cb2, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb1), RET_OK);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb2), RET_OK);
+    server_.NotifyClient(MakeEvent("evt-overwrite"));
+    EXPECT_EQ(cb1->receivedEvents_.size(), 0u);
+    EXPECT_EQ(cb2->receivedEvents_.size(), 1u);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubscribePerception_MultiKey_Coexist, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cbTime = sptr<TestCallback>::MakeSptr();
+    auto cbLoc = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cbTime, nullptr);
+    ASSERT_NE(cbLoc, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptionsWithPattern(0), cbTime), RET_OK);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptionsWithPattern(1), cbLoc), RET_OK);
+    server_.NotifyClient(MakeEvent("evt-multi"));
+    EXPECT_EQ(cbTime->receivedEvents_.size(), 1u);
+    EXPECT_EQ(cbLoc->receivedEvents_.size(), 1u);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, UnsubscribePerception_SystemApp_NullCallback, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, nullptr), RET_OK);
+    server_.NotifyClient(MakeEvent("evt-after-unsub"));
+    EXPECT_EQ(cb->receivedEvents_.size(), 0u);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, UnsubscribePerception_NullCallback_NoSubscription, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, nullptr), BehaviorAwareness::UNSUBSCRIBE_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, UnsubscribePerception_NonSystemApp, TestSize.Level1)
+{
+    auto ctx = MakeNonSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, cb), BehaviorAwareness::COMMON_NOT_SYSTEM_APP);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, UnsubscribePerception_MatchingCallback, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, cb), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, UnsubscribePerception_MismatchCallback, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb1 = sptr<TestCallback>::MakeSptr();
+    auto cb2 = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb1, nullptr);
+    ASSERT_NE(cb2, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb1), RET_OK);
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, cb2), BehaviorAwareness::UNSUBSCRIBE_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, UnsubscribePerception_OtherBundle_Skipped, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.subscriptions_["other_bundle:0"] = { PerceptionDomain::HABIT_AWARENESS, {}, cb };
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, nullptr), RET_OK);
+    EXPECT_TRUE(server_.subscriptions_.find("other_bundle:0") != server_.subscriptions_.end());
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, NotifyClient_NullCallback_Skipped, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.subscriptions_["other:0"].callback = nullptr;
+    server_.NotifyClient(MakeEvent("evt-null"));
+    EXPECT_EQ(cb->receivedEvents_.size(), 1u);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, OnRemoteDied_NullPromote, TestSize.Level1)
+{
+    wptr<IRemoteObject> nullObj = nullptr;
+    server_.OnRemoteDied(nullObj);
+    EXPECT_TRUE(server_.subscriptions_.empty());
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, OnRemoteDied_MatchingSubscription, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.OnRemoteDied(cb->AsObject());
+    EXPECT_TRUE(server_.subscriptions_.empty());
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, OnRemoteDied_NoMatchingSubscription, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb1 = sptr<TestCallback>::MakeSptr();
+    auto cb2 = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb1, nullptr);
+    ASSERT_NE(cb2, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb1), RET_OK);
+    server_.OnRemoteDied(cb2->AsObject());
+    EXPECT_FALSE(server_.subscriptions_.empty());
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, RemoveMatchingSubscription_NullCallbackInCache, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.subscriptions_.begin()->second.callback = nullptr;
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, cb), BehaviorAwareness::UNSUBSCRIBE_EXCEPTION);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, InitDeathRecipient_AlreadyExists, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.InitDeathRecipient();
+    EXPECT_NE(server_.deathRecipient_, nullptr);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubscribePerception_Overwrite_OldCallbackNull, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb1 = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb1, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb1), RET_OK);
+    server_.subscriptions_.begin()->second.callback = nullptr;
+    auto cb2 = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb2, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb2), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubscribePerception_Overwrite_NewCallbackNull, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb1 = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb1, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb1), RET_OK);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), nullptr), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubscribePerception_NewKey_NullCallback, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), nullptr), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, RemoveAllSubscriptions_DeathRecipientNull, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.deathRecipient_ = nullptr;
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, nullptr), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, RemoveMatchingSubscription_DeathRecipientNull, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.deathRecipient_ = nullptr;
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, cb), RET_OK);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, NotifyClient_NoSubscriptions, TestSize.Level1)
+{
+    server_.NotifyClient(MakeEvent("evt-empty"));
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, OnRemoteDied_NullCallbackInSubscription, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.SubscribePerception(ctx, MakeOptions(), cb), RET_OK);
+    server_.subscriptions_.begin()->second.callback = nullptr;
+    server_.OnRemoteDied(cb->AsObject());
+    EXPECT_FALSE(server_.subscriptions_.empty());
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, SubmitFeedback_InsertFeedbackFails, TestSize.Level1)
+{
+    const char *invalidDbPath = "/data/local/tmp/invalid_branch_db.db";
+    FILE *f = fopen(invalidDbPath, "w");
+    ASSERT_NE(f, nullptr);
+    fputs("not a database", f);
+    fclose(f);
+    FeedbackStore::GetInstance().SetDatabasePathForTesting(invalidDbPath);
+    auto ctx = MakeSystemContext();
+    FeedbackData fb { .perceptionEventId = "habitAwareness_1", .feedbackType = FeedbackType::ACCEPT, .feedbackTime = 1000 };
+    EXPECT_EQ(server_.SubmitFeedback(ctx, fb), SERVICE_EXCEPTION);
+    FeedbackStore::GetInstance().SetDatabasePathForTesting("/data/local/tmp/nonexistent_branch_db.db");
+    unlink(invalidDbPath);
+}
+
+HWTEST_F(BehaviorAwarenessServerBranchTest, RemoveMatchingSubscription_EmptySubscriptions, TestSize.Level1)
+{
+    auto ctx = MakeSystemContext();
+    auto cb = sptr<TestCallback>::MakeSptr();
+    ASSERT_NE(cb, nullptr);
+    EXPECT_EQ(server_.UnsubscribePerception(ctx, cb), BehaviorAwareness::UNSUBSCRIBE_EXCEPTION);
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS
