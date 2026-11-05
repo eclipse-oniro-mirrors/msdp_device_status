@@ -17,8 +17,10 @@
 #define BEHAVIOR_AWARENESS_SERVER_H
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "behavior_awareness_type.h"
 #include "i_plugin.h"
@@ -57,6 +59,7 @@ private:
 
     static const std::vector<std::string> SUPPORT_DEVICE_TYPE_;
 
+    std::mutex mtx_;
     std::unordered_map<std::string, SubscriptionInfo> subscriptions_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
 };
