@@ -14,6 +14,7 @@
  */
 
 #include "device_status_napi.h"
+#include "drop_event_napi.h"
 
 #include <mutex>
 
@@ -444,6 +445,8 @@ napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("on", SubscribeDeviceStatus),
         DECLARE_NAPI_STATIC_FUNCTION("off", UnsubscribeDeviceStatus),
         DECLARE_NAPI_STATIC_FUNCTION("getDeviceRotationRadian", GetDeviceRotationRadian),
+        DECLARE_NAPI_STATIC_FUNCTION("onDropDetect", DeviceStatusMotionEventNapi::OnDropDetect),
+        DECLARE_NAPI_STATIC_FUNCTION("offDropDetect", DeviceStatusMotionEventNapi::OffDropDetect),
     };
     MSDP_CALL(napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
 
@@ -457,6 +460,7 @@ napi_value DeviceStatusNapi::Init(napi_env env, napi_value exports)
     SetInt32Property(env, napiStatus, STATUS_ENTER, "STATUS_ENTER");
     SetInt32Property(env, napiStatus, STATUS_EXIT, "STATUS_EXIT");
     SetPropertyName(env, exports, "SteadyStandingStatus", napiStatus);
+    DeviceStatusMotionEventNapi::DefineDropDetectionStatus(env, exports);
     FI_HILOGD("Exit");
     return exports;
 }
