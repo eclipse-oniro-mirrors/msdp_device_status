@@ -92,6 +92,17 @@ void DeviceStatusService::OnAddSystemAbility(int32_t saId, const std::string &de
             MSDP_DEVICESTATUS_SERVICE_ID);
     }
 #endif
+
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    if (saId == CAMERA_SERVICE_ID && intention_ != nullptr) {
+        if (carAwarenessStarted_.exchange(true)) {
+            FI_HILOGD("Camera service ready, carAwareness already inited, skip");
+            return;
+        }
+        FI_HILOGD("Camera service ready, init carAwareness");
+        intention_->InitCarAwareness();
+    }
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 }
 
 void DeviceStatusService::OnStart()
@@ -123,7 +134,9 @@ void DeviceStatusService::OnStart()
         return;
     }
     intention_->ListenLiveBroadcast();
-    intention_->InitCarAwareness();
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    AddSystemAbilityListener(CAMERA_SERVICE_ID);
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
     state_ = ServiceRunningState::STATE_RUNNING;
     ready_ = true;
     worker_ = std::thread([this] { this->OnThread(); });
