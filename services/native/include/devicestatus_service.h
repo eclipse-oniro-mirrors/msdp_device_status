@@ -109,7 +109,10 @@ private:
     std::unique_ptr<IInputAdapter> input_;
     std::unique_ptr<IPluginManager> pluginMgr_;
     std::unique_ptr<IDSoftbusAdapter> dsoftbus_;
-    sptr<IntentionService> intention_;
+    sptr<IntentionService> intention_ = nullptr;
+#ifdef DEVICE_STATUS_CAR_AWARENESS_ENABLE
+    std::atomic<bool> carAwarenessStarted_ { false };
+#endif // DEVICE_STATUS_CAR_AWARENESS_ENABLE
 };
 } // namespace DeviceStatus
 } // namespace Msdp

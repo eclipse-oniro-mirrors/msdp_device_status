@@ -52,6 +52,8 @@ struct AsyncContext {
     napi_deferred deferred = nullptr;
 
     int32_t asyncWorkRet;
+
+    virtual ~AsyncContext() = default;
 };
 
 struct CapabilityContext : AsyncContext {
