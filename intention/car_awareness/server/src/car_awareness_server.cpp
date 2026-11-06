@@ -89,32 +89,20 @@ const std::map<std::string, int32_t> FEATURE_NAME_TO_TYPE = {
 
 const std::unordered_set<std::string> CONDITIONAL_FEATURES = {"OccupantSense"};
 
-enum class SubPermissionMode {
-    // 系统应用直接放行；非系统应用必须校验 permission（不会被系统应用校验拦截）
-    SYSTEM_OR_PERMISSION,
-    // 必须是系统应用；permission 非空时还需额外校验权限
-    SYSTEM_ONLY
-};
-
-struct SubPermissionRule {
-    SubPermissionMode mode;
-    std::string permission;  // SYSTEM_ONLY 模式下可为空，表示仅校验系统应用
-};
-
 // 订阅权限注册表：新增 type 只需在此登记，新增权限只需复用/新增权限常量
-const std::map<int32_t, SubPermissionRule> SUB_PERMISSION_RULES = {
+const std::map<int32_t, std::string> SUB_PERMISSION_RULES = {
     // 200 以下：系统应用直接放行，非系统应用校验权限
-    {TYPE_SPATIAL_MOTION, {SubPermissionMode::SYSTEM_OR_PERMISSION, SPATIALACTION_PERMISSION}},
-    {TYPE_REALTIME_WEATHER, {SubPermissionMode::SYSTEM_OR_PERMISSION, WEATHER_PERMISSION}},
-    {TYPE_REFULING, {SubPermissionMode::SYSTEM_OR_PERMISSION, ENERGYREFILL_PERMISSION}},
+    {TYPE_SPATIAL_MOTION, SPATIALACTION_PERMISSION},
+    {TYPE_REALTIME_WEATHER, WEATHER_PERMISSION},
+    {TYPE_REFULING, ENERGYREFILL_PERMISSION},
     // 200 及以上：必须是系统应用，部分类型还需额外校验权限
-    {TYPE_SPATIAL_POINT, {SubPermissionMode::SYSTEM_ONLY, SPATIALACTION_PERMISSION}},
-    {TYPE_SPATIAL_GESTURE, {SubPermissionMode::SYSTEM_ONLY, SPATIALACTION_PERMISSION}},
-    {TYPE_SPATIAL_DRAW, {SubPermissionMode::SYSTEM_ONLY, SPATIALACTION_PERMISSION}},
-    {TYPE_GESTURE_CLOSEDOOR, {SubPermissionMode::SYSTEM_ONLY, SPATIALACTION_PERMISSION}},
-    {TYPE_CAR_STATUS, {SubPermissionMode::SYSTEM_ONLY, CARSTATUS_PERMISSION}},
-    {TYPE_HABIT_RECOMMENDATION, {SubPermissionMode::SYSTEM_ONLY, ""}},
-    {TYPE_OCCUPANT_SENSE, {SubPermissionMode::SYSTEM_ONLY, OCCUPANT_PERMISSION}}
+    {TYPE_SPATIAL_POINT, SPATIALACTION_PERMISSION},
+    {TYPE_SPATIAL_GESTURE, SPATIALACTION_PERMISSION},
+    {TYPE_SPATIAL_DRAW, SPATIALACTION_PERMISSION},
+    {TYPE_GESTURE_CLOSEDOOR, SPATIALACTION_PERMISSION},
+    {TYPE_CAR_STATUS, CARSTATUS_PERMISSION},
+    {TYPE_HABIT_RECOMMENDATION, ""},
+    {TYPE_OCCUPANT_SENSE, OCCUPANT_PERMISSION}
 };
 }  // namespace
 
@@ -157,32 +145,30 @@ int32_t CarAwarenessServer::CheckSubPermissionByType(const CallingContext &conte
     auto ruleIt = SUB_PERMISSION_RULES.find(type);
     if (ruleIt == SUB_PERMISSION_RULES.end()) {
         FI_HILOGE("unhandled type:%{public}d", type);
-        if (type >= SYSTEM_API_TYPES_START) {  // 未注册的系统类型沿用仅校验系统调用
+        // 未注册的系统类型沿用仅校验系统调用
+        if (type >= SYSTEM_API_TYPES_START) {
             return CheckSystemCall(context) ? RET_OK : COMMON_NOT_SYSTEM_APP;
         }
         return CAR_AWARENESS_SPECIFIC_ERR;
     }
 
-    const SubPermissionRule &rule = ruleIt->second;
+    const std::string &permission = ruleIt->second;
     bool isSystem = CheckSystemCall(context);
 
-    if (rule.mode == SubPermissionMode::SYSTEM_OR_PERMISSION) {
-        // 200 以下：系统应用直接放行，非系统应用继续校验权限
+    if (type >= SYSTEM_API_TYPES_START) {
+        if (!isSystem) {
+            return COMMON_NOT_SYSTEM_APP;
+        }
+        if (permission.empty()) {
+            return RET_OK;
+        }
+        return CheckPermission(context, permission);
+    } else {
         if (isSystem) {
             return RET_OK;
         }
-        return CheckPermission(context, rule.permission);
+        return CheckPermission(context, permission);
     }
-
-    // 200 及以上：必须是系统应用，否则直接拦截
-    if (!isSystem) {
-        return COMMON_NOT_SYSTEM_APP;
-    }
-    if (rule.permission.empty()) {
-        return RET_OK;
-    }
-    // 额外校验系统应用校验
-    return CheckPermission(context, rule.permission);
 }
 
 void CarAwarenessServer::OnResultFromAlgo(const std::string &featureName, const std::string &result)
