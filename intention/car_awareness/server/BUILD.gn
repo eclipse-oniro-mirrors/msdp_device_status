@@ -60,7 +60,8 @@ ohos_source_set("intention_car_awareness_server") {
     "access_token:libprivacy_sdk",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "json:nlohmann_json_static"
+    "json:nlohmann_json_static",
+    "eventhandler:libeventhandler"
   ]
 
   subsystem_name = "${device_status_subsystem_name}"

@@ -40,8 +40,11 @@ namespace {
 const std::string SPATIALACTION_PERMISSION = "ohos.permission.vehicle.MMA_SPATIALACTION";
 const std::string WEATHER_PERMISSION = "ohos.permission.vehicle.MMA_WEATHER";
 const std::string ENERGYREFILL_PERMISSION = "ohos.permission.vehicle.MMA_ENERGYREFILL";
+const std::string OCCUPANT_PERMISSION = "ohos.permission.vehicle.MMA_OCCUPANT";
+const std::string CARSTATUS_PERMISSION = "ohos.permission.vehicle.CARSTATUS";
 const std::string CAR_AWARENESS_LIB_PATH = "/system/lib64/libcar_awareness_service.z.so";
 const std::string CLIENT_PID_KEY = "client_pid";
+const std::string THREAD_NAME = "CAR_AWARENESS_CALLBACK_HANDLER";
 
 constexpr int32_t CAR_AWARENESS_SPECIFIC_ERR = 34000002;
 
@@ -85,14 +88,46 @@ const std::map<std::string, int32_t> FEATURE_NAME_TO_TYPE = {
 };
 
 const std::unordered_set<std::string> CONDITIONAL_FEATURES = {"OccupantSense"};
+
+enum class SubPermissionMode {
+    // 系统应用直接放行；非系统应用必须校验 permission（不会被系统应用校验拦截）
+    SYSTEM_OR_PERMISSION,
+    // 必须是系统应用；permission 非空时还需额外校验权限
+    SYSTEM_ONLY
+};
+
+struct SubPermissionRule {
+    SubPermissionMode mode;
+    std::string permission;  // SYSTEM_ONLY 模式下可为空，表示仅校验系统应用
+};
+
+// 订阅权限注册表：新增 type 只需在此登记，新增权限只需复用/新增权限常量
+const std::map<int32_t, SubPermissionRule> SUB_PERMISSION_RULES = {
+    // 200 以下：系统应用直接放行，非系统应用校验权限
+    {TYPE_SPATIAL_MOTION, {SubPermissionMode::SYSTEM_OR_PERMISSION, SPATIALACTION_PERMISSION}},
+    {TYPE_REALTIME_WEATHER, {SubPermissionMode::SYSTEM_OR_PERMISSION, WEATHER_PERMISSION}},
+    {TYPE_REFULING, {SubPermissionMode::SYSTEM_OR_PERMISSION, ENERGYREFILL_PERMISSION}},
+    // 200 及以上：必须是系统应用，部分类型还需额外校验权限
+    {TYPE_SPATIAL_POINT, {SubPermissionMode::SYSTEM_ONLY, SPATIALACTION_PERMISSION}},
+    {TYPE_SPATIAL_GESTURE, {SubPermissionMode::SYSTEM_ONLY, SPATIALACTION_PERMISSION}},
+    {TYPE_SPATIAL_DRAW, {SubPermissionMode::SYSTEM_ONLY, SPATIALACTION_PERMISSION}},
+    {TYPE_GESTURE_CLOSEDOOR, {SubPermissionMode::SYSTEM_ONLY, SPATIALACTION_PERMISSION}},
+    {TYPE_CAR_STATUS, {SubPermissionMode::SYSTEM_ONLY, CARSTATUS_PERMISSION}},
+    {TYPE_HABIT_RECOMMENDATION, {SubPermissionMode::SYSTEM_ONLY, ""}},
+    {TYPE_OCCUPANT_SENSE, {SubPermissionMode::SYSTEM_ONLY, OCCUPANT_PERMISSION}}
+};
 }  // namespace
 
 CarAwarenessServer::CarAwarenessServer()
-{}
+{
+    auto runner = AppExecFwk::EventRunner::Create(THREAD_NAME, AppExecFwk::ThreadMode::FFRT);
+    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+}
 
 CarAwarenessServer::~CarAwarenessServer()
 {
     UnloadAlgoLib();
+    eventHandler_.reset();
 }
 
 int32_t CarAwarenessServer::CheckPermission(const CallingContext &context, const std::string &requiredPermission)
@@ -119,25 +154,35 @@ bool CarAwarenessServer::CheckSystemCall(const CallingContext &context)
 
 int32_t CarAwarenessServer::CheckSubPermissionByType(const CallingContext &context, int32_t type)
 {
-    if (type >= SYSTEM_API_TYPES_START) {  // 200 以上类型仅校验是否系统调用
-        return CheckSystemCall(context) ? RET_OK : COMMON_NOT_SYSTEM_APP;
-    } else if (CheckSystemCall(context)) {  // 200 以下如果是系统应用直接放行
-        return RET_OK;
+    auto ruleIt = SUB_PERMISSION_RULES.find(type);
+    if (ruleIt == SUB_PERMISSION_RULES.end()) {
+        FI_HILOGE("unhandled type:%{public}d", type);
+        if (type >= SYSTEM_API_TYPES_START) {  // 未注册的系统类型沿用仅校验系统调用
+            return CheckSystemCall(context) ? RET_OK : COMMON_NOT_SYSTEM_APP;
+        }
+        return CAR_AWARENESS_SPECIFIC_ERR;
     }
 
-    // 三方调用，public 类型校验权限
-    switch (type) {
-        case TYPE_SPATIAL_MOTION:
-            return CheckPermission(context, SPATIALACTION_PERMISSION);
-        case TYPE_REALTIME_WEATHER:
-            return CheckPermission(context, WEATHER_PERMISSION);
-        case TYPE_REFULING:
-            return CheckPermission(context, ENERGYREFILL_PERMISSION);
-        default:
-            FI_HILOGE("unhandled type:%{public}d", type);
-            return CAR_AWARENESS_SPECIFIC_ERR;
+    const SubPermissionRule &rule = ruleIt->second;
+    bool isSystem = CheckSystemCall(context);
+
+    if (rule.mode == SubPermissionMode::SYSTEM_OR_PERMISSION) {
+        // 200 以下：系统应用直接放行，非系统应用继续校验权限
+        if (isSystem) {
+            return RET_OK;
+        }
+        return CheckPermission(context, rule.permission);
     }
-    return CAR_AWARENESS_SPECIFIC_ERR;
+
+    // 200 及以上：必须是系统应用，否则直接拦截
+    if (!isSystem) {
+        return COMMON_NOT_SYSTEM_APP;
+    }
+    if (rule.permission.empty()) {
+        return RET_OK;
+    }
+    // 额外校验系统应用校验
+    return CheckPermission(context, rule.permission);
 }
 
 void CarAwarenessServer::OnResultFromAlgo(const std::string &featureName, const std::string &result)
@@ -165,12 +210,16 @@ void CarAwarenessServer::OnResultFromAlgo(const std::string &featureName, const 
     CarAwarenessEvent event;
     event.type = it->second;
     event.eventData = result;
-    std::thread t([callbacks, result, event]() {
+
+    if (eventHandler_ == nullptr) {
+        FI_HILOGE("event handler is null");
+        return;
+    }
+    eventHandler_->PostTask([callbacks, result, event] {
         for (auto const &clientInfo : callbacks) {
             clientInfo.cb->OnAwarenessEvent(event);
         }
     });
-    t.detach();
 }
 
 int32_t CarAwarenessServer::AddClientToCallbacks(const std::string &featureName, CarAwarenessClientInfo &info)
@@ -245,8 +294,14 @@ void CarAwarenessServer::NotifyClientCached(int32_t type, const sptr<ICarAwarene
     CarAwarenessEvent event;
     event.type = type;
     event.eventData = resultIt->second;
-    std::thread t([event, cb]() { cb->OnAwarenessEvent(event); });
-    t.detach();
+
+    if (eventHandler_ == nullptr) {
+        FI_HILOGE("event handler is null");
+        return;
+    }
+    eventHandler_->PostTask([event, cb] {
+        cb->OnAwarenessEvent(event);
+    });
 }
 
 int32_t CarAwarenessServer::SubscribeCapability(const CallingContext &context, int32_t type,
