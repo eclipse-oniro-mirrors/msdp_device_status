@@ -64,6 +64,7 @@ const std::set<std::string> CAP_LIST = {
     "PrivacyWindow",
     "ModalDialog",
     "SystemNotification",
+    "PageRecall",
 };
 #endif
 } // namespace
