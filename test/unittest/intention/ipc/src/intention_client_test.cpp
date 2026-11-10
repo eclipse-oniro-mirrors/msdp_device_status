@@ -173,6 +173,45 @@ HWTEST_F(IntentionClientTest, IntentionClientTest7, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IntentionClientTest_GetStateMgmtInfo_001
+ * @tc.desc: Test GetStateMgmtInfo with valid callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionClientTest, IntentionClientTest_GetStateMgmtInfo_001, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = IntentionClient::GetInstance();
+    ASSERT_NE(env, nullptr);
+    OnScreen::StateMgmtInfo info;
+    info.componentName = "component";
+    info.propertyName = "property";
+    info.jsonPath = "path";
+    info.onlyVisible = true;
+    sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = env->GetStateMgmtInfo(info, callback);
+    EXPECT_NE(ret, RET_OK);
+}
+
+/**
+ * @tc.name: IntentionClientTest_GetStateMgmtInfo_002
+ * @tc.desc: Test GetStateMgmtInfo with null callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionClientTest, IntentionClientTest_GetStateMgmtInfo_002, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    auto env = IntentionClient::GetInstance();
+    ASSERT_NE(env, nullptr);
+    OnScreen::StateMgmtInfo info;
+    sptr<IRemoteOnScreenCallbackTest> callback = nullptr;
+    int32_t ret = env->GetStateMgmtInfo(info, callback);
+    EXPECT_NE(ret, RET_OK);
+}
+
+/**
  * @tc.name: IntentionClientTest_StartDrag_001
  * @tc.desc: Test StartDrag
  * @tc.type: FUNC

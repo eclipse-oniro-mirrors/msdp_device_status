@@ -21,6 +21,8 @@ void SetWriteInt32Fail(bool fail);
 void SetWriteStringFail(bool fail);
 void SetReadInt32Fail(bool fail);
 void SetReadStringFail(bool fail);
+void SetWriteBoolFail(bool fail);
+void SetReadBoolFail(bool fail);
 void ResetMockFlags();
 }
 

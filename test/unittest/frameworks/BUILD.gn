@@ -228,6 +228,41 @@ ohos_unittest("CarAwarenessMgrTest") {
   ]
 }
 
+ohos_unittest("OnScreenCallbackTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  defines = device_status_default_defines
+  branch_protector_ret = "pac_ret"
+  module_out_path = module_output_path
+  include_dirs = [
+    "${device_status_interfaces_path}/innerkits/include",
+    "${device_status_root_path}/intention/ipc/sequenceable_types/include",
+    "${device_status_utils_path}/include",
+  ]
+
+  sources = [
+    "src/on_screen_callback_test.cpp",
+    "${device_status_frameworks_path}/native/src/on_screen_callback_proxy.cpp",
+    "${device_status_frameworks_path}/native/src/on_screen_callback_stub.cpp",
+  ]
+
+   deps = [
+    "${device_status_root_path}/intention/ipc/sequenceable_types:sequenceable_types",
+    "${device_status_utils_path}:devicestatus_util",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "ipc:ipc_single",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -237,6 +272,7 @@ group("unittest") {
   if (device_status_interaction_coordination) {
     deps += [
       ":InteractionManagerTest",
+      ":OnScreenCallbackTest",
       ":OnScreenManagerTest"
     ]
   }

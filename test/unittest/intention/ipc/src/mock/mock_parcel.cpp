@@ -26,6 +26,8 @@ thread_local bool g_mockWriteInt32Fail = false;
 thread_local bool g_mockWriteStringFail = false;
 thread_local bool g_mockReadInt32Fail = false;
 thread_local bool g_mockReadStringFail = false;
+thread_local bool g_mockWriteBoolFail = false;
+thread_local bool g_mockReadBoolFail = false;
 void SetWriteInt32Fail(bool fail)
 {
     g_mockWriteInt32Fail = fail;
@@ -42,12 +44,22 @@ void SetReadStringFail(bool fail)
 {
     g_mockReadStringFail = fail;
 }
+void SetWriteBoolFail(bool fail)
+{
+    g_mockWriteBoolFail = fail;
+}
+void SetReadBoolFail(bool fail)
+{
+    g_mockReadBoolFail = fail;
+}
 void ResetMockFlags()
 {
     g_mockWriteInt32Fail = false;
     g_mockWriteStringFail = false;
     g_mockReadInt32Fail = false;
     g_mockReadStringFail = false;
+    g_mockWriteBoolFail = false;
+    g_mockReadBoolFail = false;
 }
 bool Parcel::WriteStringVector(const std::vector<std::string> &expectVector)
 {
@@ -135,12 +147,18 @@ bool Parcel::ReadString(std::string &value)
  
 bool Parcel::ReadBool(bool &value)
 {
+    if (g_mockReadBoolFail) {
+        return false;
+    }
     value = g_expectBool;
     return true;
 };
  
 bool Parcel::WriteBool(bool value)
 {
+    if (g_mockWriteBoolFail) {
+        return false;
+    }
     g_expectBool = value;
     return true;
 };
