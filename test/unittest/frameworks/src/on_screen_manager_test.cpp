@@ -88,6 +88,26 @@ HWTEST_F(OnScreenManagerTest, Trigger, TestSize.Level1)
     auto result = OnScreenManager::GetInstance().Trigger(cap, option, info);
     EXPECT_NE(result, 0);
 }
+
+/**
+ * @tc.name: GetStateMgmtInfo
+ * @tc.desc: test for GetStateMgmtInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenManagerTest, GetStateMgmtInfo, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    StateMgmtInfo info;
+    info.componentName = "component";
+    info.propertyName = "property";
+    info.jsonPath = "path";
+    info.onlyVisible = true;
+    sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
+    EXPECT_NE(callback, nullptr);
+
+    auto result = OnScreenManager::GetInstance().GetStateMgmtInfo(info, callback);
+    EXPECT_NE(result, 0);
+}
 }  // namespace OnScreen
 }  // namespace DeviceStatus
 }  // namespace Msdp

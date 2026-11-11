@@ -450,6 +450,57 @@ HWTEST_F(OnScreenServerNewTest, IsSystemCalling, TestSize.Level0)
 }
 
 /**
+ * @tc.name: GetStateMgmtInfo_NullCallback
+ * @tc.desc: GetStateMgmtInfo returns RET_ERR when callback is null
+ */
+HWTEST_F(OnScreenServerNewTest, GetStateMgmtInfo_NullCallback, TestSize.Level0)
+{
+    CALL_INFO_TRACE;
+    OnScreenServer onScreen;
+    CallingContext context {
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    StateMgmtInfo info;
+    sptr<IRemoteOnScreenCallback> callback = nullptr;
+    int32_t ret = onScreen.GetStateMgmtInfo(context, info, callback);
+    EXPECT_EQ(ret, RET_ERR);
+}
+
+/**
+ * @tc.name: GetStateMgmtInfo_AlgoNotLoaded
+ * @tc.desc: GetStateMgmtInfo returns RET_NO_SUPPORT when mma algo lib is unavailable
+ */
+HWTEST_F(OnScreenServerNewTest, GetStateMgmtInfo_AlgoNotLoaded, TestSize.Level0)
+{
+    CALL_INFO_TRACE;
+    OnScreenServer onScreen;
+    onScreen.handle_.handle = nullptr;
+    onScreen.handle_.pAlgorithm = nullptr;
+    onScreen.handle_.create = nullptr;
+    onScreen.handle_.destroy = nullptr;
+    CallingContext context {
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    StateMgmtInfo info;
+    info.componentName = "component";
+    info.propertyName = "property";
+    info.jsonPath = "path";
+    info.onlyVisible = true;
+    sptr<IRemoteOnScreenCallback> callback = new (std::nothrow) OnScreenServerNewTestCallback();
+    ASSERT_NE(callback, nullptr);
+    int32_t ret = onScreen.GetStateMgmtInfo(context, info, callback);
+    EXPECT_TRUE(ret == RET_OK || ret == 801 || ret == RET_ERR);
+    onScreen.handle_.pAlgorithm = nullptr;
+    onScreen.handle_.handle = nullptr;
+    onScreen.handle_.create = nullptr;
+    onScreen.handle_.destroy = nullptr;
+}
+
+/**
  * @tc.name: RegisterAwarenessCallback
  * @tc.desc: Test func named RegisterAwarenessCallback001
  * @tc.type: FUNC

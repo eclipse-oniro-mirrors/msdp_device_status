@@ -301,6 +301,65 @@ ohos_unittest("SequenceableOnscreenAwarenessInfoTest") {
     "ipc:ipc_single"
   ]
 }
+
+ohos_unittest("SequenceableStateMgmtInfoTest") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "./../../ipc_blocklist.txt"
+  }
+ 
+  branch_protector_ret = "pac_ret"
+  module_out_path = module_output_path
+  include_dirs = [ "${device_status_root_path}/intention/ipc/sequenceable_types/include",
+                   "${device_status_interfaces_path}/innerkits/include",
+                   "include" 
+                 ]
+ 
+  defines = []
+ 
+  sources = [ "src/mock/mock_parcel.cpp",
+              "src/sequenceable_state_mgmt_info_test.cpp"
+  ]
+ 
+  cflags = [ "-Dprivate=public" ]
+ 
+  deps = [
+    "${device_status_root_path}/intention/ipc/tunnel:intention_client",
+    "${device_status_root_path}/services:devicestatus_static_service",
+    "${device_status_root_path}/utils/ipc:devicestatus_ipc",
+    "${device_status_utils_path}:devicestatus_util",
+    "${device_status_root_path}/intention/common/epoll:intention_epoll",
+    "${device_status_root_path}/intention/prototype:intention_prototype",
+    "${device_status_root_path}/intention/scheduler/timer_manager:intention_timer_manager",
+    "${device_status_root_path}/intention/services/device_manager:intention_device_manager",
+    "${device_status_root_path}/intention/ipc/socket:intention_socket_session_manager",
+    "${device_status_root_path}/intention/ipc/tunnel:intention_server_stub",
+  ]
+ 
+  external_deps = [
+    "ability_runtime:app_manager",
+    "data_share:datashare_consumer",
+    "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "samgr:samgr_proxy",
+    "window_manager:libdm",
+    "googletest:gtest_main",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_single",
+    "os_account:os_account_innerkits",
+    "hisysevent:libhisysevent",
+    "qos_manager:concurrent_task_client",
+    "qos_manager:qos",
+  ]
+}
  
 ohos_unittest("SequenceableOnscreenAwarenessOptionTest") {
   sanitize = {
@@ -681,6 +740,7 @@ group("unittest") {
     ":SequenceableOnscreenAwarenessCapTest",
     ":SequenceableOnscreenAwarenessInfoTest",
     ":SequenceableOnscreenAwarenessOptionTest",
+    ":SequenceableStateMgmtInfoTest",
     ":SequenceableDragDataModifyTest",
     ":SequenceableCarAwarenessOptionTest",
     ":SequenceableCarAwarenessEventArrayTest",

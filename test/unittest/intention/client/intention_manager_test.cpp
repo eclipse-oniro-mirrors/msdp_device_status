@@ -74,6 +74,26 @@ HWTEST_F(IntentionManagerTest, IntentionManagerTest_RegisterAwarenessCallback, T
     int32_t ret = OHOS::Singleton<IntentionManager>::GetInstance().RegisterAwarenessCallback(cap, callback, option);
     EXPECT_NE(ret, 0);
 }
+
+/**
+ * @tc.name: IntentionManagerTest_GetStateMgmtInfo
+ * @tc.desc: Check GetStateMgmtInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionManagerTest, IntentionManagerTest_GetStateMgmtInfo, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::StateMgmtInfo info;
+    info.componentName = "component";
+    info.propertyName = "property";
+    info.jsonPath = "path";
+    info.onlyVisible = true;
+    sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
+    EXPECT_NE(callback, nullptr);
+    int32_t ret = OHOS::Singleton<IntentionManager>::GetInstance().GetStateMgmtInfo(info, callback);
+    EXPECT_NE(ret, 0);
+}
  
 /**
  * @tc.name: IntentionManagerTest_UnregisterAwarenessCallback

@@ -234,6 +234,46 @@ void IntentionServiceNewTest::AssignToAnimation(PreviewAnimation &animation)
     animation.curveName = CURVE_NAME;
     animation.curve = {0.33, 0, 0.67, 1};
 }
+
+/**
+ * @tc.name: GetStateMgmtInfo
+ * @tc.desc: Check GetStateMgmtInfo with valid callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceNewTest, GetStateMgmtInfo, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::StateMgmtInfo rawInfo;
+    rawInfo.componentName = "component";
+    rawInfo.propertyName = "property";
+    rawInfo.jsonPath = "path";
+    rawInfo.onlyVisible = true;
+    OnScreen::SequenceableStateMgmtInfo info(rawInfo);
+    sptr<IRemoteOnScreenCallbackTest> callback = new (std::nothrow) IRemoteOnScreenCallbackTest();
+    EXPECT_NE(intentionService_, nullptr);
+    auto result = intentionService_->GetStateMgmtInfo(info, callback);
+    EXPECT_TRUE(result == RET_OK || result == RET_ERR || result == 801);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
+ 
+/**
+ * @tc.name: GetStateMgmtInfo_NullCallback
+ * @tc.desc: Check GetStateMgmtInfo with null callback returns error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentionServiceNewTest, GetStateMgmtInfo_NullCallback, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    OnScreen::StateMgmtInfo rawInfo;
+    OnScreen::SequenceableStateMgmtInfo info(rawInfo);
+    sptr<IRemoteOnScreenCallbackTest> callback = nullptr;
+    EXPECT_NE(intentionService_, nullptr);
+    auto result = intentionService_->GetStateMgmtInfo(info, callback);
+    EXPECT_EQ(result, RET_ERR);
+    std::this_thread::sleep_for(std::chrono::milliseconds(TIME_WAIT_FOR_OP_MS));
+}
  
 /**
  * @tc.name: RegisterAwarenessCallback
