@@ -52,6 +52,7 @@ ohos_shared_library("devicestatus_napi") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
     "hiappevent:hiappevent_innerapi",
@@ -61,7 +62,6 @@ ohos_shared_library("devicestatus_napi") {
   if (device_status_motion_enable) {
     defines = [ "MOTION_ENABLE" ]
     external_deps += [
-      "init:libbegetutil",
       "motion:motion_client",
       "motion:motion_interface_native",
     ]

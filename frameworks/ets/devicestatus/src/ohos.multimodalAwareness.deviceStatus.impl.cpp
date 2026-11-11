@@ -18,7 +18,6 @@
 
 #ifdef MOTION_ENABLE
 #include "motion_client.h"
-#include "parameters.h"
 #endif // MOTION_ENABLE
 #include "ani_drop_event.h"
 #include "app_event.h"
@@ -33,6 +32,7 @@
 #include "stationary_data.h"
 #include "stationary_manager.h"
 #include "fi_log.h"
+#include "parameters.h"
 #include "taihe/runtime.hpp"
 
 #undef LOG_TAG
@@ -47,14 +47,24 @@ const std::string SDK_NAME = "MultimodalAwarenessKit";
 constexpr int32_t EVENT_NOT_SUPPORT = -200;
 constexpr int32_t EVENT_NO_INITIALIZE = -1;
 
-#ifdef MOTION_ENABLE
+constexpr char DROP_DETECTION_NOT_SUPPORTED[] =
+    "Capability not supported because the device doesnot support the drop detection";
+
+void ThrowDropDetectionError(int32_t code)
+{
+    if (code == DEVICE_EXCEPTION) {
+        ani_errorutils::ThrowError(code, DROP_DETECTION_NOT_SUPPORTED);
+        return;
+    }
+    ani_errorutils::ThrowDeviceStatusErr(code);
+}
+
 bool CheckDeviceTypeForDropDetection()
 {
     std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
     FI_HILOGD("deviceType:%{public}s", deviceType.c_str());
     return deviceType == "phone";
 }
-#endif // MOTION_ENABLE
 
 static std::mutex gCallbacksMutex_;
 static std::map<DeviceStatus::Type, sptr<ani_observerutils::AniDeviceStatusCallback>> gCallbacks_;
@@ -249,41 +259,41 @@ void OnDropDetect(
     ::taihe::callback_view<void(::ohos::multimodalAwareness::deviceStatus::DropDetectionStatus)> f)
 {
     FI_HILOGD("OnDropDetect enter");
+    if (!CheckDeviceTypeForDropDetection()) {
+        ThrowDropDetectionError(DEVICE_EXCEPTION);
+        return;
+    }
 #ifdef MOTION_ENABLE
     FI_HILOGI("OnDropDetect Enter MOTION_ENABLE");
     ::taihe::env_guard guard;
     if (guard.get_env() == nullptr) {
         FI_HILOGE("get_env failed");
-        ani_errorutils::ThrowDeviceStatusErr(SERVICE_EXCEPTION);
-        return;
-    }
-    if (!CheckDeviceTypeForDropDetection()) {
-        ani_errorutils::ThrowDeviceStatusErr(DEVICE_EXCEPTION);
+        ThrowDropDetectionError(SERVICE_EXCEPTION);
         return;
     }
     auto instance = AniMotionEvent::GetInstance();
     int32_t ret = instance->SubscribeCallback(MOTION_TYPE_DROP_DETECTION, f);
     if (ret != RET_OK) {
         FI_HILOGE("SubscribeCallback failed");
-        ani_errorutils::ThrowDeviceStatusErr(ret);
+        ThrowDropDetectionError(ret);
     }
 #else
-    ani_errorutils::ThrowDeviceStatusErr(DEVICE_EXCEPTION);
+    ThrowDropDetectionError(DEVICE_EXCEPTION);
 #endif // MOTION_ENABLE
 }
 
 void OffDropDetectInner(const DropDetectCallback *callback)
 {
     FI_HILOGD("OffDropDetect enter");
+    if (!CheckDeviceTypeForDropDetection()) {
+        ThrowDropDetectionError(DEVICE_EXCEPTION);
+        return;
+    }
 #ifdef MOTION_ENABLE
     FI_HILOGI("OffDropDetect Enter MOTION_ENABLE");
     ::taihe::env_guard guard;
     if (guard.get_env() == nullptr) {
-        ani_errorutils::ThrowDeviceStatusErr(SERVICE_EXCEPTION);
-        return;
-    }
-    if (!CheckDeviceTypeForDropDetection()) {
-        ani_errorutils::ThrowDeviceStatusErr(DEVICE_EXCEPTION);
+        ThrowDropDetectionError(SERVICE_EXCEPTION);
         return;
     }
     auto instance = AniMotionEvent::GetInstance();
@@ -292,10 +302,10 @@ void OffDropDetectInner(const DropDetectCallback *callback)
     int32_t ret = instance->UnSubscribeCallback(MOTION_TYPE_DROP_DETECTION, callback);
     if (ret != RET_OK) {
         FI_HILOGE("UnSubscribeCallback failed");
-        ani_errorutils::ThrowDeviceStatusErr(ret);
+        ThrowDropDetectionError(ret);
     }
 #else
-    ani_errorutils::ThrowDeviceStatusErr(DEVICE_EXCEPTION);
+    ThrowDropDetectionError(DEVICE_EXCEPTION);
 #endif // MOTION_ENABLE
 }
 
