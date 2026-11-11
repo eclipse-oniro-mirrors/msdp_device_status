@@ -16,8 +16,10 @@
 #ifndef DEVICE_STATUS_DROP_EVENT_NAPI_H
 #define DEVICE_STATUS_DROP_EVENT_NAPI_H
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "napi/native_api.h"
@@ -31,6 +33,23 @@
 
 namespace OHOS {
 namespace Msdp {
+namespace DropDetectionError {
+constexpr char NOT_SUPPORTED[] =
+    "Capability not supported because the device doesnot support the drop detection";
+constexpr char PARAMETER_PREFIX[] = "Parameter error. ";
+constexpr char CALLBACK_REQUIRED[] = "Param[0] is required, cannot be null or undefined";
+
+inline std::string ParameterCount(const std::string &expected, size_t actual)
+{
+    return "Incorrect parameter count. Expected: " + expected + ", Actual: " + std::to_string(actual);
+}
+
+inline std::string CallbackType(const std::string &expected, const std::string &actual)
+{
+    return "Param[0] type mismatch. Expected: " + expected + ", Actual: " + actual;
+}
+} // namespace DropDetectionError
+
 enum class DropDetectionStatus : int32_t {
     STATUS_NORMAL = 0,
     STATUS_DROPPED = 1,
@@ -64,7 +83,8 @@ public:
 
 private:
     // NAPI helpers.
-    static bool ValidateOffArgsType(napi_env env, napi_value callback);
+    static bool ValidateDropDetectArgs(napi_env env, napi_callback_info info, bool callbackRequired,
+        size_t &argc, napi_value &callback);
     static void SetInt32Property(napi_env env, napi_value targetObj, int32_t value, const char *propName);
     static void SetPropertyName(napi_env env, napi_value targetObj, const char *propName, napi_value propValue);
 

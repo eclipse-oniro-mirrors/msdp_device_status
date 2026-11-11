@@ -15,17 +15,19 @@
 
 #include "drop_event_napi.h"
 
+#include <map>
+#include <string>
+
 #include "devicestatus_define.h"
 #include "device_status_napi_error.h"
 #include "fi_log.h"
+#include "parameters.h"
 #ifdef MOTION_ENABLE
 #include <algorithm>
 #include <new>
-#include <string>
 #include <unordered_map>
 
 #include "motion_client.h"
-#include "parameters.h"
 #endif // MOTION_ENABLE
 
 #undef LOG_TAG
@@ -36,6 +38,44 @@ namespace Msdp {
 namespace {
 constexpr uint8_t ARG_0 = 0;
 constexpr uint8_t ARG_1 = 1;
+
+void ThrowDropDetectionError(napi_env env, int32_t code, const std::string &message)
+{
+    if (code != DeviceStatusV1::DEVICE_EXCEPTION && code != DeviceStatusV1::PARAM_EXCEPTION) {
+        DeviceStatusV1::ThrowDeviceStatusErr(env, code, message);
+        return;
+    }
+    FI_HILOGE("printMsg:%{public}s, errCode:%{public}d", message.c_str(), code);
+    const std::string errorMessage = (code == DeviceStatusV1::DEVICE_EXCEPTION ?
+        DropDetectionError::NOT_SUPPORTED : DropDetectionError::PARAMETER_PREFIX + message);
+    napi_value error = DeviceStatusV1::CreateDeviceStatusNapiError(env, code, errorMessage);
+    napi_throw(env, error);
+}
+
+const char *GetNapiTypeName(napi_valuetype type)
+{
+    static const std::map<napi_valuetype, const char *> typeNames = {
+        { napi_undefined, "undefined" },
+        { napi_null, "null" },
+        { napi_boolean, "boolean" },
+        { napi_number, "number" },
+        { napi_string, "string" },
+        { napi_symbol, "symbol" },
+        { napi_object, "object" },
+        { napi_external, "external" },
+        { napi_bigint, "bigint" },
+    };
+    auto iter = typeNames.find(type);
+    return iter != typeNames.end() ? iter->second : "unknown";
+}
+
+bool CheckDeviceTypeForDropDetection()
+{
+    std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
+    FI_HILOGD("deviceType:%{public}s", deviceType.c_str());
+    return deviceType == "phone";
+}
+
 #ifdef MOTION_ENABLE
 constexpr int32_t MOTION_OPERATION_FAILED = -2;
 constexpr int32_t MOTION_SUBSCRIBE_EXCEPTION = 31500002;
@@ -49,13 +89,6 @@ std::mutex g_subscriptionMutex;
 // Never hold this lock while invoking application callbacks or native subscription IPC.
 std::mutex g_callbacksMutex;
 sptr<DropDetectCallback> g_dropCallback;
-
-bool CheckDeviceTypeForDropDetection()
-{
-    std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
-    FI_HILOGD("deviceType:%{public}s", deviceType.c_str());
-    return deviceType == "phone";
-}
 
 int32_t ConvertMotionErrorCode(int32_t ret, int32_t operationErrCode)
 {
@@ -78,7 +111,7 @@ int32_t ConvertMotionErrorCode(int32_t ret, int32_t operationErrCode)
 void ThrowMotionError(napi_env env, int32_t ret, int32_t operationErrCode, const char *message)
 {
     int32_t code = ConvertMotionErrorCode(ret, operationErrCode);
-    DeviceStatusV1::ThrowDeviceStatusErr(env, code, message);
+    ThrowDropDetectionError(env, code, message);
 }
 
 #endif // MOTION_ENABLE
@@ -88,49 +121,42 @@ void ThrowMotionError(napi_env env, int32_t ret, int32_t operationErrCode, const
 napi_value DeviceStatusMotionEventNapi::OnDropDetect(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
-    size_t argc = ARG_1;
-    napi_value args[ARG_1] = { nullptr };
-    napi_value result = nullptr;
-    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (status != napi_ok) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::SERVICE_EXCEPTION, "napi_get_cb_info failed");
+    if (!CheckDeviceTypeForDropDetection()) {
+        ThrowDropDetectionError(env, DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
         return nullptr;
     }
-    napi_valuetype valueType = napi_undefined;
-    if (argc != ARG_1 || napi_typeof(env, args[ARG_0], &valueType) != napi_ok || valueType != napi_function) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::PARAM_EXCEPTION, "validateargstype failed");
+    size_t argc = ARG_0;
+    napi_value callback = nullptr;
+    napi_value result = nullptr;
+    if (!ValidateDropDetectArgs(env, info, true, argc, callback)) {
         return nullptr;
     }
 #ifdef MOTION_ENABLE
-    if (!CheckDeviceTypeForDropDetection()) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
-        return nullptr;
-    }
     auto instance = GetOrCreateInstance(env);
     if (instance == nullptr) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::SERVICE_EXCEPTION,
+        ThrowDropDetectionError(env, DeviceStatusV1::SERVICE_EXCEPTION,
             "Failed to get DeviceStatusMotionEventNapi instance");
         return nullptr;
     }
-    int32_t addRet = instance->AddCallbackEx(args[ARG_0]);
+    int32_t addRet = instance->AddCallbackEx(callback);
     if (addRet != RET_OK) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, addRet, "AddCallback failed");
+        ThrowDropDetectionError(env, addRet, "AddCallback failed");
         return nullptr;
     }
     int32_t subscribeRet = instance->SubscribeToService();
     if (subscribeRet != RET_OK) {
         // Remove this registration before throwing, so queued events skip it and
         // rollback NAPI calls run without a pending subscription exception.
-        if (instance->RemoveCallback(args[ARG_0]) != RET_OK) {
+        if (instance->RemoveCallback(callback) != RET_OK) {
             FI_HILOGE("Failed to roll back callback after subscription failed");
         }
-        DeviceStatusV1::ThrowDeviceStatusErr(env, subscribeRet, "Subscribe failed");
+        ThrowDropDetectionError(env, subscribeRet, "Subscribe failed");
         return nullptr;
     }
     napi_get_undefined(env, &result);
     return result;
 #else
-    DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
+    ThrowDropDetectionError(env, DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
     return result;
 #endif // MOTION_ENABLE
 }
@@ -138,34 +164,27 @@ napi_value DeviceStatusMotionEventNapi::OnDropDetect(napi_env env, napi_callback
 napi_value DeviceStatusMotionEventNapi::OffDropDetect(napi_env env, napi_callback_info info)
 {
     FI_HILOGD("Enter");
-    size_t argc = ARG_1;
-    napi_value result = nullptr;
-    napi_value args[ARG_1] = { nullptr };
-    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (status != napi_ok) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::SERVICE_EXCEPTION, "napi_get_cb_info failed");
+    if (!CheckDeviceTypeForDropDetection()) {
+        ThrowDropDetectionError(env, DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
         return nullptr;
     }
-    if (argc > ARG_1 || (argc == ARG_1 && !ValidateOffArgsType(env, args[ARG_0]))) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::PARAM_EXCEPTION,
-            argc > ARG_1 ? "wrong number of arguments" : "validateargstype failed");
+    size_t argc = ARG_0;
+    napi_value callback = nullptr;
+    napi_value result = nullptr;
+    if (!ValidateDropDetectArgs(env, info, false, argc, callback)) {
         return nullptr;
     }
 #ifdef MOTION_ENABLE
-    if (!CheckDeviceTypeForDropDetection()) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
-        return nullptr;
-    }
     auto instance = GetInstance(env);
     if (instance == nullptr) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::UNSUBSCRIBE_EXCEPTION,
+        ThrowDropDetectionError(env, DeviceStatusV1::UNSUBSCRIBE_EXCEPTION,
             "DeviceStatusMotionEventNapi instance is nullptr");
         return nullptr;
     }
     int32_t removeRet = (argc == ARG_0 ? instance->RemoveAllCallback() :
-        instance->RemoveCallback(args[ARG_0]));
+        instance->RemoveCallback(callback));
     if (removeRet != RET_OK) {
-        DeviceStatusV1::ThrowDeviceStatusErr(env, removeRet, "RemoveCallback failed");
+        ThrowDropDetectionError(env, removeRet, "RemoveCallback failed");
         return nullptr;
     }
     if (!instance->HasCallbacks()) {
@@ -179,7 +198,7 @@ napi_value DeviceStatusMotionEventNapi::OffDropDetect(napi_env env, napi_callbac
     napi_get_undefined(env, &result);
     return result;
 #else
-    DeviceStatusV1::ThrowDeviceStatusErr(env, DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
+    ThrowDropDetectionError(env, DeviceStatusV1::DEVICE_EXCEPTION, "Device not support");
     return result;
 #endif // MOTION_ENABLE
 }
@@ -526,15 +545,47 @@ bool DeviceStatusMotionEventNapi::IsSameValue(const napi_env &env, const napi_va
 #endif // MOTION_ENABLE
 
 // NAPI helpers.
-bool DeviceStatusMotionEventNapi::ValidateOffArgsType(napi_env env, napi_value callback)
+bool DeviceStatusMotionEventNapi::ValidateDropDetectArgs(napi_env env, napi_callback_info info,
+    bool callbackRequired, size_t &argc, napi_value &callback)
 {
     FI_HILOGD("Enter");
+    argc = ARG_1;
+    if (napi_get_cb_info(env, info, &argc, &callback, nullptr, nullptr) != napi_ok) {
+        FI_HILOGE("napi_get_cb_info failed");
+        ThrowDropDetectionError(env, DeviceStatusV1::SERVICE_EXCEPTION, "napi_get_cb_info failed");
+        return false;
+    }
+    if (argc > ARG_1 || (callbackRequired && argc != ARG_1)) {
+        const std::string expectedCount = callbackRequired ? "1" : "0 or 1";
+        FI_HILOGE("Incorrect parameter count. Expected: %{public}s, Actual: %{public}zu",
+            expectedCount.c_str(), argc);
+        ThrowDropDetectionError(env, DeviceStatusV1::PARAM_EXCEPTION,
+            DropDetectionError::ParameterCount(expectedCount, argc));
+        return false;
+    }
+    if (argc == ARG_0) {
+        return true;
+    }
     napi_valuetype valueType = napi_undefined;
     if (napi_typeof(env, callback, &valueType) != napi_ok) {
         FI_HILOGE("Error while checking argument type");
+        ThrowDropDetectionError(env, DeviceStatusV1::SERVICE_EXCEPTION, "napi_typeof failed");
         return false;
     }
-    return valueType == napi_function;
+    if (callbackRequired && (valueType == napi_null || valueType == napi_undefined)) {
+        FI_HILOGE("Callback is null or undefined");
+        ThrowDropDetectionError(env, DeviceStatusV1::PARAM_EXCEPTION,
+            DropDetectionError::CALLBACK_REQUIRED);
+        return false;
+    }
+    if (valueType != napi_function) {
+        const char *actualType = GetNapiTypeName(valueType);
+        FI_HILOGE("Callback type mismatch, expected:function, actual: %{public}s", actualType);
+        ThrowDropDetectionError(env, DeviceStatusV1::PARAM_EXCEPTION,
+            DropDetectionError::CallbackType("function", actualType));
+        return false;
+    }
+    return true;
 }
 
 void DeviceStatusMotionEventNapi::SetInt32Property(napi_env env, napi_value targetObj, int32_t value,
