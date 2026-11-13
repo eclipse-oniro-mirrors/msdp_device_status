@@ -163,13 +163,11 @@ void RejectPromise(napi_env env, napi_deferred deferred, int32_t errCode, const 
     napi_reject_deferred(env, deferred, error);
 }
 
-napi_value ResolvePromise(napi_env env, napi_deferred deferred)
+napi_value ResolvePromise(napi_env env, napi_deferred deferred, napi_value promise)
 {
     napi_value undefined = nullptr;
     napi_get_undefined(env, &undefined);
     napi_resolve_deferred(env, deferred, undefined);
-    napi_value promise = nullptr;
-    napi_create_object(env, &promise);
     return promise;
 }
 
@@ -656,7 +654,7 @@ napi_value BehaviorAwarenessNapi::OnPerception(napi_env env, napi_callback_info 
     }
     SwapCallbackRef(env, stub, newRef);
     FI_HILOGI("OnPerception: success, key:%{public}s, isNew:%{public}d", key.c_str(), isNewStub);
-    return ResolvePromise(env, deferred);
+    return ResolvePromise(env, deferred, promise);
 }
 
 napi_value BehaviorAwarenessNapi::OffPerception(napi_env env, napi_callback_info info)
@@ -705,7 +703,7 @@ napi_value BehaviorAwarenessNapi::OffPerception(napi_env env, napi_callback_info
         ClearAllCallbacks(env);
     }
     FI_HILOGI("OffPerception: success");
-    return ResolvePromise(env, deferred);
+    return ResolvePromise(env, deferred, promise);
 }
 
 napi_value BehaviorAwarenessNapi::SubmitFeedback(napi_env env, napi_callback_info info)
@@ -734,7 +732,7 @@ napi_value BehaviorAwarenessNapi::SubmitFeedback(napi_env env, napi_callback_inf
         return promise;
     }
     FI_HILOGI("SubmitFeedback: success");
-    return ResolvePromise(env, deferred);
+    return ResolvePromise(env, deferred, promise);
 }
 
 EXTERN_C_START

@@ -87,7 +87,7 @@ inline std::string BuildSubscriptionKey(const SubscribeOptions &options)
 inline const std::map<int32_t, std::string>& GetErrorMsgMap()
 {
     static const std::map<int32_t, std::string> messages = {
-        { COMMON_NOT_SYSTEM_APP, "Permission verification failed. A non-system application uses the system API." },
+        { COMMON_NOT_SYSTEM_APP, "Permission verification failed. A non-system application calls a system API." },
         { PARAM_EXCEPTION, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified; "
             "2. Incorrect parameter types; 3. Parameter verification failed." },
         { DEVICE_NOT_SUPPORT, "Capability not supported. Possible causes: "
