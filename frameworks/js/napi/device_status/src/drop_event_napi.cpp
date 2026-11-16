@@ -572,6 +572,10 @@ bool DeviceStatusMotionEventNapi::ValidateDropDetectArgs(napi_env env, napi_call
         ThrowDropDetectionError(env, DeviceStatusV1::SERVICE_EXCEPTION, "napi_typeof failed");
         return false;
     }
+    if (!callbackRequired && valueType == napi_undefined) {
+        argc = ARG_0;
+        return true;
+    }
     if (callbackRequired && (valueType == napi_null || valueType == napi_undefined)) {
         FI_HILOGE("Callback is null or undefined");
         ThrowDropDetectionError(env, DeviceStatusV1::PARAM_EXCEPTION,
