@@ -297,8 +297,7 @@ void OffDropDetectInner(const DropDetectCallback *callback)
         return;
     }
     auto instance = AniMotionEvent::GetInstance();
-    FI_HILOGI("OffDropDetectInner: callback != nullptr=%{public}d, callback=%{public}p",
-        static_cast<int32_t>(callback != nullptr), static_cast<const void *>(callback));
+    FI_HILOGI("OffDropDetectInner: callback != nullptr=%{public}d", static_cast<int32_t>(callback != nullptr));
     int32_t ret = instance->UnSubscribeCallback(MOTION_TYPE_DROP_DETECTION, callback);
     if (ret != RET_OK) {
         FI_HILOGE("UnSubscribeCallback failed");

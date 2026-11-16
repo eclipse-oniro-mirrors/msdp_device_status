@@ -34,7 +34,10 @@ ohos_unittest("UtilityTest") {
 
   defines = []
 
-  sources = [ "src/utility_test.cpp" ]
+  sources = [
+    "src/drop_event_debouncer_test.cpp",
+    "src/utility_test.cpp",
+  ]
 
   configs = []
 

@@ -28,6 +28,7 @@
 #include <mutex>
 #include <set>
 
+#include "drop_event_debouncer.h"
 #include "motion_callback_stub.h"
 #endif // MOTION_ENABLE
 
@@ -51,7 +52,6 @@ inline std::string CallbackType(const std::string &expected, const std::string &
 } // namespace DropDetectionError
 
 enum class DropDetectionStatus : int32_t {
-    STATUS_NORMAL = 0,
     STATUS_DROPPED = 1,
 };
 
@@ -95,6 +95,8 @@ private:
         explicit CallbackRegistration(napi_ref handlerRef) : handlerRef(handlerRef) {}
         // Accessed only on the environment thread; cancellation deletes this reference.
         napi_ref handlerRef;
+        // Accessed only on the environment thread.
+        DropEventDebouncer debouncer;
     };
     using CallbackSnapshot = std::vector<std::shared_ptr<CallbackRegistration>>;
 
@@ -111,7 +113,7 @@ private:
     // Called by DropDetectCallback while holding the registration snapshot lock.
     void PostMotionEvent(const MotionEvent &event);
     void OnEventDropDetection(int32_t status, const CallbackSnapshot &callbacks);
-    bool ConvertDropDetectionData(napi_value handler, int32_t status);
+    bool ConvertDropDetectionData(napi_value handler);
 
     // JS callback management.
     int32_t AddCallbackEx(napi_value handler);

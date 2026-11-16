@@ -26,6 +26,7 @@
 #include "ohos.multimodalAwareness.deviceStatus.proj.hpp"
 #include "ohos.multimodalAwareness.deviceStatus.impl.hpp"
 #ifdef MOTION_ENABLE
+#include "drop_event_debouncer.h"
 #include "event_handler.h"
 #include "motion_callback_stub.h"
 #include "motion_agent_type.h"
@@ -45,6 +46,8 @@ struct DropCallbackInfo {
     DropDetectCallback callback;
     std::shared_ptr<AppExecFwk::EventHandler> handler;
     std::atomic<bool> active {true};
+    // Accessed only on this registration's event runner.
+    DropEventDebouncer debouncer;
 };
 
 class AniMotionCallback : public MotionCallbackStub {
@@ -72,6 +75,7 @@ private:
     bool CheckEvents(int32_t eventType);
     int32_t AddCallback(int32_t eventType, const std::shared_ptr<DropCallbackInfo> &callback);
     int32_t RemoveCallback(int32_t eventType, const DropDetectCallback *callback);
+    void PostDropEvent(const std::shared_ptr<DropCallbackInfo> &record, DropDetectionStatus_t status);
 
     // Serialize each complete on/off operation, including native IPC and state commit.
     // Event delivery only takes mutex_ and never waits for subscriptionMutex_.

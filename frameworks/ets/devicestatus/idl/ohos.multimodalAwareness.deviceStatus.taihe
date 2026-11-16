@@ -42,7 +42,6 @@ struct DeviceRotationRadian {
 function getDeviceRotationRadianSync(): DeviceRotationRadian;
 
 enum DropDetectionStatus : i32 {
-  STATUS_NORMAL = 0,
   STATUS_DROPPED = 1,
 }
 
