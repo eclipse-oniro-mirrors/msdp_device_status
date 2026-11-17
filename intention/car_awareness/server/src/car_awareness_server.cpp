@@ -143,30 +143,29 @@ bool CarAwarenessServer::CheckSystemCall(const CallingContext &context)
 
 int32_t CarAwarenessServer::CheckSubPermissionByType(const CallingContext &context, int32_t type)
 {
-	auto ruleIt = SUB_PERMISSION_RULES.find(type);
-	if (ruleIt == SUB_PERMISSION_RULES.end()) {
-		FI_HILOGE("unhandled type:%{public}d", type);
-		// 未注册的系统类型直接返回错误
-		return CAR_AWARENESS_SPECIFIC_ERR;
-	}
-	const std::string &permission = ruleIt->second;
-	bool isSystem = CheckSystemCall(context);
-
+    auto ruleIt = SUB_PERMISSION_RULES.find(type);
+    if (ruleIt == SUB_PERMISSION_RULES.end()) {
+        FI_HILOGE("unhandled type:%{public}d", type);
+        // 未注册的系统类型直接返回错误
+        return CAR_AWARENESS_SPECIFIC_ERR;
+    }
+    const std::string &permission = ruleIt->second;
+    bool isSystem = CheckSystemCall(context);
     if (type >= SYSTEM_API_TYPES_START) {
-		if (!isSystem) {
-			return COMMON_NOT_SYSTEM_APP;
-		}
-		if (permission.empty()) {
-			return RET_OK;
-		}
-		int32_t ret = CheckPermission(context, permission);
-		return ret != RET_OK ? SYSTEM_APP_PERMISSION_ERR : RET_OK;
-	} else {
-		if (isSystem) {
-			return RET_OK;
-		}
-		return CheckPermission(context, permission);
-	}
+        if (!isSystem) {
+            return COMMON_NOT_SYSTEM_APP;
+        }
+        if (permission.empty()) {
+            return RET_OK;
+        }
+        int32_t ret = CheckPermission(context, permission);
+        return ret != RET_OK ? SYSTEM_APP_PERMISSION_ERR : RET_OK;
+    } else {
+        if (isSystem) {
+            return RET_OK;
+        }
+        return CheckPermission(context, permission);
+    }
 }
 
 void CarAwarenessServer::OnResultFromAlgo(const std::string &featureName, const std::string &result)
