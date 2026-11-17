@@ -47,6 +47,7 @@ const std::string CLIENT_PID_KEY = "client_pid";
 const std::string THREAD_NAME = "CAR_AWARENESS_CALLBACK_HANDLER";
 
 constexpr int32_t CAR_AWARENESS_SPECIFIC_ERR = 34000002;
+constexpr int32_t SYSTEM_APP_PERMISSION_ERR = 301;
 
 constexpr int32_t TYPE_SPATIAL_MOTION = 101;
 constexpr int32_t TYPE_REALTIME_WEATHER = 102;
@@ -88,18 +89,6 @@ const std::map<std::string, int32_t> FEATURE_NAME_TO_TYPE = {
 };
 
 const std::unordered_set<std::string> CONDITIONAL_FEATURES = {"OccupantSense"};
-
-enum class SubPermissionMode {
-    // 系统应用直接放行；非系统应用必须校验 permission（不会被系统应用校验拦截）
-    SYSTEM_OR_PERMISSION,
-    // 必须是系统应用；permission 非空时还需额外校验权限
-    SYSTEM_ONLY
-};
-
-struct SubPermissionRule {
-    SubPermissionMode mode;
-    std::string permission;  // SYSTEM_ONLY 模式下可为空，表示仅校验系统应用
-};
 
 // 订阅权限注册表：新增 type 只需在此登记，新增权限只需复用/新增权限常量
 const std::map<int32_t, SubPermissionRule> SUB_PERMISSION_RULES = {
@@ -154,35 +143,30 @@ bool CarAwarenessServer::CheckSystemCall(const CallingContext &context)
 
 int32_t CarAwarenessServer::CheckSubPermissionByType(const CallingContext &context, int32_t type)
 {
-    auto ruleIt = SUB_PERMISSION_RULES.find(type);
-    if (ruleIt == SUB_PERMISSION_RULES.end()) {
-        FI_HILOGE("unhandled type:%{public}d", type);
-        if (type >= SYSTEM_API_TYPES_START) {  // 未注册的系统类型沿用仅校验系统调用
-            return CheckSystemCall(context) ? RET_OK : COMMON_NOT_SYSTEM_APP;
-        }
-        return CAR_AWARENESS_SPECIFIC_ERR;
-    }
+	auto ruleIt = SUB_PERMISSION_RULES.find(type);
+	if (ruleIt == SUB_PERMISSION_RULES.end()) {
+		FI_HILOGE("unhandled type:%{public}d", type);
+		// 未注册的系统类型直接返回错误
+		return CAR_AWARENESS_SPECIFIC_ERR;
+	}
+	const std::string &permission = ruleIt->second;
+	bool isSystem = CheckSystemCall(context);
 
-    const SubPermissionRule &rule = ruleIt->second;
-    bool isSystem = CheckSystemCall(context);
-
-    if (rule.mode == SubPermissionMode::SYSTEM_OR_PERMISSION) {
-        // 200 以下：系统应用直接放行，非系统应用继续校验权限
-        if (isSystem) {
-            return RET_OK;
-        }
-        return CheckPermission(context, rule.permission);
-    }
-
-    // 200 及以上：必须是系统应用，否则直接拦截
-    if (!isSystem) {
-        return COMMON_NOT_SYSTEM_APP;
-    }
-    if (rule.permission.empty()) {
-        return RET_OK;
-    }
-    // 额外校验系统应用校验
-    return CheckPermission(context, rule.permission);
+    if (type >= SYSTEM_API_TYPES_START) {
+		if (!isSystem) {
+			return COMMON_NOT_SYSTEM_APP;
+		}
+		if (permission.empty()) {
+			return RET_OK;
+		}
+		int32_t ret = CheckPermission(context, permission);
+		return ret != RET_OK ? SYSTEM_APP_PERMISSION_ERR : RET_OK;
+	} else {
+		if (isSystem) {
+			return RET_OK;
+		}
+		return CheckPermission(context, permission);
+	}
 }
 
 void CarAwarenessServer::OnResultFromAlgo(const std::string &featureName, const std::string &result)

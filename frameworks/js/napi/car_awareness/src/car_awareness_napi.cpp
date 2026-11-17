@@ -337,14 +337,6 @@ bool CarAwarenessNapi::IsArgAllValid(napi_env env, napi_value *args, size_t argc
 bool CarAwarenessNapi::GetCarAwarenessOption(napi_env env, napi_value awarenessOption, int32_t type,
     CarAwarenessOption &option)
 {
-    if (type == TYPE_CAR_STATUS) {
-        return GetCarStatusAwarenessOption(env, awarenessOption, option);
-    }
-    return true;
-}
-
-bool CarAwarenessNapi::GetCarStatusAwarenessOption(napi_env env, napi_value awarenessOption, CarAwarenessOption &option)
-{
     napi_value parameters;
     napi_status status = napi_get_named_property(env, awarenessOption, "parameters", &parameters);
     if (status != napi_ok) {
@@ -393,6 +385,7 @@ bool CarAwarenessNapi::GetCarStatusAwarenessOption(napi_env env, napi_value awar
         
         option.entityInfo[keyStr] = valueStr;
     }
+	FI_HILOGI("get car awareness option success: %{public}d", type);
     return true;
 }
 
@@ -512,7 +505,9 @@ void CarAwarenessNapi::ThrowIpcExcuteErr(napi_env env, int32_t errCode)
     } else if (errCode == NOT_SYSTEM_APP_ERR) {
         FI_HILOGE("Not system application");
         ThrowErrToJs(env, NOT_SYSTEM_APP_ERR, "Not system application");
-    } else if (errCode == DEVICE_ERR) {
+    } else if (errCode == SYSTEM_APP_PERMISSION_ERR) {
++        FI_HILOGE("System application no permission");
+	} else if (errCode == DEVICE_ERR) {
         FI_HILOGE("Device not support");
         ThrowErrToJs(env, DEVICE_ERR, "Device not support");
     } else if (errCode == SPECIFIC_ERR) {
