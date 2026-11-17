@@ -385,7 +385,7 @@ bool CarAwarenessNapi::GetCarAwarenessOption(napi_env env, napi_value awarenessO
         
         option.entityInfo[keyStr] = valueStr;
     }
-	FI_HILOGI("get car awareness option success: %{public}d", type);
+    FI_HILOGI("get car awareness option success: %{public}d", type);
     return true;
 }
 
