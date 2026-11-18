@@ -505,8 +505,9 @@ void CarAwarenessNapi::ThrowIpcExcuteErr(napi_env env, int32_t errCode)
     } else if (errCode == NOT_SYSTEM_APP_ERR) {
         FI_HILOGE("Not system application");
         ThrowErrToJs(env, NOT_SYSTEM_APP_ERR, "Not system application");
-    } else if (errCode == SYSTEM_APP_PERMISSION_ERR) {
-        FI_HILOGE("System application no permission");
+    } else if (errCode == SERVICE_ERR) {
+        FI_HILOGE("Call service api failed");
+        ThrowErrToJs(env, SERVICE_ERR, "Call service api failed");
     } else if (errCode == DEVICE_ERR) {
         FI_HILOGE("Device not support");
         ThrowErrToJs(env, DEVICE_ERR, "Device not support");
