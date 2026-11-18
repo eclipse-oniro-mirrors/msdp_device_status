@@ -131,6 +131,46 @@ HWTEST_F(OnScreenCallbackTest, OnScreenCallbackStub_OnStateMgmtInfoStub_003, Tes
 }
 
 /**
+ * @tc.name: OnScreenCallbackStub_OnStateMgmtInfoStub_004
+ * @tc.desc: test for OnScreenCallbackTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenCallbackTest, OnScreenCallbackStub_OnStateMgmtInfoStub_004, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    ASSERT_TRUE(data.WriteInterfaceToken(OnScreenCallbackStub::GetDescriptor()));
+    ASSERT_TRUE(data.WriteInt32(51));
+
+    int32_t ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(IRemoteOnScreenCallback::ON_STATE_MGMT_INFO), data, reply, option);
+    EXPECT_EQ(ret, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    EXPECT_FALSE(stub_->called_);
+}
+
+/**
+ * @tc.name: OnScreenCallbackStub_OnStateMgmtInfoStub_005
+ * @tc.desc: test for OnScreenCallbackTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(OnScreenCallbackTest, OnScreenCallbackStub_OnStateMgmtInfoStub_005, TestSize.Level1)
+{
+    CALL_TEST_DEBUG;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    ASSERT_TRUE(data.WriteInterfaceToken(OnScreenCallbackStub::GetDescriptor()));
+    ASSERT_TRUE(data.WriteInt32(-1));
+
+    int32_t ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(IRemoteOnScreenCallback::ON_STATE_MGMT_INFO), data, reply, option);
+    EXPECT_EQ(ret, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    EXPECT_FALSE(stub_->called_);
+}
+
+/**
  * @tc.name: OnScreenCallbackProxy_OnStateMgmtInfo_001
  * @tc.desc: test for OnScreenCallbackTest
  * @tc.type: FUNC

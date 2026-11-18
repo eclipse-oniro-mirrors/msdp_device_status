@@ -21,6 +21,9 @@
 #include "devicestatus_define.h"
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 #include "sequenceable_util.h"
+namespace {
+    constexpr int32_t MAX_STATE_MGMT_INFO_SIZE = 50;
+}
 #endif
 
 #undef LOG_TAG
@@ -99,6 +102,10 @@ int32_t OnScreenCallbackStub::OnStateMgmtInfoStub(MessageParcel &data)
     CALL_DEBUG_ENTER;
     int32_t size = 0;
     READINT32(data, size, E_DEVICESTATUS_READ_PARCEL_ERROR);
+    if (size < 0 || size > MAX_STATE_MGMT_INFO_SIZE) {
+        FI_HILOGE("state mgmt info size over limit, %{public}d", size);
+        return E_DEVICESTATUS_READ_PARCEL_ERROR;
+    }
     std::vector<std::string> results;
     for (int32_t i = 0; i < size; i++) {
         std::string result;
