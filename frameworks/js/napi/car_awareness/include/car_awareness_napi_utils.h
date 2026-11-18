@@ -30,7 +30,6 @@ namespace Msdp {
 constexpr int32_t RES_SUCCESS { 0 };
 constexpr int32_t PERMISSION_ERR { 201 };
 constexpr int32_t NOT_SYSTEM_APP_ERR { 202 };
-constexpr int32_t SYSTEM_APP_PERMISSION_ERR { 301 };
 constexpr int32_t PARAM_ERR { 401 };
 constexpr int32_t DEVICE_ERR { 801 };
 constexpr int32_t SERVICE_ERR { 34000001 };
