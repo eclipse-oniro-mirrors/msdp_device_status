@@ -21,9 +21,6 @@
 #include "devicestatus_define.h"
 #ifndef DEVICE_STATUS_PHONE_STANDARD_LITE
 #include "sequenceable_util.h"
-namespace {
-    constexpr int32_t MAX_STATE_MGMT_INFO_SIZE = 50;
-}
 #endif
 
 #undef LOG_TAG
@@ -33,6 +30,9 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace OnScreen {
+namespace {
+    constexpr int32_t MAX_STATE_MGMT_INFO_SIZE = 50;
+}
 int32_t OnScreenCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
