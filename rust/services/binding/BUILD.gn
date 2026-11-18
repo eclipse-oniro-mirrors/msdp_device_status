@@ -27,6 +27,8 @@ config("fusion_services_binding_public_config") {
 }
 
 ohos_shared_library("fusion_services_binding") {
+  branch_protector_ret = "pac_ret"
+
   sources = [ "src/fusion_services_binding.cpp" ]
 
   deps = [

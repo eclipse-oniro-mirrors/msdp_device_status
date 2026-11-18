@@ -183,6 +183,8 @@ if (!is_arkui_x) {
   }
 } else {
   ohos_source_set("interaction_client_crossplatform") {
+    branch_protector_ret = "pac_ret"
+
     include_dirs = [
       "//third_party/cJSON",
       "${device_status_root_path}/interfaces/innerkits/interaction/include",

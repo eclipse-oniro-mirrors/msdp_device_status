@@ -31,6 +31,8 @@ config("fusion_device_profile_binding_public_config") {
 }
 
 ohos_shared_library("fusion_device_profile_binding") {
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "src/fusion_device_profile.cpp",
     "src/fusion_device_profile_adapter.cpp",
