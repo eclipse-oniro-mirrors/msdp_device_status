@@ -46,8 +46,8 @@ const std::string CAR_AWARENESS_LIB_PATH = "/system/lib64/libcar_awareness_servi
 const std::string CLIENT_PID_KEY = "client_pid";
 const std::string THREAD_NAME = "CAR_AWARENESS_CALLBACK_HANDLER";
 
+constexpr int32_t CAR_AWARENESS_SERVICE_ERR = 34000001;
 constexpr int32_t CAR_AWARENESS_SPECIFIC_ERR = 34000002;
-constexpr int32_t SYSTEM_APP_PERMISSION_ERR = 301;
 
 constexpr int32_t TYPE_SPATIAL_MOTION = 101;
 constexpr int32_t TYPE_REALTIME_WEATHER = 102;
@@ -159,7 +159,7 @@ int32_t CarAwarenessServer::CheckSubPermissionByType(const CallingContext &conte
             return RET_OK;
         }
         int32_t ret = CheckPermission(context, permission);
-        return ret != RET_OK ? SYSTEM_APP_PERMISSION_ERR : RET_OK;
+        return ret != RET_OK ? CAR_AWARENESS_SERVICE_ERR : RET_OK;
     } else {
         if (isSystem) {
             return RET_OK;
