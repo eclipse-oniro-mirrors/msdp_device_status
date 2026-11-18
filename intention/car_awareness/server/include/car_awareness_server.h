@@ -25,6 +25,7 @@
 #include "i_plugin.h"
 #include "i_car_awareness_mgr.h"
 #include "icar_awareness_callback.h"
+#include "event_handler.h"
 
 namespace OHOS {
 namespace Msdp {
@@ -111,6 +112,7 @@ private:
     CarAwarenessPluginHandle algoHandle_;
     CarAwareness::CarAwarenessCallback algoCb_ = nullptr;
     std::map<std::string, std::string> algoResultCache_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
 };
 
 }  // namespace DeviceStatus

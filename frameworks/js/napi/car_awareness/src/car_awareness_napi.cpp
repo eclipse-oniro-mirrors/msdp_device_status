@@ -337,14 +337,6 @@ bool CarAwarenessNapi::IsArgAllValid(napi_env env, napi_value *args, size_t argc
 bool CarAwarenessNapi::GetCarAwarenessOption(napi_env env, napi_value awarenessOption, int32_t type,
     CarAwarenessOption &option)
 {
-    if (type == TYPE_CAR_STATUS) {
-        return GetCarStatusAwarenessOption(env, awarenessOption, option);
-    }
-    return true;
-}
-
-bool CarAwarenessNapi::GetCarStatusAwarenessOption(napi_env env, napi_value awarenessOption, CarAwarenessOption &option)
-{
     napi_value parameters;
     napi_status status = napi_get_named_property(env, awarenessOption, "parameters", &parameters);
     if (status != napi_ok) {
@@ -393,6 +385,7 @@ bool CarAwarenessNapi::GetCarStatusAwarenessOption(napi_env env, napi_value awar
         
         option.entityInfo[keyStr] = valueStr;
     }
+    FI_HILOGI("get car awareness option success: %{public}d", type);
     return true;
 }
 

@@ -103,7 +103,6 @@ private:
     static bool CheckSystemApiArgument(napi_env env, napi_value *args, size_t argc);
     static bool GetCarAwarenessOption(napi_env env, napi_value awarenessOption, int32_t type,
         CarAwarenessOption &option);
-    static bool GetCarStatusAwarenessOption(napi_env env, napi_value awarenessOption, CarAwarenessOption &option);
     static void SaveJsClassWeakRef(napi_env env, napi_value exports);
 #ifdef CAR_AWARENESS_ENABLE
     static void DeleteJsClassRef(napi_env env);
