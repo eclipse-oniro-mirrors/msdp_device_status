@@ -752,13 +752,10 @@ bool DistanceMeasurementNapi::DeleteDistMeasureCallback(napi_env env, napi_value
     CDistMeasureData cdistMeasureData)
 {
     FI_HILOGI("Enter");
-    if (distMeasureCallback_ == nullptr || !g_DistanceMeasurementNapi->HasRegisteredCallback(cdistMeasureData)) {
-        FI_HILOGI("never before Subscribe  distance measurement callback");
+    if (distMeasureCallback_ == nullptr || g_DistanceMeasurementNapi == nullptr ||
+        !g_DistanceMeasurementNapi->HasRegisteredCallback(cdistMeasureData)) {
+        FI_HILOGI("never before Subscribe distance measurement callback");
         return true;
-    }
-    if (g_DistanceMeasurementNapi == nullptr) {
-        ThrowErr(env, SERVICE_EXCEPTION, "Service exception.");
-        return false;
     }
     if (g_DistanceMeasurementNapi->g_distanceMeasurementHandle == nullptr && !LoadLibrary()) {
         ThrowErr(env, DEVICE_EXCEPTION, "Device not support");
