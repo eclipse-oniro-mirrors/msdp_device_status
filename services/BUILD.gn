@@ -207,6 +207,8 @@ ohos_shared_library("devicestatus_service") {
 }
 
 ohos_static_library("devicestatus_static_service") {
+  branch_protector_ret = "pac_ret"
+
   sanitize = {
     integer_overflow = true
     ubsan = true

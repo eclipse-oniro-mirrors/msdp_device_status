@@ -27,6 +27,8 @@ config("fusion_subsystem_binding_public_config") {
 }
 
 ohos_shared_library("fusion_subsystem_binding") {
+  branch_protector_ret = "pac_ret"
+
   sources = [ "multimedia/src/fusion_image_framework.cpp" ]
 
   deps = [ "${device_status_root_path}/utils/common:devicestatus_util" ]
