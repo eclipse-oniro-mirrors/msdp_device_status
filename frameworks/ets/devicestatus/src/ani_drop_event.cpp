@@ -198,6 +198,9 @@ void AniMotionEvent::OnEventDropDetection(int32_t eventType, const std::shared_p
         return;
     }
     FI_HILOGD("eventType: %{public}d,%{public}d", eventType, event->status);
+    if (event->status == 0 || event->status == -1) {
+        return;
+    }
     std::vector<std::shared_ptr<DropCallbackInfo>> records;
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -207,33 +210,40 @@ void AniMotionEvent::OnEventDropDetection(int32_t eventType, const std::shared_p
         }
         records = iter->second;
     }
-    DropDetectionStatus_t status = event->status == 0 || event->status == -1 ?
-        DropDetectionStatus_t::key_t::STATUS_NORMAL : DropDetectionStatus_t::key_t::STATUS_DROPPED;
+    DropDetectionStatus_t status = DropDetectionStatus_t::key_t::STATUS_DROPPED;
     for (const auto &record : records) {
-        // Always enqueue: native IPC may synchronously deliver an event while on/off holds
-        // subscriptionMutex_. Application callbacks must not run on that IPC stack.
-        // A queued task must not keep a cancelled callback (or its event runner) alive.
-        auto task = [weakRecord = std::weak_ptr<DropCallbackInfo>(record), status]() {
-            auto callbackInfo = weakRecord.lock();
-            if (callbackInfo == nullptr || !callbackInfo->active.load()) {
-                return;
-            }
-            ::taihe::env_guard guard;
-            if (guard.get_env() == nullptr) {
-                FI_HILOGE("Get ANI environment failed");
-                return;
-            }
-            callbackInfo->callback(status);
-            if (::taihe::has_error()) {
-                FI_HILOGE("Execute callback failed");
-            }
-        };
-        if (!record->handler->PostTask(task, "deviceStatus.dropDetect", 0,
-            AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-            FI_HILOGE("Post drop event failed, eventType:%{public}d, "
-                      "status:%{public}d",
-                      eventType, event->status);
+        PostDropEvent(record, status);
+    }
+}
+
+void AniMotionEvent::PostDropEvent(const std::shared_ptr<DropCallbackInfo> &record, DropDetectionStatus_t status)
+{
+    // Always enqueue: native IPC may synchronously deliver an event while on/off holds
+    // subscriptionMutex_. Application callbacks must not run on that IPC stack.
+    // A queued task must not keep a cancelled callback (or its event runner) alive.
+    auto task = [weakRecord = std::weak_ptr<DropCallbackInfo>(record), status]() {
+        auto callbackInfo = weakRecord.lock();
+        if (callbackInfo == nullptr || !callbackInfo->active.load()) {
+            return;
         }
+        ::taihe::env_guard guard;
+        if (guard.get_env() == nullptr) {
+            FI_HILOGE("Get ANI environment failed");
+            return;
+        }
+        if (!callbackInfo->debouncer.ShouldDispatch()) {
+            return;
+        }
+        callbackInfo->callback(status);
+        if (::taihe::has_error()) {
+            FI_HILOGE("Execute callback failed");
+            return;
+        }
+        callbackInfo->debouncer.MarkDispatched();
+    };
+    if (!record->handler->PostTask(task, "deviceStatus.dropDetect", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+        FI_HILOGE("Post drop event failed, status:%{public}d", status.get_value());
     }
 }
 #endif // MOTION_ENABLE

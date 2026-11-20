@@ -212,8 +212,6 @@ void DeviceStatusMotionEventNapi::DefineDropDetectionStatus(napi_env env, napi_v
         return;
     }
     SetInt32Property(env, dropDetectionStatus,
-        static_cast<int32_t>(DropDetectionStatus::STATUS_NORMAL), "STATUS_NORMAL");
-    SetInt32Property(env, dropDetectionStatus,
         static_cast<int32_t>(DropDetectionStatus::STATUS_DROPPED), "STATUS_DROPPED");
     SetPropertyName(env, exports, "DropDetectionStatus", dropDetectionStatus);
 }
@@ -401,6 +399,9 @@ void DeviceStatusMotionEventNapi::PostMotionEvent(const MotionEvent &event)
 
 void DeviceStatusMotionEventNapi::OnEventDropDetection(int32_t status, const CallbackSnapshot &callbacks)
 {
+    if (status == 0 || status == -1) {
+        return;
+    }
     for (const auto &callback : callbacks) {
         napi_value handler = nullptr;
         {
@@ -415,18 +416,21 @@ void DeviceStatusMotionEventNapi::OnEventDropDetection(int32_t status, const Cal
                 continue;
             }
         }
+        if (!callback->debouncer.ShouldDispatch()) {
+            continue;
+        }
         // The napi_send_event handle scope keeps the function alive during reentry.
-        if (!ConvertDropDetectionData(handler, status)) {
+        if (!ConvertDropDetectionData(handler)) {
             FI_HILOGE("Failed to dispatch drop event");
             continue;
         }
+        callback->debouncer.MarkDispatched();
     }
 }
 
-bool DeviceStatusMotionEventNapi::ConvertDropDetectionData(napi_value handler, int32_t status)
+bool DeviceStatusMotionEventNapi::ConvertDropDetectionData(napi_value handler)
 {
-    int32_t dropStatus = static_cast<int32_t>(status == 0 || status == -1 ?
-        DropDetectionStatus::STATUS_NORMAL : DropDetectionStatus::STATUS_DROPPED);
+    int32_t dropStatus = static_cast<int32_t>(DropDetectionStatus::STATUS_DROPPED);
     napi_value result = nullptr;
     if (napi_create_int32(env_, dropStatus, &result) != napi_ok) {
         FI_HILOGE("napi_create_int32 failed");

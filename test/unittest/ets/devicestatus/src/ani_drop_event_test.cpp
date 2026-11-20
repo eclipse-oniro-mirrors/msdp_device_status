@@ -40,7 +40,6 @@ constexpr int32_t MOTION_SUBSCRIBE_EXCEPTION = 31500002;
 constexpr int32_t MOTION_UNSUBSCRIBE_EXCEPTION = 31500003;
 constexpr int32_t NON_SYSTEM_APP_ERROR = 202;
 
-constexpr int32_t MOTION_STATUS_INVALID = -1;
 constexpr int32_t MOTION_STATUS_FREE_FALL_15_CM = 1;
 constexpr int32_t MOTION_STATUS_FREE_FALL_50_CM = 2;
 constexpr int32_t MOTION_STATUS_FREE_FALL_30_CM = 3;
@@ -153,6 +152,7 @@ protected:
     {
         int32_t result = SERVICE_EXCEPTION;
         Run([&]() { result = subject_->SubscribeCallback(DROP_TYPE, callback); });
+        Drain();
         return result;
     }
 
@@ -201,6 +201,8 @@ HWTEST_F(AniDropEventTest, DistinctCallbacksShareNativeSubscription, TestSize.Le
     auto second = RecordingCallback(other);
     ASSERT_EQ(Subscribe(first), 0);
     ASSERT_EQ(Subscribe(second), 0);
+    EXPECT_TRUE(received_.empty());
+    EXPECT_TRUE(other.empty());
     EXPECT_EQ(MotionClient::GetInstance().subscribeCalls, 1);
     Run([&]() { EXPECT_EQ(subject_->events_.at(DROP_TYPE).size(), EXPECTED_CALLBACK_COUNT); });
 }
@@ -234,6 +236,7 @@ HWTEST_F(AniDropEventTest, SubscribeFailureMapsErrorsAndRollsBack, TestSize.Leve
         SCOPED_TRACE(error.first);
         MotionClient::GetInstance().subscribeResult = error.first;
         EXPECT_EQ(Subscribe(callback), error.second);
+        EXPECT_TRUE(received_.empty());
         Run([&]() {
             EXPECT_TRUE(subject_->events_.empty());
             EXPECT_TRUE(subject_->callbacks_.empty());
@@ -406,7 +409,7 @@ HWTEST_F(AniDropEventTest, NativeSubscriptionIsReusedAfterFailedUnsubscribe, Tes
     EXPECT_EQ(motion.unsubscribeCalls, EXPECTED_MOTION_CALL_COUNT);
 }
 
-HWTEST_F(AniDropEventTest, EachRawDropStateMapsToDropped, TestSize.Level1)
+HWTEST_F(AniDropEventTest, DifferentRawDropStatesAreDebounced, TestSize.Level1)
 {
     auto callback = RecordingCallback(received_);
     ASSERT_EQ(Subscribe(callback), 0);
@@ -417,19 +420,7 @@ HWTEST_F(AniDropEventTest, EachRawDropStateMapsToDropped, TestSize.Level1)
         }
     });
     Drain();
-    EXPECT_EQ(received_, std::vector<int32_t>({1, 1, 1, 1}));
-}
-
-HWTEST_F(AniDropEventTest, NormalAndInvalidSentinelFollowCurrentMapping, TestSize.Level1)
-{
-    auto callback = RecordingCallback(received_);
-    ASSERT_EQ(Subscribe(callback), 0);
-    Run([&]() {
-        Emit(0);
-        Emit(MOTION_STATUS_INVALID);
-    });
-    Drain();
-    EXPECT_EQ(received_, std::vector<int32_t>({0, 0}));
+    EXPECT_EQ(received_, std::vector<int32_t>({1}));
 }
 
 HWTEST_F(AniDropEventTest, OtherRawValuesFollowCurrentNonzeroMapping, TestSize.Level1)
@@ -441,10 +432,10 @@ HWTEST_F(AniDropEventTest, OtherRawValuesFollowCurrentNonzeroMapping, TestSize.L
         Emit(OUT_OF_RANGE_MOTION_STATUS);
     });
     Drain();
-    EXPECT_EQ(received_, std::vector<int32_t>({1, 1}));
+    EXPECT_EQ(received_, std::vector<int32_t>({1}));
 }
 
-HWTEST_F(AniDropEventTest, ConsecutiveIdenticalEventsAreNotDeduplicated, TestSize.Level1)
+HWTEST_F(AniDropEventTest, ConsecutiveIdenticalEventsAreDebounced, TestSize.Level1)
 {
     auto callback = RecordingCallback(received_);
     ASSERT_EQ(Subscribe(callback), 0);
@@ -453,7 +444,7 @@ HWTEST_F(AniDropEventTest, ConsecutiveIdenticalEventsAreNotDeduplicated, TestSiz
         Emit(MOTION_STATUS_FREE_FALL_15_CM);
     });
     Drain();
-    EXPECT_EQ(received_, std::vector<int32_t>({1, 1}));
+    EXPECT_EQ(received_, std::vector<int32_t>({1}));
 }
 
 HWTEST_F(AniDropEventTest, EventIsDeliveredToBothCallbacks, TestSize.Level1)
@@ -628,7 +619,9 @@ HWTEST_F(AniDropEventTest, CallbackCanCancelAllWithoutDeadlock, TestSize.Level1)
 {
     auto callback = MakeCallback([this](DropDetectionStatus_t status) {
         received_.push_back(status.get_value());
-        EXPECT_EQ(subject_->UnSubscribeCallback(DROP_TYPE, nullptr), 0);
+        if (status.get_value() == 1) {
+            EXPECT_EQ(subject_->UnSubscribeCallback(DROP_TYPE, nullptr), 0);
+        }
     });
     ASSERT_EQ(Subscribe(callback), 0);
     Run([&]() {
@@ -646,12 +639,36 @@ HWTEST_F(AniDropEventTest, MissingAniEnvironmentDropsDelivery, TestSize.Level1)
     ASSERT_EQ(Subscribe(callback), 0);
     Run([&]() {
         g_envAvailable = false;
+        g_errorChecks = 0;
         Emit(MOTION_STATUS_FREE_FALL_15_CM);
     });
     Drain();
     EXPECT_TRUE(received_.empty());
     EXPECT_EQ(g_errorChecks.load(), 0);
     g_envAvailable = true;
+}
+
+HWTEST_F(AniDropEventTest, FailedCallbackCanRetryAndSuccessStartsDebounce, TestSize.Level1)
+{
+    auto callback = MakeCallback([this](DropDetectionStatus_t status) {
+        received_.push_back(status.get_value());
+        g_pendingError = received_.size() == 1;
+    });
+    ASSERT_EQ(Subscribe(callback), 0);
+    Run([&]() { Emit(MOTION_STATUS_FREE_FALL_15_CM); });
+    Drain();
+    ASSERT_EQ(received_, std::vector<int32_t>({1}));
+
+    Run([&]() {
+        g_pendingError = false;
+        Emit(MOTION_STATUS_FREE_FALL_50_CM);
+    });
+    Drain();
+    EXPECT_EQ(received_, std::vector<int32_t>({1, 1}));
+
+    Run([&]() { Emit(MOTION_STATUS_FREE_FALL_30_CM); });
+    Drain();
+    EXPECT_EQ(received_, std::vector<int32_t>({1, 1}));
 }
 
 HWTEST_F(AniDropEventTest, PendingCallbackErrorDoesNotPreventOtherDelivery, TestSize.Level1)
@@ -664,6 +681,7 @@ HWTEST_F(AniDropEventTest, PendingCallbackErrorDoesNotPreventOtherDelivery, Test
     auto second = RecordingCallback(other);
     ASSERT_EQ(Subscribe(first), 0);
     ASSERT_EQ(Subscribe(second), 0);
+    g_errorChecks = 0;
     Run([&]() { Emit(MOTION_STATUS_FREE_FALL_15_CM); });
     Drain();
     EXPECT_EQ(received_, std::vector<int32_t>({1}));
