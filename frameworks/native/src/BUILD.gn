@@ -23,6 +23,7 @@ config("devicestatusnapi_private_config") {
 }
 
 ohos_shared_library("deviceagent") {
+  version_script = "libdeviceagent.map"
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
