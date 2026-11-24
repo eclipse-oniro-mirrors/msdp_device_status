@@ -241,11 +241,15 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [
-    ":device_status_algorithm_test",
-    ":device_status_datahub_test",
-    ":device_status_mock_test",
-    ":device_status_algo_mgr_test",
-    ":device_status_algo_mock_test",
-  ]
+  deps += [ ":device_status_mock_test" ]
+
+  if (device_status_motion_enable) {
+    deps += [
+      ":StationaryServerTest",
+      ":device_status_algorithm_test",
+      ":device_status_datahub_test",
+      ":device_status_algo_mgr_test",
+      ":device_status_algo_mock_test"
+    ]
+  }
 }

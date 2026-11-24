@@ -200,9 +200,10 @@ ohos_unittest("DsoftbusAdapterNewTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":InputAdapterTest"
-  ]
+  deps = []
+  if (device_status_motion_enable) {
+    deps += [ ":InputAdapterTest" ]
+  }
   if (device_status_interaction_coordination) {
     deps += [
       ":CommonEventAdapterTest",

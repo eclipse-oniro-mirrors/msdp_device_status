@@ -734,7 +734,6 @@ group("unittest") {
   testonly = true
   deps = [
     ":SocketSessionTest",
-    ":SocketSessionNewTest",
     ":SequencableTest",
     ":IntentionClientTest",
     ":SequenceableOnscreenAwarenessCapTest",
@@ -749,4 +748,8 @@ group("unittest") {
     ":MsdpKitReportNewTest",
     ":MsdpTimerInfoTest"
   ]
+
+  if (device_status_motion_enable) {
+    deps += [ ":SocketSessionNewTest" ]
+  }
 }

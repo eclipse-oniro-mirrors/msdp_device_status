@@ -453,12 +453,16 @@ ohos_unittest("DragSmoothProcessorTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":DragDrawingTest",
     ":DragManagerTest",
-    ":DragServerTest",
     ":DragClientTest",
     ":DragDataUtilTest",
-    ":DragSmoothProcessorTest",
-    ":DisplayChangeEventListenerTest"
+    ":DragSmoothProcessorTest"
   ]
+  if (device_status_motion_enable) {
+    deps += [
+      ":DragDrawingTest",
+      ":DragServerTest",
+      ":DisplayChangeEventListenerTest"
+    ]
+  }
 }
