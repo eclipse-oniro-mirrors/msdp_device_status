@@ -126,8 +126,8 @@ ohos_unittest("StationaryServerNewTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ 
-    ":StationaryServerTest",
-    ":StationaryServerNewTest"
-  ]
+  deps = [ ":StationaryServerNewTest" ]
+  if (device_status_motion_enable) {
+    deps += [ ":StationaryServerTest" ]
+  }
 }

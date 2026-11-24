@@ -134,7 +134,11 @@ group("systemtest") {
   testonly = true
   deps = []
 
-  deps += [ ":DeviceStatusClientTest",
-            ":DeviceStatusGetParagraphs",
-            ":IStopDragListenerTest" ]
+  deps += [
+    ":DeviceStatusGetParagraphs",
+    ":IStopDragListenerTest"
+  ]
+  if (device_status_motion_enable) {
+    deps += [ ":DeviceStatusClientTest" ]
+  }
 }

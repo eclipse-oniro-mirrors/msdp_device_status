@@ -248,9 +248,13 @@ group("unittest") {
 
   deps += [
     ":DeviceStatusAgentTest",
-    ":DragDataManagerTest",
-    ":test_devicestatus_service",
-    ":DeviceStatusManagerTest",
     ":DeviceStatusMsdpClientImplTest"
   ]
+  if (device_status_motion_enable) {
+    deps += [
+      ":DragDataManagerTest",
+      ":test_devicestatus_service",
+      ":DeviceStatusManagerTest"
+    ]
+  }
 }

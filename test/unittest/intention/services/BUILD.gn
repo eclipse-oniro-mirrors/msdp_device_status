@@ -642,10 +642,15 @@ group("unittest") {
       ":BoomerangDumperTest",
       ":DeviceTest",
       ":EnumeratorTest",
-      ":IntentionDeviceManagerTest",
       ":IntentionDumperTest",
-      ":IntentionServiceCoverTest",
+      
       ":MonitorTest",
+    ]
+  }
+  if (device_status_motion_enable) {
+    deps += [
+      ":IntentionDeviceManagerTest",
+      ":IntentionServiceCoverTest"
     ]
   }
   if (device_status_interaction_coordination) {

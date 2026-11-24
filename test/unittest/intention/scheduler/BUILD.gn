@@ -99,7 +99,7 @@ ohos_unittest("TimerManagerTest") {
 group("unittest") {
   testonly = true
   deps = []
-  if (device_status_intention_framework) {
+  if (device_status_intention_framework && device_status_motion_enable) {
     deps += [ ":TimerManagerTest" ]
   }
 }
