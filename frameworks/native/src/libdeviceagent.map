@@ -14,8 +14,6 @@
  */
 {
   global:
-    Create;
-    Destroy;
     extern "C++" {
       OHOS::Msdp::DeviceStatus::*;
       *vtable*for*OHOS::Msdp::DeviceStatus*;
