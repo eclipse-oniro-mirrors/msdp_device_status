@@ -598,6 +598,7 @@ ohos_unittest("MsdpKitReportTest") {
     "googletest:gtest_main",
     "hiappevent:hiappevent_innerapi",
     "hilog:libhilog",
+    "samgr:samgr_proxy",
     "time_service:time_client"
   ]
 }

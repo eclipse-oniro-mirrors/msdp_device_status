@@ -78,6 +78,7 @@ ohos_unittest("AniDropEventTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 }
 
