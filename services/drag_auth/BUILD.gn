@@ -20,6 +20,8 @@ config("drag_auth_public_config") {
 
 ohos_shared_library("drag_auth") {
 
+  version_script = "libdrag_auth.map"
+
   sanitize = {
     integer_overflow = true
     ubsan = true

@@ -22,6 +22,8 @@ config("devicestatus_ipc_public_config") {
 }
 
 ohos_shared_library("devicestatus_ipc") {
+  version_script = "libdevicestatus_ipc.map"
+
   sanitize = {
     integer_overflow = true
     ubsan = true
